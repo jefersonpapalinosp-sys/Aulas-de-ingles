@@ -16,8 +16,8 @@ from app.schemas.lesson import (
     ExerciseWithLessonOut,
     LessonDetailOut,
     LessonSummaryOut,
-    VocabItemOut,
     RevealAnswerOut,
+    VocabItemOut,
     VocabItemWithLessonOut,
 )
 

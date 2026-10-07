@@ -131,5 +131,6 @@ async def test_gabarito_so_sai_quando_pedido(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_exercicio_inexistente_devolve_404(client: AsyncClient) -> None:
-    assert (await client.post("/api/exercises/99999/check", json={"answer": "x"})).status_code == 404
+    conferir = await client.post("/api/exercises/99999/check", json={"answer": "x"})
+    assert conferir.status_code == 404
     assert (await client.get("/api/exercises/99999/answer")).status_code == 404
