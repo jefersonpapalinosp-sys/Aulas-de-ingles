@@ -2,21 +2,17 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Exercise, Lesson, VocabItem
 from app.db.session import get_session
-from app.domain.answers import acertou
 from app.schemas.lesson import (
-    CheckAnswerIn,
-    CheckAnswerOut,
     ExerciseOut,
     ExerciseWithLessonOut,
     LessonDetailOut,
     LessonSummaryOut,
-    RevealAnswerOut,
     VocabItemOut,
     VocabItemWithLessonOut,
 )
@@ -88,51 +84,6 @@ async def listar_exercicios(
     if lesson is not None:
         stmt = stmt.where(Lesson.number == lesson)
     return [
-        ExerciseWithLessonOut(
-            **ExerciseOut.model_validate(item).model_dump(), lesson_number=numero
-        )
+        ExerciseWithLessonOut(**ExerciseOut.model_validate(item).model_dump(), lesson_number=numero)
         for item, numero in (await session.execute(stmt)).all()
     ]
-
-
-async def _buscar_exercicio(session: AsyncSession, exercise_id: int) -> Exercise:
-    exercicio = (
-        await session.execute(select(Exercise).where(Exercise.id == exercise_id))
-    ).scalar_one_or_none()
-    if exercicio is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Exercício {exercise_id} não existe."
-        )
-    return exercicio
-
-
-@router.post("/exercises/{exercise_id}/check", response_model=CheckAnswerOut)
-async def conferir_resposta(
-    exercise_id: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    corpo: Annotated[CheckAnswerIn, Body()],
-) -> CheckAnswerOut:
-    """Confere uma resposta sem entregar a certa.
-
-    A correção mora aqui, e não no cliente, porque a resposta certa não faz
-    parte do contrato de leitura — mandá-la ao navegador para o JavaScript
-    comparar seria o mesmo que publicar o gabarito. Na S3 este endpoint passa
-    a gravar a tentativa do usuário logado; a resposta que ele devolve não muda.
-    """
-    exercicio = await _buscar_exercicio(session, exercise_id)
-    aceitas = [a.value for a in exercicio.answers]
-    return CheckAnswerOut(
-        correct=acertou(corpo.answer, aceitas), explanation=exercicio.explanation
-    )
-
-
-@router.get("/exercises/{exercise_id}/answer", response_model=RevealAnswerOut)
-async def revelar_resposta(
-    exercise_id: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> RevealAnswerOut:
-    """Entrega o gabarito — só quando o usuário pede."""
-    exercicio = await _buscar_exercicio(session, exercise_id)
-    return RevealAnswerOut(
-        answers=[a.value for a in exercicio.answers], explanation=exercicio.explanation
-    )

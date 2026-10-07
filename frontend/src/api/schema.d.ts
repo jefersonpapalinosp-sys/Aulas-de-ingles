@@ -4,6 +4,97 @@
  */
 
 export interface paths {
+    "/api/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrar */
+        post: operations["entrar_api_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sair
+         * @description Revoga a sessão de refresh e apaga o cookie.
+         */
+        post: operations["sair_api_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quem Sou Eu */
+        get: operations["quem_sou_eu_api_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renovar
+         * @description Troca o refresh por um access novo. O refresh antigo é revogado.
+         */
+        post: operations["renovar_api_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Registrar */
+        post: operations["registrar_api_auth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/exercises": {
         parameters: {
             query?: never;
@@ -36,7 +127,7 @@ export interface paths {
         };
         /**
          * Revelar Resposta
-         * @description Entrega o gabarito — só quando o usuário pede.
+         * @description Entrega o gabarito — só quando o usuário pede, e só se estiver logado.
          */
         get: operations["revelar_resposta_api_exercises__exercise_id__answer_get"];
         put?: never;
@@ -47,7 +138,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/exercises/{exercise_id}/check": {
+    "/api/exercises/{exercise_id}/attempt": {
         parameters: {
             query?: never;
             header?: never;
@@ -57,15 +148,15 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Conferir Resposta
-         * @description Confere uma resposta sem entregar a certa.
+         * Tentar
+         * @description Confere a resposta e grava a tentativa.
          *
-         *     A correção mora aqui, e não no cliente, porque a resposta certa não faz
-         *     parte do contrato de leitura — mandá-la ao navegador para o JavaScript
-         *     comparar seria o mesmo que publicar o gabarito. Na S3 este endpoint passa
-         *     a gravar a tentativa do usuário logado; a resposta que ele devolve não muda.
+         *     A correção acontece aqui porque a resposta certa não faz parte do contrato
+         *     de leitura: mandá-la ao navegador para o JavaScript comparar seria publicar
+         *     o gabarito. A comparação é a mesma de `app/domain/answers.py` — a regra
+         *     mora num lugar só.
          */
-        post: operations["conferir_resposta_api_exercises__exercise_id__check_post"];
+        post: operations["tentar_api_exercises__exercise_id__attempt_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -135,6 +226,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/lessons/{number}/studied": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Marcar Estudada
+         * @description Idempotente: marcar duas vezes não cria duas linhas.
+         */
+        put: operations["marcar_estudada_api_lessons__number__studied_put"];
+        post?: never;
+        /** Desmarcar Estudada */
+        delete: operations["desmarcar_estudada_api_lessons__number__studied_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/live": {
         parameters: {
             query?: never;
@@ -147,6 +259,26 @@ export interface paths {
          * @description Liveness: o processo está de pé. Não toca em dependência nenhuma.
          */
         get: operations["live_api_live_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Meu Progresso
+         * @description Uma linha por aula, sempre as dez — aula sem atividade vem zerada.
+         */
+        get: operations["meu_progresso_api_me_progress_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -179,16 +311,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** CheckAnswerIn */
-        CheckAnswerIn: {
+        /** AttemptIn */
+        AttemptIn: {
             /**
              * Answer
              * @description O que o usuário digitou.
              */
             answer: string;
         };
-        /** CheckAnswerOut */
-        CheckAnswerOut: {
+        /** AttemptOut */
+        AttemptOut: {
             /** Correct */
             correct: boolean;
             /** Explanation */
@@ -297,6 +429,19 @@ export interface components {
             /** Vocab */
             vocab: components["schemas"]["VocabItemOut"][];
         };
+        /** LessonProgressOut */
+        LessonProgressOut: {
+            /** Attempts */
+            attempts: number;
+            /** Correct */
+            correct: number;
+            /** Lesson Number */
+            lesson_number: number;
+            /** Studied */
+            studied: boolean;
+            /** Studied At */
+            studied_at: string | null;
+        };
         /**
          * LessonSummaryOut
          * @description O que a trilha de navegação precisa — sem carregar a aula inteira.
@@ -315,6 +460,16 @@ export interface components {
             /** Title Pt */
             title_pt: string;
         };
+        /** LoginIn */
+        LoginIn: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+        };
         /** PhraseOut */
         PhraseOut: {
             /** Note */
@@ -324,12 +479,40 @@ export interface components {
             /** Text Pt */
             text_pt: string;
         };
+        /** ProgressOut */
+        ProgressOut: {
+            /** Attempts */
+            attempts: number;
+            /** Correct */
+            correct: number;
+            /** Lessons */
+            lessons: components["schemas"]["LessonProgressOut"][];
+            /** Studied Count */
+            studied_count: number;
+            /** Total Lessons */
+            total_lessons: number;
+        };
         /** PronunciationNoteOut */
         PronunciationNoteOut: {
             /** Explanation */
             explanation: string;
             /** Label */
             label: string;
+        };
+        /** RegistroIn */
+        RegistroIn: {
+            /** Display Name */
+            display_name: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /**
+             * Password
+             * @description No mínimo 8 caracteres.
+             */
+            password: string;
         };
         /**
          * RevealAnswerOut
@@ -340,6 +523,33 @@ export interface components {
             answers: string[];
             /** Explanation */
             explanation: string;
+        };
+        /**
+         * TokenOut
+         * @description O access token volta no corpo; o refresh vai em cookie httpOnly.
+         */
+        TokenOut: {
+            /** Access Token */
+            access_token: string;
+            /**
+             * Expires In
+             * @description Validade do access token, em segundos.
+             */
+            expires_in: number;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+        };
+        /** UsuarioOut */
+        UsuarioOut: {
+            /** Display Name */
+            display_name: string;
+            /** Email */
+            email: string;
+            /** Id */
+            id: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -391,6 +601,130 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    entrar_api_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sair_api_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    quem_sou_eu_api_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsuarioOut"];
+                };
+            };
+        };
+    };
+    renovar_api_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+        };
+    };
+    registrar_api_auth_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistroIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listar_exercicios_api_exercises_get: {
         parameters: {
             query?: {
@@ -454,7 +788,7 @@ export interface operations {
             };
         };
     };
-    conferir_resposta_api_exercises__exercise_id__check_post: {
+    tentar_api_exercises__exercise_id__attempt_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -465,7 +799,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CheckAnswerIn"];
+                "application/json": components["schemas"]["AttemptIn"];
             };
         };
         responses: {
@@ -475,7 +809,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CheckAnswerOut"];
+                    "application/json": components["schemas"]["AttemptOut"];
                 };
             };
             /** @description Validation Error */
@@ -560,6 +894,64 @@ export interface operations {
             };
         };
     };
+    marcar_estudada_api_lessons__number__studied_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    desmarcar_estudada_api_lessons__number__studied_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     live_api_live_get: {
         parameters: {
             query?: never;
@@ -578,6 +970,26 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    meu_progresso_api_me_progress_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProgressOut"];
                 };
             };
         };

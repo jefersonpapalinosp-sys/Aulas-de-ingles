@@ -16,6 +16,9 @@ type Veredito =
  * A correção é do servidor: a resposta certa não faz parte do contrato de
  * leitura, então mandá-la ao navegador para o JavaScript comparar seria
  * publicar o gabarito. O botão "Resposta" pede o gabarito explicitamente.
+ *
+ * Desde a S3 cada tentativa é gravada na conta de quem respondeu — é o que
+ * vai alimentar o deck de revisão da S4.
  */
 export function ExerciseCard({
   exercicio,
@@ -31,7 +34,7 @@ export function ExerciseCard({
 
   const conferir = useMutation({
     mutationFn: async (answer: string) => {
-      const { data, response } = await api.POST('/api/exercises/{exercise_id}/check', {
+      const { data, response } = await api.POST('/api/exercises/{exercise_id}/attempt', {
         params: { path: { exercise_id: exercicio.id } },
         body: { answer },
       })
