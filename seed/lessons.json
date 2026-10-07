@@ -1,0 +1,4026 @@
+[
+  {
+    "number": 31,
+    "title": "Take Me Out to the Ball Game",
+    "title_pt": "Me leva pro jogo de beisebol",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-31-take-me-out-to-the-ball-game/3535235.html",
+    "grammar_tag": "Comparativos + conselho",
+    "focus_points": [
+      "should / ought to",
+      "-er than",
+      "a lot + comparativo"
+    ],
+    "story_note": null,
+    "lead": "Anna quer ver um jogo dos Washington Nationals. Todo mundo que ela encontra tem uma opinião sobre qual transporte é mais rápido — e ela chega tarde demais, quando os ingressos já estão esgotados. A aula inteira é construída sobre **comparar duas coisas** e **dar conselho**.",
+    "goals": [
+      "Comparar duas coisas com **-er than** (adjetivos curtos) e **more … than** (adjetivos longos).",
+      "Dar conselho com **should** e **ought to** — os dois significam a mesma coisa, mas *ought to* é mais formal e mais raro na fala.",
+      "Intensificar a comparação com **a lot / much** + comparativo: *a lot faster*, *much earlier*.",
+      "Vocabulário de beisebol e de transporte urbano."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Comparativo: a regra decide pelo tamanho do adjetivo",
+        "why": "Em inglês você não escolhe entre *-er* e *more* por gosto: quem decide é o número de sílabas do adjetivo. Compare com o português, que usa sempre \"mais … que\".",
+        "warning": "**Erro clássico de brasileiro** Não existe \"more faster\" nem \"more better\". É *faster* ou *more exciting* — nunca os dois juntos. E o *than* é obrigatório quando você diz com quem está comparando.",
+        "table_head": [
+          "Adjetivo",
+          "Comparativo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "fast (1 sílaba)",
+              "fast**er** than",
+              "A taxi is **faster than** a bus."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "early (2 sílabas, -y)",
+              "earl**ier** than",
+              "You should go a lot **earlier than** 7 o'clock."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "big (1 sílaba, CVC)",
+              "big**ger** than",
+              "Nationals Park is **bigger than** my old field."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "exciting (3 sílabas)",
+              "**more** exciting than",
+              "Baseball is **more exciting than** television."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "good / bad (irregulares)",
+              "better / worse than",
+              "Being early is **better than** being late."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "should e ought to: conselho, não ordem",
+        "why": "Os dois vêm seguidos de verbo no infinitivo **sem** *to* — exceto *ought*, que exige o *to*. É a única diferença estrutural entre eles.",
+        "warning": "**Atenção** \"You should to go\" está errado. Só *ought* leva *to*.",
+        "table_head": [
+          "Forma",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "afirmativa",
+              "should + verbo",
+              "Next time, you **should buy** your ticket online."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "afirmativa (formal)",
+              "ought **to** + verbo",
+              "You **ought to take** the Metro."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "negativa",
+              "shouldn't + verbo",
+              "You **shouldn't take** the bus."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "pergunta",
+              "Should + sujeito + verbo",
+              "**Should I take** a taxi?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "a lot / much antes do comparativo",
+        "why": "Para dizer \"muito mais rápido\" não se usa *very*. Comparativo pede **a lot**, **much** ou **far**.",
+        "warning": null,
+        "table_head": [
+          "Certo",
+          "Errado",
+          "Tradução"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "a lot faster",
+              "*very faster*",
+              "muito mais rápido"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "much earlier",
+              "*very earlier*",
+              "muito mais cedo"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "a little faster",
+              "—",
+              "um pouco mais rápido"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Don't take the bus. A taxi is *faster than* a bus.",
+        "text_pt": "Não pegue o ônibus. Um táxi é mais rápido que um ônibus.",
+        "note": "Imperativo negativo (Don't + verbo) + comparativo curto."
+      },
+      {
+        "position": 1,
+        "text_en": "In D.C. traffic sometimes a bicycle is *faster than* a car.",
+        "text_pt": "No trânsito de Washington, às vezes uma bicicleta é mais rápida que um carro.",
+        "note": "D.C. = Washington, District of Columbia."
+      },
+      {
+        "position": 2,
+        "text_en": "Anna, you *should* go *a lot earlier than* 7 o'clock.",
+        "text_pt": "Anna, você deveria ir muito mais cedo que às 7.",
+        "note": "Conselho + intensificador + comparativo de adjetivo em -y."
+      },
+      {
+        "position": 3,
+        "text_en": "The Metro is faster than a taxi and a bicycle. You *ought to* take the Metro.",
+        "text_pt": "O metrô é mais rápido que táxi e bicicleta. Você deveria pegar o metrô.",
+        "note": "Na fala, *ought to* soa como \"oughta\"."
+      },
+      {
+        "position": 4,
+        "text_en": "The tickets are *sold out*? Noooooo!",
+        "text_pt": "Os ingressos estão esgotados? Nãããão!",
+        "note": "*sold out* = esgotado. Phrasal adjective muito comum."
+      },
+      {
+        "position": 5,
+        "text_en": "*Being early is better than being late.*",
+        "text_pt": "Chegar cedo é melhor que chegar tarde.",
+        "note": "Gerúndio como sujeito dos dois lados da comparação + irregular *better*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "ball game",
+        "ipa": "/bɔːl ɡeɪm/",
+        "translation_pt": "jogo (de beisebol)",
+        "example_en": "Take me out to the ball game."
+      },
+      {
+        "position": 1,
+        "term": "home plate",
+        "ipa": "/hoʊm pleɪt/",
+        "translation_pt": "base principal",
+        "example_en": "I am at home plate. I wait for the pitch."
+      },
+      {
+        "position": 2,
+        "term": "pitch",
+        "ipa": "/pɪtʃ/",
+        "translation_pt": "arremesso; arremessar",
+        "example_en": "The ball comes. I swing."
+      },
+      {
+        "position": 3,
+        "term": "swing",
+        "ipa": "/swɪŋ/",
+        "translation_pt": "dar a tacada",
+        "example_en": "I swing. It's a hit!"
+      },
+      {
+        "position": 4,
+        "term": "home run",
+        "ipa": "/hoʊm rʌn/",
+        "translation_pt": "rebatida que dá a volta completa",
+        "example_en": "It's a home run! The crowd cheers!"
+      },
+      {
+        "position": 5,
+        "term": "crowd",
+        "ipa": "/kraʊd/",
+        "translation_pt": "multidão, torcida",
+        "example_en": "The crowd cheers! Woo hoo!"
+      },
+      {
+        "position": 6,
+        "term": "sold out",
+        "ipa": "/soʊld aʊt/",
+        "translation_pt": "esgotado",
+        "example_en": "The tickets are sold out."
+      },
+      {
+        "position": 7,
+        "term": "ticket window",
+        "ipa": "/ˈtɪkɪt ˈwɪndoʊ/",
+        "translation_pt": "bilheteria",
+        "example_en": "There's the ticket window."
+      },
+      {
+        "position": 8,
+        "term": "traffic",
+        "ipa": "/ˈtræfɪk/",
+        "translation_pt": "trânsito (incontável)",
+        "example_en": "Right now, there is a lot of traffic."
+      },
+      {
+        "position": 9,
+        "term": "good point",
+        "ipa": "/ɡʊd pɔɪnt/",
+        "translation_pt": "boa observação",
+        "example_en": "Good point. But I don't have a bicycle."
+      },
+      {
+        "position": 10,
+        "term": "advice",
+        "ipa": "/ədˈvaɪs/",
+        "translation_pt": "conselho (incontável!)",
+        "example_en": "Thanks a lot. It is good advice."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "ought to → \"oughta\"",
+        "explanation": "Na fala natural o *t* do *to* desaparece: /ˈɔː.tə/. Igual acontece com *want to → wanna* e *going to → gonna*."
+      },
+      {
+        "position": 1,
+        "label": "than → /ðən/",
+        "explanation": "Em *faster than a bus*, o *than* é fraco e quase cola na palavra anterior: \"fasterthna bus\". Nunca pronuncie \"dan\" — é o *th* sonoro, língua entre os dentes."
+      },
+      {
+        "position": 2,
+        "label": "should /ʃʊd/",
+        "explanation": "O *l* é **mudo**: \"shud\", não \"shôuld\". Mesma coisa em *could* e *would*."
+      },
+      {
+        "position": 3,
+        "label": "advice /ədˈvaɪs/",
+        "explanation": "Substantivo termina em som de *s*. O verbo é *advise* /ədˈvaɪz/, com som de *z*."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "A bicycle is `____` (fast) than a taxi.",
+        "hint": null,
+        "explanation": "*fast* tem 1 sílaba → -er + than.",
+        "answers": [
+          "faster"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Baseball is `____` (exciting) than golf.",
+        "hint": "2 palavras",
+        "explanation": "*exciting* tem 3 sílabas → more + adjetivo.",
+        "answers": [
+          "more exciting"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Being early is `____` (good) than being late.",
+        "hint": null,
+        "explanation": "*good* é irregular: good → better → the best.",
+        "answers": [
+          "better"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Você quer dar um conselho: \"Você deveria comprar online.\" → You `____` buy it online.",
+        "hint": null,
+        "explanation": "*should* + verbo, ou *ought to* + verbo. Os dois valem.",
+        "answers": [
+          "should",
+          "ought to"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Complete com o intensificador correto: The Metro is `____` faster than a bus.",
+        "hint": "não use \"very\"",
+        "explanation": "Comparativo aceita *a lot / much / far*, nunca *very*.",
+        "answers": [
+          "a lot",
+          "much",
+          "far"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Corrija: \"A taxi is more faster than a bus.\" → A taxi is `____` than a bus.",
+        "hint": null,
+        "explanation": "Nunca junte *more* com a terminação *-er*.",
+        "answers": [
+          "faster"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 32,
+    "title": "Welcome to the Treehouse!",
+    "title_pt": "Bem-vindo à casa na árvore!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-32-welcome-treehouse/3547306.html",
+    "grammar_tag": "Futuro: going to / will",
+    "focus_points": [
+      "be going to",
+      "will / 'll",
+      "can · cannot"
+    ],
+    "story_note": "Parte 1 de 2 · continua na 33",
+    "lead": "Estreia do programa infantil da Anna, *The Time Traveling Treehouse*. Os colegas assistem e comentam. É a aula do **futuro**: tudo que vai acontecer no programa é anunciado com *going to* ou *will* — e MINDY, o computador, só fala de **capacidade** com *can*.",
+    "goals": [
+      "Usar **be going to** para plano já decidido e para previsão com evidência.",
+      "Usar **will / 'll** para previsão, promessa e decisão tomada na hora.",
+      "Fazer perguntas de futuro: *Will the shark eat her?* / *Is Anna going to be lost forever?*",
+      "Distinguir **can** (capacidade/possibilidade) de **cannot** e usar *that*-clause depois de *know*, *think*, *hope*."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "going to vs. will: os dois são futuro, mas não são iguais",
+        "why": "Esta é a confusão número um de quem fala português, porque nós temos uma forma só (\"vou assistir\"). Em inglês a escolha informa **quando** a decisão foi tomada.",
+        "warning": "**Regra prática** Se você já tinha decidido antes de falar, use *going to*. Se decidiu agora, enquanto falava, use *will*.",
+        "table_head": [
+          "Uso",
+          "Forma",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "plano já decidido",
+              "be going to",
+              "Today you **are going to watch** my new show."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "previsão com evidência",
+              "be going to",
+              "**Is** Anna **going to be** lost forever?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "previsão / opinião",
+              "will",
+              "After they watch it, **they'll tell** me what they liked."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "decisão na hora",
+              "will",
+              "— Where's the flour? — **I'll get** it."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "pergunta com will",
+              "Will + sujeito + verbo",
+              "**Will** the shark **eat** her?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Contrações: é assim que soa de verdade",
+        "why": "Ninguém diz *they will* numa conversa. Treine ouvindo e repetindo a forma contraída — é o que aparece no vídeo.",
+        "warning": null,
+        "table_head": [
+          "Completa",
+          "Contraída",
+          "Som"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I will",
+              "I'll",
+              "/aɪl/"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you will",
+              "you'll",
+              "/juːl/"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "they will",
+              "they'll",
+              "/ðeɪl/"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "will not",
+              "won't",
+              "/woʊnt/"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "I would like",
+              "I'd like",
+              "/aɪd laɪk/"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "going to (fala rápida)",
+              "gonna",
+              "/ˈɡʌnə/"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "can / cannot + that-clause",
+        "why": "*can* nunca muda de forma (não existe \"cans\", não existe \"to can\") e o verbo depois dele fica no infinitivo sem *to*. E depois de *know / think / hope* entra uma oração com *that* — que pode ser omitido.",
+        "warning": "**Cuidado** \"She can to travel\" e \"She cans travel\" estão errados. Modal nunca leva *to* nem *-s*.",
+        "table_head": [
+          "Estrutura",
+          "Frase da aula",
+          "Observação"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "can + verbo",
+              "It **can time travel**.",
+              "capacidade"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "cannot + verbo",
+              "An ocean **cannot teach** us about baseball.",
+              "*cannot* = can't /kænt/"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "know + that + oração",
+              "I know **that** we can find it.",
+              "o *that* é opcional"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "hope + oração",
+              "I hope you like it.",
+              "*that* omitido"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Some people *are going to watch* your children's show.",
+        "text_pt": "Algumas pessoas vão assistir ao seu programa infantil.",
+        "note": "Plano já marcado → going to."
+      },
+      {
+        "position": 1,
+        "text_en": "After they watch it, *they'll tell* me what they liked.",
+        "text_pt": "Depois que assistirem, eles vão me dizer o que gostaram.",
+        "note": "Depois de *after* o verbo fica no presente, mesmo falando do futuro."
+      },
+      {
+        "position": 2,
+        "text_en": "My name means Massive Information Navigation Device, for You!",
+        "text_pt": "Meu nome significa Dispositivo Massivo de Navegação de Informação, para Você!",
+        "note": "MINDY é um acrônimo — piada recorrente da série."
+      },
+      {
+        "position": 3,
+        "text_en": "I know *that* we *can* find it, Anna!",
+        "text_pt": "Eu sei que a gente consegue achar, Anna!",
+        "note": "*can* aqui é \"conseguir\", não \"poder\"."
+      },
+      {
+        "position": 4,
+        "text_en": "An ocean *cannot* teach us about baseball!",
+        "text_pt": "Um oceano não pode nos ensinar sobre beisebol!",
+        "note": "*cannot* junto, uma palavra só, é a forma enfática."
+      },
+      {
+        "position": 5,
+        "text_en": "*Is* Anna *going to be* lost forever?",
+        "text_pt": "A Anna vai ficar perdida para sempre?",
+        "note": "Pergunta com *going to*: inverte o verbo *be*, não o *going*."
+      },
+      {
+        "position": 6,
+        "text_en": "Next week, you *can watch* part two of \"The Time Traveling Treehouse!\"",
+        "text_pt": "Semana que vem vocês podem assistir à parte dois.",
+        "note": "Aqui *can* = possibilidade/permissão."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "treehouse",
+        "ipa": "/ˈtriːhaʊs/",
+        "translation_pt": "casa na árvore",
+        "example_en": "This is not a usual treehouse."
+      },
+      {
+        "position": 1,
+        "term": "time travel",
+        "ipa": "/taɪm ˈtrævəl/",
+        "translation_pt": "viajar no tempo",
+        "example_en": "It can time travel!"
+      },
+      {
+        "position": 2,
+        "term": "excited / nervous",
+        "ipa": "/ɪkˈsaɪtɪd/ /ˈnɜːrvəs/",
+        "translation_pt": "animado / nervoso",
+        "example_en": "I'm excited and nervous."
+      },
+      {
+        "position": 3,
+        "term": "conference room",
+        "ipa": "/ˈkɑːnfərəns ruːm/",
+        "translation_pt": "sala de reunião",
+        "example_en": "They're in the conference room."
+      },
+      {
+        "position": 4,
+        "term": "massive",
+        "ipa": "/ˈmæsɪv/",
+        "translation_pt": "enorme, gigantesco",
+        "example_en": "Massive Information Navigation Device."
+      },
+      {
+        "position": 5,
+        "term": "partner",
+        "ipa": "/ˈpɑːrtnər/",
+        "translation_pt": "parceiro, dupla",
+        "example_en": "This is my partner, MINDY!"
+      },
+      {
+        "position": 6,
+        "term": "snowy",
+        "ipa": "/ˈsnoʊi/",
+        "translation_pt": "nevado",
+        "example_en": "Now I am on a snowy mountain!"
+      },
+      {
+        "position": 7,
+        "term": "ski / surfing",
+        "ipa": "/skiː/ /ˈsɜːrfɪŋ/",
+        "translation_pt": "esquiar / surfe",
+        "example_en": "I don't know how to ski!"
+      },
+      {
+        "position": 8,
+        "term": "yell",
+        "ipa": "/jel/",
+        "translation_pt": "gritar",
+        "example_en": "Please don't yell, Anna."
+      },
+      {
+        "position": 9,
+        "term": "fix",
+        "ipa": "/fɪks/",
+        "translation_pt": "consertar, arrumar",
+        "example_en": "I need to fix my navigation device."
+      },
+      {
+        "position": 10,
+        "term": "ending",
+        "ipa": "/ˈendɪŋ/",
+        "translation_pt": "final (de uma história)",
+        "example_en": "Please tell me the ending!"
+      },
+      {
+        "position": 11,
+        "term": "all over the world",
+        "ipa": "/ɔːl ˈoʊvər ðə wɜːrld/",
+        "translation_pt": "do mundo inteiro",
+        "example_en": "Kids from all over the world ask us questions."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "they'll /ðeɪl/",
+        "explanation": "Uma sílaba só. Brasileiro tende a dizer \"dei-ul\" — junte tudo e mantenha o *th* sonoro."
+      },
+      {
+        "position": 1,
+        "label": "won't /woʊnt/ ≠ want /wɑːnt/",
+        "explanation": "*won't* tem o ditongo /oʊ/ (boca em O); *want* tem /ɑː/ aberto. Trocar os dois muda completamente a frase."
+      },
+      {
+        "position": 2,
+        "label": "going to → gonna",
+        "explanation": "Em *you are going to watch*, a fala rápida vira \"you're gonna watch\". Reconhecer isso é 90% da dificuldade de listening."
+      },
+      {
+        "position": 3,
+        "label": "cannot → can't /kænt/",
+        "explanation": "No inglês americano o *t* final quase desaparece e o que marca a negativa é a vogal mais longa e a sílaba **tônica**: *I CAN'T go* (ênfase) vs *I can GO* (can fraco, /kən/)."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Plano já decidido: Tonight I `____` watch the show.",
+        "hint": "3 palavras",
+        "explanation": "Plano combinado antes de falar → be going to.",
+        "answers": [
+          "am going to",
+          "'m going to"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Decisão tomada na hora: — The phone is ringing! — OK, `____` answer it.",
+        "hint": "2 palavras, contraído",
+        "explanation": "Decisão no momento da fala → *will*, normalmente contraído: *I'll*.",
+        "answers": [
+          "i'll",
+          "ill"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Contraia: She **will not** say no. → She `____` say no.",
+        "hint": null,
+        "explanation": "will not → won't.",
+        "answers": [
+          "won't",
+          "wont"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Complete: An ocean `____` teach us about baseball.",
+        "hint": "negativa de can",
+        "explanation": "*cannot* / *can't* + verbo no infinitivo sem *to*.",
+        "answers": [
+          "cannot",
+          "can't",
+          "cant"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Pergunta de futuro: `____` the shark eat her?",
+        "hint": null,
+        "explanation": "Will + sujeito + verbo.",
+        "answers": [
+          "will"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Corrija: \"MINDY cans find the answer.\" → MINDY `____` find the answer.",
+        "hint": null,
+        "explanation": "Modal não recebe *-s* na 3ª pessoa.",
+        "answers": [
+          "can"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 33,
+    "title": "Learning America's Sport",
+    "title_pt": "Aprendendo o esporte dos Estados Unidos",
+    "voa_url": "https://learningenglish.voanews.com/a/lesson-33-learning-americas-sport/3555047.html",
+    "grammar_tag": "Presente simples + agentes em -er",
+    "focus_points": [
+      "First / Then / Each time",
+      "verbo → -er",
+      "regras do beisebol"
+    ],
+    "story_note": "Parte 2 de 2 · continua a 32",
+    "lead": "MINDY finalmente acerta o destino e Anna ensina beisebol num campo de verdade. A aula é um **texto explicativo**: presente simples para descrever como as coisas funcionam, marcadores de sequência, e o truque de transformar verbo em profissão com **-er**.",
+    "goals": [
+      "Explicar um processo com **presente simples** + *First… Then… Each time… At the end…*",
+      "Formar o substantivo de quem faz a ação acrescentando **-er** ao verbo: *pitch → pitcher*.",
+      "Lembrar o **-s** da 3ª pessoa do singular: *the pitcher pitch**es***.",
+      "Vocabulário completo de beisebol — útil porque é referência cultural constante no inglês americano."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Verbo + -er = quem faz a ação",
+        "why": "Nesta aula o mesmo radical é verbo e substantivo na mesma frase: *Pitchers pitch the ball*. Esse padrão é produtivo — funciona com quase qualquer verbo (*teach → teacher*, *program → programmer*).",
+        "warning": "**Dobra de consoante** Verbo curto terminado em consoante-vogal-consoante dobra a última letra: *bat → ba**tt**er*, *run → ru**nn**er*, *swim → swi**mm**er*. Mas *pitch* e *field* não dobram.",
+        "table_head": [
+          "Verbo",
+          "Quem faz",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "to pitch (arremessar)",
+              "a pitch**er**",
+              "**Pitchers pitch** the ball."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "to catch (pegar)",
+              "a catch**er**",
+              "**Catchers catch** the ball."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "to bat (rebater)",
+              "a bat**ter**",
+              "**Batters bat** the ball."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "to run (correr)",
+              "a runn**er**",
+              "**Runners run** the bases."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "to field (defender)",
+              "a field**er**",
+              "**Fielders field** the ball."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Presente simples para explicar como funciona",
+        "why": "Quando você explica uma regra, um processo ou um fato, o tempo é o presente simples — não o contínuo. É o mesmo tempo que você usa para documentar código ou explicar um sistema.",
+        "warning": "**O -s que todo mundo esquece** he / she / it / the pitcher → pitch**es**, bat**s**, run**s**, win**s**. Verbo terminado em *-ch*, *-sh*, *-s*, *-x* leva **-es**: *pitches*, *catches*.",
+        "table_head": [
+          "Marcador",
+          "Função",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "First,",
+              "primeiro passo",
+              "**First**, the pitcher pitches the ball to the batter."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Then,",
+              "passo seguinte",
+              "**Then**, the runner runs to first base."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "Each time…",
+              "sempre que",
+              "**Each time** a batter bats, the runners run around the bases."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "At the end of…",
+              "no fim de",
+              "The team with the most runs **at the end of** nine innings wins."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Passado irregular que aparece na aula",
+        "why": "A abertura e o fechamento do episódio usam passado. Vale memorizar estes três, que estão entre os mais frequentes do inglês.",
+        "warning": null,
+        "table_head": [
+          "Infinitivo",
+          "Passado",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "send",
+              "**sent**",
+              "MINDY **sent** her to many wrong places."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "take",
+              "**took**",
+              "MINDY, it **took** you a long time."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "do",
+              "**did**",
+              "But you **did** it!"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "To play baseball, you really only need a bat, a ball and a glove.",
+        "text_pt": "Para jogar beisebol, você só precisa de um bastão, uma bola e uma luva.",
+        "note": "*only need*: advérbio antes do verbo."
+      },
+      {
+        "position": 1,
+        "text_en": "*First*, the pitcher *pitches* the ball to the batter.",
+        "text_pt": "Primeiro, o arremessador arremessa a bola para o rebatedor.",
+        "note": "Marcador de sequência + -es de 3ª pessoa."
+      },
+      {
+        "position": 2,
+        "text_en": "*Each time* a runner runs across home plate, they *score a run*.",
+        "text_pt": "Cada vez que um corredor cruza a base principal, marca um ponto.",
+        "note": "*run* aqui é substantivo: o ponto no beisebol."
+      },
+      {
+        "position": 3,
+        "text_en": "There are nine *innings* in a game.",
+        "text_pt": "Há nove innings em um jogo.",
+        "note": "*inning* não tem tradução — é a unidade de tempo do beisebol."
+      },
+      {
+        "position": 4,
+        "text_en": "The team with *the most* runs at the end of nine innings *wins* the game!",
+        "text_pt": "O time com mais pontos no fim dos nove innings ganha o jogo.",
+        "note": "*the most* é superlativo — volta forte na aula 38."
+      },
+      {
+        "position": 5,
+        "text_en": "MINDY, it *took* you a long time. But you *did* it!",
+        "text_pt": "MINDY, você demorou muito. Mas conseguiu!",
+        "note": "*it took (someone) a long time* = demorou. Expressão pronta, decore."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "playground",
+        "ipa": "/ˈpleɪɡraʊnd/",
+        "translation_pt": "parquinho, área de recreação",
+        "example_en": "I am at a playground with a baseball field!"
+      },
+      {
+        "position": 1,
+        "term": "pitcher's mound",
+        "ipa": "/ˈpɪtʃərz maʊnd/",
+        "translation_pt": "montinho do arremessador",
+        "example_en": "This is a pitcher's mound."
+      },
+      {
+        "position": 2,
+        "term": "base",
+        "ipa": "/beɪs/",
+        "translation_pt": "base",
+        "example_en": "This is first base! Second base!"
+      },
+      {
+        "position": 3,
+        "term": "bat",
+        "ipa": "/bæt/",
+        "translation_pt": "bastão; rebater",
+        "example_en": "You need a bat, a ball and a glove."
+      },
+      {
+        "position": 4,
+        "term": "glove",
+        "ipa": "/ɡlʌv/",
+        "translation_pt": "luva",
+        "example_en": "a bat, a ball and a glove"
+      },
+      {
+        "position": 5,
+        "term": "team",
+        "ipa": "/tiːm/",
+        "translation_pt": "time",
+        "example_en": "Each team has many players."
+      },
+      {
+        "position": 6,
+        "term": "inning",
+        "ipa": "/ˈɪnɪŋ/",
+        "translation_pt": "inning (período do jogo)",
+        "example_en": "There are nine innings in a game."
+      },
+      {
+        "position": 7,
+        "term": "score a run",
+        "ipa": "/skɔːr ə rʌn/",
+        "translation_pt": "marcar um ponto",
+        "example_en": "They score a run!"
+      },
+      {
+        "position": 8,
+        "term": "win the game",
+        "ipa": "/wɪn ðə ɡeɪm/",
+        "translation_pt": "ganhar o jogo",
+        "example_en": "The team with the most runs wins the game."
+      },
+      {
+        "position": 9,
+        "term": "Good job!",
+        "ipa": "/ɡʊd dʒɑːb/",
+        "translation_pt": "Bom trabalho!",
+        "example_en": "Good job! That was fast."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "-er final = /ɚ/ fraquinho",
+        "explanation": "*pitcher, catcher, batter, runner, fielder*: a sílaba final é curta e sem força. Não diga \"pit-CHER\" — a tônica é sempre na **primeira** sílaba."
+      },
+      {
+        "position": 1,
+        "label": "flap T: batter /ˈbæɾɚ/",
+        "explanation": "No inglês americano, *t* entre vogais virá um som de *d* leve. *batter* soa como \"bérer\". Mesmo fenômeno em *better, water, city*."
+      },
+      {
+        "position": 2,
+        "label": "pitches /ˈpɪtʃɪz/",
+        "explanation": "Verbo em *-ch* + *-es* ganha uma sílaba inteira: *pitch* (1) → *pitches* (2). Igual em *catches, watches, washes*."
+      },
+      {
+        "position": 3,
+        "label": "glove /ɡlʌv/",
+        "explanation": "Rima com *love*, não com *go*. O *o* aqui é /ʌ/."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Quem arremessa a bola é o `____`.",
+        "hint": null,
+        "explanation": "pitch + -er.",
+        "answers": [
+          "pitcher",
+          "the pitcher"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Quem rebate é o `____`.",
+        "hint": "cuidado com a dobra de consoante",
+        "explanation": "bat → batter: consoante-vogal-consoante dobra o *t*.",
+        "answers": [
+          "batter",
+          "the batter"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Complete com o -s da 3ª pessoa: First, the pitcher `____` (pitch) the ball.",
+        "hint": null,
+        "explanation": "Verbo em *-ch* leva **-es**.",
+        "answers": [
+          "pitches"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Marcador de sequência: `____`, the runner runs to first base.",
+        "hint": "= depois",
+        "explanation": "First … Then … para ordenar os passos.",
+        "answers": [
+          "then"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Passado de *take*: It `____` you a long time.",
+        "hint": null,
+        "explanation": "take → took → taken.",
+        "answers": [
+          "took"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Quantos innings tem um jogo? `____`",
+        "hint": "em inglês, por extenso",
+        "explanation": "There are nine innings in a game.",
+        "answers": [
+          "nine",
+          "9"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 34,
+    "title": "What Will I Do?",
+    "title_pt": "O que eu vou fazer?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-34-what-will-i-do/3566043.html",
+    "grammar_tag": "will vs might + tag questions",
+    "focus_points": [
+      "might / might not",
+      "will",
+      "won't she?"
+    ],
+    "story_note": null,
+    "lead": "Halloween. Anna se veste de gênio e finge ler mentes — e descobre que dizer *might* para quem quer certeza é um desastre diplomático. A aula gira em torno do contraste **will (certeza) × might (possibilidade)** e das **tag questions**.",
+    "goals": [
+      "Expressar possibilidade com **might / might not** e certeza com **will / won't**.",
+      "Perceber que *might* soa evasivo em inglês — a aula é literalmente sobre o desconforto que ele causa.",
+      "Montar **tag questions**: afirmativa → tag negativa, negativa → tag afirmativa.",
+      "Vocabulário de Halloween e de vida universitária nos EUA."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "will × might: o grau de certeza",
+        "why": "*might* é o modal da dúvida (uns 50%). *will* é a afirmação. Na aula, a Rebecca se ofende exatamente com isso: \"I MIGHT get a job? That means I might not.\"",
+        "warning": "**Estrutura** *might* é modal: sem *to*, sem *-s*, sem *do* na negativa. \"He might~~s~~ go\", \"He doesn't might go\" e \"He might ~~to~~ go\" estão todos errados. A negativa é simplesmente *might not*.",
+        "table_head": [
+          "Certeza",
+          "Forma",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "~100%",
+              "will + verbo",
+              "You **will** get a job writing the news."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "~100% negativo",
+              "won't + verbo",
+              "She **won't** say \"no\"."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "~50%",
+              "might + verbo",
+              "I **might** go. I **might not** go."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "~50% em resposta curta",
+              "might (sozinho)",
+              "— Can you read minds? — I **might**."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "~50% com *be*",
+              "might be",
+              "Are you really a mind reader? — I **might be**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Tag questions: a confirmação no fim da frase",
+        "why": "Equivale ao nosso \"né?\". A regra é de espelho: se a frase é afirmativa, a tag é negativa — e vice-versa. Repete-se o **auxiliar**, nunca o verbo principal.",
+        "warning": "**Não existe \"no?\" nem \"right?\" universal** O português resolve tudo com \"né?\". O inglês troca a tag conforme o auxiliar da frase: *will / won't / do / don't / is / isn't / was / wasn't*…",
+        "table_head": [
+          "Frase",
+          "Tag",
+          "Tradução"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "She won't say no,",
+              "**will she?**",
+              "Ela não vai dizer não, né?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "I will have a wedding,",
+              "**won't I?**",
+              "Eu vou ter um casamento, né?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "You don't believe ads,",
+              "**do you?**",
+              "Você não acredita em anúncios, né?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "It's windy today,",
+              "**isn't it?**",
+              "Está ventando hoje, né?"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "I was too early,",
+              "**wasn't I?**",
+              "Eu entrei cedo demais, né? (aula 40)"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Léxico de certeza para usar no trabalho",
+        "why": "Útil direto para reunião e e-mail em inglês: dizer *might* quando você não tem dado, e *will* quando tem compromisso.",
+        "warning": null,
+        "table_head": [
+          "Nível",
+          "Expressão",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "compromisso",
+              "I will / I'll",
+              "I'll send the report today."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "probabilidade alta",
+              "It will probably…",
+              "The deploy will probably finish at 6."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "possibilidade",
+              "It might / may…",
+              "The test might fail on Oracle."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "improvável",
+              "It probably won't…",
+              "It probably won't take long."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I *might* go. I *might not* go. I don't have a costume.",
+        "text_pt": "Talvez eu vá. Talvez não vá. Eu não tenho fantasia.",
+        "note": "Duas frases paralelas mostrando os dois lados do *might*."
+      },
+      {
+        "position": 1,
+        "text_en": "Anna, be careful. Things *might* go wrong.",
+        "text_pt": "Anna, cuidado. As coisas podem dar errado.",
+        "note": "*go wrong* = dar errado. Phrasal essencial."
+      },
+      {
+        "position": 2,
+        "text_en": "— Are you really a mind reader? — I *might be*.",
+        "text_pt": "— Você é mesmo um leitor de mentes? — Pode ser que eu seja.",
+        "note": "Resposta curta com modal: repete-se o modal + *be*."
+      },
+      {
+        "position": 3,
+        "text_en": "I MIGHT get a job writing the news? I MIGHT! That means I *might not*.",
+        "text_pt": "Eu TALVEZ consiga um emprego escrevendo notícias? TALVEZ! Isso quer dizer que talvez eu não consiga.",
+        "note": "A ênfase na palavra *might* é o centro da piada."
+      },
+      {
+        "position": 4,
+        "text_en": "No, no, no. You *will*! You WILL get a job writing the news.",
+        "text_pt": "Não, não. Você vai! Você VAI conseguir um emprego escrevendo notícias.",
+        "note": "*will* enfático, não contraído — é assim que se mostra convicção."
+      },
+      {
+        "position": 5,
+        "text_en": "She *won't* say \"no\", *will she?*",
+        "text_pt": "Ela não vai dizer \"não\", né?",
+        "note": "Frase negativa → tag afirmativa."
+      },
+      {
+        "position": 6,
+        "text_en": "I *will* have a wedding, *won't I?*",
+        "text_pt": "Eu vou ter um casamento, né?",
+        "note": "Frase afirmativa → tag negativa."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "Halloween",
+        "ipa": "/ˌhæloʊˈiːn/",
+        "translation_pt": "Dia das Bruxas (31 de outubro)",
+        "example_en": "Halloween is very popular in the United States."
+      },
+      {
+        "position": 1,
+        "term": "trick-or-treat",
+        "ipa": "/ˌtrɪk ɔːr ˈtriːt/",
+        "translation_pt": "pedir doces de porta em porta",
+        "example_en": "Children trick-or-treat."
+      },
+      {
+        "position": 2,
+        "term": "candy",
+        "ipa": "/ˈkændi/",
+        "translation_pt": "doce, bala (incontável no AmE)",
+        "example_en": "They ask people for candy."
+      },
+      {
+        "position": 3,
+        "term": "costume",
+        "ipa": "/ˈkɑːstuːm/",
+        "translation_pt": "fantasia",
+        "example_en": "Children and adults wear costumes."
+      },
+      {
+        "position": 4,
+        "term": "read minds",
+        "ipa": "/riːd maɪndz/",
+        "translation_pt": "ler mentes",
+        "example_en": "I can do a genie trick like read minds!"
+      },
+      {
+        "position": 5,
+        "term": "go wrong",
+        "ipa": "/ɡoʊ rɔːŋ/",
+        "translation_pt": "dar errado",
+        "example_en": "Things might go wrong."
+      },
+      {
+        "position": 6,
+        "term": "junior (in college)",
+        "ipa": "/ˈdʒuːnjər/",
+        "translation_pt": "aluno do 3º ano da faculdade",
+        "example_en": "I'm a junior in college."
+      },
+      {
+        "position": 7,
+        "term": "journalism",
+        "ipa": "/ˈdʒɜːrnəlɪzəm/",
+        "translation_pt": "jornalismo",
+        "example_en": "I study journalism."
+      },
+      {
+        "position": 8,
+        "term": "graduate",
+        "ipa": "/ˈɡrædʒueɪt/",
+        "translation_pt": "formar-se",
+        "example_en": "You will graduate from college in about one year."
+      },
+      {
+        "position": 9,
+        "term": "wedding",
+        "ipa": "/ˈwedɪŋ/",
+        "translation_pt": "casamento (a festa)",
+        "example_en": "You might have a wedding very soon!"
+      },
+      {
+        "position": 10,
+        "term": "rock star",
+        "ipa": "/ˈrɑːk stɑːr/",
+        "translation_pt": "estrela do rock",
+        "example_en": "I'm a rock star!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "won't /woʊnt/",
+        "explanation": "Repetindo porque é o erro mais caro desta aula: /woʊnt/ (com O de \"ou\"). Se sair /wɑːnt/, você disse *want* e a frase inverte de sentido."
+      },
+      {
+        "position": 1,
+        "label": "might /maɪt/",
+        "explanation": "Rima com *night*, *light*. O *gh* é mudo."
+      },
+      {
+        "position": 2,
+        "label": "costume /ˈkɑːstuːm/",
+        "explanation": "Tônica na **primeira** sílaba. Não confunda com *custom* /ˈkʌstəm/ (costume, hábito) — falso amigo perfeito: *costume* em inglês é **fantasia**."
+      },
+      {
+        "position": 3,
+        "label": "Ênfase como gramática",
+        "explanation": "Em \"You WILL get a job\", a força vai no modal. Em inglês, mover a tônica muda o significado da frase sem mudar nenhuma palavra — vale treinar isso em voz alta."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Possibilidade: I `____` go to the party. I'm not sure.",
+        "hint": "1 palavra",
+        "explanation": "*might* (ou *may*) para ~50% de certeza.",
+        "answers": [
+          "might",
+          "may"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Negativa de might: I `____` go to the party.",
+        "hint": "2 palavras",
+        "explanation": "Modal não usa *don't*: a negativa é *might not*.",
+        "answers": [
+          "might not",
+          "may not"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Certeza: Don't worry. You `____` get the job!",
+        "hint": null,
+        "explanation": "*will* para afirmar com convicção.",
+        "answers": [
+          "will",
+          "'ll"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Tag question: She won't say no, `____`?",
+        "hint": "2 palavras",
+        "explanation": "Frase negativa → tag afirmativa, mesmo auxiliar.",
+        "answers": [
+          "will she"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Tag question: I will have a wedding, `____`?",
+        "hint": "2 palavras",
+        "explanation": "Frase afirmativa → tag negativa.",
+        "answers": [
+          "won't i",
+          "wont i"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Corrija: \"Things might to go wrong.\" → Things `____` go wrong.",
+        "hint": "1 palavra",
+        "explanation": "Modal nunca leva *to* depois.",
+        "answers": [
+          "might",
+          "may"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 35,
+    "title": "Let's Make Dinner!",
+    "title_pt": "Vamos fazer o jantar!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-35-lets-make-dinner/3571922.html",
+    "grammar_tag": "Quantidades e embalagens",
+    "focus_points": [
+      "a bunch of · a loaf of",
+      "too much / too many",
+      "will / won't de promessa"
+    ],
+    "story_note": "Parte 1 de 2 · continua na 36",
+    "lead": "Marsha cozinha, Anna faz as compras — com a lista errada. A aula é a aula das **unidades de embalagem** (*a bag of*, *a jar of*, *a loaf of*) e de **too much / too many**, que é como o inglês diz \"demais\".",
+    "goals": [
+      "Usar as **unidades de medida e embalagem** que o inglês exige antes de incontáveis: *a bag of coffee*, não \"a coffee\".",
+      "Distinguir **too much** (incontável) de **too many** (contável) e de *very*.",
+      "Usar **will / won't** como promessa curta: *Yes, I will. / No, I won't.*",
+      "Lidar com o plural irregular **loaf → loaves**."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Embalagens e porções: o inglês conta o recipiente",
+        "why": "Substantivo incontável não aceita *a/an* nem plural. A saída é contar a embalagem. Em português dizemos \"um café\"; em inglês é obrigatório dizer **que** café.",
+        "warning": "**Plural irregular** loa**f** → loa**ves**. O mesmo *f → ves* em *knife → knives*, *life → lives*, *shelf → shelves*, *wife → wives*.",
+        "table_head": [
+          "Unidade",
+          "Combina com",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "a bunch of",
+              "bananas, grapes, flowers",
+              "You bought **a bunch of bananas**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "a box of",
+              "pancake mix, cereal, pasta",
+              "**a box of** pancake mix"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "a bag of",
+              "coffee, rice, flour, sugar",
+              "**a bag of** coffee"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "a jar of",
+              "peanut butter, jam, honey",
+              "I bought **a jar of** peanut butter."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "a loaf of",
+              "bread",
+              "**a loaf of** bread → two **loaves of** bread"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "a couple of",
+              "qualquer contável plural",
+              "I just need **a couple of** ingredients. (aula 36)"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "too much, too many, too + adjetivo",
+        "why": "\"Demais\" em inglês depende de **o que** é demais. E *too* sempre carrega carga negativa — é mais do que o desejável, não um elogio.",
+        "warning": "**Não confunda** *too* = demais (problema). *very* = muito (neutro). \"The food is too good\" soa estranho; o que você quer dizer é \"very good\".",
+        "table_head": [
+          "Forma",
+          "Usa com",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "too much",
+              "incontável (time, money, traffic)",
+              "I did spend **too much time**!"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "too much",
+              "depois do verbo",
+              "Marsha worries **too much**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "too many",
+              "contável plural (people, bananas)",
+              "I bought **too many** bananas."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "too + adjetivo",
+              "adjetivo",
+              "You are speaking **too softly**. (aula 40)"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "very",
+              "só intensifica, sem crítica",
+              "It is **very** good."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "will / won't como promessa em resposta curta",
+        "why": "Numa resposta curta o verbo principal desaparece e só sobra o auxiliar. É assim que se promete e se nega em inglês falado.",
+        "warning": null,
+        "table_head": [
+          "Pedido",
+          "Resposta",
+          "Significado"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "Please buy all the ingredients.",
+              "Yes, Marsha, **I will**.",
+              "Prometo que compro."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Do not spend too much time.",
+              "No, Marsha, **I won't**.",
+              "Prometo que não demoro."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "Do you trust me?",
+              "— **Do I have to?**",
+              "Eu sou obrigada? (*have to* = obrigação)"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Please buy all the ingredients on the list. — Yes, Marsha, *I will*.",
+        "text_pt": "Por favor compre todos os ingredientes da lista. — Sim, Marsha, eu vou.",
+        "note": "Promessa em resposta curta: só o auxiliar."
+      },
+      {
+        "position": 1,
+        "text_en": "And do not spend *too much time* shopping. — No, Marsha, *I won't*.",
+        "text_pt": "E não gaste tempo demais fazendo compras. — Não, Marsha, não vou.",
+        "note": "*spend* serve para tempo e dinheiro."
+      },
+      {
+        "position": 2,
+        "text_en": "I did not spend *too much money*. Oh, no! But I did spend *too much time*!",
+        "text_pt": "Eu não gastei dinheiro demais. Ah, não! Mas gastei tempo demais!",
+        "note": "*did* enfático na afirmativa: \"eu **realmente** gastei\"."
+      },
+      {
+        "position": 3,
+        "text_en": "You bought *a bunch of* bananas, *a box of* pancake mix, *a bag of* coffee…",
+        "text_pt": "Você comprou um cacho de bananas, uma caixa de mistura para panqueca, um pacote de café…",
+        "note": "Três unidades diferentes em sequência — o coração da aula."
+      },
+      {
+        "position": 4,
+        "text_en": "I bought *a jar of* peanut butter and *a loaf of* bread — no, wait — two *loaves* of bread.",
+        "text_pt": "Comprei um pote de pasta de amendoim e um pão de forma — não, espera — dois pães.",
+        "note": "A própria Anna faz a correção do plural irregular."
+      },
+      {
+        "position": 5,
+        "text_en": "Anna, what *took* you so long? Our guests *will be* here soon!",
+        "text_pt": "Anna, por que você demorou tanto? Nossos convidados chegam logo!",
+        "note": "*What took you so long?* — expressão pronta, muito usada."
+      },
+      {
+        "position": 6,
+        "text_en": "When *do* our guests *arrive*? — They *arrive* in 30 minutes!",
+        "text_pt": "Quando os convidados chegam? — Chegam em 30 minutos!",
+        "note": "Presente simples para horário marcado no futuro — igual ao português."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "ingredient",
+        "ipa": "/ɪnˈɡriːdiənt/",
+        "translation_pt": "ingrediente",
+        "example_en": "Please buy all the ingredients on the list."
+      },
+      {
+        "position": 1,
+        "term": "shopping list",
+        "ipa": "/ˈʃɑːpɪŋ lɪst/",
+        "translation_pt": "lista de compras",
+        "example_en": "Do you have the shopping list?"
+      },
+      {
+        "position": 2,
+        "term": "a bunch of",
+        "ipa": "/ə bʌntʃ əv/",
+        "translation_pt": "um cacho de / um monte de",
+        "example_en": "a bunch of bananas"
+      },
+      {
+        "position": 3,
+        "term": "a jar of",
+        "ipa": "/ə dʒɑːr əv/",
+        "translation_pt": "um pote de (vidro)",
+        "example_en": "a jar of peanut butter"
+      },
+      {
+        "position": 4,
+        "term": "a loaf of bread",
+        "ipa": "/ə loʊf əv bred/",
+        "translation_pt": "um pão de forma",
+        "example_en": "two loaves of bread"
+      },
+      {
+        "position": 5,
+        "term": "pancake mix",
+        "ipa": "/ˈpænkeɪk mɪks/",
+        "translation_pt": "mistura pronta para panqueca",
+        "example_en": "a box of pancake mix"
+      },
+      {
+        "position": 6,
+        "term": "counter",
+        "ipa": "/ˈkaʊntər/",
+        "translation_pt": "bancada da cozinha",
+        "example_en": "I took this list from the counter."
+      },
+      {
+        "position": 7,
+        "term": "refrigerator",
+        "ipa": "/rɪˈfrɪdʒəreɪtər/",
+        "translation_pt": "geladeira (coloquial: *fridge*)",
+        "example_en": "the shopping list on the refrigerator"
+      },
+      {
+        "position": 8,
+        "term": "guest",
+        "ipa": "/ɡest/",
+        "translation_pt": "convidado",
+        "example_en": "Our guests will be here soon!"
+      },
+      {
+        "position": 9,
+        "term": "spend",
+        "ipa": "/spend/",
+        "translation_pt": "gastar (tempo ou dinheiro)",
+        "example_en": "Do not spend too much time shopping."
+      },
+      {
+        "position": 10,
+        "term": "trust",
+        "ipa": "/trʌst/",
+        "translation_pt": "confiar em",
+        "example_en": "I can fix this. Do you trust me?"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "of → /əv/ ou /ə/",
+        "explanation": "*a bunch of bananas* sai \"a buncha bananas\"; *a box of* → \"a boxa\". O *of* praticamente desaparece na fala rápida — é por isso que parece que falam rápido demais."
+      },
+      {
+        "position": 1,
+        "label": "loaf /loʊf/ → loaves /loʊvz/",
+        "explanation": "No plural o som muda de /f/ para /vz/. Treine o par: leaf/leaves, knife/knives."
+      },
+      {
+        "position": 2,
+        "label": "refrigerator /rɪˈfrɪdʒəreɪtər/",
+        "explanation": "5 sílabas, tônica na segunda. Na prática, todo americano diz *fridge* /frɪdʒ/."
+      },
+      {
+        "position": 3,
+        "label": "too /tuː/ = two = to",
+        "explanation": "Três palavras, um som. O contexto resolve — mas **você** precisa escolher a grafia certa ao escrever."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Complete: I bought `____` bananas.",
+        "hint": "3 palavras: cacho",
+        "explanation": "*a bunch of* bananas.",
+        "answers": [
+          "a bunch of"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Complete: a `____` of peanut butter.",
+        "hint": "pote de vidro",
+        "explanation": "a jar of peanut butter.",
+        "answers": [
+          "jar"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Plural: one loaf of bread → two `____` of bread.",
+        "hint": null,
+        "explanation": "loaf → loaves (f → ves).",
+        "answers": [
+          "loaves"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Incontável: I spent `____` time shopping.",
+        "hint": "2 palavras = demais",
+        "explanation": "*time* é incontável → too much.",
+        "answers": [
+          "too much"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Contável: I bought `____` bananas!",
+        "hint": "2 palavras = demais",
+        "explanation": "*bananas* é contável plural → too many.",
+        "answers": [
+          "too many"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Promessa curta: — Don't spend too much money. — No, I `____`.",
+        "hint": null,
+        "explanation": "Negativa de *will* em resposta curta.",
+        "answers": [
+          "won't",
+          "wont"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 36,
+    "title": "I Can Fix This!",
+    "title_pt": "Eu consigo resolver isso!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-36-i-can-fix-this/3568962.html",
+    "grammar_tag": "Preposições de lugar + I'll",
+    "focus_points": [
+      "in · inside · under · on",
+      "hand me the flour",
+      "I'll answer the door"
+    ],
+    "story_note": "Parte 2 de 2 · continua a 35",
+    "lead": "Anna salva o jantar virando a lista errada em \"panquecas de pasta de amendoim com banana\". A aula é construída sobre **onde estão as coisas** — preposições de lugar na cozinha — e sobre o **will de oferta**, decidido na hora.",
+    "goals": [
+      "Dizer onde algo está com **in, inside, on, under** e perguntar com *Where is / Where are*.",
+      "Usar o verbo com **dois objetos**: *hand me the flour* (= hand the flour to me).",
+      "Oferecer-se para fazer algo com **I'll** — decisão tomada no momento.",
+      "Concordância do *be*: *Where **is** the flour?* × *Where **are** the eggs?*"
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Preposições de lugar: in, inside, on, under",
+        "why": "Essas quatro resolvem a maior parte das descrições de lugar. O par que confunde é *in* e *inside*: *inside* enfatiza que está **dentro**, fechado.",
+        "warning": "**Where is × Where are** O verbo concorda com o que você procura: *Where **is** the flour?* (incontável, singular) / *Where **are** the eggs?* (plural). Esse erro aparece em quase toda prova.",
+        "table_head": [
+          "Preposição",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "in",
+              "dentro de (geral)",
+              "Where is the flour? It's not **in** the cabinets."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "inside",
+              "dentro de (enfático)",
+              "I put the flour **inside** the refrigerator."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "under",
+              "embaixo de",
+              "The eggs are inside the cabinet **under** the sink."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "on",
+              "sobre, em cima de",
+              "the shopping list **on** the refrigerator (aula 35)"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "in + lugar abstrato",
+              "em",
+              "Put **in** a cold, dry place."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Verbo com dois objetos: hand me the flour",
+        "why": "Verbos de transferência (*give, hand, send, tell, show, buy, make*) aceitam duas ordens. A versão sem preposição é a mais natural na fala.",
+        "warning": "**Pronome objeto** Depois do verbo entra *me, you, him, her, us, them* — nunca *I, he, she, we, they*. \"Hand ~~I~~ the flour\" está errado.",
+        "table_head": [
+          "Ordem",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "sem preposição",
+              "verbo + **pessoa** + coisa",
+              "Please **hand me the flour**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "com preposição",
+              "verbo + coisa + **to** + pessoa",
+              "Please hand the flour **to me**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "outros verbos",
+              "—",
+              "Give me a call. Tell me the ending. Show me the list."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "I'll para oferta × going to para plano",
+        "why": "A cena final mostra os dois lado a lado. Perceba que *What are you going to make?* pergunta pelo plano, e *I'll answer the door* é uma decisão instantânea.",
+        "warning": null,
+        "table_head": [
+          "Função",
+          "Forma",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "oferta / decisão na hora",
+              "I'll + verbo",
+              "**I'll** answer the door. / **I'll** finish here."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "plano / intenção",
+              "be going to",
+              "What are you **going to** make with these ingredients?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "intenção declarada",
+              "will",
+              "You clean the living room. **I will** make dinner."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "conselho geral",
+              "just + imperativo",
+              "When something goes wrong, **just change** the plan!"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Marsha, please *hand me* the flour. — Anna, *where is* the flour?",
+        "text_pt": "Marsha, me passe a farinha, por favor. — Anna, onde está a farinha?",
+        "note": "Dois objetos + *Where is* com incontável."
+      },
+      {
+        "position": 1,
+        "text_en": "It's not *in* the cabinets. — I put the flour *inside* the refrigerator.",
+        "text_pt": "Não está nos armários. — Eu coloquei a farinha dentro da geladeira.",
+        "note": "*put* é invariável: put / put / put."
+      },
+      {
+        "position": 2,
+        "text_en": "The eggs are *inside* the cabinet *under* the sink.",
+        "text_pt": "Os ovos estão dentro do armário embaixo da pia.",
+        "note": "Duas preposições encaixadas na mesma frase."
+      },
+      {
+        "position": 3,
+        "text_en": "Anna, *why are* the eggs in here?",
+        "text_pt": "Anna, por que os ovos estão aqui dentro?",
+        "note": "*are* porque *eggs* é plural. *in here* = aqui dentro."
+      },
+      {
+        "position": 4,
+        "text_en": "What *are you going to make* with these ingredients? — I have a plan.",
+        "text_pt": "O que você vai fazer com esses ingredientes? — Eu tenho um plano.",
+        "note": "Pergunta sobre plano já formado → going to."
+      },
+      {
+        "position": 5,
+        "text_en": "That's our guests! — *I'll* answer the door. — *I'll* finish here.",
+        "text_pt": "São nossos convidados! — Eu atendo a porta. — Eu termino aqui.",
+        "note": "Duas ofertas instantâneas: *I'll* dividindo tarefa."
+      },
+      {
+        "position": 6,
+        "text_en": "Hey, this *tastes good*! Anna, you *made it work*!",
+        "text_pt": "Ei, isso está gostoso! Anna, você fez funcionar!",
+        "note": "*taste* é verbo de sentido: *tastes good*, não \"tastes well\"."
+      },
+      {
+        "position": 7,
+        "text_en": "When something *goes wrong* with your plan, just *change the plan*!",
+        "text_pt": "Quando algo dá errado no seu plano, mude o plano!",
+        "note": "Moral do episódio — e frase útil no trabalho."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "flour",
+        "ipa": "/ˈflaʊər/",
+        "translation_pt": "farinha",
+        "example_en": "Marsha, please hand me the flour."
+      },
+      {
+        "position": 1,
+        "term": "cabinet",
+        "ipa": "/ˈkæbɪnət/",
+        "translation_pt": "armário (de cozinha)",
+        "example_en": "It's not in the cabinets."
+      },
+      {
+        "position": 2,
+        "term": "sink",
+        "ipa": "/sɪŋk/",
+        "translation_pt": "pia",
+        "example_en": "the cabinet under the sink"
+      },
+      {
+        "position": 3,
+        "term": "recipe",
+        "ipa": "/ˈresəpi/",
+        "translation_pt": "receita",
+        "example_en": "I made my favorite recipe."
+      },
+      {
+        "position": 4,
+        "term": "hand (someone something)",
+        "ipa": "/hænd/",
+        "translation_pt": "passar, entregar",
+        "example_en": "Please hand me the eggs."
+      },
+      {
+        "position": 5,
+        "term": "a couple of",
+        "ipa": "/ə ˈkʌpəl əv/",
+        "translation_pt": "uns dois, alguns",
+        "example_en": "I just need a couple of ingredients."
+      },
+      {
+        "position": 6,
+        "term": "cold, dry place",
+        "ipa": "/koʊld draɪ pleɪs/",
+        "translation_pt": "local fresco e seco",
+        "example_en": "It says: \"Put in a cold, dry place.\""
+      },
+      {
+        "position": 7,
+        "term": "taste good",
+        "ipa": "/teɪst ɡʊd/",
+        "translation_pt": "estar gostoso",
+        "example_en": "Hey, this tastes good!"
+      },
+      {
+        "position": 8,
+        "term": "make it work",
+        "ipa": "/meɪk ɪt wɜːrk/",
+        "translation_pt": "fazer funcionar",
+        "example_en": "Anna, you made it work!"
+      },
+      {
+        "position": 9,
+        "term": "answer the door",
+        "ipa": "/ˈænsər ðə dɔːr/",
+        "translation_pt": "atender a porta",
+        "example_en": "I'll answer the door."
+      },
+      {
+        "position": 10,
+        "term": "go wrong",
+        "ipa": "/ɡoʊ rɔːŋ/",
+        "translation_pt": "dar errado",
+        "example_en": "When something goes wrong with your plan…"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "flour = flower /ˈflaʊər/",
+        "explanation": "Homófonos perfeitos. Duas sílabas: \"FLAU-ər\"."
+      },
+      {
+        "position": 1,
+        "label": "put /pʊt/",
+        "explanation": "Vogal curta /ʊ/, como em *book* e *foot*. Não é /pat/ nem /piut/. E o passado é igual: *put*."
+      },
+      {
+        "position": 2,
+        "label": "I'll /aɪl/",
+        "explanation": "Uma sílaba, igual ao som de *aisle* e *isle*. Brasileiro tende a dizer \"ai-ou\"."
+      },
+      {
+        "position": 3,
+        "label": "recipe /ˈresəpi/",
+        "explanation": "Três sílabas e **o *e* final é pronunciado**: \"RÉ-ssə-pi\". Não rima com *ripe*."
+      },
+      {
+        "position": 4,
+        "label": "cabinet /ˈkæbɪnət/",
+        "explanation": "Na fala rápida vira 2 sílabas: \"CAB-nət\"."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Complete: The eggs are inside the cabinet `____` the sink.",
+        "hint": "embaixo",
+        "explanation": "*under* = embaixo de.",
+        "answers": [
+          "under",
+          "underneath"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Complete: I put the flour `____` the refrigerator.",
+        "hint": "dentro, enfático",
+        "explanation": "*inside* enfatiza \"dentro\"; *in* também é aceito.",
+        "answers": [
+          "inside",
+          "in"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Concordância: Where `____` the eggs?",
+        "hint": null,
+        "explanation": "*eggs* é plural → are.",
+        "answers": [
+          "are"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Concordância: Where `____` the flour?",
+        "hint": null,
+        "explanation": "*flour* é incontável → is.",
+        "answers": [
+          "is"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Reescreva sem preposição: Please hand the flour to me. → Please hand `____` the flour.",
+        "hint": "1 palavra",
+        "explanation": "Pronome objeto *me* vem direto depois do verbo.",
+        "answers": [
+          "me"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Oferta na hora: — Someone is at the door! — `____` answer it.",
+        "hint": "2 palavras, contraído",
+        "explanation": "Decisão instantânea → *I'll*.",
+        "answers": [
+          "i'll",
+          "ill"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 37,
+    "title": "Let's Agree to Disagree",
+    "title_pt": "Vamos concordar em discordar",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-37-lets-agree-to-disagree/3574029.html",
+    "grammar_tag": "Possessivos + opinião",
+    "focus_points": [
+      "mine · yours · hers · theirs",
+      "more … than",
+      "I agree / I disagree"
+    ],
+    "story_note": null,
+    "lead": "Anna acha uma bolsa perdida e pergunta de quem é — e depois discute cidade × campo com o dono. Duas camadas: os **pronomes possessivos** (*mine, yours, his, hers*) e a **linguagem de concordar e discordar**, que é a habilidade mais útil desta aula para reunião de trabalho.",
+    "goals": [
+      "Diferenciar **adjetivo possessivo** (*my bag*) de **pronome possessivo** (*mine*), que substitui o substantivo.",
+      "Perguntar de quem é algo: *Is this bag yours?* / *Whose bag is this?*",
+      "Comparar com **more … than** diante de substantivos: *more culture than the country*.",
+      "Discordar com educação: *I disagree*, *That's a good point*, *I don't think…*"
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Adjetivo possessivo × pronome possessivo",
+        "why": "A diferença é se o substantivo vem depois ou não. O pronome fica **sozinho** — e nunca leva substantivo nem artigo. É a confusão mais frequente: \"It's my\" não existe; é \"It's mine\".",
+        "warning": "**Três erros a evitar** (1) \"It's mine bag\" — pronome não aceita substantivo. (2) \"It's the mine\" — sem artigo. (3) *hers / yours / ours / theirs* **nunca** levam apóstrofo: *her's* está errado. Só *his* e *its* não mudam de forma.",
+        "table_head": [
+          "Pessoa",
+          "+ substantivo",
+          "sozinho",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I",
+              "my bag",
+              "**mine**",
+              "No. It's not **mine**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you",
+              "your bag",
+              "**yours**",
+              "Is this bag **yours**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "he",
+              "his bag",
+              "**his**",
+              "It might be **his**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "she",
+              "her bag",
+              "**hers**",
+              "It might be **hers**."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "we",
+              "our bag",
+              "**ours**",
+              "We have **ours**."
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "they",
+              "their bag",
+              "**theirs**",
+              "Maybe it's **theirs**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "more … than diante de substantivo",
+        "why": "Na aula 31 o *more* apareceu com adjetivos longos. Aqui ele aparece com **substantivos** — e vale tanto para incontáveis quanto para plurais.",
+        "warning": "**fewer × less** *fewer* para contáveis (*fewer jobs*), *less* para incontáveis (*less traffic*). Na fala nativa informal o *less* invade o lugar do *fewer*, mas em prova e em texto escrito mantenha a distinção.",
+        "table_head": [
+          "Tipo",
+          "Forma",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "incontável",
+              "more + substantivo",
+              "It has **more culture than** the country."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "contável plural",
+              "more + plural",
+              "There are **more jobs**. / **more trees** and mountains."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "incontável",
+              "more + substantivo",
+              "But the country has **more nature**!"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "negativo",
+              "fewer / less than",
+              "The country has **fewer** museums."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Concordar e discordar sem ser rude",
+        "why": "O padrão nativo é **concordar em parte antes de discordar**. Repare na estrutura que o Phil e a Anna usam: *Well, I agree… But…* É exatamente o que funciona numa reunião em inglês.",
+        "warning": null,
+        "table_head": [
+          "Função",
+          "Expressão",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "concordar",
+              "I agree.",
+              "**Well, I agree.** There is more culture in the city."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "discordar direto",
+              "I disagree.",
+              "**I disagree.** I think all the buildings are beautiful."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "discordar suave",
+              "I don't think…",
+              "**I don't think** city people are rude."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "reconhecer o ponto",
+              "That's a good point.",
+              "**That's a good point.**"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "encerrar sem acordo",
+              "agree to disagree",
+              "You can always **agree to disagree**!"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "marcar que é opinião",
+              "I think / in my opinion",
+              "They have their opinions. We have ours."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Excuse me. Is this bag *yours*? — No. It's not *mine*. It might be *hers*.",
+        "text_pt": "Com licença. Esta bolsa é sua? — Não. Não é minha. Pode ser dela.",
+        "note": "Três pronomes possessivos em duas falas + *might* da aula 34."
+      },
+      {
+        "position": 1,
+        "text_en": "No. It's not mine. It might be *his*.",
+        "text_pt": "Não. Não é minha. Pode ser dele.",
+        "note": "*his* serve como adjetivo e pronome — não muda."
+      },
+      {
+        "position": 2,
+        "text_en": "Yes, that's *mine*. These are all *my* travel things.",
+        "text_pt": "Sim, essa é minha. Essas são todas as minhas coisas de viagem.",
+        "note": "A mesma fala usa o pronome (*mine*) e o adjetivo (*my*) — compare."
+      },
+      {
+        "position": 3,
+        "text_en": "The city is exciting! It has *more culture than* the country.",
+        "text_pt": "A cidade é animada! Tem mais cultura que o interior.",
+        "note": "*culture* é incontável → more sem plural."
+      },
+      {
+        "position": 4,
+        "text_en": "Well, *I agree*. There is more culture in the city. *But* the country has more nature!",
+        "text_pt": "Bom, eu concordo. Há mais cultura na cidade. Mas o interior tem mais natureza!",
+        "note": "Padrão \"concordo em parte, mas\" — copie essa estrutura."
+      },
+      {
+        "position": 5,
+        "text_en": "*I disagree.* I think all the different buildings are beautiful.",
+        "text_pt": "Eu discordo. Eu acho que todos os prédios diferentes são bonitos.",
+        "note": "*disagree* já é negativo: não se diz \"I don't disagree\" a não ser com intenção."
+      },
+      {
+        "position": 6,
+        "text_en": "*I don't think* city people are rude. I think they're just *busy*.",
+        "text_pt": "Eu não acho que as pessoas da cidade sejam grosseiras. Acho que estão só ocupadas.",
+        "note": "O inglês nega o *think*, não o complemento: \"I don't think it's good\", não \"I think it's not good\"."
+      },
+      {
+        "position": 7,
+        "text_en": "They have *their* opinions. We have *ours*. You can always *agree to disagree*!",
+        "text_pt": "Eles têm as opiniões deles. Nós temos as nossas. Sempre se pode concordar em discordar!",
+        "note": "Adjetivo (*their*) e pronome (*ours*) em paralelo na mesma frase."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "the country",
+        "ipa": "/ðə ˈkʌntri/",
+        "translation_pt": "o interior, a zona rural",
+        "example_en": "I am from the country too!"
+      },
+      {
+        "position": 1,
+        "term": "culture",
+        "ipa": "/ˈkʌltʃər/",
+        "translation_pt": "cultura (incontável)",
+        "example_en": "It has more culture than the country."
+      },
+      {
+        "position": 2,
+        "term": "peaceful",
+        "ipa": "/ˈpiːsfəl/",
+        "translation_pt": "tranquilo, pacífico",
+        "example_en": "It's peaceful and beautiful."
+      },
+      {
+        "position": 3,
+        "term": "nature",
+        "ipa": "/ˈneɪtʃər/",
+        "translation_pt": "natureza",
+        "example_en": "But the country has more nature!"
+      },
+      {
+        "position": 4,
+        "term": "hiking / camping",
+        "ipa": "/ˈhaɪkɪŋ/ /ˈkæmpɪŋ/",
+        "translation_pt": "trilha / acampar",
+        "example_en": "You can go hiking and camping."
+      },
+      {
+        "position": 5,
+        "term": "noisy",
+        "ipa": "/ˈnɔɪzi/",
+        "translation_pt": "barulhento",
+        "example_en": "The city is noisy and dirty."
+      },
+      {
+        "position": 6,
+        "term": "rude",
+        "ipa": "/ruːd/",
+        "translation_pt": "grosseiro, mal-educado",
+        "example_en": "I think city people are rude."
+      },
+      {
+        "position": 7,
+        "term": "busy",
+        "ipa": "/ˈbɪzi/",
+        "translation_pt": "ocupado",
+        "example_en": "I think they're just busy."
+      },
+      {
+        "position": 8,
+        "term": "opinion",
+        "ipa": "/əˈpɪnjən/",
+        "translation_pt": "opinião",
+        "example_en": "They have their opinions."
+      },
+      {
+        "position": 9,
+        "term": "feel lost",
+        "ipa": "/fiːl lɔːst/",
+        "translation_pt": "sentir-se perdido",
+        "example_en": "I feel a little lost."
+      },
+      {
+        "position": 10,
+        "term": "agree to disagree",
+        "ipa": "/əˈɡriː tə ˌdɪsəˈɡriː/",
+        "translation_pt": "concordar em discordar",
+        "example_en": "You can always agree to disagree!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "hers /hɜːrz/ × his /hɪz/",
+        "explanation": "*hers* tem o som longo de *her* + z. *his* é curto, /hɪz/ — e o *h* quase desaparece na fala rápida (\"it might be-iz\")."
+      },
+      {
+        "position": 1,
+        "label": "theirs /ðerz/",
+        "explanation": "*th* sonoro + /erz/. Homófono de *there's* — o contexto resolve."
+      },
+      {
+        "position": 2,
+        "label": "busy /ˈbɪzi/",
+        "explanation": "Escreve-se com *u*, mas pronuncia-se com *i*: \"BI-zi\". O *s* soa /z/."
+      },
+      {
+        "position": 3,
+        "label": "country /ˈkʌntri/",
+        "explanation": "Primeira sílaba com /ʌ/ (como *cut*), não /aʊ/. Não é \"cáun-tri\"."
+      },
+      {
+        "position": 4,
+        "label": "rude /ruːd/",
+        "explanation": "O *r* americano é retroflexo, com a língua curvada para trás sem tocar o céu da boca — não é o *r* vibrado do português."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Is this bag `____`?",
+        "hint": "sua — pronome",
+        "explanation": "Pronome possessivo de *you*: *yours*, sem substantivo depois.",
+        "answers": [
+          "yours"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "It's not `____`.",
+        "hint": "minha — pronome",
+        "explanation": "*mine* substitui \"my bag\".",
+        "answers": [
+          "mine"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "It might be `____`.",
+        "hint": "dela — pronome",
+        "explanation": "*her* + s, sem apóstrofo.",
+        "answers": [
+          "hers"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "We have `____` opinions and they have `____`. — responda só a **segunda** lacuna",
+        "hint": "deles — pronome",
+        "explanation": "*their* + substantivo; *theirs* sozinho.",
+        "answers": [
+          "theirs"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Comparando: The city has `____` jobs than the country.",
+        "hint": "1 palavra",
+        "explanation": "*more* + substantivo plural + than.",
+        "answers": [
+          "more"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Discordando com educação: `____`, but I think city people are just busy.",
+        "hint": "2 palavras — \"eu discordo\"",
+        "explanation": "*I disagree* — e o *but* suaviza o resto.",
+        "answers": [
+          "i disagree"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 38,
+    "title": "She's My Best Friend!",
+    "title_pt": "Ela é minha melhor amiga!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-38-shes-my-best-friend/3591967.html",
+    "grammar_tag": "Superlativos",
+    "focus_points": [
+      "the -est",
+      "the most …",
+      "the best"
+    ],
+    "story_note": null,
+    "lead": "Penelope, a melhor amiga de infância, visita Washington e Anna descreve todas as pessoas da sua vida — cada uma com um **superlativo**. A aula é uma coleção quase completa das formas de superlativo do inglês, incluindo as irregulares.",
+    "goals": [
+      "Formar o superlativo com **the + adjetivo + -est** (curtos) e **the most + adjetivo** (longos).",
+      "Aplicar a mudança ortográfica **y → iest**: *messy → messiest*, *friendly → friendliest*.",
+      "Usar os irregulares **good → the best** e **bad → the worst**.",
+      "Delimitar o grupo da comparação: *of all the people I know*, *in this city*, *one of D.C.'s most famous restaurants*."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "As três formas de superlativo",
+        "why": "A regra do tamanho é a mesma da aula 31 — o que muda é que agora o artigo **the** é obrigatório, porque superlativo aponta para um único vencedor.",
+        "warning": "**Nunca os dois juntos** \"the most friendliest\" é erro grave — e comum. Escolha: *-est* **ou** *most*.",
+        "table_head": [
+          "Adjetivo",
+          "Superlativo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "nice (1 sílaba)",
+              "the nic**est**",
+              "Marsha is **the nicest** person I know in this city."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "messy (y → iest)",
+              "the mess**iest**",
+              "She says I'm **the messiest** cook she knows."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "silly (y → iest)",
+              "the sill**iest**",
+              "Pete is the most serious and also **the silliest**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "friendly (y → iest)",
+              "the friendl**iest**",
+              "They are **the friendliest** people I know."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "lucky (y → iest)",
+              "the luck**iest**",
+              "I am **the luckiest** woman in Washington, D.C."
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "serious (3 sílabas)",
+              "**the most** serious",
+              "Pete is **the most serious**…"
+            ]
+          },
+          {
+            "position": 6,
+            "cells": [
+              "famous (2 sílabas)",
+              "**the most** famous",
+              "You are **the most famous** turkey farmer I know!"
+            ]
+          },
+          {
+            "position": 7,
+            "cells": [
+              "good (irregular)",
+              "**the best**",
+              "Old friends are **the best**."
+            ]
+          },
+          {
+            "position": 8,
+            "cells": [
+              "bad (irregular)",
+              "**the worst**",
+              "—"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Delimitar o grupo: of all… / in… / that I know",
+        "why": "Superlativo precisa de um universo de comparação, dito ou implícito. A aula mostra todas as formas de marcar esse universo.",
+        "warning": "**Detalhe de estrutura** Em *one of the most famous restaurants*, o substantivo vai para o **plural** — você está escolhendo um dentro de um conjunto.",
+        "table_head": [
+          "Delimitador",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "of all…",
+              "of all + grupo",
+              "**Of all the people I know in D.C.**, Pete is the most serious."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "in…",
+              "in + lugar",
+              "Marsha is the nicest person I know **in this city**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "oração relativa",
+              "(that) I know",
+              "the messiest cook **she knows**"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "one of + superlativo + plural",
+              "one of the most…",
+              "**one of** D.C.'s **most famous restaurants**"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Escala completa: positivo → comparativo → superlativo",
+        "why": "Juntando a aula 31 com esta, você fecha o sistema. Vale decorar a linha dos irregulares.",
+        "warning": null,
+        "table_head": [
+          "Positivo",
+          "Comparativo",
+          "Superlativo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "nice",
+              "nicer than",
+              "the nicest"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "messy",
+              "messier than",
+              "the messiest"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "serious",
+              "more serious than",
+              "the most serious"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "good",
+              "better than",
+              "**the best**"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "bad",
+              "worse than",
+              "**the worst**"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "far",
+              "farther / further than",
+              "the farthest / furthest"
+            ]
+          },
+          {
+            "position": 6,
+            "cells": [
+              "many / much",
+              "more than",
+              "the most"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "My best friend from my hometown is coming here — to Washington, D.C.!",
+        "text_pt": "Minha melhor amiga da minha cidade natal está vindo para cá — para Washington!",
+        "note": "Presente contínuo com valor de futuro programado."
+      },
+      {
+        "position": 1,
+        "text_en": "I *can't wait to* catch up with her!",
+        "text_pt": "Não aguento esperar para colocar a conversa em dia com ela!",
+        "note": "*can't wait to* + verbo = estar ansioso. Expressão de altíssima frequência."
+      },
+      {
+        "position": 2,
+        "text_en": "I have a roommate. So, we *split* the rent.",
+        "text_pt": "Eu tenho uma colega de quarto. Então a gente divide o aluguel.",
+        "note": "*split the rent / split the bill* = dividir a conta."
+      },
+      {
+        "position": 3,
+        "text_en": "Marsha is *the nicest* person I know in this city.",
+        "text_pt": "Marsha é a pessoa mais legal que eu conheço nesta cidade.",
+        "note": "-est + delimitador de lugar."
+      },
+      {
+        "position": 4,
+        "text_en": "She says I'm *the messiest* cook she knows.",
+        "text_pt": "Ela diz que eu sou a cozinheira mais desorganizada que ela conhece.",
+        "note": "messy → messiest (y → iest)."
+      },
+      {
+        "position": 5,
+        "text_en": "*Of all the people I know* in D.C., Pete is *the most serious* and also *the silliest*.",
+        "text_pt": "De todas as pessoas que conheço em Washington, Pete é o mais sério e também o mais bobo.",
+        "note": "As duas formas de superlativo numa frase só."
+      },
+      {
+        "position": 6,
+        "text_en": "In the city, they are *the friendliest* people I know.",
+        "text_pt": "Na cidade, eles são as pessoas mais amigáveis que conheço.",
+        "note": "friendly → friendliest."
+      },
+      {
+        "position": 7,
+        "text_en": "New friends are good. But old friends are *the best*.",
+        "text_pt": "Amigos novos são bons. Mas amigos antigos são os melhores.",
+        "note": "good → better → the best. Superlativo sem substantivo depois."
+      },
+      {
+        "position": 8,
+        "text_en": "I am *the luckiest* woman in Washington, D.C.",
+        "text_pt": "Eu sou a mulher mais sortuda de Washington.",
+        "note": "lucky → luckiest + *in* + lugar."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "hometown",
+        "ipa": "/ˈhoʊmtaʊn/",
+        "translation_pt": "cidade natal",
+        "example_en": "my best friend from my hometown"
+      },
+      {
+        "position": 1,
+        "term": "catch up with",
+        "ipa": "/kætʃ ʌp wɪð/",
+        "translation_pt": "colocar a conversa em dia",
+        "example_en": "I can't wait to catch up with her!"
+      },
+      {
+        "position": 2,
+        "term": "can't wait to",
+        "ipa": "/kænt weɪt tə/",
+        "translation_pt": "estar ansioso por",
+        "example_en": "I can't wait to hear about everything!"
+      },
+      {
+        "position": 3,
+        "term": "rent",
+        "ipa": "/rent/",
+        "translation_pt": "aluguel",
+        "example_en": "Is your rent expensive?"
+      },
+      {
+        "position": 4,
+        "term": "split the rent",
+        "ipa": "/splɪt ðə rent/",
+        "translation_pt": "dividir o aluguel",
+        "example_en": "So, we split the rent."
+      },
+      {
+        "position": 5,
+        "term": "roommate",
+        "ipa": "/ˈruːmmeɪt/",
+        "translation_pt": "colega de quarto/apartamento",
+        "example_en": "Is your roommate nice?"
+      },
+      {
+        "position": 6,
+        "term": "messy",
+        "ipa": "/ˈmesi/",
+        "translation_pt": "desorganizado, bagunceiro",
+        "example_en": "I'm the messiest cook she knows."
+      },
+      {
+        "position": 7,
+        "term": "silly",
+        "ipa": "/ˈsɪli/",
+        "translation_pt": "bobo, tolo",
+        "example_en": "the most serious and also the silliest"
+      },
+      {
+        "position": 8,
+        "term": "friendly",
+        "ipa": "/ˈfrendli/",
+        "translation_pt": "amigável, simpático",
+        "example_en": "the friendliest people I know"
+      },
+      {
+        "position": 9,
+        "term": "lucky",
+        "ipa": "/ˈlʌki/",
+        "translation_pt": "sortudo",
+        "example_en": "I am the luckiest woman in D.C."
+      },
+      {
+        "position": 10,
+        "term": "turkey farmer",
+        "ipa": "/ˈtɜːrki ˈfɑːrmər/",
+        "translation_pt": "criador de perus",
+        "example_en": "You are the most famous turkey farmer I know!"
+      },
+      {
+        "position": 11,
+        "term": "awesome",
+        "ipa": "/ˈɔːsəm/",
+        "translation_pt": "incrível, demais",
+        "example_en": "Awesome!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "-est /ɪst/",
+        "explanation": "*nicest, messiest, luckiest*: a terminação é fraca, /ɪst/ — nunca \"-éste\". A tônica continua na sílaba original da palavra."
+      },
+      {
+        "position": 1,
+        "label": "messiest /ˈmesiɪst/",
+        "explanation": "Três sílabas: MES-si-ist. Mesma coisa em *luckiest*, *friendliest*, *silliest*."
+      },
+      {
+        "position": 2,
+        "label": "can't wait /kænt weɪt/",
+        "explanation": "Na fala rápida os dois *t* se fundem num só: \"can-WEIT\". Reconhecer essa fusão é essencial no listening."
+      },
+      {
+        "position": 3,
+        "label": "roommate /ˈruːmmeɪt/",
+        "explanation": "Dois *m* escritos, um som só. Tônica na primeira sílaba."
+      },
+      {
+        "position": 4,
+        "label": "awesome /ˈɔːsəm/",
+        "explanation": "\"Ó-ssəm\". Palavra onipresente no inglês americano informal — aparece em quase toda aula da série."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Superlativo de *nice*: Marsha is `____` person I know.",
+        "hint": "2 palavras, com artigo",
+        "explanation": "1 sílaba → the + -est.",
+        "answers": [
+          "the nicest"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Superlativo de *messy*: I'm `____` cook she knows.",
+        "hint": "2 palavras",
+        "explanation": "messy → y vira i + est.",
+        "answers": [
+          "the messiest"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Superlativo de *serious*: Pete is `____` person here.",
+        "hint": "3 palavras",
+        "explanation": "3 sílabas → the most + adjetivo.",
+        "answers": [
+          "the most serious"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Superlativo de *good*: Old friends are `____`.",
+        "hint": "2 palavras",
+        "explanation": "good → better → the best.",
+        "answers": [
+          "the best"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Superlativo de *lucky*: I am `____` woman in D.C.",
+        "hint": "2 palavras",
+        "explanation": "lucky → luckiest.",
+        "answers": [
+          "the luckiest"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Corrija: \"They are the most friendliest people.\" → They are `____` people.",
+        "hint": "2 palavras",
+        "explanation": "Nunca junte *most* com *-est*.",
+        "answers": [
+          "the friendliest"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 39,
+    "title": "It's Unbelievable!",
+    "title_pt": "É inacreditável!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-39-its-unbelieveable/3598920.html",
+    "grammar_tag": "Prefixos negativos",
+    "focus_points": [
+      "un- · in- · im- · dis-",
+      "passado simples",
+      "do you?"
+    ],
+    "story_note": null,
+    "lead": "Pete anuncia um produto milagroso para cabelo, Anna compra e o resultado é um desastre. A aula constrói o diálogo inteiro em torno dos **prefixos negativos**: *untidy, uncomfortable, inexpensive, imperfect, dishonest, unbelievable*.",
+    "goals": [
+      "Negar um adjetivo com prefixo: **un-, in-, im-, dis-** — e saber que a escolha é por costume, não por regra lógica.",
+      "Narrar o que aconteceu em **passado simples**, regular e irregular.",
+      "Fazer **tag question** em frase negativa com *do*: *you don't believe ads, do you?*",
+      "Vocabulário de compra online e de publicidade — útil no dia a dia."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Prefixos negativos: un-, in-, im-, dis-",
+        "why": "Os quatro significam \"não\". Qual usar depende da palavra — não há regra confiável, então aprenda em pares. O padrão mais forte: **im-** antes de *p*, *b* e *m*.",
+        "warning": "**Não invente** Existe *inexpensive* mas **não** existe \"uncheap\"; existe *unhappy* mas não \"inhappy\". Quando não souber, use *not* + adjetivo — sempre funciona: *not expensive*.",
+        "table_head": [
+          "Prefixo",
+          "Positivo → Negativo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "un-",
+              "tidy → **un**tidy",
+              "I am tired of my **untidy** hair."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "un-",
+              "comfortable → **un**comfortable",
+              "And it's … **uncomfortable**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "un-",
+              "believable → **un**believable",
+              "It's **unbelievable**!"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "in-",
+              "expensive → **in**expensive",
+              "Hair Be Good works and it's **inexpensive**."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "im- (antes de p/b/m)",
+              "perfect → **im**perfect",
+              "This is not perfect. This is **imperfect**!"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "dis-",
+              "honest → **dis**honest",
+              "I believed your ad, Pete. It was **dishonest**!"
+            ]
+          },
+          {
+            "position": 6,
+            "cells": [
+              "il- (antes de l)",
+              "legal → **il**legal",
+              "—"
+            ]
+          },
+          {
+            "position": 7,
+            "cells": [
+              "ir- (antes de r)",
+              "regular → **ir**regular",
+              "—"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Passado simples: o que já aconteceu",
+        "why": "Toda a segunda metade da aula é narração no passado. Regulares levam *-ed*; irregulares você decora. Em pergunta e negativa, o passado migra para o *did* e o verbo volta ao infinitivo.",
+        "warning": "**Pergunta no passado** \"What did you ~~did~~?\" está errado. O *did* já marca o passado, então o verbo principal fica no infinitivo: *What did you **do**?*",
+        "table_head": [
+          "Tipo",
+          "Infinitivo → Passado",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "regular",
+              "use → us**ed**",
+              "I **used** a new product called Hair Be Good."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "regular",
+              "believe → believ**ed**",
+              "I **believed** your ad, Pete."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "regular",
+              "arrive → arriv**ed**",
+              "It **arrived**!"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "irregular",
+              "buy → **bought**",
+              "Yes, I **bought** it."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "irregular",
+              "say → **said**",
+              "You **said** in your ad it was a perfect product."
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "irregular",
+              "do → **did**",
+              "What **did** you **do** to your hair?"
+            ]
+          },
+          {
+            "position": 6,
+            "cells": [
+              "irregular",
+              "be → **was / were**",
+              "It **was** dishonest!"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Tag question com do / don't",
+        "why": "Mesma mecânica da aula 34, agora com o auxiliar *do*. Frase negativa → tag afirmativa.",
+        "warning": null,
+        "table_head": [
+          "Frase",
+          "Tag",
+          "Função"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "You don't believe everything you see in ads,",
+              "**do you?**",
+              "buscar concordância"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Is something wrong?",
+              "—",
+              "pergunta direta"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "It arrived,",
+              "**didn't it?**",
+              "confirmação no passado"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Winter weather in Washington, D.C. can be really *windy*. And wind *messes up* my hair.",
+        "text_pt": "O inverno em Washington pode ser bem ventoso. E o vento desarruma meu cabelo.",
+        "note": "*mess up* = estragar, desarrumar. Phrasal verb útil."
+      },
+      {
+        "position": 1,
+        "text_en": "I am *tired of* my *untidy* hair.",
+        "text_pt": "Estou cansada do meu cabelo desarrumado.",
+        "note": "*be tired of* + substantivo/gerúndio = estar de saco cheio de."
+      },
+      {
+        "position": 2,
+        "text_en": "Hair Be Good works and it's *inexpensive*. One can costs only $10!",
+        "text_pt": "O Hair Be Good funciona e é baratinho. Uma lata custa só 10 dólares!",
+        "note": "*inexpensive* soa mais elegante que *cheap*, que pode sugerir baixa qualidade."
+      },
+      {
+        "position": 3,
+        "text_en": "I'll pay with a *credit card*. My *delivery* will arrive in 2 days.",
+        "text_pt": "Vou pagar com cartão de crédito. Minha entrega chega em 2 dias.",
+        "note": "*in 2 days* = dentro de 2 dias (futuro)."
+      },
+      {
+        "position": 4,
+        "text_en": "Your hair does not look good. — Oh, no! This is not good.",
+        "text_pt": "Seu cabelo não está bom. — Ah, não! Isso não está bom.",
+        "note": "*look* + adjetivo = parecer/estar com aparência de."
+      },
+      {
+        "position": 5,
+        "text_en": "This is not perfect. This is *imperfect*! — It's *unbelievable*!",
+        "text_pt": "Isso não é perfeito. Isso é imperfeito! — É inacreditável!",
+        "note": "Dois prefixos diferentes em falas seguidas — é o clímax da aula."
+      },
+      {
+        "position": 6,
+        "text_en": "I *believed* your ad, Pete. It *was dishonest*!",
+        "text_pt": "Eu acreditei no seu anúncio, Pete. Era desonesto!",
+        "note": "Passado regular + *was* + adjetivo com *dis-*."
+      },
+      {
+        "position": 7,
+        "text_en": "Anna, you *don't* believe everything you see in ads, *do you?*",
+        "text_pt": "Anna, você não acredita em tudo que vê nos anúncios, né?",
+        "note": "Tag question: negativa → tag afirmativa com *do*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "windy",
+        "ipa": "/ˈwɪndi/",
+        "translation_pt": "ventoso",
+        "example_en": "It is really windy today."
+      },
+      {
+        "position": 1,
+        "term": "mess up",
+        "ipa": "/mes ʌp/",
+        "translation_pt": "estragar, desarrumar",
+        "example_en": "Wind messes up my hair."
+      },
+      {
+        "position": 2,
+        "term": "untidy / tidy",
+        "ipa": "/ʌnˈtaɪdi/ /ˈtaɪdi/",
+        "translation_pt": "desarrumado / arrumado",
+        "example_en": "make my untidy hair tidy!"
+      },
+      {
+        "position": 3,
+        "term": "uncomfortable",
+        "ipa": "/ʌnˈkʌmftərbəl/",
+        "translation_pt": "desconfortável",
+        "example_en": "And it's … uncomfortable."
+      },
+      {
+        "position": 4,
+        "term": "product",
+        "ipa": "/ˈprɑːdʌkt/",
+        "translation_pt": "produto",
+        "example_en": "I have the perfect product for you."
+      },
+      {
+        "position": 5,
+        "term": "spray",
+        "ipa": "/spreɪ/",
+        "translation_pt": "borrifar; spray",
+        "example_en": "Just spray Hair Be Good on your hair."
+      },
+      {
+        "position": 6,
+        "term": "can",
+        "ipa": "/kæn/",
+        "translation_pt": "lata",
+        "example_en": "One can costs only $10!"
+      },
+      {
+        "position": 7,
+        "term": "inexpensive",
+        "ipa": "/ˌɪnɪkˈspensɪv/",
+        "translation_pt": "barato, em conta",
+        "example_en": "Hair Be Good works and it's inexpensive."
+      },
+      {
+        "position": 8,
+        "term": "order online",
+        "ipa": "/ˈɔːrdər ˈɑːnlaɪn/",
+        "translation_pt": "comprar pela internet",
+        "example_en": "Go online and order your Hair Be Good today!"
+      },
+      {
+        "position": 9,
+        "term": "delivery",
+        "ipa": "/dɪˈlɪvəri/",
+        "translation_pt": "entrega",
+        "example_en": "My delivery will arrive in 2 days."
+      },
+      {
+        "position": 10,
+        "term": "ad (advertisement)",
+        "ipa": "/æd/",
+        "translation_pt": "anúncio, propaganda",
+        "example_en": "You said in your ad it was a perfect product."
+      },
+      {
+        "position": 11,
+        "term": "dishonest",
+        "ipa": "/dɪsˈɑːnɪst/",
+        "translation_pt": "desonesto",
+        "example_en": "It was dishonest!"
+      },
+      {
+        "position": 12,
+        "term": "unbelievable",
+        "ipa": "/ˌʌnbɪˈliːvəbəl/",
+        "translation_pt": "inacreditável",
+        "example_en": "It's unbelievable!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "un- /ʌn/",
+        "explanation": "Som de /ʌ/ (como *up*), não \"un\" nasalizado do português. *untidy* = \"ãn-TAI-di\" — e a tônica fica na **raiz**, não no prefixo."
+      },
+      {
+        "position": 1,
+        "label": "unbelievable /ˌʌnbɪˈliːvəbəl/",
+        "explanation": "5 sílabas, tônica em **LIEV**. Palavra longa que vale treinar devagar e depois acelerar."
+      },
+      {
+        "position": 2,
+        "label": "inexpensive /ˌɪnɪkˈspensɪv/",
+        "explanation": "Tônica em **PEN**. Perceba que o prefixo *in-* não é tônico."
+      },
+      {
+        "position": 3,
+        "label": "dishonest /dɪsˈɑːnɪst/",
+        "explanation": "O *h* é **mudo**: \"dis-Ó-nist\". Mesmo caso em *honest, hour, honor*."
+      },
+      {
+        "position": 4,
+        "label": "ad /æd/ = add",
+        "explanation": "Homófonos. E *advertisement* muda de tônica entre países: AmE /ˌædvərˈtaɪzmənt/, BrE /ədˈvɜːtɪsmənt/."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Negativo de *tidy*: my `____` hair.",
+        "hint": null,
+        "explanation": "un- + tidy.",
+        "answers": [
+          "untidy"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Negativo de *perfect*: This is `____`!",
+        "hint": "antes de p usa-se im-",
+        "explanation": "im- antes de *p*, *b* e *m*.",
+        "answers": [
+          "imperfect"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Negativo de *honest*: It was `____`!",
+        "hint": null,
+        "explanation": "dis- + honest.",
+        "answers": [
+          "dishonest"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Negativo de *expensive*: It's `____` — only $10.",
+        "hint": "com prefixo",
+        "explanation": "in- + expensive. Não existe \"unexpensive\".",
+        "answers": [
+          "inexpensive"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Passado de *buy*: Yes, I `____` it.",
+        "hint": null,
+        "explanation": "buy → bought → bought.",
+        "answers": [
+          "bought"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Pergunta no passado: What `____` you do to your hair?",
+        "hint": "1 palavra",
+        "explanation": "*did* carrega o passado; o verbo principal fica no infinitivo.",
+        "answers": [
+          "did"
+        ]
+      },
+      {
+        "position": 6,
+        "prompt": "Tag question: You don't believe ads, `____`?",
+        "hint": "2 palavras",
+        "explanation": "Negativa → tag afirmativa com o mesmo auxiliar.",
+        "answers": [
+          "do you"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 40,
+    "title": "The Woods Are Alive",
+    "title_pt": "A floresta está viva",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-40-the-woods-are-alive/3630341.html",
+    "grammar_tag": "Advérbios de modo",
+    "focus_points": [
+      "adjetivo + -ly",
+      "more loudly / earlier",
+      "too … / … enough"
+    ],
+    "story_note": "Fecha o bloco",
+    "lead": "Ano novo, resolução nova: Anna faz um teste para uma peça de teatro. O diretor corrige **como** ela fala e **como** ela anda — e por isso a aula inteira é feita de **advérbios de modo**, do comparativo deles e do par *too* / *enough*.",
+    "goals": [
+      "Formar advérbio de modo com **adjetivo + -ly** e saber quando o *y* vira *i*.",
+      "Comparar advérbios: **more loudly**, **earlier**, **later**.",
+      "Diferenciar **too + adjetivo/advérbio** (demais) de **adjetivo + enough** (suficientemente).",
+      "Falar de resolução de ano novo e de audição/teatro."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Adjetivo → advérbio: o -ly",
+        "why": "O advérbio descreve **como** a ação é feita e normalmente vem depois do verbo. Em português usamos \"-mente\" ou \"de forma X\"; em inglês é quase sempre *-ly*.",
+        "warning": "**Ortografia e exceções** *y* → *ily*: easy → easily, happy → happily. E cuidado com os que **não** levam -ly: *fast → fast*, *hard → hard*, *early → early*, *late → late*, *good → **well***.",
+        "table_head": [
+          "Adjetivo",
+          "Advérbio",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "soft",
+              "soft**ly**",
+              "You are speaking too **softly**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "loud",
+              "loud**ly**",
+              "Can you speak more **loudly**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "slow",
+              "slow**ly**",
+              "You are moving **slowly** through the woods."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "quick",
+              "quick**ly**",
+              "You are walking **quickly** and loudly."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "quiet",
+              "quiet**ly**",
+              "Walk slowly and **quietly**."
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "serious",
+              "serious**ly**",
+              "…a little more **seriously**?"
+            ]
+          },
+          {
+            "position": 6,
+            "cells": [
+              "careful",
+              "careful**ly**",
+              "I thought about my resolution **carefully**."
+            ]
+          },
+          {
+            "position": 7,
+            "cells": [
+              "perfect",
+              "perfect**ly**",
+              "Oh, Anna, that fits you **perfectly**!"
+            ]
+          },
+          {
+            "position": 8,
+            "cells": [
+              "desperate",
+              "desperate**ly**",
+              "You are searching **desperately** for a way out."
+            ]
+          },
+          {
+            "position": 9,
+            "cells": [
+              "awesome",
+              "awesome**ly**",
+              "My new year is starting **awesomely**!"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Comparativo de advérbio",
+        "why": "A lógica é a mesma dos adjetivos, mas o corte é outro: advérbio terminado em *-ly* usa **more**; advérbio de uma sílaba (ou *early*) usa **-er**.",
+        "warning": null,
+        "table_head": [
+          "Advérbio",
+          "Comparativo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "loudly (-ly)",
+              "**more** loudly",
+              "Can you speak **more loudly**?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "seriously (-ly)",
+              "**more** seriously",
+              "…a little **more seriously**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "early (exceção)",
+              "earl**ier**",
+              "You need to say it **earlier**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "late (1 sílaba)",
+              "lat**er**",
+              "You said that line really **late**."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "fast (1 sílaba)",
+              "fast**er**",
+              "MINDY, please fix it **faster**. (aula 32)"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "well (irregular)",
+              "**better**",
+              "How am I doing? — You could do it **better**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "too … × … enough",
+        "why": "Os dois avaliam uma quantidade contra um padrão. *too* vem **antes** e é crítica; *enough* vem **depois** do adjetivo e é suficiência.",
+        "warning": "**Posição é obrigatória** \"enough loud\" está errado com adjetivo; é *loud enough*. Mas com substantivo é o contrário: *enough time*. Decore os dois padrões juntos.",
+        "table_head": [
+          "Forma",
+          "Posição",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "too + adjetivo/advérbio",
+              "antes",
+              "You are speaking **too softly**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "too + advérbio",
+              "antes",
+              "I was **too early**, wasn't I?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "adjetivo + enough",
+              "**depois**",
+              "Is that **loud enough**?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "enough + substantivo",
+              "antes do substantivo",
+              "I don't have **enough time**."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "not + adjetivo + enough",
+              "depois",
+              "It's **not loud enough**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 3,
+        "heading": "Tag question no passado",
+        "why": "Fecha o ciclo das tag questions (34 com *will*, 39 com *do*, aqui com *was*).",
+        "warning": null,
+        "table_head": [
+          "Frase",
+          "Tag",
+          "Resposta da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I was too early,",
+              "**wasn't I?**",
+              "Yes. Yes, you **were**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "It fits perfectly,",
+              "**doesn't it?**",
+              "—"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Some people, at the start of a new year, make a *resolution* — a promise to yourself to be better.",
+        "text_pt": "Algumas pessoas, no começo do ano novo, fazem uma resolução — uma promessa a si mesmo de ser melhor.",
+        "note": "*make* a resolution, não \"do\". Colocação fixa."
+      },
+      {
+        "position": 1,
+        "text_en": "I thought about my resolution *carefully*.",
+        "text_pt": "Eu pensei na minha resolução com cuidado.",
+        "note": "*think about* + advérbio no fim."
+      },
+      {
+        "position": 2,
+        "text_en": "You are *searching desperately* for a way out.",
+        "text_pt": "Você está procurando desesperadamente uma saída.",
+        "note": "*a way out* = uma saída. *search for* exige o *for*."
+      },
+      {
+        "position": 3,
+        "text_en": "Anna, you are speaking *too softly*. Can you speak *more loudly* and a little *more seriously*?",
+        "text_pt": "Anna, você está falando baixo demais. Pode falar mais alto e um pouco mais sério?",
+        "note": "A frase-chave da aula: too + advérbio e duas vezes more + advérbio."
+      },
+      {
+        "position": 4,
+        "text_en": "Is that *loud enough*? — Yes, that is *loud enough*.",
+        "text_pt": "Isso está alto o suficiente? — Sim, está alto o suficiente.",
+        "note": "*enough* **depois** do adjetivo. Compare com *too soft*."
+      },
+      {
+        "position": 5,
+        "text_en": "You are walking *quickly* and *loudly*. Walk *slowly* and *quietly*.",
+        "text_pt": "Você está andando rápido e fazendo barulho. Ande devagar e em silêncio.",
+        "note": "Quatro advérbios em duas frases, em pares opostos."
+      },
+      {
+        "position": 6,
+        "text_en": "You said that line really *late*. You need to say it *earlier*.",
+        "text_pt": "Você falou essa fala muito tarde. Precisa falar mais cedo.",
+        "note": "*late* e *early* são advérbios sem -ly; o comparativo é *later / earlier*."
+      },
+      {
+        "position": 7,
+        "text_en": "I was *too early*, *wasn't I?* — Yes. Yes, you *were*.",
+        "text_pt": "Eu entrei cedo demais, né? — Sim. Sim, você entrou.",
+        "note": "Tag question no passado + resposta curta com *were*."
+      },
+      {
+        "position": 8,
+        "text_en": "Oh, Anna, that *fits* you *perfectly*!",
+        "text_pt": "Ah, Anna, isso te cai perfeitamente!",
+        "note": "*fit* = servir, caber (roupa)."
+      },
+      {
+        "position": 9,
+        "text_en": "My new year is starting *awesomely*!",
+        "text_pt": "Meu ano novo está começando incrivelmente bem!",
+        "note": "*awesomely* é informal e meio brincalhão — a própria Anna está inventando moda."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "the woods",
+        "ipa": "/ðə wʊdz/",
+        "translation_pt": "a floresta, o bosque (sempre plural)",
+        "example_en": "You are lost in the woods."
+      },
+      {
+        "position": 1,
+        "term": "resolution",
+        "ipa": "/ˌrezəˈluːʃən/",
+        "translation_pt": "resolução (de ano novo)",
+        "example_en": "make a resolution"
+      },
+      {
+        "position": 2,
+        "term": "audition",
+        "ipa": "/ɔːˈdɪʃən/",
+        "translation_pt": "teste, audição; fazer teste",
+        "example_en": "Today I will audition for a show."
+      },
+      {
+        "position": 3,
+        "term": "stage",
+        "ipa": "/steɪdʒ/",
+        "translation_pt": "palco",
+        "example_en": "I want to be an actor on the stage!"
+      },
+      {
+        "position": 4,
+        "term": "director",
+        "ipa": "/dəˈrektər/",
+        "translation_pt": "diretor",
+        "example_en": "Director, how am I doing?"
+      },
+      {
+        "position": 5,
+        "term": "line",
+        "ipa": "/laɪn/",
+        "translation_pt": "fala, deixa (de ator)",
+        "example_en": "Now, say your line."
+      },
+      {
+        "position": 6,
+        "term": "scene",
+        "ipa": "/siːn/",
+        "translation_pt": "cena",
+        "example_en": "In this scene, you are moving slowly."
+      },
+      {
+        "position": 7,
+        "term": "costume",
+        "ipa": "/ˈkɑːstuːm/",
+        "translation_pt": "figurino, fantasia",
+        "example_en": "The costume is in the back."
+      },
+      {
+        "position": 8,
+        "term": "fit",
+        "ipa": "/fɪt/",
+        "translation_pt": "servir, cair bem",
+        "example_en": "That fits you perfectly!"
+      },
+      {
+        "position": 9,
+        "term": "a way out",
+        "ipa": "/ə weɪ aʊt/",
+        "translation_pt": "uma saída",
+        "example_en": "searching desperately for a way out"
+      },
+      {
+        "position": 10,
+        "term": "warm up",
+        "ipa": "/wɔːrm ʌp/",
+        "translation_pt": "aquecer (a voz)",
+        "example_en": "(warms up voice) Yes."
+      },
+      {
+        "position": 11,
+        "term": "Wish me luck!",
+        "ipa": "/wɪʃ mi lʌk/",
+        "translation_pt": "Me deseja sorte!",
+        "example_en": "Wish me luck!"
+      },
+      {
+        "position": 12,
+        "term": "How am I doing?",
+        "ipa": "/haʊ əm aɪ ˈduːɪŋ/",
+        "translation_pt": "Como estou indo?",
+        "example_en": "Director, how am I doing?"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "quietly /ˈkwaɪ.ət.li/",
+        "explanation": "Três sílabas. Brasileiro tende a comer a sílaba do meio — diga devagar: KWAI-ət-li."
+      },
+      {
+        "position": 1,
+        "label": "-ly = /li/ fraco",
+        "explanation": "Em *softly, loudly, slowly* a terminação é curta e sem força. A tônica nunca vai para o *-ly*."
+      },
+      {
+        "position": 2,
+        "label": "woods /wʊdz/",
+        "explanation": "Vogal curta /ʊ/ + /dz/ no fim. Não confunda com *words* /wɜːrdz/ — par mínimo clássico. Treine: *the woods* / *the words*."
+      },
+      {
+        "position": 3,
+        "label": "audition /ɔːˈdɪʃən/",
+        "explanation": "Tônica em **DI**. O *-tion* soa /ʃən/, como em *resolution* e *information*."
+      },
+      {
+        "position": 4,
+        "label": "earlier /ˈɜːrliər/",
+        "explanation": "Três sílabas, começando com o som /ɜːr/ de *her*. Não é \"ir-li-ér\"."
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "prompt": "Adjetivo → advérbio: speak (loud) → speak `____`.",
+        "hint": null,
+        "explanation": "loud + -ly.",
+        "answers": [
+          "loudly"
+        ]
+      },
+      {
+        "position": 1,
+        "prompt": "Adjetivo → advérbio: walk (quiet) → walk `____`.",
+        "hint": null,
+        "explanation": "quiet + -ly.",
+        "answers": [
+          "quietly"
+        ]
+      },
+      {
+        "position": 2,
+        "prompt": "Comparativo de advérbio: Can you speak `____`?",
+        "hint": "2 palavras — mais alto",
+        "explanation": "Advérbio em -ly usa *more*. *louder* também circula na fala informal.",
+        "answers": [
+          "more loudly",
+          "louder"
+        ]
+      },
+      {
+        "position": 3,
+        "prompt": "Demais: You are speaking `____`.",
+        "hint": "2 palavras — baixo demais",
+        "explanation": "*too* vem antes do advérbio.",
+        "answers": [
+          "too softly"
+        ]
+      },
+      {
+        "position": 4,
+        "prompt": "Suficiente: Is that `____`?",
+        "hint": "2 palavras — alto o suficiente",
+        "explanation": "*enough* vem **depois** do adjetivo.",
+        "answers": [
+          "loud enough"
+        ]
+      },
+      {
+        "position": 5,
+        "prompt": "Comparativo irregular: good → advérbio é `____`.",
+        "hint": null,
+        "explanation": "O advérbio de *good* é *well*, não \"goodly\".",
+        "answers": [
+          "well"
+        ]
+      },
+      {
+        "position": 6,
+        "prompt": "Tag question no passado: I was too early, `____`?",
+        "hint": "2 palavras",
+        "explanation": "Afirmativa no passado com *was* → tag *wasn't I?*",
+        "answers": [
+          "wasn't i",
+          "wasnt i"
+        ]
+      }
+    ]
+  }
+]
