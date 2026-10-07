@@ -236,7 +236,10 @@ export interface paths {
         get?: never;
         /**
          * Marcar Estudada
-         * @description Idempotente: marcar duas vezes não cria duas linhas.
+         * @description Marca a aula e põe o vocabulário dela no deck de revisão.
+         *
+         *     Idempotente nas duas pontas: marcar duas vezes não cria duas linhas nem
+         *     reinicia o agendamento de cartas que já existem.
          */
         put: operations["marcar_estudada_api_lessons__number__studied_put"];
         post?: never;
@@ -287,6 +290,103 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/review/due": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Vencidas
+         * @description Cartas do usuário logado cujo prazo já chegou, da mais atrasada primeiro.
+         */
+        get: operations["vencidas_api_review_due_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/review/items/{vocab_item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Adicionar Item
+         * @description Põe um item de vocabulário no deck.
+         */
+        post: operations["adicionar_item_api_review_items__vocab_item_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/review/lessons/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Adicionar Aula
+         * @description Põe todo o vocabulário de uma aula no deck.
+         */
+        post: operations["adicionar_aula_api_review_lessons__number__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/review/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resumo */
+        get: operations["resumo_api_review_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/review/{card_id}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Avaliar
+         * @description Aplica o SM-2 à carta e reagenda.
+         */
+        post: operations["avaliar_api_review__card_id__grade_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vocab": {
         parameters: {
             query?: never;
@@ -327,6 +427,52 @@ export interface components {
             explanation: string;
         };
         /**
+         * CardOut
+         * @description Frente e verso da carta, mais o estado do agendamento.
+         */
+        CardOut: {
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /** Ease Factor */
+            ease_factor: number;
+            /** Example En */
+            example_en: string;
+            /** Id */
+            id: number;
+            /** Interval Days */
+            interval_days: number;
+            /** Ipa */
+            ipa: string;
+            /** Lapses */
+            lapses: number;
+            /** Lesson Number */
+            lesson_number: number;
+            /** Repetitions */
+            repetitions: number;
+            /** Term */
+            term: string;
+            /** Translation Pt */
+            translation_pt: string;
+            /** Vocab Item Id */
+            vocab_item_id: number;
+        };
+        /** DeckSummaryOut */
+        DeckSummaryOut: {
+            /**
+             * Added
+             * @description Quantas cartas a última ação criou.
+             * @default 0
+             */
+            added: number;
+            /** Due Now */
+            due_now: number;
+            /** Total Cards */
+            total_cards: number;
+        };
+        /**
          * ExerciseOut
          * @description Exercício como ele chega ao cliente.
          *
@@ -360,6 +506,32 @@ export interface components {
             position: number;
             /** Prompt */
             prompt: string;
+        };
+        /** GradeIn */
+        GradeIn: {
+            /**
+             * Quality
+             * @description 0-2 errou · 3 acertou com dificuldade · 4 acertou · 5 fácil
+             */
+            quality: number;
+        };
+        /** GradeOut */
+        GradeOut: {
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /** Ease Factor */
+            ease_factor: number;
+            /** Id */
+            id: number;
+            /** Interval Days */
+            interval_days: number;
+            /** Lapses */
+            lapses: number;
+            /** Repetitions */
+            repetitions: number;
         };
         /** GrammarBlockOut */
         GrammarBlockOut: {
@@ -487,6 +659,18 @@ export interface components {
             correct: number;
             /** Lessons */
             lessons: components["schemas"]["LessonProgressOut"][];
+            /**
+             * Review Cards
+             * @description Total de cartas no deck.
+             * @default 0
+             */
+            review_cards: number;
+            /**
+             * Review Due
+             * @description Cartas vencidas agora.
+             * @default 0
+             */
+            review_due: number;
             /** Studied Count */
             studied_count: number;
             /** Total Lessons */
@@ -990,6 +1174,154 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProgressOut"];
+                };
+            };
+        };
+    };
+    vencidas_api_review_due_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    adicionar_item_api_review_items__vocab_item_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vocab_item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    adicionar_aula_api_review_lessons__number__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resumo_api_review_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckSummaryOut"];
+                };
+            };
+        };
+    };
+    avaliar_api_review__card_id__grade_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                card_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GradeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

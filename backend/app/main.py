@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, health, lessons, progress
+from app.api import auth, health, lessons, progress, review
 from app.core.config import get_settings
 from app.db.session import dispose_engine
 
@@ -40,6 +40,7 @@ def create_app() -> FastAPI:
     app.include_router(lessons.router, prefix="/api")
     app.include_router(auth.router, prefix="/api")
     app.include_router(progress.router, prefix="/api")
+    app.include_router(review.router, prefix="/api")
     return app
 
 

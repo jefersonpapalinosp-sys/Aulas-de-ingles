@@ -237,3 +237,31 @@ input[type='text']::placeholder { color: var(--ink-3); }
 .done { grid-column: 2; width: 18px; height: 18px; align-self: start; margin-top: 11px; border: 1px solid var(--rule); background: var(--surface); border-radius: 3px; display: grid; place-items: center; padding: 0; color: transparent; font-size: 11px; line-height: 1; }
 .done[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
 .done:hover:not(:disabled) { border-color: var(--accent); }
+
+/* ---------- revisão ---------- */
+.badge { display: inline-block; margin-left: 8px; font-family: var(--mono); font-size: 10.5px; background: var(--accent); color: var(--paper); padding: 1px 6px; border-radius: 100px; font-variant-numeric: tabular-nums; }
+
+.carta { margin-top: 30px; border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; padding: 40px 30px; text-align: center; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.carta-origem { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.carta-termo { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.carta-ipa { font-family: var(--mono); font-size: 14px; color: var(--ink-3); }
+.carta-verso { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule-soft); width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.carta-traducao { font-size: 21px; color: var(--ink); }
+.carta-exemplo { font-size: 15px; font-style: italic; color: var(--ink-2); max-width: 46ch; margin: 0 auto; }
+.virar { margin-top: 20px; }
+
+.notas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 16px; }
+.nota { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 13px 8px; border: 1px solid var(--rule); background: var(--surface); border-radius: 5px; }
+.nota:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-wash); }
+.nota-rotulo { font-size: 14px; font-weight: 500; }
+.nota-tecla { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; }
+.nota.errei:hover:not(:disabled) { border-color: var(--bad); background: var(--bad-wash); }
+.nota.facil:hover:not(:disabled) { border-color: var(--ok); background: var(--ok-wash); }
+
+.atalhos { margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-align: center; letter-spacing: 0.04em; }
+.ultima { margin-top: 12px; font-size: 14px; color: var(--ok); font-family: var(--mono); }
+.add-deck { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; padding: 4px 8px; border: 1px solid var(--rule); background: none; color: var(--accent); border-radius: 3px; white-space: nowrap; }
+.add-deck:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-wash); }
+.add-deck:disabled { color: var(--ok); border-color: var(--rule-soft); opacity: 1; }
+
+@media (max-width: 600px) { .notas { grid-template-columns: repeat(2, 1fr); } }

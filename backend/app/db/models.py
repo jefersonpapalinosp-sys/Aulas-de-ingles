@@ -11,6 +11,7 @@ from datetime import datetime
 from sqlalchemy import (
     Boolean,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -315,3 +316,32 @@ class ExerciseAttempt(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     exercise: Mapped[Exercise] = relationship(lazy="selectin")
+
+
+class ReviewCard(Base):
+    """Uma carta de revisão espaçada: um item de vocabulário, para um usuário.
+
+    `due_at` é `timestamptz` e sempre guardado em UTC. Conversão para o fuso
+    de quem lê acontece na borda — guardar hora local no banco é como se
+    perde uma semana inteira de revisões no horário de verão.
+    """
+
+    __tablename__ = "review_card"
+    __table_args__ = (UniqueConstraint("user_id", "vocab_item_id", name="uq_card_user_item"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    vocab_item_id: Mapped[int] = mapped_column(
+        ForeignKey("vocab_item.id", ondelete="CASCADE"), index=True
+    )
+
+    ease_factor: Mapped[float] = mapped_column(Float, default=2.5)
+    interval_days: Mapped[int] = mapped_column(Integer, default=0)
+    repetitions: Mapped[int] = mapped_column(Integer, default=0)
+    lapses: Mapped[int] = mapped_column(Integer, default=0)
+
+    due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    last_reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    vocab_item: Mapped[VocabItem] = relationship(lazy="selectin")

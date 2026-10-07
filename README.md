@@ -4,9 +4,8 @@ App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
 Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: sprint 3 (identidade e progresso).** O progresso parou de morar no
-navegador: aulas marcadas e tentativas de exercício ficam na conta. Revisão
-espaçada entra na sprint 4.
+**Estado: sprint 4 (repetição espaçada).** O vocabulário que você estuda vira
+um deck SM-2 e volta no dia em que está prestes a ser esquecido.
 
 ---
 
@@ -198,6 +197,53 @@ ignora caixa, pontuação, espaço sobrando e tipo de apóstrofo — digitar
 existe `dangerouslySetInnerHTML` em lugar nenhum do projeto, então texto vindo
 do banco nunca vira markup.
 
+## Repetição espaçada
+
+O algoritmo é o **SM-2**, o mesmo do Anki, em `app/domain/sm2.py` — função
+pura, sem banco e sem relógio global: o `agora` entra como argumento, para o
+teste simular trinta dias sem esperar trinta dias.
+
+### A curva
+
+Acertando sempre com nota máxima, uma carta volta em:
+
+| revisão | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| **dias** | 1 | 6 | 16 | 45 | 130 | 390 |
+
+Errar zera a sequência e conta um lapso, mas **não** zera o fator de
+facilidade: a dificuldade que a carta já demonstrou é informação acumulada.
+
+Dois detalhes que mudam o resultado e por isso estão fixados em teste:
+
+- o intervalo usa o fator de facilidade **anterior** à revisão, como no SM-2
+  original — inverter a ordem adianta o efeito em um passo;
+- o fator é arredondado a duas casas em cada passo. Somar `0.1` em float
+  acumula erro (`2.8 + 0.1 = 2.9000000000000004`), e esse erro chega ao
+  intervalo: `45 × 2.9000000000000004` dá `130.50000000000003`, que arredonda
+  para 131 em vez de 130.
+
+### Como as cartas entram no deck
+
+| Gatilho | O que entra |
+|---|---|
+| Marcar uma aula como estudada | todo o vocabulário da aula |
+| Botão **+ revisar** na tabela de vocabulário | aquele item |
+| Errar um exercício cuja resposta é um termo do vocabulário | aquele item |
+
+O terceiro gatilho estava no plano como a fonte principal, mas vale para
+**4 dos 62 exercícios** do bloco: eles treinam gramática, não palavra. O
+grosso do deck vem de marcar a aula como estudada.
+
+Adicionar é idempotente: um item que já está no deck não tem o agendamento
+reiniciado — isso apagaria o histórico de quem já estuda.
+
+### Fuso
+
+`due_at` é `timestamptz` e sempre em UTC; a conversão acontece na borda.
+A suíte roda idêntica sob `TZ=UTC`, `America/Sao_Paulo`, `Pacific/Kiritimati`
+(UTC+14) e `Pacific/Midway` (UTC−11).
+
 ## Estrutura
 
 ```
@@ -206,7 +252,7 @@ backend/   app/{api,core,db,domain,schemas}  — FastAPI, uv, pytest
            openapi.json                — baseline do contrato
 frontend/  src/api/                    — cliente tipado + schema GERADO
            src/components/             — Markdown, gramática, exercício
-           src/pages/                  — mapa, aula, prova
+           src/pages/                  — mapa, aula, revisão, prova
 infra/     compose.yml                 — db + api + web
 seed/      lessons.json                — conteúdo das 10 aulas
 ```

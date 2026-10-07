@@ -34,6 +34,100 @@
                 "title": "AttemptOut",
                 "type": "object"
             },
+            "CardOut": {
+                "description": "Frente e verso da carta, mais o estado do agendamento.",
+                "properties": {
+                    "due_at": {
+                        "format": "date-time",
+                        "title": "Due At",
+                        "type": "string"
+                    },
+                    "ease_factor": {
+                        "title": "Ease Factor",
+                        "type": "number"
+                    },
+                    "example_en": {
+                        "title": "Example En",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "interval_days": {
+                        "title": "Interval Days",
+                        "type": "integer"
+                    },
+                    "ipa": {
+                        "title": "Ipa",
+                        "type": "string"
+                    },
+                    "lapses": {
+                        "title": "Lapses",
+                        "type": "integer"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "repetitions": {
+                        "title": "Repetitions",
+                        "type": "integer"
+                    },
+                    "term": {
+                        "title": "Term",
+                        "type": "string"
+                    },
+                    "translation_pt": {
+                        "title": "Translation Pt",
+                        "type": "string"
+                    },
+                    "vocab_item_id": {
+                        "title": "Vocab Item Id",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "vocab_item_id",
+                    "term",
+                    "ipa",
+                    "translation_pt",
+                    "example_en",
+                    "lesson_number",
+                    "ease_factor",
+                    "interval_days",
+                    "repetitions",
+                    "lapses",
+                    "due_at"
+                ],
+                "title": "CardOut",
+                "type": "object"
+            },
+            "DeckSummaryOut": {
+                "properties": {
+                    "added": {
+                        "default": 0,
+                        "description": "Quantas cartas a última ação criou.",
+                        "title": "Added",
+                        "type": "integer"
+                    },
+                    "due_now": {
+                        "title": "Due Now",
+                        "type": "integer"
+                    },
+                    "total_cards": {
+                        "title": "Total Cards",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "due_now",
+                    "total_cards"
+                ],
+                "title": "DeckSummaryOut",
+                "type": "object"
+            },
             "ExerciseOut": {
                 "description": "Exercício como ele chega ao cliente.\n\nA resposta certa **não** faz parte deste schema. Na S3 a correção passa a\nser feita pelo servidor; até lá o cliente corrige, mas o contrato já nasce\nno formato certo para não ter que mudar depois.",
                 "properties": {
@@ -118,6 +212,61 @@
                     "lesson_number"
                 ],
                 "title": "ExerciseWithLessonOut",
+                "type": "object"
+            },
+            "GradeIn": {
+                "properties": {
+                    "quality": {
+                        "description": "0-2 errou · 3 acertou com dificuldade · 4 acertou · 5 fácil",
+                        "maximum": 5.0,
+                        "minimum": 0.0,
+                        "title": "Quality",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "quality"
+                ],
+                "title": "GradeIn",
+                "type": "object"
+            },
+            "GradeOut": {
+                "properties": {
+                    "due_at": {
+                        "format": "date-time",
+                        "title": "Due At",
+                        "type": "string"
+                    },
+                    "ease_factor": {
+                        "title": "Ease Factor",
+                        "type": "number"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "interval_days": {
+                        "title": "Interval Days",
+                        "type": "integer"
+                    },
+                    "lapses": {
+                        "title": "Lapses",
+                        "type": "integer"
+                    },
+                    "repetitions": {
+                        "title": "Repetitions",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "interval_days",
+                    "ease_factor",
+                    "repetitions",
+                    "lapses",
+                    "due_at"
+                ],
+                "title": "GradeOut",
                 "type": "object"
             },
             "GrammarBlockOut": {
@@ -492,6 +641,18 @@
                         },
                         "title": "Lessons",
                         "type": "array"
+                    },
+                    "review_cards": {
+                        "default": 0,
+                        "description": "Total de cartas no deck.",
+                        "title": "Review Cards",
+                        "type": "integer"
+                    },
+                    "review_due": {
+                        "default": 0,
+                        "description": "Cartas vencidas agora.",
+                        "title": "Review Due",
+                        "type": "integer"
                     },
                     "studied_count": {
                         "title": "Studied Count",
@@ -1166,7 +1327,7 @@
                 ]
             },
             "put": {
-                "description": "Idempotente: marcar duas vezes não cria duas linhas.",
+                "description": "Marca a aula e põe o vocabulário dela no deck de revisão.\n\nIdempotente nas duas pontas: marcar duas vezes não cria duas linhas nem\nreinicia o agendamento de cartas que já existem.",
                 "operationId": "marcar_estudada_api_lessons__number__studied_put",
                 "parameters": [
                     {
@@ -1245,6 +1406,216 @@
                 "summary": "Meu Progresso",
                 "tags": [
                     "progress"
+                ]
+            }
+        },
+        "/api/review/due": {
+            "get": {
+                "description": "Cartas do usuário logado cujo prazo já chegou, da mais atrasada primeiro.",
+                "operationId": "vencidas_api_review_due_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CardOut"
+                                    },
+                                    "title": "Response Vencidas Api Review Due Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Vencidas",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
+        "/api/review/items/{vocab_item_id}": {
+            "post": {
+                "description": "Põe um item de vocabulário no deck.",
+                "operationId": "adicionar_item_api_review_items__vocab_item_id__post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "vocab_item_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Vocab Item Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DeckSummaryOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Adicionar Item",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
+        "/api/review/lessons/{number}": {
+            "post": {
+                "description": "Põe todo o vocabulário de uma aula no deck.",
+                "operationId": "adicionar_aula_api_review_lessons__number__post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DeckSummaryOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Adicionar Aula",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
+        "/api/review/summary": {
+            "get": {
+                "operationId": "resumo_api_review_summary_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DeckSummaryOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Resumo",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
+        "/api/review/{card_id}/grade": {
+            "post": {
+                "description": "Aplica o SM-2 à carta e reagenda.",
+                "operationId": "avaliar_api_review__card_id__grade_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "card_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Card Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GradeIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GradeOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Avaliar",
+                "tags": [
+                    "review"
                 ]
             }
         },
