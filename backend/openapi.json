@@ -1,6 +1,39 @@
 {
     "components": {
         "schemas": {
+            "CheckAnswerIn": {
+                "properties": {
+                    "answer": {
+                        "description": "O que o usuário digitou.",
+                        "maxLength": 200,
+                        "title": "Answer",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "answer"
+                ],
+                "title": "CheckAnswerIn",
+                "type": "object"
+            },
+            "CheckAnswerOut": {
+                "properties": {
+                    "correct": {
+                        "title": "Correct",
+                        "type": "boolean"
+                    },
+                    "explanation": {
+                        "title": "Explanation",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "correct",
+                    "explanation"
+                ],
+                "title": "CheckAnswerOut",
+                "type": "object"
+            },
             "ExerciseOut": {
                 "description": "Exercício como ele chega ao cliente.\n\nA resposta certa **não** faz parte deste schema. Na S3 a correção passa a\nser feita pelo servidor; até lá o cliente corrige, mas o contrato já nasce\nno formato certo para não ter que mudar depois.",
                 "properties": {
@@ -40,6 +73,51 @@
                     "explanation"
                 ],
                 "title": "ExerciseOut",
+                "type": "object"
+            },
+            "ExerciseWithLessonOut": {
+                "properties": {
+                    "explanation": {
+                        "title": "Explanation",
+                        "type": "string"
+                    },
+                    "hint": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Hint"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "prompt": {
+                        "title": "Prompt",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "position",
+                    "prompt",
+                    "hint",
+                    "explanation",
+                    "lesson_number"
+                ],
+                "title": "ExerciseWithLessonOut",
                 "type": "object"
             },
             "GrammarBlockOut": {
@@ -355,6 +433,28 @@
                 "title": "PronunciationNoteOut",
                 "type": "object"
             },
+            "RevealAnswerOut": {
+                "description": "Só sai quando o usuário pede explicitamente para ver a resposta.",
+                "properties": {
+                    "answers": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Answers",
+                        "type": "array"
+                    },
+                    "explanation": {
+                        "title": "Explanation",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "answers",
+                    "explanation"
+                ],
+                "title": "RevealAnswerOut",
+                "type": "object"
+            },
             "ValidationError": {
                 "properties": {
                     "ctx": {
@@ -474,6 +574,158 @@
     },
     "openapi": "3.1.0",
     "paths": {
+        "/api/exercises": {
+            "get": {
+                "description": "Exercícios de uma aula, ou do bloco inteiro.\n\nÉ o que a prova do bloco consome: sem isso a tela teria que baixar as dez\naulas inteiras para montar uma lista de exercícios.",
+                "operationId": "listar_exercicios_api_exercises_get",
+                "parameters": [
+                    {
+                        "description": "Filtra por número da aula.",
+                        "in": "query",
+                        "name": "lesson",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filtra por número da aula.",
+                            "title": "Lesson"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ExerciseWithLessonOut"
+                                    },
+                                    "title": "Response Listar Exercicios Api Exercises Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Listar Exercicios",
+                "tags": [
+                    "lessons"
+                ]
+            }
+        },
+        "/api/exercises/{exercise_id}/answer": {
+            "get": {
+                "description": "Entrega o gabarito — só quando o usuário pede.",
+                "operationId": "revelar_resposta_api_exercises__exercise_id__answer_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "exercise_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Exercise Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RevealAnswerOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Revelar Resposta",
+                "tags": [
+                    "lessons"
+                ]
+            }
+        },
+        "/api/exercises/{exercise_id}/check": {
+            "post": {
+                "description": "Confere uma resposta sem entregar a certa.\n\nA correção mora aqui, e não no cliente, porque a resposta certa não faz\nparte do contrato de leitura — mandá-la ao navegador para o JavaScript\ncomparar seria o mesmo que publicar o gabarito. Na S3 este endpoint passa\na gravar a tentativa do usuário logado; a resposta que ele devolve não muda.",
+                "operationId": "conferir_resposta_api_exercises__exercise_id__check_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "exercise_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Exercise Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckAnswerIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CheckAnswerOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Conferir Resposta",
+                "tags": [
+                    "lessons"
+                ]
+            }
+        },
         "/api/health": {
             "get": {
                 "description": "Readiness.\n\nAbre uma conexão de verdade e pergunta a versão ao Postgres. Se o banco\nnão responder, devolve 503 — é isso que faz o healthcheck valer alguma coisa.",

@@ -67,6 +67,11 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      - name: tipos em sincronia com o contrato
+        run: |
+          npm run gen:api
+          git diff --exit-code src/api/schema.d.ts \
+            || { echo "::error::src/api/schema.d.ts está desatualizado. Rode 'npm run gen:api' e commite."; exit 1; }
       - name: eslint
         run: npm run lint
       - name: tsc
