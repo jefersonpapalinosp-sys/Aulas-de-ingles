@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.uv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Ambiente
+.env
+.env.local
+
+# Sistema
+.DS_Store
+*.log
+
+# Playwright (S5)
+playwright-report/
+test-results/
