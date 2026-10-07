@@ -22,6 +22,7 @@ dev = [
     "httpx>=0.27",
     "ruff>=0.8",
     "mypy>=1.13",
+    "pytest-cov>=6.0",
 ]
 
 [build-system]
@@ -55,3 +56,14 @@ disallow_untyped_defs = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["app"]
+# O SQLAlchemy async executa dentro de greenlets. Sem declarar isso, o
+# coverage perde os frames e reporta endpoints inteiros como não cobertos
+# mesmo tendo teste passando em cima deles.
+concurrency = ["greenlet", "thread"]
+omit = ["app/openapi_dump.py"]
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]

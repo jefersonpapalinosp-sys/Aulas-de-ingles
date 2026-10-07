@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  DB_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+
 jobs:
   backend:
     name: backend · ruff + mypy + pytest
@@ -35,22 +38,31 @@ jobs:
       - run: uv sync --group dev --locked
       - name: ruff
         run: uv run ruff check .
-      - name: mypy
+      - name: mypy (strict)
         run: uv run mypy app
       - name: migrations (upgrade, downgrade e upgrade de novo)
         env:
-          DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+          DATABASE_URL: ${{ env.DB_URL }}
         run: |
           uv run alembic upgrade head
           uv run alembic downgrade base
           uv run alembic upgrade head
       - name: seed
         env:
-          DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+          DATABASE_URL: ${{ env.DB_URL }}
         run: uv run python -m app.cli seed
-      - name: pytest
+      - name: seed de novo é idempotente
         env:
-          DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+          DATABASE_URL: ${{ env.DB_URL }}
+        run: uv run python -m app.cli seed
+      - name: pytest com piso de cobertura
+        env:
+          DATABASE_URL: ${{ env.DB_URL }}
+        run: uv run pytest -q --cov --cov-report=term-missing:skip-covered --cov-fail-under=90
+      - name: a suíte roda igual em outro fuso
+        env:
+          DATABASE_URL: ${{ env.DB_URL }}
+          TZ: Pacific/Kiritimati
         run: uv run pytest -q
 
   frontend:
@@ -78,3 +90,46 @@ jobs:
         run: npm run typecheck
       - name: vitest
         run: npm run test
+      - name: build de produção
+        run: npm run build
+
+  e2e:
+    name: e2e · fluxo completo contra o compose de produção
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: prepara o .env.prod
+        run: |
+          sed -e "s/TROQUE_ISTO_POR_32_BYTES_OU_MAIS_DE_VERDADE/$(openssl rand -hex 32)/" \
+              -e "s/TROQUE_ISTO/ci_$(openssl rand -hex 6)/g" \
+              .env.prod.example > .env.prod
+      - name: sobe a stack de produção
+        run: |
+          docker compose --env-file .env.prod -f infra/compose.prod.yml up -d --build
+          docker compose --env-file .env.prod -f infra/compose.prod.yml exec -T api alembic upgrade head
+          docker compose --env-file .env.prod -f infra/compose.prod.yml exec -T api python -m app.cli seed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - name: instala o Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: roda o E2E
+        working-directory: e2e
+        run: npm test
+      - name: logs da API quando falha
+        if: failure()
+        run: docker compose --env-file .env.prod -f infra/compose.prod.yml logs api
+      - name: guarda o trace quando falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 7

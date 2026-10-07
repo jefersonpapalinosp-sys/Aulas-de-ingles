@@ -4,8 +4,9 @@ App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
 Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: sprint 4 (repetição espaçada).** O vocabulário que você estuda vira
-um deck SM-2 e volta no dia em que está prestes a ser esquecido.
+**Estado: v1.0 — as cinco sprints fechadas.** O programa está completo: o
+caderno, a conta, o progresso e a revisão espaçada funcionam, com E2E do
+fluxo inteiro rodando contra o empacotamento de produção.
 
 ---
 
@@ -44,17 +45,30 @@ Para mudar, edite o `.env` — nada está fixo no código.
 ## Comandos
 
 ```bash
-make help     # lista tudo
-make up       # sobe db + api + web
-make down     # derruba (mantém o banco)
-make reset    # derruba e apaga o volume do banco
-make logs     # acompanha os logs
-make health   # bate no /api/health
-make migrate  # aplica as migrations
-make seed     # carrega seed/lessons.json (idempotente)
-make openapi  # regrava o baseline do contrato
-make test     # pytest + vitest
-make lint     # ruff + mypy + eslint + tsc
+make help       # lista tudo
+
+# desenvolvimento
+make up         # sobe db + api + web, migra e semeia
+make down       # derruba (mantém o banco)
+make reset      # derruba e apaga o volume do banco
+make logs       # acompanha os logs
+make health     # bate no /api/health
+make migrate    # aplica as migrations
+make seed       # carrega seed/lessons.json (idempotente)
+make openapi    # regrava o baseline do contrato
+
+# testes
+make test       # pytest + vitest
+make cov        # pytest com relatório de cobertura
+make test-e2e   # Playwright contra o compose de produção
+make lint       # ruff + mypy + eslint + tsc
+
+# produção local
+make prod-up    # nginx + uvicorn + Postgres nas portas 5181/8011/5434
+make prod-down
+make prod-logs  # JSON, uma linha por requisição
+make backup     # dump em backups/
+make restore f=backups/aulas-....dump
 ```
 
 ### Rodar fora do container
@@ -244,6 +258,73 @@ reiniciado — isso apagaria o histórico de quem já estuda.
 A suíte roda idêntica sob `TZ=UTC`, `America/Sao_Paulo`, `Pacific/Kiritimati`
 (UTC+14) e `Pacific/Midway` (UTC−11).
 
+## Produção local
+
+O compose de produção é diferente do de dev de propósito: bundle buildado
+servido por **nginx**, API sob uvicorn com workers e **sem reload**, imagem
+sem pytest/ruff/mypy dentro, processo rodando como usuário sem root.
+
+```bash
+cp .env.prod.example .env.prod
+openssl rand -hex 32          # para o JWT_SECRET
+make prod-up                  # http://localhost:5181
+```
+
+Diferente do `.env` de dev, aqui **não há default para segredo**: a stack
+recusa subir sem `POSTGRES_PASSWORD`, `DATABASE_URL` e `JWT_SECRET` próprios,
+e a aplicação valida que o segredo tem pelo menos 32 bytes.
+
+`COOKIE_SECURE=false` em localhost é intencional: com `Secure` ligado o
+navegador simplesmente não envia o cookie por HTTP, e o login para de
+funcionar. Ligue junto com HTTPS, não antes.
+
+### Observabilidade
+
+Uma linha de log em JSON por requisição, com `request_id` que também volta no
+cabeçalho `X-Request-ID`. Um id vindo de fora é respeitado, para um proxy na
+frente conseguir amarrar o rastro de ponta a ponta.
+
+```json
+{"ts":"2026-10-07T19:43:50.752Z","level":"INFO","logger":"app.request",
+ "msg":"GET /api/health 200","request_id":"3bb1c073923e4001",
+ "method":"GET","path":"/api/health","status":200,"duration_ms":27.6}
+```
+
+`/api/live` é *liveness* e não toca em dependência; `/api/health` é
+*readiness* e abre conexão no banco.
+
+### Backup e restore
+
+```bash
+make backup                              # backups/aulas-AAAAMMDD-HHMM.dump
+make restore f=backups/aulas-....dump    # --clean --if-exists
+```
+
+Testado derrubando o schema inteiro (`drop schema public cascade`) e
+restaurando: usuários, cartas de revisão e tentativas voltam intactos.
+
+## Testes
+
+| Suíte | O que cobre | Como rodar |
+|---|---|---|
+| pytest | 82 testes, 96% de cobertura, contra o Postgres do compose | `make test-api` |
+| vitest | 27 testes de componente e de parser | `make test-web` |
+| Playwright | 4 cenários do fluxo inteiro, contra **produção** | `make prod-up && make test-e2e` |
+
+O CI roda os três, mais: `ruff`, `mypy --strict`, `eslint`, `tsc`, o build de
+produção, migrations para frente e para trás, seed rodado duas vezes, piso de
+**90% de cobertura**, e a suíte inteira de novo sob `TZ=Pacific/Kiritimati`.
+
+## Como adicionar uma aula nova
+
+1. Acrescente o objeto em `seed/lessons.json` seguindo o formato das outras
+   (texto em Markdown, nunca HTML).
+2. `make seed` — é idempotente, as aulas existentes não são tocadas.
+3. Se o modelo mudou: `make migration m="o que mudou"`, confira o arquivo
+   gerado, e `make migrate`.
+4. Se a API mudou: `make openapi` e, no frontend, `npm run gen:api`. Os dois
+   arquivos entram no mesmo commit que a mudança.
+
 ## Estrutura
 
 ```
@@ -253,7 +334,9 @@ backend/   app/{api,core,db,domain,schemas}  — FastAPI, uv, pytest
 frontend/  src/api/                    — cliente tipado + schema GERADO
            src/components/             — Markdown, gramática, exercício
            src/pages/                  — mapa, aula, revisão, prova
-infra/     compose.yml                 — db + api + web
+infra/     compose.yml                 — dev: db + api + web
+           compose.prod.yml            — prod local: nginx + uvicorn + db
+e2e/       testes/                     — Playwright, fluxo completo
 seed/      lessons.json                — conteúdo das 10 aulas
 ```
 

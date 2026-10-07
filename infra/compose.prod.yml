@@ -1,0 +1,66 @@
+# Produção local: bundle buildado atrás de nginx, API sem reload, Postgres
+# com volume próprio. Portas deslocadas para conviver com o compose de dev.
+#
+#   docker compose --env-file .env.prod -f infra/compose.prod.yml up -d --build
+name: aulas-ingles-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aulas-prod-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aulas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-aulas_ingles}
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5434}:5432"
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aulas} -d ${POSTGRES_DB:-aulas_ingles}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+
+  api:
+    build:
+      # Contexto na raiz: a imagem precisa levar seed/ junto.
+      context: ..
+      dockerfile: backend/Dockerfile.prod
+    container_name: aulas-prod-api
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?defina DATABASE_URL}
+      APP_ENV: ${APP_ENV:-prod}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET com pelo menos 32 bytes}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/live').status==200 else 1)\""]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.prod
+    container_name: aulas-prod-web
+    ports:
+      - "127.0.0.1:${WEB_HOST_PORT:-5181}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata_prod:
+    name: aulas-ingles-pgdata-prod
