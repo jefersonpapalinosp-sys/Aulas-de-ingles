@@ -4,8 +4,8 @@ App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
 Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: sprint 1 (modelo e conteúdo).** As 10 aulas do bloco 31–40 vivem no
-Postgres e saem pela API. O frontend que consome isso entra na sprint 2.
+**Estado: sprint 2 (caderno no navegador).** As 10 aulas são navegáveis em
+<http://localhost:5180>, servidas pela API. Login e progresso entram na sprint 3.
 
 ---
 
@@ -137,21 +137,49 @@ payload.
 
 ### Contrato
 
-`backend/openapi.json` é o baseline versionado. Um teste compara o contrato
-gerado pelo código com o arquivo commitado e **falha se divergirem** — mudança
-de contrato tem que aparecer no diff do PR, como decisão consciente.
+`backend/openapi.json` é o baseline versionado, e ele é a fonte dos tipos do
+frontend — nenhuma interface de API é escrita à mão.
 
 ```bash
-make openapi   # regrava o baseline depois de mudar a API
+make openapi                  # regrava o baseline depois de mudar a API
+cd frontend && npm run gen:api  # regenera src/api/schema.d.ts a partir dele
 ```
+
+Dois gates no CI garantem que ninguém esquece:
+
+- um teste do backend falha se o contrato gerado pelo código divergir do
+  arquivo commitado;
+- um passo do frontend falha se `src/api/schema.d.ts` estiver desatualizado.
+
+### Correção de exercício
+
+A resposta certa **não** faz parte do contrato de leitura. Mandá-la ao
+navegador para o JavaScript comparar seria publicar o gabarito. Então:
+
+| Ação | Endpoint |
+|---|---|
+| Conferir uma resposta | `POST /api/exercises/{id}/check` |
+| Ver o gabarito (o usuário pede) | `GET /api/exercises/{id}/answer` |
+
+A comparação vive em `app/domain/answers.py`, isolada de banco e de HTTP:
+ignora caixa, pontuação, espaço sobrando e tipo de apóstrofo — digitar
+`Won't`, `wont` ou `won’t` não pode ser a diferença entre acerto e erro.
+
+### Markdown no frontend
+
+`src/components/Markdown.tsx` renderiza o subconjunto para nós do React. Não
+existe `dangerouslySetInnerHTML` em lugar nenhum do projeto, então texto vindo
+do banco nunca vira markup.
 
 ## Estrutura
 
 ```
-backend/   app/{api,core,db,schemas}   — FastAPI, uv, pytest
+backend/   app/{api,core,db,domain,schemas}  — FastAPI, uv, pytest
            alembic/                    — migrations
            openapi.json                — baseline do contrato
-frontend/  src/                        — React, Vite, Vitest
+frontend/  src/api/                    — cliente tipado + schema GERADO
+           src/components/             — Markdown, gramática, exercício
+           src/pages/                  — mapa, aula, prova
 infra/     compose.yml                 — db + api + web
 seed/      lessons.json                — conteúdo das 10 aulas
 ```
