@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import type { Phrase, PronunciationNote, VocabItem } from '../api/client'
+import { useAdicionarItem } from '../api/review'
 import { Markdown } from './Markdown'
 
 export function PhraseList({ frases }: { frases: Phrase[] }) {
@@ -20,6 +22,9 @@ export function PhraseList({ frases }: { frases: Phrase[] }) {
 }
 
 export function VocabTable({ itens }: { itens: VocabItem[] }) {
+  const adicionar = useAdicionarItem()
+  const [postos, setPostos] = useState<Set<number>>(new Set())
+
   return (
     <div className="tw">
       <table className="vocab">
@@ -28,6 +33,7 @@ export function VocabTable({ itens }: { itens: VocabItem[] }) {
             <th scope="col">Termo</th>
             <th scope="col">Tradução</th>
             <th scope="col">Na aula</th>
+            <th scope="col">Deck</th>
           </tr>
         </thead>
         <tbody>
@@ -41,6 +47,21 @@ export function VocabTable({ itens }: { itens: VocabItem[] }) {
                 <Markdown>{v.translation_pt}</Markdown>
               </td>
               <td className="exemplo">“{v.example_en}”</td>
+              <td>
+                <button
+                  type="button"
+                  className="add-deck"
+                  disabled={adicionar.isPending || postos.has(v.id)}
+                  aria-label={`Adicionar "${v.term}" ao deck de revisão`}
+                  onClick={() =>
+                    adicionar.mutate(v.id, {
+                      onSuccess: () => setPostos((p) => new Set(p).add(v.id)),
+                    })
+                  }
+                >
+                  {postos.has(v.id) ? 'no deck' : '+ revisar'}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

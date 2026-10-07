@@ -36,4 +36,6 @@ class ProgressOut(BaseModel):
     total_lessons: int
     attempts: int
     correct: int
+    review_due: int = Field(default=0, description="Cartas vencidas agora.")
+    review_cards: int = Field(default=0, description="Total de cartas no deck.")
     lessons: list[LessonProgressOut]

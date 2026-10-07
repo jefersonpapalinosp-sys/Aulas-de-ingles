@@ -74,6 +74,10 @@ export function LessonRail({ aulas }: { aulas: LessonSummary[] }) {
       ))}
 
       <p className="rail-group">Fechamento</p>
+      <NavLink to="/revisar" className="flat">
+        Revisar
+        {!!progresso?.review_due && <span className="badge">{progresso.review_due}</span>}
+      </NavLink>
       <NavLink to="/prova" className="flat">
         Prova do bloco
       </NavLink>

@@ -5,6 +5,7 @@ import { LessonRail } from './components/LessonRail'
 import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
+import { ReviewPage } from './pages/ReviewPage'
 import { TestPage } from './pages/TestPage'
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<MapPage />} />
           <Route path="/aulas/:numero" element={<LessonPage />} />
+          <Route path="/revisar" element={<ReviewPage />} />
           <Route path="/prova" element={<TestPage />} />
           <Route
             path="*"
