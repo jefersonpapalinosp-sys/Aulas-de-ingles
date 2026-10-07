@@ -1,0 +1,35 @@
+# Imagem de produção: sem ferramenta de dev, sem reload, usuário sem root.
+#
+# O contexto de build é a RAIZ do repositório, não backend/, porque o seed
+# vive em seed/ e a imagem precisa ser autocontida: produção não pode
+# depender de um arquivo montado do host.
+FROM python:3.12-slim AS build
+
+COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+WORKDIR /app
+
+COPY backend/pyproject.toml backend/uv.lock ./
+# --no-dev: pytest, ruff e mypy não vão para a imagem que roda.
+RUN uv sync --frozen --no-dev --no-install-project
+COPY backend/app ./app
+COPY backend/alembic ./alembic
+COPY backend/alembic.ini ./
+COPY seed ./seed
+RUN uv sync --frozen --no-dev
+
+FROM python:3.12-slim AS runtime
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/app/.venv/bin:$PATH"
+
+RUN useradd --create-home --uid 10001 app
+WORKDIR /app
+COPY --from=build --chown=app:app /app /app
+
+USER app
+EXPOSE 8000
+# Workers de verdade; o reload do dev some.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", \
+     "--proxy-headers", "--forwarded-allow-ips", "*"]

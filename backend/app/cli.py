@@ -15,14 +15,19 @@ async def _seed() -> None:
     print(f"✓ seed aplicado: {total} aulas")
 
 
-def main() -> None:
-    logging.basicConfig(level=logging.INFO)
-    comando = sys.argv[1] if len(sys.argv) > 1 else ""
+def main_com_argumentos(argumentos: list[str]) -> None:
+    """Separado de main() para o teste poder chamar sem mexer em sys.argv."""
+    comando = argumentos[0] if argumentos else ""
     if comando == "seed":
         asyncio.run(_seed())
     else:
         print("uso: python -m app.cli seed", file=sys.stderr)
         raise SystemExit(2)
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO)
+    main_com_argumentos(sys.argv[1:])
 
 
 if __name__ == "__main__":

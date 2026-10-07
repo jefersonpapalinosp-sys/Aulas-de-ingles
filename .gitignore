@@ -18,6 +18,10 @@ dist/
 # Ambiente
 .env
 .env.local
+.env.prod
+
+# Backups do banco
+backups/
 
 # Sistema
 .DS_Store

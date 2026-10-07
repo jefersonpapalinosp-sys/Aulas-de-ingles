@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, type Exercise } from '../api/client'
 import { Markdown } from './Markdown'
@@ -31,6 +31,7 @@ export function ExerciseCard({
 }) {
   const [texto, setTexto] = useState('')
   const [veredito, setVeredito] = useState<Veredito>({ tipo: 'nada' })
+  const qc = useQueryClient()
 
   const conferir = useMutation({
     mutationFn: async (answer: string) => {
@@ -44,6 +45,9 @@ export function ExerciseCard({
     onSuccess: (d) => {
       setVeredito({ tipo: d.correct ? 'certo' : 'errado', explicacao: d.explanation })
       aoResponder?.(d.correct)
+      // Errar pode ter semeado o deck: o contador da trilha precisa saber.
+      void qc.invalidateQueries({ queryKey: ['progress'] })
+      void qc.invalidateQueries({ queryKey: ['review'] })
     },
     onError: (e: Error) => setVeredito({ tipo: 'falhou', mensagem: e.message }),
   })

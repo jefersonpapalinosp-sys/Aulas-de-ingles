@@ -9,25 +9,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import auth, health, lessons, progress, review
 from app.core.config import get_settings
+from app.core.logging import configurar, middleware_request_id
 from app.db.session import dispose_engine
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level.upper())
-    logging.getLogger(__name__).info("API subindo em modo %s", settings.app_env)
+    logging.getLogger(__name__).info(
+        "API no ar", extra={"env": settings.app_env, "version": app.version}
+    )
     yield
     await dispose_engine()
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    configurar(settings.log_level)
     app = FastAPI(
         title="Aulas de Inglês — API",
         version="0.1.0",
         lifespan=lifespan,
     )
+    app.middleware("http")(middleware_request_id)
     if settings.cors_origins:
         app.add_middleware(
             CORSMiddleware,
