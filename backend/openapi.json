@@ -1,7 +1,7 @@
 {
     "components": {
         "schemas": {
-            "CheckAnswerIn": {
+            "AttemptIn": {
                 "properties": {
                     "answer": {
                         "description": "O que o usuário digitou.",
@@ -13,10 +13,10 @@
                 "required": [
                     "answer"
                 ],
-                "title": "CheckAnswerIn",
+                "title": "AttemptIn",
                 "type": "object"
             },
-            "CheckAnswerOut": {
+            "AttemptOut": {
                 "properties": {
                     "correct": {
                         "title": "Correct",
@@ -31,7 +31,7 @@
                     "correct",
                     "explanation"
                 ],
-                "title": "CheckAnswerOut",
+                "title": "AttemptOut",
                 "type": "object"
             },
             "ExerciseOut": {
@@ -343,6 +343,47 @@
                 "title": "LessonDetailOut",
                 "type": "object"
             },
+            "LessonProgressOut": {
+                "properties": {
+                    "attempts": {
+                        "title": "Attempts",
+                        "type": "integer"
+                    },
+                    "correct": {
+                        "title": "Correct",
+                        "type": "integer"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "studied": {
+                        "title": "Studied",
+                        "type": "boolean"
+                    },
+                    "studied_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Studied At"
+                    }
+                },
+                "required": [
+                    "lesson_number",
+                    "studied",
+                    "studied_at",
+                    "attempts",
+                    "correct"
+                ],
+                "title": "LessonProgressOut",
+                "type": "object"
+            },
             "LessonSummaryOut": {
                 "description": "O que a trilha de navegação precisa — sem carregar a aula inteira.",
                 "properties": {
@@ -392,6 +433,26 @@
                 "title": "LessonSummaryOut",
                 "type": "object"
             },
+            "LoginIn": {
+                "properties": {
+                    "email": {
+                        "format": "email",
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "password": {
+                        "maxLength": 128,
+                        "title": "Password",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "title": "LoginIn",
+                "type": "object"
+            },
             "PhraseOut": {
                 "properties": {
                     "note": {
@@ -415,6 +476,42 @@
                 "title": "PhraseOut",
                 "type": "object"
             },
+            "ProgressOut": {
+                "properties": {
+                    "attempts": {
+                        "title": "Attempts",
+                        "type": "integer"
+                    },
+                    "correct": {
+                        "title": "Correct",
+                        "type": "integer"
+                    },
+                    "lessons": {
+                        "items": {
+                            "$ref": "#/components/schemas/LessonProgressOut"
+                        },
+                        "title": "Lessons",
+                        "type": "array"
+                    },
+                    "studied_count": {
+                        "title": "Studied Count",
+                        "type": "integer"
+                    },
+                    "total_lessons": {
+                        "title": "Total Lessons",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "studied_count",
+                    "total_lessons",
+                    "attempts",
+                    "correct",
+                    "lessons"
+                ],
+                "title": "ProgressOut",
+                "type": "object"
+            },
             "PronunciationNoteOut": {
                 "properties": {
                     "explanation": {
@@ -431,6 +528,35 @@
                     "explanation"
                 ],
                 "title": "PronunciationNoteOut",
+                "type": "object"
+            },
+            "RegistroIn": {
+                "properties": {
+                    "display_name": {
+                        "maxLength": 80,
+                        "minLength": 1,
+                        "title": "Display Name",
+                        "type": "string"
+                    },
+                    "email": {
+                        "format": "email",
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "password": {
+                        "description": "No mínimo 8 caracteres.",
+                        "maxLength": 128,
+                        "minLength": 8,
+                        "title": "Password",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password",
+                    "display_name"
+                ],
+                "title": "RegistroIn",
                 "type": "object"
             },
             "RevealAnswerOut": {
@@ -453,6 +579,54 @@
                     "explanation"
                 ],
                 "title": "RevealAnswerOut",
+                "type": "object"
+            },
+            "TokenOut": {
+                "description": "O access token volta no corpo; o refresh vai em cookie httpOnly.",
+                "properties": {
+                    "access_token": {
+                        "title": "Access Token",
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "description": "Validade do access token, em segundos.",
+                        "title": "Expires In",
+                        "type": "integer"
+                    },
+                    "token_type": {
+                        "default": "bearer",
+                        "title": "Token Type",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "access_token",
+                    "expires_in"
+                ],
+                "title": "TokenOut",
+                "type": "object"
+            },
+            "UsuarioOut": {
+                "properties": {
+                    "display_name": {
+                        "title": "Display Name",
+                        "type": "string"
+                    },
+                    "email": {
+                        "title": "Email",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "email",
+                    "display_name"
+                ],
+                "title": "UsuarioOut",
                 "type": "object"
             },
             "ValidationError": {
@@ -574,6 +748,146 @@
     },
     "openapi": "3.1.0",
     "paths": {
+        "/api/auth/login": {
+            "post": {
+                "operationId": "entrar_api_auth_login_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Entrar",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "description": "Revoga a sessão de refresh e apaga o cookie.",
+                "operationId": "sair_api_auth_logout_post",
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Sair",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "operationId": "quem_sou_eu_api_auth_me_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Quem Sou Eu",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/api/auth/refresh": {
+            "post": {
+                "description": "Troca o refresh por um access novo. O refresh antigo é revogado.",
+                "operationId": "renovar_api_auth_refresh_post",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Renovar",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "operationId": "registrar_api_auth_register_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistroIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Registrar",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
         "/api/exercises": {
             "get": {
                 "description": "Exercícios de uma aula, ou do bloco inteiro.\n\nÉ o que a prova do bloco consome: sem isso a tela teria que baixar as dez\naulas inteiras para montar uma lista de exercícios.",
@@ -632,7 +946,7 @@
         },
         "/api/exercises/{exercise_id}/answer": {
             "get": {
-                "description": "Entrega o gabarito — só quando o usuário pede.",
+                "description": "Entrega o gabarito — só quando o usuário pede, e só se estiver logado.",
                 "operationId": "revelar_resposta_api_exercises__exercise_id__answer_get",
                 "parameters": [
                     {
@@ -669,14 +983,14 @@
                 },
                 "summary": "Revelar Resposta",
                 "tags": [
-                    "lessons"
+                    "progress"
                 ]
             }
         },
-        "/api/exercises/{exercise_id}/check": {
+        "/api/exercises/{exercise_id}/attempt": {
             "post": {
-                "description": "Confere uma resposta sem entregar a certa.\n\nA correção mora aqui, e não no cliente, porque a resposta certa não faz\nparte do contrato de leitura — mandá-la ao navegador para o JavaScript\ncomparar seria o mesmo que publicar o gabarito. Na S3 este endpoint passa\na gravar a tentativa do usuário logado; a resposta que ele devolve não muda.",
-                "operationId": "conferir_resposta_api_exercises__exercise_id__check_post",
+                "description": "Confere a resposta e grava a tentativa.\n\nA correção acontece aqui porque a resposta certa não faz parte do contrato\nde leitura: mandá-la ao navegador para o JavaScript comparar seria publicar\no gabarito. A comparação é a mesma de `app/domain/answers.py` — a regra\nmora num lugar só.",
+                "operationId": "tentar_api_exercises__exercise_id__attempt_post",
                 "parameters": [
                     {
                         "in": "path",
@@ -692,7 +1006,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CheckAnswerIn"
+                                "$ref": "#/components/schemas/AttemptIn"
                             }
                         }
                     },
@@ -703,7 +1017,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CheckAnswerOut"
+                                    "$ref": "#/components/schemas/AttemptOut"
                                 }
                             }
                         },
@@ -720,9 +1034,9 @@
                         "description": "Validation Error"
                     }
                 },
-                "summary": "Conferir Resposta",
+                "summary": "Tentar",
                 "tags": [
-                    "lessons"
+                    "progress"
                 ]
             }
         },
@@ -817,6 +1131,75 @@
                 ]
             }
         },
+        "/api/lessons/{number}/studied": {
+            "delete": {
+                "operationId": "desmarcar_estudada_api_lessons__number__studied_delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Desmarcar Estudada",
+                "tags": [
+                    "progress"
+                ]
+            },
+            "put": {
+                "description": "Idempotente: marcar duas vezes não cria duas linhas.",
+                "operationId": "marcar_estudada_api_lessons__number__studied_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Marcar Estudada",
+                "tags": [
+                    "progress"
+                ]
+            }
+        },
         "/api/live": {
             "get": {
                 "description": "Liveness: o processo está de pé. Não toca em dependência nenhuma.",
@@ -840,6 +1223,28 @@
                 "summary": "Live",
                 "tags": [
                     "health"
+                ]
+            }
+        },
+        "/api/me/progress": {
+            "get": {
+                "description": "Uma linha por aula, sempre as dez — aula sem atividade vem zerada.",
+                "operationId": "meu_progresso_api_me_progress_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProgressOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Meu Progresso",
+                "tags": [
+                    "progress"
                 ]
             }
         },

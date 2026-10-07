@@ -61,7 +61,7 @@ describe('ExerciseCard', () => {
     await waitFor(() => expect(screen.getByText('Correto')).toBeInTheDocument())
     expect(aoResponder).toHaveBeenCalledWith(true)
     // A correção é do servidor — o componente não compara nada sozinho.
-    expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/check', {
+    expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
       params: { path: { exercise_id: 1 } },
       body: { answer: 'faster' },
     })

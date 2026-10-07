@@ -67,22 +67,6 @@ class ExerciseWithLessonOut(ExerciseOut):
     lesson_number: int
 
 
-class CheckAnswerIn(BaseModel):
-    answer: str = Field(max_length=200, description="O que o usuário digitou.")
-
-
-class CheckAnswerOut(BaseModel):
-    correct: bool
-    explanation: str
-
-
-class RevealAnswerOut(BaseModel):
-    """Só sai quando o usuário pede explicitamente para ver a resposta."""
-
-    answers: list[str]
-    explanation: str
-
-
 class LessonSummaryOut(ORMModel):
     """O que a trilha de navegação precisa — sem carregar a aula inteira."""
 

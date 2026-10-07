@@ -4,8 +4,9 @@ App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
 Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: sprint 2 (caderno no navegador).** As 10 aulas são navegáveis em
-<http://localhost:5180>, servidas pela API. Login e progresso entram na sprint 3.
+**Estado: sprint 3 (identidade e progresso).** O progresso parou de morar no
+navegador: aulas marcadas e tentativas de exercício ficam na conta. Revisão
+espaçada entra na sprint 4.
 
 ---
 
@@ -151,6 +152,26 @@ Dois gates no CI garantem que ninguém esquece:
   arquivo commitado;
 - um passo do frontend falha se `src/api/schema.d.ts` estiver desatualizado.
 
+## Autenticação
+
+| O quê | Onde fica | Por quê |
+|---|---|---|
+| Senha | Argon2id no banco | nunca em claro, nunca em log |
+| Access token | **memória** do frontend, 15 min | o que o JS lê, um XSS também lê |
+| Refresh token | cookie `httpOnly`, `SameSite=Lax`, `Path=/api/auth` | o JS não enxerga, e só a rota de refresh o recebe |
+| Sessão de refresh | tabela `refresh_session` | sem isso `logout` seria decorativo |
+
+O refresh **roda**: usar um invalida o anterior. Reapresentar um refresh já
+usado devolve 401 e pede login — é o que limita o estrago de um token vazado.
+
+Recarregar a página perde o access token (ele é de memória) e a aplicação
+pede um `/refresh` automaticamente. Se o cookie ainda valer, a sessão volta
+sem passar pela tela de login.
+
+O browser fala com a API pelo proxy do Vite, na mesma origem. Isso não é
+detalhe de conforto: cookie `httpOnly` com `credentials` **não funciona** com
+`allow_origins=["*"]`, então a saída certa é a mesma origem, não CORS aberto.
+
 ### Correção de exercício
 
 A resposta certa **não** faz parte do contrato de leitura. Mandá-la ao
@@ -158,8 +179,14 @@ navegador para o JavaScript comparar seria publicar o gabarito. Então:
 
 | Ação | Endpoint |
 |---|---|
-| Conferir uma resposta | `POST /api/exercises/{id}/check` |
+| Responder (confere e **grava**) | `POST /api/exercises/{id}/attempt` |
 | Ver o gabarito (o usuário pede) | `GET /api/exercises/{id}/answer` |
+| Marcar / desmarcar aula | `PUT` / `DELETE /api/lessons/{n}/studied` |
+| Meu progresso | `GET /api/me/progress` |
+
+Ler o conteúdo das aulas é público; responder e marcar exigem conta.
+Cada tentativa guarda **o texto exato digitado** — é isso que vai permitir,
+na S4, descobrir *qual* item a pessoa erra, e não só que ela errou.
 
 A comparação vive em `app/domain/answers.py`, isolada de banco e de HTTP:
 ignora caixa, pontuação, espaço sobrando e tipo de apóstrofo — digitar

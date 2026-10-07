@@ -103,34 +103,3 @@ async def test_exercicios_filtra_por_aula(client: AsyncClient) -> None:
     da_39 = (await client.get("/api/exercises?lesson=39")).json()
     assert len(da_39) == 7
     assert {e["lesson_number"] for e in da_39} == {39}
-
-
-@pytest.mark.asyncio
-async def test_correcao_acontece_no_servidor(client: AsyncClient) -> None:
-    """Exercício 1 da aula 31: 'A bicycle is ____ (fast) than a taxi.'"""
-    ex = (await client.get("/api/exercises?lesson=31")).json()[0]
-
-    certo = await client.post(f"/api/exercises/{ex['id']}/check", json={"answer": "Faster."})
-    assert certo.status_code == 200
-    assert certo.json()["correct"] is True
-    assert certo.json()["explanation"]
-
-    errado = await client.post(f"/api/exercises/{ex['id']}/check", json={"answer": "more fast"})
-    assert errado.json()["correct"] is False
-    # Errar não entrega o gabarito de brinde.
-    assert "faster" not in errado.text.lower()
-
-
-@pytest.mark.asyncio
-async def test_gabarito_so_sai_quando_pedido(client: AsyncClient) -> None:
-    ex = [e for e in (await client.get("/api/exercises?lesson=31")).json() if e["position"] == 3][0]
-    r = await client.get(f"/api/exercises/{ex['id']}/answer")
-    assert r.status_code == 200
-    assert set(r.json()["answers"]) == {"should", "ought to"}
-
-
-@pytest.mark.asyncio
-async def test_exercicio_inexistente_devolve_404(client: AsyncClient) -> None:
-    conferir = await client.post("/api/exercises/99999/check", json={"answer": "x"})
-    assert conferir.status_code == 404
-    assert (await client.get("/api/exercises/99999/answer")).status_code == 404

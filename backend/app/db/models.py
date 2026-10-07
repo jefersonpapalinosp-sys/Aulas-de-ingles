@@ -8,7 +8,16 @@ editável à mão. Quem decide a aparência é o frontend.
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -232,3 +241,77 @@ class ExerciseAnswer(Base):
     value: Mapped[str] = mapped_column(String(200))
 
     exercise: Mapped[Exercise] = relationship(back_populates="answers")
+
+
+class User(Base):
+    """Quem estuda.
+
+    O e-mail é guardado em minúsculas: duas contas que diferem só pela caixa
+    seriam a mesma pessoa tentando entrar e não conseguindo.
+    """
+
+    __tablename__ = "app_user"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    display_name: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    sessions: Mapped[list["RefreshSession"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+
+class RefreshSession(Base):
+    """Uma sessão de refresh viva.
+
+    O refresh é um JWT, mas o `jti` dele fica aqui — sem isso `logout` seria
+    decorativo: o token continuaria válido até expirar.
+    """
+
+    __tablename__ = "refresh_session"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    jti: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped[User] = relationship(back_populates="sessions")
+
+
+class LessonProgress(Base):
+    """Marcação de aula estudada, por usuário."""
+
+    __tablename__ = "lesson_progress"
+    __table_args__ = (UniqueConstraint("user_id", "lesson_id", name="uq_progress_user_lesson"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
+    studied_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    lesson: Mapped[Lesson] = relationship(lazy="selectin")
+
+
+class ExerciseAttempt(Base):
+    """Cada tentativa, certa ou errada, com o que foi digitado.
+
+    Guardar o texto exato é o que permite, na S4, descobrir *qual* item de
+    vocabulário a pessoa erra — e não só que ela errou.
+    """
+
+    __tablename__ = "exercise_attempt"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    exercise_id: Mapped[int] = mapped_column(
+        ForeignKey("exercise.id", ondelete="CASCADE"), index=True
+    )
+    answer: Mapped[str] = mapped_column(String(200))
+    correct: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    exercise: Mapped[Exercise] = relationship(lazy="selectin")
