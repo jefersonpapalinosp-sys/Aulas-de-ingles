@@ -1,0 +1,43 @@
+"""Entrypoint da API."""
+
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api import health
+from app.core.config import get_settings
+from app.db.session import dispose_engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    settings = get_settings()
+    logging.basicConfig(level=settings.log_level.upper())
+    logging.getLogger(__name__).info("API subindo em modo %s", settings.app_env)
+    yield
+    await dispose_engine()
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    app = FastAPI(
+        title="Aulas de Inglês — API",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
+    if settings.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    app.include_router(health.router, prefix="/api")
+    return app
+
+
+app = create_app()

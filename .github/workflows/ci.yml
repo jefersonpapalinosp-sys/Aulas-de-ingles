@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend · ruff + mypy + pytest
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aulas
+          POSTGRES_PASSWORD: aulas_local
+          POSTGRES_DB: aulas_ingles
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U aulas -d aulas_ingles"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --group dev --locked
+      - name: ruff
+        run: uv run ruff check .
+      - name: mypy
+        run: uv run mypy app
+      - name: pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+        run: uv run pytest -q
+
+  frontend:
+    name: frontend · eslint + tsc + vitest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: eslint
+        run: npm run lint
+      - name: tsc
+        run: npm run typecheck
+      - name: vitest
+        run: npm run test
