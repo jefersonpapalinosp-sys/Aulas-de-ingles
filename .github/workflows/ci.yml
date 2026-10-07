@@ -37,6 +37,17 @@ jobs:
         run: uv run ruff check .
       - name: mypy
         run: uv run mypy app
+      - name: migrations (upgrade, downgrade e upgrade de novo)
+        env:
+          DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: seed
+        env:
+          DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
+        run: uv run python -m app.cli seed
       - name: pytest
         env:
           DATABASE_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles

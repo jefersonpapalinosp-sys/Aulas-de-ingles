@@ -4,7 +4,7 @@
 COMPOSE := docker compose --env-file .env -f infra/compose.yml
 .DEFAULT_GOAL := help
 
-.PHONY: help up down logs ps reset api web test test-api test-web lint fmt health
+.PHONY: help up down logs ps reset api web test test-api test-web lint fmt health migrate migration seed openapi
 
 help: ## Lista os comandos
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -12,8 +12,10 @@ help: ## Lista os comandos
 .env:
 	@cp .env.example .env && echo "✓ .env criado a partir do .env.example"
 
-up: .env ## Sobe db + api + web
+up: .env ## Sobe db + api + web, aplica migrations e carrega o seed
 	$(COMPOSE) up -d --build
+	$(COMPOSE) exec -T api alembic upgrade head
+	$(COMPOSE) exec -T api python -m app.cli seed
 	@echo ""
 	@echo "  web  http://localhost:$${WEB_HOST_PORT:-5180}"
 	@echo "  api  http://localhost:$${API_HOST_PORT:-8010}/api/health"
@@ -55,3 +57,15 @@ lint: ## ruff + mypy + eslint + tsc
 
 fmt: ## Formata o backend
 	cd backend && uv run ruff format . && uv run ruff check --fix .
+
+migrate: ## Aplica as migrations pendentes
+	$(COMPOSE) exec -T api alembic upgrade head
+
+migration: ## Gera uma revisão a partir dos modelos — make migration m="texto"
+	$(COMPOSE) exec -T api alembic revision --autogenerate -m "$(m)"
+
+seed: ## Carrega seed/lessons.json (idempotente)
+	$(COMPOSE) exec -T api python -m app.cli seed
+
+openapi: ## Regrava o baseline do contrato em backend/openapi.json
+	cd backend && uv run python -m app.openapi_dump

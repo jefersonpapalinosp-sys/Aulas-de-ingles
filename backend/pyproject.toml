@@ -9,6 +9,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30",
     "pydantic-settings>=2.6",
+    "alembic>=1.14",
 ]
 
 [dependency-groups]
@@ -33,6 +34,11 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+# Migrations são geradas pelo Alembic: o estilo delas não é escolha humana,
+# e reformatá-las à mão só gera ruído no diff da próxima autogeneração.
+[tool.ruff.lint.per-file-ignores]
+"alembic/versions/*" = ["E501", "I001"]
 
 [tool.mypy]
 python_version = "3.12"

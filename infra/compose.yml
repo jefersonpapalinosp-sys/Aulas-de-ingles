@@ -37,6 +37,10 @@ services:
       # Hot reload: o código do host manda. O .venv da imagem é preservado.
       - ../backend/app:/app/app
       - ../backend/tests:/app/tests
+      - ../backend/alembic:/app/alembic
+      - ../backend/alembic.ini:/app/alembic.ini:ro
+      # O seed vive na raiz do repo, fora do contexto de build da imagem.
+      - ../seed:/app/seed:ro
     depends_on:
       db:
         condition: service_healthy

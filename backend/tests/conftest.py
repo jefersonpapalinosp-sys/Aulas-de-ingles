@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncIterator
+from typing import Any
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -15,6 +16,16 @@ from app.db.session import dispose_engine  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 get_settings.cache_clear()
+
+
+@pytest.fixture
+async def session() -> AsyncIterator[Any]:
+    """Sessão direta no Postgres do compose, para testar o seed e os modelos."""
+    from app.db.session import get_sessionmaker
+
+    async with get_sessionmaker()() as s:
+        yield s
+    await dispose_engine()
 
 
 @pytest.fixture

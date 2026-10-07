@@ -1,0 +1,8 @@
+Migrations do Aulas de Inglês.
+
+A URL do banco vem do ambiente (DATABASE_URL), nunca do alembic.ini.
+
+  make migrate            aplica tudo
+  make migration m="..."  gera uma revisão a partir dos modelos
+
+Toda migration precisa aplicar E reverter num banco limpo antes do merge.

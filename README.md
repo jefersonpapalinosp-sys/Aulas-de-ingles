@@ -4,8 +4,8 @@ App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
 Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: sprint 0 (fundação).** O esqueleto sobe e o frontend conversa com a API,
-que conversa com o Postgres. O domínio entra na sprint 1.
+**Estado: sprint 1 (modelo e conteúdo).** As 10 aulas do bloco 31–40 vivem no
+Postgres e saem pela API. O frontend que consome isso entra na sprint 2.
 
 ---
 
@@ -33,6 +33,7 @@ make up
 |---|---|
 | Frontend | <http://localhost:5180> |
 | API | <http://localhost:8010/api/health> |
+| Aulas | <http://localhost:8010/api/lessons> |
 | OpenAPI | <http://localhost:8010/docs> |
 | Postgres | `localhost:5433` |
 
@@ -49,6 +50,9 @@ make down     # derruba (mantém o banco)
 make reset    # derruba e apaga o volume do banco
 make logs     # acompanha os logs
 make health   # bate no /api/health
+make migrate  # aplica as migrations
+make seed     # carrega seed/lessons.json (idempotente)
+make openapi  # regrava o baseline do contrato
 make test     # pytest + vitest
 make lint     # ruff + mypy + eslint + tsc
 ```
@@ -94,13 +98,62 @@ docker stop aulas-db && make health   # HTTP 503
 docker start aulas-db
 ```
 
+## Conteúdo das aulas
+
+### Modelo
+
+```
+lesson ─┬─ lesson_goal
+        ├─ grammar_block ── grammar_row
+        ├─ phrase
+        ├─ vocab_item
+        ├─ pronunciation_note
+        └─ exercise ── exercise_answer
+```
+
+`exercise_answer` é tabela à parte porque um exercício aceita mais de uma
+resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
+
+O que está carregado hoje: **10 aulas**, 40 objetivos, 31 blocos de gramática
+com 156 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia
+e **62 exercícios** com 84 respostas aceitas.
+
+### Formato do texto
+
+Todo campo de texto exibível guarda um **subconjunto de Markdown** —
+`**negrito**`, `*itálico*`, `` `código` `` e `~~riscado~~`. HTML cru não entra
+no banco: elimina a superfície de XSS, deixa o seed editável à mão e mantém a
+aparência sob controle do frontend. Há um teste que falha se HTML vazar no
+payload.
+
+### Seed
+
+`seed/lessons.json` é a fonte do conteúdo. `make seed` é idempotente:
+
+- `lesson`, `vocab_item` e `exercise` são atualizados no lugar, pela chave
+  natural. A partir da S3 as tentativas e as cartas de revisão apontam para
+  esses ids, e eles não podem trocar a cada novo seed.
+- O resto é descritivo: apaga e reinsere.
+
+### Contrato
+
+`backend/openapi.json` é o baseline versionado. Um teste compara o contrato
+gerado pelo código com o arquivo commitado e **falha se divergirem** — mudança
+de contrato tem que aparecer no diff do PR, como decisão consciente.
+
+```bash
+make openapi   # regrava o baseline depois de mudar a API
+```
+
 ## Estrutura
 
 ```
-backend/   app/{api,core,db}, tests/   — FastAPI, uv, pytest
+backend/   app/{api,core,db,schemas}   — FastAPI, uv, pytest
+           alembic/                    — migrations
+           openapi.json                — baseline do contrato
 frontend/  src/                        — React, Vite, Vitest
 infra/     compose.yml                 — db + api + web
-seed/      lessons.json (S1)           — conteúdo das aulas
+seed/      lessons.json                — conteúdo das 10 aulas
 ```
 
 ## Convenções
