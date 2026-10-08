@@ -42,7 +42,8 @@ a sincronização e permanece no armazenamento local do navegador até a confirm
 
 Esta é uma auditoria técnica do código e dos fluxos automatizados, não uma certificação. Antes
 de publicação pública, repetir uma rodada manual com VoiceOver/TalkBack, zoom a 200% e contraste
-forçado do sistema.
+forçado do sistema. A execução e suas evidências são acompanhadas em
+`docs/validacao_manual_acessibilidade_2026-10-08.md`.
 
 ## Performance
 

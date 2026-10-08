@@ -970,13 +970,24 @@ Uma funcionalidade pedagógica só está pronta quando:
 - métricas não coletam conteúdo sensível;
 - README e documentação de operação foram atualizados.
 
-## 16. Próximo passo recomendado
+## 16. Fila de fechamento
 
-As Sprints 6–14 estão encerradas no bloco das Aulas 31–40. O próximo ciclo deve
-priorizar, nesta ordem:
+As Sprints 6–14 estão encerradas no bloco das Aulas 31–40 e o Pull Request desse ciclo já foi
+mesclado. A ordem abaixo é o backlog canônico para fechar as expansões restantes; um item só
+avança para concluído quando produzir a evidência indicada.
 
-1. revisar e mesclar o Pull Request somente após todos os gates do CI;
-2. realizar a rodada manual com VoiceOver/TalkBack, zoom de 200% e contraste forçado;
-3. aprofundar o listening com transcrições integrais e mais de uma atividade por aula;
-4. contratar/configurar um gateway assistido e executar o gate humano documentado;
-5. adotar fila durável antes de liberar assistência em escala.
+1. **Em andamento — validação manual de acessibilidade.** Executar VoiceOver no macOS/iOS,
+   TalkBack no Android, zoom de 200%, contraste forçado e navegação somente por teclado. A
+   matriz e o registro dos resultados ficam em
+   `docs/validacao_manual_acessibilidade_2026-10-08.md`.
+2. **Pendente — aprofundamento pedagógico das Aulas 32–40.** Adicionar transcrições integrais,
+   mais atividades de listening por aula, propostas de escrita e ampliar ditado, ordenação,
+   transformação, speaking e shadowing.
+3. **Pendente e opcional — assistência por IA.** Contratar/configurar gateways de transcrição
+   e escrita, validar privacidade e executar o gate humano definido para a Sprint 14 antes de
+   ligar as feature flags.
+4. **Pendente antes de escalar a assistência — fila durável.** Persistir jobs, retomar após
+   reinício, limitar tentativas e garantir idempotência no gateway.
+5. **Pendente — acabamento operacional.** Definir licença e política para áudio offline,
+   revisar a documentação ao fim de cada etapa e adotar Storybook somente se o catálogo de
+   componentes justificar.
