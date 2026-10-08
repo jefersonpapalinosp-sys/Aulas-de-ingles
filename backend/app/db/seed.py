@@ -13,6 +13,7 @@ nenhuma. A estratégia difere por tabela, e a razão é a S3/S4:
 import json
 import logging
 import os
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
+    ContentSource,
     Exercise,
     ExerciseAnswer,
     ExerciseHint,
@@ -28,6 +30,7 @@ from app.db.models import (
     Lesson,
     LessonGoal,
     LessonMedia,
+    LessonVersion,
     Phrase,
     PronunciationNote,
     TranscriptCue,
@@ -77,9 +80,71 @@ async def _upsert_lesson(session: AsyncSession, raw: dict[str, Any]) -> Lesson:
     return lesson
 
 
+async def _sync_editorial(session: AsyncSession, lesson: Lesson, raw: dict[str, Any]) -> None:
+    """Mantém origem e versão explícitas sem apagar versões anteriores."""
+    source_specs: tuple[tuple[str, str, str, str | None, str], ...] = (
+        (
+            "official",
+            f"VOA Let's Learn English — Lesson {lesson.number}",
+            "VOA Learning English",
+            str(raw["voa_url"]),
+            (
+                "Referência e mídia mantidas na origem. Confirmar os termos da VOA antes de "
+                "redistribuir arquivos."
+            ),
+        ),
+        (
+            "authorial",
+            "Explicações e atividades do Aulas de Inglês",
+            "Aulas de Inglês",
+            None,
+            "Conteúdo autoral do projeto; não substitui a fonte oficial.",
+        ),
+    )
+    existing_sources = {
+        item.kind: item
+        for item in (
+            await session.execute(select(ContentSource).where(ContentSource.lesson_id == lesson.id))
+        ).scalars()
+    }
+    for kind, title, publisher, url, license_note in source_specs:
+        source = existing_sources.get(kind)
+        if source is None:
+            source = ContentSource(lesson_id=lesson.id, kind=kind)
+            session.add(source)
+        source.title = title
+        source.publisher = publisher
+        source.url = url
+        source.license_note = license_note
+        source.accessed_at = date.fromisoformat(raw.get("source_accessed_at", "2026-10-07"))
+
+    version_number = int(raw.get("content_version", 1))
+    version = (
+        await session.execute(
+            select(LessonVersion).where(
+                LessonVersion.lesson_id == lesson.id,
+                LessonVersion.version == version_number,
+            )
+        )
+    ).scalar_one_or_none()
+    if version is None:
+        version = LessonVersion(lesson_id=lesson.id, version=version_number)
+        session.add(version)
+    version.status = raw.get("editorial_status", "reviewed")
+    version.learning_strategy = raw["learning_strategy"]
+    version.review_note = raw.get(
+        "review_note", "Conteúdo revisado contra o plano oficial e adaptado ao piloto."
+    )
+    version.reviewed_at = datetime(2026, 10, 7, tzinfo=UTC)
+    version.published_at = (
+        datetime(2026, 10, 7, tzinfo=UTC) if version.status == "published" else None
+    )
+    await session.flush()
+
+
 async def _replace_descriptive(session: AsyncSession, lesson: Lesson, raw: dict[str, Any]) -> None:
     """Objetivos, gramática, frases e pronúncia: apaga e reinsere."""
-    for model in (LessonGoal, GrammarBlock, Phrase, PronunciationNote, LessonMedia):
+    for model in (LessonGoal, GrammarBlock, Phrase, PronunciationNote):
         await session.execute(delete(model).where(model.lesson_id == lesson.id))
     await session.flush()
 
@@ -121,30 +186,58 @@ async def _replace_descriptive(session: AsyncSession, lesson: Lesson, raw: dict[
             )
         )
 
-    for m in raw.get("media", []):
-        media = LessonMedia(
-            lesson_id=lesson.id,
-            position=m["position"],
-            kind=m["kind"],
-            label=m["label"],
-            source_url=m["source_url"],
-            duration_seconds=m.get("duration_seconds"),
-            listening_exercise_position=m.get("listening_exercise_position"),
-        )
-        session.add(media)
+
+async def _upsert_media(session: AsyncSession, lesson: Lesson, raw: dict[str, Any]) -> None:
+    """Preserva IDs usados por retomada e gravações ao atualizar a mídia."""
+    existing_media = {
+        item.position: item
+        for item in (
+            await session.execute(select(LessonMedia).where(LessonMedia.lesson_id == lesson.id))
+        ).scalars()
+    }
+    seen_media: set[int] = set()
+    for raw_media in raw.get("media", []):
+        position = int(raw_media["position"])
+        media = existing_media.get(position)
+        if media is None:
+            media = LessonMedia(lesson_id=lesson.id, position=position)
+            session.add(media)
+        media.kind = raw_media["kind"]
+        media.label = raw_media["label"]
+        media.source_url = raw_media["source_url"]
+        media.duration_seconds = raw_media.get("duration_seconds")
+        media.listening_exercise_position = raw_media.get("listening_exercise_position")
         await session.flush()
-        for cue in m.get("cues", []):
-            session.add(
-                TranscriptCue(
-                    media_id=media.id,
-                    position=cue["position"],
-                    start_seconds=cue["start_seconds"],
-                    end_seconds=cue["end_seconds"],
-                    speaker=cue["speaker"],
-                    text_en=cue["text_en"],
-                    text_pt=cue["text_pt"],
+
+        existing_cues = {
+            cue.position: cue
+            for cue in (
+                await session.execute(
+                    select(TranscriptCue).where(TranscriptCue.media_id == media.id)
                 )
-            )
+            ).scalars()
+        }
+        seen_cues: set[int] = set()
+        for raw_cue in raw_media.get("cues", []):
+            cue_position = int(raw_cue["position"])
+            cue = existing_cues.get(cue_position)
+            if cue is None:
+                cue = TranscriptCue(media_id=media.id, position=cue_position)
+                session.add(cue)
+            cue.start_seconds = raw_cue["start_seconds"]
+            cue.end_seconds = raw_cue["end_seconds"]
+            cue.speaker = raw_cue["speaker"]
+            cue.text_en = raw_cue["text_en"]
+            cue.text_pt = raw_cue["text_pt"]
+            seen_cues.add(cue_position)
+        for cue_position, cue in existing_cues.items():
+            if cue_position not in seen_cues:
+                await session.delete(cue)
+        seen_media.add(position)
+    for position, media in existing_media.items():
+        if position not in seen_media:
+            await session.delete(media)
+    await session.flush()
 
 
 async def _upsert_vocab(session: AsyncSession, lesson: Lesson, raw: dict[str, Any]) -> None:
@@ -239,7 +332,9 @@ async def seed_lessons(session: AsyncSession, path: Path | None = None) -> int:
     dados = load_seed(path)
     for raw in dados:
         lesson = await _upsert_lesson(session, raw)
+        await _sync_editorial(session, lesson, raw)
         await _replace_descriptive(session, lesson, raw)
+        await _upsert_media(session, lesson, raw)
         await _upsert_vocab(session, lesson, raw)
         await _upsert_exercises(session, lesson, raw)
         await _upsert_writing_prompts(session, lesson, raw)

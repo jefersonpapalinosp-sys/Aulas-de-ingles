@@ -28,6 +28,7 @@ export function LessonPage() {
   if (!Number.isInteger(n)) return <p className="erro">Número de aula inválido.</p>
   if (isPending) return <Carregando oque={`a aula ${n}`} />
   if (error) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
+  const currentVersion = data.versions[0]
 
   return (
     <>
@@ -49,7 +50,41 @@ export function LessonPage() {
         ))}
       </div>
 
-      {data.number === 31 && (
+      <section className="lesson-editorial" aria-label="Origem e revisão do conteúdo">
+        <div>
+          <span>Estratégia de estudo</span>
+          <strong>{currentVersion?.learning_strategy ?? 'não informada'}</strong>
+        </div>
+        <div>
+          <span>Revisão editorial</span>
+          <strong>
+            {currentVersion
+              ? `v${currentVersion.version} · ${currentVersion.status === 'reviewed' ? 'revisada' : currentVersion.status}`
+              : 'não informada'}
+          </strong>
+        </div>
+        <div>
+          <span>Fontes</span>
+          <strong>
+            {data.content_sources.map((source, index) => (
+              <span key={source.kind}>
+                {index > 0 && ' · '}
+                {source.url ? (
+                  <a href={source.url} target="_blank" rel="noopener noreferrer">
+                    {source.kind === 'official' ? 'VOA oficial' : source.publisher}
+                  </a>
+                ) : source.kind === 'authorial' ? (
+                  'explicação autoral'
+                ) : (
+                  source.publisher
+                )}
+              </span>
+            ))}
+          </strong>
+        </div>
+      </section>
+
+      {[31, 32].includes(data.number) && (
         <div className="study-entry">
           <div>
             <p className="study-kicker">Novo · jornada guiada</p>

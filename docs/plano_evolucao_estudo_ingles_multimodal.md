@@ -434,7 +434,9 @@ POST   /api/activities/{id}/attempts
 GET    /api/activities/{id}/hints/{level}
 
 GET    /api/media/{id}/transcript
-POST   /api/media/{id}/position
+GET    /api/media/{id}/position
+PUT    /api/media/{id}/position
+DELETE /api/media/{id}/position
 
 POST   /api/speaking/attempts
 POST   /api/speaking/attempts/{id}/upload-url
@@ -481,15 +483,19 @@ Para a primeira versão, uma tabela de jobs e worker simples é suficiente. Adot
 | `learning_path_lesson` | ordem das aulas | `path_id`, `lesson_id`, `position` |
 | `lesson_version` | versão editorial | `lesson_id`, `version`, `status`, `published_at` |
 | `content_source` | origem e atribuição | `url`, `publisher`, `license_note`, `accessed_at` |
-| `media_asset` | áudio/vídeo externo ou próprio | `kind`, `source_url`, `storage_key`, `duration_ms` |
+| `lesson_media` | áudio/vídeo externo ou próprio | `kind`, `source_url`, `duration_seconds` |
 | `transcript_cue` | trecho sincronizado | `media_id`, `start_ms`, `end_ms`, `speaker`, `text_en`, `text_pt` |
-| `activity` | atividade reutilizável | `lesson_id`, `type`, `skill`, `instructions`, `position` |
-| `activity_item` | questão ou prompt | `activity_id`, `payload`, `position` |
-| `accepted_answer` | variantes objetivas | `item_id`, `answer`, `normalization_rules` |
-| `hint` | dicas graduais | `item_id`, `level`, `content` |
+| `exercise` | item de atividade reutilizável | `lesson_id`, `activity_type`, `skill`, `prompt`, `position` |
+| `exercise_answer` | variantes objetivas | `exercise_id`, `value`, `position` |
+| `exercise_hint` | dicas graduais | `exercise_id`, `level`, `content` |
 | `rubric` | critérios de produção | `activity_id`, `criteria` |
 
 `payload`, `criteria` e regras variáveis podem usar JSONB, mas relações consultadas e métricas devem continuar normalizadas.
+
+**Decisão implementada:** o modelo não ganhou um invólucro `activity` vazio. `exercise` representa
+o item executável e já contém tipo e competência; `exercise_answer` e `exercise_hint` normalizam
+as partes repetidas. Essa estrutura atende aos cinco tipos atuais com menos junções e sem
+duplicar o conceito existente.
 
 ### 8.2 Progresso e produção do usuário
 
@@ -497,6 +503,7 @@ Para a primeira versão, uma tabela de jobs e worker simples é suficiente. Adot
 |---|---|---|
 | `study_session` | retomada da sessão | `user_id`, `lesson_id`, `current_step`, `status`, `started_at`, `ended_at` |
 | `step_progress` | progresso granular | `session_id`, `step`, `status`, `seconds_spent` |
+| `media_progress` | retomada de áudio/vídeo | `user_id`, `media_id`, `position_seconds`, `updated_at` |
 | `activity_attempt` | tentativa generalizada | `user_id`, `item_id`, `answer`, `score`, `feedback`, `created_at` |
 | `writing_submission` | texto original | `user_id`, `activity_id`, `content`, `status` |
 | `writing_revision` | versões do texto | `submission_id`, `version`, `content`, `created_at` |
@@ -551,12 +558,14 @@ Cada sprint deve manter a aplicação utilizável e incluir frontend, backend, b
 
 Concluído no primeiro corte vertical:
 
-- jornada guiada da Aula 31 em cinco etapas, com retomada por usuário;
+- jornada guiada das Aulas 31 e 32 em cinco etapas, com retomada por usuário;
 - correção editorial da Aula 32 para objetos diretos/indiretos e interjeições;
 - metadados de mídia no banco e no contrato OpenAPI;
-- player do áudio oficial da VOA com velocidade, saltos, loop A–B e posição persistida;
-- 11 trechos de estudo sincronizados, tradução opcional e navegação pelo áudio;
-- primeira atividade de listening corrigida no servidor;
+- players dos áudios oficiais da VOA com velocidade, saltos, loop A–B e posição sincronizada
+  entre dispositivos, mantendo fallback local;
+- 15 trechos de estudo selecionados nas Aulas 31 e 32, tradução opcional e navegação pelo áudio;
+- atividades de listening das Aulas 31 e 32 corrigidas no servidor;
+- fontes oficiais/autorais e versões editoriais explícitas para as dez aulas;
 - prática de *shadowing* com gravação local, reprodução e autoavaliação por frase;
 - workspace de escrita da Aula 31 com autosave, fallback local, feedback determinístico e
   histórico de versões privado por conta;
@@ -571,12 +580,17 @@ Concluído no primeiro corte vertical:
 
 As Sprints 6–14 estão concluídas no corte vertical. A assistência opcional permanece desligada
 por padrão até cumprir o gate de avaliação humana. Próximas expansões possíveis são a
-transcrição editorial completa das demais aulas, mais atividades de listening, persistência do
-progresso de mídia no servidor e uma fila durável para processamento assistido.
+transcrição editorial completa das demais aulas, mais atividades de listening e uma fila
+durável para processamento assistido.
 
 ### Sprint 6 - Auditoria curricular e fundação da experiência
 
 **Objetivo:** alinhar o conteúdo às fontes e preparar o frontend para crescimento.
+
+**Estado:** concluída. As dez aulas possuem estratégia, origem oficial, explicação autoral,
+versão e status editorial no banco e no contrato. A Aula 32 foi alinhada ao plano oficial, e a
+interface expõe fonte e revisão sem misturar as anotações privadas do aluno. A migration cria
+`content_source` e `lesson_version`; o seed é idempotente e preserva IDs referenciados.
 
 Frontend:
 
@@ -607,6 +621,12 @@ Aceite:
 ### Sprint 7 - Player, transcrição e listening básico
 
 **Objetivo:** transformar mídia externa em atividade de estudo.
+
+**Estado:** concluída no piloto das Aulas 31 e 32. Ambas possuem áudio hospedado na VOA,
+alternativa textual selecionada, tradução revelável e atividade de listening. A posição é
+salva em `media_progress` por conta e também localmente para tolerar falhas de rede. O motor
+existente `exercise`/`exercise_answer`/`exercise_hint` cumpre o papel originalmente chamado de
+`activity`/`activity_item`, conforme a decisão de modelo registrada acima.
 
 Frontend:
 
@@ -856,8 +876,8 @@ Aceite:
 
 ### Fazer depois
 
-- speech-to-text;
-- feedback textual por modelo de linguagem;
+- avaliar o speech-to-text e o feedback textual com usuários antes da liberação ampla;
+- mover jobs assistidos para uma fila durável;
 - alinhamento fonético;
 - recomendações adaptativas mais sofisticadas;
 - modo offline de mídia.
@@ -877,7 +897,7 @@ Aceite:
 
 - Vitest e Testing Library para todos os estados de atividade;
 - testes de teclado, foco e anúncios de feedback;
-- `axe` automatizado em componentes e páginas principais;
+- `axe` automatizado nas páginas principais do E2E;
 - testes do player com relógio e mídia simulados;
 - testes de autosave e retomada;
 - Storybook é opcional; adotar apenas se o catálogo de componentes justificar.
@@ -952,14 +972,11 @@ Uma funcionalidade pedagógica só está pronta quando:
 
 ## 16. Próximo passo recomendado
 
-Começar pela **Sprint 6** e implementar a nova experiência somente nas aulas 31 e 32. Elas formam um piloto suficiente para validar:
+As Sprints 6–14 estão encerradas no corte vertical das Aulas 31 e 32. O próximo ciclo deve
+priorizar, nesta ordem:
 
-- uma aula alinhada ao conteúdo atual (31);
-- uma aula que exige correção editorial (32);
-- navegação por etapas;
-- metadados de fonte;
-- player real com áudio oficial, transcrição selecionada e atividade de listening;
-- retomada da sessão;
-- responsividade e acessibilidade.
-
-Depois de validar esse corte vertical, o mesmo modelo pode ser aplicado às aulas 33–40 sem duplicar telas ou contratos.
+1. revisar e mesclar o Pull Request somente após todos os gates do CI;
+2. realizar a rodada manual com VoiceOver/TalkBack, zoom de 200% e contraste forçado;
+3. ampliar mídia, transcrição selecionada e listening para as Aulas 33–40;
+4. contratar/configurar um gateway assistido e executar o gate humano documentado;
+5. adotar fila durável antes de liberar assistência em escala.

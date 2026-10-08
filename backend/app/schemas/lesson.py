@@ -4,7 +4,8 @@ Todo campo de texto vem em subconjunto de Markdown (ver app/db/models.py).
 O cliente é quem decide como renderizar.
 """
 
-from typing import Any
+from datetime import date, datetime
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -66,6 +67,24 @@ class LessonMediaOut(ORMModel):
     duration_seconds: int | None
     listening_exercise_position: int | None
     cues: list[TranscriptCueOut]
+
+
+class ContentSourceOut(ORMModel):
+    kind: Literal["official", "authorial"]
+    title: str
+    publisher: str
+    url: str | None
+    license_note: str
+    accessed_at: date
+
+
+class LessonVersionOut(ORMModel):
+    version: int
+    status: Literal["draft", "reviewed", "published"]
+    learning_strategy: str
+    review_note: str
+    reviewed_at: datetime
+    published_at: datetime | None
 
 
 class WritingRequirementOut(BaseModel):
@@ -135,5 +154,7 @@ class LessonDetailOut(LessonSummaryOut):
     vocab: list[VocabItemOut]
     pronunciation: list[PronunciationNoteOut]
     media: list[LessonMediaOut]
+    content_sources: list[ContentSourceOut]
+    versions: list[LessonVersionOut]
     writing_prompts: list[WritingPromptOut]
     exercises: list[ExerciseOut]

@@ -6,7 +6,7 @@ cru não entra no banco, o que elimina a superfície de XSS e deixa o seed
 editável à mão. Quem decide a aparência é o frontend.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     Boolean,
@@ -94,6 +94,63 @@ class Lesson(Base):
         order_by="WritingPrompt.position",
         lazy="selectin",
     )
+    content_sources: Mapped[list["ContentSource"]] = relationship(
+        back_populates="lesson",
+        cascade="all, delete-orphan",
+        order_by="ContentSource.kind",
+        lazy="selectin",
+    )
+    versions: Mapped[list["LessonVersion"]] = relationship(
+        back_populates="lesson",
+        cascade="all, delete-orphan",
+        order_by="LessonVersion.version.desc()",
+        lazy="selectin",
+    )
+
+
+class ContentSource(Base):
+    """Origem editorial de conteúdo oficial ou explicação autoral."""
+
+    __tablename__ = "content_source"
+    __table_args__ = (
+        UniqueConstraint("lesson_id", "kind", name="uq_content_source_lesson_kind"),
+        CheckConstraint("kind IN ('official', 'authorial')", name="ck_content_source_kind"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(20))
+    title: Mapped[str] = mapped_column(String(200))
+    publisher: Mapped[str] = mapped_column(String(120))
+    url: Mapped[str | None] = mapped_column(String(1000), default=None)
+    license_note: Mapped[str] = mapped_column(String(500))
+    accessed_at: Mapped[date] = mapped_column()
+
+    lesson: Mapped[Lesson] = relationship(back_populates="content_sources")
+
+
+class LessonVersion(Base):
+    """Fotografia editorial identificável do conteúdo de uma aula."""
+
+    __tablename__ = "lesson_version"
+    __table_args__ = (
+        UniqueConstraint("lesson_id", "version", name="uq_lesson_version_lesson_version"),
+        CheckConstraint(
+            "status IN ('draft', 'reviewed', 'published')", name="ck_lesson_version_status"
+        ),
+        CheckConstraint("version > 0", name="ck_lesson_version_positive"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
+    version: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20))
+    learning_strategy: Mapped[str] = mapped_column(String(100))
+    review_note: Mapped[str] = mapped_column(String(500))
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+    lesson: Mapped[Lesson] = relationship(back_populates="versions")
 
 
 class LessonMedia(Base):
@@ -146,6 +203,26 @@ class TranscriptCue(Base):
     text_pt: Mapped[str] = mapped_column(Text)
 
     media: Mapped[LessonMedia] = relationship(back_populates="cues")
+
+
+class MediaProgress(Base):
+    """Última posição de mídia sincronizada entre dispositivos."""
+
+    __tablename__ = "media_progress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "media_id", name="uq_media_progress_user_media"),
+        CheckConstraint("position_seconds >= 0", name="ck_media_progress_nonnegative"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    media_id: Mapped[int] = mapped_column(
+        ForeignKey("lesson_media.id", ondelete="CASCADE"), index=True
+    )
+    position_seconds: Mapped[float] = mapped_column(Float, default=0)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 class SpeakingAttempt(Base):

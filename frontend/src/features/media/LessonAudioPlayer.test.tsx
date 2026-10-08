@@ -1,8 +1,21 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { LessonMedia } from '../../api/client'
 import { formatAudioTime, LessonAudioPlayer } from './LessonAudioPlayer'
+
+const savePosition = vi.fn()
+const clearPosition = vi.fn()
+
+vi.mock('../../api/media', () => ({
+  useMediaPosition: () => ({ data: null }),
+  useSaveMediaPosition: () => ({
+    mutate: savePosition,
+    isError: false,
+    isSuccess: false,
+  }),
+  useClearMediaPosition: () => ({ mutate: clearPosition }),
+}))
 
 const media: LessonMedia = {
   id: 9,
@@ -24,7 +37,11 @@ const media: LessonMedia = {
   ],
 }
 
-afterEach(() => window.localStorage.clear())
+afterEach(() => {
+  window.localStorage.clear()
+  savePosition.mockClear()
+  clearPosition.mockClear()
+})
 
 describe('LessonAudioPlayer', () => {
   it('mostra o áudio oficial com duração conhecida', () => {
@@ -73,6 +90,8 @@ describe('LessonAudioPlayer', () => {
     fireEvent.timeUpdate(audio)
     await user.click(screen.getByRole('button', { name: '+5 s' }))
     expect(audio.currentTime).toBe(15)
+    fireEvent.pause(audio)
+    expect(savePosition).toHaveBeenCalledWith(15)
 
     await user.selectOptions(screen.getByLabelText('Velocidade do áudio'), '1.25')
     expect(audio.playbackRate).toBe(1.25)
@@ -82,6 +101,18 @@ describe('LessonAudioPlayer', () => {
     fireEvent.timeUpdate(audio)
     await user.click(screen.getByRole('button', { name: 'Marcar fim B' }))
     expect(screen.getByText('A 0:15 · B 0:20')).toBeInTheDocument()
+  })
+
+  it('limpa a retomada local e remota ao terminar', () => {
+    const { container } = render(<LessonAudioPlayer media={media} userId={7} />)
+    const audio = container.querySelector('audio')
+    if (!audio) throw new Error('elemento de áudio não renderizado')
+    window.localStorage.setItem('aulas-ingles:media-position:v1:7:9', '200')
+
+    fireEvent.ended(audio)
+
+    expect(window.localStorage.getItem('aulas-ingles:media-position:v1:7:9')).toBeNull()
+    expect(clearPosition).toHaveBeenCalledOnce()
   })
 
   it('formata tempo sem deixar valores inválidos escaparem', () => {

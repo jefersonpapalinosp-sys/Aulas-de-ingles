@@ -90,3 +90,12 @@ class StudySessionOut(StudySessionIn):
     updated_at: datetime | None
     completed_at: datetime | None
     total_seconds: int
+
+
+class MediaPositionIn(BaseModel):
+    position_seconds: float = Field(ge=0)
+
+
+class MediaPositionOut(MediaPositionIn):
+    media_id: int
+    updated_at: datetime | None

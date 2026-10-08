@@ -456,6 +456,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/media/{media_id}/position": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Posicao */
+        get: operations["obter_posicao_api_media__media_id__position_get"];
+        /** Salvar Posicao */
+        put: operations["salvar_posicao_api_media__media_id__position_put"];
+        post?: never;
+        /** Limpar Posicao */
+        delete: operations["limpar_posicao_api_media__media_id__position_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/review/due": {
         parameters: {
             query?: never;
@@ -903,6 +922,27 @@ export interface components {
             /** Vocab Item Id */
             vocab_item_id: number | null;
         };
+        /** ContentSourceOut */
+        ContentSourceOut: {
+            /**
+             * Accessed At
+             * Format: date
+             */
+            accessed_at: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "official" | "authorial";
+            /** License Note */
+            license_note: string;
+            /** Publisher */
+            publisher: string;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string | null;
+        };
         /** DeckSummaryOut */
         DeckSummaryOut: {
             /**
@@ -1066,6 +1106,8 @@ export interface components {
         };
         /** LessonDetailOut */
         LessonDetailOut: {
+            /** Content Sources */
+            content_sources: components["schemas"]["ContentSourceOut"][];
             /** Exercises */
             exercises: components["schemas"]["ExerciseOut"][];
             /** Focus Points */
@@ -1092,6 +1134,8 @@ export interface components {
             title: string;
             /** Title Pt */
             title_pt: string;
+            /** Versions */
+            versions: components["schemas"]["LessonVersionOut"][];
             /** Voa Url */
             voa_url: string;
             /** Vocab */
@@ -1147,6 +1191,27 @@ export interface components {
             /** Title Pt */
             title_pt: string;
         };
+        /** LessonVersionOut */
+        LessonVersionOut: {
+            /** Learning Strategy */
+            learning_strategy: string;
+            /** Published At */
+            published_at: string | null;
+            /** Review Note */
+            review_note: string;
+            /**
+             * Reviewed At
+             * Format: date-time
+             */
+            reviewed_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "reviewed" | "published";
+            /** Version */
+            version: number;
+        };
         /** LoginIn */
         LoginIn: {
             /**
@@ -1156,6 +1221,20 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /** MediaPositionIn */
+        MediaPositionIn: {
+            /** Position Seconds */
+            position_seconds: number;
+        };
+        /** MediaPositionOut */
+        MediaPositionOut: {
+            /** Media Id */
+            media_id: number;
+            /** Position Seconds */
+            position_seconds: number;
+            /** Updated At */
+            updated_at: string | null;
         };
         /** NotebookEntryIn */
         NotebookEntryIn: {
@@ -1218,6 +1297,10 @@ export interface components {
             exported_at: string;
             /** Lesson Progress */
             lesson_progress: {
+                [key: string]: unknown;
+            }[];
+            /** Media Progress */
+            media_progress: {
                 [key: string]: unknown;
             }[];
             /** Notebook */
@@ -2550,6 +2633,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TodayOut"];
+                };
+            };
+        };
+    };
+    obter_posicao_api_media__media_id__position_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaPositionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    salvar_posicao_api_media__media_id__position_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MediaPositionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaPositionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    limpar_posicao_api_media__media_id__position_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -16,6 +16,7 @@ from app.db.models import (
     Lesson,
     LessonMedia,
     LessonProgress,
+    MediaProgress,
     NotebookEntry,
     ReviewItem,
     SkillEvidence,
@@ -277,10 +278,19 @@ async def exportar_dados(
             .order_by(SkillEvidence.occurred_at)
         )
     ).scalars()
+    media_rows = (
+        await session.execute(
+            select(MediaProgress, LessonMedia, Lesson)
+            .join(LessonMedia, MediaProgress.media_id == LessonMedia.id)
+            .join(Lesson, LessonMedia.lesson_id == Lesson.id)
+            .where(MediaProgress.user_id == usuario.id)
+            .order_by(Lesson.number, LessonMedia.position)
+        )
+    ).all()
 
     response.headers["Content-Disposition"] = 'attachment; filename="aulas-ingles-dados.json"'
     return PersonalDataExportOut(
-        schema_version="1.3",
+        schema_version="1.4",
         exported_at=datetime.now(UTC),
         profile={
             "id": usuario.id,
@@ -324,6 +334,15 @@ async def exportar_dados(
                 "updated_at": step.updated_at,
             }
             for step, _, lesson in step_rows
+        ],
+        media_progress=[
+            {
+                "lesson_number": lesson.number,
+                "media_label": media.label,
+                "position_seconds": progress.position_seconds,
+                "updated_at": progress.updated_at,
+            }
+            for progress, media, lesson in media_rows
         ],
         skill_evidence=[
             {

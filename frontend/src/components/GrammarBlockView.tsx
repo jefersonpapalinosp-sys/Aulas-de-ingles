@@ -12,7 +12,7 @@ export function GrammarBlockView({ bloco }: { bloco: GrammarBlock }) {
       </p>
 
       {bloco.table_head && bloco.rows.length > 0 && (
-        <div className="tw">
+        <div className="tw" role="region" aria-label="Tabela de gramática" tabIndex={0}>
           <table>
             <thead>
               <tr>

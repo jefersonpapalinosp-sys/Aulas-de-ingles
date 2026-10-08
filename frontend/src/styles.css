@@ -5,7 +5,7 @@
   --rail: #eceef4;
   --ink: #161a22;
   --ink-2: #4a5160;
-  --ink-3: #767e8e;
+  --ink-3: #5f6776;
   --rule: #d2d6e0;
   --rule-soft: #e4e7ee;
   --accent: #2c4a9e;
@@ -111,6 +111,11 @@ h1 { font-size: clamp(27px, 4vw, 38px); margin-top: 10px; }
 .chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; }
 .chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 9px; border: 1px solid var(--rule); border-radius: 100px; color: var(--ink-2); background: var(--surface); }
 .chip.key { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.lesson-editorial { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 12px; margin-top: 18px; padding: 14px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface-2); }
+.lesson-editorial div { display: grid; gap: 2px; }
+.lesson-editorial div > span, .media-sync { color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lesson-editorial strong { font-size: 13px; }
+.lesson-editorial strong span { font-weight: 600; }
 .watch { display: inline-flex; gap: 7px; margin-top: 18px; font-family: var(--mono); font-size: 12px; padding: 8px 13px; border: 1px solid var(--accent); border-radius: 4px; text-decoration: none; background: var(--surface); }
 .watch:hover { background: var(--accent-wash); }
 
@@ -305,7 +310,7 @@ input[type='text']::placeholder { color: var(--ink-3); }
 
 .nav-linha { display: grid; grid-template-columns: 1fr 38px; align-items: stretch; }
 .nav-linha .nav-item { grid-column: 1; }
-.done { grid-column: 2; width: 18px; height: 18px; align-self: start; margin-top: 11px; border: 1px solid var(--rule); background: var(--surface); border-radius: 3px; display: grid; place-items: center; padding: 0; color: transparent; font-size: 11px; line-height: 1; }
+.done { grid-column: 2; width: 24px; height: 24px; align-self: start; margin-top: 8px; border: 1px solid var(--rule); background: var(--surface); border-radius: 3px; display: grid; place-items: center; padding: 0; color: transparent; font-size: 11px; line-height: 1; }
 .done[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
 .done:hover:not(:disabled) { border-color: var(--accent); }
 

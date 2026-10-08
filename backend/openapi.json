@@ -303,6 +303,56 @@
                 "title": "CardOut",
                 "type": "object"
             },
+            "ContentSourceOut": {
+                "properties": {
+                    "accessed_at": {
+                        "format": "date",
+                        "title": "Accessed At",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "official",
+                            "authorial"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "license_note": {
+                        "title": "License Note",
+                        "type": "string"
+                    },
+                    "publisher": {
+                        "title": "Publisher",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Url"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "title",
+                    "publisher",
+                    "url",
+                    "license_note",
+                    "accessed_at"
+                ],
+                "title": "ContentSourceOut",
+                "type": "object"
+            },
             "DeckSummaryOut": {
                 "properties": {
                     "added": {
@@ -716,6 +766,13 @@
             },
             "LessonDetailOut": {
                 "properties": {
+                    "content_sources": {
+                        "items": {
+                            "$ref": "#/components/schemas/ContentSourceOut"
+                        },
+                        "title": "Content Sources",
+                        "type": "array"
+                    },
                     "exercises": {
                         "items": {
                             "$ref": "#/components/schemas/ExerciseOut"
@@ -796,6 +853,13 @@
                         "title": "Title Pt",
                         "type": "string"
                     },
+                    "versions": {
+                        "items": {
+                            "$ref": "#/components/schemas/LessonVersionOut"
+                        },
+                        "title": "Versions",
+                        "type": "array"
+                    },
                     "voa_url": {
                         "title": "Voa Url",
                         "type": "string"
@@ -830,6 +894,8 @@
                     "vocab",
                     "pronunciation",
                     "media",
+                    "content_sources",
+                    "versions",
                     "writing_prompts",
                     "exercises"
                 ],
@@ -986,6 +1052,58 @@
                 "title": "LessonSummaryOut",
                 "type": "object"
             },
+            "LessonVersionOut": {
+                "properties": {
+                    "learning_strategy": {
+                        "title": "Learning Strategy",
+                        "type": "string"
+                    },
+                    "published_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Published At"
+                    },
+                    "review_note": {
+                        "title": "Review Note",
+                        "type": "string"
+                    },
+                    "reviewed_at": {
+                        "format": "date-time",
+                        "title": "Reviewed At",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "draft",
+                            "reviewed",
+                            "published"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "version",
+                    "status",
+                    "learning_strategy",
+                    "review_note",
+                    "reviewed_at",
+                    "published_at"
+                ],
+                "title": "LessonVersionOut",
+                "type": "object"
+            },
             "LoginIn": {
                 "properties": {
                     "email": {
@@ -1004,6 +1122,52 @@
                     "password"
                 ],
                 "title": "LoginIn",
+                "type": "object"
+            },
+            "MediaPositionIn": {
+                "properties": {
+                    "position_seconds": {
+                        "minimum": 0.0,
+                        "title": "Position Seconds",
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "position_seconds"
+                ],
+                "title": "MediaPositionIn",
+                "type": "object"
+            },
+            "MediaPositionOut": {
+                "properties": {
+                    "media_id": {
+                        "title": "Media Id",
+                        "type": "integer"
+                    },
+                    "position_seconds": {
+                        "minimum": 0.0,
+                        "title": "Position Seconds",
+                        "type": "number"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    }
+                },
+                "required": [
+                    "position_seconds",
+                    "media_id",
+                    "updated_at"
+                ],
+                "title": "MediaPositionOut",
                 "type": "object"
             },
             "NotebookEntryIn": {
@@ -1141,6 +1305,14 @@
                         "title": "Lesson Progress",
                         "type": "array"
                     },
+                    "media_progress": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Media Progress",
+                        "type": "array"
+                    },
                     "notebook": {
                         "items": {
                             "additionalProperties": true,
@@ -1227,6 +1399,7 @@
                     "study_sessions",
                     "study_plan",
                     "step_progress",
+                    "media_progress",
                     "skill_evidence",
                     "exercise_attempts",
                     "review_items",
@@ -3721,6 +3894,131 @@
                 "summary": "Painel Hoje",
                 "tags": [
                     "dashboard"
+                ]
+            }
+        },
+        "/api/media/{media_id}/position": {
+            "delete": {
+                "operationId": "limpar_posicao_api_media__media_id__position_delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "media_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Media Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Limpar Posicao",
+                "tags": [
+                    "media"
+                ]
+            },
+            "get": {
+                "operationId": "obter_posicao_api_media__media_id__position_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "media_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Media Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MediaPositionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Posicao",
+                "tags": [
+                    "media"
+                ]
+            },
+            "put": {
+                "operationId": "salvar_posicao_api_media__media_id__position_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "media_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Media Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MediaPositionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MediaPositionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Salvar Posicao",
+                "tags": [
+                    "media"
                 ]
             }
         },

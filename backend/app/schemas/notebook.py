@@ -59,6 +59,7 @@ class PersonalDataExportOut(BaseModel):
     study_sessions: list[dict[str, Any]]
     study_plan: dict[str, Any] | None
     step_progress: list[dict[str, Any]]
+    media_progress: list[dict[str, Any]]
     skill_evidence: list[dict[str, Any]]
     exercise_attempts: list[dict[str, Any]]
     review_items: list[dict[str, Any]]

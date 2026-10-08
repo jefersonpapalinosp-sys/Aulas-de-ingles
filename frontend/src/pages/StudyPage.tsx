@@ -46,7 +46,11 @@ function StepContent({
         </div>
         <aside className="study-prompt" aria-labelledby="study-warmup-title">
           <p className="study-kicker">Aquecimento · responda em voz alta</p>
-          <h3 id="study-warmup-title">Como você compararia duas formas de transporte?</h3>
+          <h3 id="study-warmup-title">
+            {lesson.number === 32
+              ? 'Como você pediria uma informação e responderia com entusiasmo?'
+              : 'Como você compararia duas formas de transporte?'}
+          </h3>
           <p>
             Tente usar uma frase curta em inglês. Não precisa acertar de primeira — volte a esta
             pergunta depois da prática.
@@ -85,11 +89,19 @@ function StepContent({
         <div className="study-instructions">
           <p className="study-kicker">Estratégia · visualizar</p>
           <h2>Assista primeiro pelo contexto</h2>
-          <ol>
-            <li>Na primeira vez, assista sem pausar e identifique onde Anna quer chegar.</li>
-            <li>Na segunda, perceba quais transportes são comparados.</li>
-            <li>Depois, leia as frases abaixo e confira o que reconheceu.</li>
-          </ol>
+          {lesson.number === 32 ? (
+            <ol>
+              <li>Na primeira vez, identifique quem são Anna e MINDY.</li>
+              <li>Na segunda, perceba quem recebe cada pergunta ou resposta.</li>
+              <li>Depois, acompanhe as interjeições e confira os trechos selecionados.</li>
+            </ol>
+          ) : (
+            <ol>
+              <li>Na primeira vez, assista sem pausar e identifique onde Anna quer chegar.</li>
+              <li>Na segunda, perceba quais transportes são comparados.</li>
+              <li>Depois, leia as frases abaixo e confira o que reconheceu.</li>
+            </ol>
+          )}
           <a className="watch" href={lesson.voa_url} target="_blank" rel="noopener noreferrer">
             Abrir vídeo e áudio na VOA ↗
           </a>

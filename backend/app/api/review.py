@@ -100,9 +100,7 @@ async def adicionar_item_revisao(
     return True
 
 
-async def remover_item_por_origem(
-    session: AsyncSession, user_id: int, source_key: str
-) -> None:
+async def remover_item_por_origem(session: AsyncSession, user_id: int, source_key: str) -> None:
     item = (
         await session.execute(
             select(ReviewItem).where(

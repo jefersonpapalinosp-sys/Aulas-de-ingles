@@ -5,11 +5,13 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
+    ContentSource,
     Exercise,
     ExerciseAnswer,
     ExerciseHint,
     Lesson,
     LessonMedia,
+    LessonVersion,
     TranscriptCue,
     VocabItem,
     WritingPrompt,
@@ -22,6 +24,8 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
     for nome, modelo in (
         ("lesson", Lesson),
         ("lesson_media", LessonMedia),
+        ("content_source", ContentSource),
+        ("lesson_version", LessonVersion),
         ("transcript_cue", TranscriptCue),
         ("vocab_item", VocabItem),
         ("exercise", Exercise),
@@ -38,11 +42,13 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     dados = load_seed()
     assert [d["number"] for d in dados] == list(range(31, 41))
     assert sum(len(d["vocab"]) for d in dados) == 115
-    assert sum(len(d["exercises"]) for d in dados) == 65
-    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 18
-    assert sum(len(d.get("media", [])) for d in dados) == 1
+    assert sum(len(d["exercises"]) for d in dados) == 66
+    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 19
+    assert sum(len(d.get("media", [])) for d in dados) == 2
     assert sum(len(d.get("writing_prompts", [])) for d in dados) == 1
-    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 11
+    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 15
+    assert all(d["editorial_status"] == "reviewed" for d in dados)
+    assert all(d["learning_strategy"] for d in dados)
 
 
 @pytest.mark.asyncio
@@ -67,6 +73,32 @@ async def test_ids_de_vocabulario_sobrevivem_ao_reseed(session: AsyncSession) ->
         (v.lesson_id, v.term): v.id for v in (await session.execute(select(VocabItem))).scalars()
     }
     assert antes == depois
+
+
+@pytest.mark.asyncio
+async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession) -> None:
+    """Retomada e speaking apontam para esses IDs e não podem ser apagados pelo seed."""
+    media_before = {
+        (item.lesson_id, item.position): item.id
+        for item in (await session.execute(select(LessonMedia))).scalars()
+    }
+    cues_before = {
+        (item.media_id, item.position): item.id
+        for item in (await session.execute(select(TranscriptCue))).scalars()
+    }
+
+    await seed_lessons(session)
+
+    media_after = {
+        (item.lesson_id, item.position): item.id
+        for item in (await session.execute(select(LessonMedia))).scalars()
+    }
+    cues_after = {
+        (item.media_id, item.position): item.id
+        for item in (await session.execute(select(TranscriptCue))).scalars()
+    }
+    assert media_after == media_before
+    assert cues_after == cues_before
 
 
 @pytest.mark.asyncio

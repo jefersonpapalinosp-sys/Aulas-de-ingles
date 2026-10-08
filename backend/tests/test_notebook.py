@@ -25,9 +25,7 @@ async def test_caderno_exige_login_e_valida_conteudo(client: AsyncClient) -> Non
     assert (await client.get("/api/me/export")).status_code == 401
 
     headers = await conta(client, "validacao")
-    blank = await client.post(
-        "/api/me/notebook", headers=headers, json={**body, "content": "   "}
-    )
+    blank = await client.post("/api/me/notebook", headers=headers, json={**body, "content": "   "})
     invalid_kind = await client.post(
         "/api/me/notebook", headers=headers, json={**body, "kind": "public"}
     )
@@ -104,6 +102,11 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
 
     await client.put("/api/lessons/31/studied", headers=headers)
     await client.put(
+        f"/api/media/{lesson['media'][0]['id']}/position",
+        headers=headers,
+        json={"position_seconds": 42.5},
+    )
+    await client.put(
         f"/api/writing/prompts/{prompt['id']}/draft", headers=headers, json={"text": text}
     )
     await client.post(
@@ -127,9 +130,10 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
         'attachment; filename="aulas-ingles-dados.json"'
     )
     data = exported.json()
-    assert data["schema_version"] == "1.3"
+    assert data["schema_version"] == "1.4"
     assert data["profile"]["email"] == "caderno-exportacao@exemplo.com"
     assert data["lesson_progress"][0]["lesson_number"] == 31
+    assert data["media_progress"][0]["position_seconds"] == 42.5
     assert data["writing"][0]["draft"] == text
     assert data["writing"][0]["revisions"][0]["version"] == 1
     assert data["writing"][0]["feedbacks"][0]["text"] == text

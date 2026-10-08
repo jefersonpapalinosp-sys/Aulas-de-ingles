@@ -280,16 +280,12 @@ async def test_item_pode_ser_suspenso_reativado_e_excluido(client: AsyncClient) 
     listed = (await client.get("/api/review/items?status=suspended", headers=owner)).json()
     assert [row["id"] for row in listed] == [item["id"]]
     assert (
-        await client.post(
-            f"/api/review/{item['id']}/grade", headers=owner, json={"quality": 4}
-        )
+        await client.post(f"/api/review/{item['id']}/grade", headers=owner, json={"quality": 4})
     ).status_code == 409
 
     intruder = await conta(client, "gerencia-intruso")
     assert (
-        await client.patch(
-            f"/api/review/{item['id']}", headers=intruder, json={"status": "active"}
-        )
+        await client.patch(f"/api/review/{item['id']}", headers=intruder, json={"status": "active"})
     ).status_code == 404
 
     reactivated = await client.patch(
@@ -298,9 +294,7 @@ async def test_item_pode_ser_suspenso_reativado_e_excluido(client: AsyncClient) 
     assert reactivated.json()["status"] == "active"
     assert (await client.delete(f"/api/review/{item['id']}", headers=owner)).status_code == 204
     assert (
-        await client.patch(
-            f"/api/review/{item['id']}", headers=owner, json={"status": "active"}
-        )
+        await client.patch(f"/api/review/{item['id']}", headers=owner, json={"status": "active"})
     ).status_code == 404
 
 

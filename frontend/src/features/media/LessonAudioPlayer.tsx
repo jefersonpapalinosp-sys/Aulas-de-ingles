@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { LessonMedia } from '../../api/client'
+import { useClearMediaPosition, useMediaPosition, useSaveMediaPosition } from '../../api/media'
 
 function positionKey(userId: number, mediaId: number): string {
   return `aulas-ingles:media-position:v1:${userId}:${mediaId}`
@@ -22,13 +23,30 @@ export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userI
   const [failed, setFailed] = useState(false)
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [translationOpen, setTranslationOpen] = useState(false)
+  const remotePosition = useMediaPosition(media.id, userId)
+  const saveRemotePosition = useSaveMediaPosition(media.id, userId)
+  const clearRemotePosition = useClearMediaPosition(media.id, userId)
   const activeCue = media.cues.find(
     (cue) => position >= cue.start_seconds && position < cue.end_seconds,
   )
 
+  useEffect(() => {
+    const audio = audioRef.current
+    const remote = remotePosition.data
+    if (!audio || !remote?.updated_at || position > 0) return
+    const upper = Number.isFinite(audio.duration) ? audio.duration : duration
+    if (remote.position_seconds > 0 && remote.position_seconds < upper - 2) {
+      audio.currentTime = remote.position_seconds
+      setPosition(remote.position_seconds)
+      lastSavedAt.current = remote.position_seconds
+      window.localStorage.setItem(positionKey(userId, media.id), String(remote.position_seconds))
+    }
+  }, [duration, media.id, position, remotePosition.data, userId])
+
   function persistPosition(at: number) {
     window.localStorage.setItem(positionKey(userId, media.id), String(at))
     lastSavedAt.current = at
+    if (userId > 0 && navigator.onLine) saveRemotePosition.mutate(at)
   }
 
   function onLoadedMetadata() {
@@ -36,7 +54,10 @@ export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userI
     if (!audio) return
     if (Number.isFinite(audio.duration)) setDuration(audio.duration)
 
-    const saved = Number(window.localStorage.getItem(positionKey(userId, media.id)))
+    const localSaved = Number(window.localStorage.getItem(positionKey(userId, media.id)))
+    const saved = remotePosition.data?.updated_at
+      ? remotePosition.data.position_seconds
+      : localSaved
     if (Number.isFinite(saved) && saved > 0 && saved < audio.duration - 2) {
       audio.currentTime = saved
       setPosition(saved)
@@ -107,6 +128,7 @@ export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userI
         onPause={() => persistPosition(audioRef.current?.currentTime ?? position)}
         onEnded={() => {
           window.localStorage.removeItem(positionKey(userId, media.id))
+          if (userId > 0 && navigator.onLine) clearRemotePosition.mutate()
           setPosition(0)
         }}
         onError={() => setFailed(true)}
@@ -114,6 +136,14 @@ export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userI
         <source src={media.source_url} type="audio/mpeg" />
         Seu navegador não consegue reproduzir este áudio.
       </audio>
+
+      <p className="media-sync" aria-live="polite">
+        {saveRemotePosition.isError
+          ? 'Posição salva neste dispositivo; sincronização pendente.'
+          : saveRemotePosition.isSuccess
+            ? 'Posição sincronizada com sua conta.'
+            : ''}
+      </p>
 
       <div className="audio-toolbar" aria-label="Controles adicionais do áudio">
         <button type="button" onClick={() => skip(-5)}>

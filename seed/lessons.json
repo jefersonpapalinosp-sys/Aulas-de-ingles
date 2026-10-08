@@ -135,6 +135,10 @@
       "a lot + comparativo"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "visualizar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Anna quer ver um jogo dos Washington Nationals. Todo mundo que ela encontra tem uma opinião sobre qual transporte é mais rápido — e ela chega tarde demais, quando os ingressos já estão esgotados. A aula inteira é construída sobre **comparar duas coisas** e **dar conselho**.",
     "goals": [
       "Comparar duas coisas com **-er than** (adjetivos curtos) e **more … than** (adjetivos longos).",
@@ -566,6 +570,50 @@
     "title": "Welcome to the Treehouse!",
     "title_pt": "Bem-vindo à casa na árvore!",
     "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-32-welcome-treehouse/3547306.html",
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 32",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/13/054d9504-47b3-4cc2-80d1-cb66fff404e4_hq.mp3",
+        "duration_seconds": 228,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 0,
+            "end_seconds": 10,
+            "speaker": "Anna",
+            "text_en": "I'm excited and nervous.",
+            "text_pt": "Estou animada e nervosa."
+          },
+          {
+            "position": 1,
+            "start_seconds": 76,
+            "end_seconds": 83,
+            "speaker": "Anna",
+            "text_en": "This is my partner, MINDY!",
+            "text_pt": "Esta é minha parceira, MINDY!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 91,
+            "end_seconds": 98,
+            "speaker": "Anna",
+            "text_en": "We find them answers!",
+            "text_pt": "Nós encontramos respostas para elas!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 104,
+            "end_seconds": 114,
+            "speaker": "Layla",
+            "text_en": "I'd like to know -- how do you play baseball?",
+            "text_pt": "Eu gostaria de saber: como se joga beisebol?"
+          }
+        ]
+      }
+    ],
     "grammar_tag": "Objetos diretos e indiretos + interjeições",
     "focus_points": [
       "direct object",
@@ -573,6 +621,10 @@
       "interjections"
     ],
     "story_note": "Parte 1 de 2 · continua na 33",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "monitorar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Estreia do programa infantil da Anna, *The Time Traveling Treehouse*. Crianças fazem perguntas e Anna e MINDY procuram respostas. A aula mostra **quem recebe a ação** com objetos diretos e indiretos, como pedir informação e como interjeições mudam a emoção da fala.",
     "goals": [
       "Reconhecer o **objeto direto**, que recebe diretamente a ação do verbo: *ask a question*.",
@@ -920,6 +972,25 @@
           "id",
           "i would"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "her partner",
+          "her teacher",
+          "her neighbor"
+        ],
+        "prompt": "Listening: Who is MINDY to Anna?",
+        "hint": "Ouça como Anna apresenta MINDY.",
+        "hints": [
+          "A palavra aparece logo depois de 'my'."
+        ],
+        "explanation": "Anna apresenta MINDY como *my partner*.",
+        "answers": [
+          "her partner"
+        ]
       }
     ]
   },
@@ -935,6 +1006,10 @@
       "regras do beisebol"
     ],
     "story_note": "Parte 2 de 2 · continua a 32",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "sequenciar",
+    "source_accessed_at": "2026-10-07",
     "lead": "MINDY finalmente acerta o destino e Anna ensina beisebol num campo de verdade. A aula é um **texto explicativo**: presente simples para descrever como as coisas funcionam, marcadores de sequência, e o truque de transformar verbo em profissão com **-er**.",
     "goals": [
       "Explicar um processo com **presente simples** + *First… Then… Each time… At the end…*",
@@ -1283,6 +1358,10 @@
       "won't she?"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "inferir",
+    "source_accessed_at": "2026-10-07",
     "lead": "Halloween. Anna se veste de gênio e finge ler mentes — e descobre que dizer *might* para quem quer certeza é um desastre diplomático. A aula gira em torno do contraste **will (certeza) × might (possibilidade)** e das **tag questions**.",
     "goals": [
       "Expressar possibilidade com **might / might not** e certeza com **will / won't**.",
@@ -1662,6 +1741,10 @@
       "will / won't de promessa"
     ],
     "story_note": "Parte 1 de 2 · continua na 36",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "cooperar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Marsha cozinha, Anna faz as compras — com a lista errada. A aula é a aula das **unidades de embalagem** (*a bag of*, *a jar of*, *a loaf of*) e de **too much / too many**, que é como o inglês diz \"demais\".",
     "goals": [
       "Usar as **unidades de medida e embalagem** que o inglês exige antes de incontáveis: *a bag of coffee*, não \"a coffee\".",
@@ -2037,6 +2120,10 @@
       "I'll answer the door"
     ],
     "story_note": "Parte 2 de 2 · continua a 35",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "substituir",
+    "source_accessed_at": "2026-10-07",
     "lead": "Anna salva o jantar virando a lista errada em \"panquecas de pasta de amendoim com banana\". A aula é construída sobre **onde estão as coisas** — preposições de lugar na cozinha — e sobre o **will de oferta**, decidido na hora.",
     "goals": [
       "Dizer onde algo está com **in, inside, on, under** e perguntar com *Where is / Where are*.",
@@ -2409,6 +2496,10 @@
       "I agree / I disagree"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "personalizar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Anna acha uma bolsa perdida e pergunta de quem é — e depois discute cidade × campo com o dono. Duas camadas: os **pronomes possessivos** (*mine, yours, his, hers*) e a **linguagem de concordar e discordar**, que é a habilidade mais útil desta aula para reunião de trabalho.",
     "goals": [
       "Diferenciar **adjetivo possessivo** (*my bag*) de **pronome possessivo** (*mine*), que substitui o substantivo.",
@@ -2817,6 +2908,10 @@
       "the best"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "avaliar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Penelope, a melhor amiga de infância, visita Washington e Anna descreve todas as pessoas da sua vida — cada uma com um **superlativo**. A aula é uma coleção quase completa das formas de superlativo do inglês, incluindo as irregulares.",
     "goals": [
       "Formar o superlativo com **the + adjetivo + -est** (curtos) e **the most + adjetivo** (longos).",
@@ -3263,6 +3358,10 @@
       "do you?"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "perguntar para esclarecer",
+    "source_accessed_at": "2026-10-07",
     "lead": "Pete anuncia um produto milagroso para cabelo, Anna compra e o resultado é um desastre. A aula constrói o diálogo inteiro em torno dos **prefixos negativos**: *untidy, uncomfortable, inexpensive, imperfect, dishonest, unbelievable*.",
     "goals": [
       "Negar um adjetivo com prefixo: **un-, in-, im-, dis-** — e saber que a escolha é por costume, não por regra lógica.",
@@ -3703,6 +3802,10 @@
       "too … / … enough"
     ],
     "story_note": "Fecha o bloco",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "autoavaliar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Ano novo, resolução nova: Anna faz um teste para uma peça de teatro. O diretor corrige **como** ela fala e **como** ela anda — e por isso a aula inteira é feita de **advérbios de modo**, do comparativo deles e do par *too* / *enough*.",
     "goals": [
       "Formar advérbio de modo com **adjetivo + -ly** e saber quando o *y* vira *i*.",

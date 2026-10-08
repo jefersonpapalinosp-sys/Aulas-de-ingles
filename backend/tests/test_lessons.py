@@ -28,6 +28,16 @@ async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     assert all(isinstance(g, str) for g in a["goals"])
     assert len(a["media"]) == 1
     assert len(a["writing_prompts"]) == 1
+    assert {source["kind"] for source in a["content_sources"]} == {
+        "official",
+        "authorial",
+    }
+    official = next(source for source in a["content_sources"] if source["kind"] == "official")
+    assert official["publisher"] == "VOA Learning English"
+    assert official["url"] == a["voa_url"]
+    assert a["versions"][0]["version"] == 1
+    assert a["versions"][0]["status"] == "reviewed"
+    assert a["versions"][0]["learning_strategy"] == "visualizar"
     assert a["writing_prompts"][0] == {
         **a["writing_prompts"][0],
         "position": 0,
@@ -71,7 +81,13 @@ async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> No
     assert a["grammar_blocks"][0]["heading"].startswith("Objeto direto")
     assert a["grammar_blocks"][1]["heading"].startswith("Objeto indireto")
     assert any("woo-hoo" in note["label"] for note in a["pronunciation"])
-    assert len(a["exercises"]) == 6
+    assert len(a["exercises"]) == 7
+    assert len(a["media"]) == 1
+    assert a["media"][0]["duration_seconds"] == 228
+    assert len(a["media"][0]["cues"]) == 4
+    listening = next(exercise for exercise in a["exercises"] if exercise["skill"] == "listening")
+    assert listening["options"] == ["her partner", "her teacher", "her neighbor"]
+    assert a["versions"][0]["learning_strategy"] == "monitorar"
 
 
 @pytest.mark.asyncio
@@ -145,7 +161,7 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
-    assert len(todos) == 65
+    assert len(todos) == 66
     assert {e["lesson_number"] for e in todos} == set(range(31, 41))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]

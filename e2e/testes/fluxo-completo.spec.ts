@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 
 /**
  * O caminho inteiro, numa sessão só:
@@ -192,6 +193,47 @@ test('a correção acontece no servidor: o gabarito não viaja antes', async ({ 
     expect(corpo).not.toContain('"answers"')
     expect(corpo).toContain('"prompt"')
   }
+})
+
+test('metadados editoriais e posição de mídia atravessam a API', async ({ request }) => {
+  const register = await request.post('/api/auth/register', {
+    data: {
+      email: emailUnico(),
+      password: SENHA,
+      display_name: 'Mídia E2E',
+    },
+  })
+  expect(register.status()).toBe(201)
+  const headers = { Authorization: `Bearer ${(await register.json()).access_token as string}` }
+  const lesson = await (await request.get('/api/lessons/32')).json()
+
+  expect(lesson.versions[0]).toMatchObject({
+    version: 1,
+    status: 'reviewed',
+    learning_strategy: 'monitorar',
+  })
+  expect(lesson.content_sources).toEqual(
+    expect.arrayContaining([expect.objectContaining({ kind: 'official', publisher: 'VOA Learning English' })]),
+  )
+  expect(lesson.media[0].cues).toHaveLength(4)
+
+  const mediaId = lesson.media[0].id as number
+  expect(await (await request.get(`/api/media/${mediaId}/position`, { headers })).json()).toMatchObject({
+    media_id: mediaId,
+    position_seconds: 0,
+  })
+  expect(
+    (
+      await request.put(`/api/media/${mediaId}/position`, {
+        headers,
+        data: { position_seconds: 42.5 },
+      })
+    ).ok(),
+  ).toBeTruthy()
+  expect(await (await request.get(`/api/media/${mediaId}/position`, { headers })).json()).toMatchObject({
+    position_seconds: 42.5,
+  })
+  expect((await request.delete(`/api/media/${mediaId}/position`, { headers })).status()).toBe(204)
 })
 
 test('gravação oral exige consentimento e pode ser excluída', async ({ request }) => {
@@ -393,4 +435,22 @@ test('sem sessão, a aplicação pede login', async ({ page }) => {
   // Rota interna também cai no login.
   await page.goto('/revisar')
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
+})
+
+test('painel e aula não têm violações WCAG sérias ou críticas', async ({ page }) => {
+  await criarConta(page, 'Acessibilidade E2E')
+
+  const painel = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(painel.violations.filter(({ impact }) => impact === 'serious' || impact === 'critical'))
+    .toEqual([])
+
+  await page.goto('/aulas/32')
+  await expect(page.getByRole('heading', { name: 'Welcome to the Treehouse!' })).toBeVisible()
+  const aula = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(aula.violations.filter(({ impact }) => impact === 'serious' || impact === 'critical'))
+    .toEqual([])
 })

@@ -125,9 +125,7 @@ async def _recommendation(
             lesson_number=lesson.number,
         )
 
-    studied_lesson_ids = select(LessonProgress.lesson_id).where(
-        LessonProgress.user_id == user_id
-    )
+    studied_lesson_ids = select(LessonProgress.lesson_id).where(LessonProgress.user_id == user_id)
     next_lesson = (
         await session.execute(
             select(Lesson)
