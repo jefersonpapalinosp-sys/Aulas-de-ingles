@@ -430,6 +430,9 @@ input[type='text']::placeholder { color: var(--ink-3); }
 .audio-player-head h2 { font-size: 20px; }
 .audio-time { flex: none; font-family: var(--mono); font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .audio-player audio { display: block; width: 100%; margin-top: 16px; }
+.media-rights { margin-top: 12px; color: var(--muted); font-size: 13.5px; }
+.media-rights summary { cursor: pointer; color: var(--ink); font-weight: 700; }
+.media-rights p { margin-top: 7px; }
 .audio-toolbar, .audio-loop { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .audio-toolbar button, .audio-loop button { font-family: var(--mono); font-size: 11px; padding: 6px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--accent); }
 .audio-toolbar button:hover:not(:disabled), .audio-loop button:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-wash); }

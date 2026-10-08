@@ -904,6 +904,10 @@
             },
             "LessonMediaOut": {
                 "properties": {
+                    "attribution": {
+                        "title": "Attribution",
+                        "type": "string"
+                    },
                     "cues": {
                         "items": {
                             "$ref": "#/components/schemas/TranscriptCueOut"
@@ -934,6 +938,43 @@
                         "title": "Label",
                         "type": "string"
                     },
+                    "license_note": {
+                        "title": "License Note",
+                        "type": "string"
+                    },
+                    "license_reviewed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "License Reviewed At"
+                    },
+                    "license_status": {
+                        "enum": [
+                            "public_domain",
+                            "permission_granted",
+                            "restricted",
+                            "review_required"
+                        ],
+                        "title": "License Status",
+                        "type": "string"
+                    },
+                    "license_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "License Url"
+                    },
                     "listening_exercise_position": {
                         "anyOf": [
                             {
@@ -944,6 +985,14 @@
                             }
                         ],
                         "title": "Listening Exercise Position"
+                    },
+                    "offline_policy": {
+                        "enum": [
+                            "network_only",
+                            "cache_allowed"
+                        ],
+                        "title": "Offline Policy",
+                        "type": "string"
                     },
                     "source_url": {
                         "title": "Source Url",
@@ -962,6 +1011,12 @@
                     "kind",
                     "label",
                     "source_url",
+                    "license_status",
+                    "license_url",
+                    "license_note",
+                    "attribution",
+                    "offline_policy",
+                    "license_reviewed_at",
                     "duration_seconds",
                     "listening_exercise_position",
                     "cues",

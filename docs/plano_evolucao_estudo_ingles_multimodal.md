@@ -994,6 +994,8 @@ avança para concluído quando produzir a evidência indicada.
    reivindica registros com bloqueio concorrente, retoma processamento interrompido, limita
    tentativas com backoff e reutiliza uma chave de idempotência estável no gateway. O desenho,
    operação e evidências estão em `docs/fila_duravel_assistencia_2026-10-08.md`.
-5. **Pendente — acabamento operacional.** Definir licença e política para áudio offline,
-   revisar a documentação ao fim de cada etapa e adotar Storybook somente se o catálogo de
-   componentes justificar.
+5. **Concluído — acabamento operacional.** As mídias agora declaram licença, atribuição, revisão
+   e política offline; o service worker mantém cache fail-closed e a interface expõe os termos.
+   A revisão do catálogo concluiu que Storybook ainda não compensa o custo: existem apenas cinco
+   componentes compartilhados e os estados críticos já possuem testes. Critérios de reavaliação
+   e política completa estão em `docs/politica_midia_offline_2026-10-08.md`.

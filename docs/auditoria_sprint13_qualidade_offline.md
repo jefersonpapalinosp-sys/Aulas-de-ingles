@@ -10,8 +10,10 @@ vinculada ao ID da conta, e são enviadas com a mesma chave idempotente depois q
 renovada. Trocar de conta não envia itens de outro aluno.
 
 O service worker não armazena endpoints autenticados, gabaritos, progresso, escrita, speaking
-ou revisão. Áudio e vídeo também são excluídos do cache; a mídia oficial continua dependente da
-origem enquanto não houver autorização e política de armazenamento específicas.
+ou revisão. Áudio e vídeo também são excluídos do cache. A licença das dez mídias VOA foi
+registrada como domínio público com atribuição, mas a política permanece `network_only` até o
+produto possuir download explícito, orçamento de armazenamento e exclusão controlada. A decisão
+detalhada está em `docs/politica_midia_offline_2026-10-08.md`.
 
 ## Matriz offline
 
@@ -22,7 +24,7 @@ origem enquanto não houver autorização e política de armazenamento específi
 | tentativa de exercício | fila local + POST idempotente | não perder a resposta |
 | autenticação e dados da conta | rede; perfil mínimo só para identificar a sessão offline | não persistir token |
 | gabarito, dicas, progresso, revisão, escrita e speaking | somente rede | conteúdo privado ou mutável |
-| áudio e vídeo | somente rede | licença, origem e volume de armazenamento |
+| áudio e vídeo | somente rede | política fail-closed; licença não ativa cache automaticamente |
 
 Limites da fila: 100 tentativas recentes por navegador. A resposta digitada é necessária para
 a sincronização e permanece no armazenamento local do navegador até a confirmação da API.
@@ -53,7 +55,7 @@ O gate `npm run check:budget`, executado depois do build, falha quando:
 - qualquer CSS ultrapassa 15 KiB gzip;
 - a soma de JavaScript e CSS ultrapassa 170 KiB gzip.
 
-Medição desta entrega: **117,5 KiB JS + 7,7 KiB CSS = 125,2 KiB gzip**.
+Medição desta entrega: **121,1 KiB JS + 8,3 KiB CSS = 129,4 KiB gzip**.
 
 ## Telemetria e privacidade
 
@@ -64,8 +66,8 @@ sentinela nesses campos e confirma que nenhum aparece no JSON do log.
 
 ## Evidência automatizada
 
-- 119 testes backend, incluindo privacidade da telemetria;
-- 62 testes frontend, incluindo fila, idempotência, isolamento por usuário e sessão offline;
+- 152 testes backend, incluindo política de mídia e privacidade da telemetria;
+- 68 testes frontend, incluindo exclusão de mídia do cache, fila e isolamento por usuário;
 - 10 cenários E2E em Desktop Chrome e Pixel 5 (20 execuções);
 - cenário PWA: visita online, reload offline, resposta na fila e sincronização ao reconectar;
 - ESLint, TypeScript, build e orçamento de bundle no CI.

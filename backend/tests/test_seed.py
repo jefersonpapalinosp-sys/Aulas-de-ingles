@@ -1,5 +1,7 @@
 """O seed precisa poder rodar quantas vezes for preciso."""
 
+from datetime import date
+
 import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,6 +51,11 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     assert sum(len(d.get("writing_prompts", [])) for d in dados) == 10
     assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 48
     assert sum(len(m.get("transcript", [])) for d in dados for m in d.get("media", [])) == 289
+    media = [item for lesson in dados for item in lesson.get("media", [])]
+    assert all(item["license_status"] == "public_domain" for item in media)
+    assert all(item["offline_policy"] == "network_only" for item in media)
+    assert all(item["attribution"] and item["license_url"] for item in media)
+    assert all(item["license_reviewed_at"] == "2026-10-08" for item in media)
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
 
@@ -101,6 +108,20 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
     }
     assert media_after == media_before
     assert cues_after == cues_before
+
+
+@pytest.mark.asyncio
+async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
+    media = list((await session.execute(select(LessonMedia))).scalars())
+
+    assert len(media) == 10
+    assert all(item.license_status == "public_domain" for item in media)
+    assert all(item.offline_policy == "network_only" for item in media)
+    assert all(item.attribution == "Voice of America (VOA Learning English)" for item in media)
+    assert all(
+        item.license_url == "https://learningenglish.voanews.com/p/6021.html" for item in media
+    )
+    assert all(item.license_reviewed_at == date(2026, 10, 8) for item in media)
 
 
 @pytest.mark.asyncio

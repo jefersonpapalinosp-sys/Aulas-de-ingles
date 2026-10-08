@@ -161,7 +161,23 @@ class LessonMedia(Base):
     """
 
     __tablename__ = "lesson_media"
-    __table_args__ = (UniqueConstraint("lesson_id", "position", name="uq_media_lesson_position"),)
+    __table_args__ = (
+        UniqueConstraint("lesson_id", "position", name="uq_media_lesson_position"),
+        CheckConstraint(
+            "license_status IN ('public_domain', 'permission_granted', "
+            "'restricted', 'review_required')",
+            name="ck_media_license_status",
+        ),
+        CheckConstraint(
+            "offline_policy IN ('network_only', 'cache_allowed')",
+            name="ck_media_offline_policy",
+        ),
+        CheckConstraint(
+            "offline_policy != 'cache_allowed' OR "
+            "license_status IN ('public_domain', 'permission_granted')",
+            name="ck_media_offline_requires_license",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
@@ -169,6 +185,12 @@ class LessonMedia(Base):
     kind: Mapped[str] = mapped_column(String(40))
     label: Mapped[str] = mapped_column(String(200))
     source_url: Mapped[str] = mapped_column(String(1000))
+    license_status: Mapped[str] = mapped_column(String(30), default="review_required")
+    license_url: Mapped[str | None] = mapped_column(String(1000), default=None)
+    license_note: Mapped[str] = mapped_column(String(500))
+    attribution: Mapped[str] = mapped_column(String(200))
+    offline_policy: Mapped[str] = mapped_column(String(20), default="network_only")
+    license_reviewed_at: Mapped[date | None] = mapped_column(default=None)
     duration_seconds: Mapped[int | None] = mapped_column(Integer, default=None)
     listening_exercise_position: Mapped[int | None] = mapped_column(Integer, default=None)
     transcript: Mapped[list[dict[str, object]]] = mapped_column(JSONB, default=list)

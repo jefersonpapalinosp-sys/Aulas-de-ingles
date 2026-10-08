@@ -1,4 +1,4 @@
-const VERSION = 'aulas-v13-1'
+const VERSION = 'aulas-v19-1'
 const SHELL_CACHE = `${VERSION}-shell`
 const TEXT_CACHE = `${VERSION}-text`
 const STATIC_CACHE = `${VERSION}-static`
@@ -81,7 +81,9 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET' || url.origin !== self.location.origin) return
 
-  // Dados privados, gabaritos, progresso e qualquer mídia nunca entram no cache.
+  // Política fail-closed: dados privados e mídia nunca entram no cache. Mesmo
+  // uma mídia com licença compatível permanece online até existir download
+  // explícito, cota de armazenamento e exclusão controlada pelo estudante.
   if (request.destination === 'audio' || request.destination === 'video') return
 
   if (isPublicTextApi(url)) {

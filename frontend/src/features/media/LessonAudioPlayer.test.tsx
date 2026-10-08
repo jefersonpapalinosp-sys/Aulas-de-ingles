@@ -22,6 +22,12 @@ const media: LessonMedia = {
   kind: 'conversation_audio',
   label: 'Conversa da Aula 31',
   source_url: 'https://audio.example.com/lesson-31.mp3',
+  license_status: 'public_domain',
+  license_url: 'https://learningenglish.voanews.com/p/6021.html',
+  license_note: 'Produção exclusiva da VOA em domínio público.',
+  attribution: 'Voice of America (VOA Learning English)',
+  offline_policy: 'network_only',
+  license_reviewed_at: '2026-10-08',
   duration_seconds: 209,
   listening_exercise_position: 6,
   cues: [
@@ -58,6 +64,8 @@ describe('LessonAudioPlayer', () => {
     expect(screen.getByRole('heading', { name: media.label })).toBeInTheDocument()
     expect(screen.getByText('0:00 / 3:29')).toBeInTheDocument()
     expect(container.querySelector('source')).toHaveAttribute('src', media.source_url)
+    expect(screen.getByText('Fonte, licença e uso offline')).toBeInTheDocument()
+    expect(screen.getByText(/o aplicativo não armazena este áudio no cache/)).toBeInTheDocument()
 
     const audio = container.querySelector('audio')
     if (!audio) throw new Error('elemento de áudio não renderizado')

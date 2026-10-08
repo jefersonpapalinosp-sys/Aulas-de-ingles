@@ -205,6 +205,12 @@ async def _upsert_media(session: AsyncSession, lesson: Lesson, raw: dict[str, An
         media.kind = raw_media["kind"]
         media.label = raw_media["label"]
         media.source_url = raw_media["source_url"]
+        media.license_status = raw_media["license_status"]
+        media.license_url = raw_media.get("license_url")
+        media.license_note = raw_media["license_note"]
+        media.attribution = raw_media["attribution"]
+        media.offline_policy = raw_media["offline_policy"]
+        media.license_reviewed_at = date.fromisoformat(raw_media["license_reviewed_at"])
         media.duration_seconds = raw_media.get("duration_seconds")
         media.listening_exercise_position = raw_media.get("listening_exercise_position")
         media.transcript = raw_media.get("transcript", [])

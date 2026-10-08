@@ -70,6 +70,14 @@ class LessonMediaOut(ORMModel):
     kind: str
     label: str
     source_url: str
+    license_status: Literal[
+        "public_domain", "permission_granted", "restricted", "review_required"
+    ]
+    license_url: str | None
+    license_note: str
+    attribution: str
+    offline_policy: Literal["network_only", "cache_allowed"]
+    license_reviewed_at: date | None
     duration_seconds: int | None
     listening_exercise_position: int | None
     cues: list[TranscriptCueOut]

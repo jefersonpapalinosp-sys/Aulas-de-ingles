@@ -210,8 +210,10 @@ automaticamente com a chave idempotente original.
 
 O access token continua apenas em memória. O navegador guarda somente o perfil mínimo do
 último aluno para associar corretamente a fila. Dados privados, gabaritos, progresso, revisão,
-escrita, speaking, áudio e vídeo não entram no cache. A política completa e a auditoria WCAG
-estão em `docs/auditoria_sprint13_qualidade_offline.md`.
+escrita, speaking, áudio e vídeo não entram no cache. Cada mídia declara licença, atribuição,
+data de revisão e política offline na API. A política operacional está em
+`docs/politica_midia_offline_2026-10-08.md`; a auditoria PWA e WCAG está em
+`docs/auditoria_sprint13_qualidade_offline.md`.
 
 O browser fala com a API pelo proxy do Vite, na mesma origem. Isso não é
 detalhe de conforto: cookie `httpOnly` com `credentials` **não funciona** com

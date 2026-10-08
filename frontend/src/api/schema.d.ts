@@ -1145,6 +1145,8 @@ export interface components {
         };
         /** LessonMediaOut */
         LessonMediaOut: {
+            /** Attribution */
+            attribution: string;
             /** Cues */
             cues: components["schemas"]["TranscriptCueOut"][];
             /** Duration Seconds */
@@ -1155,8 +1157,24 @@ export interface components {
             kind: string;
             /** Label */
             label: string;
+            /** License Note */
+            license_note: string;
+            /** License Reviewed At */
+            license_reviewed_at: string | null;
+            /**
+             * License Status
+             * @enum {string}
+             */
+            license_status: "public_domain" | "permission_granted" | "restricted" | "review_required";
+            /** License Url */
+            license_url: string | null;
             /** Listening Exercise Position */
             listening_exercise_position: number | null;
+            /**
+             * Offline Policy
+             * @enum {string}
+             */
+            offline_policy: "network_only" | "cache_allowed";
             /** Source Url */
             source_url: string;
             /** Transcript */

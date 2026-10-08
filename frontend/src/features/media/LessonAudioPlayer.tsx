@@ -146,6 +146,23 @@ export function LessonAudioPlayer({
         Seu navegador não consegue reproduzir este áudio.
       </audio>
 
+      <details className="media-rights">
+        <summary>Fonte, licença e uso offline</summary>
+        <p>
+          <strong>{media.attribution}.</strong> {media.license_note}
+        </p>
+        <p>
+          {media.offline_policy === 'network_only'
+            ? 'Reprodução somente online: o aplicativo não armazena este áudio no cache.'
+            : 'Esta mídia pode ser armazenada para uso offline.'}{' '}
+          {media.license_url && (
+            <a href={media.license_url} target="_blank" rel="noopener noreferrer">
+              Consultar os termos da fonte
+            </a>
+          )}
+        </p>
+      </details>
+
       <p className="media-sync" aria-live="polite">
         {saveRemotePosition.isError
           ? 'Posição salva neste dispositivo; sincronização pendente.'
