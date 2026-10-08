@@ -165,6 +165,7 @@ def _detail_out(
             "estimated_minutes": review.estimated_minutes,
             "content_version": review.content_version,
             "review_lesson_number": review.review_lesson_number,
+            "listening_lesson_number": review.listening_lesson_number,
             "question_count": len(review.questions),
             "listening_media": LessonMediaOut.model_validate(media) if media else None,
             "listening_source_page_url": listening_source_page_url,

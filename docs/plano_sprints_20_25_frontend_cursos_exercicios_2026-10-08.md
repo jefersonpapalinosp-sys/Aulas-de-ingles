@@ -1,8 +1,8 @@
 # Plano das Sprints 20–25 — frontend escalável, cursos e exercícios
 
 Data da análise: 8 de outubro de 2026  
-Estado: Sprints 20–22 implementadas e validadas; Sprints 23–25 permanecem planejadas
-Próxima prioridade: Sprint 23 — Level 1, unidade 45–49
+Estado: Sprints 20–23 implementadas; Sprints 24–25 permanecem planejadas
+Próxima prioridade: Sprint 24 — Level 1, unidade 50–52 e conclusão do recorte
 
 ## 1. Objetivo
 
@@ -486,8 +486,8 @@ payload inicial.
 | 20 | navegação e catálogo escaláveis, com identidade multi-curso | nenhuma nova aula deve entrar antes dela | concluída |
 | 21 | página de exercícios por aula e packs 31/38/40 | contrato da Sprint 20 | concluída |
 | 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | concluída |
-| 23 | unidade Level 1 45–49 e revisão | Sprint 22 | próxima |
-| 24 | unidade Level 1 50–52, conclusão do recorte e transição | Sprint 23 | planejada |
+| 23 | unidade Level 1 45–49 e revisão | Sprint 22 | concluída |
+| 24 | unidade Level 1 50–52, conclusão do recorte e transição | Sprint 23 | próxima |
 | 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | planejada |
 
 ## 9. Sprint 20 — navegação escalável e catálogo de cursos
@@ -710,7 +710,33 @@ sem copiar Wordwall e sem duplicar o motor atual.
 
 ## 12. Sprint 23 — Level 1, unidade 45–49
 
+**Estado:** concluída em 8 de outubro de 2026.
+
 **Objetivo:** avançar pelo future continuous e present perfect usando a mesma arquitetura.
+
+### Implementação entregue
+
+- Aulas 45–49 publicadas na unidade `45-49`, totalizando 19 aulas disponíveis no recorte do
+  Level 1;
+- cada nova aula possui objetivos, teoria, vocabulário, pronúncia, proposta de escrita, áudio
+  oficial da conversa com cinco trechos selecionados e oito exercícios autorais — ao menos quatro
+  deles de listening;
+- `Checkpoint 45–49` publicado como item curricular próprio, com seis questões, retomada do áudio
+  da Aula 49, correção no servidor e resultado persistido por conta;
+- explicações da revisão passaram a justificar o tempo verbal pelas pistas do contexto, como
+  `at this time tomorrow`, `now`, `last night`, `for` e `never ... before`;
+- avaliação, revisão espaçada, caderno, histórico de escrita, tentativas de fala, progresso e mapa
+  de competências aceitam o escopo composto por curso e unidade;
+- a avaliação da unidade seleciona uma questão de cada aula usando `course_slug + lesson_number`,
+  sem deduplicar apenas pelo número;
+- caderno e históricos mostram curso, unidade e aula, e seus links sempre retornam à rota canônica
+  correta;
+- a primeira aula de uma unidade oferece retorno ao checkpoint anterior; a última conduz ao
+  checkpoint atual, e o resultado do checkpoint 40–44 continua para a Aula 45;
+- contrato OpenAPI e tipos TypeScript foram atualizados para transportar a identidade curricular
+  composta nos recursos privados;
+- a suíte E2E da sprint cobre catálogo, unidade 45–49, fronteiras de navegação, avaliação escopada,
+  áudio do checkpoint, correção, explicações temporais e restauração do resultado salvo.
 
 ### Entregas
 
@@ -872,7 +898,8 @@ O ciclo 20–25 estará concluído quando:
 
 ## 19. Próxima ação recomendada
 
-Iniciar a Sprint 23 reutilizando o contrato multi-curso e o checkpoint validados na Sprint 22,
-publicando as Aulas 45–49 e a revisão da unidade. A pesquisa editorial pode continuar em paralelo,
-mas cada aula nova só deve entrar no seed principal depois da auditoria de fonte, mídia, licença e
-conteúdo autoral prevista nessa sprint.
+Iniciar a Sprint 24 sobre o contrato e os filtros contextuais validados na Sprint 23, publicando as
+Aulas 50–52 e a revisão final do recorte 31–52. O fechamento deve distinguir aulas vistas,
+concluídas e competências apoiadas por evidência; a transição para o Level 2 deve permanecer
+recomendada e opcional. Cada aula nova continua condicionada à auditoria de fonte, mídia, licença e
+conteúdo autoral antes de entrar no seed principal.

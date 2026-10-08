@@ -12,7 +12,12 @@ import { ReviewPage } from './pages/ReviewPage'
 import { StudyPage } from './pages/StudyPage'
 import { TestPage } from './pages/TestPage'
 import { ConnectivityStatus } from './features/offline/ConnectivityStatus'
-import { DEFAULT_COURSE_SLUG, lessonPath, studyPath } from './routing/courseRoutes'
+import {
+  assessmentPath,
+  DEFAULT_COURSE_SLUG,
+  lessonPath,
+  studyPath,
+} from './routing/courseRoutes'
 
 export function LegacyLessonRedirect({ study = false }: { study?: boolean }) {
   const { numero, etapa } = useParams()
@@ -54,6 +59,10 @@ export default function App() {
               path="/cursos/:courseSlug/unidades/:unitSlug/checkpoint"
               element={<CourseReviewPage />}
             />
+            <Route
+              path="/cursos/:courseSlug/unidades/:unitSlug/avaliacao"
+              element={<TestPage />}
+            />
             <Route path="/cursos/:courseSlug/aulas/:numero" element={<LessonPage />} />
             <Route
               path="/cursos/:courseSlug/aulas/:numero/exercicios"
@@ -78,7 +87,15 @@ export default function App() {
             />
             <Route path="/revisar" element={<ReviewPage />} />
             <Route path="/caderno" element={<NotebookPage />} />
-            <Route path="/prova" element={<TestPage />} />
+            <Route
+              path="/prova"
+              element={
+                <Navigate
+                  to={assessmentPath(DEFAULT_COURSE_SLUG, '31-40')}
+                  replace
+                />
+              }
+            />
             <Route
               path="*"
               element={

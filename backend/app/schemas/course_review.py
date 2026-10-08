@@ -68,6 +68,7 @@ class CourseReviewDetailOut(CourseReviewSummaryOut):
     source_note: str
     intro: str
     content_version: int
+    listening_lesson_number: int | None
     listening_media: LessonMediaOut | None
     listening_source_page_url: str | None
     questions: list[CourseReviewQuestionOut]

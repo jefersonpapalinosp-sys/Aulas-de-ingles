@@ -85,14 +85,17 @@ async def listar_exercicios(
     course: Annotated[
         str, Query(description="Slug do curso; o padrão mantém a consulta no Level 1.")
     ] = DEFAULT_COURSE_SLUG,
+    unit: Annotated[
+        str | None, Query(description="Limita a avaliação a uma unidade do curso.")
+    ] = None,
 ) -> list[ExerciseWithLessonOut]:
-    """Exercícios de uma aula, ou do bloco inteiro.
+    """Exercícios de uma aula, unidade ou curso.
 
     É o que a prova do bloco consome: sem isso a tela teria que baixar as dez
     aulas inteiras para montar uma lista de exercícios.
     """
     stmt = (
-        select(Exercise, Lesson.number)
+        select(Exercise, Course.slug, CourseUnit.slug, Lesson.number)
         .join(Lesson, Exercise.lesson_id == Lesson.id)
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
@@ -101,10 +104,14 @@ async def listar_exercicios(
     )
     if lesson is not None:
         stmt = stmt.where(Lesson.number == lesson)
+    if unit is not None:
+        stmt = stmt.where(CourseUnit.slug == unit)
     return [
         ExerciseWithLessonOut(
             **ExerciseOut.model_validate(exercise_public_payload(item)).model_dump(),
+            course_slug=course_slug,
+            unit_slug=unit_slug,
             lesson_number=numero,
         )
-        for item, numero in (await session.execute(stmt)).all()
+        for item, course_slug, unit_slug, numero in (await session.execute(stmt)).all()
     ]

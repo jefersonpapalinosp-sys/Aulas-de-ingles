@@ -4,12 +4,12 @@ App de estudo construído sobre a série *Let's Learn English* da VOA. O catálo
 níveis 1 e 2, com unidades navegáveis, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: Sprints 6–14 e 20–22 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
+**Estado: Sprints 6–14 e 20–23 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
 da jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável,
-rotas canônicas por curso, laboratório retomável por aula e checkpoint curricular persistido. As
-Aulas 31–44 estão publicadas no Level 1; as Aulas 45–52 e o Level 2 aparecem como planejamento,
-sem conteúdo fictício. Os recursos assistidos ficam desligados por padrão até passarem pela
-avaliação humana.
+rotas canônicas por curso, laboratório retomável por aula e checkpoints curriculares persistidos.
+As **19 Aulas 31–49** e os checkpoints 40–44 e 45–49 estão publicados no Level 1; as Aulas 50–52
+e o Level 2 aparecem como planejamento, sem conteúdo fictício. Os recursos assistidos ficam
+desligados por padrão até passarem pela avaliação humana.
 
 O total de **52 aulas** exibido no catálogo corresponde à extensão oficial do Level 1. O recorte
 curricular deste projeto começa na Aula 31: as Aulas 1–30 não estão no seed, e a conclusão planejada
@@ -44,6 +44,14 @@ make up
 | Aulas | <http://localhost:8010/api/lessons> |
 | OpenAPI | <http://localhost:8010/docs> |
 | Postgres | `localhost:5433` |
+
+Rotas úteis da unidade mais recente:
+
+- mapa: <http://localhost:5180/cursos/voa-level-1/unidades/45-49>;
+- checkpoint: <http://localhost:5180/cursos/voa-level-1/unidades/45-49/checkpoint>;
+- avaliação escopada: <http://localhost:5180/cursos/voa-level-1/unidades/45-49/avaliacao>;
+- revisão e caderno no mesmo contexto: `/revisar?course=voa-level-1&unit=45-49` e
+  `/caderno?course=voa-level-1&unit=45-49`.
 
 As portas não são as padrão de propósito: `5432`, `5444`, `5456`, `8000`, `8001`,
 `8005`, `5173` e `5174` já estão em uso por outros projetos na máquina de origem.
@@ -154,14 +162,14 @@ app_user ─┬─ study_session_progress ─┬─ lesson
 `exercise_answer` é tabela à parte porque um exercício aceita mais de uma
 resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
-O que está carregado hoje: **14 aulas**, 56 objetivos, 43 blocos de gramática
-com 189 linhas, 96 frases, **155 itens de vocabulário**, 57 notas de pronúncia,
-**14 áudios oficiais**, 68 trechos selecionados, 289 falas de transcrição integral nas Aulas 32–40,
-**14 propostas de escrita** e **143 exercícios**
-com 169 respostas aceitas e 199 dicas graduais nas Aulas 31–44. As Aulas 41–44 usam cinco trechos
-selecionados com texto e tradução por aula, mas ainda não possuem transcrição integral. As Aulas
-32–44 possuem ao menos três práticas de listening e atividades de ditado, ordenação e transformação.
-As 14 aulas também possuem fonte oficial/autoral, estratégia, versão e status editorial explícitos.
+O que está carregado hoje: **19 aulas**, 76 objetivos, 58 blocos de gramática
+com 234 linhas, 121 frases, **205 itens de vocabulário**, 72 notas de pronúncia,
+**19 áudios oficiais**, 93 trechos selecionados, 289 falas de transcrição integral nas Aulas 32–40,
+**19 propostas de escrita** e **183 exercícios** com 212 respostas aceitas e 279 dicas graduais nas
+Aulas 31–49. As Aulas 41–49 usam cinco trechos selecionados com texto e tradução por aula, mas
+ainda não possuem transcrição integral. As Aulas 32–49 possuem ao menos três práticas de listening
+e atividades de ditado, ordenação e transformação. As 19 aulas também possuem fonte
+oficial/autoral, estratégia, versão e status editorial explícitos.
 
 Os packs autorais das Aulas 31, 38 e 40 estão na versão 2 e possuem objetivo pedagógico
 explícito (`recognize`, `apply`, `correct`, `produce` ou `listen`) e duas dicas progressivas por
@@ -309,12 +317,14 @@ navegador para o JavaScript comparar seria publicar o gabarito. Então:
 | Responder (confere e **grava**) | `POST /api/exercises/{id}/attempt` |
 | Pedir dica gradual | `GET /api/exercises/{id}/hints/{level}` |
 | Ver o gabarito (o usuário pede) | `GET /api/exercises/{id}/answer` |
+| Avaliação por unidade | `GET /api/exercises?course={curso}&unit={unidade}` |
 | Marcar / desmarcar aula | `PUT` / `DELETE /api/courses/{curso}/lessons/{n}/studied` |
 | Ler / salvar retomada | `GET` / `PUT /api/courses/{curso}/lessons/{n}/study-session` |
 | Ler / salvar rascunho | `GET` / `PUT /api/writing/prompts/{id}/draft` |
 | Criar versão do texto | `POST /api/writing/prompts/{id}/versions` |
 | Analisar critérios | `POST /api/writing/prompts/{id}/feedback` |
-| Meu progresso | `GET /api/me/progress` |
+| Meu progresso contextual | `GET /api/me/progress?course={curso}&unit={unidade}` |
+| Revisão contextual | `GET /api/review/due?course={curso}&unit={unidade}` |
 
 Ler o conteúdo das aulas é público; responder e marcar exigem conta.
 Os endpoints antigos em `/api/lessons/...` permanecem compatíveis e resolvem o Level 1.
@@ -437,15 +447,15 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 187 testes contra o Postgres do compose | `make test-api` |
-| vitest | 125 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 26 cenários em desktop e mobile (52 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 191 testes contra o Postgres do compose | `make test-api` |
+| vitest | 130 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 29 cenários em desktop e mobile (58 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
-O frontend possui uma **jornada guiada** em todas as Aulas 31–44. Ela divide o estudo em
+O frontend possui uma **jornada guiada** em todas as Aulas 31–49. Ela divide o estudo em
 preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
 permitindo continuar em outro navegador. Em “Assistir”, o player usa o áudio oficial da VOA,
 sincroniza a posição na conta e oferece velocidade, saltos de cinco segundos, repetição A–B e
-68 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
+93 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
 API sem enviar o gabarito antes da
 resposta. Na revisão, o aluno pode praticar *shadowing*, gravar a voz localmente, comparar com
 o modelo e salvar uma autoavaliação. O áudio permanece local por padrão; somente após
@@ -499,7 +509,7 @@ infra/     compose.yml                 — dev: db + api + worker + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
 seed/      courses.json                — catálogo de cursos e unidades
-           lessons.json                — conteúdo das 14 aulas publicadas
+           lessons.json                — conteúdo das 19 aulas publicadas
 ```
 
 ## Convenções

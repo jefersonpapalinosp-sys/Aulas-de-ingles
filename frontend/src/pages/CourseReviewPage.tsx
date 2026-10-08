@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useSessao } from '../api/auth'
 import type { CourseReviewAttempt } from '../api/client'
 import { useCourseReview, useSubmitCourseReview } from '../api/courseReviews'
+import { useCourseCurriculum } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
 import { LessonAudioPlayer } from '../features/media/LessonAudioPlayer'
 import {
@@ -15,10 +16,12 @@ import {
 function ReviewResult({
   result,
   courseSlug,
+  nextLessonNumber,
   onRetry,
 }: {
   result: CourseReviewAttempt
   courseSlug: string
+  nextLessonNumber?: number
   onRetry: () => void
 }) {
   const consolidated = result.status === 'consolidated'
@@ -80,6 +83,11 @@ function ReviewResult({
         <button type="button" className="btn" onClick={onRetry}>
           Refazer checkpoint
         </button>
+        {nextLessonNumber !== undefined && (
+          <Link className="btn" to={lessonPath(courseSlug, nextLessonNumber)}>
+            Continuar na Aula {nextLessonNumber}
+          </Link>
+        )}
         <Link className="btn ghost" to={coursePath(courseSlug)}>
           Voltar ao mapa
         </Link>
@@ -108,6 +116,7 @@ function CourseReviewContent({
 }) {
   const { usuario } = useSessao()
   const review = useCourseReview(courseSlug, unitSlug)
+  const curriculum = useCourseCurriculum(courseSlug)
   const submit = useSubmitCourseReview(courseSlug, unitSlug)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [retrying, setRetrying] = useState(false)
@@ -127,6 +136,15 @@ function CourseReviewContent({
 
   const data = review.data
   const result = submit.data ?? (!retrying ? data.latest_attempt : null)
+  const currentUnitIndex = curriculum.data?.units.findIndex((unit) => unit.slug === unitSlug) ?? -1
+  const nextLessonNumber =
+    currentUnitIndex >= 0
+      ? curriculum.data?.units
+          .slice(currentUnitIndex + 1)
+          .find((unit) => unit.lessons.length > 0)?.lessons[0]?.number
+      : undefined
+  const listeningLessonNumber =
+    data.listening_lesson_number ?? data.review_lesson_number
 
   function send(event: FormEvent) {
     event.preventDefault()
@@ -180,17 +198,22 @@ function CourseReviewContent({
       </section>
 
       {result ? (
-        <ReviewResult result={result} courseSlug={courseSlug} onRetry={retry} />
+        <ReviewResult
+          result={result}
+          courseSlug={courseSlug}
+          nextLessonNumber={nextLessonNumber}
+          onRetry={retry}
+        />
       ) : (
         <>
           <section className="checkpoint-listening">
             <div className="checkpoint-section-head">
               <div>
                 <p className="study-kicker">Retomada de listening</p>
-                <h2>Volte à escuta da Aula {data.review_lesson_number}</h2>
+                <h2>Volte à escuta da Aula {listeningLessonNumber}</h2>
               </div>
-              <Link className="btn ghost" to={lessonPath(courseSlug, data.review_lesson_number)}>
-                Rever Aula {data.review_lesson_number}
+              <Link className="btn ghost" to={lessonPath(courseSlug, listeningLessonNumber)}>
+                Rever Aula {listeningLessonNumber}
               </Link>
             </div>
             {data.listening_media ? (
@@ -199,15 +222,15 @@ function CourseReviewContent({
                 userId={usuario.id}
                 sourcePageUrl={
                   data.listening_source_page_url ??
-                  lessonPath(courseSlug, data.review_lesson_number)
+                  lessonPath(courseSlug, listeningLessonNumber)
                 }
               />
             ) : (
               <div className="media-fallback" role="note">
-                <strong>Áudio indisponível neste checkpoint.</strong>
+                <strong>Retomada por áudio indisponível neste checkpoint.</strong>
                 <p>
-                  Use a transcrição e o áudio da Aula {data.review_lesson_number} antes de
-                  responder à questão de compreensão.
+                  Abra a Aula {listeningLessonNumber} para usar os trechos de estudo ou retome o
+                  resumo e o foco de listening antes de responder.
                 </p>
               </div>
             )}

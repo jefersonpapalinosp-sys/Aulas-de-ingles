@@ -51,6 +51,9 @@ async def test_crud_filtros_e_isolamento_do_caderno(client: AsyncClient) -> None
     )
     assert created.status_code == 201
     entry = created.json()
+    assert entry["course_slug"] == "voa-level-1"
+    assert entry["course_title"] == "Let's Learn English — Level 1"
+    assert entry["unit_slug"] == "31-40"
     assert entry["lesson_number"] == 31
     assert entry["lesson_title"] == "Take Me Out to the Ball Game"
     review = (await client.get("/api/review/due?item_type=phrase", headers=ana)).json()
@@ -65,6 +68,9 @@ async def test_crud_filtros_e_isolamento_do_caderno(client: AsyncClient) -> None
         await client.get("/api/me/notebook?lesson=31&kind=favorite_phrase", headers=ana)
     ).json()
     assert [item["id"] for item in filtered] == [entry["id"]]
+    assert filtered[0]["course_slug"] == "voa-level-1"
+    assert filtered[0]["course_title"] == "Let's Learn English — Level 1"
+    assert filtered[0]["unit_slug"] == "31-40"
 
     updated = await client.put(
         f"/api/me/notebook/{entry['id']}",
@@ -160,7 +166,11 @@ async def test_historico_de_escrita_e_privado(client: AsyncClient) -> None:
 
     history = (await client.get("/api/writing/history", headers=ana)).json()
     assert len(history) == 1
+    assert history[0]["course_slug"] == "voa-level-1"
+    assert history[0]["course_title"] == "Let's Learn English — Level 1"
+    assert history[0]["unit_slug"] == "31-40"
     assert history[0]["lesson_number"] == 31
+    assert history[0]["lesson_title"] == "Take Me Out to the Ball Game"
     assert history[0]["revisions"][0]["text"] == text
     assert history[0]["feedbacks"][0]["id"] > 0
 

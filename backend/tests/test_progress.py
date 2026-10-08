@@ -97,13 +97,86 @@ async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncCli
 
     assert saved.status_code == resumed.status_code == 200
     assert resumed.json()["current_step"] == "assistir"
-    assert level_1.json()["total_lessons"] == 14
+    assert level_1.json()["total_lessons"] == 19
     assert level_1.json()["studied_count"] == 1
     row = next(item for item in level_1.json()["lessons"] if item["lesson_number"] == 32)
     assert row["course_slug"] == "voa-level-1"
     assert row["unit_slug"] == "31-40"
     assert level_2.json()["total_lessons"] == 0
     assert level_2.json()["lessons"] == []
+
+
+@pytest.mark.asyncio
+async def test_progresso_filtra_curso_unidade_tentativas_e_revisao(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "progresso-por-unidade")
+    exercise_31 = await primeiro_exercicio(client, 31)
+    exercise_41 = await primeiro_exercicio(client, 41)
+
+    await client.put("/api/lessons/31/studied", headers=headers)
+    await client.put("/api/lessons/41/studied", headers=headers)
+    await client.post(
+        f"/api/exercises/{exercise_31['id']}/attempt",
+        headers=headers,
+        json=tentativa("wrong", 901),
+    )
+    await client.post(
+        f"/api/exercises/{exercise_41['id']}/attempt",
+        headers=headers,
+        json=tentativa("wrong", 902),
+    )
+
+    first = (
+        await client.get(
+            "/api/me/progress?course=voa-level-1&unit=31-40", headers=headers
+        )
+    ).json()
+    second = (
+        await client.get(
+            "/api/me/progress?course=voa-level-1&unit=40-44", headers=headers
+        )
+    ).json()
+    third = (
+        await client.get(
+            "/api/me/progress?course=voa-level-1&unit=45-49", headers=headers
+        )
+    ).json()
+
+    assert first["total_lessons"] == 10
+    assert first["studied_count"] == first["attempts"] == 1
+    assert {item["lesson_number"] for item in first["lessons"]} == set(range(31, 41))
+    assert all(item["course_slug"] == "voa-level-1" for item in first["lessons"])
+    assert all(item["unit_slug"] == "31-40" for item in first["lessons"])
+
+    assert second["total_lessons"] == 4
+    assert second["studied_count"] == second["attempts"] == 1
+    assert {item["lesson_number"] for item in second["lessons"]} == set(range(41, 45))
+    assert all(item["unit_slug"] == "40-44" for item in second["lessons"])
+
+    assert third["total_lessons"] == 5
+    assert third["studied_count"] == third["attempts"] == 0
+    assert {item["lesson_number"] for item in third["lessons"]} == set(range(45, 50))
+    assert all(item["unit_slug"] == "45-49" for item in third["lessons"])
+
+    for unit_slug, progress in (("31-40", first), ("40-44", second), ("45-49", third)):
+        due = (
+            await client.get(
+                f"/api/review/due?course=voa-level-1&unit={unit_slug}",
+                headers=headers,
+            )
+        ).json()
+        assert progress["review_cards"] == progress["review_due"] == len(due)
+
+    other_course = (
+        await client.get(
+            "/api/me/progress?course=voa-level-2&unit=45-49", headers=headers
+        )
+    ).json()
+    assert other_course["total_lessons"] == 0
+    assert other_course["studied_count"] == other_course["attempts"] == 0
+    assert other_course["review_cards"] == other_course["review_due"] == 0
+    assert other_course["lessons"] == []
 
 
 @pytest.mark.asyncio
@@ -193,7 +266,7 @@ async def test_marcar_aula_e_idempotente(client: AsyncClient) -> None:
 
     p = (await client.get("/api/me/progress", headers=h)).json()
     assert p["studied_count"] == 1
-    assert p["total_lessons"] == 14
+    assert p["total_lessons"] == 19
     assert [linha["studied"] for linha in p["lessons"]].count(True) == 1
 
 
@@ -208,10 +281,10 @@ async def test_desmarcar_aula(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_progresso_traz_as_quatorze_aulas_mesmo_sem_atividade(client: AsyncClient) -> None:
+async def test_progresso_traz_as_dezenove_aulas_mesmo_sem_atividade(client: AsyncClient) -> None:
     h = await conta(client, "zerado")
     p = (await client.get("/api/me/progress", headers=h)).json()
-    assert len(p["lessons"]) == 14
+    assert len(p["lessons"]) == 19
     assert p == {
         **p,
         "studied_count": 0,

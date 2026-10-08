@@ -12,15 +12,21 @@ export function formatAudioTime(seconds: number): string {
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`
 }
 
-export function LessonAudioPlayer({
-  media,
-  userId,
-  sourcePageUrl,
-}: {
+type LessonAudioPlayerProps = {
   media: LessonMedia
   userId: number
   sourcePageUrl: string
-}) {
+}
+
+export function LessonAudioPlayer(props: LessonAudioPlayerProps) {
+  return <LessonAudioPlayerContent key={props.media.id} {...props} />
+}
+
+function LessonAudioPlayerContent({
+  media,
+  userId,
+  sourcePageUrl,
+}: LessonAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const lastSavedAt = useRef(0)
   const [position, setPosition] = useState(0)

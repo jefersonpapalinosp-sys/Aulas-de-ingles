@@ -3,6 +3,8 @@ import type { ReviewItemType } from './client'
 import { api } from './client'
 
 export type ReviewFilters = {
+  courseSlug?: string
+  unitSlug?: string
   itemType?: ReviewItemType
   skill?: string
   maxMinutes?: number
@@ -27,6 +29,8 @@ export function useDueCards(filters: ReviewFilters = {}) {
         params: {
           query: {
             limit: 20,
+            course: filters.courseSlug,
+            unit: filters.unitSlug,
             item_type: filters.itemType,
             skill: filters.skill,
             max_minutes: filters.maxMinutes,
@@ -40,12 +44,18 @@ export function useDueCards(filters: ReviewFilters = {}) {
   })
 }
 
-export function useSuspendedReviewItems() {
+export function useSuspendedReviewItems(filters: Pick<ReviewFilters, 'courseSlug' | 'unitSlug'> = {}) {
   return useQuery({
-    queryKey: ['review', 'items', 'suspended'],
+    queryKey: ['review', 'items', 'suspended', filters],
     queryFn: async () => {
       const { data, response } = await api.GET('/api/review/items', {
-        params: { query: { status: 'suspended' } },
+        params: {
+          query: {
+            status: 'suspended',
+            course: filters.courseSlug,
+            unit: filters.unitSlug,
+          },
+        },
       })
       if (!data) {
         throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar suspensos.`)

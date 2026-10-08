@@ -3,10 +3,13 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { LegacyLessonRedirect } from '../App'
 import {
+  assessmentPath,
   canonicalizeLegacyHref,
   courseReviewPath,
   lessonPath,
+  notebookPath,
   practicePath,
+  reviewPath,
   studyPath,
 } from './courseRoutes'
 
@@ -33,6 +36,18 @@ describe('rotas de curso', () => {
     )
     expect(courseReviewPath('curso com espaço', 'unidade/avançada')).toBe(
       '/cursos/curso%20com%20espa%C3%A7o/unidades/unidade%2Favan%C3%A7ada/checkpoint',
+    )
+  })
+
+  it('mantém curso e unidade nas rotas de avaliação, revisão e caderno', () => {
+    expect(assessmentPath('voa-level-1', '45-49')).toBe(
+      '/cursos/voa-level-1/unidades/45-49/avaliacao',
+    )
+    expect(reviewPath('voa-level-1', '45-49')).toBe(
+      '/revisar?course=voa-level-1&unit=45-49',
+    )
+    expect(notebookPath('curso com espaço', 'unidade/avançada')).toBe(
+      '/caderno?course=curso+com+espa%C3%A7o&unit=unidade%2Favan%C3%A7ada',
     )
   })
 

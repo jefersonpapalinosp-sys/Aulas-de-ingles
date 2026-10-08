@@ -3,7 +3,7 @@
 import asyncio
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,8 @@ from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
 from app.db.models import (
+    Course,
+    CourseUnit,
     Lesson,
     SkillEvidence,
     WritingDraft,
@@ -331,16 +333,22 @@ async def avaliar_feedback(
 async def historico_de_escrita(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[WritingHistoryItemOut]:
-    rows = (
-        await session.execute(
-            select(WritingDraft, WritingPrompt, Lesson)
-            .join(WritingPrompt, WritingDraft.prompt_id == WritingPrompt.id)
-            .join(Lesson, WritingPrompt.lesson_id == Lesson.id)
-            .where(WritingDraft.user_id == usuario.id)
-            .order_by(WritingDraft.updated_at.desc())
-        )
-    ).all()
+    history = (
+        select(WritingDraft, WritingPrompt, Lesson)
+        .join(WritingPrompt, WritingDraft.prompt_id == WritingPrompt.id)
+        .join(Lesson, WritingPrompt.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(WritingDraft.user_id == usuario.id)
+    )
+    if course is not None:
+        history = history.where(Course.slug == course)
+    if unit is not None:
+        history = history.where(CourseUnit.slug == unit)
+    rows = (await session.execute(history.order_by(WritingDraft.updated_at.desc()))).all()
     prompt_ids = [prompt.id for _, prompt, _ in rows]
     feedback_by_prompt: dict[int, list[WritingFeedbackRecord]] = {}
     if prompt_ids:
@@ -360,6 +368,9 @@ async def historico_de_escrita(
     return [
         WritingHistoryItemOut(
             prompt_id=prompt.id,
+            course_slug=lesson.course.slug,
+            course_title=lesson.course.title,
+            unit_slug=lesson.unit.slug,
             lesson_number=lesson.number,
             lesson_title=lesson.title,
             prompt_title=prompt.title,

@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import CourseReview, CourseReviewAttempt
+from app.db.models import CourseReview, CourseReviewAttempt, CourseUnit
 
 REVIEW_URL = "/api/courses/voa-level-1/units/40-44/review"
 
@@ -241,7 +241,13 @@ async def test_nova_versao_nao_reutiliza_resultado_anterior(
     )
     assert created.status_code == 201
 
-    review = (await session.execute(select(CourseReview))).scalar_one()
+    review = (
+        await session.execute(
+            select(CourseReview)
+            .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
+            .where(CourseUnit.slug == "40-44")
+        )
+    ).scalar_one()
     original_version = review.content_version
     try:
         review.content_version = original_version + 1
@@ -262,7 +268,13 @@ async def test_checkpoint_nao_publicado_nao_e_exposto(
 ) -> None:
     headers = await conta(client, "not-published")
     body = attempt_body((await client.get(REVIEW_URL, headers=headers)).json())
-    review = (await session.execute(select(CourseReview))).scalar_one()
+    review = (
+        await session.execute(
+            select(CourseReview)
+            .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
+            .where(CourseUnit.slug == "40-44")
+        )
+    ).scalar_one()
     original_status = review.status
     try:
         review.status = "planned"

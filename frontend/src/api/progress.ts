@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type StudySessionInput } from './client'
 
-export function useProgress(courseSlug?: string) {
+export function useProgress(courseSlug?: string, unitSlug?: string) {
   return useQuery({
-    queryKey: ['progress', courseSlug ?? 'all'],
+    queryKey: ['progress', courseSlug ?? 'all', unitSlug ?? 'all'],
     queryFn: async () => {
       const { data, response } = await api.GET('/api/me/progress', {
-        params: { query: { course: courseSlug } },
+        params: { query: { course: courseSlug, unit: unitSlug } },
       })
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar progresso.`)
       return data
@@ -60,6 +60,7 @@ export function useStudySession(courseSlug: string, numero: number, enabled = tr
 export function useSalvarStudySession(courseSlug: string, numero: number) {
   const qc = useQueryClient()
   return useMutation({
+    mutationKey: ['study-session', courseSlug, numero, 'save'],
     scope: { id: `study-session-${courseSlug}-${numero}` },
     mutationFn: async (body: StudySessionInput) => {
       const { data, response } = await api.PUT(

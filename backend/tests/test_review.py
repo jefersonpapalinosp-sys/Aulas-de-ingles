@@ -265,6 +265,69 @@ async def test_filtros_encontram_listening_por_tipo_competencia_e_duracao(
 
 
 @pytest.mark.asyncio
+async def test_due_e_items_filtram_curso_unidade_e_expoem_identidade(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "escopo-curricular")
+    await client.post("/api/review/lessons/31", headers=headers)
+    await client.post("/api/review/lessons/41", headers=headers)
+
+    first = (
+        await client.get(
+            "/api/review/due?course=voa-level-1&unit=31-40", headers=headers
+        )
+    ).json()
+    second = (
+        await client.get(
+            "/api/review/due?course=voa-level-1&unit=40-44", headers=headers
+        )
+    ).json()
+    assert first and second
+    for unit_slug, lesson_number, items in (
+        ("31-40", 31, first),
+        ("40-44", 41, second),
+    ):
+        assert {item["lesson_number"] for item in items} == {lesson_number}
+        assert all(item["course_slug"] == "voa-level-1" for item in items)
+        assert all(
+            item["course_title"] == "Let's Learn English — Level 1" for item in items
+        )
+        assert all(item["unit_slug"] == unit_slug for item in items)
+        assert all(item["lesson_title"] for item in items)
+
+    assert (
+        await client.get(
+            "/api/review/due?course=voa-level-2&unit=31-40", headers=headers
+        )
+    ).json() == []
+
+    for item in (first[0], second[0]):
+        response = await client.patch(
+            f"/api/review/{item['id']}",
+            headers=headers,
+            json={"status": "suspended"},
+        )
+        assert response.status_code == 200
+
+    suspended_first = (
+        await client.get(
+            "/api/review/items?status=suspended&course=voa-level-1&unit=31-40",
+            headers=headers,
+        )
+    ).json()
+    suspended_second = (
+        await client.get(
+            "/api/review/items?status=suspended&course=voa-level-1&unit=40-44",
+            headers=headers,
+        )
+    ).json()
+    assert [item["id"] for item in suspended_first] == [first[0]["id"]]
+    assert [item["id"] for item in suspended_second] == [second[0]["id"]]
+    assert suspended_first[0]["unit_slug"] == "31-40"
+    assert suspended_second[0]["unit_slug"] == "40-44"
+
+
+@pytest.mark.asyncio
 async def test_item_pode_ser_suspenso_reativado_e_excluido(client: AsyncClient) -> None:
     owner = await conta(client, "gerencia")
     await client.post("/api/review/lessons/31", headers=owner)

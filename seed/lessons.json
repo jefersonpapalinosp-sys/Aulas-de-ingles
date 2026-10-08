@@ -9587,5 +9587,2595 @@
         ]
       }
     ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "45-49",
+    "slug": "lesson-45",
+    "position": 1,
+    "number": 45,
+    "title": "This Land is Your Land",
+    "title_pt": "Esta terra é a sua terra",
+    "voa_url": "https://learningenglish.voanews.com/a/lesson-45-this-land-is-your-land/3710209.html",
+    "grammar_tag": "Future continuous",
+    "focus_points": [
+      "will be + verbo com -ing",
+      "perguntas e negativas no futuro contínuo",
+      "previsões e planos de viagem"
+    ],
+    "story_note": "Anna e Marsha fazem uma longa viagem de carro pelos Estados Unidos e usam o futuro contínuo para antecipar o que estará acontecendo em cada etapa.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "prever",
+    "review_note": "Sprint 23: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; letras e performances musicais foram excluídas e não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Anna e Marsha saem de Washington, D.C. com uma lista ambiciosa de lugares. Durante a viagem, elas dizem o que estarão fazendo, vendo e visitando.",
+    "warmup_prompt": "Imagine uma viagem amanhã: o que você estará fazendo em três horários diferentes?",
+    "listening_focus": "as previsões com future continuous, os destinos e a mudança de direção durante a viagem",
+    "goals": [
+      "Formar afirmações com **will be + verbo-ing**.",
+      "Construir perguntas e negativas no futuro contínuo.",
+      "Usar expressões de tempo para prever ações em andamento no futuro.",
+      "Identificar destinos, problemas e decisões na conversa de viagem."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Ação em andamento no futuro",
+        "why": "O future continuous apresenta uma ação que estará acontecendo em um momento posterior: **will be + verbo-ing**.",
+        "warning": "Não omita *be* e não flexione o verbo depois de *will*.",
+        "table_head": [
+          "Momento",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "afirmação",
+              "will be + -ing",
+              "We will be driving all morning."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "forma reduzida",
+              "'ll be + -ing",
+              "We'll be eating at noon."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "marcador temporal",
+              "in + período",
+              "We'll be arriving in an hour."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Perguntas e negativas",
+        "why": "Nas perguntas, *will* vem antes do sujeito. Na negativa, usamos *will not* ou *won't* antes de *be*.",
+        "warning": "Depois de *won't*, mantenha *be*: **won't be stopping**, não *won't stopping*.",
+        "table_head": [
+          "Função",
+          "Padrão",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "pergunta",
+              "Will + sujeito + be + -ing?",
+              "Will we be stopping soon?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "negativa",
+              "sujeito + won't be + -ing",
+              "We won't be stopping soon."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "resposta curta",
+              "Yes, ... will. / No, ... won't.",
+              "No, we won't."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Future continuous × futuro simples",
+        "why": "O futuro contínuo destaca uma atividade em progresso; o futuro simples pode indicar uma decisão, promessa ou fato futuro.",
+        "warning": "Nem toda frase futura precisa de *be + -ing*. Escolha a forma conforme o foco da mensagem.",
+        "table_head": [
+          "Foco",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "atividade em progresso",
+              "future continuous",
+              "At ten, we will be crossing the state."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "decisão",
+              "will + verbo",
+              "I will exit the highway."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "previsão de viagem",
+              "will be + -ing",
+              "We will be seeing many sights."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "We will be driving for a long time.",
+        "text_pt": "Estaremos dirigindo por muito tempo.",
+        "note": "A ação ocupará um período no futuro."
+      },
+      {
+        "position": 1,
+        "text_en": "Will we be stopping soon?",
+        "text_pt": "Vamos parar em breve?",
+        "note": "A inversão de *will* forma a pergunta."
+      },
+      {
+        "position": 2,
+        "text_en": "We won't be stopping soon.",
+        "text_pt": "Não vamos parar em breve.",
+        "note": "*Won't* é a redução de *will not*."
+      },
+      {
+        "position": 3,
+        "text_en": "We'll be eating lunch in about two hours.",
+        "text_pt": "Estaremos almoçando em cerca de duas horas.",
+        "note": "A expressão de tempo situa a ação futura."
+      },
+      {
+        "position": 4,
+        "text_en": "We are going in the wrong direction.",
+        "text_pt": "Estamos indo na direção errada.",
+        "note": "*Wrong direction* sinaliza um problema de rota."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "road trip",
+        "ipa": "/ˈroʊd trɪp/",
+        "translation_pt": "viagem de carro",
+        "example_en": "They are taking a road trip together."
+      },
+      {
+        "position": 1,
+        "term": "pack",
+        "ipa": "/pæk/",
+        "translation_pt": "fazer as malas; arrumar",
+        "example_en": "Anna packed her bags."
+      },
+      {
+        "position": 2,
+        "term": "sight",
+        "ipa": "/saɪt/",
+        "translation_pt": "atração; ponto turístico",
+        "example_en": "The list includes a roadside sight."
+      },
+      {
+        "position": 3,
+        "term": "redwood",
+        "ipa": "/ˈredwʊd/",
+        "translation_pt": "sequoia",
+        "example_en": "They want to see a redwood forest."
+      },
+      {
+        "position": 4,
+        "term": "get bored",
+        "ipa": "/ɡet bɔːrd/",
+        "translation_pt": "ficar entediado",
+        "example_en": "They might get bored on a long drive."
+      },
+      {
+        "position": 5,
+        "term": "litter",
+        "ipa": "/ˈlɪtər/",
+        "translation_pt": "jogar lixo; lixo espalhado",
+        "example_en": "Do not litter beside the highway."
+      },
+      {
+        "position": 6,
+        "term": "enter",
+        "ipa": "/ˈentər/",
+        "translation_pt": "entrar",
+        "example_en": "They will enter another state."
+      },
+      {
+        "position": 7,
+        "term": "exit",
+        "ipa": "/ˈeɡzɪt/",
+        "translation_pt": "sair; saída",
+        "example_en": "Anna will exit the highway."
+      },
+      {
+        "position": 8,
+        "term": "highway",
+        "ipa": "/ˈhaɪweɪ/",
+        "translation_pt": "rodovia",
+        "example_en": "The car is back on the highway."
+      },
+      {
+        "position": 9,
+        "term": "direction",
+        "ipa": "/dəˈrekʃən/",
+        "translation_pt": "direção",
+        "example_en": "They notice the wrong direction."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "will → /l/",
+        "explanation": "Na fala conectada, *will* pode se reduzir e se unir ao sujeito: *we'll be* soa como uma única unidade."
+      },
+      {
+        "position": 1,
+        "label": "won't /woʊnt/",
+        "explanation": "A vogal distingue *won't* de *want*; mantenha também o fechamento nasal antes do /t/."
+      },
+      {
+        "position": 2,
+        "label": "in about → /ɪnəˈbaʊt/",
+        "explanation": "As palavras se conectam e o *a* inicial de *about* fica reduzido."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 45",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/02/07/1fb535dc-77e2-4e0e-930e-b50fab4e45cd_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA Learning English em domínio público; letras, músicas e performances de terceiros não estão incluídas.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 239,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 42,
+            "end_seconds": 52,
+            "speaker": "Marsha",
+            "text_en": "We will be driving for a long time. So, we might get bored.",
+            "text_pt": "Estaremos dirigindo por muito tempo. Então, talvez fiquemos entediadas."
+          },
+          {
+            "position": 1,
+            "start_seconds": 72,
+            "end_seconds": 79,
+            "speaker": "Marsha",
+            "text_en": "Will we be stopping soon?",
+            "text_pt": "Vamos parar em breve?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 80,
+            "end_seconds": 91,
+            "speaker": "Anna",
+            "text_en": "We'll be eating lunch in about two hours.",
+            "text_pt": "Estaremos almoçando em cerca de duas horas."
+          },
+          {
+            "position": 3,
+            "start_seconds": 101,
+            "end_seconds": 111,
+            "speaker": "Marsha",
+            "text_en": "We will be arriving in New York City very soon!",
+            "text_pt": "Estaremos chegando a Nova York muito em breve!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 171,
+            "end_seconds": 183,
+            "speaker": "Anna",
+            "text_en": "We will be entering North Dakota any minute now!",
+            "text_pt": "Estaremos entrando em Dakota do Norte a qualquer momento!"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "At this time tomorrow, we `____` across the state.",
+        "hint": null,
+        "explanation": "Uma ação em andamento em um momento futuro usa **will be driving**.",
+        "hints": [
+          "Use *will + be*.",
+          "Acrescente *-ing* ao verbo *drive*."
+        ],
+        "answers": [
+          "will be driving"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "We'll be visiting the museum this afternoon.",
+          "We'll visiting the museum this afternoon.",
+          "We will be visit the museum this afternoon."
+        ],
+        "prompt": "Escolha a frase correta no future continuous.",
+        "hint": null,
+        "explanation": "A estrutura correta é **will + be + verbo-ing**.",
+        "hints": [
+          "Procure as três partes da estrutura.",
+          "O verbo principal deve terminar em *-ing*."
+        ],
+        "answers": [
+          "We'll be visiting the museum this afternoon."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija: ‘We will stopping for gas soon.’ → We `____` for gas soon.",
+        "hint": null,
+        "explanation": "O auxiliar **be** é obrigatório entre *will* e *stopping*.",
+        "hints": [
+          "Não altere *stopping*.",
+          "Insira uma palavra depois de *will*."
+        ],
+        "answers": [
+          "will be stopping"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "Will",
+          "we",
+          "be",
+          "seeing",
+          "the",
+          "monument",
+          "today"
+        ],
+        "prompt": "Ordene a pergunta sobre uma atividade futura.",
+        "hint": null,
+        "explanation": "Perguntas usam **Will + sujeito + be + verbo-ing**.",
+        "hints": [
+          "Comece com *Will we*.",
+          "Coloque *be* antes de *seeing*."
+        ],
+        "answers": [
+          "Will we be seeing the monument today"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Their vacations happen at the same time.",
+          "They both bought a new car.",
+          "Their boss sent them on a work trip."
+        ],
+        "prompt": "Listening: o que torna possível a viagem conjunta de Anna e Marsha?",
+        "hint": null,
+        "explanation": "As duas estarão de férias no mesmo período e, por isso, planejam viajar juntas.",
+        "hints": [
+          "A razão aparece no início.",
+          "Escute a expressão *at the same time*."
+        ],
+        "answers": [
+          "Their vacations happen at the same time."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a previsão que termina em ‘lunch in about two hours’.",
+        "hint": null,
+        "explanation": "A fala usa a redução **we'll** e o future continuous.",
+        "hints": [
+          "Comece com *We'll be*.",
+          "O verbo principal é *eating*."
+        ],
+        "answers": [
+          "We'll be eating lunch in about two hours",
+          "We will be eating lunch in about two hours"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "They enter North Dakota instead of heading to South Dakota.",
+          "They return to Washington before lunch.",
+          "They miss the exit for New York City."
+        ],
+        "prompt": "Listening: qual pista revela que elas estão na direção errada?",
+        "hint": null,
+        "explanation": "Mount Rushmore fica no destino planejado, South Dakota, mas Anna anuncia North Dakota.",
+        "hints": [
+          "Compare os nomes dos dois estados.",
+          "Um deles começa com *North*."
+        ],
+        "answers": [
+          "They enter North Dakota instead of heading to South Dakota."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "The itinerary still has three more pages.",
+          "They visited every place in the book.",
+          "Marsha wrote a second list at the hotel."
+        ],
+        "prompt": "Listening: o que a descoberta das páginas 2, 3 e 4 indica no final?",
+        "hint": null,
+        "explanation": "Elas concluíram apenas a primeira página; a lista de Anna ainda contém muitos planos.",
+        "hints": [
+          "Pense no contraste entre *everything* e *page 1*.",
+          "As páginas adicionais ampliam o roteiro."
+        ],
+        "answers": [
+          "The itinerary still has three more pages."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Um dia futuro na estrada",
+        "instructions": "Write 5 to 7 sentences in English about a future trip. Say where you will go and describe what will be happening at three different times.",
+        "min_words": 55,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "três ações no future continuous",
+            "terms": [
+              "will be ",
+              "'ll be "
+            ]
+          },
+          {
+            "label": "uma expressão de tempo",
+            "terms": [
+              "in an hour",
+              "at noon",
+              "tomorrow",
+              "next week"
+            ]
+          },
+          {
+            "label": "um destino ou atração",
+            "terms": [
+              "visit",
+              "see",
+              "trip",
+              "sight"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "45-49",
+    "slug": "lesson-46",
+    "position": 2,
+    "number": 46,
+    "title": "May I Borrow That?",
+    "title_pt": "Posso pegar isso emprestado?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-46-may-i-borrow-that/3723588.html",
+    "grammar_tag": "Lend, borrow e loan",
+    "focus_points": [
+      "borrow × lend × loan",
+      "pedidos de permissão",
+      "objetos e pronomes na devolução"
+    ],
+    "story_note": "Anna esquece o aniversário de Marsha e pega materiais de escritório emprestados para criar um presente.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "encenar",
+    "review_note": "Sprint 23: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Sem receber o pagamento até a semana seguinte, Anna transforma materiais emprestados em um presente improvisado e aprende a marcar quem dá e quem recebe cada objeto.",
+    "warmup_prompt": "Que objeto você pediria emprestado no trabalho e como prometeria devolvê-lo?",
+    "listening_focus": "quem empresta ou recebe cada objeto, os pedidos de permissão e as promessas de devolução",
+    "goals": [
+      "Distinguir **borrow** de **lend/loan** pelo ponto de vista de quem recebe ou oferece.",
+      "Pedir permissão com **May I...?** e **Can I...?**.",
+      "Usar *from*, *to*, *it* e *them* ao falar de empréstimos e devoluções.",
+      "Reconhecer materiais de escritório e condições impostas pelos colegas."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Borrow: receber temporariamente",
+        "why": "Use *borrow* quando o sujeito recebe algo por um período: **borrow something from someone**.",
+        "warning": "Não use *borrow* com a pessoa como objeto direto: diga *borrow a pen from Amelia*, não *borrow Amelia a pen*.",
+        "table_head": [
+          "Padrão",
+          "Perspectiva",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "borrow + objeto",
+              "quem recebe",
+              "Can I borrow your scissors?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "borrow + objeto + from",
+              "origem",
+              "Anna borrowed tape from a coworker."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "borrowed",
+              "passado",
+              "She borrowed several supplies."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Lend e loan: oferecer temporariamente",
+        "why": "Use *lend* ou, no inglês americano, *loan* quando o sujeito entrega algo que deverá voltar.",
+        "warning": "O passado de *lend* é **lent**, não *lended*. O passado de *loan* é *loaned*.",
+        "table_head": [
+          "Padrão",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "lend + pessoa + objeto",
+              "presente",
+              "I can lend you my stapler."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "lend + objeto + to",
+              "alternativa",
+              "She lent the scissors to Anna."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "loan + objeto",
+              "uso verbal americano",
+              "They loaned some supplies."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Permissão, condição e devolução",
+        "why": "Pedidos com *may* ou *can* podem receber uma condição com *but* e uma promessa com *will*.",
+        "warning": "Depois de *may*, *can* e *will*, use o verbo na forma base: *borrow*, *return*, *bring*.",
+        "table_head": [
+          "Etapa",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "pedido",
+              "May/Can I borrow...?",
+              "May I borrow your stapler?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "condição",
+              "but + imperativo",
+              "But please return it."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "promessa",
+              "will + verbo",
+              "I'll bring them back tomorrow."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "May I borrow your stapler?",
+        "text_pt": "Posso pegar seu grampeador emprestado?",
+        "note": "*May I* formula um pedido de permissão cortês."
+      },
+      {
+        "position": 1,
+        "text_en": "I can lend you my stapler.",
+        "text_pt": "Posso emprestar meu grampeador para você.",
+        "note": "Quem usa *lend* oferece o objeto."
+      },
+      {
+        "position": 2,
+        "text_en": "But please return it.",
+        "text_pt": "Mas, por favor, devolva-o.",
+        "note": "*It* retoma um objeto singular."
+      },
+      {
+        "position": 3,
+        "text_en": "Can I borrow your scissors?",
+        "text_pt": "Posso pegar sua tesoura emprestada?",
+        "note": "*Can I* é comum em pedidos cotidianos."
+      },
+      {
+        "position": 4,
+        "text_en": "I'll bring them back tomorrow.",
+        "text_pt": "Vou devolvê-las amanhã.",
+        "note": "*Them* retoma *scissors*, palavra tratada como plural."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "paycheck",
+        "ipa": "/ˈpeɪtʃek/",
+        "translation_pt": "pagamento; contracheque",
+        "example_en": "Anna gets her paycheck next week."
+      },
+      {
+        "position": 1,
+        "term": "stapler",
+        "ipa": "/ˈsteɪplər/",
+        "translation_pt": "grampeador",
+        "example_en": "Amelia lends Anna a stapler."
+      },
+      {
+        "position": 2,
+        "term": "scissors",
+        "ipa": "/ˈsɪzərz/",
+        "translation_pt": "tesoura",
+        "example_en": "These scissors are very sharp."
+      },
+      {
+        "position": 3,
+        "term": "office supplies",
+        "ipa": "/ˈɔːfɪs səˈplaɪz/",
+        "translation_pt": "materiais de escritório",
+        "example_en": "The hat contains office supplies."
+      },
+      {
+        "position": 4,
+        "term": "eraser",
+        "ipa": "/ɪˈreɪsər/",
+        "translation_pt": "borracha",
+        "example_en": "There is an eraser on the hat."
+      },
+      {
+        "position": 5,
+        "term": "rubber band",
+        "ipa": "/ˈrʌbər bænd/",
+        "translation_pt": "elástico",
+        "example_en": "She adds a rubber band."
+      },
+      {
+        "position": 6,
+        "term": "binder clip",
+        "ipa": "/ˈbaɪndər klɪp/",
+        "translation_pt": "prendedor de papel",
+        "example_en": "A binder clip holds many pages."
+      },
+      {
+        "position": 7,
+        "term": "paper clip",
+        "ipa": "/ˈpeɪpər klɪp/",
+        "translation_pt": "clipe de papel",
+        "example_en": "The gift has several paper clips."
+      },
+      {
+        "position": 8,
+        "term": "balloon",
+        "ipa": "/bəˈluːn/",
+        "translation_pt": "balão",
+        "example_en": "A balloon helps friends find Marsha."
+      },
+      {
+        "position": 9,
+        "term": "trust",
+        "ipa": "/trʌst/",
+        "translation_pt": "confiar",
+        "example_en": "You can trust me with the stapler."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "final r americano",
+        "explanation": "Em palavras como *paper*, *stapler* e *eraser*, o /r/ final é pronunciado no inglês americano."
+      },
+      {
+        "position": 1,
+        "label": "scissors /ˈsɪzərz/",
+        "explanation": "A grafia tem duas letras *s*, mas a palavra começa com /s/ e termina com a sequência sonora /zərz/."
+      },
+      {
+        "position": 2,
+        "label": "borrow /ˈbɑːroʊ/ × balloon /bəˈluːn/",
+        "explanation": "A força está no início de *borrow* e na segunda sílaba de *balloon*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 46",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/02/22/8e170a7e-dd5c-4c9b-b214-48b68bc68f47_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA Learning English em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 179,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 6,
+            "end_seconds": 16,
+            "speaker": "Marsha",
+            "text_en": "Do you have pen and paper I can borrow?",
+            "text_pt": "Você tem caneta e papel que eu possa pegar emprestados?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 47,
+            "end_seconds": 56,
+            "speaker": "Anna",
+            "text_en": "Amelia, may I borrow your stapler?",
+            "text_pt": "Amelia, posso pegar seu grampeador emprestado?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 53,
+            "end_seconds": 65,
+            "speaker": "Amelia",
+            "text_en": "I can lend you my stapler, Anna. But please return it.",
+            "text_pt": "Posso emprestar meu grampeador para você, Anna. Mas, por favor, devolva-o."
+          },
+          {
+            "position": 3,
+            "start_seconds": 75,
+            "end_seconds": 86,
+            "speaker": "Anna",
+            "text_en": "Jonathan! Can I borrow your scissors?",
+            "text_pt": "Jonathan! Posso pegar sua tesoura emprestada?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 142,
+            "end_seconds": 157,
+            "speaker": "Anna",
+            "text_en": "Many people loaned or shared their supplies with me.",
+            "text_pt": "Muitas pessoas emprestaram ou compartilharam seus materiais comigo."
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "May I `____` your stapler for an hour?",
+        "hint": null,
+        "explanation": "Quem recebe temporariamente um objeto usa **borrow**.",
+        "hints": [
+          "O grampeador virá para quem fala.",
+          "Use o verbo na forma base depois de *may*."
+        ],
+        "answers": [
+          "borrow"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "Could you lend me your scissors?",
+          "Could you borrow me your scissors?",
+          "Could you lent me your scissors?"
+        ],
+        "prompt": "Escolha a pergunta feita por quem quer receber a tesoura.",
+        "hint": null,
+        "explanation": "A outra pessoa **lends** o objeto para quem pede; depois de *could*, usamos a forma base.",
+        "hints": [
+          "O sujeito *you* oferecerá o objeto.",
+          "Um modal não aceita verbo no passado."
+        ],
+        "answers": [
+          "Could you lend me your scissors?"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija: ‘She lended the tape to Anna.’ → She `____` the tape to Anna.",
+        "hint": null,
+        "explanation": "O passado irregular de **lend** é **lent**.",
+        "hints": [
+          "Não acrescente *-ed*.",
+          "A resposta tem quatro letras."
+        ],
+        "answers": [
+          "lent"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "I",
+          "will",
+          "bring",
+          "them",
+          "back",
+          "tomorrow"
+        ],
+        "prompt": "Ordene a promessa de devolver objetos no dia seguinte.",
+        "hint": null,
+        "explanation": "**Bring something back** significa devolver algo ao lugar ou à pessoa de origem.",
+        "hints": [
+          "Comece com *I will bring*.",
+          "Coloque *back* antes do marcador de tempo."
+        ],
+        "answers": [
+          "I will bring them back tomorrow"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She forgot Marsha's birthday and will be paid only next week.",
+          "The restaurant does not sell birthday gifts.",
+          "Marsha asked for a hat made at the office."
+        ],
+        "prompt": "Listening: por que Anna decide fabricar um presente com itens emprestados?",
+        "hint": null,
+        "explanation": "Ela esqueceu a data e ainda não recebeu o próximo pagamento.",
+        "hints": [
+          "Escute o que Anna admite sobre o aniversário.",
+          "Depois, ela menciona o *paycheck*."
+        ],
+        "answers": [
+          "She forgot Marsha's birthday and will be paid only next week."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o pedido de Anna a Amelia.",
+        "hint": null,
+        "explanation": "A pergunta cortês é **May I borrow your stapler?**.",
+        "hints": [
+          "Comece com *May I*.",
+          "O objeto é um *stapler*."
+        ],
+        "answers": [
+          "May I borrow your stapler"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Return the scissors and handle them carefully.",
+          "Buy a new pair before the party.",
+          "Use the scissors only inside the restaurant."
+        ],
+        "prompt": "Listening: qual condição Jonathan associa ao empréstimo da tesoura?",
+        "hint": null,
+        "explanation": "Ele enfatiza que a tesoura é afiada e deve ser devolvida; Anna promete cuidado e devolução.",
+        "hints": [
+          "Jonathan valoriza muito esse objeto.",
+          "Anna promete trazê-lo de volta amanhã."
+        ],
+        "answers": [
+          "Return the scissors and handle them carefully."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "An office-supply hat",
+          "A paper birthday cake",
+          "A restaurant sign"
+        ],
+        "prompt": "Listening: em que Anna transforma os objetos emprestados?",
+        "hint": null,
+        "explanation": "O presente reúne vários materiais de escritório em um chapéu.",
+        "hints": [
+          "Marsha gosta de chapéus.",
+          "O presente também contém uma luz e um balão."
+        ],
+        "answers": [
+          "An office-supply hat"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Um empréstimo com regras claras",
+        "instructions": "Write a dialogue of 6 to 8 lines in English. One person asks to borrow an object, the other agrees with a condition, and the borrower promises to return it.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "um pedido com may ou can",
+            "terms": [
+              "may i borrow",
+              "can i borrow"
+            ]
+          },
+          {
+            "label": "uma oferta com lend ou loan",
+            "terms": [
+              "lend",
+              "loan"
+            ]
+          },
+          {
+            "label": "uma promessa de devolução",
+            "terms": [
+              "return it",
+              "return them",
+              "bring it back",
+              "bring them back"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "45-49",
+    "slug": "lesson-47",
+    "position": 3,
+    "number": 47,
+    "title": "How Can I Help?",
+    "title_pt": "Como posso ajudar?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-47-how-can-i-help/3737352.html",
+    "grammar_tag": "Continuous tenses e reflexive pronouns",
+    "focus_points": [
+      "present × past continuous",
+      "pronomes reflexivos",
+      "oferecer e aceitar ajuda"
+    ],
+    "story_note": "Pete tenta consertar o próprio carro; Anna oferece ajuda, mas o diagnóstico mais simples só aparece no final.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "consultar fontes de informação",
+    "review_note": "Sprint 23: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Pete confia em um curso on-line de 450 aulas para consertar o carro. Anna compara o que está acontecendo agora, o que acontecia antes e o que cada pessoa consegue fazer sozinha.",
+    "warmup_prompt": "Quando você não sabe consertar algo, tenta sozinho ou procura uma fonte confiável?",
+    "listening_focus": "as ações em andamento, as ofertas de ajuda e as pistas que levam ao verdadeiro problema do carro",
+    "goals": [
+      "Distinguir **present continuous** de **past continuous** pelo momento da ação.",
+      "Escolher pronomes reflexivos que concordem com o sujeito.",
+      "Oferecer, aceitar ou recusar ajuda de forma adequada.",
+      "Localizar informações e pistas para explicar por que o carro não funciona."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Acontecendo agora × acontecendo antes",
+        "why": "O present continuous descreve uma ação em progresso agora; o past continuous cria o pano de fundo de uma ação passada.",
+        "warning": "Faça o verbo *be* concordar com o sujeito e com o tempo: *am/is/are* no presente, *was/were* no passado.",
+        "table_head": [
+          "Tempo",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "agora",
+              "am/is/are + -ing",
+              "I am fixing my car."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "antes",
+              "was/were + -ing",
+              "I was watching a course."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "evento durante o processo",
+              "past continuous + simple past",
+              "I was studying when Anna arrived."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Pronomes reflexivos",
+        "why": "Um reflexivo mostra que quem realiza a ação também a recebe ou enfatiza que alguém faz algo sem ajuda.",
+        "warning": "Use formas padronizadas como *myself* e *yourself*; *my self* e *your self* não funcionam como pronomes reflexivos.",
+        "table_head": [
+          "Sujeito",
+          "Reflexivo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I",
+              "myself",
+              "I can fix it myself."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you",
+              "yourself",
+              "Can you fix it yourself?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "we / they",
+              "ourselves / themselves",
+              "We checked it ourselves."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Oferecer ajuda e prever resultado",
+        "why": "Perguntas como *How can I help?* iniciam uma oferta; uma condição com *if* pode explicar o resultado esperado.",
+        "warning": "Na condição real, use presente depois de *if* e *will* na consequência: *If I fix it, it will run*.",
+        "table_head": [
+          "Função",
+          "Modelo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "oferta",
+              "How can I help?",
+              "How can I help with the car?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "recusa cortês",
+              "I can..., but thanks.",
+              "I can fix it myself, but thanks."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "resultado provável",
+              "If + presente, will + verbo",
+              "If I fix it, it will run."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Right now, I am fixing my car.",
+        "text_pt": "Neste momento, estou consertando meu carro.",
+        "note": "*Right now* pede uma ação em andamento no presente."
+      },
+      {
+        "position": 1,
+        "text_en": "How can I help?",
+        "text_pt": "Como posso ajudar?",
+        "note": "Pergunta direta e colaborativa para oferecer ajuda."
+      },
+      {
+        "position": 2,
+        "text_en": "I can fix it myself.",
+        "text_pt": "Eu consigo consertá-lo sozinho.",
+        "note": "*Myself* enfatiza ausência de ajuda externa."
+      },
+      {
+        "position": 3,
+        "text_en": "I'll be back in a flash!",
+        "text_pt": "Volto num instante!",
+        "note": "*In a flash* significa muito rapidamente."
+      },
+      {
+        "position": 4,
+        "text_en": "Pull yourself together.",
+        "text_pt": "Controle-se; recomponha-se.",
+        "note": "Expressão usada para pedir que alguém recupere a calma."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "spark plug",
+        "ipa": "/ˈspɑːrk plʌɡ/",
+        "translation_pt": "vela de ignição",
+        "example_en": "The engine needs every spark plug."
+      },
+      {
+        "position": 1,
+        "term": "engine",
+        "ipa": "/ˈendʒɪn/",
+        "translation_pt": "motor",
+        "example_en": "The engine does not start."
+      },
+      {
+        "position": 2,
+        "term": "tool",
+        "ipa": "/tuːl/",
+        "translation_pt": "ferramenta",
+        "example_en": "Anna goes to get her tools."
+      },
+      {
+        "position": 3,
+        "term": "teenager",
+        "ipa": "/ˈtiːneɪdʒər/",
+        "translation_pt": "adolescente",
+        "example_en": "She fixed cars as a teenager."
+      },
+      {
+        "position": 4,
+        "term": "master",
+        "ipa": "/ˈmæstər/",
+        "translation_pt": "mestre; especialista",
+        "example_en": "Anna says she learned from a master."
+      },
+      {
+        "position": 5,
+        "term": "teamwork",
+        "ipa": "/ˈtiːmwɜːrk/",
+        "translation_pt": "trabalho em equipe",
+        "example_en": "The repair needs teamwork."
+      },
+      {
+        "position": 6,
+        "term": "ignition",
+        "ipa": "/ɪɡˈnɪʃən/",
+        "translation_pt": "ignição",
+        "example_en": "Turn the key in the ignition."
+      },
+      {
+        "position": 7,
+        "term": "tire",
+        "ipa": "/ˈtaɪər/",
+        "translation_pt": "pneu",
+        "example_en": "Kicking a tire will not help."
+      },
+      {
+        "position": 8,
+        "term": "gas",
+        "ipa": "/ɡæs/",
+        "translation_pt": "gasolina",
+        "example_en": "The car is out of gas."
+      },
+      {
+        "position": 9,
+        "term": "in a flash",
+        "ipa": "/ɪn ə flæʃ/",
+        "translation_pt": "num instante",
+        "example_en": "Anna returns in a flash."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "I'll /aɪl/",
+        "explanation": "A redução de *I will* forma uma sílaba curta; ligue-a diretamente ao verbo seguinte."
+      },
+      {
+        "position": 1,
+        "label": "yourself /jərˈself/",
+        "explanation": "A força cai em *self*; a primeira sílaba pode ficar reduzida na fala natural."
+      },
+      {
+        "position": 2,
+        "label": "engine /ˈendʒɪn/ × ignition /ɪɡˈnɪʃən/",
+        "explanation": "*Engine* começa com /endʒ/; em *ignition*, a sílaba forte é /nɪʃ/."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 47",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/03/03/8511524b-9e6f-4e73-9fa1-cd3f6b32b495_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA Learning English em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 191,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 3,
+            "end_seconds": 13,
+            "speaker": "Pete",
+            "text_en": "Right now, I am fixing my car.",
+            "text_pt": "Neste momento, estou consertando meu carro."
+          },
+          {
+            "position": 1,
+            "start_seconds": 14,
+            "end_seconds": 28,
+            "speaker": "Anna and Pete",
+            "text_en": "How can I help? I can fix it myself. But thanks.",
+            "text_pt": "Como posso ajudar? Eu consigo consertá-lo sozinho. Mas obrigado."
+          },
+          {
+            "position": 2,
+            "start_seconds": 43,
+            "end_seconds": 55,
+            "speaker": "Pete",
+            "text_en": "Last night I was watching the online video course.",
+            "text_pt": "Ontem à noite eu estava assistindo ao curso de vídeo on-line."
+          },
+          {
+            "position": 3,
+            "start_seconds": 67,
+            "end_seconds": 80,
+            "speaker": "Anna",
+            "text_en": "If I fix your car, I'll have it running in ten to fifteen minutes.",
+            "text_pt": "Se eu consertar seu carro, vou colocá-lo para funcionar em dez a quinze minutos."
+          },
+          {
+            "position": 4,
+            "start_seconds": 145,
+            "end_seconds": 157,
+            "speaker": "Anna",
+            "text_en": "Pull yourself together, man. Give me the keys.",
+            "text_pt": "Recomponha-se, homem. Dê-me as chaves."
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Last night, Pete `____` an online repair course.",
+        "hint": null,
+        "explanation": "A ação estava em progresso no passado: **was watching**.",
+        "hints": [
+          "O sujeito é singular.",
+          "Use *was + verbo-ing*."
+        ],
+        "answers": [
+          "was watching"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "Pete is fixing the car now, but he was studying last night.",
+          "Pete was fixing the car now, but he is studying last night.",
+          "Pete fixing the car now and watched last night."
+        ],
+        "prompt": "Escolha a frase que contrasta corretamente agora e ontem à noite.",
+        "hint": null,
+        "explanation": "*Now* combina com present continuous; *last night*, com past continuous para a ação em progresso.",
+        "hints": [
+          "Observe os marcadores de tempo.",
+          "Procure *is + -ing* e *was + -ing*."
+        ],
+        "answers": [
+          "Pete is fixing the car now, but he was studying last night."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija: ‘Pete can fix the car hisself.’ → Pete can fix the car `____`.",
+        "hint": null,
+        "explanation": "O reflexivo correspondente a *he/Pete* é **himself**.",
+        "hints": [
+          "Comece com *him-*.",
+          "A palavra termina em *-self*."
+        ],
+        "answers": [
+          "himself"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "If",
+          "I",
+          "fix",
+          "the",
+          "car",
+          "it",
+          "will",
+          "run"
+        ],
+        "prompt": "Ordene a condição e o resultado provável.",
+        "hint": null,
+        "explanation": "A oração com *if* usa presente; a consequência usa *will + verbo*.",
+        "hints": [
+          "Comece com *If I fix the car*.",
+          "Termine com *it will run*."
+        ],
+        "answers": [
+          "If I fix the car it will run"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "It is out of gas.",
+          "It has too many working tires.",
+          "The key is broken."
+        ],
+        "prompt": "Listening: qual é o problema real do carro?",
+        "hint": null,
+        "explanation": "Depois de várias tentativas, o medidor revela que o tanque está vazio.",
+        "hints": [
+          "A resposta só aparece perto do fim.",
+          "Pete precisa buscar algo para o tanque."
+        ],
+        "answers": [
+          "It is out of gas."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a previsão de Anna que começa com ‘If I fix your car...’.",
+        "hint": null,
+        "explanation": "A fala combina uma condição no presente com a redução **I'll**.",
+        "hints": [
+          "Depois da vírgula, escreva *I'll have it running*.",
+          "O tempo informado vai de dez a quinze minutos."
+        ],
+        "answers": [
+          "If I fix your car I'll have it running in ten to fifteen minutes",
+          "If I fix your car I will have it running in ten to fifteen minutes"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "He watched the first ten lessons of a 450-lesson course.",
+          "He completed an in-person mechanic program.",
+          "He read the car manual from beginning to end."
+        ],
+        "prompt": "Listening: em que Pete baseia sua confiança para fazer o conserto sozinho?",
+        "hint": null,
+        "explanation": "Pete viu apenas dez de 450 aulas do curso on-line.",
+        "hints": [
+          "Compare dois números mencionados.",
+          "A fonte de informação é um vídeo on-line."
+        ],
+        "answers": [
+          "He watched the first ten lessons of a 450-lesson course."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She checks the fuel gauge after trying the key.",
+          "She replaces every tire before starting the car.",
+          "She follows lesson 450 of Pete's course."
+        ],
+        "prompt": "Listening: qual ação leva Anna ao diagnóstico final?",
+        "hint": null,
+        "explanation": "Ao assumir a chave e observar o carro, ela percebe que falta combustível.",
+        "hints": [
+          "A pista vem depois de *Give me the keys*.",
+          "O diagnóstico está ligado ao tanque."
+        ],
+        "answers": [
+          "She checks the fuel gauge after trying the key."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Ajuda para resolver um problema",
+        "instructions": "Write a dialogue of 6 to 8 lines in English. Describe what someone is doing now, mention what they were doing before, and offer help to solve the problem.",
+        "min_words": 60,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "uma ação no present continuous",
+            "terms": [
+              "am ",
+              "is ",
+              "are "
+            ]
+          },
+          {
+            "label": "uma ação no past continuous",
+            "terms": [
+              "was ",
+              "were "
+            ]
+          },
+          {
+            "label": "uma oferta ou um reflexivo",
+            "terms": [
+              "how can i help",
+              "myself",
+              "yourself",
+              "himself",
+              "herself"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "45-49",
+    "slug": "lesson-48",
+    "position": 4,
+    "number": 48,
+    "title": "Have You Ever ...?",
+    "title_pt": "Você já...?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-48-have-you-ever/3753664.html",
+    "grammar_tag": "Present perfect",
+    "focus_points": [
+      "have/has + past participle",
+      "ever, never, always e just",
+      "present perfect × simple past"
+    ],
+    "story_note": "Anna recomenda atrações a uma turista e percebe que ainda há lugares e animais que ela mesma nunca viu em Washington.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "concentrar a atenção",
+    "review_note": "Sprint 23: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Uma conversa sobre museus vira uma troca de experiências. Anna usa o present perfect para conectar visitas, conhecimentos e experiências passadas ao presente.",
+    "warmup_prompt": "Qual atração da sua cidade você já visitou e qual ainda nunca conheceu?",
+    "listening_focus": "as experiências com ever/never, as recomendações de lugares e o contraste entre passado concluído e experiência atual",
+    "goals": [
+      "Formar o **present perfect** com *have/has + past participle*.",
+      "Perguntar e responder sobre experiências com **ever** e **never**.",
+      "Usar **for**, **always** e **just** para situar experiências ligadas ao presente.",
+      "Distinguir o present perfect do simple past quando há um momento passado concluído."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Have/has + particípio passado",
+        "why": "O present perfect liga uma experiência ou situação passada ao momento atual sem indicar um tempo passado encerrado.",
+        "warning": "Não use a forma simples do passado depois de *have/has*: diga *has seen*, não *has saw*.",
+        "table_head": [
+          "Sujeito",
+          "Auxiliar",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I / you / we / they",
+              "have",
+              "I have visited many museums."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "he / she / it",
+              "has",
+              "She has seen every animal."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "contração",
+              "'ve / 's",
+              "I've lived here for a year."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Ever, never, always e just",
+        "why": "Esses advérbios refinam a experiência: *ever* pergunta em algum momento; *never* nega; *always* indica constância; *just* marca algo recente.",
+        "warning": "*Never* já contém sentido negativo: evite *haven't never*.",
+        "table_head": [
+          "Advérbio",
+          "Uso",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "ever",
+              "pergunta de experiência",
+              "Have you ever seen a sculpture garden?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "never",
+              "experiência inexistente",
+              "I've never been to the zoo."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "just",
+              "passado muito recente",
+              "She has just flown in."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Present perfect × simple past",
+        "why": "Use present perfect para duração ou experiência ainda relevante; use simple past com um evento concluído em um momento passado.",
+        "warning": "Marcadores como *yesterday* e *last year* normalmente pedem simple past, não present perfect.",
+        "table_head": [
+          "Sentido",
+          "Tempo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "situação que continua",
+              "present perfect + for",
+              "I have lived here for over a year."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "origem concluída",
+              "simple past",
+              "I grew up on a farm."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "conhecimento até agora",
+              "present perfect",
+              "I've known farm animals my whole life."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I have lived in Washington for a long time.",
+        "text_pt": "Moro em Washington há muito tempo.",
+        "note": "A situação começou no passado e continua."
+      },
+      {
+        "position": 1,
+        "text_en": "I've just flown in from Boston.",
+        "text_pt": "Acabei de chegar de avião de Boston.",
+        "note": "*Just* marca um acontecimento recente."
+      },
+      {
+        "position": 2,
+        "text_en": "Have you ever seen sculptures in a garden?",
+        "text_pt": "Você já viu esculturas em um jardim?",
+        "note": "*Ever* pergunta sobre qualquer momento da experiência."
+      },
+      {
+        "position": 3,
+        "text_en": "I've never been to any zoos.",
+        "text_pt": "Nunca fui a nenhum zoológico.",
+        "note": "*Never* expressa que a experiência não aconteceu."
+      },
+      {
+        "position": 4,
+        "text_en": "I've written my own must-see list.",
+        "text_pt": "Escrevi minha própria lista de coisas imperdíveis.",
+        "note": "O resultado da escrita existe no presente."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "tourist",
+        "ipa": "/ˈtʊrɪst/",
+        "translation_pt": "turista",
+        "example_en": "Anna meets a tourist from Boston."
+      },
+      {
+        "position": 1,
+        "term": "museum",
+        "ipa": "/mjuˈziːəm/",
+        "translation_pt": "museu",
+        "example_en": "Jean wants an unusual museum."
+      },
+      {
+        "position": 2,
+        "term": "sculpture",
+        "ipa": "/ˈskʌlptʃər/",
+        "translation_pt": "escultura",
+        "example_en": "The garden displays sculpture outdoors."
+      },
+      {
+        "position": 3,
+        "term": "artistic",
+        "ipa": "/ɑːrˈtɪstɪk/",
+        "translation_pt": "artístico",
+        "example_en": "The sculpture garden is artistic."
+      },
+      {
+        "position": 4,
+        "term": "culture",
+        "ipa": "/ˈkʌltʃər/",
+        "translation_pt": "cultura",
+        "example_en": "Jean likes learning about culture."
+      },
+      {
+        "position": 5,
+        "term": "peaceful",
+        "ipa": "/ˈpiːsfəl/",
+        "translation_pt": "tranquilo",
+        "example_en": "Anna describes the museum as peaceful."
+      },
+      {
+        "position": 6,
+        "term": "botanic garden",
+        "ipa": "/bəˈtænɪk ˈɡɑːrdən/",
+        "translation_pt": "jardim botânico",
+        "example_en": "The botanic garden is good for plant lovers."
+      },
+      {
+        "position": 7,
+        "term": "suggestion",
+        "ipa": "/səˈdʒestʃən/",
+        "translation_pt": "sugestão",
+        "example_en": "Jean asks for another suggestion."
+      },
+      {
+        "position": 8,
+        "term": "majestic",
+        "ipa": "/məˈdʒestɪk/",
+        "translation_pt": "majestoso",
+        "example_en": "Jean says elephants are majestic."
+      },
+      {
+        "position": 9,
+        "term": "must-see",
+        "ipa": "/ˈmʌst siː/",
+        "translation_pt": "imperdível",
+        "example_en": "Anna makes a must-see animal list."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "been /bɪn/",
+        "explanation": "No inglês americano, o particípio de *be* costuma soar /bɪn/, especialmente em *I've been*."
+      },
+      {
+        "position": 1,
+        "label": "I've /aɪv/ e you've /juːv/",
+        "explanation": "O som /v/ final carrega o auxiliar *have* e deve permanecer audível antes do particípio."
+      },
+      {
+        "position": 2,
+        "label": "flown, known, written",
+        "explanation": "Particípios irregulares não recebem *-ed*: *fly–flown*, *know–known* e *write–written*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 48",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/03/09/d11896f1-be6c-47bf-acbc-968ebda02e96_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA Learning English em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 217,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 2,
+            "end_seconds": 15,
+            "speaker": "Anna",
+            "text_en": "I have lived in Washington, D.C. for a long time now. And I have done a lot.",
+            "text_pt": "Moro em Washington, D.C. há muito tempo. E já fiz muitas coisas."
+          },
+          {
+            "position": 1,
+            "start_seconds": 23,
+            "end_seconds": 33,
+            "speaker": "Jean",
+            "text_en": "I've just flown in from Boston.",
+            "text_pt": "Acabei de chegar de avião de Boston."
+          },
+          {
+            "position": 2,
+            "start_seconds": 76,
+            "end_seconds": 87,
+            "speaker": "Anna",
+            "text_en": "Have you ever seen sculptures in a garden?",
+            "text_pt": "Você já viu esculturas em um jardim?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 91,
+            "end_seconds": 102,
+            "speaker": "Anna",
+            "text_en": "I've visited that museum many times. It is very peaceful.",
+            "text_pt": "Visitei esse museu muitas vezes. Ele é muito tranquilo."
+          },
+          {
+            "position": 4,
+            "start_seconds": 153,
+            "end_seconds": 168,
+            "speaker": "Anna",
+            "text_en": "I've never been to D.C.'s zoo. I've never been to any zoos!",
+            "text_pt": "Nunca fui ao zoológico de Washington. Nunca fui a nenhum zoológico!"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Anna `____` in Washington for over a year.",
+        "hint": null,
+        "explanation": "A situação começou no passado e continua: **has lived**.",
+        "hints": [
+          "O sujeito é *Anna/she*.",
+          "Use *has + particípio*."
+        ],
+        "answers": [
+          "has lived"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "Jean has just flown in from Boston.",
+          "Jean has just flew in from Boston.",
+          "Jean have just fly in from Boston."
+        ],
+        "prompt": "Escolha a frase com auxiliar e particípio corretos.",
+        "hint": null,
+        "explanation": "Com *Jean/she*, usamos **has**; o particípio de *fly* é **flown**.",
+        "hints": [
+          "Procure *has*.",
+          "O particípio não é *flew*."
+        ],
+        "answers": [
+          "Jean has just flown in from Boston."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Transforme em pergunta de experiência: ‘You visited a sculpture garden.’ → `____`",
+        "hint": null,
+        "explanation": "A pergunta usa **Have you ever + particípio**.",
+        "hints": [
+          "Comece com *Have you ever*.",
+          "O particípio regular é *visited*."
+        ],
+        "answers": [
+          "Have you ever visited a sculpture garden"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "I",
+          "have",
+          "never",
+          "been",
+          "to",
+          "a",
+          "zoo"
+        ],
+        "prompt": "Ordene a frase sobre uma experiência que não aconteceu.",
+        "hint": null,
+        "explanation": "*Never* fica entre o auxiliar **have** e o particípio **been**.",
+        "hints": [
+          "Comece com *I have never*.",
+          "Depois vem *been to*."
+        ],
+        "answers": [
+          "I have never been to a zoo"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "An unusual museum",
+          "The nearest airport",
+          "A farm outside the city"
+        ],
+        "prompt": "Listening: que tipo de lugar Jean pede que Anna recomende?",
+        "hint": null,
+        "explanation": "Jean quer conhecer um museu interessante e, depois, especifica que prefere algo incomum.",
+        "hints": [
+          "A conversa começa perto de um mapa turístico.",
+          "Escute a palavra *unusual*."
+        ],
+        "answers": [
+          "An unusual museum"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta de Anna sobre esculturas em um jardim.",
+        "hint": null,
+        "explanation": "A pergunta completa é **Have you ever seen sculptures in a garden?**.",
+        "hints": [
+          "Comece com *Have you ever seen*.",
+          "Termine com *in a garden*."
+        ],
+        "answers": [
+          "Have you ever seen sculptures in a garden"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She has never visited any zoo.",
+          "She has never visited a museum.",
+          "She has never seen farm animals."
+        ],
+        "prompt": "Listening: qual experiência Anna percebe que ainda não teve?",
+        "hint": null,
+        "explanation": "Embora conheça animais de fazenda, Anna nunca foi a um zoológico.",
+        "hints": [
+          "Jean menciona leões, elefantes e zebras.",
+          "Anna reage criando uma nova lista."
+        ],
+        "answers": [
+          "She has never visited any zoo."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She grew up on a farm, so she has known farm animals her whole life.",
+          "She has grown up yesterday and knew zoo animals.",
+          "She lived at the zoo for over a year."
+        ],
+        "prompt": "Listening: qual opção combina corretamente a origem passada de Anna com uma experiência que continua?",
+        "hint": null,
+        "explanation": "*Grew up* relata uma fase concluída; *has known ... her whole life* conecta o conhecimento ao presente.",
+        "hints": [
+          "A origem usa simple past.",
+          "A duração até hoje usa present perfect."
+        ],
+        "answers": [
+          "She grew up on a farm, so she has known farm animals her whole life."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Experiências e recomendações da minha cidade",
+        "instructions": "Write 5 to 7 sentences in English about places in your city. Say what you have visited, what you have never seen, and recommend one place to another visitor.",
+        "min_words": 60,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "uma experiência afirmativa no present perfect",
+            "terms": [
+              "i have ",
+              "i've "
+            ]
+          },
+          {
+            "label": "uma experiência com never",
+            "terms": [
+              "have never",
+              "'ve never"
+            ]
+          },
+          {
+            "label": "uma recomendação",
+            "terms": [
+              "you should",
+              "you can",
+              "i recommend"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "45-49",
+    "slug": "lesson-49",
+    "position": 5,
+    "number": 49,
+    "title": "Operation Spy!",
+    "title_pt": "Operação espiã!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-49-operation-spy/3763537.html",
+    "grammar_tag": "Present perfect em contraste",
+    "focus_points": [
+      "present perfect × present continuous",
+      "present perfect × simple past",
+      "experiência, processo e resultado"
+    ],
+    "story_note": "Em uma missão no museu de espionagem, Anna relata experiências, ações em progresso e resultados concluídos antes de descobrir a tarefa real.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "buscar oportunidades de prática",
+    "review_note": "Sprint 23: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; imagens e marcas do museu não foram incorporadas e não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Anna assume o codinome Agent Flamingo e transforma uma pesquisa para o trabalho em treinamento de espionagem. Cada etapa evidencia a diferença entre experiência, processo e evento concluído.",
+    "warmup_prompt": "Como você relataria uma missão: o que já concluiu, o que está fazendo agora e o que fez em um momento específico?",
+    "listening_focus": "as mudanças entre never/ever, ações em progresso e resultados concluídos durante a missão",
+    "goals": [
+      "Contrastar **present perfect** e **present continuous**.",
+      "Distinguir **present perfect** de **simple past** pelo foco temporal.",
+      "Relatar experiências com *ever/never* e resultados com *have/has + particípio*.",
+      "Reconhecer a sequência das tarefas e a revelação final da missão."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Experiência × ação em progresso",
+        "why": "O present perfect resume experiência ou resultado até agora; o present continuous mostra o processo que ocorre neste momento.",
+        "warning": "Não use *have* antes do verbo com *-ing* para formar o present continuous; ele precisa de *am/is/are*.",
+        "table_head": [
+          "Foco",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "experiência até agora",
+              "have + particípio",
+              "I have never cracked a code."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "processo atual",
+              "am + -ing",
+              "I am trying to crack the code."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "resultado atual",
+              "have + particípio",
+              "I have cracked the code!"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Resultado atual × evento concluído",
+        "why": "O present perfect destaca o resultado relevante agora; o simple past conta um evento concluído em uma sequência passada.",
+        "warning": "Quando a frase informa um momento encerrado, como *five minutes ago*, prefira o simple past.",
+        "table_head": [
+          "Perspectiva",
+          "Tempo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "resultado disponível",
+              "present perfect",
+              "I have completed the mission."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "evento na narrativa",
+              "simple past",
+              "I sneaked down the air duct."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "momento definido",
+              "simple past",
+              "I finished it at noon."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Perguntas e reduções com have/has",
+        "why": "Perguntas de experiência colocam *have/has* antes do sujeito; na fala conectada, o auxiliar pode se reduzir.",
+        "warning": "Mesmo reduzido na pronúncia, o auxiliar continua necessário na estrutura escrita.",
+        "table_head": [
+          "Função",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "pergunta",
+              "Have + sujeito + particípio?",
+              "Have you ever cracked a code?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "contração",
+              "I have → I've",
+              "I've completed the mission."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "terceira pessoa",
+              "has → 's",
+              "My boss has sent me here."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "My boss has sent me here on a mission.",
+        "text_pt": "Minha chefe me enviou aqui em uma missão.",
+        "note": "O envio passado determina a situação atual de Anna."
+      },
+      {
+        "position": 1,
+        "text_en": "I have never snuck down an air duct.",
+        "text_pt": "Nunca passei escondida por um duto de ar.",
+        "note": "*Never* marca uma experiência inédita."
+      },
+      {
+        "position": 2,
+        "text_en": "I am sneaking down a long, dark air duct.",
+        "text_pt": "Estou passando escondida por um duto de ar longo e escuro.",
+        "note": "O present continuous acompanha a ação em progresso."
+      },
+      {
+        "position": 3,
+        "text_en": "Have you ever cracked a code?",
+        "text_pt": "Você já decifrou um código?",
+        "note": "A pergunta investiga experiência anterior."
+      },
+      {
+        "position": 4,
+        "text_en": "I've cracked the code!",
+        "text_pt": "Decifrei o código!",
+        "note": "O resultado concluído é relevante naquele momento."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "spy",
+        "ipa": "/spaɪ/",
+        "translation_pt": "espião; espiã",
+        "example_en": "A spy collects secret information."
+      },
+      {
+        "position": 1,
+        "term": "intelligence",
+        "ipa": "/ɪnˈtelɪdʒəns/",
+        "translation_pt": "informação de inteligência",
+        "example_en": "Anna must collect intelligence for the show."
+      },
+      {
+        "position": 2,
+        "term": "mission",
+        "ipa": "/ˈmɪʃən/",
+        "translation_pt": "missão",
+        "example_en": "The agent receives a mission."
+      },
+      {
+        "position": 3,
+        "term": "report for duty",
+        "ipa": "/rɪˈpɔːrt fər ˈduːti/",
+        "translation_pt": "apresentar-se para o serviço",
+        "example_en": "Agent Flamingo reports for duty."
+      },
+      {
+        "position": 4,
+        "term": "air duct",
+        "ipa": "/ˈer dʌkt/",
+        "translation_pt": "duto de ar",
+        "example_en": "The air duct is dark and small."
+      },
+      {
+        "position": 5,
+        "term": "sneak",
+        "ipa": "/sniːk/",
+        "translation_pt": "mover-se às escondidas",
+        "example_en": "Spies sometimes sneak through narrow places."
+      },
+      {
+        "position": 6,
+        "term": "crack a code",
+        "ipa": "/kræk ə koʊd/",
+        "translation_pt": "decifrar um código",
+        "example_en": "Anna tries to crack a code."
+      },
+      {
+        "position": 7,
+        "term": "in good shape",
+        "ipa": "/ɪn ɡʊd ʃeɪp/",
+        "translation_pt": "em boa forma",
+        "example_en": "Agents need to be in good shape."
+      },
+      {
+        "position": 8,
+        "term": "break up",
+        "ipa": "/breɪk ʌp/",
+        "translation_pt": "falhar; cortar, sobre um sinal",
+        "example_en": "The phone signal is breaking up."
+      },
+      {
+        "position": 9,
+        "term": "headquarters",
+        "ipa": "/ˈhedkwɔːrtərz/",
+        "translation_pt": "sede; quartel-general",
+        "example_en": "Anna returns to headquarters."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "I've /aɪv/",
+        "explanation": "Na contração, o auxiliar *have* vira /v/ e se liga ao particípio seguinte."
+      },
+      {
+        "position": 1,
+        "label": "has → /əz/ ou /z/",
+        "explanation": "Sem ênfase, *has* pode se reduzir em sequências como *my boss has sent me*."
+      },
+      {
+        "position": 2,
+        "label": "cracked /krækt/",
+        "explanation": "O final *-ed* de *cracked* soa /t/ depois do som surdo /k/."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 49",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/03/16/fdd6be45-f44e-4a0d-8231-e9cc9e710f44_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 204,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 13,
+            "end_seconds": 25,
+            "speaker": "Anna",
+            "text_en": "My boss, Ms. Weaver, has sent me here on a mission!",
+            "text_pt": "Minha chefe, Ms. Weaver, me enviou aqui em uma missão!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 64,
+            "end_seconds": 76,
+            "speaker": "Anna",
+            "text_en": "I have never snuck down an air duct. It's dark and small.",
+            "text_pt": "Nunca passei escondida por um duto de ar. Ele é escuro e pequeno."
+          },
+          {
+            "position": 2,
+            "start_seconds": 83,
+            "end_seconds": 98,
+            "speaker": "Anna",
+            "text_en": "I am sneaking down a long, dark, small air duct.",
+            "text_pt": "Estou passando escondida por um duto de ar longo, escuro e pequeno."
+          },
+          {
+            "position": 3,
+            "start_seconds": 126,
+            "end_seconds": 136,
+            "speaker": "Ms. Weaver",
+            "text_en": "Have you ever cracked a code?",
+            "text_pt": "Você já decifrou um código?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 138,
+            "end_seconds": 156,
+            "speaker": "Anna",
+            "text_en": "I've never cracked a code before. I'm still trying to crack the code. I've cracked the code!",
+            "text_pt": "Nunca decifrei um código antes. Ainda estou tentando decifrá-lo. Decifrei o código!"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Ms. Weaver `____` Anna to the museum on a mission.",
+        "hint": null,
+        "explanation": "O envio passado define a missão atual: **has sent**.",
+        "hints": [
+          "O sujeito é singular.",
+          "O particípio de *send* é *sent*."
+        ],
+        "answers": [
+          "has sent"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "I'm trying to crack the code; I haven't finished yet.",
+          "I've trying to crack the code; I don't finish yet.",
+          "I have crack the code while I am finished."
+        ],
+        "prompt": "Escolha a frase que descreve corretamente um processo ainda em andamento.",
+        "hint": null,
+        "explanation": "**Am trying** mostra o processo atual; **haven't finished** informa que não há resultado concluído.",
+        "hints": [
+          "Procure *am + -ing*.",
+          "A segunda parte deve usar particípio depois de *have*."
+        ],
+        "answers": [
+          "I'm trying to crack the code; I haven't finished yet."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Inclua o momento passado e ajuste o tempo verbal: ‘I have cracked the code.’ + yesterday → I `____` yesterday.",
+        "hint": null,
+        "explanation": "Um momento concluído, *yesterday*, pede simple past: **cracked the code**.",
+        "hints": [
+          "Retire o auxiliar *have*.",
+          "O verbo regular mantém *-ed*."
+        ],
+        "answers": [
+          "cracked the code"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "Have",
+          "you",
+          "ever",
+          "cracked",
+          "a",
+          "code"
+        ],
+        "prompt": "Ordene a pergunta sobre experiência.",
+        "hint": null,
+        "explanation": "Perguntas no present perfect começam com **Have + sujeito**.",
+        "hints": [
+          "Comece com *Have you ever*.",
+          "O particípio é *cracked*."
+        ],
+        "answers": [
+          "Have you ever cracked a code"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "To collect information for a new show",
+          "To become a museum security guard",
+          "To find a missing secret agent"
+        ],
+        "prompt": "Listening: qual é a finalidade profissional da visita de Anna?",
+        "hint": null,
+        "explanation": "Ms. Weaver quer informações para o novo programa chamado D.C. Secrets.",
+        "hints": [
+          "Anna chama isso de *collect intelligence*.",
+          "A chefe menciona um novo show."
+        ],
+        "answers": [
+          "To collect information for a new show"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a frase de Anna sobre nunca ter passado por um duto de ar.",
+        "hint": null,
+        "explanation": "A experiência inédita é expressa por **I have never snuck...**.",
+        "hints": [
+          "Comece com *I have never*.",
+          "Termine com *down an air duct*."
+        ],
+        "answers": [
+          "I have never snuck down an air duct",
+          "I've never snuck down an air duct"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She has never cracked one, is trying, and then has cracked it.",
+          "She cracked it before arriving and then forgets it.",
+          "She refuses to try because the code is too easy."
+        ],
+        "prompt": "Listening: qual sequência representa a mudança de Anna diante do código?",
+        "hint": null,
+        "explanation": "A fala passa de nenhuma experiência para processo atual e, por fim, resultado concluído.",
+        "hints": [
+          "Observe *never*, *still trying* e a exclamação final.",
+          "A sequência usa dois tempos verbais."
+        ],
+        "answers": [
+          "She has never cracked one, is trying, and then has cracked it."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Bring Ms. Weaver's lunch",
+          "Return through the air duct",
+          "Design a new museum code"
+        ],
+        "prompt": "Listening: qual é a missão importante revelada no final?",
+        "hint": null,
+        "explanation": "A brincadeira final revela que Anna também foi buscar o almoço da chefe.",
+        "hints": [
+          "A resposta aparece depois de Anna voltar à sede.",
+          "Ms. Weaver reage com *Yummy!*."
+        ],
+        "answers": [
+          "Bring Ms. Weaver's lunch"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Relatório de uma missão",
+        "instructions": "Write 6 to 8 sentences in English as an agent's mission report. Describe one thing you have completed, one action you are doing now, and one event you completed at a specific past time.",
+        "min_words": 65,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "um resultado no present perfect",
+            "terms": [
+              "i have ",
+              "i've "
+            ]
+          },
+          {
+            "label": "uma ação no present continuous",
+            "terms": [
+              "i am ",
+              "i'm "
+            ]
+          },
+          {
+            "label": "um evento no simple past com tempo definido",
+            "terms": [
+              "yesterday",
+              "last night",
+              "at noon",
+              "ago"
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]

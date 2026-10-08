@@ -138,6 +138,8 @@ class ExerciseOut(ORMModel):
 
 
 class ExerciseWithLessonOut(ExerciseOut):
+    course_slug: str
+    unit_slug: str
     lesson_number: int
 
 

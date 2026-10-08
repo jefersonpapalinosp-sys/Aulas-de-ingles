@@ -25,6 +25,20 @@ vi.mock('../api/courseReviews', () => ({
   useSubmitCourseReview: hooks.useSubmitCourseReview,
 }))
 
+vi.mock('../api/queries', () => ({
+  useCourseCurriculum: () => ({
+    data: {
+      course: { title: "Let's Learn English — Level 1" },
+      units: [
+        { id: 2, slug: '40-44', lessons: [{ number: 41 }] },
+        { id: 3, slug: '45-49', lessons: [{ number: 45 }] },
+      ],
+    },
+    isPending: false,
+    error: null,
+  }),
+}))
+
 vi.mock('../features/media/LessonAudioPlayer', () => ({
   LessonAudioPlayer: ({
     media,
@@ -106,6 +120,7 @@ const review: CourseReview = {
   question_count: 6,
   content_version: 3,
   review_lesson_number: 40,
+  listening_lesson_number: 40,
   source_kind: 'mixed',
   source_title: "VOA Let's Learn English — Level 1",
   source_url: 'https://learningenglish.voanews.com/p/5644.html',
@@ -339,6 +354,10 @@ describe('CourseReviewPage', () => {
     expect(screen.getByRole('link', { name: 'Aula 42' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-1/aulas/42',
+    )
+    expect(screen.getByRole('link', { name: 'Continuar na Aula 45' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/aulas/45',
     )
     expect(
       screen.getByText(

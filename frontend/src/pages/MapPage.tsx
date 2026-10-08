@@ -108,9 +108,9 @@ function PlanEditor({ plan }: { plan: StudyPlan }) {
   )
 }
 
-function TodayPanel() {
+function TodayPanel({ courseSlug, unitSlug }: { courseSlug: string; unitSlug?: string }) {
   const today = useToday()
-  const skills = useSkills()
+  const skills = useSkills(courseSlug, unitSlug)
 
   if (today.isPending || skills.isPending) return <Carregando oque="seu painel de hoje" />
   if (today.error) {
@@ -217,6 +217,10 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
       <Erro erro={curriculum.error} aoTentarDeNovo={() => void curriculum.refetch()} />
     )
   }
+  if (progress.isPending) return <Carregando oque="o progresso deste curso" />
+  if (progress.error) {
+    return <Erro erro={progress.error} aoTentarDeNovo={() => void progress.refetch()} />
+  }
 
   const studied = new Set(
     progress.data?.lessons
@@ -240,7 +244,7 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
 
   return (
     <>
-      {showToday && <TodayPanel />}
+      {showToday && <TodayPanel courseSlug={courseSlug} unitSlug={unitSlug} />}
       <section
         className={showToday ? 'map-section course-map' : 'course-map'}
         aria-labelledby="map-title"

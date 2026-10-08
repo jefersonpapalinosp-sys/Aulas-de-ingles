@@ -168,6 +168,18 @@ describe('LessonRail', () => {
     const secondUnit = within(desktop!).getByRole('button', { name: /Unidade 15–20/ })
     await waitFor(() => expect(firstUnit).toHaveAttribute('aria-expanded', 'true'))
     expect(secondUnit).toHaveAttribute('aria-expanded', 'false')
+    expect(within(desktop!).getByRole('link', { name: /Revisar/ })).toHaveAttribute(
+      'href',
+      '/revisar?course=voa-level-1&unit=1-14',
+    )
+    expect(within(desktop!).getByRole('link', { name: 'Caderno' })).toHaveAttribute(
+      'href',
+      '/caderno?course=voa-level-1&unit=1-14',
+    )
+    expect(within(desktop!).getByRole('link', { name: 'Avaliação' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/1-14/avaliacao',
+    )
 
     const lessonLinks = within(desktop!).getAllByRole('link', { name: /Lesson \d+/ })
     expect(lessonLinks.filter((link) => link.classList.contains('trail-lesson-link'))).toHaveLength(12)
@@ -237,6 +249,28 @@ describe('LessonRail', () => {
 
     expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
       'Checkpoint 40–44',
+    )
+  })
+
+  it('preserva curso e unidade do escopo nas páginas utilitárias', async () => {
+    const { container } = renderRailAt(
+      '/revisar?course=voa-level-1&unit=40-44',
+    )
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    await waitFor(() =>
+      expect(
+        within(desktop!).getByRole('button', { name: /Unidade 40–44/ }),
+      ).toHaveAttribute('aria-expanded', 'true'),
+    )
+    expect(within(desktop!).getByRole('link', { name: /Revisar/ })).toHaveAttribute(
+      'href',
+      '/revisar?course=voa-level-1&unit=40-44',
+    )
+    expect(within(desktop!).getByRole('link', { name: 'Avaliação' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/40-44/avaliacao',
     )
   })
 })

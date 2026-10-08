@@ -12,6 +12,29 @@ const clientMocks = vi.hoisted(() => ({
   DELETE: vi.fn(),
   authenticatedFetch: vi.fn(),
 }))
+const queryHooks = vi.hoisted(() => ({
+  useCourses: vi.fn(),
+  useCourseCurriculum: vi.fn(),
+}))
+
+const course = {
+  id: 1,
+  slug: 'voa-level-1',
+  title: "Let's Learn English — Level 1",
+  level: 'Level 1',
+  proficiency_label: 'Iniciante',
+  provider: 'VOA Learning English',
+  source_url: 'https://example.com',
+  position: 1,
+  status: 'published',
+  total_lessons: 52,
+  published_lessons: 49,
+}
+
+vi.mock('../api/queries', () => ({
+  useCourses: queryHooks.useCourses,
+  useCourseCurriculum: queryHooks.useCourseCurriculum,
+}))
 
 vi.mock('../api/client', () => ({
   api: {
@@ -24,17 +47,25 @@ vi.mock('../api/client', () => ({
 }))
 
 const lesson = {
-  number: 31,
-  title: 'Take Me Out to the Ball Game',
-  title_pt: 'Leve-me ao jogo',
-  grammar_tag: 'Comparatives',
-  focus_points: ['comparatives'],
+  id: 45,
+  course_slug: 'voa-level-1',
+  unit_slug: '45-49',
+  slug: 'lesson-45',
+  position: 1,
+  number: 45,
+  title: 'This Land is Your Land',
+  title_pt: 'Esta terra é sua terra',
+  grammar_tag: 'Present perfect',
+  focus_points: ['present perfect'],
   story_note: null,
 }
 
 const entry = {
   id: 8,
-  lesson_number: 31,
+  course_slug: 'voa-level-1',
+  course_title: course.title,
+  unit_slug: '45-49',
+  lesson_number: 45,
   lesson_title: lesson.title,
   kind: 'favorite_phrase' as const,
   content: 'A taxi is faster than a bus.',
@@ -44,7 +75,6 @@ const entry = {
 
 function mockQueries(entries = [entry]) {
   clientMocks.GET.mockImplementation(async (path) => {
-    if (path === '/api/lessons') return { data: [lesson] }
     if (path === '/api/me/notebook') return { data: entries }
     if (path === '/api/speaking/attempts') return { data: [] }
     if (path === '/api/writing/history') {
@@ -52,7 +82,10 @@ function mockQueries(entries = [entry]) {
         data: [
           {
             prompt_id: 4,
-            lesson_number: 31,
+            course_slug: 'voa-level-1',
+            course_title: course.title,
+            unit_slug: '45-49',
+            lesson_number: 45,
             lesson_title: lesson.title,
             prompt_title: 'Compare caminhos',
             draft_text: 'The train is faster.',
@@ -67,11 +100,11 @@ function mockQueries(entries = [entry]) {
   })
 }
 
-function renderNotebook() {
+function renderNotebook(route = '/caderno?course=voa-level-1&unit=45-49') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[route]}>
         <NotebookPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -84,9 +117,36 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+function mockCurriculum() {
+  queryHooks.useCourses.mockReturnValue({ data: [course], isPending: false, error: null })
+  queryHooks.useCourseCurriculum.mockReturnValue({
+    data: {
+      course,
+      units: [
+        {
+          id: 4,
+          slug: '45-49',
+          title: 'Aulas 45–49',
+          position: 4,
+          status: 'published',
+          lesson_start: 45,
+          lesson_end: 49,
+          total_lessons: 5,
+          published_lessons: 1,
+          lessons: [lesson],
+          review: null,
+        },
+      ],
+    },
+    isPending: false,
+    error: null,
+  })
+}
+
 describe('NotebookPage', () => {
   it('cria, edita e exclui uma anotação privada', async () => {
     const user = userEvent.setup()
+    mockCurriculum()
     mockQueries()
     clientMocks.POST.mockResolvedValue({ data: { ...entry, id: 9, kind: 'note', content: 'New note' } })
     clientMocks.PUT.mockResolvedValue({ data: { ...entry, content: 'Frase atualizada.' } })
@@ -100,8 +160,29 @@ describe('NotebookPage', () => {
     await user.click(screen.getByRole('button', { name: 'Salvar no caderno' }))
     await waitFor(() => expect(clientMocks.POST).toHaveBeenCalled())
     expect(clientMocks.POST).toHaveBeenCalledWith('/api/me/notebook', {
-      body: { lesson_number: 31, kind: 'note', content: 'New note' },
+      body: {
+        course_slug: 'voa-level-1',
+        lesson_number: 45,
+        kind: 'note',
+        content: 'New note',
+      },
     })
+
+    expect(clientMocks.GET).toHaveBeenCalledWith('/api/me/notebook', {
+      params: {
+        query: {
+          lesson: undefined,
+          kind: undefined,
+          course: 'voa-level-1',
+          unit: '45-49',
+        },
+      },
+    })
+    expect(screen.getAllByText(/Let's Learn English — Level 1 · Aula 45/).length).toBeGreaterThan(0)
+    expect(screen.getByRole('link', { name: 'Abrir texto' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/aulas/45/estudar/revisar',
+    )
 
     await user.click(screen.getByRole('button', { name: 'Editar' }))
     const editBox = screen.getByRole('textbox', { name: 'Conteúdo da anotação' })
@@ -118,6 +199,7 @@ describe('NotebookPage', () => {
 
   it('baixa a exportação JSON do aluno', async () => {
     const user = userEvent.setup()
+    mockCurriculum()
     mockQueries([])
     const blob = new Blob(['{"schema_version":"1.0"}'], { type: 'application/json' })
     clientMocks.authenticatedFetch.mockResolvedValue({ ok: true, blob: async () => blob })

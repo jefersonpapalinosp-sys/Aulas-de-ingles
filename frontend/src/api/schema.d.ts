@@ -308,7 +308,7 @@ export interface paths {
         };
         /**
          * Listar Exercicios
-         * @description Exercícios de uma aula, ou do bloco inteiro.
+         * @description Exercícios de uma aula, unidade ou curso.
          *
          *     É o que a prova do bloco consome: sem isso a tela teria que baixar as dez
          *     aulas inteiras para montar uma lista de exercícios.
@@ -568,7 +568,7 @@ export interface paths {
         };
         /**
          * Meu Progresso
-         * @description Uma linha por aula publicada, opcionalmente limitada a um curso.
+         * @description Uma linha por aula publicada, opcionalmente limitada a curso e unidade.
          */
         get: operations["meu_progresso_api_me_progress_get"];
         put?: never;
@@ -1122,6 +1122,10 @@ export interface components {
             answer: string;
             /** Context */
             context: string | null;
+            /** Course Slug */
+            course_slug: string;
+            /** Course Title */
+            course_title: string;
             /** Cue End Seconds */
             cue_end_seconds: number | null;
             /** Cue Start Seconds */
@@ -1148,6 +1152,8 @@ export interface components {
             lapses: number;
             /** Lesson Number */
             lesson_number: number;
+            /** Lesson Title */
+            lesson_title: string;
             /** Media Url */
             media_url: string | null;
             /** Prompt */
@@ -1165,6 +1171,8 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "suspended";
+            /** Unit Slug */
+            unit_slug: string;
             /** Vocab Item Id */
             vocab_item_id: number | null;
         };
@@ -1252,6 +1260,8 @@ export interface components {
             /** Intro */
             intro: string;
             latest_attempt: components["schemas"]["CourseReviewAttemptOut"] | null;
+            /** Listening Lesson Number */
+            listening_lesson_number: number | null;
             listening_media: components["schemas"]["LessonMediaOut"] | null;
             /** Listening Source Page Url */
             listening_source_page_url: string | null;
@@ -1475,6 +1485,8 @@ export interface components {
         ExerciseWithLessonOut: {
             /** Activity Type */
             activity_type: string;
+            /** Course Slug */
+            course_slug: string;
             /** Explanation */
             explanation: string | null;
             /** Hint */
@@ -1498,6 +1510,8 @@ export interface components {
             prompt: string;
             /** Skill */
             skill: string;
+            /** Unit Slug */
+            unit_slug: string;
         };
         /** FeedbackTokenOut */
         FeedbackTokenOut: {
@@ -1765,6 +1779,11 @@ export interface components {
             /** Content */
             content: string;
             /**
+             * Course Slug
+             * @default voa-level-1
+             */
+            course_slug: string;
+            /**
              * Kind
              * @enum {string}
              */
@@ -1776,6 +1795,10 @@ export interface components {
         NotebookEntryOut: {
             /** Content */
             content: string;
+            /** Course Slug */
+            course_slug: string;
+            /** Course Title */
+            course_title: string;
             /**
              * Created At
              * Format: date-time
@@ -1792,6 +1815,8 @@ export interface components {
             lesson_number: number;
             /** Lesson Title */
             lesson_title: string;
+            /** Unit Slug */
+            unit_slug: string;
             /**
              * Updated At
              * Format: date-time
@@ -2187,6 +2212,10 @@ export interface components {
              * Format: date-time
              */
             consented_at: string;
+            /** Course Slug */
+            course_slug: string;
+            /** Course Title */
+            course_title: string;
             /**
              * Created At
              * Format: date-time
@@ -2214,6 +2243,8 @@ export interface components {
              */
             status: "pending" | "ready";
             transcription?: components["schemas"]["TranscriptionJobOut"] | null;
+            /** Unit Slug */
+            unit_slug: string;
         };
         /** StudyPlanIn */
         StudyPlanIn: {
@@ -2531,6 +2562,10 @@ export interface components {
         };
         /** WritingHistoryItemOut */
         WritingHistoryItemOut: {
+            /** Course Slug */
+            course_slug: string;
+            /** Course Title */
+            course_title: string;
             /** Draft Text */
             draft_text: string;
             /** Feedbacks */
@@ -2545,6 +2580,8 @@ export interface components {
             prompt_title: string;
             /** Revisions */
             revisions: components["schemas"]["WritingRevisionOut"][];
+            /** Unit Slug */
+            unit_slug: string;
             /**
              * Updated At
              * Format: date-time
@@ -3157,6 +3194,8 @@ export interface operations {
                 lesson?: number | null;
                 /** @description Slug do curso; o padrão mantém a consulta no Level 1. */
                 course?: string;
+                /** @description Limita a avaliação a uma unidade do curso. */
+                unit?: string | null;
             };
             header?: never;
             path?: never;
@@ -3536,6 +3575,8 @@ export interface operations {
             query?: {
                 lesson?: number | null;
                 kind?: ("note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question") | null;
+                course?: string | null;
+                unit?: string | null;
             };
             header?: never;
             path?: never;
@@ -3665,6 +3706,8 @@ export interface operations {
             query?: {
                 /** @description Limita aulas e denominadores ao slug de um curso. */
                 course?: string | null;
+                /** @description Limita aulas, tentativas e revisões a uma unidade. */
+                unit?: string | null;
             };
             header?: never;
             path?: never;
@@ -3694,7 +3737,10 @@ export interface operations {
     };
     minhas_competencias_api_me_skills_get: {
         parameters: {
-            query?: never;
+            query?: {
+                course?: string | null;
+                unit?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3708,6 +3754,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SkillSummaryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -4018,6 +4073,8 @@ export interface operations {
                 item_type?: ("vocabulary" | "grammar_error" | "phrase" | "listening" | "writing_prompt" | "speaking_prompt") | null;
                 skill?: string | null;
                 max_minutes?: number | null;
+                course?: string | null;
+                unit?: string | null;
             };
             header?: never;
             path?: never;
@@ -4049,6 +4106,8 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "active" | "suspended";
+                course?: string | null;
+                unit?: string | null;
             };
             header?: never;
             path?: never;
@@ -4261,6 +4320,8 @@ export interface operations {
         parameters: {
             query?: {
                 lesson?: number | null;
+                course?: string | null;
+                unit?: string | null;
             };
             header?: never;
             path?: never;
@@ -4578,7 +4639,10 @@ export interface operations {
     };
     historico_de_escrita_api_writing_history_get: {
         parameters: {
-            query?: never;
+            query?: {
+                course?: string | null;
+                unit?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4592,6 +4656,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WritingHistoryItemOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

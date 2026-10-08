@@ -10,11 +10,14 @@ import {
   matchesLessonSearch,
 } from '../features/curriculum/curriculum'
 import {
+  assessmentPath,
   coursePath,
   courseReviewPath,
   courseSlugFromPath,
   DEFAULT_COURSE_SLUG,
   lessonPath,
+  notebookPath,
+  reviewPath,
   unitPath,
 } from '../routing/courseRoutes'
 
@@ -93,6 +96,7 @@ export function NavigationPanel({
     ).length ?? 0
   const courseTitle =
     curriculum?.course.title ?? courses.find((course) => course.slug === courseSlug)?.title
+  const scopeUnitSlug = activeUnitSlug ?? expandedUnit ?? undefined
 
   return (
     <div className="trail-panel">
@@ -170,18 +174,20 @@ export function NavigationPanel({
         <NavLink to="/cursos" onClick={onNavigate}>
           Cursos
         </NavLink>
-        <NavLink to="/revisar" onClick={onNavigate}>
+        <NavLink to={reviewPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
           Revisar
           {Boolean(progress?.review_due) && (
             <span className="badge">{progress?.review_due}</span>
           )}
         </NavLink>
-        <NavLink to="/caderno" onClick={onNavigate}>
+        <NavLink to={notebookPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
           Caderno
         </NavLink>
-        <NavLink to="/prova" onClick={onNavigate}>
-          Avaliação
-        </NavLink>
+        {scopeUnitSlug && (
+          <NavLink to={assessmentPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
+            Avaliação
+          </NavLink>
+        )}
         {expandedUnit && (
           <NavLink to={unitPath(courseSlug, expandedUnit)} onClick={onNavigate}>
             Mapa da unidade
@@ -342,7 +348,11 @@ export function LessonRail() {
   const location = useLocation()
   const navigate = useNavigate()
   const courses = useCourses()
-  const courseSlug = courseSlugFromPath(location.pathname) ?? DEFAULT_COURSE_SLUG
+  const search = new URLSearchParams(location.search)
+  const courseSlug =
+    courseSlugFromPath(location.pathname) ??
+    search.get('course') ??
+    DEFAULT_COURSE_SLUG
   const curriculum = useCourseCurriculum(courseSlug)
   const progress = useProgress(courseSlug)
   const markStudied = useMarcarEstudada(courseSlug)
@@ -352,7 +362,8 @@ export function LessonRail() {
         (lesson) => lesson.number === context.lessonNumber,
       )
     : undefined
-  const contextualUnit = context.unitSlug ?? activeLesson?.unit_slug
+  const contextualUnit =
+    context.unitSlug ?? search.get('unit') ?? activeLesson?.unit_slug
   const [expandedUnit, setExpandedUnit] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)

@@ -12,11 +12,13 @@ export function useToday() {
   })
 }
 
-export function useSkills() {
+export function useSkills(courseSlug?: string, unitSlug?: string) {
   return useQuery({
-    queryKey: ['skills'],
+    queryKey: ['skills', courseSlug ?? 'all', unitSlug ?? 'all'],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/me/skills')
+      const { data, response } = await api.GET('/api/me/skills', {
+        params: { query: { course: courseSlug, unit: unitSlug } },
+      })
       if (!data) {
         throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar competências.`)
       }

@@ -4,8 +4,8 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 from typing import cast as typing_cast
 
-from fastapi import APIRouter, Body, Depends
-from sqlalchemy import Integer, cast, func, select
+from fastapi import APIRouter, Body, Depends, Query
+from sqlalchemy import Integer, Select, and_, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
@@ -17,11 +17,16 @@ from app.db.models import (
     Exercise,
     ExerciseAttempt,
     Lesson,
+    LessonMedia,
     LessonProgress,
     ReviewItem,
     SkillEvidence,
+    SpeakingAttempt,
     StudyPlan,
     StudySessionProgress,
+    TranscriptCue,
+    WritingFeedbackRecord,
+    WritingPrompt,
 )
 from app.db.session import get_session
 from app.schemas.dashboard import (
@@ -275,7 +280,53 @@ async def painel_hoje(
 async def minhas_competencias(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[SkillSummaryOut]:
+    def scoped_ids(stmt: Select[int]) -> Select[int]:
+        scoped = stmt
+        if course is not None:
+            scoped = scoped.where(Course.slug == course)
+        if unit is not None:
+            scoped = scoped.where(CourseUnit.slug == unit)
+        return scoped
+
+    exercise_ids = scoped_ids(
+        select(ExerciseAttempt.id)
+        .join(Exercise, ExerciseAttempt.exercise_id == Exercise.id)
+        .join(Lesson, Exercise.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+    )
+    speaking_ids = scoped_ids(
+        select(SpeakingAttempt.id)
+        .join(TranscriptCue, SpeakingAttempt.transcript_cue_id == TranscriptCue.id)
+        .join(LessonMedia, TranscriptCue.media_id == LessonMedia.id)
+        .join(Lesson, LessonMedia.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+    )
+    writing_ids = scoped_ids(
+        select(WritingFeedbackRecord.id)
+        .join(WritingPrompt, WritingFeedbackRecord.prompt_id == WritingPrompt.id)
+        .join(Lesson, WritingPrompt.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+    )
+    scope_filter = or_(
+        and_(
+            SkillEvidence.source_type == "exercise_attempt",
+            SkillEvidence.source_id.in_(exercise_ids),
+        ),
+        and_(
+            SkillEvidence.source_type == "speaking_attempt",
+            SkillEvidence.source_id.in_(speaking_ids),
+        ),
+        and_(
+            SkillEvidence.source_type == "writing_feedback",
+            SkillEvidence.source_id.in_(writing_ids),
+        ),
+    )
     aggregates = (
         await session.execute(
             select(
@@ -283,25 +334,31 @@ async def minhas_competencias(
                 func.count(SkillEvidence.id),
                 func.avg(SkillEvidence.score),
             )
-            .where(SkillEvidence.user_id == usuario.id)
+            .where(SkillEvidence.user_id == usuario.id, scope_filter)
             .group_by(SkillEvidence.skill)
         )
     ).all()
     by_skill = {skill: (int(samples), float(score)) for skill, samples, score in aggregates}
 
-    topic_rows = (
-        await session.execute(
-            select(
-                Exercise.skill,
-                Lesson.grammar_tag,
-                func.count(ExerciseAttempt.id),
-                func.avg(cast(ExerciseAttempt.correct, Integer)),
-            )
-            .join(Exercise, ExerciseAttempt.exercise_id == Exercise.id)
-            .join(Lesson, Exercise.lesson_id == Lesson.id)
-            .where(ExerciseAttempt.user_id == usuario.id)
-            .group_by(Exercise.skill, Lesson.grammar_tag)
+    topic_stmt = (
+        select(
+            Exercise.skill,
+            Lesson.grammar_tag,
+            func.count(ExerciseAttempt.id),
+            func.avg(cast(ExerciseAttempt.correct, Integer)),
         )
+        .join(Exercise, ExerciseAttempt.exercise_id == Exercise.id)
+        .join(Lesson, Exercise.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(ExerciseAttempt.user_id == usuario.id)
+    )
+    if course is not None:
+        topic_stmt = topic_stmt.where(Course.slug == course)
+    if unit is not None:
+        topic_stmt = topic_stmt.where(CourseUnit.slug == unit)
+    topic_rows = (
+        await session.execute(topic_stmt.group_by(Exercise.skill, Lesson.grammar_tag))
     ).all()
     fragile: dict[str, list[str]] = {}
     for skill, topic, samples, score in topic_rows:

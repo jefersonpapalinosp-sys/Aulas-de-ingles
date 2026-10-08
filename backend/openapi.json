@@ -179,6 +179,14 @@
                         ],
                         "title": "Context"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
+                    "course_title": {
+                        "title": "Course Title",
+                        "type": "string"
+                    },
                     "cue_end_seconds": {
                         "anyOf": [
                             {
@@ -242,6 +250,10 @@
                         "title": "Lesson Number",
                         "type": "integer"
                     },
+                    "lesson_title": {
+                        "title": "Lesson Title",
+                        "type": "string"
+                    },
                     "media_url": {
                         "anyOf": [
                             {
@@ -288,6 +300,10 @@
                         "title": "Status",
                         "type": "string"
                     },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    },
                     "vocab_item_id": {
                         "anyOf": [
                             {
@@ -308,7 +324,11 @@
                     "prompt_note",
                     "answer",
                     "context",
+                    "course_slug",
+                    "course_title",
+                    "unit_slug",
                     "lesson_number",
+                    "lesson_title",
                     "reason",
                     "estimated_seconds",
                     "media_url",
@@ -538,6 +558,17 @@
                             }
                         ]
                     },
+                    "listening_lesson_number": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Listening Lesson Number"
+                    },
                     "listening_media": {
                         "anyOf": [
                             {
@@ -639,6 +670,7 @@
                     "source_note",
                     "intro",
                     "content_version",
+                    "listening_lesson_number",
                     "listening_media",
                     "listening_source_page_url",
                     "questions",
@@ -1120,6 +1152,10 @@
                         "title": "Activity Type",
                         "type": "string"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
                     "explanation": {
                         "anyOf": [
                             {
@@ -1190,6 +1226,10 @@
                     "skill": {
                         "title": "Skill",
                         "type": "string"
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -1203,6 +1243,8 @@
                     "hint",
                     "hint_count",
                     "explanation",
+                    "course_slug",
+                    "unit_slug",
                     "lesson_number"
                 ],
                 "title": "ExerciseWithLessonOut",
@@ -1966,6 +2008,13 @@
                         "title": "Content",
                         "type": "string"
                     },
+                    "course_slug": {
+                        "default": "voa-level-1",
+                        "maxLength": 100,
+                        "minLength": 1,
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
                     "kind": {
                         "enum": [
                             "note",
@@ -1997,6 +2046,14 @@
                         "title": "Content",
                         "type": "string"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
+                    "course_title": {
+                        "title": "Course Title",
+                        "type": "string"
+                    },
                     "created_at": {
                         "format": "date-time",
                         "title": "Created At",
@@ -2025,6 +2082,10 @@
                         "title": "Lesson Title",
                         "type": "string"
                     },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    },
                     "updated_at": {
                         "format": "date-time",
                         "title": "Updated At",
@@ -2033,6 +2094,9 @@
                 },
                 "required": [
                     "id",
+                    "course_slug",
+                    "course_title",
+                    "unit_slug",
                     "lesson_number",
                     "lesson_title",
                     "kind",
@@ -3098,6 +3162,14 @@
                         "title": "Consented At",
                         "type": "string"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
+                    "course_title": {
+                        "title": "Course Title",
+                        "type": "string"
+                    },
                     "created_at": {
                         "format": "date-time",
                         "title": "Created At",
@@ -3178,10 +3250,17 @@
                                 "type": "null"
                             }
                         ]
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "id",
+                    "course_slug",
+                    "course_title",
+                    "unit_slug",
                     "lesson_number",
                     "cue_id",
                     "cue_text",
@@ -4123,6 +4202,14 @@
             },
             "WritingHistoryItemOut": {
                 "properties": {
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
+                    "course_title": {
+                        "title": "Course Title",
+                        "type": "string"
+                    },
                     "draft_text": {
                         "title": "Draft Text",
                         "type": "string"
@@ -4157,6 +4244,10 @@
                         "title": "Revisions",
                         "type": "array"
                     },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    },
                     "updated_at": {
                         "format": "date-time",
                         "title": "Updated At",
@@ -4165,6 +4256,9 @@
                 },
                 "required": [
                     "prompt_id",
+                    "course_slug",
+                    "course_title",
+                    "unit_slug",
                     "lesson_number",
                     "lesson_title",
                     "prompt_title",
@@ -5130,7 +5224,7 @@
         },
         "/api/exercises": {
             "get": {
-                "description": "Exercícios de uma aula, ou do bloco inteiro.\n\nÉ o que a prova do bloco consome: sem isso a tela teria que baixar as dez\naulas inteiras para montar uma lista de exercícios.",
+                "description": "Exercícios de uma aula, unidade ou curso.\n\nÉ o que a prova do bloco consome: sem isso a tela teria que baixar as dez\naulas inteiras para montar uma lista de exercícios.",
                 "operationId": "listar_exercicios_api_exercises_get",
                 "parameters": [
                     {
@@ -5161,6 +5255,24 @@
                             "description": "Slug do curso; o padrão mantém a consulta no Level 1.",
                             "title": "Course",
                             "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Limita a avaliação a uma unidade do curso.",
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Limita a avaliação a uma unidade do curso.",
+                            "title": "Unit"
                         }
                     }
                 ],
@@ -5709,6 +5821,40 @@
                             ],
                             "title": "Kind"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
                     }
                 ],
                 "responses": {
@@ -5869,7 +6015,7 @@
         },
         "/api/me/progress": {
             "get": {
-                "description": "Uma linha por aula publicada, opcionalmente limitada a um curso.",
+                "description": "Uma linha por aula publicada, opcionalmente limitada a curso e unidade.",
                 "operationId": "meu_progresso_api_me_progress_get",
                 "parameters": [
                     {
@@ -5888,6 +6034,24 @@
                             ],
                             "description": "Limita aulas e denominadores ao slug de um curso.",
                             "title": "Course"
+                        }
+                    },
+                    {
+                        "description": "Limita aulas, tentativas e revisões a uma unidade.",
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Limita aulas, tentativas e revisões a uma unidade.",
+                            "title": "Unit"
                         }
                     }
                 ],
@@ -5922,6 +6086,42 @@
         "/api/me/skills": {
             "get": {
                 "operationId": "minhas_competencias_api_me_skills_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -5936,6 +6136,16 @@
                             }
                         },
                         "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
                     }
                 },
                 "summary": "Minhas Competencias",
@@ -6429,6 +6639,40 @@
                             ],
                             "title": "Max Minutes"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
                     }
                 ],
                 "responses": {
@@ -6479,6 +6723,40 @@
                             ],
                             "title": "Status",
                             "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
                         }
                     }
                 ],
@@ -6775,6 +7053,40 @@
                                 }
                             ],
                             "title": "Lesson"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
                         }
                     }
                 ],
@@ -7216,6 +7528,42 @@
         "/api/writing/history": {
             "get": {
                 "operationId": "historico_de_escrita_api_writing_history_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -7230,6 +7578,16 @@
                             }
                         },
                         "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
                     }
                 },
                 "summary": "Historico De Escrita",

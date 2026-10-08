@@ -14,6 +14,28 @@ export function courseReviewPath(courseSlug: string, unitSlug: string): string {
   return `${unitPath(courseSlug, unitSlug)}/checkpoint`
 }
 
+export function assessmentPath(courseSlug: string, unitSlug: string): string {
+  return `${unitPath(courseSlug, unitSlug)}/avaliacao`
+}
+
+function scopedUtilityPath(
+  pathname: '/revisar' | '/caderno',
+  courseSlug: string,
+  unitSlug?: string,
+): string {
+  const search = new URLSearchParams({ course: courseSlug })
+  if (unitSlug) search.set('unit', unitSlug)
+  return `${pathname}?${search.toString()}`
+}
+
+export function reviewPath(courseSlug: string, unitSlug?: string): string {
+  return scopedUtilityPath('/revisar', courseSlug, unitSlug)
+}
+
+export function notebookPath(courseSlug: string, unitSlug?: string): string {
+  return scopedUtilityPath('/caderno', courseSlug, unitSlug)
+}
+
 export function lessonPath(courseSlug: string, lessonNumber: number): string {
   return `${coursePath(courseSlug)}/aulas/${lessonNumber}`
 }

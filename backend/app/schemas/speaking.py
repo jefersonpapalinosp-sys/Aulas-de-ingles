@@ -19,6 +19,9 @@ class SpeakingAttemptIn(BaseModel):
 
 class SpeakingAttemptOut(BaseModel):
     id: int
+    course_slug: str
+    course_title: str
+    unit_slug: str
     lesson_number: int
     cue_id: int
     cue_text: str

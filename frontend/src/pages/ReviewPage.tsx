@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import type { ReviewItemType } from '../api/client'
 import {
   useAvaliar,
@@ -8,8 +8,10 @@ import {
   useSetReviewItemStatus,
   useSuspendedReviewItems,
 } from '../api/review'
+import { useCourseCurriculum, useCourses } from '../api/queries'
 import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
+import { DEFAULT_COURSE_SLUG } from '../routing/courseRoutes'
 
 const NOTES = [
   { key: '1', label: 'Errei', quality: 1, className: 'errei' },
@@ -40,6 +42,11 @@ function durationLabel(seconds: number): string {
 }
 
 export function ReviewPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const courseSlug = searchParams.get('course') || DEFAULT_COURSE_SLUG
+  const unitSlug = searchParams.get('unit') || ''
+  const courses = useCourses()
+  const curriculum = useCourseCurriculum(courseSlug)
   const [itemType, setItemType] = useState<ReviewItemType | ''>('')
   const [skill, setSkill] = useState('')
   const [maxMinutes, setMaxMinutes] = useState<number | ''>('')
@@ -49,11 +56,16 @@ export function ReviewPage() {
     error,
     refetch,
   } = useDueCards({
+    courseSlug,
+    unitSlug: unitSlug || undefined,
     itemType: itemType || undefined,
     skill: skill || undefined,
     maxMinutes: maxMinutes || undefined,
   })
-  const suspended = useSuspendedReviewItems()
+  const suspended = useSuspendedReviewItems({
+    courseSlug,
+    unitSlug: unitSlug || undefined,
+  })
   const grade = useAvaliar()
   const setStatus = useSetReviewItemStatus()
   const deleteItem = useDeleteReviewItem()
@@ -61,7 +73,18 @@ export function ReviewPage() {
   const [lastMessage, setLastMessage] = useState<string | null>(null)
 
   const item = items?.[0]
-  const hasFilters = Boolean(itemType || skill || maxMinutes)
+  const hasActivityFilters = Boolean(itemType || skill || maxMinutes)
+  const hasFilters = Boolean(unitSlug || hasActivityFilters)
+
+  function setScope(nextCourse: string, nextUnit = '') {
+    const next = new URLSearchParams(searchParams)
+    next.set('course', nextCourse)
+    if (nextUnit) next.set('unit', nextUnit)
+    else next.delete('unit')
+    setSearchParams(next, { replace: true })
+    setFlipped(false)
+    setLastMessage(null)
+  }
 
   const answer = useCallback(
     (quality: number) => {
@@ -140,6 +163,36 @@ export function ReviewPage() {
               : 'Marque uma aula como estudada ou pratique: vocabulário e erros relevantes entram aqui.'}
       </p>
 
+      <div className="review-filters review-scope" aria-label="Escopo da revisão">
+        <label>
+          Curso
+          <select
+            value={courseSlug}
+            onChange={(event) => setScope(event.target.value)}
+          >
+            {(courses.data ?? []).map((course) => (
+              <option key={course.slug} value={course.slug}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Unidade
+          <select
+            value={unitSlug}
+            onChange={(event) => setScope(courseSlug, event.target.value)}
+          >
+            <option value="">Todas as unidades</option>
+            {(curriculum.data?.units ?? []).map((unit) => (
+              <option key={unit.slug} value={unit.slug}>
+                {unit.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <div className="review-filters" aria-label="Filtros da revisão">
         <label>
           Tipo
@@ -188,7 +241,7 @@ export function ReviewPage() {
             <option value="10">Até 10 min</option>
           </select>
         </label>
-        {hasFilters && (
+        {hasActivityFilters && (
           <button
             type="button"
             onClick={() => {
@@ -210,7 +263,7 @@ export function ReviewPage() {
             <span>{TYPE_LABELS[item.item_type]}</span>
             <span>{item.skill}</span>
             <span>{durationLabel(item.estimated_seconds)}</span>
-            <span>Aula {item.lesson_number}</span>
+            <span>{item.course_title} · Aula {item.lesson_number}</span>
           </div>
           <aside className="review-reason">
             <strong>Por que voltou?</strong>
@@ -218,7 +271,9 @@ export function ReviewPage() {
           </aside>
 
           <div className={`carta review-${item.item_type}`}>
-            <p className="carta-origem">Aula {item.lesson_number} · {TYPE_LABELS[item.item_type]}</p>
+            <p className="carta-origem">
+              {item.course_title} · Aula {item.lesson_number} · {TYPE_LABELS[item.item_type]}
+            </p>
             <div className="carta-termo"><Markdown>{item.prompt}</Markdown></div>
             {item.prompt_note && <p className="carta-ipa">{item.prompt_note}</p>}
             {item.media_url && (
@@ -282,7 +337,10 @@ export function ReviewPage() {
             {suspended.data?.map((suspendedItem) => (
               <li key={suspendedItem.id}>
                 <div>
-                  <span>{TYPE_LABELS[suspendedItem.item_type]} · Aula {suspendedItem.lesson_number}</span>
+                  <span>
+                    {suspendedItem.course_title} · Aula {suspendedItem.lesson_number} ·{' '}
+                    {TYPE_LABELS[suspendedItem.item_type]}
+                  </span>
                   <strong>{suspendedItem.prompt}</strong>
                 </div>
                 <button

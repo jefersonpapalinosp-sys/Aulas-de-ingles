@@ -26,7 +26,7 @@ async def test_catalogo_separa_planejado_de_publicado(client: AsyncClient) -> No
         "position": 1,
         "status": "published",
         "total_lessons": 52,
-        "published_lessons": 14,
+        "published_lessons": 19,
     }
     assert courses[1]["total_lessons"] == 30
     assert courses[1]["published_lessons"] == 0
@@ -39,7 +39,7 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
 
     assert response.status_code == 200
     curriculum = response.json()
-    assert curriculum["course"]["published_lessons"] == 14
+    assert curriculum["course"]["published_lessons"] == 19
     assert [unit["slug"] for unit in curriculum["units"]] == [
         "31-40",
         "40-44",
@@ -79,7 +79,14 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
         "question_count": 6,
     }
     assert first["review"] is None
-    assert all(unit["lessons"] == [] for unit in curriculum["units"][2:])
+    third = curriculum["units"][2]
+    assert third["total_lessons"] == third["published_lessons"] == 5
+    assert [lesson["number"] for lesson in third["lessons"]] == list(range(45, 50))
+    assert all(lesson["unit_slug"] == "45-49" for lesson in third["lessons"])
+    assert third["review"]["slug"] == "checkpoint-45-49"
+    assert third["review"]["question_count"] == 6
+    assert curriculum["units"][3]["lessons"] == []
+    assert curriculum["units"][3]["review"] is None
 
 
 @pytest.mark.asyncio

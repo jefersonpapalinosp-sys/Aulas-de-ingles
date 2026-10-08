@@ -54,17 +54,33 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
 
 
 @pytest.mark.asyncio
-async def test_arquivo_de_seed_tem_as_quatorze_aulas() -> None:
+async def test_arquivo_de_seed_tem_as_dezenove_aulas() -> None:
     dados = load_seed()
-    assert [d["number"] for d in dados] == list(range(31, 45))
-    assert sum(len(d["vocab"]) for d in dados) == 155
-    assert sum(len(d["exercises"]) for d in dados) == 143
-    assert sum(len(e.get("answers", [])) for d in dados for e in d["exercises"]) == 169
-    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 199
-    assert sum(len(d.get("media", [])) for d in dados) == 14
-    assert sum(len(d.get("writing_prompts", [])) for d in dados) == 14
-    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 68
-    assert sum(len(m.get("transcript", [])) for d in dados for m in d.get("media", [])) == 289
+    assert [d["number"] for d in dados] == list(range(31, 50))
+
+    # O conteúdo publicado nas Sprints anteriores não pode ser reduzido durante
+    # a expansão. As contagens novas são verificadas por aula, evitando acoplar
+    # o teste ao tamanho editorial de transcrições e gabaritos.
+    anteriores = dados[:14]
+    assert sum(len(d["vocab"]) for d in anteriores) == 155
+    assert sum(len(d["exercises"]) for d in anteriores) == 143
+    assert sum(len(e.get("answers", [])) for d in anteriores for e in d["exercises"]) == 169
+    assert sum(len(e.get("hints", [])) for d in anteriores for e in d["exercises"]) == 199
+    assert sum(len(d.get("media", [])) for d in anteriores) == 14
+    assert sum(len(d.get("writing_prompts", [])) for d in anteriores) == 14
+    assert sum(len(m.get("cues", [])) for d in anteriores for m in d.get("media", [])) == 68
+    assert (
+        sum(len(m.get("transcript", [])) for d in anteriores for m in d.get("media", []))
+        == 289
+    )
+
+    novas = dados[14:]
+    assert [d["number"] for d in novas] == list(range(45, 50))
+    assert all(len(d["vocab"]) == 10 for d in novas)
+    assert all(len(d["exercises"]) == 8 for d in novas)
+    assert all(len(d.get("media", [])) == 1 for d in novas)
+    assert all(len(d["media"][0].get("cues", [])) == 5 for d in novas)
+    assert all(len(d.get("writing_prompts", [])) == 1 for d in novas)
     media = [item for lesson in dados for item in lesson.get("media", [])]
     assert all(item["license_status"] == "public_domain" for item in media)
     assert all(item["offline_policy"] == "network_only" for item in media)
@@ -74,9 +90,11 @@ async def test_arquivo_de_seed_tem_as_quatorze_aulas() -> None:
     assert all(d["learning_strategy"] for d in dados)
     assert all(d["course_slug"] == "voa-level-1" for d in dados)
     assert all(d["unit_slug"] == "31-40" for d in dados[:10])
-    assert all(d["unit_slug"] == "40-44" for d in dados[10:])
+    assert all(d["unit_slug"] == "40-44" for d in dados[10:14])
+    assert all(d["unit_slug"] == "45-49" for d in dados[14:])
     assert [d["position"] for d in dados[:10]] == list(range(1, 11))
-    assert [d["position"] for d in dados[10:]] == list(range(1, 5))
+    assert [d["position"] for d in dados[10:14]] == list(range(1, 5))
+    assert [d["position"] for d in dados[14:]] == list(range(1, 6))
     assert all(d["warmup_prompt"] and d["listening_focus"] for d in dados)
 
     pilots = [lesson for lesson in dados if lesson["number"] in {31, 38, 40}]
@@ -106,25 +124,43 @@ def test_checkpoint_do_seed_valida_referencias_e_gabarito() -> None:
     lessons = load_seed()
     validate_course_reviews(courses, lessons)
 
+    reviews = [
+        unit["review"]
+        for course in courses
+        for unit in course["units"]
+        if unit.get("review") is not None
+    ]
+    assert [review["slug"] for review in reviews] == [
+        "checkpoint-40-44",
+        "checkpoint-45-49",
+    ]
+    assert all(len(review["questions"]) == 6 for review in reviews)
+
+    review_unit_index = next(
+        index
+        for index, unit in enumerate(courses[0]["units"])
+        if (unit.get("review") or {}).get("slug") == "checkpoint-45-49"
+    )
+
     broken_lesson = deepcopy(courses)
-    broken_lesson[0]["units"][1]["review"]["review_lesson_number"] = 999
+    broken_lesson[0]["units"][review_unit_index]["review"]["review_lesson_number"] = 999
     with pytest.raises(ValueError, match="Aula 999"):
         validate_course_reviews(broken_lesson, lessons)
 
     broken_media = deepcopy(courses)
-    broken_media[0]["units"][1]["review"]["listening_media_position"] = 999
+    broken_media[0]["units"][review_unit_index]["review"]["listening_media_position"] = 999
     with pytest.raises(ValueError, match="mídia inexistente"):
         validate_course_reviews(broken_media, lessons)
 
     broken_answer = deepcopy(courses)
-    broken_answer[0]["units"][1]["review"]["questions"][0][
+    broken_answer[0]["units"][review_unit_index]["review"]["questions"][0][
         "accepted_answers"
     ] = []
     with pytest.raises(ValueError, match="resposta aceita"):
         validate_course_reviews(broken_answer, lessons)
 
     broken_question_lessons = deepcopy(courses)
-    broken_question_lessons[0]["units"][1]["review"]["questions"][0][
+    broken_question_lessons[0]["units"][review_unit_index]["review"]["questions"][0][
         "lesson_numbers"
     ] = []
     with pytest.raises(ValueError, match="ao menos uma aula"):
@@ -136,9 +172,9 @@ async def test_seed_rodado_de_novo_nao_duplica(session: AsyncSession) -> None:
     antes = await _contagens(session)
     assert antes["course"] == 2
     assert antes["course_unit"] == 10
-    assert antes["course_review"] == 1
-    assert antes["course_review_question"] == 6
-    assert antes["lesson"] == 14
+    assert antes["course_review"] == 2
+    assert antes["course_review_question"] == 12
+    assert antes["lesson"] == 19
 
     await seed_lessons(session)
 
@@ -164,20 +200,28 @@ async def test_ids_de_aula_sobrevivem_ao_reseed(session: AsyncSession) -> None:
 
 @pytest.mark.asyncio
 async def test_ids_do_checkpoint_sobrevivem_ao_reseed(session: AsyncSession) -> None:
-    review_before_id = (await session.execute(select(CourseReview.id))).scalar_one()
+    reviews_before = {
+        item.unit_id: item.id
+        for item in (await session.execute(select(CourseReview))).scalars()
+    }
     questions_before = {
-        item.position: item.id
+        (item.review_id, item.position): item.id
         for item in (await session.execute(select(CourseReviewQuestion))).scalars()
     }
+    assert len(reviews_before) == 2
+    assert len(questions_before) == 12
 
     await seed_lessons(session)
 
-    review_after = (await session.execute(select(CourseReview))).scalar_one()
+    reviews_after = {
+        item.unit_id: item.id
+        for item in (await session.execute(select(CourseReview))).scalars()
+    }
     questions_after = {
-        item.position: item.id
+        (item.review_id, item.position): item.id
         for item in (await session.execute(select(CourseReviewQuestion))).scalars()
     }
-    assert review_after.id == review_before_id
+    assert reviews_after == reviews_before
     assert questions_after == questions_before
 
 
@@ -224,7 +268,7 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
 async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
     media = list((await session.execute(select(LessonMedia))).scalars())
 
-    assert len(media) == 14
+    assert len(media) == 19
     assert all(item.license_status == "public_domain" for item in media)
     assert all(item.offline_policy == "network_only" for item in media)
     assert all(item.attribution == "Voice of America (VOA Learning English)" for item in media)

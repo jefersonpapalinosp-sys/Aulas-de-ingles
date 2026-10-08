@@ -605,8 +605,12 @@ async def meu_progresso(
         str | None,
         Query(description="Limita aulas e denominadores ao slug de um curso."),
     ] = None,
+    unit: Annotated[
+        str | None,
+        Query(description="Limita aulas, tentativas e revisões a uma unidade."),
+    ] = None,
 ) -> ProgressOut:
-    """Uma linha por aula publicada, opcionalmente limitada a um curso."""
+    """Uma linha por aula publicada, opcionalmente limitada a curso e unidade."""
     estudadas = {
         p.lesson_id: p.studied_at
         for p in (
@@ -638,6 +642,8 @@ async def meu_progresso(
     )
     if course is not None:
         lessons_stmt = lessons_stmt.where(Course.slug == course)
+    if unit is not None:
+        lessons_stmt = lessons_stmt.where(CourseUnit.slug == unit)
     aulas = list((await session.execute(lessons_stmt)).scalars())
     linhas = [
         LessonProgressOut(
@@ -651,17 +657,22 @@ async def meu_progresso(
         )
         for a in aulas
     ]
-    total_cartas = (
-        await session.execute(
-            select(func.count()).select_from(ReviewItem).where(ReviewItem.user_id == usuario.id)
-        )
-    ).scalar_one()
+    cards_stmt = (
+        select(func.count())
+        .select_from(ReviewItem)
+        .join(Lesson, ReviewItem.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(ReviewItem.user_id == usuario.id)
+    )
+    if course is not None:
+        cards_stmt = cards_stmt.where(Course.slug == course)
+    if unit is not None:
+        cards_stmt = cards_stmt.where(CourseUnit.slug == unit)
+    total_cartas = (await session.execute(cards_stmt)).scalar_one()
     vencidas = (
         await session.execute(
-            select(func.count())
-            .select_from(ReviewItem)
-            .where(
-                ReviewItem.user_id == usuario.id,
+            cards_stmt.where(
                 ReviewItem.status == "active",
                 ReviewItem.due_at <= datetime.now(UTC),
             )

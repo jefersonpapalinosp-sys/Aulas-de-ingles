@@ -1,13 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   api,
   authenticatedFetch,
   type NotebookEntry,
   type NotebookKind,
 } from '../api/client'
-import { useLessons } from '../api/queries'
+import { useCourseCurriculum, useCourses } from '../api/queries'
+import { curriculumLessons } from '../features/curriculum/curriculum'
 import { DEFAULT_COURSE_SLUG, studyPath } from '../routing/courseRoutes'
 
 const KINDS: readonly { value: NotebookKind; label: string }[] = [
@@ -24,7 +25,18 @@ function kindLabel(kind: NotebookKind): string {
 
 export function NotebookPage() {
   const queryClient = useQueryClient()
-  const { data: lessons = [] } = useLessons()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const courseSlug = searchParams.get('course') || DEFAULT_COURSE_SLUG
+  const unitSlug = searchParams.get('unit') || ''
+  const courses = useCourses()
+  const curriculum = useCourseCurriculum(courseSlug)
+  const lessons = useMemo(
+    () =>
+      curriculumLessons(curriculum.data).filter(
+        (lesson) => !unitSlug || lesson.unit_slug === unitSlug,
+      ),
+    [curriculum.data, unitSlug],
+  )
   const [lessonFilter, setLessonFilter] = useState<'all' | number>('all')
   const [kindFilter, setKindFilter] = useState<'all' | NotebookKind>('all')
   const [lessonNumber, setLessonNumber] = useState(0)
@@ -38,13 +50,15 @@ export function NotebookPage() {
   const [playingAttemptId, setPlayingAttemptId] = useState<number | null>(null)
 
   const entriesQuery = useQuery({
-    queryKey: ['notebook', lessonFilter, kindFilter],
+    queryKey: ['notebook', courseSlug, unitSlug || 'all', lessonFilter, kindFilter],
     queryFn: async () => {
       const { data } = await api.GET('/api/me/notebook', {
         params: {
           query: {
-            lesson: lessonFilter === 'all' ? undefined : lessonFilter,
-            kind: kindFilter === 'all' ? undefined : kindFilter,
+              lesson: lessonFilter === 'all' ? undefined : lessonFilter,
+              kind: kindFilter === 'all' ? undefined : kindFilter,
+              course: courseSlug,
+              unit: unitSlug || undefined,
           },
         },
       })
@@ -54,18 +68,22 @@ export function NotebookPage() {
     retry: false,
   })
   const writingQuery = useQuery({
-    queryKey: ['writing-history'],
+    queryKey: ['writing-history', courseSlug, unitSlug || 'all'],
     queryFn: async () => {
-      const { data } = await api.GET('/api/writing/history')
+      const { data } = await api.GET('/api/writing/history', {
+        params: { query: { course: courseSlug, unit: unitSlug || undefined } },
+      })
       if (!data) throw new Error('Não foi possível carregar os textos.')
       return data
     },
     retry: false,
   })
   const speakingQuery = useQuery({
-    queryKey: ['speaking-attempts'],
+    queryKey: ['speaking-attempts', courseSlug, unitSlug || 'all'],
     queryFn: async () => {
-      const { data } = await api.GET('/api/speaking/attempts')
+      const { data } = await api.GET('/api/speaking/attempts', {
+        params: { query: { course: courseSlug, unit: unitSlug || undefined } },
+      })
       if (!data) throw new Error('Não foi possível carregar as gravações.')
       return data
     },
@@ -80,8 +98,22 @@ export function NotebookPage() {
   )
 
   useEffect(() => {
-    if (lessonNumber === 0 && lessons[0]) setLessonNumber(lessons[0].number)
+    if (!lessons.some((lesson) => lesson.number === lessonNumber)) {
+      setLessonNumber(lessons[0]?.number ?? 0)
+    }
   }, [lessonNumber, lessons])
+
+  function setScope(nextCourse: string, nextUnit = '') {
+    const next = new URLSearchParams(searchParams)
+    next.set('course', nextCourse)
+    if (nextUnit) next.set('unit', nextUnit)
+    else next.delete('unit')
+    setSearchParams(next, { replace: true })
+    setLessonFilter('all')
+    setLessonNumber(0)
+    setEditing(null)
+    setMessage('')
+  }
 
   async function refreshNotebook() {
     await queryClient.invalidateQueries({ queryKey: ['notebook'] })
@@ -93,7 +125,7 @@ export function NotebookPage() {
     setMessage('')
     try {
       const { data } = await api.POST('/api/me/notebook', {
-        body: { lesson_number: lessonNumber, kind, content },
+        body: { course_slug: courseSlug, lesson_number: lessonNumber, kind, content },
       })
       if (!data) throw new Error('Falha ao criar anotação.')
       setContent('')
@@ -206,6 +238,32 @@ export function NotebookPage() {
         Estas anotações pertencem somente à sua conta. Elas não alteram as aulas e não aparecem
         para outros estudantes.
       </p>
+      <div className="notebook-filters" aria-label="Escopo do caderno">
+        <label>
+          Curso
+          <select value={courseSlug} onChange={(event) => setScope(event.target.value)}>
+            {(courses.data ?? []).map((course) => (
+              <option key={course.slug} value={course.slug}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Unidade
+          <select
+            value={unitSlug}
+            onChange={(event) => setScope(courseSlug, event.target.value)}
+          >
+            <option value="">Todas as unidades</option>
+            {(curriculum.data?.units ?? []).map((unit) => (
+              <option key={unit.slug} value={unit.slug}>
+                {unit.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       {message && <p className="notebook-message" role="status">{message}</p>}
 
       <section className="notebook-compose" aria-labelledby="new-note-title">
@@ -215,8 +273,11 @@ export function NotebookPage() {
           <label>
             Aula
             <select value={lessonNumber} onChange={(event) => setLessonNumber(Number(event.target.value))}>
+              {lessons.length === 0 && <option value={0}>Nenhuma aula publicada</option>}
               {lessons.map((lesson) => (
-                <option key={lesson.number} value={lesson.number}>Aula {lesson.number} · {lesson.title}</option>
+                <option key={`${lesson.course_slug}:${lesson.number}`} value={lesson.number}>
+                  Aula {lesson.number} · {lesson.title}
+                </option>
               ))}
             </select>
           </label>
@@ -238,7 +299,12 @@ export function NotebookPage() {
         </label>
         <div className="notebook-compose-actions">
           <span>{content.length}/2000</span>
-          <button type="button" className="btn" disabled={saving || !content.trim()} onClick={() => void createEntry()}>
+          <button
+            type="button"
+            className="btn"
+            disabled={saving || lessonNumber === 0 || !content.trim()}
+            onClick={() => void createEntry()}
+          >
             {saving ? 'Salvando…' : 'Salvar no caderno'}
           </button>
         </div>
@@ -255,7 +321,11 @@ export function NotebookPage() {
               Aula
               <select value={lessonFilter} onChange={(event) => setLessonFilter(event.target.value === 'all' ? 'all' : Number(event.target.value))}>
                 <option value="all">Todas</option>
-                {lessons.map((lesson) => <option key={lesson.number} value={lesson.number}>{lesson.number}</option>)}
+                {lessons.map((lesson) => (
+                  <option key={`${lesson.course_slug}:${lesson.number}`} value={lesson.number}>
+                    {lesson.number}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
@@ -297,7 +367,7 @@ export function NotebookPage() {
                 <>
                   <div className="notebook-entry-meta">
                     <span>{kindLabel(entry.kind)}</span>
-                    <span>Aula {entry.lesson_number}</span>
+                    <span>{entry.course_title} · Aula {entry.lesson_number}</span>
                     <time dateTime={entry.updated_at}>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(entry.updated_at))}</time>
                   </div>
                   <p>{entry.content}</p>
@@ -322,12 +392,12 @@ export function NotebookPage() {
           {writingQuery.data?.map((item) => (
             <li key={item.prompt_id}>
               <div>
-                <span>Aula {item.lesson_number} · {item.lesson_title}</span>
+                <span>{item.course_title} · Aula {item.lesson_number} · {item.lesson_title}</span>
                 <strong>{item.prompt_title}</strong>
                 <small>{item.revisions.length} versões · {item.feedbacks.length} análises</small>
               </div>
               <Link
-                to={studyPath(DEFAULT_COURSE_SLUG, item.lesson_number, 'revisar')}
+                to={studyPath(item.course_slug, item.lesson_number, 'revisar')}
               >
                 Abrir texto
               </Link>
@@ -346,7 +416,7 @@ export function NotebookPage() {
           {speakingQuery.data?.map((attempt) => (
             <li key={attempt.id}>
               <div>
-                <span>Aula {attempt.lesson_number}</span>
+                <span>{attempt.course_title} · Aula {attempt.lesson_number}</span>
                 <strong lang="en">{attempt.cue_text}</strong>
                 <small>{Math.ceil(attempt.duration_ms / 1000)}s · {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date(attempt.created_at))}</small>
               </div>

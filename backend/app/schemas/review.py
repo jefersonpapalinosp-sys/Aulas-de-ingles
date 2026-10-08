@@ -26,7 +26,11 @@ class CardOut(BaseModel):
     prompt_note: str | None
     answer: str
     context: str | None
+    course_slug: str
+    course_title: str
+    unit_slug: str
     lesson_number: int
+    lesson_title: str
     reason: str
     estimated_seconds: int
     media_url: str | None

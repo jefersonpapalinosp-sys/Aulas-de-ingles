@@ -59,6 +59,9 @@ class WritingFeedbackOut(BaseModel):
 
 class WritingHistoryItemOut(BaseModel):
     prompt_id: int
+    course_slug: str
+    course_title: str
+    unit_slug: str
     lesson_number: int
     lesson_title: str
     prompt_title: str

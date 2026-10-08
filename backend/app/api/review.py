@@ -8,7 +8,7 @@ from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
-from app.db.models import ReviewItem, User, VocabItem
+from app.db.models import Course, CourseUnit, Lesson, ReviewItem, User, VocabItem
 from app.db.session import get_session
 from app.domain.sm2 import Estado, revisar
 from app.schemas.review import (
@@ -159,7 +159,11 @@ def _out(item: ReviewItem) -> CardOut:
         prompt_note=item.prompt_note,
         answer=item.answer,
         context=item.context,
+        course_slug=item.lesson.course.slug,
+        course_title=item.lesson.course.title,
+        unit_slug=item.lesson.unit.slug,
         lesson_number=item.lesson.number,
+        lesson_title=item.lesson.title,
         reason=_reason(item),
         estimated_seconds=item.estimated_seconds,
         media_url=item.media_url,
@@ -231,11 +235,19 @@ def _filtered_query(
     item_type: ReviewItemType | None,
     skill: str | None,
     max_minutes: int | None,
+    course: str | None,
+    unit: str | None,
     due_only: bool,
 ) -> Select[ReviewItem]:
-    query = select(ReviewItem).where(
-        ReviewItem.user_id == user_id,
-        ReviewItem.status == item_status,
+    query = (
+        select(ReviewItem)
+        .join(Lesson, ReviewItem.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            ReviewItem.user_id == user_id,
+            ReviewItem.status == item_status,
+        )
     )
     if due_only:
         query = query.where(ReviewItem.due_at <= datetime.now(UTC))
@@ -245,6 +257,10 @@ def _filtered_query(
         query = query.where(ReviewItem.skill == skill)
     if max_minutes is not None:
         query = query.where(ReviewItem.estimated_seconds <= max_minutes * 60)
+    if course is not None:
+        query = query.where(Course.slug == course)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
     return query
 
 
@@ -256,6 +272,8 @@ async def vencidas(
     item_type: Annotated[ReviewItemType | None, Query()] = None,
     skill: Annotated[str | None, Query(max_length=40)] = None,
     max_minutes: Annotated[int | None, Query(ge=1, le=30)] = None,
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[CardOut]:
     items = (
         await session.execute(
@@ -265,6 +283,8 @@ async def vencidas(
                 item_type=item_type,
                 skill=skill,
                 max_minutes=max_minutes,
+                course=course,
+                unit=unit,
                 due_only=True,
             )
             .order_by(ReviewItem.due_at, ReviewItem.id)
@@ -279,6 +299,8 @@ async def listar_itens(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
     item_status: Annotated[ReviewItemStatus, Query(alias="status")] = "suspended",
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[CardOut]:
     items = (
         await session.execute(
@@ -288,6 +310,8 @@ async def listar_itens(
                 item_type=None,
                 skill=None,
                 max_minutes=None,
+                course=course,
+                unit=unit,
                 due_only=False,
             ).order_by(ReviewItem.created_at.desc())
         )

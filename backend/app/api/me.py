@@ -11,6 +11,8 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao, remover_item_por_origem
 from app.db.models import (
+    Course,
+    CourseUnit,
     Exercise,
     ExerciseAttempt,
     Lesson,
@@ -46,6 +48,9 @@ router = APIRouter(prefix="/me", tags=["me"])
 def _entry_out(entry: NotebookEntry) -> NotebookEntryOut:
     return NotebookEntryOut(
         id=entry.id,
+        course_slug=entry.lesson.course.slug,
+        course_title=entry.lesson.course.title,
+        unit_slug=entry.lesson.unit.slug,
         lesson_number=entry.lesson.number,
         lesson_title=entry.lesson.title,
         kind=entry.kind,  # type: ignore[arg-type]
@@ -75,14 +80,20 @@ async def listar_caderno(
     session: Annotated[AsyncSession, Depends(get_session)],
     lesson: Annotated[int | None, Query(ge=1)] = None,
     kind: Annotated[NotebookKind | None, Query()] = None,
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[NotebookEntryOut]:
     query = select(NotebookEntry).where(NotebookEntry.user_id == usuario.id)
+    if course is not None:
+        query = query.where(NotebookEntry.lesson.has(Lesson.course.has(Course.slug == course)))
+    if unit is not None:
+        query = query.where(NotebookEntry.lesson.has(Lesson.unit.has(CourseUnit.slug == unit)))
     if lesson is not None:
         query = query.where(
             NotebookEntry.lesson.has(
                 and_(
                     Lesson.number == lesson,
-                    Lesson.course.has(slug=DEFAULT_COURSE_SLUG),
+                    Lesson.course.has(slug=course or DEFAULT_COURSE_SLUG),
                 )
             )
         )
@@ -98,7 +109,7 @@ async def criar_anotacao(
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[NotebookEntryIn, Body()],
 ) -> NotebookEntryOut:
-    lesson = await lesson_by_course_number(session, DEFAULT_COURSE_SLUG, corpo.lesson_number)
+    lesson = await lesson_by_course_number(session, corpo.course_slug, corpo.lesson_number)
     if lesson is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aula não existe.")
     entry = NotebookEntry(

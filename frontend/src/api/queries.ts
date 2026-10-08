@@ -61,11 +61,18 @@ export function useLesson(courseSlug: string, number: number) {
   })
 }
 
-export function useAllExercises() {
+export function useAllExercises(courseSlug?: string, unitSlug?: string) {
   return useQuery({
-    queryKey: ['exercises'],
+    queryKey: ['exercises', courseSlug ?? 'all', unitSlug ?? 'all'],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/exercises')
+      const { data, response } = await api.GET('/api/exercises', {
+        params: {
+          query: {
+            course: courseSlug,
+            unit: unitSlug,
+          },
+        },
+      })
       if (!data) throw falhou(response?.status, 'os exercícios do bloco')
       return data
     },

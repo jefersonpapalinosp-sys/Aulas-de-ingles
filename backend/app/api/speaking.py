@@ -15,7 +15,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
-from sqlalchemy import Select, and_, delete, select
+from sqlalchemy import Select, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -24,6 +24,8 @@ from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
 from app.db.models import (
+    Course,
+    CourseUnit,
     Lesson,
     LessonMedia,
     SkillEvidence,
@@ -77,6 +79,9 @@ def _output(
 ) -> SpeakingAttemptOut:
     return SpeakingAttemptOut(
         id=attempt.id,
+        course_slug=attempt.cue.media.lesson.course.slug,
+        course_title=attempt.cue.media.lesson.course.title,
+        unit_slug=attempt.cue.media.lesson.unit.slug,
         lesson_number=attempt.cue.media.lesson.number,
         cue_id=attempt.transcript_cue_id,
         cue_text=attempt.cue.text_en,
@@ -230,25 +235,30 @@ async def listar_tentativas(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
     lesson: Annotated[int | None, Query(ge=1)] = None,
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[SpeakingAttemptOut]:
     await _purge_expired_transcriptions(session, usuario.id)
     query = _query().where(
         SpeakingAttempt.user_id == usuario.id,
         SpeakingAttempt.status == "ready",
     )
-    if lesson is not None:
+    if lesson is not None or course is not None or unit is not None:
         query = (
             query.join(SpeakingAttempt.cue)
             .join(TranscriptCue.media)
-            .where(
-                LessonMedia.lesson.has(
-                    and_(
-                        Lesson.number == lesson,
-                        Lesson.course.has(slug=DEFAULT_COURSE_SLUG),
-                    )
-                )
-            )
+            .join(LessonMedia.lesson)
+            .join(Lesson.course)
+            .join(Lesson.unit)
         )
+    if lesson is not None:
+        query = query.where(Lesson.number == lesson)
+    if course is not None:
+        query = query.where(Course.slug == course)
+    elif lesson is not None:
+        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
     attempts = list(
         (await session.execute(query.order_by(SpeakingAttempt.created_at.desc()))).scalars()
     )

@@ -110,10 +110,139 @@
         "slug": "45-49",
         "title": "Aulas 45–49",
         "position": 3,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 45,
         "lesson_end": 49,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-45-49",
+          "title": "Checkpoint 45–49",
+          "position": 6,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Lessons 45–49",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-review-lesson-45-49/3765169.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são autorais do projeto.",
+          "intro": "Consolide as previsões de viagem, os empréstimos, as ofertas de ajuda e os contrastes entre ações em progresso, experiências e resultados. A escuta da Aula 49 verifica como as formas verbais mudam ao longo de uma missão.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 49,
+          "listening_lesson_number": 49,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Complete a previsão: At this time tomorrow, we ____ across the state.",
+              "options": [
+                "will be driving",
+                "will driving",
+                "were driving"
+              ],
+              "accepted_answers": [
+                "will be driving"
+              ],
+              "explanation": "A pista temporal ‘at this time tomorrow’ aponta para uma ação que estará em andamento; por isso usamos will + be + verbo-ing.",
+              "lesson_numbers": [
+                45
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Anna receberá uma tesoura por algumas horas. Qual pedido representa corretamente esse ponto de vista?",
+              "options": [
+                "May I borrow your scissors?",
+                "May I lend your scissors?",
+                "May I borrowed your scissors?"
+              ],
+              "accepted_answers": [
+                "May I borrow your scissors?"
+              ],
+              "explanation": "Durante o período do empréstimo, Anna recebe o objeto, então usa borrow; quem entrega usa lend. Depois de may, o verbo permanece na forma base.",
+              "lesson_numbers": [
+                46
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase contrasta uma ação de agora com outra que estava em andamento ontem à noite?",
+              "options": [
+                "Pete is fixing the car now, but he was studying last night.",
+                "Pete was fixing the car now, but he is studying last night.",
+                "Pete fixes now, but he was study last night."
+              ],
+              "accepted_answers": [
+                "Pete is fixing the car now, but he was studying last night."
+              ],
+              "explanation": "‘Now’ pede present continuous (is fixing), enquanto ‘last night’ cria um ponto passado para a ação em progresso (was studying).",
+              "lesson_numbers": [
+                47
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "A situação começou há três anos e continua hoje. Qual frase expressa essa duração?",
+              "options": [
+                "I have lived here for three years.",
+                "I lived here for three years tomorrow.",
+                "I have live here since three years."
+              ],
+              "accepted_answers": [
+                "I have lived here for three years."
+              ],
+              "explanation": "‘For three years’ mede uma duração que chega ao presente; have + lived conecta o início passado à situação atual.",
+              "lesson_numbers": [
+                48
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 49, qual sequência acompanha o trabalho de Anna com o código?",
+              "options": [
+                "She has never cracked one, is still trying, and then has cracked it.",
+                "She cracked it before the mission and is forgetting it.",
+                "She will try tomorrow but never starts."
+              ],
+              "accepted_answers": [
+                "She has never cracked one, is still trying, and then has cracked it."
+              ],
+              "explanation": "As pistas ‘never before’, ‘still trying’ e a exclamação final marcam, em ordem, ausência de experiência, processo atual e resultado recém-concluído.",
+              "lesson_numbers": [
+                49
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual linha do tempo usa corretamente uma ação futura em progresso, uma ação atual e uma experiência até agora?",
+              "options": [
+                "Tomorrow we will be traveling; now we are packing; we have never visited that city.",
+                "Tomorrow we were traveling; now we packed; we never have visit that city.",
+                "Tomorrow we will traveling; now we have pack; we did never visited that city."
+              ],
+              "accepted_answers": [
+                "Tomorrow we will be traveling; now we are packing; we have never visited that city."
+              ],
+              "explanation": "‘Tomorrow’ com ação em curso pede will be traveling; ‘now’ pede are packing; ‘never ... até agora’ pede have never visited.",
+              "lesson_numbers": [
+                45,
+                47,
+                48,
+                49
+              ]
+            }
+          ]
+        }
       },
       {
         "slug": "50-52",

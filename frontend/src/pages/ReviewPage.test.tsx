@@ -10,11 +10,34 @@ const setStatus = vi.fn()
 const deleteItem = vi.fn()
 const useDueCards = vi.fn()
 const useSuspended = vi.fn()
+const queryHooks = vi.hoisted(() => ({
+  useCourses: vi.fn(),
+  useCourseCurriculum: vi.fn(),
+}))
+
+const course = {
+  id: 1,
+  slug: 'voa-level-1',
+  title: "Let's Learn English — Level 1",
+  level: 'Level 1',
+  proficiency_label: 'Iniciante',
+  provider: 'VOA Learning English',
+  source_url: 'https://example.com',
+  position: 1,
+  status: 'published',
+  total_lessons: 52,
+  published_lessons: 49,
+}
+
+vi.mock('../api/queries', () => ({
+  useCourses: queryHooks.useCourses,
+  useCourseCurriculum: queryHooks.useCourseCurriculum,
+}))
 
 vi.mock('../api/review', () => ({
   useDueCards: (filters: unknown) => useDueCards(filters),
   useAvaliar: () => ({ mutate: avaliar, isPending: false }),
-  useSuspendedReviewItems: () => useSuspended(),
+  useSuspendedReviewItems: (filters: unknown) => useSuspended(filters),
   useSetReviewItemStatus: () => ({ mutate: setStatus, isPending: false }),
   useDeleteReviewItem: () => ({ mutate: deleteItem, isPending: false }),
 }))
@@ -34,7 +57,11 @@ const carta = {
   cue_end_seconds: null,
   status: 'active',
   vocab_item_id: 70,
+  course_slug: 'voa-level-1',
+  course_title: "Let's Learn English — Level 1",
+  unit_slug: '45-49',
   lesson_number: 31,
+  lesson_title: 'Take Me Out to the Ball Game',
   ease_factor: 2.5,
   interval_days: 0,
   repetitions: 0,
@@ -42,11 +69,11 @@ const carta = {
   due_at: '2026-10-07T12:00:00Z',
 }
 
-function montar() {
+function montar(route = '/revisar?course=voa-level-1&unit=45-49') {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[route]}>
         <ReviewPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -57,6 +84,29 @@ afterEach(() => vi.resetAllMocks())
 
 beforeEach(() => {
   useSuspended.mockReturnValue({ data: [], isPending: false, error: null })
+  queryHooks.useCourses.mockReturnValue({ data: [course], isPending: false, error: null })
+  queryHooks.useCourseCurriculum.mockReturnValue({
+    data: {
+      course,
+      units: [
+        {
+          id: 4,
+          slug: '45-49',
+          title: 'Aulas 45–49',
+          position: 4,
+          status: 'published',
+          lesson_start: 45,
+          lesson_end: 49,
+          total_lessons: 5,
+          published_lessons: 5,
+          lessons: [],
+          review: null,
+        },
+      ],
+    },
+    isPending: false,
+    error: null,
+  })
 })
 
 describe('ReviewPage', () => {
@@ -105,10 +155,28 @@ describe('ReviewPage', () => {
     await user.selectOptions(screen.getByLabelText('Duração'), '2')
 
     expect(useDueCards).toHaveBeenLastCalledWith({
+      courseSlug: 'voa-level-1',
+      unitSlug: '45-49',
       itemType: 'grammar_error',
       skill: 'grammar',
       maxMinutes: 2,
     })
+    expect(useSuspended).toHaveBeenLastCalledWith({
+      courseSlug: 'voa-level-1',
+      unitSlug: '45-49',
+    })
+  })
+
+  it('mostra a identidade do curso no card e permite ampliar para todas as unidades', async () => {
+    const user = userEvent.setup()
+    useDueCards.mockReturnValue({ data: [carta], isPending: false, error: null })
+    montar()
+
+    expect(screen.getAllByText(/Let's Learn English — Level 1 · Aula 31/)).toHaveLength(2)
+    await user.selectOptions(screen.getByLabelText('Unidade'), '')
+    expect(useDueCards).toHaveBeenLastCalledWith(
+      expect.objectContaining({ courseSlug: 'voa-level-1', unitSlug: undefined }),
+    )
   })
 
   it('reativa um item suspenso', async () => {
@@ -155,7 +223,7 @@ describe('ReviewPage', () => {
 
   it('deck vazio explica como encher', () => {
     useDueCards.mockReturnValue({ data: [], isPending: false, error: null })
-    montar()
+    montar('/revisar?course=voa-level-1')
     expect(screen.getByText('Nada para revisar agora')).toBeInTheDocument()
     expect(screen.getByText(/Marque uma aula como estudada/)).toBeInTheDocument()
   })

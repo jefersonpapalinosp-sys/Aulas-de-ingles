@@ -42,6 +42,9 @@ export function LessonPage() {
   const unit = curriculum.data?.units.find((candidate) =>
     candidate.lessons.some((lesson) => lesson.id === data.id),
   )
+  const unitIndex = curriculum.data?.units.findIndex((candidate) => candidate.id === unit?.id) ?? -1
+  const previousUnit = unitIndex > 0 ? curriculum.data?.units[unitIndex - 1] : undefined
+  const isFirstLessonInUnit = unit?.lessons[0]?.id === data.id
   const isLastLessonInUnit = unit?.lessons.at(-1)?.id === data.id
   const conversationAudio = data.media.find((media) => media.kind === 'conversation_audio')
 
@@ -174,7 +177,11 @@ export function LessonPage() {
       )}
 
       <nav className="navbtns">
-        {previous ? (
+        {isFirstLessonInUnit && previousUnit?.review ? (
+          <Link className="btn ghost" to={courseReviewPath(courseSlug, previousUnit.slug)}>
+            ← {previousUnit.review.title}
+          </Link>
+        ) : previous ? (
           <Link className="btn ghost" to={lessonPath(courseSlug, previous.number)}>
             ← Aula {previous.number}
           </Link>

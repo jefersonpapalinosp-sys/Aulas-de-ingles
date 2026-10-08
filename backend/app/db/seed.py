@@ -147,14 +147,32 @@ def validate_course_reviews(
 
             if listening_number is not None:
                 listening_lesson = lessons_by_course_number[(course_slug, int(listening_number))]
-                media_positions = {
-                    int(media["position"]) for media in listening_lesson.get("media", [])
+                media_by_position = {
+                    int(media["position"]): media for media in listening_lesson.get("media", [])
                 }
-                if int(listening_position) not in media_positions:
+                listening_media = media_by_position.get(int(listening_position))
+                if listening_media is None:
                     raise ValueError(
                         f"Checkpoint {course_slug}/{unit['slug']} referencia mídia inexistente "
                         f"na Aula {listening_number}."
                     )
+                if listening_media.get("kind") != "conversation_audio":
+                    raise ValueError(
+                        f"Checkpoint {course_slug}/{unit['slug']} deve usar áudio de conversa."
+                    )
+
+            unit_lessons = [
+                lesson
+                for lesson in lessons
+                if lesson["course_slug"] == course_slug
+                and lesson["unit_slug"] == unit["slug"]
+            ]
+            if unit_lessons and int(review["position"]) <= max(
+                int(lesson["position"]) for lesson in unit_lessons
+            ):
+                raise ValueError(
+                    f"Checkpoint {course_slug}/{unit['slug']} deve vir depois das aulas."
+                )
 
 
 async def _upsert_catalog(session: AsyncSession, courses: list[dict[str, Any]]) -> None:
@@ -211,6 +229,87 @@ async def _upsert_course_review(
     if review is None:
         review = CourseReview(unit_id=unit.id, slug=raw["slug"])
         session.add(review)
+        existing_questions: list[CourseReviewQuestion] = []
+    else:
+        existing_questions = list(
+            (
+                await session.execute(
+                    select(CourseReviewQuestion)
+                    .where(CourseReviewQuestion.review_id == review.id)
+                    .order_by(CourseReviewQuestion.position)
+                )
+            ).scalars()
+        )
+        incoming_version = int(raw["content_version"])
+        if incoming_version < review.content_version:
+            raise ValueError(
+                f"Checkpoint {unit.slug} não pode reduzir content_version "
+                f"de {review.content_version} para {incoming_version}."
+            )
+        stored_content = {
+            "slug": review.slug,
+            "title": review.title,
+            "position": review.position,
+            "status": review.status,
+            "source_kind": review.source_kind,
+            "source_title": review.source_title,
+            "source_url": review.source_url,
+            "source_note": review.source_note,
+            "intro": review.intro,
+            "estimated_minutes": review.estimated_minutes,
+            "review_lesson_number": review.review_lesson_number,
+            "listening_lesson_number": review.listening_lesson_number,
+            "listening_media_position": review.listening_media_position,
+            "questions": [
+                {
+                    "position": question.position,
+                    "activity_type": question.activity_type,
+                    "skill": question.skill,
+                    "prompt": question.prompt,
+                    "options": question.options,
+                    "accepted_answers": question.accepted_answers,
+                    "explanation": question.explanation,
+                    "lesson_numbers": question.lesson_numbers,
+                }
+                for question in existing_questions
+            ],
+        }
+        incoming_content = {
+            key: raw.get(key)
+            for key in (
+                "slug",
+                "title",
+                "position",
+                "status",
+                "source_kind",
+                "source_title",
+                "source_url",
+                "source_note",
+                "intro",
+                "estimated_minutes",
+                "review_lesson_number",
+                "listening_lesson_number",
+                "listening_media_position",
+            )
+        }
+        incoming_content["questions"] = [
+            {
+                "position": question["position"],
+                "activity_type": question["activity_type"],
+                "skill": question["skill"],
+                "prompt": question["prompt"],
+                "options": question.get("options"),
+                "accepted_answers": question["accepted_answers"],
+                "explanation": question["explanation"],
+                "lesson_numbers": question["lesson_numbers"],
+            }
+            for question in raw["questions"]
+        ]
+        if incoming_content != stored_content and incoming_version == review.content_version:
+            raise ValueError(
+                f"Checkpoint {unit.slug} mudou sem incrementar content_version "
+                f"{review.content_version}."
+            )
     review.slug = raw["slug"]
     review.title = raw["title"]
     review.position = raw["position"]
@@ -229,11 +328,7 @@ async def _upsert_course_review(
 
     existing = {
         question.position: question
-        for question in (
-            await session.execute(
-                select(CourseReviewQuestion).where(CourseReviewQuestion.review_id == review.id)
-            )
-        ).scalars()
+        for question in existing_questions
     }
     seen: set[int] = set()
     for raw_question in raw["questions"]:

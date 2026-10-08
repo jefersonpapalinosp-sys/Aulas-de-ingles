@@ -86,6 +86,10 @@ async def test_fluxo_de_upload_listagem_audio_e_exclusao(
 
     listed = (await client.get("/api/speaking/attempts?lesson=31", headers=headers)).json()
     assert [item["id"] for item in listed] == [attempt["id"]]
+    assert listed[0]["course_slug"] == "voa-level-1"
+    assert listed[0]["course_title"] == "Let's Learn English — Level 1"
+    assert listed[0]["unit_slug"] == "31-40"
+    assert listed[0]["lesson_number"] == 31
     downloaded = await client.get(f"/api/speaking/attempts/{attempt['id']}/audio", headers=headers)
     assert downloaded.status_code == 200
     assert downloaded.content == audio

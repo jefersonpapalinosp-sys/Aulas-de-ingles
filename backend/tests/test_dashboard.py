@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
     CourseReview,
+    CourseUnit,
     Lesson,
     LessonProgress,
     StepProgress,
@@ -164,7 +165,13 @@ async def test_recommendation_offers_unit_checkpoint_after_required_lessons(
     ]
     assert after_attempt["kind"] != "course_review"
 
-    review = (await session.execute(select(CourseReview))).scalar_one()
+    review = (
+        await session.execute(
+            select(CourseReview)
+            .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
+            .where(CourseUnit.slug == "40-44")
+        )
+    ).scalar_one()
     original_version = review.content_version
     try:
         review.content_version = original_version + 1
@@ -214,6 +221,70 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
     assert grammar["samples"] == 3
     assert grammar["score_percent"] == 67
     assert grammar["status"] == "steady"
+
+
+@pytest.mark.asyncio
+async def test_skills_sao_isoladas_por_curso_e_unidade(client: AsyncClient) -> None:
+    headers = await conta(client, "skills-por-unidade")
+    lesson_31 = (await client.get("/api/exercises?lesson=31")).json()
+    lesson_41 = (await client.get("/api/exercises?lesson=41")).json()
+    exercise_31 = next(item for item in lesson_31 if item["skill"] == "grammar")
+    exercise_41 = next(item for item in lesson_41 if item["skill"] == "grammar")
+
+    for key in (701, 702):
+        response = await client.post(
+            f"/api/exercises/{exercise_31['id']}/attempt",
+            headers=headers,
+            json=attempt("definitely wrong", key),
+        )
+        assert response.status_code == 200
+        assert response.json()["correct"] is False
+    response = await client.post(
+        f"/api/exercises/{exercise_41['id']}/attempt",
+        headers=headers,
+        json=attempt("definitely wrong", 703),
+    )
+    assert response.status_code == 200
+    assert response.json()["correct"] is False
+
+    first = (
+        await client.get(
+            "/api/me/skills?course=voa-level-1&unit=31-40", headers=headers
+        )
+    ).json()
+    second = (
+        await client.get(
+            "/api/me/skills?course=voa-level-1&unit=40-44", headers=headers
+        )
+    ).json()
+    future = (
+        await client.get(
+            "/api/me/skills?course=voa-level-1&unit=45-49", headers=headers
+        )
+    ).json()
+    other_course = (
+        await client.get(
+            "/api/me/skills?course=voa-level-2&unit=31-40", headers=headers
+        )
+    ).json()
+    global_skills = (await client.get("/api/me/skills", headers=headers)).json()
+
+    first_grammar = next(item for item in first if item["skill"] == "grammar")
+    second_grammar = next(item for item in second if item["skill"] == "grammar")
+    future_grammar = next(item for item in future if item["skill"] == "grammar")
+    other_grammar = next(item for item in other_course if item["skill"] == "grammar")
+    global_grammar = next(item for item in global_skills if item["skill"] == "grammar")
+
+    assert first_grammar["samples"] == 2
+    assert first_grammar["score_percent"] is None
+    assert "Comparativos + conselho" in first_grammar["fragile_topics"]
+    assert second_grammar["samples"] == 1
+    assert second_grammar["fragile_topics"] == []
+    assert future_grammar["samples"] == 0
+    assert other_grammar["samples"] == 0
+    assert global_grammar["samples"] == 3
+    assert global_grammar["score_percent"] == 0
+    assert global_grammar["status"] == "developing"
 
 
 @pytest.mark.asyncio

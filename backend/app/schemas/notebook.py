@@ -15,6 +15,7 @@ NotebookKind = Literal[
 
 
 class NotebookEntryIn(BaseModel):
+    course_slug: str = Field(default="voa-level-1", min_length=1, max_length=100)
     lesson_number: int = Field(ge=1)
     kind: NotebookKind
     content: str = Field(min_length=1, max_length=2000)
@@ -43,6 +44,9 @@ class NotebookEntryUpdate(BaseModel):
 
 class NotebookEntryOut(BaseModel):
     id: int
+    course_slug: str
+    course_title: str
+    unit_slug: str
     lesson_number: int
     lesson_title: str
     kind: NotebookKind
