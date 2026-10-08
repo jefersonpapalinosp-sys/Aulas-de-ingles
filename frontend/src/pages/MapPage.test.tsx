@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MapPage } from './MapPage'
 
@@ -19,6 +19,19 @@ const lesson = {
   focus_points: ['faster than'],
   story_note: 'Transportation',
 }
+
+const unitLessons = Array.from({ length: 4 }, (_, index) => ({
+  ...lesson,
+  id: 41 + index,
+  unit_slug: '40-44',
+  slug: `lesson-${41 + index}`,
+  position: index + 1,
+  number: 41 + index,
+  title: `Lesson ${41 + index}`,
+  title_pt: `Aula ${41 + index}`,
+  grammar_tag: 'Gramática da unidade',
+}))
+let studiedLessonNumbers: number[] = []
 
 vi.mock('../api/queries', () => ({
   useCourseCurriculum: () => ({
@@ -48,6 +61,30 @@ vi.mock('../api/queries', () => ({
           total_lessons: 10,
           published_lessons: 1,
           lessons: [lesson],
+          review: null,
+        },
+        {
+          id: 2,
+          slug: '40-44',
+          title: 'Unidade 40–44',
+          position: 2,
+          status: 'published',
+          lesson_start: 40,
+          lesson_end: 44,
+          total_lessons: 4,
+          published_lessons: 4,
+          lessons: unitLessons,
+          review: {
+            id: 12,
+            slug: 'checkpoint-40-44',
+            position: 5,
+            title: 'Checkpoint 40–44',
+            status: 'published',
+            estimated_minutes: 12,
+            question_count: 6,
+            review_lesson_number: 40,
+            source_kind: 'mixed',
+          },
         },
       ],
     },
@@ -61,22 +98,22 @@ vi.mock('../api/progress', () => ({
   useProgress: () => ({
     data: {
       studied_count: 0,
-      total_lessons: 1,
+      total_lessons: 5,
       attempts: 0,
       correct: 0,
       review_due: 0,
       review_cards: 0,
-      lessons: [
-        {
-          course_slug: 'voa-level-1',
-          unit_slug: '31-40',
-          lesson_number: 31,
-          studied: false,
-          studied_at: null,
-          attempts: 0,
-          correct: 0,
-        },
-      ],
+      lessons: [lesson, ...unitLessons].map((item) => ({
+        course_slug: item.course_slug,
+        unit_slug: item.unit_slug,
+        lesson_number: item.number,
+        studied: studiedLessonNumbers.includes(item.number),
+        studied_at: studiedLessonNumbers.includes(item.number)
+          ? '2026-10-08T00:00:00Z'
+          : null,
+        attempts: 0,
+        correct: 0,
+      })),
     },
   }),
 }))
@@ -144,7 +181,10 @@ vi.mock('../api/dashboard', () => ({
 }))
 
 describe('MapPage / painel Hoje', () => {
-  beforeEach(() => savePlan.mockReset())
+  beforeEach(() => {
+    savePlan.mockReset()
+    studiedLessonNumbers = []
+  })
 
   it('explica a recomendação e converte o link antigo para a rota canônica', () => {
     render(<MapPage showToday />, { wrapper: MemoryRouter })
@@ -182,5 +222,50 @@ describe('MapPage / painel Hoje', () => {
       goal: 'Inglês para viagem',
     })
     expect(screen.getByRole('link', { name: /Unidade 31–40/ })).toBeInTheDocument()
+  })
+
+  it('apresenta o checkpoint como item próprio no mapa da unidade', () => {
+    render(
+      <MemoryRouter
+        initialEntries={['/cursos/voa-level-1/unidades/40-44']}
+      >
+        <Routes>
+          <Route
+            path="/cursos/:courseSlug/unidades/:unitSlug"
+            element={<MapPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Unidade 40–44' })).toBeInTheDocument()
+    expect(screen.getByText(/4 aulas disponíveis e um checkpoint/)).toBeInTheDocument()
+    const checkpoint = screen.getByRole('link', { name: /Checkpoint 40–44/ })
+    expect(checkpoint).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/40-44/checkpoint',
+    )
+    expect(within(checkpoint).getByText(/6 questões · cerca de 12 min/)).toBeInTheDocument()
+    expect(within(checkpoint).getByText('CP')).toBeInTheDocument()
+    expect(checkpoint).not.toHaveTextContent('✓')
+  })
+
+  it('distingue aulas concluídas do estado ainda desconhecido do checkpoint', () => {
+    studiedLessonNumbers = [41, 42, 43, 44]
+    render(
+      <MemoryRouter initialEntries={['/cursos/voa-level-1/unidades/40-44']}>
+        <Routes>
+          <Route
+            path="/cursos/:courseSlug/unidades/:unitSlug"
+            element={<MapPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const unit = screen.getByRole('link', { name: /Unidade 40–44/ })
+    expect(unit).toHaveTextContent('Aulas concluídas · checkpoint disponível')
+    expect(unit).toHaveTextContent('4/4 aulas')
+    expect(within(unit).queryByText(/^Concluída$/)).not.toBeInTheDocument()
   })
 })

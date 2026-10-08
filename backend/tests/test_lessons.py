@@ -5,11 +5,11 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_lista_as_dez_aulas_em_ordem(client: AsyncClient) -> None:
+async def test_lista_as_quatorze_aulas_em_ordem(client: AsyncClient) -> None:
     r = await client.get("/api/lessons")
     assert r.status_code == 200
     aulas = r.json()
-    assert [a["number"] for a in aulas] == list(range(31, 41))
+    assert [a["number"] for a in aulas] == list(range(31, 45))
     assert aulas[0]["title"] == "Take Me Out to the Ball Game"
     # O resumo não carrega a aula inteira.
     assert "grammar_blocks" not in aulas[0]
@@ -93,7 +93,7 @@ async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> No
 
 @pytest.mark.asyncio
 async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient) -> None:
-    for number in range(31, 41):
+    for number in range(31, 45):
         lesson = (await client.get(f"/api/lessons/{number}")).json()
         assert len(lesson["media"]) == 1
         media = lesson["media"][0]
@@ -113,20 +113,27 @@ async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient)
 
 
 @pytest.mark.asyncio
-async def test_aulas_32_a_40_tem_pratica_multimodal_completa(client: AsyncClient) -> None:
-    for number in range(32, 41):
+async def test_aulas_32_a_44_tem_pratica_multimodal_completa(client: AsyncClient) -> None:
+    for number in range(32, 45):
         lesson = (await client.get(f"/api/lessons/{number}")).json()
         activity_types = {exercise["activity_type"] for exercise in lesson["exercises"]}
 
         assert {"dictation", "reorder", "transformation", "multiple_choice"} <= activity_types
         assert len(
             [exercise for exercise in lesson["exercises"] if exercise["skill"] == "listening"]
-        ) == 3
+        ) >= 3
         assert len(lesson["writing_prompts"]) == 1
-        transcript = lesson["media"][0]["transcript"]
-        assert len(transcript) >= 20
-        assert [line["position"] for line in transcript] == list(range(len(transcript)))
-        assert all(line["speaker"] and line["text_en"] for line in transcript)
+        media = lesson["media"][0]
+        transcript = media["transcript"]
+        if transcript:
+            assert len(transcript) >= 20
+            assert [line["position"] for line in transcript] == list(range(len(transcript)))
+            assert all(line["speaker"] and line["text_en"] for line in transcript)
+        else:
+            # Aulas sem transcrição integral licenciada continuam estudáveis pelos
+            # trechos selecionados e identificados no player.
+            assert len(media["cues"]) >= 4
+            assert all(cue["speaker"] and cue["text_en"] for cue in media["cues"])
         prompt = lesson["writing_prompts"][0]
         assert prompt["min_words"] >= 40
         assert prompt["min_sentences"] >= 5
@@ -191,7 +198,7 @@ async def test_texto_vem_em_markdown_sem_html(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_vocabulario_filtra_por_aula(client: AsyncClient) -> None:
     todos = (await client.get("/api/vocab")).json()
-    assert len(todos) == 115
+    assert len(todos) == 155
     da_40 = (await client.get("/api/vocab?lesson=40")).json()
     assert len(da_40) == 13
     assert {v["lesson_number"] for v in da_40} == {40}
@@ -207,8 +214,8 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
-    assert len(todos) == 111
-    assert {e["lesson_number"] for e in todos} == set(range(31, 41))
+    assert len(todos) == 143
+    assert {e["lesson_number"] for e in todos} == set(range(31, 45))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
     assert chaves == sorted(chaves)

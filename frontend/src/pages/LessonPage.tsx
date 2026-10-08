@@ -7,6 +7,7 @@ import { Carregando, Erro } from '../components/States'
 import { adjacentLessons } from '../features/curriculum/curriculum'
 import {
   coursePath,
+  courseReviewPath,
   DEFAULT_COURSE_SLUG,
   lessonPath,
   practicePath,
@@ -41,6 +42,8 @@ export function LessonPage() {
   const unit = curriculum.data?.units.find((candidate) =>
     candidate.lessons.some((lesson) => lesson.id === data.id),
   )
+  const isLastLessonInUnit = unit?.lessons.at(-1)?.id === data.id
+  const conversationAudio = data.media.find((media) => media.kind === 'conversation_audio')
 
   return (
     <>
@@ -96,65 +99,79 @@ export function LessonPage() {
         </div>
       </section>
 
-      {data.media.some((media) => media.kind === 'conversation_audio') && (
-        <div className="study-entry">
-          <div>
-            <p className="study-kicker">Jornada guiada</p>
-            <strong>Estude em cinco etapas e continue de onde parou.</strong>
-          </div>
-          <Link className="btn" to={studyPath(courseSlug, data.number)}>
-            Começar estudo
-          </Link>
+      <div className="study-entry">
+        <div>
+          <p className="study-kicker">Jornada guiada</p>
+          <strong>
+            {conversationAudio
+              ? 'Estude em cinco etapas com áudio e continue de onde parou.'
+              : 'Estude em cinco etapas; quando não houver mídia, use a alternativa textual.'}
+          </strong>
         </div>
-      )}
+        <Link className="btn" to={studyPath(courseSlug, data.number)}>
+          Começar estudo
+        </Link>
+      </div>
 
       <a className="watch" href={data.voa_url} target="_blank" rel="noopener noreferrer">
         Assistir e ouvir no VOA ↗
       </a>
 
-      <Secao n="01" titulo="Objetivos da aula">
-        <ul className="goals">
-          {data.goals.map((g, i) => (
-            <li key={i}>
-              <Markdown>{g}</Markdown>
-            </li>
-          ))}
-        </ul>
-      </Secao>
+      {data.goals.length > 0 && (
+        <Secao n="01" titulo="Objetivos da aula">
+          <ul className="goals">
+            {data.goals.map((g, i) => (
+              <li key={i}>
+                <Markdown>{g}</Markdown>
+              </li>
+            ))}
+          </ul>
+        </Secao>
+      )}
 
-      <Secao n="02" titulo="Gramática">
-        <div className="stack">
-          {data.grammar_blocks.map((b, i) => (
-            <GrammarBlockView bloco={b} key={i} />
-          ))}
-        </div>
-      </Secao>
-
-      <Secao n="03" titulo="Frases da aula">
-        <PhraseList frases={data.phrases} />
-      </Secao>
-
-      <Secao n="04" titulo="Vocabulário">
-        <VocabTable itens={data.vocab} />
-      </Secao>
-
-      <Secao n="05" titulo="Pronúncia">
-        <PronunciationList notas={data.pronunciation} />
-      </Secao>
-
-      <Secao n="06" titulo="Exercícios">
-        <div className="practice-entry">
-          <div>
-            <p className="study-kicker">Uma questão por vez</p>
-            <strong>
-              {data.exercises.length} atividades com retomada, filtros e resumo final.
-            </strong>
+      {data.grammar_blocks.length > 0 && (
+        <Secao n="02" titulo="Gramática">
+          <div className="stack">
+            {data.grammar_blocks.map((b, i) => (
+              <GrammarBlockView bloco={b} key={i} />
+            ))}
           </div>
-          <Link className="btn" to={practicePath(courseSlug, data.number)}>
-            Abrir laboratório
-          </Link>
-        </div>
-      </Secao>
+        </Secao>
+      )}
+
+      {data.phrases.length > 0 && (
+        <Secao n="03" titulo="Frases da aula">
+          <PhraseList frases={data.phrases} />
+        </Secao>
+      )}
+
+      {data.vocab.length > 0 && (
+        <Secao n="04" titulo="Vocabulário">
+          <VocabTable itens={data.vocab} />
+        </Secao>
+      )}
+
+      {data.pronunciation.length > 0 && (
+        <Secao n="05" titulo="Pronúncia">
+          <PronunciationList notas={data.pronunciation} />
+        </Secao>
+      )}
+
+      {data.exercises.length > 0 && (
+        <Secao n="06" titulo="Exercícios">
+          <div className="practice-entry">
+            <div>
+              <p className="study-kicker">Uma questão por vez</p>
+              <strong>
+                {data.exercises.length} atividades com retomada, filtros e resumo final.
+              </strong>
+            </div>
+            <Link className="btn" to={practicePath(courseSlug, data.number)}>
+              Abrir laboratório
+            </Link>
+          </div>
+        </Secao>
+      )}
 
       <nav className="navbtns">
         {previous ? (
@@ -169,7 +186,11 @@ export function LessonPage() {
             ← Mapa do curso
           </Link>
         )}
-        {next ? (
+        {isLastLessonInUnit && unit?.review ? (
+          <Link className="btn ghost" to={courseReviewPath(courseSlug, unit.slug)}>
+            {unit.review.title} →
+          </Link>
+        ) : next ? (
           <Link className="btn ghost" to={lessonPath(courseSlug, next.number)}>
             Aula {next.number} →
           </Link>

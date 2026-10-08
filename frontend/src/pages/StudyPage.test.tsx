@@ -139,8 +139,10 @@ const lesson = {
   ],
 }
 
+let lessonFixture = lesson
+
 vi.mock('../api/queries', () => ({
-  useLesson: () => ({ data: lesson, isPending: false, error: null, refetch: vi.fn() }),
+  useLesson: () => ({ data: lessonFixture, isPending: false, error: null, refetch: vi.fn() }),
 }))
 
 vi.mock('../features/writing/WritingWorkspace', () => ({
@@ -174,6 +176,7 @@ function renderStudy(route: string) {
 }
 
 afterEach(() => {
+  lessonFixture = lesson
   window.localStorage.clear()
   vi.clearAllMocks()
 })
@@ -266,6 +269,81 @@ describe('StudyPage', () => {
 
     expect(screen.getByTestId('shared-practice-runner')).toHaveTextContent(
       'Runner compartilhado · embedded',
+    )
+  })
+
+  it('oferece listening textual utilizável quando mídia e coleções estão vazias', async () => {
+    lessonFixture = {
+      ...lesson,
+      goals: [],
+      grammar_blocks: [],
+      media: [],
+      phrases: [],
+      vocab: [],
+      pronunciation: [],
+      writing_prompts: [],
+      exercises: [],
+    }
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/assistir')
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Áudio não disponível neste aplicativo',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('note')).toHaveTextContent('Resumo: Compare transportes e dê conselhos.')
+    expect(screen.getByRole('note')).toHaveTextContent(
+      'Crie uma frase curta em inglês usando o foco indicado acima.',
+    )
+    expect(screen.getByRole('link', { name: 'Abrir a aula na VOA ↗' })).toHaveAttribute(
+      'href',
+      'https://example.com/lesson-31',
+    )
+    expect(screen.queryByRole('audio')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Leia primeiro pelo contexto' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Frases para acompanhar' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Escute e responda antes de ler' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('oferece tarefas textuais nas etapas sem teoria, exercícios ou revisão enriquecida', async () => {
+    lessonFixture = {
+      ...lesson,
+      goals: [],
+      grammar_blocks: [],
+      media: [],
+      phrases: [],
+      vocab: [],
+      pronunciation: [],
+      writing_prompts: [],
+      exercises: [],
+    }
+
+    const theory = renderStudy('/cursos/voa-level-1/aulas/31/estudar/estudar')
+    expect(
+      await screen.findByRole('heading', { name: 'Estudo textual alternativo' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('note')).toHaveTextContent(
+      'Escreva duas frases sobre esse contexto usando Comparativos + conselho',
+    )
+    theory.unmount()
+
+    const practice = renderStudy('/cursos/voa-level-1/aulas/31/estudar/praticar')
+    expect(
+      await screen.findByRole('heading', { name: 'Prática textual alternativa' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('note')).toHaveTextContent(
+      'Como você compararia duas formas de transporte?',
+    )
+    practice.unmount()
+
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/revisar')
+    expect(
+      await screen.findByRole('heading', { name: 'Revisão textual rápida' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('note')).toHaveTextContent(
+      'Crie um novo exemplo com Comparativos + conselho.',
     )
   })
 })

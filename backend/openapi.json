@@ -395,6 +395,436 @@
                 "title": "CourseCurriculumOut",
                 "type": "object"
             },
+            "CourseReviewAnswerIn": {
+                "properties": {
+                    "answer": {
+                        "maxLength": 500,
+                        "minLength": 1,
+                        "title": "Answer",
+                        "type": "string"
+                    },
+                    "question_id": {
+                        "exclusiveMinimum": 0.0,
+                        "title": "Question Id",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "question_id",
+                    "answer"
+                ],
+                "title": "CourseReviewAnswerIn",
+                "type": "object"
+            },
+            "CourseReviewAttemptIn": {
+                "properties": {
+                    "answers": {
+                        "items": {
+                            "$ref": "#/components/schemas/CourseReviewAnswerIn"
+                        },
+                        "maxItems": 30,
+                        "minItems": 1,
+                        "title": "Answers",
+                        "type": "array"
+                    },
+                    "content_version": {
+                        "exclusiveMinimum": 0.0,
+                        "title": "Content Version",
+                        "type": "integer"
+                    },
+                    "idempotency_key": {
+                        "format": "uuid",
+                        "title": "Idempotency Key",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "idempotency_key",
+                    "content_version",
+                    "answers"
+                ],
+                "title": "CourseReviewAttemptIn",
+                "type": "object"
+            },
+            "CourseReviewAttemptOut": {
+                "properties": {
+                    "completed_at": {
+                        "format": "date-time",
+                        "title": "Completed At",
+                        "type": "string"
+                    },
+                    "content_version": {
+                        "title": "Content Version",
+                        "type": "integer"
+                    },
+                    "feedback": {
+                        "items": {
+                            "$ref": "#/components/schemas/CourseReviewQuestionResultOut"
+                        },
+                        "title": "Feedback",
+                        "type": "array"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "reinforced_lesson_numbers": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "title": "Reinforced Lesson Numbers",
+                        "type": "array"
+                    },
+                    "score": {
+                        "title": "Score",
+                        "type": "integer"
+                    },
+                    "score_percent": {
+                        "title": "Score Percent",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "enum": [
+                            "consolidated",
+                            "reinforce"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "total": {
+                        "title": "Total",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "content_version",
+                    "score",
+                    "total",
+                    "score_percent",
+                    "status",
+                    "reinforced_lesson_numbers",
+                    "feedback",
+                    "completed_at"
+                ],
+                "title": "CourseReviewAttemptOut",
+                "type": "object"
+            },
+            "CourseReviewDetailOut": {
+                "properties": {
+                    "content_version": {
+                        "title": "Content Version",
+                        "type": "integer"
+                    },
+                    "estimated_minutes": {
+                        "title": "Estimated Minutes",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "intro": {
+                        "title": "Intro",
+                        "type": "string"
+                    },
+                    "latest_attempt": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CourseReviewAttemptOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "listening_media": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/LessonMediaOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "listening_source_page_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Listening Source Page Url"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "question_count": {
+                        "title": "Question Count",
+                        "type": "integer"
+                    },
+                    "questions": {
+                        "items": {
+                            "$ref": "#/components/schemas/CourseReviewQuestionOut"
+                        },
+                        "title": "Questions",
+                        "type": "array"
+                    },
+                    "review_lesson_number": {
+                        "title": "Review Lesson Number",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "source_kind": {
+                        "enum": [
+                            "official",
+                            "authorial",
+                            "mixed"
+                        ],
+                        "title": "Source Kind",
+                        "type": "string"
+                    },
+                    "source_note": {
+                        "title": "Source Note",
+                        "type": "string"
+                    },
+                    "source_title": {
+                        "title": "Source Title",
+                        "type": "string"
+                    },
+                    "source_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Source Url"
+                    },
+                    "status": {
+                        "enum": [
+                            "planned",
+                            "published",
+                            "archived"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "slug",
+                    "title",
+                    "position",
+                    "status",
+                    "source_kind",
+                    "estimated_minutes",
+                    "review_lesson_number",
+                    "question_count",
+                    "source_title",
+                    "source_url",
+                    "source_note",
+                    "intro",
+                    "content_version",
+                    "listening_media",
+                    "listening_source_page_url",
+                    "questions",
+                    "latest_attempt"
+                ],
+                "title": "CourseReviewDetailOut",
+                "type": "object"
+            },
+            "CourseReviewQuestionOut": {
+                "properties": {
+                    "activity_type": {
+                        "enum": [
+                            "multiple_choice",
+                            "short_answer"
+                        ],
+                        "title": "Activity Type",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "lesson_numbers": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "title": "Lesson Numbers",
+                        "type": "array"
+                    },
+                    "options": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Options"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "prompt": {
+                        "title": "Prompt",
+                        "type": "string"
+                    },
+                    "skill": {
+                        "enum": [
+                            "grammar",
+                            "listening",
+                            "vocabulary"
+                        ],
+                        "title": "Skill",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "position",
+                    "activity_type",
+                    "skill",
+                    "prompt",
+                    "options",
+                    "lesson_numbers"
+                ],
+                "title": "CourseReviewQuestionOut",
+                "type": "object"
+            },
+            "CourseReviewQuestionResultOut": {
+                "properties": {
+                    "accepted_answers": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Accepted Answers",
+                        "type": "array"
+                    },
+                    "answer": {
+                        "title": "Answer",
+                        "type": "string"
+                    },
+                    "correct": {
+                        "title": "Correct",
+                        "type": "boolean"
+                    },
+                    "explanation": {
+                        "title": "Explanation",
+                        "type": "string"
+                    },
+                    "lesson_numbers": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "title": "Lesson Numbers",
+                        "type": "array"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "question_id": {
+                        "title": "Question Id",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "question_id",
+                    "position",
+                    "correct",
+                    "answer",
+                    "accepted_answers",
+                    "explanation",
+                    "lesson_numbers"
+                ],
+                "title": "CourseReviewQuestionResultOut",
+                "type": "object"
+            },
+            "CourseReviewSummaryOut": {
+                "description": "Checkpoint como item curricular próprio, sem fingir ser uma aula.",
+                "properties": {
+                    "estimated_minutes": {
+                        "title": "Estimated Minutes",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "question_count": {
+                        "title": "Question Count",
+                        "type": "integer"
+                    },
+                    "review_lesson_number": {
+                        "title": "Review Lesson Number",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "source_kind": {
+                        "enum": [
+                            "official",
+                            "authorial",
+                            "mixed"
+                        ],
+                        "title": "Source Kind",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "planned",
+                            "published",
+                            "archived"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "slug",
+                    "title",
+                    "position",
+                    "status",
+                    "source_kind",
+                    "estimated_minutes",
+                    "review_lesson_number",
+                    "question_count"
+                ],
+                "title": "CourseReviewSummaryOut",
+                "type": "object"
+            },
             "CourseSummaryOut": {
                 "properties": {
                     "id": {
@@ -492,6 +922,16 @@
                         "title": "Published Lessons",
                         "type": "integer"
                     },
+                    "review": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CourseReviewSummaryOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "slug": {
                         "title": "Slug",
                         "type": "string"
@@ -524,7 +964,8 @@
                     "lesson_end",
                     "total_lessons",
                     "published_lessons",
-                    "lessons"
+                    "lessons",
+                    "review"
                 ],
                 "title": "CourseUnitOut",
                 "type": "object"
@@ -2450,6 +2891,7 @@
                             "review",
                             "continue_lesson",
                             "start_lesson",
+                            "course_review",
                             "practice"
                         ],
                         "title": "Kind",
@@ -4559,6 +5001,130 @@
                 "summary": "Salvar Sessao De Estudo No Curso",
                 "tags": [
                     "progress"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/units/{unit_slug}/review": {
+            "get": {
+                "description": "Entrega questões sem gabarito e a tentativa mais recente da conta.",
+                "operationId": "get_course_review_api_courses__course_slug__units__unit_slug__review_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "unit_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Unit Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseReviewDetailOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Get Course Review",
+                "tags": [
+                    "course-reviews"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/units/{unit_slug}/review/attempts": {
+            "post": {
+                "description": "Corrige a execução completa no servidor e persiste sua fotografia.",
+                "operationId": "submit_course_review_api_courses__course_slug__units__unit_slug__review_attempts_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "unit_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Unit Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseReviewAttemptIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseReviewAttemptOut"
+                                }
+                            }
+                        },
+                        "description": "A tentativa idempotente já existia."
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseReviewAttemptOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Submit Course Review",
+                "tags": [
+                    "course-reviews"
                 ]
             }
         },

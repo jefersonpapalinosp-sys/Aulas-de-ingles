@@ -98,6 +98,148 @@ class CourseUnit(Base):
         lazy="raise",
         overlaps="course,lessons",
     )
+    review: Mapped["CourseReview | None"] = relationship(
+        back_populates="unit",
+        cascade="all, delete-orphan",
+        uselist=False,
+        lazy="selectin",
+    )
+
+
+class CourseReview(Base):
+    """Checkpoint curricular de uma unidade — não é uma aula artificial."""
+
+    __tablename__ = "course_review"
+    __table_args__ = (
+        UniqueConstraint("unit_id", name="uq_course_review_unit"),
+        UniqueConstraint("unit_id", "slug", name="uq_course_review_unit_slug"),
+        CheckConstraint("position > 0", name="ck_course_review_position_positive"),
+        CheckConstraint("estimated_minutes > 0", name="ck_course_review_minutes_positive"),
+        CheckConstraint("content_version > 0", name="ck_course_review_version_positive"),
+        CheckConstraint(
+            "review_lesson_number > 0", name="ck_course_review_lesson_positive"
+        ),
+        CheckConstraint(
+            "listening_lesson_number IS NULL OR listening_lesson_number > 0",
+            name="ck_course_review_listening_lesson_positive",
+        ),
+        CheckConstraint(
+            "listening_media_position IS NULL OR listening_media_position >= 0",
+            name="ck_course_review_listening_position_nonnegative",
+        ),
+        CheckConstraint(
+            "(listening_lesson_number IS NULL) = (listening_media_position IS NULL)",
+            name="ck_course_review_listening_pair",
+        ),
+        CheckConstraint(
+            "status IN ('planned', 'published', 'archived')", name="ck_course_review_status"
+        ),
+        CheckConstraint(
+            "source_kind IN ('official', 'authorial', 'mixed')",
+            name="ck_course_review_source_kind",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    unit_id: Mapped[int] = mapped_column(
+        ForeignKey("course_unit.id", ondelete="CASCADE"), index=True
+    )
+    slug: Mapped[str] = mapped_column(String(120))
+    title: Mapped[str] = mapped_column(String(200))
+    position: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20), default="planned")
+    source_kind: Mapped[str] = mapped_column(String(20))
+    source_title: Mapped[str] = mapped_column(String(200))
+    source_url: Mapped[str | None] = mapped_column(String(1000), default=None)
+    source_note: Mapped[str] = mapped_column(String(500))
+    intro: Mapped[str] = mapped_column(Text)
+    estimated_minutes: Mapped[int] = mapped_column(Integer)
+    content_version: Mapped[int] = mapped_column(Integer, default=1)
+    review_lesson_number: Mapped[int] = mapped_column(Integer)
+    listening_lesson_number: Mapped[int | None] = mapped_column(Integer, default=None)
+    listening_media_position: Mapped[int | None] = mapped_column(Integer, default=None)
+
+    unit: Mapped[CourseUnit] = relationship(back_populates="review", lazy="joined")
+    questions: Mapped[list["CourseReviewQuestion"]] = relationship(
+        back_populates="review",
+        cascade="all, delete-orphan",
+        order_by="CourseReviewQuestion.position",
+        lazy="selectin",
+    )
+
+
+class CourseReviewQuestion(Base):
+    """Questão autoral de checkpoint; o gabarito nunca sai na leitura inicial."""
+
+    __tablename__ = "course_review_question"
+    __table_args__ = (
+        UniqueConstraint("review_id", "position", name="uq_course_review_question_position"),
+        CheckConstraint("position > 0", name="ck_course_review_question_position_positive"),
+        CheckConstraint(
+            "activity_type IN ('multiple_choice', 'short_answer')",
+            name="ck_course_review_question_activity_type",
+        ),
+        CheckConstraint(
+            "skill IN ('grammar', 'listening', 'vocabulary')",
+            name="ck_course_review_question_skill",
+        ),
+        CheckConstraint(
+            "jsonb_array_length(accepted_answers) > 0",
+            name="ck_course_review_question_answers_nonempty",
+        ),
+        CheckConstraint(
+            "jsonb_array_length(lesson_numbers) > 0",
+            name="ck_course_review_question_lessons_nonempty",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    review_id: Mapped[int] = mapped_column(
+        ForeignKey("course_review.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    activity_type: Mapped[str] = mapped_column(String(30))
+    skill: Mapped[str] = mapped_column(String(30))
+    prompt: Mapped[str] = mapped_column(Text)
+    options: Mapped[list[str] | None] = mapped_column(JSONB, default=None)
+    accepted_answers: Mapped[list[str]] = mapped_column(JSONB)
+    explanation: Mapped[str] = mapped_column(Text)
+    lesson_numbers: Mapped[list[int]] = mapped_column(JSONB, default=list)
+
+    review: Mapped[CourseReview] = relationship(back_populates="questions")
+
+
+class CourseReviewAttempt(Base):
+    """Resultado imutável de uma execução completa do checkpoint."""
+
+    __tablename__ = "course_review_attempt"
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id", "idempotency_key", name="uq_course_review_attempt_user_idempotency"
+        ),
+        CheckConstraint("content_version > 0", name="ck_course_review_attempt_version_positive"),
+        CheckConstraint("score >= 0", name="ck_course_review_attempt_score_nonnegative"),
+        CheckConstraint("total > 0", name="ck_course_review_attempt_total_positive"),
+        CheckConstraint("score <= total", name="ck_course_review_attempt_score_within_total"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("app_user.id", ondelete="CASCADE"), index=True
+    )
+    review_id: Mapped[int] = mapped_column(
+        ForeignKey("course_review.id", ondelete="CASCADE"), index=True
+    )
+    idempotency_key: Mapped[str] = mapped_column(String(36))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    content_version: Mapped[int] = mapped_column(Integer)
+    answers: Mapped[list[dict[str, object]]] = mapped_column(JSONB)
+    result: Mapped[list[dict[str, object]]] = mapped_column(JSONB)
+    score: Mapped[int] = mapped_column(Integer)
+    total: Mapped[int] = mapped_column(Integer)
+    completed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
 
 class Lesson(Base):

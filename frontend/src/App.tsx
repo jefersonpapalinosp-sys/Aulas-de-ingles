@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-do
 import { useSessao } from './api/auth'
 import { LessonRail } from './components/LessonRail'
 import { CourseCatalogPage } from './pages/CourseCatalogPage'
+import { CourseReviewPage } from './pages/CourseReviewPage'
 import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
@@ -48,6 +49,10 @@ export default function App() {
             <Route
               path="/cursos/:courseSlug/unidades/:unitSlug"
               element={<MapPage />}
+            />
+            <Route
+              path="/cursos/:courseSlug/unidades/:unitSlug/checkpoint"
+              element={<CourseReviewPage />}
             />
             <Route path="/cursos/:courseSlug/aulas/:numero" element={<LessonPage />} />
             <Route

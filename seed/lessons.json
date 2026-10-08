@@ -7506,5 +7506,2086 @@
         ]
       }
     ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "40-44",
+    "slug": "lesson-41",
+    "position": 1,
+    "number": 41,
+    "title": "Teamwork Works Best With a Team",
+    "title_pt": "Trabalho em equipe funciona melhor com uma equipe",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-41-teamwork/3635015.html",
+    "grammar_tag": "Condicional real no futuro",
+    "focus_points": [
+      "if + presente, will + verbo",
+      "feedback sobre desempenho",
+      "ênfase contrastiva"
+    ],
+    "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "usar atenção seletiva",
+    "review_note": "Sprint 22: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Na avaliação anual de trabalho, Ms. Weaver pede que Anna aumente a audiência. Anna presta atenção aos gatos dos cartazes e interpreta o conselho de um jeito muito literal.",
+    "warmup_prompt": "Que conselho você daria a alguém que quer melhorar o desempenho no trabalho ou nos estudos?",
+    "listening_focus": "as condições com if, o feedback de Ms. Weaver e a interpretação de Anna",
+    "goals": [
+      "Formar a condicional real no futuro com **if + presente** e **will + verbo**.",
+      "Pedir, compreender e dar feedback sobre desempenho.",
+      "Identificar como a ênfase muda a informação mais importante de uma frase.",
+      "Usar atenção seletiva sem perder o sentido geral da conversa."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Future real conditional: if + presente, will + verbo",
+        "why": "Use esta estrutura para relacionar uma condição possível no presente a um resultado provável no futuro.",
+        "warning": "Na oração com *if*, não use *will* neste padrão: diga *If you study, you will improve*, não *If you will study...*.",
+        "table_head": [
+          "Condição",
+          "Resultado",
+          "Frase completa"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "If you look at the chart",
+              "you will see the change",
+              "If you look at the chart, you will see the change."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "If Anna works with the team",
+              "the show will improve",
+              "If Anna works with the team, the show will improve."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "If we listen carefully",
+              "we will understand",
+              "If we listen carefully, we will understand."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Ordem, vírgula e forma negativa",
+        "why": "As duas orações podem trocar de posição. A vírgula é usada quando a oração com *if* vem primeiro.",
+        "warning": "Depois de *will* vem o verbo base: *will improve*, não *will improves*.",
+        "table_head": [
+          "Padrão",
+          "Exemplo",
+          "Observação"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "If..., result",
+              "If you practice, you will succeed.",
+              "leva vírgula"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Result if...",
+              "You will succeed if you practice.",
+              "normalmente sem vírgula"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "Negativa",
+              "The numbers will not rise if nothing changes.",
+              "will not = won't"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Linguagem de feedback",
+        "why": "Feedback útil combina uma observação concreta com uma orientação de melhoria.",
+        "warning": "*Ought to* expressa recomendação; não é uma ordem tão direta quanto *must*.",
+        "table_head": [
+          "Função",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "elogiar",
+              "Good job + detalhe",
+              "Good job, team."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "recomendar",
+              "ought to + verbo",
+              "You ought to think about the feedback."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "definir meta",
+              "want + objeto + to + verbo",
+              "I want these numbers to go up."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "At the start of a new year, we have a work review.",
+        "text_pt": "No começo de um novo ano, fazemos uma avaliação de trabalho.",
+        "note": "*Work review* é uma conversa formal sobre desempenho."
+      },
+      {
+        "position": 1,
+        "text_en": "If you look at this chart, you will see something good.",
+        "text_pt": "Se você olhar este gráfico, verá algo bom.",
+        "note": "Modelo completo da condicional real no futuro."
+      },
+      {
+        "position": 2,
+        "text_en": "You really ought to think seriously about them.",
+        "text_pt": "Você realmente deveria pensar seriamente sobre eles.",
+        "note": "*Ought to* introduz uma recomendação."
+      },
+      {
+        "position": 3,
+        "text_en": "Let's get to work!",
+        "text_pt": "Vamos trabalhar!",
+        "note": "Expressão curta para iniciar uma tarefa em grupo."
+      },
+      {
+        "position": 4,
+        "text_en": "Did I give you enough cats?",
+        "text_pt": "Eu lhe dei gatos suficientes?",
+        "note": "*Enough* vem antes do substantivo *cats*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "audience",
+        "ipa": "/ˈɔːdiəns/",
+        "translation_pt": "audiência, público",
+        "example_en": "The show's audience is growing."
+      },
+      {
+        "position": 1,
+        "term": "chart",
+        "ipa": "/tʃɑːrt/",
+        "translation_pt": "gráfico, tabela",
+        "example_en": "Look at this chart."
+      },
+      {
+        "position": 2,
+        "term": "flip",
+        "ipa": "/flɪp/",
+        "translation_pt": "virar rapidamente",
+        "example_en": "Let's flip the chart around."
+      },
+      {
+        "position": 3,
+        "term": "poster",
+        "ipa": "/ˈpoʊstər/",
+        "translation_pt": "cartaz",
+        "example_en": "The office has an idea poster."
+      },
+      {
+        "position": 4,
+        "term": "review",
+        "ipa": "/rɪˈvjuː/",
+        "translation_pt": "avaliação, análise",
+        "example_en": "Anna has a work review."
+      },
+      {
+        "position": 5,
+        "term": "right-side up",
+        "ipa": "/ˌraɪt saɪd ˈʌp/",
+        "translation_pt": "com o lado correto para cima",
+        "example_en": "Now the chart is right-side up."
+      },
+      {
+        "position": 6,
+        "term": "succeed",
+        "ipa": "/səkˈsiːd/",
+        "translation_pt": "ter sucesso",
+        "example_en": "If you practice, you will succeed."
+      },
+      {
+        "position": 7,
+        "term": "success",
+        "ipa": "/səkˈses/",
+        "translation_pt": "sucesso",
+        "example_en": "The project was a success."
+      },
+      {
+        "position": 8,
+        "term": "teamwork",
+        "ipa": "/ˈtiːmwɜːrk/",
+        "translation_pt": "trabalho em equipe",
+        "example_en": "Good teamwork helps the show."
+      },
+      {
+        "position": 9,
+        "term": "upside down",
+        "ipa": "/ˌʌpsaɪd ˈdaʊn/",
+        "translation_pt": "de cabeça para baixo",
+        "example_en": "The chart is upside down."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "ênfase contrastiva",
+        "explanation": "A palavra mais forte corrige ou contrasta informação: *The audience is BIG, but not big ENOUGH*."
+      },
+      {
+        "position": 1,
+        "label": "succeed /səkˈsiːd/ × success /səkˈses/",
+        "explanation": "O verbo termina com vogal longa /iːd/; o substantivo termina com /es/."
+      },
+      {
+        "position": 2,
+        "label": "teamwork /ˈtiːmwɜːrk/",
+        "explanation": "A força está na primeira parte, *team*; una as duas palavras sem pausa."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 41",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/01/05/64e9d749-33ff-4b41-934d-9f44e81cfea0_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 212,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 31,
+            "end_seconds": 40,
+            "speaker": "Ms. Weaver",
+            "text_en": "If you look at it, you will see something bad.",
+            "text_pt": "Se você olhar para ele, verá algo ruim."
+          },
+          {
+            "position": 1,
+            "start_seconds": 48,
+            "end_seconds": 56,
+            "speaker": "Ms. Weaver",
+            "text_en": "If you look at this chart, you will see something good.",
+            "text_pt": "Se você olhar este gráfico, verá algo bom."
+          },
+          {
+            "position": 2,
+            "start_seconds": 86,
+            "end_seconds": 95,
+            "speaker": "Anna",
+            "text_en": "If at first you succeed, you will be a success.",
+            "text_pt": "Se de primeira você tiver sucesso, será um sucesso."
+          },
+          {
+            "position": 3,
+            "start_seconds": 110,
+            "end_seconds": 119,
+            "speaker": "Anna",
+            "text_en": "Teamwork works best with a team.",
+            "text_pt": "Trabalho em equipe funciona melhor com uma equipe."
+          },
+          {
+            "position": 4,
+            "start_seconds": 198,
+            "end_seconds": 212,
+            "speaker": "Anna",
+            "text_en": "I don't know, MINDY. I think we need more cats!",
+            "text_pt": "Não sei, MINDY. Acho que precisamos de mais gatos!"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "If you practice every day, you `____` improve.",
+        "hint": null,
+        "explanation": "O resultado provável usa **will + verbo base**.",
+        "hints": [
+          "A oração com *if* já está no presente.",
+          "Use o modal de futuro antes de *improve*."
+        ],
+        "answers": [
+          "will"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "If Anna works with the team, the show will improve.",
+          "If Anna will work with the team, the show improves will.",
+          "If Anna worked with the team, the show will improves."
+        ],
+        "prompt": "Escolha a condicional real no futuro correta.",
+        "hint": null,
+        "explanation": "A condição fica no presente e o resultado usa **will + verbo base**.",
+        "hints": [
+          "Procure *if + simple present*.",
+          "Depois de *will*, o verbo não recebe *-s*."
+        ],
+        "answers": [
+          "If Anna works with the team, the show will improve."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija: ‘If you will listen carefully, you will understand.’ → If you `____` carefully, you will understand.",
+        "hint": null,
+        "explanation": "Neste padrão, a oração com *if* usa o presente simples: **listen**.",
+        "hints": [
+          "Retire o futuro da condição.",
+          "Use a forma base de *listen*."
+        ],
+        "answers": [
+          "listen"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "If",
+          "we",
+          "work",
+          "together",
+          "we",
+          "will",
+          "succeed"
+        ],
+        "prompt": "Ordene uma condição e seu resultado.",
+        "hint": null,
+        "explanation": "A frase combina **if + presente** com **will + verbo**.",
+        "hints": [
+          "Comece com *If we work together*.",
+          "A segunda oração começa com *we will*."
+        ],
+        "answers": [
+          "If we work together we will succeed"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "The chart is upside down.",
+          "The audience is too small to measure.",
+          "The chart belongs to another show."
+        ],
+        "prompt": "Listening: por que o gráfico parece mostrar algo ruim no início?",
+        "hint": null,
+        "explanation": "Anna percebe que o gráfico está **upside down**.",
+        "hints": [
+          "O problema não está nos números.",
+          "Anna vira o gráfico."
+        ],
+        "answers": [
+          "The chart is upside down."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a condição que começa com ‘If you look at this chart...’.",
+        "hint": null,
+        "explanation": "A fala completa usa a condição no presente e o resultado com *will*.",
+        "hints": [
+          "Depois da vírgula, o sujeito é *you*.",
+          "O resultado termina em *something good*."
+        ],
+        "answers": [
+          "If you look at this chart you will see something good"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "More cats",
+          "A smaller audience",
+          "A new chart"
+        ],
+        "prompt": "Listening: o que Anna acredita que Ms. Weaver quer no programa?",
+        "hint": null,
+        "explanation": "Anna se concentra nos cartazes e conclui que o programa precisa de **more cats**.",
+        "hints": [
+          "Pense nas imagens dos cartazes.",
+          "MINDY pergunta se deu uma quantidade suficiente desses animais."
+        ],
+        "answers": [
+          "More cats"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "reorder",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Teamwork",
+          "works",
+          "best",
+          "with",
+          "a",
+          "team"
+        ],
+        "prompt": "Listening: reconstrua o texto do cartaz favorito de Ms. Weaver.",
+        "hint": null,
+        "explanation": "O cartaz diz **Teamwork works best with a team**.",
+        "hints": [
+          "Comece pelo substantivo composto *Teamwork*.",
+          "A frase termina em *with a team*."
+        ],
+        "answers": [
+          "Teamwork works best with a team"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Conselhos para melhorar",
+        "instructions": "Write 5 to 7 sentences giving practical feedback to a student or co-worker. Include possible results of following the advice.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "duas condicionais com if + will",
+            "terms": [
+              "if ",
+              "will "
+            ]
+          },
+          {
+            "label": "uma expressão de feedback",
+            "terms": [
+              "good job",
+              "ought to",
+              "you can improve",
+              "work together"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "40-44",
+    "slug": "lesson-42",
+    "position": 2,
+    "number": 42,
+    "title": "I Was Minding My Own Business",
+    "title_pt": "Eu estava cuidando da minha vida",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-42-i-was-minding-my-own-business/3647264.html",
+    "grammar_tag": "Past continuous e pronomes reflexivos",
+    "focus_points": [
+      "was/were + verbo-ing",
+      "while + ação em andamento",
+      "myself · yourself · themselves"
+    ],
+    "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "ler nas entrelinhas",
+    "review_note": "Sprint 22: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Anna conta a um repórter como tentou impedir um roubo. A narrativa alterna ações em andamento, acontecimentos pontuais e uma surpresa sobre como ela realmente machucou o braço.",
+    "warmup_prompt": "Como você contaria duas ações que estavam acontecendo ao mesmo tempo no passado?",
+    "listening_focus": "a sequência dos acontecimentos, as orações com while e os pronomes reflexivos",
+    "goals": [
+      "Formar o **past continuous** com *was/were + verbo-ing*.",
+      "Usar **while** para ligar ações em andamento no passado.",
+      "Escolher pronomes reflexivos como *myself, herself* e *themselves*.",
+      "Narrar uma sequência e inferir informações não ditas diretamente."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Past continuous: ação em andamento",
+        "why": "O past continuous mostra uma ação que estava acontecendo em determinado momento do passado.",
+        "warning": "O auxiliar concorda com o sujeito: *I/he/she was*; *you/we/they were*.",
+        "table_head": [
+          "Sujeito",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I / she",
+              "was + verbo-ing",
+              "I was running after the bus."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "they",
+              "were + verbo-ing",
+              "They were grabbing her bag."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "negativa",
+              "was not / were not",
+              "I was not fighting the robbers."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "While + ação longa, passado simples + evento",
+        "why": "*While* apresenta o pano de fundo em andamento; o passado simples destaca o acontecimento que ocorreu nesse intervalo.",
+        "warning": "Não confunda *while* (durante uma ação) com *when* (quando um evento ocorreu). Em muitos contextos ambos são possíveis, mas o foco muda.",
+        "table_head": [
+          "Ação em andamento",
+          "Evento",
+          "Frase"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "while I was running",
+              "I tripped and fell",
+              "While I was running, I tripped and fell."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "while I was lying on the ground",
+              "someone stepped on my arm",
+              "Someone stepped on my arm while I was lying down."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "while she was yelling",
+              "the robbers ran away",
+              "The robbers ran away while she was yelling."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Pronomes reflexivos",
+        "why": "Use o reflexivo quando o sujeito pratica e recebe a ação, ou para dar ênfase ao próprio sujeito.",
+        "warning": "O reflexivo deve combinar com o sujeito: *they → themselves*, nunca *theirselves*.",
+        "table_head": [
+          "Pronome",
+          "Reflexivo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I",
+              "myself",
+              "I hurt myself."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you",
+              "yourself",
+              "Did you hurt yourself?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "they",
+              "themselves",
+              "They got themselves kicked off the bus."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "we",
+              "ourselves",
+              "We found ourselves another story."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I was minding my own business.",
+        "text_pt": "Eu estava cuidando da minha vida.",
+        "note": "Expressão idiomática para dizer que você não estava incomodando ninguém."
+      },
+      {
+        "position": 1,
+        "text_en": "Two robbers were grabbing her bag.",
+        "text_pt": "Dois ladrões estavam agarrando a bolsa dela.",
+        "note": "Past continuous descreve a cena em andamento."
+      },
+      {
+        "position": 2,
+        "text_en": "While I was running, I tripped and fell.",
+        "text_pt": "Enquanto eu corria, tropecei e caí.",
+        "note": "Ação longa com *while* e dois eventos no passado simples."
+      },
+      {
+        "position": 3,
+        "text_en": "That's too bad.",
+        "text_pt": "Que pena.",
+        "note": "Resposta comum para demonstrar solidariedade."
+      },
+      {
+        "position": 4,
+        "text_en": "My co-worker is stuck in a vending machine.",
+        "text_pt": "Minha colega está presa em uma máquina de vendas.",
+        "note": "A revelação final explica como Anna se machucou."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "crime",
+        "ipa": "/kraɪm/",
+        "translation_pt": "crime",
+        "example_en": "Anna saw a crime."
+      },
+      {
+        "position": 1,
+        "term": "robber",
+        "ipa": "/ˈrɑːbər/",
+        "translation_pt": "assaltante, ladrão",
+        "example_en": "The robbers ran away."
+      },
+      {
+        "position": 2,
+        "term": "grab",
+        "ipa": "/ɡræb/",
+        "translation_pt": "agarrar rapidamente",
+        "example_en": "They grabbed her bag."
+      },
+      {
+        "position": 3,
+        "term": "umbrella",
+        "ipa": "/ʌmˈbrelə/",
+        "translation_pt": "guarda-chuva",
+        "example_en": "She was holding an umbrella."
+      },
+      {
+        "position": 4,
+        "term": "trip",
+        "ipa": "/trɪp/",
+        "translation_pt": "tropeçar",
+        "example_en": "Anna tripped and fell."
+      },
+      {
+        "position": 5,
+        "term": "lie",
+        "ipa": "/laɪ/",
+        "translation_pt": "ficar deitado",
+        "example_en": "She was lying on the ground."
+      },
+      {
+        "position": 6,
+        "term": "ground",
+        "ipa": "/ɡraʊnd/",
+        "translation_pt": "chão",
+        "example_en": "Anna was on the ground."
+      },
+      {
+        "position": 7,
+        "term": "snack",
+        "ipa": "/snæk/",
+        "translation_pt": "lanche pequeno",
+        "example_en": "She went to get a snack."
+      },
+      {
+        "position": 8,
+        "term": "stuck",
+        "ipa": "/stʌk/",
+        "translation_pt": "preso, emperrado",
+        "example_en": "The bag of chips was stuck."
+      },
+      {
+        "position": 9,
+        "term": "vending machine",
+        "ipa": "/ˈvendɪŋ məˌʃiːn/",
+        "translation_pt": "máquina de vendas automática",
+        "example_en": "The snack was in a vending machine."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "did you → /dɪdʒə/",
+        "explanation": "Na fala rápida americana, *did you* frequentemente se une e soa próximo de ‘didja’."
+      },
+      {
+        "position": 1,
+        "label": "reflexivos com -self / -selves",
+        "explanation": "Dê clareza à sílaba final: *my-SELF*, *them-SELVES*; o plural troca *f* por *ves*."
+      },
+      {
+        "position": 2,
+        "label": "lying /ˈlaɪɪŋ/",
+        "explanation": "*Lie* perde o *e* e forma *lying*; mantenha dois movimentos vocálicos sem inserir /g/."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 42",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/01/12/51393a0f-7412-4703-8f47-866cfd57955c_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 181,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 20,
+            "end_seconds": 29,
+            "speaker": "Anna",
+            "text_en": "I was minding my own business.",
+            "text_pt": "Eu estava cuidando da minha vida."
+          },
+          {
+            "position": 1,
+            "start_seconds": 39,
+            "end_seconds": 50,
+            "speaker": "Anna",
+            "text_en": "Two robbers were grabbing her bag. She was hitting them with her umbrella.",
+            "text_pt": "Dois ladrões estavam agarrando a bolsa dela. Ela batia neles com o guarda-chuva."
+          },
+          {
+            "position": 2,
+            "start_seconds": 104,
+            "end_seconds": 112,
+            "speaker": "Anna",
+            "text_en": "While I was running, I tripped and fell.",
+            "text_pt": "Enquanto eu corria, tropecei e caí."
+          },
+          {
+            "position": 3,
+            "start_seconds": 114,
+            "end_seconds": 124,
+            "speaker": "Anna",
+            "text_en": "While I was lying on the ground, someone stepped on my arm!",
+            "text_pt": "Enquanto eu estava deitada no chão, alguém pisou no meu braço!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 157,
+            "end_seconds": 170,
+            "speaker": "Ms. Weaver",
+            "text_en": "My co-worker is stuck in a vending machine.",
+            "text_pt": "Minha colega está presa em uma máquina de vendas."
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "The robbers `____` grabbing her bag.",
+        "hint": null,
+        "explanation": "O sujeito plural *robbers* pede **were** no past continuous.",
+        "hints": [
+          "A ação estava em andamento.",
+          "Use o passado de *be* para um sujeito plural."
+        ],
+        "answers": [
+          "were"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "While I was running, I tripped and fell.",
+          "While I running, I was trip and fall.",
+          "While I were running, I tripped and falling."
+        ],
+        "prompt": "Escolha a frase que combina ação em andamento e evento pontual.",
+        "hint": null,
+        "explanation": "*Was running* cria o pano de fundo; *tripped and fell* relata os eventos.",
+        "hints": [
+          "Depois de *while*, procure *was + -ing*.",
+          "Os acontecimentos seguintes ficam no passado simples."
+        ],
+        "answers": [
+          "While I was running, I tripped and fell."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija: ‘They got theirselves kicked off the bus.’ → They got `____` kicked off the bus.",
+        "hint": null,
+        "explanation": "O reflexivo de *they* é **themselves**.",
+        "hints": [
+          "O pronome deve concordar com *they*.",
+          "O plural termina em *-selves*."
+        ],
+        "answers": [
+          "themselves"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "Someone",
+          "stepped",
+          "on",
+          "my",
+          "arm",
+          "while",
+          "I",
+          "was",
+          "lying",
+          "down"
+        ],
+        "prompt": "Ordene o evento e a ação que estava em andamento.",
+        "hint": null,
+        "explanation": "O evento usa passado simples; a oração com *while* usa past continuous.",
+        "hints": [
+          "Comece com *Someone stepped on my arm*.",
+          "Termine com *while I was lying down*."
+        ],
+        "answers": [
+          "Someone stepped on my arm while I was lying down"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She was getting lunch.",
+          "She was riding a bus.",
+          "She was interviewing a reporter."
+        ],
+        "prompt": "Listening: o que Anna fazia quando ouviu uma mulher gritar?",
+        "hint": null,
+        "explanation": "Anna havia saído do trabalho para **get some lunch**.",
+        "hints": [
+          "Ela estava no intervalo do trabalho.",
+          "A atividade envolve comida."
+        ],
+        "answers": [
+          "She was getting lunch."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a frase que começa com ‘While I was running...’.",
+        "hint": null,
+        "explanation": "A frase liga a corrida em andamento aos eventos *tripped* e *fell*.",
+        "hints": [
+          "Depois da vírgula, há dois verbos no passado.",
+          "Os verbos são *trip* e *fall*."
+        ],
+        "answers": [
+          "While I was running I tripped and fell"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "They did not pay the bus fare.",
+          "They argued with Anna.",
+          "They lost the umbrella."
+        ],
+        "prompt": "Listening: por que os ladrões foram expulsos do ônibus?",
+        "hint": null,
+        "explanation": "Eles foram expulsos porque **they didn't pay**.",
+        "hints": [
+          "O motivo envolve uma regra do transporte.",
+          "Você precisa pagar ao entrar no ônibus."
+        ],
+        "answers": [
+          "They did not pay the bus fare.",
+          "They didn't pay the bus fare."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She reached into a vending machine.",
+          "She fell while chasing the bus.",
+          "A robber hit her with an umbrella."
+        ],
+        "prompt": "Listening: como Anna realmente machucou o braço?",
+        "hint": null,
+        "explanation": "A reviravolta final mostra Anna presa na máquina ao tentar pegar um pacote de chips.",
+        "hints": [
+          "A resposta aparece somente no fim.",
+          "O problema começou porque um lanche ficou preso."
+        ],
+        "answers": [
+          "She reached into a vending machine."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma sequência inesperada",
+        "instructions": "Write 5 to 7 sentences about an unexpected event. Explain what people were doing and what happened next.",
+        "min_words": 55,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "duas formas de past continuous",
+            "terms": [
+              "was ",
+              "were "
+            ]
+          },
+          {
+            "label": "uma oração com while",
+            "terms": [
+              "while "
+            ]
+          },
+          {
+            "label": "um pronome reflexivo",
+            "terms": [
+              "myself",
+              "yourself",
+              "herself",
+              "himself",
+              "ourselves",
+              "themselves"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "40-44",
+    "slug": "lesson-43",
+    "position": 3,
+    "number": 43,
+    "title": "Time for Plan B",
+    "title_pt": "Hora do plano B",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-43-time-for-plan-b/3666458.html",
+    "grammar_tag": "Pedidos educados e capacidade",
+    "focus_points": [
+      "could · would · be able to",
+      "have to / have got to",
+      "too + adjetivo"
+    ],
+    "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "usar o que você já sabe",
+    "review_note": "Sprint 22: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; o plano oficial prioriza ‘Use What You Know’, embora a revisão 40–44 use outro rótulo. Não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Anna perde a carteira e fica sem dinheiro no centro. Cada amigo tem uma razão para não ajudar, então ela transforma pedidos educados em uma sequência de planos alternativos.",
+    "warmup_prompt": "Como você pediria ajuda e responderia com educação quando não pudesse ajudar?",
+    "listening_focus": "os pedidos com could e would, as desculpas e a sequência dos planos",
+    "goals": [
+      "Fazer pedidos educados com **could**, **would** e **be able to**.",
+      "Falar de capacidade no presente, passado e futuro.",
+      "Explicar obrigações com *have to / have got to* e desculpas com *too + adjetivo*.",
+      "Usar conhecimento prévio para resolver um problema de comunicação."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Pedidos educados com could e would",
+        "why": "*Could* e *would* tornam um pedido menos direto e mais cortês.",
+        "warning": "A resposta *I wish I could* expressa vontade, mas informa que a pessoa não pode ajudar.",
+        "table_head": [
+          "Estrutura",
+          "Exemplo",
+          "Uso"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "Could you + verbo?",
+              "Could you give me some money?",
+              "pedido educado"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Would you be able to + verbo?",
+              "Would you be able to come downtown?",
+              "pergunta sobre disponibilidade"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "I was wondering if...",
+              "I was wondering if you could help.",
+              "pedido ainda mais indireto"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Can, could e be able to",
+        "why": "As três formas falam de capacidade; *be able to* é especialmente útil quando precisamos flexionar o tempo verbal.",
+        "warning": "Depois de modal use o verbo base: *could help*, não *could to help*.",
+        "table_head": [
+          "Tempo",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "presente",
+              "can / am able to",
+              "I can help now."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "passado",
+              "could / was able to",
+              "I was able to find another plan."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "futuro",
+              "will be able to",
+              "I will be able to pay you back."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Obrigações e desculpas",
+        "why": "Uma resposta educada costuma reconhecer o pedido, explicar a obrigação e encerrar com empatia.",
+        "warning": "*Too busy* significa ocupado demais para fazer algo; *very busy* apenas intensifica a descrição.",
+        "table_head": [
+          "Forma",
+          "Sentido",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "have to + verbo",
+              "obrigação",
+              "I have to give a presentation."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "have got to + verbo",
+              "obrigação, uso informal",
+              "I've got to go to the airport."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "too + adjetivo",
+              "excesso que impede uma ação",
+              "I'm too busy to come downtown."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I lost my wallet!",
+        "text_pt": "Perdi minha carteira!",
+        "note": "*Lose* é irregular: *lose → lost*."
+      },
+      {
+        "position": 1,
+        "text_en": "Would you be able to come downtown?",
+        "text_pt": "Você conseguiria vir ao centro?",
+        "note": "Pedido educado que verifica disponibilidade."
+      },
+      {
+        "position": 2,
+        "text_en": "I was wondering if you could give me some money.",
+        "text_pt": "Eu estava pensando se você poderia me dar algum dinheiro.",
+        "note": "A introdução indireta suaviza o pedido."
+      },
+      {
+        "position": 3,
+        "text_en": "I wish I could help.",
+        "text_pt": "Eu queria poder ajudar.",
+        "note": "Demonstra boa vontade ao recusar."
+      },
+      {
+        "position": 4,
+        "text_en": "I'll pay you back. I promise.",
+        "text_pt": "Vou devolver o dinheiro. Eu prometo.",
+        "note": "*Pay back* significa devolver dinheiro emprestado."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "wallet",
+        "ipa": "/ˈwɑːlɪt/",
+        "translation_pt": "carteira",
+        "example_en": "Anna lost her wallet."
+      },
+      {
+        "position": 1,
+        "term": "downtown",
+        "ipa": "/ˌdaʊnˈtaʊn/",
+        "translation_pt": "centro da cidade",
+        "example_en": "She is stuck downtown."
+      },
+      {
+        "position": 2,
+        "term": "emergency",
+        "ipa": "/ɪˈmɜːrdʒənsi/",
+        "translation_pt": "emergência",
+        "example_en": "Always have emergency money."
+      },
+      {
+        "position": 3,
+        "term": "empty",
+        "ipa": "/ˈempti/",
+        "translation_pt": "vazio",
+        "example_en": "The envelope is empty."
+      },
+      {
+        "position": 4,
+        "term": "airport",
+        "ipa": "/ˈerpɔːrt/",
+        "translation_pt": "aeroporto",
+        "example_en": "Jonathan is at the airport."
+      },
+      {
+        "position": 5,
+        "term": "flight",
+        "ipa": "/flaɪt/",
+        "translation_pt": "voo",
+        "example_en": "Her flight leaves in two hours."
+      },
+      {
+        "position": 6,
+        "term": "presentation",
+        "ipa": "/ˌprezənˈteɪʃən/",
+        "translation_pt": "apresentação",
+        "example_en": "Marsha has a presentation."
+      },
+      {
+        "position": 7,
+        "term": "babysit",
+        "ipa": "/ˈbeɪbisɪt/",
+        "translation_pt": "cuidar temporariamente de uma criança",
+        "example_en": "Ashley is babysitting."
+      },
+      {
+        "position": 8,
+        "term": "worried",
+        "ipa": "/ˈwɜːrid/",
+        "translation_pt": "preocupado",
+        "example_en": "I'm not worried about the money."
+      },
+      {
+        "position": 9,
+        "term": "pay back",
+        "ipa": "/peɪ bæk/",
+        "translation_pt": "devolver dinheiro",
+        "example_en": "I'll pay you back tomorrow."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "what are you → /ˈwʌtʃə/",
+        "explanation": "Na conversa rápida, os sons se unem e podem soar próximos de ‘whatcha’."
+      },
+      {
+        "position": 1,
+        "label": "would you → /ˈwʊdʒə/",
+        "explanation": "O /d/ de *would* encontra o /j/ de *you* e produz um som semelhante a /dʒ/."
+      },
+      {
+        "position": 2,
+        "label": "could /kʊd/ × would /wʊd/",
+        "explanation": "As duas palavras usam a vogal curta /ʊ/; o *l* não é pronunciado."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 43",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/01/18/b97c84f3-f68d-4b35-bf71-9c369a107e82_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 219,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 5,
+            "end_seconds": 16,
+            "speaker": "Anna",
+            "text_en": "I lost my wallet! It has my Metro card, my credit card and my money!",
+            "text_pt": "Perdi minha carteira! Ela tem meu cartão do metrô, meu cartão de crédito e meu dinheiro!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 48,
+            "end_seconds": 60,
+            "speaker": "Anna",
+            "text_en": "Would you be able to come downtown?",
+            "text_pt": "Você conseguiria vir ao centro?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 91,
+            "end_seconds": 103,
+            "speaker": "Anna",
+            "text_en": "I was wondering if you could give me some money.",
+            "text_pt": "Eu estava pensando se você poderia me dar algum dinheiro."
+          },
+          {
+            "position": 3,
+            "start_seconds": 144,
+            "end_seconds": 159,
+            "speaker": "Anna",
+            "text_en": "Would you be able to come downtown? And could you give me twenty dollars?",
+            "text_pt": "Você conseguiria vir ao centro? E poderia me dar vinte dólares?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 201,
+            "end_seconds": 219,
+            "speaker": "Anna",
+            "text_en": "Could you give, won't you give me money?",
+            "text_pt": "Você poderia me dar, você não me daria dinheiro?"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "`____` you be able to come downtown?",
+        "hint": null,
+        "explanation": "**Would you be able to...** é uma forma educada de verificar disponibilidade.",
+        "hints": [
+          "A frase pede ajuda de maneira indireta.",
+          "Use o modal que costuma acompanhar *be able to* em pedidos."
+        ],
+        "answers": [
+          "Would"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "Could you give me some money?",
+          "Could you to give me some money?",
+          "Could you gave me some money?"
+        ],
+        "prompt": "Escolha o pedido educado com a forma verbal correta.",
+        "hint": null,
+        "explanation": "Depois de *could*, use o verbo base sem *to*: **could give**.",
+        "hints": [
+          "Um modal é seguido pela forma base.",
+          "Não use *to* nem passado depois de *could*."
+        ],
+        "answers": [
+          "Could you give me some money?"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Torne o pedido mais educado: ‘Give me twenty dollars.’ → `____`",
+        "hint": null,
+        "explanation": "Uma opção cortês é **Could you give me twenty dollars?**.",
+        "hints": [
+          "Comece com um modal de pedido.",
+          "Use *Could you + verbo base...?*."
+        ],
+        "answers": [
+          "Could you give me twenty dollars",
+          "Could you give me $20",
+          "Would you give me twenty dollars"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "I",
+          "was",
+          "wondering",
+          "if",
+          "you",
+          "could",
+          "help",
+          "me"
+        ],
+        "prompt": "Ordene o pedido indireto.",
+        "hint": null,
+        "explanation": "A introdução **I was wondering if** suaviza *you could help me*.",
+        "hints": [
+          "Comece com *I was wondering*.",
+          "Depois de *if*, use *you could help me*."
+        ],
+        "answers": [
+          "I was wondering if you could help me"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Her wallet",
+          "Her phone",
+          "Her ukulele"
+        ],
+        "prompt": "Listening: o que Anna perdeu?",
+        "hint": null,
+        "explanation": "Anna perdeu a carteira que continha cartões e dinheiro.",
+        "hints": [
+          "O objeto guardava o cartão do metrô.",
+          "A palavra começa com *w*."
+        ],
+        "answers": [
+          "Her wallet"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o pedido que termina em ‘come downtown?’.",
+        "hint": null,
+        "explanation": "A fala é **Would you be able to come downtown?**.",
+        "hints": [
+          "Comece com *Would you*.",
+          "Entre *you* e *to come* aparece *be able*."
+        ],
+        "answers": [
+          "Would you be able to come downtown"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She has to give a presentation.",
+          "She has to catch a flight.",
+          "She is babysitting."
+        ],
+        "prompt": "Listening: por que Marsha não pode ajudar?",
+        "hint": null,
+        "explanation": "Marsha está ocupada porque precisa fazer uma apresentação em uma hora.",
+        "hints": [
+          "Não é a desculpa de Jonathan nem de Ashley.",
+          "Ela falará para um grupo de pessoas."
+        ],
+        "answers": [
+          "She has to give a presentation."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She sings polite requests to strangers.",
+          "She finds her wallet at the Metro.",
+          "She sells her ukulele."
+        ],
+        "prompt": "Listening: qual é o Plano F de Anna?",
+        "hint": null,
+        "explanation": "No fim, Anna canta pedidos de dinheiro para as pessoas.",
+        "hints": [
+          "O plano final transforma a linguagem da aula em música.",
+          "Ela repete *could*, *would* e *won't you*."
+        ],
+        "answers": [
+          "She sings polite requests to strangers."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Pedido, resposta e plano alternativo",
+        "instructions": "Write a short dialogue of 6 to 8 lines. One person asks for help, the other gives an excuse, and they agree on another plan.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "um pedido com could ou would",
+            "terms": [
+              "could you",
+              "would you"
+            ]
+          },
+          {
+            "label": "uma desculpa com have to ou too",
+            "terms": [
+              "have to",
+              "have got to",
+              "too busy",
+              "too tired"
+            ]
+          },
+          {
+            "label": "uma resposta empática",
+            "terms": [
+              "I wish I could",
+              "sorry",
+              "good luck",
+              "thanks anyway"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "40-44",
+    "slug": "lesson-44",
+    "position": 4,
+    "number": 44,
+    "title": "Making Healthy Choices",
+    "title_pt": "Fazendo escolhas saudáveis",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-44-making-healthy-choices/3688552.html",
+    "grammar_tag": "Must, should e don't have to",
+    "focus_points": [
+      "must × should",
+      "mustn't × don't have to",
+      "alimentação e classificação"
+    ],
+    "story_note": "Fecha o bloco 40–44 e prepara a revisão curricular.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "classificar",
+    "review_note": "Sprint 22: conteúdo autoral conferido documentalmente com a página, a transcrição e o plano oficial da VOA; não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "No supermercado, as vozes ‘Healthy’ e ‘Junky’ discutem cada escolha de Anna. A conversa contrasta conselho, obrigação, proibição e ausência de obrigação.",
+    "warmup_prompt": "Qual é a diferença entre algo que você não deve fazer e algo que não precisa fazer?",
+    "listening_focus": "must, should, mustn't e don't have to nas escolhas feitas no supermercado",
+    "goals": [
+      "Distinguir conselho com **should** de obrigação com **must**.",
+      "Diferenciar proibição com **mustn't** de ausência de obrigação com **don't have to**.",
+      "Classificar alimentos e justificar escolhas em inglês.",
+      "Reconhecer e pronunciar *must* e *mustn't* em fala conectada."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Must × should",
+        "why": "*Must* apresenta uma necessidade forte; *should* oferece conselho ou recomendação.",
+        "warning": "A força dessas palavras depende do contexto. Para recomendações pessoais, *should* geralmente soa menos autoritário.",
+        "table_head": [
+          "Modal",
+          "Força",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "must",
+              "necessidade forte",
+              "You must eat more vegetables."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "should",
+              "conselho",
+              "You should choose some fruit."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "shouldn't",
+              "conselho negativo",
+              "You shouldn't eat only junk food."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Mustn't × don't have to",
+        "why": "*Mustn't* proíbe uma ação. *Don't have to* informa apenas que a ação não é necessária.",
+        "warning": "Esta diferença muda completamente o sentido: *You mustn't buy it* = não compre; *You don't have to buy it* = compre somente se quiser.",
+        "table_head": [
+          "Forma",
+          "Sentido",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "mustn't",
+              "é proibido / não faça",
+              "You mustn't buy donuts."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "don't have to",
+              "não é necessário",
+              "You don't have to buy bread."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "have to",
+              "é necessário",
+              "I have to choose my food."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Classificar e quantificar escolhas",
+        "why": "Palavras de quantidade ajudam a transformar uma classificação simples em uma recomendação mais precisa.",
+        "warning": "Use *much* com incontáveis (*sugar*) e *many* com contáveis (*donuts*).",
+        "table_head": [
+          "Quantidade",
+          "Tipo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "a little",
+              "pequena quantidade",
+              "A little ice cream is enough."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "too much",
+              "incontável em excesso",
+              "Don't eat too much sugar."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "lots of",
+              "grande quantidade",
+              "Choose lots of vegetables."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I should eat more vegetables.",
+        "text_pt": "Eu deveria comer mais vegetais.",
+        "note": "*Should* apresenta uma recomendação."
+      },
+      {
+        "position": 1,
+        "text_en": "You must eat more vegetables.",
+        "text_pt": "Você precisa comer mais vegetais.",
+        "note": "*Must* torna a necessidade mais forte."
+      },
+      {
+        "position": 2,
+        "text_en": "You mustn't eat junk food.",
+        "text_pt": "Você não pode comer comida pouco saudável.",
+        "note": "*Mustn't* expressa proibição, não falta de necessidade."
+      },
+      {
+        "position": 3,
+        "text_en": "You don't have to buy bread.",
+        "text_pt": "Você não precisa comprar pão.",
+        "note": "A ação é opcional."
+      },
+      {
+        "position": 4,
+        "text_en": "You two need to cool off!",
+        "text_pt": "Vocês duas precisam se acalmar!",
+        "note": "*Cool off* significa ficar mais calmo depois de um conflito."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "aisle",
+        "ipa": "/aɪl/",
+        "translation_pt": "corredor de loja",
+        "example_en": "Go to the frozen food aisle."
+      },
+      {
+        "position": 1,
+        "term": "bakery",
+        "ipa": "/ˈbeɪkəri/",
+        "translation_pt": "padaria",
+        "example_en": "The bakery has fresh bread."
+      },
+      {
+        "position": 2,
+        "term": "cart",
+        "ipa": "/kɑːrt/",
+        "translation_pt": "carrinho de compras",
+        "example_en": "Take this cart."
+      },
+      {
+        "position": 3,
+        "term": "cholesterol",
+        "ipa": "/kəˈlestərɔːl/",
+        "translation_pt": "colesterol",
+        "example_en": "They argue about cholesterol."
+      },
+      {
+        "position": 4,
+        "term": "cool off",
+        "ipa": "/kuːl ɔːf/",
+        "translation_pt": "acalmar-se",
+        "example_en": "You need to cool off."
+      },
+      {
+        "position": 5,
+        "term": "frozen",
+        "ipa": "/ˈfroʊzən/",
+        "translation_pt": "congelado",
+        "example_en": "Anna sees frozen peas."
+      },
+      {
+        "position": 6,
+        "term": "healthy",
+        "ipa": "/ˈhelθi/",
+        "translation_pt": "saudável",
+        "example_en": "She wants healthy food."
+      },
+      {
+        "position": 7,
+        "term": "junk food",
+        "ipa": "/ˈdʒʌŋk fuːd/",
+        "translation_pt": "comida de baixo valor nutricional",
+        "example_en": "Anna also wants junk food."
+      },
+      {
+        "position": 8,
+        "term": "organic",
+        "ipa": "/ɔːrˈɡænɪk/",
+        "translation_pt": "orgânico",
+        "example_en": "They discuss organic bread."
+      },
+      {
+        "position": 9,
+        "term": "whole wheat",
+        "ipa": "/ˌhoʊl ˈwiːt/",
+        "translation_pt": "integral, de trigo integral",
+        "example_en": "She finds whole wheat bread."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "must /mʌst/",
+        "explanation": "Mantenha o grupo final /st/ claro quando a palavra recebe ênfase."
+      },
+      {
+        "position": 1,
+        "label": "mustn't /ˈmʌsənt/",
+        "explanation": "Na fala natural, o primeiro /t/ pode não ser liberado; a sílaba negativa precisa continuar audível."
+      },
+      {
+        "position": 2,
+        "label": "aisle /aɪl/",
+        "explanation": "O *s* é mudo: a palavra soa como *I'll*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 44",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/01/30/e8edcdf8-a252-41eb-af50-d1337bbb614f_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA em domínio público; materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 214,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 15,
+            "end_seconds": 27,
+            "speaker": "Anna",
+            "text_en": "When I'm hungry, I only want to eat junk food! But I know I should eat healthy food.",
+            "text_pt": "Quando estou com fome, só quero comer comida pouco saudável! Mas sei que deveria comer comida saudável."
+          },
+          {
+            "position": 1,
+            "start_seconds": 49,
+            "end_seconds": 59,
+            "speaker": "Healthy",
+            "text_en": "You must eat more vegetables, like celery!",
+            "text_pt": "Você precisa comer mais vegetais, como aipo!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 69,
+            "end_seconds": 80,
+            "speaker": "Healthy",
+            "text_en": "You mustn't eat junk food.",
+            "text_pt": "Você não pode comer comida pouco saudável."
+          },
+          {
+            "position": 3,
+            "start_seconds": 132,
+            "end_seconds": 145,
+            "speaker": "Junky",
+            "text_en": "You don't have to buy bread. Buy some donuts, Anna!",
+            "text_pt": "Você não precisa comprar pão. Compre alguns donuts, Anna!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 197,
+            "end_seconds": 211,
+            "speaker": "Anna",
+            "text_en": "I am going to go buy my healthy food and my junk food!",
+            "text_pt": "Vou comprar minha comida saudável e minha comida pouco saudável!"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "You should eat more vegetables.",
+          "You mustn't eat more vegetables.",
+          "You don't have to never eat vegetables."
+        ],
+        "prompt": "Escolha a frase que dá um conselho sem expressar proibição.",
+        "hint": null,
+        "explanation": "**Should** apresenta uma recomendação.",
+        "hints": [
+          "Procure o modal de conselho.",
+          "A frase não deve proibir a ação."
+        ],
+        "answers": [
+          "You should eat more vegetables."
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "This food is forbidden here. You `____` bring it inside.",
+        "hint": null,
+        "explanation": "Uma proibição forte usa **mustn't**.",
+        "hints": [
+          "A regra não torna a ação opcional.",
+          "Use a forma negativa de *must*."
+        ],
+        "answers": [
+          "mustn't",
+          "must not"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija o sentido: comprar pão é opcional. ‘You mustn't buy bread.’ → You `____` buy bread.",
+        "hint": null,
+        "explanation": "Ausência de obrigação é **don't have to**, não *mustn't*.",
+        "hints": [
+          "A pessoa pode comprar, mas não precisa.",
+          "Use *do not + have to*."
+        ],
+        "answers": [
+          "don't have to",
+          "do not have to"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "You",
+          "should",
+          "eat",
+          "a",
+          "little",
+          "fruit"
+        ],
+        "prompt": "Ordene um conselho com expressão de quantidade.",
+        "hint": null,
+        "explanation": "O modal vem antes do verbo base; *a little* indica pequena quantidade.",
+        "hints": [
+          "Comece com *You should eat*.",
+          "A expressão de quantidade vem antes de *fruit*."
+        ],
+        "answers": [
+          "You should eat a little fruit"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Healthy food and junk food",
+          "Only frozen food",
+          "Only bread and donuts"
+        ],
+        "prompt": "Listening: entre quais dois tipos de comida Anna está dividida?",
+        "hint": null,
+        "explanation": "Anna descreve uma disputa entre **healthy food** e **junk food**.",
+        "hints": [
+          "Uma opção representa conselho; a outra, desejo.",
+          "As duas expressões terminam em *food*."
+        ],
+        "answers": [
+          "Healthy food and junk food"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a recomendação com *must* e *vegetables*.",
+        "hint": null,
+        "explanation": "A fala é **You must eat more vegetables**.",
+        "hints": [
+          "Comece com *You must eat*.",
+          "A última parte é *more vegetables*."
+        ],
+        "answers": [
+          "You must eat more vegetables"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Frozen peas",
+          "Ice cream",
+          "Fresh bread"
+        ],
+        "prompt": "Listening: qual comida Healthy prefere no corredor de congelados?",
+        "hint": null,
+        "explanation": "Healthy repete com entusiasmo **frozen peas**.",
+        "hints": [
+          "É um vegetal.",
+          "Junky acha estranho dizer ‘Mmm’ para essa comida."
+        ],
+        "answers": [
+          "Frozen peas"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She decides to buy both kinds of food.",
+          "She buys only vegetables.",
+          "She leaves without buying anything."
+        ],
+        "prompt": "Listening: qual decisão Anna toma no final?",
+        "hint": null,
+        "explanation": "Anna encerra a discussão e decide comprar comida saudável e comida pouco saudável.",
+        "hints": [
+          "Ela não escolhe somente um dos lados.",
+          "A última fala repete os dois tipos de comida."
+        ],
+        "answers": [
+          "She decides to buy both kinds of food."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Escolhas para uma semana equilibrada",
+        "instructions": "Write 5 to 7 sentences in English about food choices for one week. Give advice, state one important rule, and mention one optional choice.",
+        "min_words": 55,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "um conselho com should",
+            "terms": [
+              "should "
+            ]
+          },
+          {
+            "label": "uma regra com must ou mustn't",
+            "terms": [
+              "must ",
+              "mustn't ",
+              "must not "
+            ]
+          },
+          {
+            "label": "uma escolha opcional com don't have to",
+            "terms": [
+              "don't have to",
+              "do not have to"
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]

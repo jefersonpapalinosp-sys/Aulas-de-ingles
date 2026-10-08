@@ -10,6 +10,10 @@ export function unitPath(courseSlug: string, unitSlug: string): string {
   return `${coursePath(courseSlug)}/unidades/${encodeURIComponent(unitSlug)}`
 }
 
+export function courseReviewPath(courseSlug: string, unitSlug: string): string {
+  return `${unitPath(courseSlug, unitSlug)}/checkpoint`
+}
+
 export function lessonPath(courseSlug: string, lessonNumber: number): string {
   return `${coursePath(courseSlug)}/aulas/${lessonNumber}`
 }

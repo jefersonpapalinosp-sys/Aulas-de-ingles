@@ -23,10 +23,88 @@
         "slug": "40-44",
         "title": "Aulas 40–44",
         "position": 2,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 40,
         "lesson_end": 44,
-        "total_lessons": 5
+        "total_lessons": 4,
+        "review": {
+          "slug": "checkpoint-40-44",
+          "title": "Checkpoint 40–44",
+          "position": 5,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review Lessons 40–44",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-review-lessons-40-44/3688551.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são autorais do projeto.",
+          "intro": "Retome a escuta da Aula 40 e consolide os pontos centrais das Aulas 41–44. O resultado indica se o bloco está consolidado ou quais aulas vale reforçar.",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 40,
+          "listening_lesson_number": 40,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na conversa da Aula 40, qual papel o diretor dá a Anna?",
+              "options": ["uma árvore", "a diretora", "uma viajante perdida"],
+              "accepted_answers": ["uma árvore"],
+              "explanation": "No fim da audição, Anna veste o figurino e diz que é uma árvore.",
+              "lesson_numbers": [40]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Complete a condição real: If you look at the chart, you ____ the audience growing.",
+              "options": ["will see", "would see", "saw"],
+              "accepted_answers": ["will see"],
+              "explanation": "Na first conditional, usamos if + presente e will + verbo para uma consequência provável.",
+              "lesson_numbers": [41]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Escolha a frase correta sobre a história da Aula 42.",
+              "options": ["Anna hurt herself.", "Anna hurt her self.", "Anna hurt himself."],
+              "accepted_answers": ["Anna hurt herself."],
+              "explanation": "O pronome reflexivo que retoma Anna/she é herself, escrito em uma palavra.",
+              "lesson_numbers": [42]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual pedido é mais adequado e cortês para pedir ajuda?",
+              "options": ["Would you be able to help me?", "You help me now.", "Could to you help me?"],
+              "accepted_answers": ["Would you be able to help me?"],
+              "explanation": "Would you be able to…? formula um pedido indireto e cortês; could nunca recebe to nessa estrutura.",
+              "lesson_numbers": [43]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase expressa ausência de obrigação, e não proibição?",
+              "options": ["You don't have to buy bread.", "You mustn't buy bread.", "You must buy bread."],
+              "accepted_answers": ["You don't have to buy bread."],
+              "explanation": "Don't have to significa que algo não é necessário; mustn't proíbe a ação.",
+              "lesson_numbers": [44]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual opção reúne uma consequência provável, um reflexivo e uma obrigação forte?",
+              "options": ["will succeed · yourself · must", "would succeed · your self · could", "succeeded · himself · don't have to"],
+              "accepted_answers": ["will succeed · yourself · must"],
+              "explanation": "A sequência retoma, respectivamente, a condição real da 41, o reflexivo da 42 e a obrigação forte da 44.",
+              "lesson_numbers": [41, 42, 44]
+            }
+          ]
+        }
       },
       {
         "slug": "45-49",

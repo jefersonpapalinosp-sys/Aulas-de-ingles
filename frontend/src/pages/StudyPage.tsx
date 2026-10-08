@@ -42,13 +42,17 @@ function StepContent({
         <div className="study-intro-card">
           <p className="study-kicker">Antes de começar</p>
           <h2>O que você vai conseguir fazer</h2>
-          <ul className="goals">
-            {lesson.goals.map((goal) => (
-              <li key={goal}>
-                <Markdown>{goal}</Markdown>
-              </li>
-            ))}
-          </ul>
+          {lesson.goals.length > 0 ? (
+            <ul className="goals">
+              {lesson.goals.map((goal) => (
+                <li key={goal}>
+                  <Markdown>{goal}</Markdown>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="study-copy">Use o foco gramatical e o aquecimento como meta desta sessão.</p>
+          )}
         </div>
         <aside className="study-prompt" aria-labelledby="study-warmup-title">
           <p className="study-kicker">Aquecimento · responda em voz alta</p>
@@ -67,14 +71,34 @@ function StepContent({
     const listeningExercises = lesson.exercises.filter((exercise) => exercise.skill === 'listening')
     return (
       <>
-        {conversationAudio && (
+        {conversationAudio ? (
           <LessonAudioPlayer
             media={conversationAudio}
             userId={userId}
             sourcePageUrl={lesson.voa_url}
           />
+        ) : (
+          <div className="media-fallback" role="note">
+            <p className="study-kicker">Alternativa textual</p>
+            <h2>Áudio não disponível neste aplicativo</h2>
+            <p>
+              <strong>Resumo:</strong> <Markdown>{lesson.lead}</Markdown>
+            </p>
+            <p>
+              <strong>Foco de compreensão:</strong>{' '}
+              {lesson.listening_focus || lesson.grammar_tag}.
+            </p>
+            <ol>
+              <li>Leia o resumo uma vez para identificar situação, pessoas e objetivo.</li>
+              <li>Escreva duas palavras que você esperaria ouvir nessa situação.</li>
+              <li>Crie uma frase curta em inglês usando o foco indicado acima.</li>
+            </ol>
+            <a href={lesson.voa_url} target="_blank" rel="noopener noreferrer">
+              Abrir a aula na VOA ↗
+            </a>
+          </div>
         )}
-        {listeningExercises.length > 0 && (
+        {conversationAudio && listeningExercises.length > 0 && (
           <div className="study-section listening-check">
             <p className="study-kicker">Compreensão geral</p>
             <h2>Escute e responda antes de ler</h2>
@@ -96,24 +120,39 @@ function StepContent({
         )}
         <div className="study-instructions">
           <p className="study-kicker">
-            Estratégia · {lesson.versions[0]?.learning_strategy ?? 'escuta ativa'}
+            Estratégia ·{' '}
+            {conversationAudio
+              ? (lesson.versions[0]?.learning_strategy ?? 'escuta ativa')
+              : 'leitura contextual'}
           </p>
-          <h2>Escute primeiro pelo contexto</h2>
-          <ol>
-            <li>Na primeira vez, não pause: identifique as pessoas, o lugar e o problema.</li>
-            <li>
-              Na segunda, concentre-se em {lesson.listening_focus}.
-            </li>
-            <li>Depois, abra os trechos selecionados e confira o que conseguiu reconhecer.</li>
-          </ol>
-          <a className="watch" href={lesson.voa_url} target="_blank" rel="noopener noreferrer">
-            Abrir vídeo e áudio na VOA ↗
-          </a>
+          <h2>{conversationAudio ? 'Escute primeiro pelo contexto' : 'Leia primeiro pelo contexto'}</h2>
+          {conversationAudio ? (
+            <>
+              <ol>
+                <li>Na primeira vez, não pause: identifique as pessoas, o lugar e o problema.</li>
+                <li>
+                  Na segunda, concentre-se em {lesson.listening_focus}.
+                </li>
+                <li>Depois, abra os trechos selecionados e confira o que conseguiu reconhecer.</li>
+              </ol>
+              <a className="watch" href={lesson.voa_url} target="_blank" rel="noopener noreferrer">
+                Abrir vídeo e áudio na VOA ↗
+              </a>
+            </>
+          ) : (
+            <ol>
+              <li>Explique com suas palavras qual é a situação apresentada no resumo.</li>
+              <li>Compare sua frase em inglês com o foco gramatical: {lesson.grammar_tag}.</li>
+              <li>Leia a frase em voz alta e ajuste uma palavra para criar uma nova versão.</li>
+            </ol>
+          )}
         </div>
-        <div className="study-section">
-          <h2>Frases para acompanhar</h2>
-          <PhraseList frases={lesson.phrases} />
-        </div>
+        {lesson.phrases.length > 0 && (
+          <div className="study-section">
+            <h2>Frases para acompanhar</h2>
+            <PhraseList frases={lesson.phrases} />
+          </div>
+        )}
       </>
     )
   }
@@ -123,11 +162,29 @@ function StepContent({
       <div className="study-section">
         <p className="study-kicker">Teoria aplicada</p>
         <h2>{lesson.grammar_tag}</h2>
-        <div className="stack">
-          {lesson.grammar_blocks.map((block) => (
-            <GrammarBlockView bloco={block} key={block.heading} />
-          ))}
-        </div>
+        {lesson.grammar_blocks.length > 0 ? (
+          <div className="stack">
+            {lesson.grammar_blocks.map((block) => (
+              <GrammarBlockView bloco={block} key={block.heading} />
+            ))}
+          </div>
+        ) : (
+          <div className="media-fallback" role="note">
+            <h3>Estudo textual alternativo</h3>
+            <p>
+              <strong>Contexto:</strong> <Markdown>{lesson.lead}</Markdown>
+            </p>
+            <p>
+              Escreva duas frases sobre esse contexto usando <strong>{lesson.grammar_tag}</strong>
+              {lesson.focus_points[0] && (
+                <>
+                  {' '}e o foco <Markdown>{lesson.focus_points[0]}</Markdown>
+                </>
+              )}
+              .
+            </p>
+          </div>
+        )}
       </div>
     )
   }
@@ -141,16 +198,27 @@ function StepContent({
           Responda antes de pedir o gabarito. A correção acontece no servidor e cada tentativa
           fica registrada no seu progresso.
         </p>
-        <PracticeRunner
-          key={`${lesson.course_slug}:${lesson.number}`}
-          courseSlug={lesson.course_slug}
-          lessonNumber={lesson.number}
-          lessonTitle={lesson.title}
-          userId={userId}
-          variant="embedded"
-          initialFilters={{ skill: 'grammar' }}
-          lockFilters
-        />
+        {lesson.exercises.length > 0 ? (
+          <PracticeRunner
+            key={`${lesson.course_slug}:${lesson.number}`}
+            courseSlug={lesson.course_slug}
+            lessonNumber={lesson.number}
+            lessonTitle={lesson.title}
+            userId={userId}
+            variant="embedded"
+            initialFilters={{ skill: 'grammar' }}
+            lockFilters
+          />
+        ) : (
+          <div className="media-fallback" role="note">
+            <h3>Prática textual alternativa</h3>
+            <ol>
+              <li>Responda em inglês: {lesson.warmup_prompt}</li>
+              <li>Reescreva sua resposta usando {lesson.grammar_tag}.</li>
+              <li>Leia as duas versões em voz alta e escolha a mais clara.</li>
+            </ol>
+          </div>
+        )}
       </div>
     )
   }
@@ -170,19 +238,35 @@ function StepContent({
           lessonNumber={lesson.number}
         />
       )}
-      <div className="study-section">
-        <p className="study-kicker">Consolidação</p>
-        <h2>Revise o som e as palavras</h2>
-        <p className="study-copy">
-          Leia os termos em voz alta. Adicione ao deck os que você ainda não consegue recuperar
-          sem olhar a tradução.
-        </p>
-        <PronunciationList notas={lesson.pronunciation} />
-      </div>
-      <div className="study-section">
-        <h2>Vocabulário da aula</h2>
-        <VocabTable itens={lesson.vocab} />
-      </div>
+      {lesson.pronunciation.length > 0 && (
+        <div className="study-section">
+          <p className="study-kicker">Consolidação</p>
+          <h2>Revise o som e as palavras</h2>
+          <p className="study-copy">
+            Leia os termos em voz alta. Adicione ao deck os que você ainda não consegue recuperar
+            sem olhar a tradução.
+          </p>
+          <PronunciationList notas={lesson.pronunciation} />
+        </div>
+      )}
+      {lesson.vocab.length > 0 && (
+        <div className="study-section">
+          <h2>Vocabulário da aula</h2>
+          <VocabTable itens={lesson.vocab} />
+        </div>
+      )}
+      {!writingPrompt && !shadowingMedia && lesson.pronunciation.length === 0 && lesson.vocab.length === 0 && (
+        <div className="media-fallback" role="note">
+          <h2>Revisão textual rápida</h2>
+          <ol>
+            <li>
+              Resuma em uma frase: <Markdown>{lesson.lead}</Markdown>
+            </li>
+            <li>Crie um novo exemplo com {lesson.grammar_tag}.</li>
+            <li>Responda novamente ao aquecimento: {lesson.warmup_prompt}</li>
+          </ol>
+        </div>
+      )}
     </>
   )
 }

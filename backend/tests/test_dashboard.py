@@ -1,13 +1,21 @@
 """Painel Hoje, plano semanal, recomendações e competências."""
 
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import StepProgress, StudySessionProgress, User
+from app.db.models import (
+    CourseReview,
+    Lesson,
+    LessonProgress,
+    StepProgress,
+    StudySessionProgress,
+    User,
+)
 
 
 async def conta(client: AsyncClient, suffix: str) -> dict[str, str]:
@@ -99,6 +107,75 @@ async def test_recommendation_prioritizes_due_review_then_resume(client: AsyncCl
     review = (await client.get("/api/me/today", headers=headers)).json()["recommendation"]
     assert review["kind"] == "review"
     assert "venceram" in review["reason"].lower()
+
+
+@pytest.mark.asyncio
+async def test_recommendation_offers_unit_checkpoint_after_required_lessons(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "today-checkpoint")
+    user = (
+        await session.execute(select(User).where(User.email == "today-checkpoint@example.com"))
+    ).scalar_one()
+    lessons = list(
+        (
+            await session.execute(
+                select(Lesson).where(Lesson.number.in_([40, 41, 42, 43, 44]))
+            )
+        ).scalars()
+    )
+    session.add_all(
+        [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons]
+    )
+    await session.commit()
+
+    recommendation = (await client.get("/api/me/today", headers=headers)).json()[
+        "recommendation"
+    ]
+    assert recommendation["kind"] == "course_review"
+    assert recommendation["title"] == "Checkpoint 40–44"
+    assert recommendation["href"] == (
+        "/cursos/voa-level-1/unidades/40-44/checkpoint"
+    )
+
+    detail = (
+        await client.get(
+            "/api/courses/voa-level-1/units/40-44/review", headers=headers
+        )
+    ).json()
+    submitted = await client.post(
+        "/api/courses/voa-level-1/units/40-44/review/attempts",
+        headers=headers,
+        json={
+            "idempotency_key": str(uuid4()),
+            "content_version": detail["content_version"],
+            "answers": [
+                {
+                    "question_id": question["id"],
+                    "answer": question["options"][0],
+                }
+                for question in detail["questions"]
+            ],
+        },
+    )
+    assert submitted.status_code == 201
+    after_attempt = (await client.get("/api/me/today", headers=headers)).json()[
+        "recommendation"
+    ]
+    assert after_attempt["kind"] != "course_review"
+
+    review = (await session.execute(select(CourseReview))).scalar_one()
+    original_version = review.content_version
+    try:
+        review.content_version = original_version + 1
+        await session.commit()
+        after_update = (await client.get("/api/me/today", headers=headers)).json()[
+            "recommendation"
+        ]
+        assert after_update["kind"] == "course_review"
+    finally:
+        review.content_version = original_version
+        await session.commit()
 
 
 @pytest.mark.asyncio

@@ -34,6 +34,10 @@ function practicePath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
   return `${lessonPath(lessonNumber, courseSlug)}/exercicios`
 }
 
+function courseReviewPath(unitSlug: string, courseSlug = LEVEL_1_SLUG): string {
+  return `${coursePath(courseSlug)}/unidades/${unitSlug}/checkpoint`
+}
+
 function studyPath(
   lessonNumber: number,
   step?: 'preparar' | 'assistir' | 'estudar' | 'praticar' | 'revisar',
@@ -76,10 +80,9 @@ async function globalLink(page: Page, name: RegExp): Promise<Locator> {
 async function expectCourseProgress(page: Page, completed: number): Promise<void> {
   const dialog = await ensureTrailVisible(page)
   const scope = dialog ?? page
-  await expect(scope.getByRole('progressbar', { name: 'Progresso do curso' })).toHaveAttribute(
-    'aria-valuenow',
-    String(completed),
-  )
+  await expect(
+    scope.getByRole('progressbar', { name: 'Progresso das aulas do curso' }),
+  ).toHaveAttribute('aria-valuenow', String(completed))
 }
 
 async function tabAte(page: Page, alvo: Locator, limite = 80): Promise<void> {
@@ -393,6 +396,94 @@ test('metadados editoriais e posição de mídia atravessam a API', async ({ req
     position_seconds: 42.5,
   })
   expect((await request.delete(`/api/media/${mediaId}/position`, { headers })).status()).toBe(204)
+})
+
+test('checkpoint 40–44 corrige seis questões e restaura o resultado salvo', async ({ page }) => {
+  await criarConta(page, 'Checkpoint Sprint 22 E2E')
+
+  // O teste confirma a presença e os metadados do player, sem depender de
+  // baixar ou reproduzir o MP3 externo da VOA.
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+  const checkpointPath = courseReviewPath('40-44')
+  await page.goto(checkpointPath)
+
+  await expect(page).toHaveURL(new RegExp(`${checkpointPath}$`))
+  await expect(page.getByRole('heading', { level: 1, name: 'Checkpoint 40–44' })).toBeVisible()
+
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(provenance).toBeVisible()
+  await expect(
+    provenance.getByRole('link', { name: /VOA Learning English — Review Lessons 40–44/ }),
+  ).toBeVisible()
+  await expect(provenance.getByText('Conteúdo autoral do projeto')).toBeVisible()
+  await expect(provenance).toContainText(
+    'A seleção de competências acompanha a revisão oficial da VOA',
+  )
+
+  await expect(page.getByRole('heading', { name: 'Conversa da Aula 40' })).toBeVisible()
+  const checkpointAudio = page.locator('audio[aria-label="Conversa da Aula 40"]')
+  await expect(checkpointAudio).toBeVisible()
+  await expect(checkpointAudio.locator('source')).toHaveAttribute(
+    'src',
+    /voa-audio\.voanews\.eu/,
+  )
+  await expect(page.getByRole('link', { name: 'Rever Aula 40' })).toHaveAttribute(
+    'href',
+    lessonPath(40),
+  )
+
+  const accessibility = await new AxeBuilder({ page })
+    .include('.checkpoint-page')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(
+    accessibility.violations.filter(
+      ({ impact }) => impact === 'serious' || impact === 'critical',
+    ),
+  ).toEqual([])
+
+  const form = page.locator('.checkpoint-form')
+  await expect(form.getByRole('group')).toHaveCount(6)
+  await expect(form.getByText('0/6 respondidas')).toBeVisible()
+
+  for (const answer of [
+    'uma árvore',
+    'will see',
+    'Anna hurt herself.',
+    'Would you be able to help me?',
+    "You don't have to buy bread.",
+    'will succeed · yourself · must',
+  ]) {
+    await form.getByRole('radio', { name: answer, exact: true }).check()
+  }
+
+  await expect(form.getByText('6/6 respondidas')).toBeVisible()
+  await expect(form.getByRole('progressbar', { name: 'Questões respondidas' })).toHaveAttribute(
+    'aria-valuenow',
+    '6',
+  )
+
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        '/api/courses/voa-level-1/units/40-44/review/attempts' &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  )
+  await form.getByRole('button', { name: 'Concluir checkpoint' }).click()
+  expect((await saved).status()).toBe(201)
+
+  await expect(page.getByText('Resultado salvo')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await expect(page.getByLabel('100 por cento')).toBeVisible()
+
+  await page.reload()
+  await expect(page).toHaveURL(new RegExp(`${checkpointPath}$`))
+  await expect(page.getByText('Resultado salvo')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await expect(page.locator('.checkpoint-form')).toHaveCount(0)
 })
 
 test('gravação oral exige consentimento e pode ser excluída', async ({ request }) => {

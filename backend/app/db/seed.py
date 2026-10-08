@@ -23,6 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import (
     ContentSource,
     Course,
+    CourseReview,
+    CourseReviewQuestion,
     CourseUnit,
     Exercise,
     ExerciseAnswer,
@@ -74,6 +76,87 @@ def load_course_seed(path: Path | None = None) -> list[dict[str, Any]]:
     return data
 
 
+def validate_course_reviews(
+    courses: list[dict[str, Any]], lessons: list[dict[str, Any]]
+) -> None:
+    """Falha cedo quando um checkpoint referencia conteúdo inexistente/inválido."""
+    lessons_by_course_number = {
+        (str(lesson["course_slug"]), int(lesson["number"])): lesson
+        for lesson in lessons
+    }
+    for course in courses:
+        course_slug = str(course["slug"])
+        for unit in course["units"]:
+            review = unit.get("review")
+            if review is None:
+                continue
+
+            listening_number = review.get("listening_lesson_number")
+            listening_position = review.get("listening_media_position")
+            if (listening_number is None) != (listening_position is None):
+                raise ValueError(
+                    f"Checkpoint {course_slug}/{unit['slug']} deve informar aula e posição "
+                    "de listening juntas."
+                )
+
+            referenced_numbers = {int(review["review_lesson_number"])}
+            if listening_number is not None:
+                referenced_numbers.add(int(listening_number))
+            questions = review.get("questions", [])
+            if not questions:
+                raise ValueError(
+                    f"Checkpoint {course_slug}/{unit['slug']} precisa ter questões."
+                )
+            positions = [int(question["position"]) for question in questions]
+            if positions != list(range(1, len(questions) + 1)):
+                raise ValueError(
+                    f"Checkpoint {course_slug}/{unit['slug']} tem posições não contíguas."
+                )
+
+            for question in questions:
+                answers = question.get("accepted_answers", [])
+                if not answers or not all(
+                    isinstance(answer, str) and answer.strip() for answer in answers
+                ):
+                    raise ValueError(
+                        f"Questão {question['position']} de {course_slug}/{unit['slug']} "
+                        "precisa de resposta aceita."
+                    )
+                options = question.get("options")
+                if question["activity_type"] == "multiple_choice" and (
+                    not options or not set(answers).issubset(set(options))
+                ):
+                    raise ValueError(
+                        f"Questão {question['position']} de {course_slug}/{unit['slug']} "
+                        "tem gabarito fora das alternativas."
+                    )
+                lesson_numbers = question.get("lesson_numbers", [])
+                if not lesson_numbers:
+                    raise ValueError(
+                        f"Questão {question['position']} de {course_slug}/{unit['slug']} "
+                        "precisa referenciar ao menos uma aula."
+                    )
+                referenced_numbers.update(int(number) for number in lesson_numbers)
+
+            for number in referenced_numbers:
+                if (course_slug, number) not in lessons_by_course_number:
+                    raise ValueError(
+                        f"Checkpoint {course_slug}/{unit['slug']} referencia a Aula {number} "
+                        "fora do curso semeado."
+                    )
+
+            if listening_number is not None:
+                listening_lesson = lessons_by_course_number[(course_slug, int(listening_number))]
+                media_positions = {
+                    int(media["position"]) for media in listening_lesson.get("media", [])
+                }
+                if int(listening_position) not in media_positions:
+                    raise ValueError(
+                        f"Checkpoint {course_slug}/{unit['slug']} referencia mídia inexistente "
+                        f"na Aula {listening_number}."
+                    )
+
+
 async def _upsert_catalog(session: AsyncSession, courses: list[dict[str, Any]]) -> None:
     """Cria cursos e unidades antes das aulas que dependem deles."""
     for raw in courses:
@@ -112,7 +195,65 @@ async def _upsert_catalog(session: AsyncSession, courses: list[dict[str, Any]]) 
             unit.lesson_start = raw_unit["lesson_start"]
             unit.lesson_end = raw_unit["lesson_end"]
             unit.total_lessons = raw_unit["total_lessons"]
+            await session.flush()
+            if raw_review := raw_unit.get("review"):
+                await _upsert_course_review(session, unit, raw_review)
         await session.flush()
+
+
+async def _upsert_course_review(
+    session: AsyncSession, unit: CourseUnit, raw: dict[str, Any]
+) -> None:
+    """Atualiza checkpoint e questões sem trocar suas chaves estáveis."""
+    review = (
+        await session.execute(select(CourseReview).where(CourseReview.unit_id == unit.id))
+    ).scalar_one_or_none()
+    if review is None:
+        review = CourseReview(unit_id=unit.id, slug=raw["slug"])
+        session.add(review)
+    review.slug = raw["slug"]
+    review.title = raw["title"]
+    review.position = raw["position"]
+    review.status = raw["status"]
+    review.source_kind = raw["source_kind"]
+    review.source_title = raw["source_title"]
+    review.source_url = raw.get("source_url")
+    review.source_note = raw["source_note"]
+    review.intro = raw["intro"]
+    review.estimated_minutes = raw["estimated_minutes"]
+    review.content_version = raw["content_version"]
+    review.review_lesson_number = raw["review_lesson_number"]
+    review.listening_lesson_number = raw.get("listening_lesson_number")
+    review.listening_media_position = raw.get("listening_media_position")
+    await session.flush()
+
+    existing = {
+        question.position: question
+        for question in (
+            await session.execute(
+                select(CourseReviewQuestion).where(CourseReviewQuestion.review_id == review.id)
+            )
+        ).scalars()
+    }
+    seen: set[int] = set()
+    for raw_question in raw["questions"]:
+        position = int(raw_question["position"])
+        question = existing.get(position)
+        if question is None:
+            question = CourseReviewQuestion(review_id=review.id, position=position)
+            session.add(question)
+        question.activity_type = raw_question["activity_type"]
+        question.skill = raw_question["skill"]
+        question.prompt = raw_question["prompt"]
+        question.options = raw_question.get("options")
+        question.accepted_answers = raw_question["accepted_answers"]
+        question.explanation = raw_question["explanation"]
+        question.lesson_numbers = raw_question["lesson_numbers"]
+        seen.add(position)
+    for position, question in existing.items():
+        if position not in seen:
+            await session.delete(question)
+    await session.flush()
 
 
 async def _upsert_lesson(session: AsyncSession, raw: dict[str, Any]) -> Lesson:
@@ -428,8 +569,10 @@ async def _upsert_writing_prompts(
 async def seed_lessons(session: AsyncSession, path: Path | None = None) -> int:
     """Aplica o seed e devolve quantas aulas foram processadas."""
     catalog_path = path.with_name("courses.json") if path is not None else None
-    await _upsert_catalog(session, load_course_seed(catalog_path))
+    courses = load_course_seed(catalog_path)
     dados = load_seed(path)
+    validate_course_reviews(courses, dados)
+    await _upsert_catalog(session, courses)
     for raw in dados:
         lesson = await _upsert_lesson(session, raw)
         await _sync_editorial(session, lesson, raw)

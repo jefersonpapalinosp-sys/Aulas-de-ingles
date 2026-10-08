@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import UsuarioAtual
 from app.db.models import (
     Course,
+    CourseReview,
+    CourseReviewAttempt,
     CourseUnit,
     Exercise,
     ExerciseAttempt,
@@ -132,6 +134,56 @@ async def _recommendation(
         )
 
     studied_lesson_ids = select(LessonProgress.lesson_id).where(LessonProgress.user_id == user_id)
+    completed_current_review = (
+        select(CourseReviewAttempt.id)
+        .where(
+            CourseReviewAttempt.user_id == user_id,
+            CourseReviewAttempt.review_id == CourseReview.id,
+            CourseReviewAttempt.content_version == CourseReview.content_version,
+        )
+        .exists()
+    )
+    reviews = (
+        await session.execute(
+            select(CourseReview, CourseUnit, Course)
+            .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
+            .join(Course, CourseUnit.course_id == Course.id)
+            .where(
+                CourseReview.status == "published",
+                CourseUnit.status == "published",
+                Course.status == "published",
+                ~completed_current_review,
+            )
+            .order_by(Course.position, CourseUnit.position, CourseReview.position)
+        )
+    ).all()
+    for course_review, unit, course in reviews:
+        required_ids = select(Lesson.id).where(
+            (Lesson.unit_id == unit.id)
+            | (
+                (Lesson.course_id == course.id)
+                & (Lesson.number == course_review.review_lesson_number)
+            )
+        )
+        missing_required = (
+            await session.execute(
+                select(func.count())
+                .select_from(Lesson)
+                .where(Lesson.id.in_(required_ids), Lesson.id.not_in(studied_lesson_ids))
+            )
+        ).scalar_one()
+        if missing_required == 0:
+            return RecommendationOut(
+                kind="course_review",
+                title=course_review.title,
+                reason="Você concluiu as aulas da unidade; agora consolide o bloco.",
+                href=(
+                    f"/cursos/{course.slug}/unidades/{unit.slug}/checkpoint"
+                ),
+                estimated_minutes=course_review.estimated_minutes,
+                course_slug=course.slug,
+            )
+
     next_lesson = (
         await session.execute(
             select(Lesson)

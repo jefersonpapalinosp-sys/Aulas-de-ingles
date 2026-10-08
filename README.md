@@ -4,11 +4,16 @@ App de estudo construído sobre a série *Let's Learn English* da VOA. O catálo
 níveis 1 e 2, com unidades navegáveis, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: Sprints 6–14 e 20–21 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
+**Estado: Sprints 6–14 e 20–22 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
 da jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável,
-rotas canônicas por curso e um laboratório retomável de exercícios por aula. As Aulas 31–40 estão
-publicadas no Level 1; o restante do Level 1 e o Level 2 aparecem como planejamento, sem conteúdo
-fictício. Os recursos assistidos ficam desligados por padrão até passarem pela avaliação humana.
+rotas canônicas por curso, laboratório retomável por aula e checkpoint curricular persistido. As
+Aulas 31–44 estão publicadas no Level 1; as Aulas 45–52 e o Level 2 aparecem como planejamento,
+sem conteúdo fictício. Os recursos assistidos ficam desligados por padrão até passarem pela
+avaliação humana.
+
+O total de **52 aulas** exibido no catálogo corresponde à extensão oficial do Level 1. O recorte
+curricular deste projeto começa na Aula 31: as Aulas 1–30 não estão no seed, e a conclusão planejada
+é explicitamente a do recorte 31–52, não a publicação das 52 aulas pelo aplicativo.
 
 ---
 
@@ -119,17 +124,18 @@ docker start aulas-db
 ### Modelo
 
 ```
-course ── course_unit ── lesson ─┬─ lesson_goal
-                                 ├─ content_source
-                                 ├─ lesson_version
-                                 ├─ grammar_block ── grammar_row
-                                 ├─ phrase
-                                 ├─ lesson_media ── transcript_cue
-                                 ├─ writing_prompt
-                                 ├─ vocab_item
-                                 ├─ pronunciation_note
-                                 └─ exercise ─┬─ exercise_answer
-                                              └─ exercise_hint
+course ── course_unit ─┬─ lesson ─┬─ lesson_goal
+                       │          ├─ content_source
+                       │          ├─ lesson_version
+                       │          ├─ grammar_block ── grammar_row
+                       │          ├─ phrase
+                       │          ├─ lesson_media ── transcript_cue
+                       │          ├─ writing_prompt
+                       │          ├─ vocab_item
+                       │          ├─ pronunciation_note
+                       │          └─ exercise ─┬─ exercise_answer
+                       │                       └─ exercise_hint
+                       └─ course_review ── course_review_question
 
 app_user ─┬─ study_session_progress ─┬─ lesson
           │                          └─ step_progress
@@ -137,6 +143,7 @@ app_user ─┬─ study_session_progress ─┬─ lesson
           │                                             └─ exercise_attempt
           ├─ study_plan
           ├─ skill_evidence
+          ├─ course_review_attempt ── course_review
           ├─ review_item ── lesson / origem da atividade
           ├─ media_progress ── lesson_media
           ├─ speaking_attempt ── transcription_job ── worker PostgreSQL
@@ -147,13 +154,14 @@ app_user ─┬─ study_session_progress ─┬─ lesson
 `exercise_answer` é tabela à parte porque um exercício aceita mais de uma
 resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
-O que está carregado hoje: **10 aulas**, 40 objetivos, 31 blocos de gramática
-com 152 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia,
-**10 áudios oficiais**, 48 trechos selecionados, 289 falas de transcrição integral,
-**10 propostas de escrita** e **111 exercícios**
-com 132 respostas aceitas e 135 dicas graduais nas Aulas 31–40. As Aulas 32–40 possuem
-três práticas de listening e atividades de ditado, ordenação e transformação. As dez aulas também
-possuem fonte oficial/autoral, estratégia, versão e status editorial explícitos.
+O que está carregado hoje: **14 aulas**, 56 objetivos, 43 blocos de gramática
+com 189 linhas, 96 frases, **155 itens de vocabulário**, 57 notas de pronúncia,
+**14 áudios oficiais**, 68 trechos selecionados, 289 falas de transcrição integral nas Aulas 32–40,
+**14 propostas de escrita** e **143 exercícios**
+com 169 respostas aceitas e 199 dicas graduais nas Aulas 31–44. As Aulas 41–44 usam cinco trechos
+selecionados com texto e tradução por aula, mas ainda não possuem transcrição integral. As Aulas
+32–44 possuem ao menos três práticas de listening e atividades de ditado, ordenação e transformação.
+As 14 aulas também possuem fonte oficial/autoral, estratégia, versão e status editorial explícitos.
 
 Os packs autorais das Aulas 31, 38 e 40 estão na versão 2 e possuem objetivo pedagógico
 explícito (`recognize`, `apply`, `correct`, `produce` ou `listen`) e duas dicas progressivas por
@@ -429,15 +437,15 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 174 testes contra o Postgres do compose | `make test-api` |
-| vitest | 111 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 25 cenários em desktop e mobile (50 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 187 testes contra o Postgres do compose | `make test-api` |
+| vitest | 125 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 26 cenários em desktop e mobile (52 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
-O frontend possui uma **jornada guiada** em todas as Aulas 31–40. Ela divide o estudo em
+O frontend possui uma **jornada guiada** em todas as Aulas 31–44. Ela divide o estudo em
 preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
 permitindo continuar em outro navegador. Em “Assistir”, o player usa o áudio oficial da VOA,
 sincroniza a posição na conta e oferece velocidade, saltos de cinco segundos, repetição A–B e
-48 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
+68 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
 API sem enviar o gabarito antes da
 resposta. Na revisão, o aluno pode praticar *shadowing*, gravar a voz localmente, comparar com
 o modelo e salvar uma autoavaliação. O áudio permanece local por padrão; somente após
@@ -491,7 +499,7 @@ infra/     compose.yml                 — dev: db + api + worker + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
 seed/      courses.json                — catálogo de cursos e unidades
-           lessons.json                — conteúdo das 10 aulas publicadas
+           lessons.json                — conteúdo das 14 aulas publicadas
 ```
 
 ## Convenções

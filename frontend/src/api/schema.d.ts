@@ -259,6 +259,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/courses/{course_slug}/units/{unit_slug}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Course Review
+         * @description Entrega questões sem gabarito e a tentativa mais recente da conta.
+         */
+        get: operations["get_course_review_api_courses__course_slug__units__unit_slug__review_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/units/{unit_slug}/review/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Course Review
+         * @description Corrige a execução completa no servidor e persiste sua fotografia.
+         */
+        post: operations["submit_course_review_api_courses__course_slug__units__unit_slug__review_attempts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/exercises": {
         parameters: {
             query?: never;
@@ -1155,6 +1195,165 @@ export interface components {
             /** Units */
             units: components["schemas"]["CourseUnitOut"][];
         };
+        /** CourseReviewAnswerIn */
+        CourseReviewAnswerIn: {
+            /** Answer */
+            answer: string;
+            /** Question Id */
+            question_id: number;
+        };
+        /** CourseReviewAttemptIn */
+        CourseReviewAttemptIn: {
+            /** Answers */
+            answers: components["schemas"]["CourseReviewAnswerIn"][];
+            /** Content Version */
+            content_version: number;
+            /**
+             * Idempotency Key
+             * Format: uuid
+             */
+            idempotency_key: string;
+        };
+        /** CourseReviewAttemptOut */
+        CourseReviewAttemptOut: {
+            /**
+             * Completed At
+             * Format: date-time
+             */
+            completed_at: string;
+            /** Content Version */
+            content_version: number;
+            /** Feedback */
+            feedback: components["schemas"]["CourseReviewQuestionResultOut"][];
+            /** Id */
+            id: number;
+            /** Reinforced Lesson Numbers */
+            reinforced_lesson_numbers: number[];
+            /** Score */
+            score: number;
+            /** Score Percent */
+            score_percent: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "consolidated" | "reinforce";
+            /** Total */
+            total: number;
+        };
+        /** CourseReviewDetailOut */
+        CourseReviewDetailOut: {
+            /** Content Version */
+            content_version: number;
+            /** Estimated Minutes */
+            estimated_minutes: number;
+            /** Id */
+            id: number;
+            /** Intro */
+            intro: string;
+            latest_attempt: components["schemas"]["CourseReviewAttemptOut"] | null;
+            listening_media: components["schemas"]["LessonMediaOut"] | null;
+            /** Listening Source Page Url */
+            listening_source_page_url: string | null;
+            /** Position */
+            position: number;
+            /** Question Count */
+            question_count: number;
+            /** Questions */
+            questions: components["schemas"]["CourseReviewQuestionOut"][];
+            /** Review Lesson Number */
+            review_lesson_number: number;
+            /** Slug */
+            slug: string;
+            /**
+             * Source Kind
+             * @enum {string}
+             */
+            source_kind: "official" | "authorial" | "mixed";
+            /** Source Note */
+            source_note: string;
+            /** Source Title */
+            source_title: string;
+            /** Source Url */
+            source_url: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "archived";
+            /** Title */
+            title: string;
+        };
+        /** CourseReviewQuestionOut */
+        CourseReviewQuestionOut: {
+            /**
+             * Activity Type
+             * @enum {string}
+             */
+            activity_type: "multiple_choice" | "short_answer";
+            /** Id */
+            id: number;
+            /** Lesson Numbers */
+            lesson_numbers: number[];
+            /** Options */
+            options: string[] | null;
+            /** Position */
+            position: number;
+            /** Prompt */
+            prompt: string;
+            /**
+             * Skill
+             * @enum {string}
+             */
+            skill: "grammar" | "listening" | "vocabulary";
+        };
+        /** CourseReviewQuestionResultOut */
+        CourseReviewQuestionResultOut: {
+            /** Accepted Answers */
+            accepted_answers: string[];
+            /** Answer */
+            answer: string;
+            /** Correct */
+            correct: boolean;
+            /** Explanation */
+            explanation: string;
+            /** Lesson Numbers */
+            lesson_numbers: number[];
+            /** Position */
+            position: number;
+            /** Question Id */
+            question_id: number;
+        };
+        /**
+         * CourseReviewSummaryOut
+         * @description Checkpoint como item curricular próprio, sem fingir ser uma aula.
+         */
+        CourseReviewSummaryOut: {
+            /** Estimated Minutes */
+            estimated_minutes: number;
+            /** Id */
+            id: number;
+            /** Position */
+            position: number;
+            /** Question Count */
+            question_count: number;
+            /** Review Lesson Number */
+            review_lesson_number: number;
+            /** Slug */
+            slug: string;
+            /**
+             * Source Kind
+             * @enum {string}
+             */
+            source_kind: "official" | "authorial" | "mixed";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "archived";
+            /** Title */
+            title: string;
+        };
         /** CourseSummaryOut */
         CourseSummaryOut: {
             /** Id */
@@ -1197,6 +1396,7 @@ export interface components {
             position: number;
             /** Published Lessons */
             published_lessons: number;
+            review: components["schemas"]["CourseReviewSummaryOut"] | null;
             /** Slug */
             slug: string;
             /**
@@ -1907,7 +2107,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "review" | "continue_lesson" | "start_lesson" | "practice";
+            kind: "review" | "continue_lesson" | "start_lesson" | "course_review" | "practice";
             /** Lesson Number */
             lesson_number?: number | null;
             /** Reason */
@@ -2860,6 +3060,83 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StudySessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_course_review_api_courses__course_slug__units__unit_slug__review_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                unit_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseReviewDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_course_review_api_courses__course_slug__units__unit_slug__review_attempts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                unit_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseReviewAttemptIn"];
+            };
+        };
+        responses: {
+            /** @description A tentativa idempotente já existia. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseReviewAttemptOut"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseReviewAttemptOut"];
                 };
             };
             /** @description Validation Error */

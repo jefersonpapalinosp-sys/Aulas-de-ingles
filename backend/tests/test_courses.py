@@ -26,7 +26,7 @@ async def test_catalogo_separa_planejado_de_publicado(client: AsyncClient) -> No
         "position": 1,
         "status": "published",
         "total_lessons": 52,
-        "published_lessons": 10,
+        "published_lessons": 14,
     }
     assert courses[1]["total_lessons"] == 30
     assert courses[1]["published_lessons"] == 0
@@ -39,7 +39,7 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
 
     assert response.status_code == 200
     curriculum = response.json()
-    assert curriculum["course"]["published_lessons"] == 10
+    assert curriculum["course"]["published_lessons"] == 14
     assert [unit["slug"] for unit in curriculum["units"]] == [
         "31-40",
         "40-44",
@@ -63,7 +63,23 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
         "story_note": None,
     }
     assert "grammar_blocks" not in first["lessons"][0]
-    assert all(unit["lessons"] == [] for unit in curriculum["units"][1:])
+    second = curriculum["units"][1]
+    assert second["total_lessons"] == second["published_lessons"] == 4
+    assert [lesson["number"] for lesson in second["lessons"]] == list(range(41, 45))
+    assert all(lesson["unit_slug"] == "40-44" for lesson in second["lessons"])
+    assert second["review"] == {
+        "id": second["review"]["id"],
+        "slug": "checkpoint-40-44",
+        "title": "Checkpoint 40–44",
+        "position": 5,
+        "status": "published",
+        "source_kind": "mixed",
+        "estimated_minutes": 12,
+        "review_lesson_number": 40,
+        "question_count": 6,
+    }
+    assert first["review"] is None
+    assert all(unit["lessons"] == [] for unit in curriculum["units"][2:])
 
 
 @pytest.mark.asyncio
@@ -145,4 +161,3 @@ async def test_mesmo_numero_pode_existir_em_dois_cursos(
     finally:
         await session.execute(delete(Lesson).where(Lesson.id.in_(ids)))
         await session.commit()
-

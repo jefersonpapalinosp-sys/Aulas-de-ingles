@@ -97,7 +97,7 @@ async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncCli
 
     assert saved.status_code == resumed.status_code == 200
     assert resumed.json()["current_step"] == "assistir"
-    assert level_1.json()["total_lessons"] == 10
+    assert level_1.json()["total_lessons"] == 14
     assert level_1.json()["studied_count"] == 1
     row = next(item for item in level_1.json()["lessons"] if item["lesson_number"] == 32)
     assert row["course_slug"] == "voa-level-1"
@@ -193,7 +193,7 @@ async def test_marcar_aula_e_idempotente(client: AsyncClient) -> None:
 
     p = (await client.get("/api/me/progress", headers=h)).json()
     assert p["studied_count"] == 1
-    assert p["total_lessons"] == 10
+    assert p["total_lessons"] == 14
     assert [linha["studied"] for linha in p["lessons"]].count(True) == 1
 
 
@@ -208,10 +208,10 @@ async def test_desmarcar_aula(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_progresso_traz_as_dez_aulas_mesmo_sem_atividade(client: AsyncClient) -> None:
+async def test_progresso_traz_as_quatorze_aulas_mesmo_sem_atividade(client: AsyncClient) -> None:
     h = await conta(client, "zerado")
     p = (await client.get("/api/me/progress", headers=h)).json()
-    assert len(p["lessons"]) == 10
+    assert len(p["lessons"]) == 14
     assert p == {
         **p,
         "studied_count": 0,

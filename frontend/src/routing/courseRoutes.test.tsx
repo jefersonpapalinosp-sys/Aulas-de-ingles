@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { LegacyLessonRedirect } from '../App'
 import {
   canonicalizeLegacyHref,
+  courseReviewPath,
   lessonPath,
   practicePath,
   studyPath,
@@ -23,6 +24,15 @@ describe('rotas de curso', () => {
     )
     expect(practicePath('voa-level-2', 1)).toBe(
       '/cursos/voa-level-2/aulas/1/exercicios',
+    )
+  })
+
+  it('monta a rota canônica do checkpoint como item próprio da unidade', () => {
+    expect(courseReviewPath('voa-level-1', '40-44')).toBe(
+      '/cursos/voa-level-1/unidades/40-44/checkpoint',
+    )
+    expect(courseReviewPath('curso com espaço', 'unidade/avançada')).toBe(
+      '/cursos/curso%20com%20espa%C3%A7o/unidades/unidade%2Favan%C3%A7ada/checkpoint',
     )
   })
 

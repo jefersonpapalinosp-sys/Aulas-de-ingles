@@ -11,6 +11,7 @@ import {
 } from '../features/curriculum/curriculum'
 import {
   coursePath,
+  courseReviewPath,
   courseSlugFromPath,
   DEFAULT_COURSE_SLUG,
   lessonPath,
@@ -111,7 +112,7 @@ export function NavigationPanel({
         <div className="trail-progress-grid">
           <div className="prog">
             <div className="prog-top">
-              <span>Curso</span>
+              <span>Aulas do curso</span>
               <span>
                 {studiedInCourse}/{courseLessons.length}
               </span>
@@ -119,7 +120,7 @@ export function NavigationPanel({
             <div
               className="prog-bar"
               role="progressbar"
-              aria-label="Progresso do curso"
+              aria-label="Progresso das aulas do curso"
               aria-valuemin={0}
               aria-valuemax={courseLessons.length}
               aria-valuenow={studiedInCourse}
@@ -136,7 +137,7 @@ export function NavigationPanel({
           </div>
           <div className="prog">
             <div className="prog-top">
-              <span>Unidade</span>
+              <span>Aulas da unidade</span>
               <span>
                 {studiedInUnit}/{expanded?.lessons.length ?? 0}
               </span>
@@ -144,7 +145,7 @@ export function NavigationPanel({
             <div
               className="prog-bar"
               role="progressbar"
-              aria-label="Progresso da unidade"
+              aria-label="Progresso das aulas da unidade"
               aria-valuemin={0}
               aria-valuemax={expanded?.lessons.length ?? 0}
               aria-valuenow={studiedInUnit}
@@ -189,12 +190,12 @@ export function NavigationPanel({
       </nav>
 
       <label className="trail-search">
-        <span>Buscar aula</span>
+        <span>Buscar aula ou checkpoint</span>
         <input
           ref={searchInputRef}
           type="search"
           value={query}
-          placeholder="Número, título ou tópico"
+          placeholder="Número, título, tópico ou checkpoint"
           onChange={(event) => onQueryChange(event.target.value)}
         />
       </label>
@@ -203,6 +204,13 @@ export function NavigationPanel({
         <div className="trail-units">
           {curriculum?.units.map((unit) => {
             const matches = unit.lessons.filter((lesson) => matchesLessonSearch(lesson, query))
+            const reviewMatches = Boolean(
+              unit.review &&
+                (!query.trim() ||
+                  unit.review.title.toLocaleLowerCase('pt-BR').includes(
+                    query.trim().toLocaleLowerCase('pt-BR'),
+                  )),
+            )
             const isExpanded = expandedUnit === unit.slug
             const visible = visibleWindow(matches, activeLessonNumber)
             return (
@@ -228,7 +236,7 @@ export function NavigationPanel({
                   <ul
                     id={`${idPrefix}-trail-unit-${unit.id}`}
                     className="trail-lessons"
-                    aria-label={`Aulas de ${unit.title}`}
+                    aria-label={`Itens de ${unit.title}`}
                   >
                     {visible.map((lesson) => {
                       const isActive = lesson.number === activeLessonNumber
@@ -269,8 +277,25 @@ export function NavigationPanel({
                         encontrar outra aula.
                       </li>
                     )}
-                    {matches.length === 0 && (
-                      <li className="trail-empty">Nenhuma aula encontrada nesta unidade.</li>
+                    {reviewMatches && unit.review && (
+                      <li className="trail-review-row">
+                        <NavLink
+                          to={courseReviewPath(courseSlug, unit.slug)}
+                          onClick={onNavigate}
+                        >
+                          <span aria-hidden="true">CP</span>
+                          <span>
+                            <strong>{unit.review.title}</strong>
+                            <small>
+                              {unit.review.question_count} questões ·{' '}
+                              {unit.review.estimated_minutes} min
+                            </small>
+                          </span>
+                        </NavLink>
+                      </li>
+                    )}
+                    {matches.length === 0 && !reviewMatches && (
+                      <li className="trail-empty">Nenhum item encontrado nesta unidade.</li>
                     )}
                   </ul>
                 )}
@@ -280,10 +305,13 @@ export function NavigationPanel({
         </div>
         {curriculum &&
           curriculum.units.every((unit) =>
-            unit.lessons.every((lesson) => !matchesLessonSearch(lesson, query)),
+            unit.lessons.every((lesson) => !matchesLessonSearch(lesson, query)) &&
+            !unit.review?.title
+              .toLocaleLowerCase('pt-BR')
+              .includes(query.trim().toLocaleLowerCase('pt-BR')),
           ) && (
             <p className="trail-empty trail-empty-course">
-              Nenhuma aula encontrada neste curso.
+              Nenhuma aula ou checkpoint encontrado neste curso.
             </p>
           )}
       </div>
@@ -342,8 +370,11 @@ export function LessonRail() {
 
   useEffect(() => {
     if (!query.trim() || !curriculum.data) return
-    const firstMatchingUnit = curriculum.data.units.find((unit) =>
-      unit.lessons.some((lesson) => matchesLessonSearch(lesson, query)),
+    const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR')
+    const firstMatchingUnit = curriculum.data.units.find(
+      (unit) =>
+        unit.lessons.some((lesson) => matchesLessonSearch(lesson, query)) ||
+        unit.review?.title.toLocaleLowerCase('pt-BR').includes(normalizedQuery),
     )
     if (firstMatchingUnit) setExpandedUnit(firstMatchingUnit.slug)
   }, [query, curriculum.data])
@@ -412,9 +443,18 @@ export function LessonRail() {
     completionPending: markStudied.isPending,
   }
 
+  const contextualUnitData = curriculum.data?.units.find(
+    (unit) => unit.slug === contextualUnit,
+  )
+  const activeCheckpoint = /\/checkpoint\/?$/.test(location.pathname)
+    ? contextualUnitData?.review
+    : undefined
   const mobileLabel = activeLesson
     ? `Aula ${activeLesson.number} · ${activeLesson.title}`
-    : (curriculum.data?.course.title ?? 'Escolher aula')
+    : activeCheckpoint?.title ??
+      contextualUnitData?.title ??
+      curriculum.data?.course.title ??
+      'Escolher aula'
 
   return (
     <aside className="navigation-shell" aria-label="Navegação do curso">

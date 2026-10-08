@@ -1,5 +1,6 @@
 """O seed precisa poder rodar quantas vezes for preciso."""
 
+from copy import deepcopy
 from datetime import date
 
 import pytest
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import (
     ContentSource,
     Course,
+    CourseReview,
+    CourseReviewQuestion,
     CourseUnit,
     Exercise,
     ExerciseAnswer,
@@ -20,7 +23,12 @@ from app.db.models import (
     VocabItem,
     WritingPrompt,
 )
-from app.db.seed import load_course_seed, load_seed, seed_lessons
+from app.db.seed import (
+    load_course_seed,
+    load_seed,
+    seed_lessons,
+    validate_course_reviews,
+)
 
 
 async def _contagens(session: AsyncSession) -> dict[str, int]:
@@ -28,6 +36,8 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
     for nome, modelo in (
         ("course", Course),
         ("course_unit", CourseUnit),
+        ("course_review", CourseReview),
+        ("course_review_question", CourseReviewQuestion),
         ("lesson", Lesson),
         ("lesson_media", LessonMedia),
         ("content_source", ContentSource),
@@ -44,16 +54,16 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
 
 
 @pytest.mark.asyncio
-async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
+async def test_arquivo_de_seed_tem_as_quatorze_aulas() -> None:
     dados = load_seed()
-    assert [d["number"] for d in dados] == list(range(31, 41))
-    assert sum(len(d["vocab"]) for d in dados) == 115
-    assert sum(len(d["exercises"]) for d in dados) == 111
-    assert sum(len(e.get("answers", [])) for d in dados for e in d["exercises"]) == 132
-    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 135
-    assert sum(len(d.get("media", [])) for d in dados) == 10
-    assert sum(len(d.get("writing_prompts", [])) for d in dados) == 10
-    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 48
+    assert [d["number"] for d in dados] == list(range(31, 45))
+    assert sum(len(d["vocab"]) for d in dados) == 155
+    assert sum(len(d["exercises"]) for d in dados) == 143
+    assert sum(len(e.get("answers", [])) for d in dados for e in d["exercises"]) == 169
+    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 199
+    assert sum(len(d.get("media", [])) for d in dados) == 14
+    assert sum(len(d.get("writing_prompts", [])) for d in dados) == 14
+    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 68
     assert sum(len(m.get("transcript", [])) for d in dados for m in d.get("media", [])) == 289
     media = [item for lesson in dados for item in lesson.get("media", [])]
     assert all(item["license_status"] == "public_domain" for item in media)
@@ -63,8 +73,10 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
     assert all(d["course_slug"] == "voa-level-1" for d in dados)
-    assert all(d["unit_slug"] == "31-40" for d in dados)
-    assert [d["position"] for d in dados] == list(range(1, 11))
+    assert all(d["unit_slug"] == "31-40" for d in dados[:10])
+    assert all(d["unit_slug"] == "40-44" for d in dados[10:])
+    assert [d["position"] for d in dados[:10]] == list(range(1, 11))
+    assert [d["position"] for d in dados[10:]] == list(range(1, 5))
     assert all(d["warmup_prompt"] and d["listening_focus"] for d in dados)
 
     pilots = [lesson for lesson in dados if lesson["number"] in {31, 38, 40}]
@@ -89,12 +101,44 @@ async def test_seed_de_cursos_planeja_os_dois_niveis() -> None:
     assert [len(course["units"]) for course in courses] == [4, 6]
 
 
+def test_checkpoint_do_seed_valida_referencias_e_gabarito() -> None:
+    courses = load_course_seed()
+    lessons = load_seed()
+    validate_course_reviews(courses, lessons)
+
+    broken_lesson = deepcopy(courses)
+    broken_lesson[0]["units"][1]["review"]["review_lesson_number"] = 999
+    with pytest.raises(ValueError, match="Aula 999"):
+        validate_course_reviews(broken_lesson, lessons)
+
+    broken_media = deepcopy(courses)
+    broken_media[0]["units"][1]["review"]["listening_media_position"] = 999
+    with pytest.raises(ValueError, match="mídia inexistente"):
+        validate_course_reviews(broken_media, lessons)
+
+    broken_answer = deepcopy(courses)
+    broken_answer[0]["units"][1]["review"]["questions"][0][
+        "accepted_answers"
+    ] = []
+    with pytest.raises(ValueError, match="resposta aceita"):
+        validate_course_reviews(broken_answer, lessons)
+
+    broken_question_lessons = deepcopy(courses)
+    broken_question_lessons[0]["units"][1]["review"]["questions"][0][
+        "lesson_numbers"
+    ] = []
+    with pytest.raises(ValueError, match="ao menos uma aula"):
+        validate_course_reviews(broken_question_lessons, lessons)
+
+
 @pytest.mark.asyncio
 async def test_seed_rodado_de_novo_nao_duplica(session: AsyncSession) -> None:
     antes = await _contagens(session)
     assert antes["course"] == 2
     assert antes["course_unit"] == 10
-    assert antes["lesson"] == 10
+    assert antes["course_review"] == 1
+    assert antes["course_review_question"] == 6
+    assert antes["lesson"] == 14
 
     await seed_lessons(session)
 
@@ -116,6 +160,25 @@ async def test_ids_de_aula_sobrevivem_ao_reseed(session: AsyncSession) -> None:
         for lesson in (await session.execute(select(Lesson))).scalars()
     }
     assert after == before
+
+
+@pytest.mark.asyncio
+async def test_ids_do_checkpoint_sobrevivem_ao_reseed(session: AsyncSession) -> None:
+    review_before_id = (await session.execute(select(CourseReview.id))).scalar_one()
+    questions_before = {
+        item.position: item.id
+        for item in (await session.execute(select(CourseReviewQuestion))).scalars()
+    }
+
+    await seed_lessons(session)
+
+    review_after = (await session.execute(select(CourseReview))).scalar_one()
+    questions_after = {
+        item.position: item.id
+        for item in (await session.execute(select(CourseReviewQuestion))).scalars()
+    }
+    assert review_after.id == review_before_id
+    assert questions_after == questions_before
 
 
 @pytest.mark.asyncio
@@ -161,7 +224,7 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
 async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
     media = list((await session.execute(select(LessonMedia))).scalars())
 
-    assert len(media) == 10
+    assert len(media) == 14
     assert all(item.license_status == "public_domain" for item in media)
     assert all(item.offline_policy == "network_only" for item in media)
     assert all(item.attribution == "Voice of America (VOA Learning English)" for item in media)

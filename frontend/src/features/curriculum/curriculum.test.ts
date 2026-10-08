@@ -47,6 +47,7 @@ function longCurriculum(): CourseCurriculum {
         total_lessons: 9,
         published_lessons: 9,
         lessons: unitLessons,
+        review: null,
       }
     }),
   }

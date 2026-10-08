@@ -9,6 +9,7 @@ import { lessonProgressKey } from '../features/curriculum/curriculum'
 import {
   canonicalizeLegacyHref,
   coursePath,
+  courseReviewPath,
   DEFAULT_COURSE_SLUG,
   lessonPath,
   unitPath,
@@ -255,7 +256,7 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
             </h1>
             <p className="lead">
               {selectedUnit
-                ? `${selectedUnit.published_lessons} aulas disponíveis nesta unidade.`
+                ? `${selectedUnit.published_lessons} aulas disponíveis${selectedUnit.review ? ' e um checkpoint de consolidação' : ''} nesta unidade.`
                 : 'Abra uma unidade para ver uma lista curta de aulas e continuar sem percorrer o curso inteiro.'}
             </p>
           </div>
@@ -279,7 +280,9 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                 : completed === 0
                 ? 'Não iniciada'
                 : completed === unit.lessons.length
-                  ? 'Concluída'
+                  ? unit.review
+                    ? 'Aulas concluídas · checkpoint disponível'
+                    : 'Concluída'
                   : 'Em andamento'
             return (
               <Link
@@ -292,12 +295,14 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                   <strong>{unit.title}</strong>
                   <small>
                     Aulas {unit.lesson_start}–{unit.lesson_end}
+                    {unit.review ? ' · checkpoint' : ''}
                   </small>
                 </span>
                 <span>
                   <small>{state}</small>
                   <strong>
-                    {completed}/{unit.lessons.length}
+                    {completed}/{unit.lessons.length}{' '}
+                    {unit.lessons.length === 1 ? 'aula' : 'aulas'}
                   </strong>
                 </span>
               </Link>
@@ -330,6 +335,20 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                 </Link>
               )
             })}
+            {selectedUnit.review && (
+              <Link
+                className="arow checkpoint-map-row"
+                to={courseReviewPath(courseSlug, selectedUnit.slug)}
+              >
+                <span className="an" aria-hidden="true">CP</span>
+                <span className="at">{selectedUnit.review.title}</span>
+                <span className="ag">
+                  {selectedUnit.review.question_count} questões · cerca de{' '}
+                  {selectedUnit.review.estimated_minutes} min
+                </span>
+                <span className="ap">Abrir</span>
+              </Link>
+            )}
           </div>
         )}
       </section>

@@ -39,7 +39,7 @@ const curriculum: CourseCurriculum = {
     position: 1,
     status: 'published',
     total_lessons: 52,
-    published_lessons: 15,
+    published_lessons: 16,
   },
   units: [
     {
@@ -53,6 +53,7 @@ const curriculum: CourseCurriculum = {
       total_lessons: 14,
       published_lessons: 14,
       lessons: firstUnitLessons,
+      review: null,
     },
     {
       id: 2,
@@ -65,6 +66,30 @@ const curriculum: CourseCurriculum = {
       total_lessons: 6,
       published_lessons: 1,
       lessons: [lesson(15, '15-20')],
+      review: null,
+    },
+    {
+      id: 3,
+      slug: '40-44',
+      title: 'Unidade 40–44',
+      position: 3,
+      status: 'published',
+      lesson_start: 40,
+      lesson_end: 44,
+      total_lessons: 4,
+      published_lessons: 1,
+      lessons: [lesson(41, '40-44')],
+      review: {
+        id: 12,
+        slug: 'checkpoint-40-44',
+        position: 5,
+        title: 'Checkpoint 40–44',
+        status: 'published',
+        estimated_minutes: 12,
+        question_count: 6,
+        review_lesson_number: 40,
+        source_kind: 'mixed',
+      },
     },
   ],
 }
@@ -93,12 +118,12 @@ vi.mock('../api/progress', () => ({
   useProgress: () => ({
     data: {
       studied_count: 1,
-      total_lessons: 15,
+      total_lessons: 16,
       attempts: 0,
       correct: 0,
       review_due: 2,
       review_cards: 2,
-      lessons: [...firstUnitLessons, lesson(15, '15-20')].map((item) => ({
+      lessons: [...firstUnitLessons, lesson(15, '15-20'), lesson(41, '40-44')].map((item) => ({
         course_slug: item.course_slug,
         unit_slug: item.unit_slug,
         lesson_number: item.number,
@@ -115,12 +140,16 @@ vi.mock('../api/progress', () => ({
   }),
 }))
 
-function renderRail() {
+function renderRailAt(route = '/cursos/voa-level-1/aulas/14') {
   return render(
-    <MemoryRouter initialEntries={['/cursos/voa-level-1/aulas/14']}>
+    <MemoryRouter initialEntries={[route]}>
       <LessonRail />
     </MemoryRouter>,
   )
+}
+
+function renderRail() {
+  return renderRailAt()
 }
 
 describe('LessonRail', () => {
@@ -160,12 +189,12 @@ describe('LessonRail', () => {
 
     await user.click(opener)
     const dialog = screen.getByRole('dialog', { name: 'Trilha de estudo' })
-    const search = within(dialog).getByRole('searchbox', { name: 'Buscar aula' })
+    const search = within(dialog).getByRole('searchbox', { name: 'Buscar aula ou checkpoint' })
     await waitFor(() => expect(search).toHaveFocus())
 
     await user.type(search, 'não existe')
     expect(
-      within(dialog).getByText('Nenhuma aula encontrada neste curso.'),
+      within(dialog).getByText('Nenhuma aula ou checkpoint encontrado neste curso.'),
     ).toBeInTheDocument()
 
     fireEvent.keyDown(dialog, { key: 'Escape' })
@@ -183,5 +212,31 @@ describe('LessonRail', () => {
     await user.tab({ shift: true })
     expect(dialog).toContainElement(document.activeElement as HTMLElement)
     expect(document.activeElement).not.toBe(first)
+  })
+
+  it('mostra o checkpoint no trilho e aponta para a rota da unidade', async () => {
+    const user = userEvent.setup()
+    const { container } = renderRail()
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    await user.click(within(desktop!).getByRole('button', { name: /Unidade 40–44/ }))
+    const checkpoint = within(desktop!).getByRole('link', { name: /Checkpoint 40–44/ })
+
+    expect(checkpoint).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/40-44/checkpoint',
+    )
+    expect(checkpoint).toHaveTextContent('6 questões · 12 min')
+    expect(within(checkpoint).getByText('CP')).toBeInTheDocument()
+    expect(checkpoint).not.toHaveTextContent('✓')
+  })
+
+  it('identifica o checkpoint no cabeçalho móvel da rota ativa', () => {
+    renderRailAt('/cursos/voa-level-1/unidades/40-44/checkpoint')
+
+    expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
+      'Checkpoint 40–44',
+    )
   })
 })

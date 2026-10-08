@@ -171,6 +171,20 @@ class LessonSummaryOut(ORMModel):
     story_note: str | None
 
 
+class CourseReviewSummaryOut(ORMModel):
+    """Checkpoint como item curricular próprio, sem fingir ser uma aula."""
+
+    id: int
+    slug: str
+    title: str
+    position: int
+    status: Literal["planned", "published", "archived"]
+    source_kind: Literal["official", "authorial", "mixed"]
+    estimated_minutes: int
+    review_lesson_number: int
+    question_count: int
+
+
 class CourseUnitOut(ORMModel):
     id: int
     slug: str
@@ -182,6 +196,7 @@ class CourseUnitOut(ORMModel):
     total_lessons: int
     published_lessons: int
     lessons: list[LessonSummaryOut]
+    review: CourseReviewSummaryOut | None
 
 
 class CourseCurriculumOut(BaseModel):

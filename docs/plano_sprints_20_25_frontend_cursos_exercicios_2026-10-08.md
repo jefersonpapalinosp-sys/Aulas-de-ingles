@@ -1,17 +1,23 @@
 # Plano das Sprints 20–25 — frontend escalável, cursos e exercícios
 
 Data da análise: 8 de outubro de 2026  
-Estado: Sprints 20 e 21 implementadas e validadas; Sprints 22–25 permanecem planejadas
-Próxima prioridade: Sprint 22 — Level 1, unidade 40–44
+Estado: Sprints 20–22 implementadas e validadas; Sprints 23–25 permanecem planejadas
+Próxima prioridade: Sprint 23 — Level 1, unidade 45–49
 
 ## 1. Objetivo
 
 Preparar o Aulas de Inglês para três mudanças já conhecidas:
 
-1. concluir o *Let's Learn English — Level 1*, avançando da Aula 40 até a Aula 52;
+1. concluir o recorte curricular adotado do *Let's Learn English — Level 1*, avançando da Aula 40
+   até a Aula 52;
 2. iniciar o *Let's Learn English — Level 2*, que possui outra numeração e maior complexidade;
 3. oferecer uma página de exercícios por aula com prática curta, explicação e retomada, inspirada
    nas mecânicas observadas no Wordwall, mas com conteúdo, interface e feedback autorais.
+
+Neste roadmap, `total_lessons = 52` registra a extensão oficial do Level 1 da VOA. O recorte
+curricular implementado pelo projeto começa na Aula 31; as Aulas 1–30 não fazem parte do seed.
+Portanto, “conclusão do Level 1” e eventual certificado significam concluir o recorte 31–52, e não
+ter publicado ou estudado as 52 aulas oficiais dentro deste aplicativo.
 
 A decisão principal é não acrescentar dezenas de itens à barra lateral atual. O problema mostrado
 na captura não é apenas o tamanho da fonte ou a presença de uma barra de rolagem: a interface usa
@@ -124,10 +130,10 @@ As revisões 40–44, 45–49 e 50–52 devem ser itens curriculares próprios. 
 têm objetivo de consolidação, listening quiz e métricas diferentes. A unidade 40–44 retoma a Aula
 40 já existente e depois introduz 41–44.
 
-Após a Aula 52, o produto deve mostrar conclusão do Level 1, revisão final, competências observadas
-e acesso contextual ao Level 2. A revisão histórica 50–52 menciona um curso seguinte da época de
-publicação; o aplicativo não deve copiar esse chamado antigo. A continuidade atual deve apontar
-para a página oficial e para o catálogo presente do Level 2.
+Após a Aula 52, o produto deve mostrar a conclusão do recorte 31–52 do Level 1, revisão final,
+competências observadas e acesso contextual ao Level 2. A revisão histórica 50–52 menciona um curso
+seguinte da época de publicação; o aplicativo não deve copiar esse chamado antigo. A continuidade
+atual deve apontar para a página oficial e para o catálogo presente do Level 2.
 
 ### 4.2 Level 2
 
@@ -479,9 +485,9 @@ payload inicial.
 |---|---|---|---|
 | 20 | navegação e catálogo escaláveis, com identidade multi-curso | nenhuma nova aula deve entrar antes dela | concluída |
 | 21 | página de exercícios por aula e packs 31/38/40 | contrato da Sprint 20 | concluída |
-| 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | próxima |
-| 23 | unidade Level 1 45–49 e revisão | Sprint 22 | planejada |
-| 24 | unidade Level 1 50–52, conclusão e transição | Sprint 23 | planejada |
+| 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | concluída |
+| 23 | unidade Level 1 45–49 e revisão | Sprint 22 | próxima |
+| 24 | unidade Level 1 50–52, conclusão do recorte e transição | Sprint 23 | planejada |
 | 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | planejada |
 
 ## 9. Sprint 20 — navegação escalável e catálogo de cursos
@@ -663,7 +669,25 @@ sem copiar Wordwall e sem duplicar o motor atual.
 
 ## 11. Sprint 22 — Level 1, unidade 40–44
 
+**Estado:** concluída e validada em 8 de outubro de 2026.
+
 **Objetivo:** disponibilizar as Aulas 41–44 e o primeiro checkpoint no novo desenho.
+
+### Implementação entregue
+
+- Aulas 41–44 publicadas na unidade `40-44`, com áudio oficial, trechos de estudo,
+  teoria, vocabulário, pronúncia, escrita e laboratório autoral;
+- checkpoint `40–44` modelado como entidade curricular própria, com seis questões,
+  listening da Aula 40, correção no servidor, idempotência, histórico por conta e indicação
+  de bloco consolidado ou aulas a reforçar;
+- mapa e rail exibem o checkpoint sem duplicar nem mover a Aula 40;
+- painel Hoje recomenda o checkpoint depois das aulas necessárias;
+- jornada e página completa passaram a usar presença de conteúdo e mídia como capacidade,
+  oferecendo alternativa textual e omitindo seções vazias;
+- procedência distingue a base oficial da VOA das explicações e atividades autorais;
+- migrations, seed, OpenAPI e tipos TypeScript atualizados sem condições por número no frontend.
+- validação final: 187 testes backend, 125 testes frontend e 52 execuções E2E em
+  desktop/mobile, além de lint, tipagem, build de produção e ciclos limpos das migrations.
 
 ### Conteúdo e experiência
 
@@ -706,9 +730,10 @@ sem copiar Wordwall e sem duplicar o motor atual.
 - histórico e caderno exibem curso + aula quando houver ambiguidade;
 - catálogo permanece rápido e navegável com 19 aulas publicadas no Level 1.
 
-## 13. Sprint 24 — Level 1, unidade 50–52 e conclusão
+## 13. Sprint 24 — Level 1, unidade 50–52 e conclusão do recorte
 
-**Objetivo:** concluir o Level 1 com revisão cumulativa e transição responsável.
+**Objetivo:** concluir o recorte curricular 31–52 do Level 1 com revisão cumulativa e transição
+responsável.
 
 ### Entregas
 
@@ -837,7 +862,7 @@ já estabelecidas.
 O ciclo 20–25 estará concluído quando:
 
 - a navegação não depender de lista plana nem de números globais;
-- Level 1 completo e Level 2/1–5 coexistirem;
+- recorte curricular 31–52 do Level 1 completo e Level 2/1–5 coexistirem;
 - revisões forem itens curriculares próprios;
 - a página de exercícios funcionar nas Aulas 31, 38, 40 e nas novas unidades;
 - nenhuma rota, progresso, prova ou caderno misturar cursos;
@@ -847,7 +872,7 @@ O ciclo 20–25 estará concluído quando:
 
 ## 19. Próxima ação recomendada
 
-Iniciar a Sprint 22 sobre o laboratório e o contrato multi-curso já validados, publicando as Aulas
-41–44 e o primeiro checkpoint da unidade 40–44. A pesquisa editorial pode continuar em paralelo,
+Iniciar a Sprint 23 reutilizando o contrato multi-curso e o checkpoint validados na Sprint 22,
+publicando as Aulas 45–49 e a revisão da unidade. A pesquisa editorial pode continuar em paralelo,
 mas cada aula nova só deve entrar no seed principal depois da auditoria de fonte, mídia, licença e
 conteúdo autoral prevista nessa sprint.

@@ -167,9 +167,10 @@ export function ExerciseCard({
         idempotencyKey: key,
         correct: data.correct,
       })
-      // Errar pode ter semeado o deck: o contador da trilha precisa saber.
+      // Errar pode ter semeado o deck: trilha e recomendação de Hoje precisam saber.
       void qc.invalidateQueries({ queryKey: ['progress'] })
       void qc.invalidateQueries({ queryKey: ['review'] })
+      void qc.invalidateQueries({ queryKey: ['today'] })
     },
     onError: (e: Error) => setVeredito({ tipo: 'falhou', mensagem: e.message }),
   })

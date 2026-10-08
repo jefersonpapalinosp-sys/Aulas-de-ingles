@@ -10,6 +10,7 @@ from app.db.models import Course, CourseUnit, Lesson
 from app.db.session import get_session
 from app.schemas.lesson import (
     CourseCurriculumOut,
+    CourseReviewSummaryOut,
     CourseSummaryOut,
     CourseUnitOut,
     LessonDetailOut,
@@ -17,6 +18,25 @@ from app.schemas.lesson import (
 from app.services.curriculum import lesson_by_course_number, lesson_summaries
 
 router = APIRouter(prefix="/courses", tags=["courses"])
+
+
+def _review_out(unit: CourseUnit) -> CourseReviewSummaryOut | None:
+    review = unit.review
+    if review is None or review.status != "published":
+        return None
+    return CourseReviewSummaryOut.model_validate(
+        {
+            "id": review.id,
+            "slug": review.slug,
+            "title": review.title,
+            "position": review.position,
+            "status": review.status,
+            "source_kind": review.source_kind,
+            "estimated_minutes": review.estimated_minutes,
+            "review_lesson_number": review.review_lesson_number,
+            "question_count": len(review.questions),
+        }
+    )
 
 
 def _course_out(course: Course, published_lessons: int) -> CourseSummaryOut:
@@ -114,6 +134,7 @@ async def get_curriculum(
                 "total_lessons": unit.total_lessons,
                 "published_lessons": int(count),
                 "lessons": lessons_by_unit.get(unit.slug, []),
+                "review": _review_out(unit),
             }
         )
         for unit, count in unit_rows
@@ -134,4 +155,3 @@ async def get_course_lesson(
             detail=f"Aula {number} não existe no curso {course_slug!r}.",
         )
     return lesson
-
