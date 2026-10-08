@@ -217,6 +217,15 @@ test('metadados editoriais e posição de mídia atravessam a API', async ({ req
   )
   expect(lesson.media[0].cues).toHaveLength(4)
 
+  for (const number of Array.from({ length: 10 }, (_, index) => index + 31)) {
+    const current = await (await request.get(`/api/lessons/${number}`)).json()
+    expect(current.media).toHaveLength(1)
+    expect(current.media[0].source_url).toContain('voa-audio.voanews.eu')
+    expect(current.media[0].cues.length).toBeGreaterThanOrEqual(4)
+    expect(current.exercises.some((exercise: { skill: string }) => exercise.skill === 'listening'))
+      .toBeTruthy()
+  }
+
   const mediaId = lesson.media[0].id as number
   expect(await (await request.get(`/api/media/${mediaId}/position`, { headers })).json()).toMatchObject({
     media_id: mediaId,
@@ -446,8 +455,15 @@ test('painel e aula não têm violações WCAG sérias ou críticas', async ({ p
   expect(painel.violations.filter(({ impact }) => impact === 'serious' || impact === 'critical'))
     .toEqual([])
 
-  await page.goto('/aulas/32')
-  await expect(page.getByRole('heading', { name: 'Welcome to the Treehouse!' })).toBeVisible()
+  await page.goto('/aulas/40')
+  await expect(page.getByRole('heading', { name: 'The Woods Are Alive' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Começar estudo' })).toHaveAttribute(
+    'href',
+    '/aulas/40/estudar',
+  )
+  await page.goto('/aulas/40/estudar/assistir')
+  await expect(page.getByRole('heading', { name: 'Conversa da Aula 40' })).toBeVisible()
+  await expect(page.getByText('What part does the director give Anna?')).toBeVisible()
   const aula = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
     .analyze()

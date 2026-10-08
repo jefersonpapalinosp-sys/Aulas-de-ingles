@@ -42,11 +42,11 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     dados = load_seed()
     assert [d["number"] for d in dados] == list(range(31, 41))
     assert sum(len(d["vocab"]) for d in dados) == 115
-    assert sum(len(d["exercises"]) for d in dados) == 66
-    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 19
-    assert sum(len(d.get("media", [])) for d in dados) == 2
+    assert sum(len(d["exercises"]) for d in dados) == 74
+    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 35
+    assert sum(len(d.get("media", [])) for d in dados) == 10
     assert sum(len(d.get("writing_prompts", [])) for d in dados) == 1
-    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 15
+    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 48
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
 

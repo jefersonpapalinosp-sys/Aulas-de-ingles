@@ -146,8 +146,8 @@ resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
 O que está carregado hoje: **10 aulas**, 40 objetivos, 31 blocos de gramática
 com 152 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia,
-**2 áudios oficiais**, 15 trechos selecionados, **1 proposta de escrita** e **66 exercícios**
-com 89 respostas aceitas e 19 dicas graduais no piloto das Aulas 31 e 32. As dez aulas também
+**10 áudios oficiais**, 48 trechos selecionados, **1 proposta de escrita** e **74 exercícios**
+com 97 respostas aceitas e 35 dicas graduais nas Aulas 31–40. As dez aulas também
 possuem fonte oficial/autoral, estratégia, versão e status editorial explícitos.
 
 ### Formato do texto
@@ -364,15 +364,15 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 128 testes contra o Postgres do compose | `make test-api` |
+| pytest | 129 testes contra o Postgres do compose | `make test-api` |
 | vitest | 65 testes de componente, fluxo e parser | `make test-web` |
 | Playwright | 12 cenários em desktop e mobile (24 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
-O frontend também possui um piloto de **jornada guiada** nas Aulas 31 e 32. Ele divide o estudo em
+O frontend possui uma **jornada guiada** em todas as Aulas 31–40. Ela divide o estudo em
 preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
 permitindo continuar em outro navegador. Em “Assistir”, o player usa o áudio oficial da VOA,
 sincroniza a posição na conta e oferece velocidade, saltos de cinco segundos, repetição A–B e
-15 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
+48 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
 API sem enviar o gabarito antes da
 resposta. Na revisão, o aluno pode praticar *shadowing*, gravar a voz localmente, comparar com
 o modelo e salvar uma autoavaliação. O áudio permanece local por padrão; somente após

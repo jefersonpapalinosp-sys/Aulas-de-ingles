@@ -84,10 +84,10 @@ export function LessonPage() {
         </div>
       </section>
 
-      {[31, 32].includes(data.number) && (
+      {data.media.some((media) => media.kind === 'conversation_audio') && (
         <div className="study-entry">
           <div>
-            <p className="study-kicker">Novo · jornada guiada</p>
+            <p className="study-kicker">Jornada guiada</p>
             <strong>Estude em cinco etapas e continue de onde parou.</strong>
           </div>
           <Link className="btn" to={`/aulas/${data.number}/estudar`}>

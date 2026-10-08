@@ -1286,6 +1286,50 @@
         "explanation": "Rima com *love*, não com *go*. O *o* aqui é /ʌ/."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 33",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/21/f7144253-3403-4acd-9e09-9c31443113f7_hq.mp3",
+        "duration_seconds": 228,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 124,
+            "end_seconds": 127,
+            "speaker": "Anna",
+            "text_en": "Pitchers pitch the ball.",
+            "text_pt": "Arremessadores lançam a bola."
+          },
+          {
+            "position": 1,
+            "start_seconds": 128,
+            "end_seconds": 131,
+            "speaker": "Anna",
+            "text_en": "Catchers catch the ball.",
+            "text_pt": "Receptores pegam a bola."
+          },
+          {
+            "position": 2,
+            "start_seconds": 147,
+            "end_seconds": 150,
+            "speaker": "Anna",
+            "text_en": "Then, the runner runs to first base.",
+            "text_pt": "Depois, o corredor vai para a primeira base."
+          },
+          {
+            "position": 3,
+            "start_seconds": 160,
+            "end_seconds": 162,
+            "speaker": "Anna",
+            "text_en": "There are nine innings in a game.",
+            "text_pt": "Há nove entradas em um jogo."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -1342,6 +1386,26 @@
         "answers": [
           "nine",
           "9"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "The batter bats the ball",
+          "The runner leaves the field",
+          "The catcher scores a run"
+        ],
+        "prompt": "Listening: What happens immediately after the pitcher pitches the ball?",
+        "hint": "Ouça o trecho que começa com *First*.",
+        "hints": [
+          "A ação seguinte é feita pelo *batter*.",
+          "O verbo tem a mesma raiz de *batter*."
+        ],
+        "explanation": "Anna explica a sequência: o arremessador lança e, em seguida, **the batter bats the ball**.",
+        "answers": [
+          "The batter bats the ball"
         ]
       }
     ]
@@ -1667,6 +1731,50 @@
         "explanation": "Em \"You WILL get a job\", a força vai no modal. Em inglês, mover a tônica muda o significado da frase sem mudar nenhuma palavra — vale treinar isso em voz alta."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 34",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/26/a9095f28-b489-4110-98fd-7ce6be485793_hq.mp3",
+        "duration_seconds": 244,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 31,
+            "end_seconds": 38,
+            "speaker": "Anna",
+            "text_en": "I might go. I might not go.",
+            "text_pt": "Talvez eu vá. Talvez eu não vá."
+          },
+          {
+            "position": 1,
+            "start_seconds": 48,
+            "end_seconds": 52,
+            "speaker": "Genie",
+            "text_en": "Things might go wrong.",
+            "text_pt": "As coisas podem dar errado."
+          },
+          {
+            "position": 2,
+            "start_seconds": 108,
+            "end_seconds": 114,
+            "speaker": "Anna",
+            "text_en": "You might get a job.",
+            "text_pt": "Talvez você consiga um emprego."
+          },
+          {
+            "position": 3,
+            "start_seconds": 161,
+            "end_seconds": 169,
+            "speaker": "Kaveh",
+            "text_en": "She won't say no, will she?",
+            "text_pt": "Ela não vai dizer não, vai?"
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -1725,6 +1833,26 @@
         "answers": [
           "might",
           "may"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "Rebecca",
+          "Genie",
+          "Anna"
+        ],
+        "prompt": "Listening: Who might get a job writing the news?",
+        "hint": "Anna está tentando ler a mente de uma estudante de jornalismo.",
+        "hints": [
+          "A pessoa diz que está no terceiro ano da faculdade.",
+          "O nome dela é dito antes da conversa sobre jornalismo."
+        ],
+        "explanation": "Anna prevê que **Rebecca** talvez consiga um emprego escrevendo notícias.",
+        "answers": [
+          "Rebecca"
         ]
       }
     ]
@@ -2050,6 +2178,50 @@
         "explanation": "Três palavras, um som. O contexto resolve — mas **você** precisa escolher a grafia certa ao escrever."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 35",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/11/02/0c67a47c-b66d-4d36-85f5-41dca2d12bde_hq.mp3",
+        "duration_seconds": 167,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 44,
+            "end_seconds": 50,
+            "speaker": "Marsha e Anna",
+            "text_en": "Do not spend too much time.",
+            "text_pt": "Não passe tempo demais."
+          },
+          {
+            "position": 1,
+            "start_seconds": 80,
+            "end_seconds": 89,
+            "speaker": "Marsha",
+            "text_en": "A bunch of bananas.",
+            "text_pt": "Um cacho de bananas."
+          },
+          {
+            "position": 2,
+            "start_seconds": 94,
+            "end_seconds": 101,
+            "speaker": "Anna",
+            "text_en": "A jar of peanut butter.",
+            "text_pt": "Um pote de pasta de amendoim."
+          },
+          {
+            "position": 3,
+            "start_seconds": 120,
+            "end_seconds": 125,
+            "speaker": "Marsha",
+            "text_en": "This is the shopping list for breakfast.",
+            "text_pt": "Esta é a lista de compras do café da manhã."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -2104,6 +2276,26 @@
         "answers": [
           "won't",
           "wont"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "the breakfast shopping list",
+          "the dinner shopping list",
+          "the dessert shopping list"
+        ],
+        "prompt": "Listening: Which shopping list did Anna accidentally use?",
+        "hint": "Os ingredientes incluem bananas, mistura para panquecas e café.",
+        "hints": [
+          "Marsha explica para qual refeição era aquela lista.",
+          "A refeição vem antes do almoço."
+        ],
+        "explanation": "Anna pegou por engano **the breakfast shopping list** no balcão.",
+        "answers": [
+          "the breakfast shopping list"
         ]
       }
     ]
@@ -2424,6 +2616,50 @@
         "explanation": "Na fala rápida vira 2 sílabas: \"CAB-nət\"."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 36",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/11/14/65b768cd-1b20-4074-beb4-3279d8f8e715_hq.mp3",
+        "duration_seconds": 123,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 22,
+            "end_seconds": 24,
+            "speaker": "Anna e Marsha",
+            "text_en": "Please hand me the flour.",
+            "text_pt": "Por favor, passe-me a farinha."
+          },
+          {
+            "position": 1,
+            "start_seconds": 29,
+            "end_seconds": 32,
+            "speaker": "Anna",
+            "text_en": "I put the flour inside the refrigerator.",
+            "text_pt": "Coloquei a farinha dentro da geladeira."
+          },
+          {
+            "position": 2,
+            "start_seconds": 48,
+            "end_seconds": 52,
+            "speaker": "Anna",
+            "text_en": "The eggs are inside the cabinet under the sink.",
+            "text_pt": "Os ovos estão dentro do armário sob a pia."
+          },
+          {
+            "position": 3,
+            "start_seconds": 108,
+            "end_seconds": 110,
+            "speaker": "Marsha",
+            "text_en": "I'll answer the door.",
+            "text_pt": "Eu atendo a porta."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -2480,6 +2716,26 @@
         "answers": [
           "i'll",
           "ill"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "inside the refrigerator",
+          "under the sink",
+          "on the counter"
+        ],
+        "prompt": "Listening: Where did Anna put the flour?",
+        "hint": "Ela interpreta literalmente *a cold, dry place*.",
+        "hints": [
+          "Não é o mesmo lugar onde ela colocou os ovos.",
+          "É o eletrodoméstico usado para manter alimentos frios."
+        ],
+        "explanation": "Anna diz: **I put the flour inside the refrigerator.**",
+        "answers": [
+          "inside the refrigerator"
         ]
       }
     ]
@@ -2839,6 +3095,51 @@
         "explanation": "O *r* americano é retroflexo, com a língua curvada para trás sem tocar o céu da boca — não é o *r* vibrado do português."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 37",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/11/17/a0f8f1e0-4d24-425c-8db5-0322d86f3de9_hq.mp3",
+        "duration_seconds": 218,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 21,
+            "end_seconds": 26,
+            "speaker": "Anna e Dr. Jill",
+            "end_seconds": 23,
+            "text_en": "Is this bag yours?",
+            "text_pt": "Esta bolsa é sua?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 24,
+            "end_seconds": 26,
+            "speaker": "Dr. Jill",
+            "text_en": "It might be hers.",
+            "text_pt": "Talvez seja dela."
+          },
+          {
+            "position": 2,
+            "start_seconds": 85,
+            "end_seconds": 89,
+            "speaker": "Anna",
+            "text_en": "It has more culture than the country.",
+            "text_pt": "Tem mais cultura que o campo."
+          },
+          {
+            "position": 3,
+            "start_seconds": 209,
+            "end_seconds": 214,
+            "speaker": "Anna",
+            "text_en": "You can always agree to disagree!",
+            "text_pt": "Sempre podemos concordar em discordar!"
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -2892,6 +3193,26 @@
         "explanation": "*I disagree* — e o *but* suaviza o resto.",
         "answers": [
           "i disagree"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "There are more jobs",
+          "She wants to go camping",
+          "She is looking for a bag"
+        ],
+        "prompt": "Listening: According to Anna, why is she in the city?",
+        "hint": "Ela menciona cultura, museus e uma razão ligada ao trabalho.",
+        "hints": [
+          "A resposta usa o comparativo *more*.",
+          "A última palavra da resposta é *jobs*."
+        ],
+        "explanation": "Anna conclui: **There are more jobs. That is why I'm here.**",
+        "answers": [
+          "There are more jobs"
         ]
       }
     ]
@@ -3289,6 +3610,51 @@
         "explanation": "\"Ó-ssəm\". Palavra onipresente no inglês americano informal — aparece em quase toda aula da série."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 38",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/12/01/7b357de6-9247-45fd-8e49-77197599f6d5_hq.mp3",
+        "duration_seconds": 211,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 59,
+            "end_seconds": 72,
+            "speaker": "Anna",
+            "end_seconds": 64,
+            "text_en": "Marsha is the nicest person.",
+            "text_pt": "Marsha é a pessoa mais gentil."
+          },
+          {
+            "position": 1,
+            "start_seconds": 67,
+            "end_seconds": 72,
+            "speaker": "Anna",
+            "text_en": "I'm the messiest cook she knows.",
+            "text_pt": "Sou a cozinheira mais bagunceira que ela conhece."
+          },
+          {
+            "position": 2,
+            "start_seconds": 90,
+            "end_seconds": 93,
+            "speaker": "Anna",
+            "text_en": "Pete is the most serious.",
+            "text_pt": "Pete é o mais sério."
+          },
+          {
+            "position": 3,
+            "start_seconds": 195,
+            "end_seconds": 199,
+            "speaker": "Anna",
+            "text_en": "I am the luckiest woman in Washington, D.C.",
+            "text_pt": "Sou a mulher mais sortuda de Washington."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -3342,6 +3708,26 @@
         "explanation": "Nunca junte *most* com *-est*.",
         "answers": [
           "the friendliest"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "Marsha",
+          "Penelope",
+          "Pete"
+        ],
+        "prompt": "Listening: Who is the nicest person Anna knows in the city?",
+        "hint": "Anna está descrevendo sua colega de apartamento.",
+        "hints": [
+          "A pessoa divide o aluguel com Anna.",
+          "O nome começa com **M**."
+        ],
+        "explanation": "Anna afirma: **Marsha is the nicest person I know in this city.**",
+        "answers": [
+          "Marsha"
         ]
       }
     ]
@@ -3724,6 +4110,50 @@
         "explanation": "Homófonos. E *advertisement* muda de tônica entre países: AmE /ˌædvərˈtaɪzmənt/, BrE /ədˈvɜːtɪsmənt/."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 39",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/12/02/5fd0aa74-ef38-40c2-85fb-47f536c14e28_hq.mp3",
+        "duration_seconds": 207,
+        "listening_exercise_position": 7,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 50,
+            "end_seconds": 54,
+            "speaker": "Pete",
+            "text_en": "I have the perfect product for you.",
+            "text_pt": "Tenho o produto perfeito para você."
+          },
+          {
+            "position": 1,
+            "start_seconds": 68,
+            "end_seconds": 71,
+            "speaker": "Pete",
+            "text_en": "One can costs only $10!",
+            "text_pt": "Uma lata custa apenas dez dólares!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 110,
+            "end_seconds": 113,
+            "speaker": "Anna",
+            "text_en": "Make my untidy hair tidy!",
+            "text_pt": "Deixe meu cabelo desarrumado arrumado!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 176,
+            "end_seconds": 178,
+            "speaker": "Anna",
+            "text_en": "It was dishonest!",
+            "text_pt": "Foi desonesto!"
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -3786,6 +4216,26 @@
         "explanation": "Negativa → tag afirmativa com o mesmo auxiliar.",
         "answers": [
           "do you"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "$10",
+          "$20",
+          "$2"
+        ],
+        "prompt": "Listening: How much does one can of Hair Be Good cost?",
+        "hint": "O preço aparece no anúncio de Pete.",
+        "hints": [
+          "Pete diz *only* antes do valor.",
+          "O valor tem dois algarismos."
+        ],
+        "explanation": "No anúncio, Pete diz: **One can costs only $10.**",
+        "answers": [
+          "$10"
         ]
       }
     ]
@@ -4233,6 +4683,59 @@
         "explanation": "Três sílabas, começando com o som /ɜːr/ de *her*. Não é \"ir-li-ér\"."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 40",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/12/29/b24ae633-80a3-46e9-afc8-5e2719ed1fa7_hq.mp3",
+        "duration_seconds": 251,
+        "listening_exercise_position": 7,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 83,
+            "end_seconds": 93,
+            "speaker": "Director",
+            "end_seconds": 86,
+            "text_en": "You are speaking too softly.",
+            "text_pt": "Você está falando baixo demais."
+          },
+          {
+            "position": 1,
+            "start_seconds": 87,
+            "end_seconds": 90,
+            "speaker": "Director",
+            "text_en": "Can you speak more loudly?",
+            "text_pt": "Pode falar mais alto?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 102,
+            "end_seconds": 104,
+            "speaker": "Anna",
+            "text_en": "Is that loud enough?",
+            "text_pt": "Está alto o suficiente?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 131,
+            "end_seconds": 136,
+            "speaker": "Director",
+            "text_en": "Walk slowly and quietly.",
+            "text_pt": "Ande devagar e silenciosamente."
+          },
+          {
+            "position": 4,
+            "start_seconds": 227,
+            "end_seconds": 229,
+            "speaker": "Anna",
+            "text_en": "I'm a tree.",
+            "text_pt": "Sou uma árvore."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -4297,6 +4800,26 @@
         "answers": [
           "wasn't i",
           "wasnt i"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "a tree",
+          "the director",
+          "a lost traveler"
+        ],
+        "prompt": "Listening: What part does the director give Anna?",
+        "hint": "O figurino fica nos bastidores.",
+        "hints": [
+          "Anna repete o nome do papel duas vezes.",
+          "É algo que vive na floresta."
+        ],
+        "explanation": "Depois de vestir o figurino, Anna comemora: **I'm a tree!**",
+        "answers": [
+          "a tree"
         ]
       }
     ]

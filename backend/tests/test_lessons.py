@@ -91,6 +91,27 @@ async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> No
 
 
 @pytest.mark.asyncio
+async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient) -> None:
+    for number in range(31, 41):
+        lesson = (await client.get(f"/api/lessons/{number}")).json()
+        assert len(lesson["media"]) == 1
+        media = lesson["media"][0]
+        assert media["kind"] == "conversation_audio"
+        assert media["source_url"].startswith("https://voa-audio.voanews.eu/")
+        assert len(media["cues"]) >= 4
+        assert all(cue["start_seconds"] < cue["end_seconds"] for cue in media["cues"])
+        listening = [
+            exercise
+            for exercise in lesson["exercises"]
+            if exercise["skill"] == "listening"
+        ]
+        assert listening
+        assert media["listening_exercise_position"] in {
+            exercise["position"] for exercise in listening
+        }
+
+
+@pytest.mark.asyncio
 async def test_aula_inexistente_devolve_404(client: AsyncClient) -> None:
     r = await client.get("/api/lessons/99")
     assert r.status_code == 404
@@ -161,7 +182,7 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
-    assert len(todos) == 66
+    assert len(todos) == 74
     assert {e["lesson_number"] for e in todos} == set(range(31, 41))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
@@ -173,5 +194,5 @@ async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_exercicios_filtra_por_aula(client: AsyncClient) -> None:
     da_39 = (await client.get("/api/exercises?lesson=39")).json()
-    assert len(da_39) == 7
+    assert len(da_39) == 8
     assert {e["lesson_number"] for e in da_39} == {39}

@@ -55,6 +55,16 @@ const lesson = {
   lead: 'Compare transportes e dê conselhos.',
   goals: ['Comparar duas coisas com **-er than**.', 'Dar conselho com **should**.'],
   grammar_blocks: [],
+  versions: [
+    {
+      version: 1,
+      status: 'reviewed',
+      learning_strategy: 'visualizar',
+      review_note: 'Revisada.',
+      reviewed_at: '2026-10-08T00:00:00Z',
+      published_at: null,
+    },
+  ],
   media: [
     {
       id: 9,
@@ -161,7 +171,7 @@ describe('StudyPage', () => {
     await user.click(screen.getByRole('button', { name: /Concluir e ir para Assistir/i }))
 
     expect(screen.getByText('Etapa 2 de 5')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Assista primeiro pelo contexto' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Escute primeiro pelo contexto' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Conversa da Aula 31' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Escute e responda antes de ler' })).toBeInTheDocument()
     expect(JSON.parse(window.localStorage.getItem(studyProgressKey(7, 31)) ?? '{}')).toEqual({

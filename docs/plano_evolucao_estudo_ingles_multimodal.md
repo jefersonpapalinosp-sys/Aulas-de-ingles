@@ -558,13 +558,13 @@ Cada sprint deve manter a aplicação utilizável e incluir frontend, backend, b
 
 Concluído no primeiro corte vertical:
 
-- jornada guiada das Aulas 31 e 32 em cinco etapas, com retomada por usuário;
+- jornada guiada das Aulas 31–40 em cinco etapas, com retomada por usuário;
 - correção editorial da Aula 32 para objetos diretos/indiretos e interjeições;
 - metadados de mídia no banco e no contrato OpenAPI;
-- players dos áudios oficiais da VOA com velocidade, saltos, loop A–B e posição sincronizada
+- players dos dez áudios oficiais da VOA com velocidade, saltos, loop A–B e posição sincronizada
   entre dispositivos, mantendo fallback local;
-- 15 trechos de estudo selecionados nas Aulas 31 e 32, tradução opcional e navegação pelo áudio;
-- atividades de listening das Aulas 31 e 32 corrigidas no servidor;
+- 48 trechos de estudo selecionados nas Aulas 31–40, tradução opcional e navegação pelo áudio;
+- atividades de listening em todas as Aulas 31–40 corrigidas no servidor;
 - fontes oficiais/autorais e versões editoriais explícitas para as dez aulas;
 - prática de *shadowing* com gravação local, reprodução e autoavaliação por frase;
 - workspace de escrita da Aula 31 com autosave, fallback local, feedback determinístico e
@@ -580,7 +580,7 @@ Concluído no primeiro corte vertical:
 
 As Sprints 6–14 estão concluídas no corte vertical. A assistência opcional permanece desligada
 por padrão até cumprir o gate de avaliação humana. Próximas expansões possíveis são a
-transcrição editorial completa das demais aulas, mais atividades de listening e uma fila
+transcrições editoriais integrais, mais atividades de listening por aula e uma fila
 durável para processamento assistido.
 
 ### Sprint 6 - Auditoria curricular e fundação da experiência
@@ -622,8 +622,8 @@ Aceite:
 
 **Objetivo:** transformar mídia externa em atividade de estudo.
 
-**Estado:** concluída no piloto das Aulas 31 e 32. Ambas possuem áudio hospedado na VOA,
-alternativa textual selecionada, tradução revelável e atividade de listening. A posição é
+**Estado:** concluída nas Aulas 31–40. Todas possuem áudio hospedado na VOA,
+trechos textuais selecionados, tradução revelável e atividade de listening. A posição é
 salva em `media_progress` por conta e também localmente para tolerar falhas de rede. O motor
 existente `exercise`/`exercise_answer`/`exercise_hint` cumpre o papel originalmente chamado de
 `activity`/`activity_item`, conforme a decisão de modelo registrada acima.
@@ -972,11 +972,11 @@ Uma funcionalidade pedagógica só está pronta quando:
 
 ## 16. Próximo passo recomendado
 
-As Sprints 6–14 estão encerradas no corte vertical das Aulas 31 e 32. O próximo ciclo deve
+As Sprints 6–14 estão encerradas no bloco das Aulas 31–40. O próximo ciclo deve
 priorizar, nesta ordem:
 
 1. revisar e mesclar o Pull Request somente após todos os gates do CI;
 2. realizar a rodada manual com VoiceOver/TalkBack, zoom de 200% e contraste forçado;
-3. ampliar mídia, transcrição selecionada e listening para as Aulas 33–40;
+3. aprofundar o listening com transcrições integrais e mais de uma atividade por aula;
 4. contratar/configurar um gateway assistido e executar o gate humano documentado;
 5. adotar fila durável antes de liberar assistência em escala.
