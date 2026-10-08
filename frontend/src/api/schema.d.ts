@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/assist/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status Assistencia */
+        get: operations["status_assistencia_api_assist_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -163,6 +180,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/exercises/{exercise_id}/hints/{level}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obter Dica
+         * @description Libera dicas em ordem; a segunda exige ao menos uma tentativa errada.
+         */
+        get: operations["obter_dica_api_exercises__exercise_id__hints__level__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -250,6 +287,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/lessons/{number}/study-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obter Sessao De Estudo
+         * @description Devolve o ponto salvo ou o início da jornada quando ela ainda não existe.
+         */
+        get: operations["obter_sessao_de_estudo_api_lessons__number__study_session_get"];
+        /**
+         * Salvar Sessao De Estudo
+         * @description Cria ou atualiza a retomada da jornada, isolada por conta e aula.
+         */
+        put: operations["salvar_sessao_de_estudo_api_lessons__number__study_session_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/live": {
         parameters: {
             query?: never;
@@ -265,6 +326,59 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exportar Dados */
+        get: operations["exportar_dados_api_me_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notebook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Caderno */
+        get: operations["listar_caderno_api_me_notebook_get"];
+        put?: never;
+        /** Criar Anotacao */
+        post: operations["criar_anotacao_api_me_notebook_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notebook/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Atualizar Anotacao */
+        put: operations["atualizar_anotacao_api_me_notebook__entry_id__put"];
+        post?: never;
+        /** Excluir Anotacao */
+        delete: operations["excluir_anotacao_api_me_notebook__entry_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -290,6 +404,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/skills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Minhas Competencias */
+        get: operations["minhas_competencias_api_me_skills_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/study-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Plano */
+        get: operations["obter_plano_api_me_study_plan_get"];
+        /** Salvar Plano */
+        put: operations["salvar_plano_api_me_study_plan_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Painel Hoje */
+        get: operations["painel_hoje_api_me_today_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/review/due": {
         parameters: {
             query?: never;
@@ -297,11 +463,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Vencidas
-         * @description Cartas do usuário logado cujo prazo já chegou, da mais atrasada primeiro.
-         */
+        /** Vencidas */
         get: operations["vencidas_api_review_due_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/review/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Itens */
+        get: operations["listar_itens_api_review_items_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -319,10 +499,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Adicionar Item
-         * @description Põe um item de vocabulário no deck.
-         */
+        /** Adicionar Item */
         post: operations["adicionar_item_api_review_items__vocab_item_id__post"];
         delete?: never;
         options?: never;
@@ -339,10 +516,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Adicionar Aula
-         * @description Põe todo o vocabulário de uma aula no deck.
-         */
+        /** Adicionar Aula */
         post: operations["adicionar_aula_api_review_lessons__number__post"];
         delete?: never;
         options?: never;
@@ -367,7 +541,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/review/{card_id}/grade": {
+    "/api/review/{item_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -376,11 +550,130 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Avaliar
-         * @description Aplica o SM-2 à carta e reagenda.
-         */
-        post: operations["avaliar_api_review__card_id__grade_post"];
+        post?: never;
+        /** Excluir Item */
+        delete: operations["excluir_item_api_review__item_id__delete"];
+        options?: never;
+        head?: never;
+        /** Alterar Status */
+        patch: operations["alterar_status_api_review__item_id__patch"];
+        trace?: never;
+    };
+    "/api/review/{item_id}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Avaliar */
+        post: operations["avaliar_api_review__item_id__grade_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Tentativas */
+        get: operations["listar_tentativas_api_speaking_attempts_get"];
+        put?: never;
+        /** Criar Tentativa */
+        post: operations["criar_tentativa_api_speaking_attempts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/attempts/{attempt_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Excluir Tentativa */
+        delete: operations["excluir_tentativa_api_speaking_attempts__attempt_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/attempts/{attempt_id}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Audio */
+        get: operations["obter_audio_api_speaking_attempts__attempt_id__audio_get"];
+        /** Enviar Audio */
+        put: operations["enviar_audio_api_speaking_attempts__attempt_id__audio_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/attempts/{attempt_id}/transcription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Solicitar Transcricao */
+        post: operations["solicitar_transcricao_api_speaking_attempts__attempt_id__transcription_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/transcriptions/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Excluir Transcricao */
+        delete: operations["excluir_transcricao_api_speaking_transcriptions__job_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/transcriptions/{job_id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Avaliar Transcricao */
+        put: operations["avaliar_transcricao_api_speaking_transcriptions__job_id__rating_put"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -407,10 +700,131 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/writing/feedback/{feedback_id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Avaliar Feedback */
+        put: operations["avaliar_feedback_api_writing_feedback__feedback_id__rating_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/writing/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historico De Escrita */
+        get: operations["historico_de_escrita_api_writing_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/writing/prompts/{prompt_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Rascunho */
+        get: operations["obter_rascunho_api_writing_prompts__prompt_id__draft_get"];
+        /** Salvar Rascunho */
+        put: operations["salvar_rascunho_api_writing_prompts__prompt_id__draft_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/writing/prompts/{prompt_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Analisar Texto */
+        post: operations["analisar_texto_api_writing_prompts__prompt_id__feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/writing/prompts/{prompt_id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Criar Versao */
+        post: operations["criar_versao_api_writing_prompts__prompt_id__versions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AssistStatusOut */
+        AssistStatusOut: {
+            /** Cost Microusd Today */
+            cost_microusd_today: number;
+            /** Daily Quota */
+            daily_quota: number;
+            /**
+             * Evaluation Only
+             * @default true
+             * @constant
+             */
+            evaluation_only: true;
+            /** Remaining Today */
+            remaining_today: number;
+            /** Retention Days */
+            retention_days: number;
+            /** Transcription Enabled */
+            transcription_enabled: boolean;
+            /** Used Today */
+            used_today: number;
+            /** Writing Enabled */
+            writing_enabled: boolean;
+        };
+        /** AttemptFeedbackOut */
+        AttemptFeedbackOut: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "correct" | "missing_word" | "extra_word" | "word_order" | "spelling" | "word_choice";
+            /** Message */
+            message: string;
+            /** Tokens */
+            tokens: components["schemas"]["FeedbackTokenOut"][];
+        };
         /** AttemptIn */
         AttemptIn: {
             /**
@@ -418,19 +832,35 @@ export interface components {
              * @description O que o usuário digitou.
              */
             answer: string;
+            /**
+             * Idempotency Key
+             * Format: uuid
+             */
+            idempotency_key: string;
         };
         /** AttemptOut */
         AttemptOut: {
+            /** Attempt Id */
+            attempt_id: number;
             /** Correct */
             correct: boolean;
             /** Explanation */
-            explanation: string;
+            explanation: string | null;
+            feedback: components["schemas"]["AttemptFeedbackOut"];
         };
         /**
          * CardOut
-         * @description Frente e verso da carta, mais o estado do agendamento.
+         * @description Frente, verso, mídia e estado de um item da fila.
          */
         CardOut: {
+            /** Answer */
+            answer: string;
+            /** Context */
+            context: string | null;
+            /** Cue End Seconds */
+            cue_end_seconds: number | null;
+            /** Cue Start Seconds */
+            cue_start_seconds: number | null;
             /**
              * Due At
              * Format: date-time
@@ -438,39 +868,69 @@ export interface components {
             due_at: string;
             /** Ease Factor */
             ease_factor: number;
-            /** Example En */
-            example_en: string;
+            /** Estimated Seconds */
+            estimated_seconds: number;
             /** Id */
             id: number;
             /** Interval Days */
             interval_days: number;
-            /** Ipa */
-            ipa: string;
+            /**
+             * Item Type
+             * @enum {string}
+             */
+            item_type: "vocabulary" | "grammar_error" | "phrase" | "listening" | "writing_prompt" | "speaking_prompt";
             /** Lapses */
             lapses: number;
             /** Lesson Number */
             lesson_number: number;
+            /** Media Url */
+            media_url: string | null;
+            /** Prompt */
+            prompt: string;
+            /** Prompt Note */
+            prompt_note: string | null;
+            /** Reason */
+            reason: string;
             /** Repetitions */
             repetitions: number;
-            /** Term */
-            term: string;
-            /** Translation Pt */
-            translation_pt: string;
+            /** Skill */
+            skill: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "suspended";
             /** Vocab Item Id */
-            vocab_item_id: number;
+            vocab_item_id: number | null;
         };
         /** DeckSummaryOut */
         DeckSummaryOut: {
             /**
              * Added
-             * @description Quantas cartas a última ação criou.
+             * @description Quantos itens a última ação criou.
              * @default 0
              */
             added: number;
+            /** By Type */
+            by_type?: {
+                [key: string]: number;
+            };
             /** Due Now */
             due_now: number;
+            /**
+             * Suspended
+             * @default 0
+             */
+            suspended: number;
             /** Total Cards */
             total_cards: number;
+        };
+        /** ExerciseHintOut */
+        ExerciseHintOut: {
+            /** Content */
+            content: string;
+            /** Level */
+            level: number;
         };
         /**
          * ExerciseOut
@@ -481,31 +941,57 @@ export interface components {
          *     no formato certo para não ter que mudar depois.
          */
         ExerciseOut: {
+            /** Activity Type */
+            activity_type: string;
             /** Explanation */
             explanation: string;
             /** Hint */
             hint: string | null;
+            /** Hint Count */
+            hint_count: number;
             /** Id */
             id: number;
+            /** Options */
+            options: string[] | null;
             /** Position */
             position: number;
             /** Prompt */
             prompt: string;
+            /** Skill */
+            skill: string;
         };
         /** ExerciseWithLessonOut */
         ExerciseWithLessonOut: {
+            /** Activity Type */
+            activity_type: string;
             /** Explanation */
             explanation: string;
             /** Hint */
             hint: string | null;
+            /** Hint Count */
+            hint_count: number;
             /** Id */
             id: number;
             /** Lesson Number */
             lesson_number: number;
+            /** Options */
+            options: string[] | null;
             /** Position */
             position: number;
             /** Prompt */
             prompt: string;
+            /** Skill */
+            skill: string;
+        };
+        /** FeedbackTokenOut */
+        FeedbackTokenOut: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "keep" | "review";
+            /** Text */
+            text: string;
         };
         /** GradeIn */
         GradeIn: {
@@ -570,6 +1056,14 @@ export interface components {
             /** Version */
             version?: string | null;
         };
+        /** HumanRatingIn */
+        HumanRatingIn: {
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "helpful" | "not_helpful";
+        };
         /** LessonDetailOut */
         LessonDetailOut: {
             /** Exercises */
@@ -584,6 +1078,8 @@ export interface components {
             grammar_tag: string;
             /** Lead */
             lead: string;
+            /** Media */
+            media: components["schemas"]["LessonMediaOut"][];
             /** Number */
             number: number;
             /** Phrases */
@@ -600,6 +1096,25 @@ export interface components {
             voa_url: string;
             /** Vocab */
             vocab: components["schemas"]["VocabItemOut"][];
+            /** Writing Prompts */
+            writing_prompts: components["schemas"]["WritingPromptOut"][];
+        };
+        /** LessonMediaOut */
+        LessonMediaOut: {
+            /** Cues */
+            cues: components["schemas"]["TranscriptCueOut"][];
+            /** Duration Seconds */
+            duration_seconds: number | null;
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /** Listening Exercise Position */
+            listening_exercise_position: number | null;
+            /** Source Url */
+            source_url: string;
         };
         /** LessonProgressOut */
         LessonProgressOut: {
@@ -642,6 +1157,108 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** NotebookEntryIn */
+        NotebookEntryIn: {
+            /** Content */
+            content: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question";
+            /** Lesson Number */
+            lesson_number: number;
+        };
+        /** NotebookEntryOut */
+        NotebookEntryOut: {
+            /** Content */
+            content: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question";
+            /** Lesson Number */
+            lesson_number: number;
+            /** Lesson Title */
+            lesson_title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** NotebookEntryUpdate */
+        NotebookEntryUpdate: {
+            /** Content */
+            content: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question";
+        };
+        /** PersonalDataExportOut */
+        PersonalDataExportOut: {
+            /** Exercise Attempts */
+            exercise_attempts: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Exported At
+             * Format: date-time
+             */
+            exported_at: string;
+            /** Lesson Progress */
+            lesson_progress: {
+                [key: string]: unknown;
+            }[];
+            /** Notebook */
+            notebook: {
+                [key: string]: unknown;
+            }[];
+            /** Profile */
+            profile: {
+                [key: string]: unknown;
+            };
+            /** Review Items */
+            review_items: {
+                [key: string]: unknown;
+            }[];
+            /** Schema Version */
+            schema_version: string;
+            /** Skill Evidence */
+            skill_evidence: {
+                [key: string]: unknown;
+            }[];
+            /** Speaking */
+            speaking: {
+                [key: string]: unknown;
+            }[];
+            /** Step Progress */
+            step_progress: {
+                [key: string]: unknown;
+            }[];
+            /** Study Plan */
+            study_plan: {
+                [key: string]: unknown;
+            } | null;
+            /** Study Sessions */
+            study_sessions: {
+                [key: string]: unknown;
+            }[];
+            /** Writing */
+            writing: {
+                [key: string]: unknown;
+            }[];
+        };
         /** PhraseOut */
         PhraseOut: {
             /** Note */
@@ -683,6 +1300,42 @@ export interface components {
             /** Label */
             label: string;
         };
+        /** RecentSessionOut */
+        RecentSessionOut: {
+            /** Completed Steps */
+            completed_steps: number;
+            /** Current Step */
+            current_step: string;
+            /** Lesson Number */
+            lesson_number: number;
+            /** Lesson Title */
+            lesson_title: string;
+            /** Total Minutes */
+            total_minutes: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** RecommendationOut */
+        RecommendationOut: {
+            /** Estimated Minutes */
+            estimated_minutes: number;
+            /** Href */
+            href: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "review" | "continue_lesson" | "start_lesson" | "practice";
+            /** Lesson Number */
+            lesson_number?: number | null;
+            /** Reason */
+            reason: string;
+            /** Title */
+            title: string;
+        };
         /** RegistroIn */
         RegistroIn: {
             /** Display Name */
@@ -708,6 +1361,139 @@ export interface components {
             /** Explanation */
             explanation: string;
         };
+        /** ReviewItemStatusIn */
+        ReviewItemStatusIn: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "suspended";
+        };
+        /** SkillSummaryOut */
+        SkillSummaryOut: {
+            /** Fragile Topics */
+            fragile_topics: string[];
+            /** Label */
+            label: string;
+            /** Samples */
+            samples: number;
+            /** Score Percent */
+            score_percent: number | null;
+            /** Skill */
+            skill: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "insufficient" | "developing" | "steady" | "strong";
+        };
+        /** SpeakingAttemptIn */
+        SpeakingAttemptIn: {
+            /**
+             * Consent
+             * @constant
+             */
+            consent: true;
+            /** Cue Id */
+            cue_id: number;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Self Rating */
+            self_rating?: ("repeat" | "almost" | "confident") | null;
+        };
+        /** SpeakingAttemptOut */
+        SpeakingAttemptOut: {
+            /**
+             * Consented At
+             * Format: date-time
+             */
+            consented_at: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Cue Id */
+            cue_id: number;
+            /** Cue Text */
+            cue_text: string;
+            /** Duration Ms */
+            duration_ms: number;
+            /** File Size */
+            file_size: number | null;
+            /** Id */
+            id: number;
+            /** Lesson Number */
+            lesson_number: number;
+            /** Mime Type */
+            mime_type: string | null;
+            /** Self Rating */
+            self_rating: ("repeat" | "almost" | "confident") | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "ready";
+            transcription?: components["schemas"]["TranscriptionJobOut"] | null;
+        };
+        /** StudyPlanIn */
+        StudyPlanIn: {
+            /** Goal */
+            goal: string;
+            /** Preferred Days */
+            preferred_days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            /** Weekly Minutes */
+            weekly_minutes: number;
+        };
+        /** StudyPlanOut */
+        StudyPlanOut: {
+            /** Goal */
+            goal: string;
+            /** Preferred Days */
+            preferred_days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            /** Updated At */
+            updated_at: string | null;
+            /** Weekly Minutes */
+            weekly_minutes: number;
+        };
+        /** StudySessionIn */
+        StudySessionIn: {
+            /** Completed Steps */
+            completed_steps: ("preparar" | "assistir" | "estudar" | "praticar" | "revisar")[];
+            /**
+             * Current Step
+             * @enum {string}
+             */
+            current_step: "preparar" | "assistir" | "estudar" | "praticar" | "revisar";
+        };
+        /** StudySessionOut */
+        StudySessionOut: {
+            /** Completed At */
+            completed_at: string | null;
+            /** Completed Steps */
+            completed_steps: ("preparar" | "assistir" | "estudar" | "praticar" | "revisar")[];
+            /**
+             * Current Step
+             * @enum {string}
+             */
+            current_step: "preparar" | "assistir" | "estudar" | "praticar" | "revisar";
+            /** Lesson Number */
+            lesson_number: number;
+            /** Started At */
+            started_at: string | null;
+            /** Total Seconds */
+            total_seconds: number;
+            /** Updated At */
+            updated_at: string | null;
+        };
+        /** TodayOut */
+        TodayOut: {
+            plan: components["schemas"]["StudyPlanOut"];
+            recent_session: components["schemas"]["RecentSessionOut"] | null;
+            recommendation: components["schemas"]["RecommendationOut"];
+            /** Recorded Minutes This Week */
+            recorded_minutes_this_week: number;
+        };
         /**
          * TokenOut
          * @description O access token volta no corpo; o refresh vai em cookie httpOnly.
@@ -725,6 +1511,90 @@ export interface components {
              * @default bearer
              */
             token_type: string;
+        };
+        /** TranscriptCueOut */
+        TranscriptCueOut: {
+            /** End Seconds */
+            end_seconds: number;
+            /** Id */
+            id: number;
+            /** Position */
+            position: number;
+            /** Speaker */
+            speaker: string;
+            /** Start Seconds */
+            start_seconds: number;
+            /** Text En */
+            text_en: string;
+            /** Text Pt */
+            text_pt: string;
+        };
+        /** TranscriptionJobOut */
+        TranscriptionJobOut: {
+            /** Attempt Id */
+            attempt_id: number;
+            /**
+             * Automated
+             * @default true
+             * @constant
+             */
+            automated: true;
+            /** Completed At */
+            completed_at: string | null;
+            /** Cost Microusd */
+            cost_microusd: number;
+            /** Error Code */
+            error_code: string | null;
+            /**
+             * Evaluation Only
+             * @default true
+             * @constant
+             */
+            evaluation_only: true;
+            /** Expected Text */
+            expected_text: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Human Rating */
+            human_rating: ("helpful" | "not_helpful") | null;
+            /** Id */
+            id: number;
+            /** Low Confidence */
+            low_confidence: boolean;
+            /** Mean Confidence */
+            mean_confidence: number | null;
+            /** Provider */
+            provider: string;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** Similarity Score */
+            similarity_score: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "processing" | "completed" | "failed";
+            /** Transcript Text */
+            transcript_text: string | null;
+            /** Words */
+            words: components["schemas"]["TranscriptionWordOut"][];
+        };
+        /** TranscriptionWordOut */
+        TranscriptionWordOut: {
+            /** Confidence */
+            confidence: number;
+            /** End Ms */
+            end_ms: number;
+            /** Start Ms */
+            start_ms: number;
+            /** Text */
+            text: string;
         };
         /** UsuarioOut */
         UsuarioOut: {
@@ -776,6 +1646,152 @@ export interface components {
             /** Translation Pt */
             translation_pt: string;
         };
+        /** WritingDraftIn */
+        WritingDraftIn: {
+            /** Text */
+            text: string;
+        };
+        /** WritingDraftOut */
+        WritingDraftOut: {
+            /** Prompt Id */
+            prompt_id: number;
+            /** Revisions */
+            revisions: components["schemas"]["WritingRevisionOut"][];
+            /** Text */
+            text: string;
+            /** Updated At */
+            updated_at: string | null;
+        };
+        /** WritingFeedbackCheckOut */
+        WritingFeedbackCheckOut: {
+            /** Code */
+            code: string;
+            /** Label */
+            label: string;
+            /** Passed */
+            passed: boolean;
+            /** Suggestion */
+            suggestion: string;
+        };
+        /** WritingFeedbackIn */
+        WritingFeedbackIn: {
+            /**
+             * Assisted
+             * @default false
+             */
+            assisted: boolean;
+            /** Text */
+            text: string;
+        };
+        /** WritingFeedbackOut */
+        WritingFeedbackOut: {
+            /**
+             * Analysis Mode
+             * @enum {string}
+             */
+            analysis_mode: "deterministic" | "assisted" | "fallback";
+            /** Assisted Confidence */
+            assisted_confidence: number | null;
+            /** Assisted Cost Microusd */
+            assisted_cost_microusd: number;
+            /** Assisted Error Code */
+            assisted_error_code: string | null;
+            /** Assisted Suggestions */
+            assisted_suggestions: {
+                [key: string]: unknown;
+            }[];
+            /** Assisted Summary */
+            assisted_summary: string | null;
+            /**
+             * Automated
+             * @default true
+             * @constant
+             */
+            automated: true;
+            /** Checks */
+            checks: components["schemas"]["WritingFeedbackCheckOut"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Evaluation Only */
+            evaluation_only: boolean;
+            /** Human Rating */
+            human_rating: ("helpful" | "not_helpful") | null;
+            /** Id */
+            id: number;
+            /** Low Confidence */
+            low_confidence: boolean;
+            /** Provider */
+            provider: string | null;
+            /** Ready */
+            ready: boolean;
+            /** Sentence Count */
+            sentence_count: number;
+            /** Word Count */
+            word_count: number;
+        };
+        /** WritingHistoryItemOut */
+        WritingHistoryItemOut: {
+            /** Draft Text */
+            draft_text: string;
+            /** Feedbacks */
+            feedbacks: components["schemas"]["WritingFeedbackOut"][];
+            /** Lesson Number */
+            lesson_number: number;
+            /** Lesson Title */
+            lesson_title: string;
+            /** Prompt Id */
+            prompt_id: number;
+            /** Prompt Title */
+            prompt_title: string;
+            /** Revisions */
+            revisions: components["schemas"]["WritingRevisionOut"][];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** WritingPromptOut */
+        WritingPromptOut: {
+            /** Id */
+            id: number;
+            /** Instructions */
+            instructions: string;
+            /** Min Sentences */
+            min_sentences: number;
+            /** Min Words */
+            min_words: number;
+            /** Position */
+            position: number;
+            /** Requirements */
+            requirements: components["schemas"]["WritingRequirementOut"][];
+            /** Title */
+            title: string;
+        };
+        /** WritingRequirementOut */
+        WritingRequirementOut: {
+            /** Label */
+            label: string;
+            /** Terms */
+            terms: string[];
+        };
+        /** WritingRevisionOut */
+        WritingRevisionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Text */
+            text: string;
+            /** Version */
+            version: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -785,6 +1801,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    status_assistencia_api_assist_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistStatusOut"];
+                };
+            };
+        };
+    };
     entrar_api_auth_login_post: {
         parameters: {
             query?: never;
@@ -1007,6 +2043,38 @@ export interface operations {
             };
         };
     };
+    obter_dica_api_exercises__exercise_id__hints__level__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                exercise_id: number;
+                level: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExerciseHintOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;
@@ -1136,6 +2204,72 @@ export interface operations {
             };
         };
     };
+    obter_sessao_de_estudo_api_lessons__number__study_session_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudySessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    salvar_sessao_de_estudo_api_lessons__number__study_session_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudySessionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudySessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     live_api_live_get: {
         parameters: {
             query?: never;
@@ -1154,6 +2288,155 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    exportar_dados_api_me_export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalDataExportOut"];
+                };
+            };
+        };
+    };
+    listar_caderno_api_me_notebook_get: {
+        parameters: {
+            query?: {
+                lesson?: number | null;
+                kind?: ("note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotebookEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_anotacao_api_me_notebook_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotebookEntryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotebookEntryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    atualizar_anotacao_api_me_notebook__entry_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotebookEntryUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotebookEntryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_anotacao_api_me_notebook__entry_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1178,10 +2461,137 @@ export interface operations {
             };
         };
     };
+    minhas_competencias_api_me_skills_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SkillSummaryOut"][];
+                };
+            };
+        };
+    };
+    obter_plano_api_me_study_plan_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyPlanOut"];
+                };
+            };
+        };
+    };
+    salvar_plano_api_me_study_plan_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudyPlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyPlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    painel_hoje_api_me_today_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodayOut"];
+                };
+            };
+        };
+    };
     vencidas_api_review_due_get: {
         parameters: {
             query?: {
                 limit?: number;
+                item_type?: ("vocabulary" | "grammar_error" | "phrase" | "listening" | "writing_prompt" | "speaking_prompt") | null;
+                skill?: string | null;
+                max_minutes?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_itens_api_review_items_get: {
+        parameters: {
+            query?: {
+                status?: "active" | "suspended";
             };
             header?: never;
             path?: never;
@@ -1291,12 +2701,76 @@ export interface operations {
             };
         };
     };
-    avaliar_api_review__card_id__grade_post: {
+    excluir_item_api_review__item_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                card_id: number;
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alterar_status_api_review__item_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewItemStatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    avaliar_api_review__item_id__grade_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
             };
             cookie?: never;
         };
@@ -1313,6 +2787,256 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GradeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listar_tentativas_api_speaking_attempts_get: {
+        parameters: {
+            query?: {
+                lesson?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakingAttemptOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_tentativa_api_speaking_attempts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SpeakingAttemptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakingAttemptOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_tentativa_api_speaking_attempts__attempt_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    obter_audio_api_speaking_attempts__attempt_id__audio_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enviar_audio_api_speaking_attempts__attempt_id__audio_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakingAttemptOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    solicitar_transcricao_api_speaking_attempts__attempt_id__transcription_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranscriptionJobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    excluir_transcricao_api_speaking_transcriptions__job_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    avaliar_transcricao_api_speaking_transcriptions__job_id__rating_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HumanRatingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranscriptionJobOut"];
                 };
             };
             /** @description Validation Error */
@@ -1345,6 +3069,197 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VocabItemWithLessonOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    avaliar_feedback_api_writing_feedback__feedback_id__rating_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedback_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HumanRatingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingFeedbackOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    historico_de_escrita_api_writing_history_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingHistoryItemOut"][];
+                };
+            };
+        };
+    };
+    obter_rascunho_api_writing_prompts__prompt_id__draft_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                prompt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    salvar_rascunho_api_writing_prompts__prompt_id__draft_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                prompt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WritingDraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    analisar_texto_api_writing_prompts__prompt_id__feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                prompt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WritingFeedbackIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingFeedbackOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    criar_versao_api_writing_prompts__prompt_id__versions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                prompt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WritingDraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingRevisionOut"];
                 };
             };
             /** @description Validation Error */

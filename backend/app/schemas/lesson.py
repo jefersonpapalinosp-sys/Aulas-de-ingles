@@ -48,6 +48,41 @@ class PronunciationNoteOut(ORMModel):
     explanation: str
 
 
+class TranscriptCueOut(ORMModel):
+    id: int
+    position: int
+    start_seconds: float
+    end_seconds: float
+    speaker: str
+    text_en: str
+    text_pt: str
+
+
+class LessonMediaOut(ORMModel):
+    id: int
+    kind: str
+    label: str
+    source_url: str
+    duration_seconds: int | None
+    listening_exercise_position: int | None
+    cues: list[TranscriptCueOut]
+
+
+class WritingRequirementOut(BaseModel):
+    label: str
+    terms: list[str]
+
+
+class WritingPromptOut(ORMModel):
+    id: int
+    position: int
+    title: str
+    instructions: str
+    min_words: int
+    min_sentences: int
+    requirements: list[WritingRequirementOut]
+
+
 class ExerciseOut(ORMModel):
     """Exercício como ele chega ao cliente.
 
@@ -58,8 +93,12 @@ class ExerciseOut(ORMModel):
 
     id: int
     position: int
+    activity_type: str
+    skill: str
+    options: list[str] | None
     prompt: str
     hint: str | None
+    hint_count: int
     explanation: str
 
 
@@ -95,4 +134,6 @@ class LessonDetailOut(LessonSummaryOut):
     phrases: list[PhraseOut]
     vocab: list[VocabItemOut]
     pronunciation: list[PronunciationNoteOut]
+    media: list[LessonMediaOut]
+    writing_prompts: list[WritingPromptOut]
     exercises: list[ExerciseOut]

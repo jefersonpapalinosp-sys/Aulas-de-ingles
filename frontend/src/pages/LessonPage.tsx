@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { useSessao } from '../api/auth'
 import { useLesson } from '../api/queries'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { GrammarBlockView } from '../components/GrammarBlockView'
@@ -19,6 +20,7 @@ function Secao({ n, titulo, children }: { n: string; titulo: string; children: R
 }
 
 export function LessonPage() {
+  const { usuario } = useSessao()
   const { numero } = useParams()
   const n = Number(numero)
   const { data, isPending, error, refetch } = useLesson(n)
@@ -46,6 +48,18 @@ export function LessonPage() {
           </span>
         ))}
       </div>
+
+      {data.number === 31 && (
+        <div className="study-entry">
+          <div>
+            <p className="study-kicker">Novo · jornada guiada</p>
+            <strong>Estude em cinco etapas e continue de onde parou.</strong>
+          </div>
+          <Link className="btn" to={`/aulas/${data.number}/estudar`}>
+            Começar estudo
+          </Link>
+        </div>
+      )}
 
       <a className="watch" href={data.voa_url} target="_blank" rel="noopener noreferrer">
         Assistir e ouvir no VOA ↗
@@ -84,7 +98,7 @@ export function LessonPage() {
       <Secao n="06" titulo="Exercícios">
         <div className="stack tight">
           {data.exercises.map((e, i) => (
-            <ExerciseCard exercicio={e} numero={i + 1} key={e.id} />
+            <ExerciseCard exercicio={e} numero={i + 1} userId={usuario?.id ?? 0} key={e.id} />
           ))}
         </div>
       </Secao>

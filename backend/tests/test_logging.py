@@ -61,3 +61,21 @@ async def test_requisicao_vira_uma_linha_de_log(client: AsyncClient, caplog) -> 
     assert registro.status == 200
     assert registro.path == "/api/live"
     assert registro.duration_ms >= 0
+
+
+@pytest.mark.asyncio
+async def test_telemetria_nao_registra_corpo_query_ou_autorizacao(
+    client: AsyncClient, caplog
+) -> None:
+    segredo = "senha-que-nao-pode-vazar"
+    with caplog.at_level(logging.INFO, logger="app.request"):
+        await client.post(
+            "/api/auth/login?campanha=dado-sensivel",
+            headers={"Authorization": "Bearer token-secreto"},
+            json={"email": "privado@example.com", "password": segredo},
+        )
+    registro = next(r for r in caplog.records if r.name == "app.request")
+    saida = FormatadorJson().format(registro)
+    assert registro.path == "/api/auth/login"
+    for sensivel in [segredo, "privado@example.com", "dado-sensivel", "token-secreto"]:
+        assert sensivel not in saida

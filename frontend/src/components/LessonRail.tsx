@@ -45,7 +45,7 @@ export function LessonRail({ aulas }: { aulas: LessonSummary[] }) {
 
       <p className="rail-group">Visão geral</p>
       <NavLink to="/" end className="flat">
-        Mapa do bloco
+        Hoje e mapa
       </NavLink>
 
       <p className="rail-group">Aulas</p>
@@ -74,6 +74,9 @@ export function LessonRail({ aulas }: { aulas: LessonSummary[] }) {
       ))}
 
       <p className="rail-group">Fechamento</p>
+      <NavLink to="/caderno" className="flat">
+        Caderno
+      </NavLink>
       <NavLink to="/revisar" className="flat">
         Revisar
         {!!progresso?.review_due && <span className="badge">{progresso.review_due}</span>}

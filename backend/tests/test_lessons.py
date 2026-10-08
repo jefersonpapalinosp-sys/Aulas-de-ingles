@@ -23,9 +23,55 @@ async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     assert len(a["grammar_blocks"]) == 3
     assert len(a["phrases"]) == 6
     assert len(a["vocab"]) == 11
-    assert len(a["exercises"]) == 6
+    assert len(a["exercises"]) == 9
     assert len(a["goals"]) == 4
     assert all(isinstance(g, str) for g in a["goals"])
+    assert len(a["media"]) == 1
+    assert len(a["writing_prompts"]) == 1
+    assert a["writing_prompts"][0] == {
+        **a["writing_prompts"][0],
+        "position": 0,
+        "title": "Compare caminhos para o estádio",
+        "min_words": 35,
+        "min_sentences": 4,
+    }
+    assert [item["terms"] for item in a["writing_prompts"][0]["requirements"]] == [
+        ["than"],
+        ["should", "ought"],
+    ]
+    assert a["media"][0]["kind"] == "conversation_audio"
+    assert a["media"][0]["duration_seconds"] == 209
+    assert a["media"][0]["source_url"].endswith("81890cf1-5a16-4426-87db-fdb240c750cc_hq.mp3")
+    assert a["media"][0]["listening_exercise_position"] == 6
+    cues = a["media"][0]["cues"]
+    assert len(cues) == 11
+    assert [cue["position"] for cue in cues] == list(range(11))
+    assert all(cue["start_seconds"] < cue["end_seconds"] for cue in cues)
+    listening_choice = next(exercise for exercise in a["exercises"] if exercise["position"] == 6)
+    assert a["exercises"][0]["activity_type"] == "gap_fill"
+    assert a["exercises"][0]["hint_count"] == 2
+    assert listening_choice["activity_type"] == "multiple_choice"
+    assert listening_choice["skill"] == "listening"
+    assert listening_choice["options"] == ["bus", "taxi", "Metro"]
+    assert {exercise["activity_type"] for exercise in a["exercises"]} == {
+        "gap_fill",
+        "multiple_choice",
+        "transformation",
+        "dictation",
+        "reorder",
+    }
+
+
+@pytest.mark.asyncio
+async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> None:
+    a = (await client.get("/api/lessons/32")).json()
+
+    assert a["grammar_tag"] == "Objetos diretos e indiretos + interjeições"
+    assert a["focus_points"] == ["direct object", "indirect object", "interjections"]
+    assert a["grammar_blocks"][0]["heading"].startswith("Objeto direto")
+    assert a["grammar_blocks"][1]["heading"].startswith("Objeto indireto")
+    assert any("woo-hoo" in note["label"] for note in a["pronunciation"])
+    assert len(a["exercises"]) == 6
 
 
 @pytest.mark.asyncio
@@ -41,7 +87,17 @@ async def test_resposta_certa_nao_vaza_no_contrato(client: AsyncClient) -> None:
     r = await client.get("/api/lessons/34")
     assert "answers" not in r.text
     for exercicio in r.json()["exercises"]:
-        assert set(exercicio) == {"id", "position", "prompt", "hint", "explanation"}
+        assert set(exercicio) == {
+            "id",
+            "position",
+            "activity_type",
+            "skill",
+            "options",
+            "prompt",
+            "hint",
+            "hint_count",
+            "explanation",
+        }
 
 
 @pytest.mark.asyncio
@@ -89,13 +145,13 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
-    assert len(todos) == 62
+    assert len(todos) == 65
     assert {e["lesson_number"] for e in todos} == set(range(31, 41))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
     assert chaves == sorted(chaves)
     # A resposta certa continua fora do contrato.
-    assert "answers" not in (await client.get("/api/exercises")).text
+    assert all("answers" not in exercicio for exercicio in todos)
 
 
 @pytest.mark.asyncio

@@ -3,9 +3,9 @@
 Idempotente por construção: rodar duas vezes seguidas não muda contagem
 nenhuma. A estratégia difere por tabela, e a razão é a S3/S4:
 
-- `lesson`, `vocab_item` e `exercise` são atualizados no lugar (upsert pela
-  chave natural), porque tentativas e cartas de revisão vão apontar para eles
-  e não podem perder a referência a cada novo seed.
+- `lesson`, `vocab_item`, `exercise` e `writing_prompt` são atualizados no
+  lugar (upsert pela chave natural), porque dados do usuário vão apontar para
+  eles e não podem perder a referência a cada novo seed.
 - O resto é conteúdo puramente descritivo: apagar e reinserir é mais simples
   e não quebra nada.
 """
@@ -22,13 +22,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import (
     Exercise,
     ExerciseAnswer,
+    ExerciseHint,
     GrammarBlock,
     GrammarRow,
     Lesson,
     LessonGoal,
+    LessonMedia,
     Phrase,
     PronunciationNote,
+    TranscriptCue,
     VocabItem,
+    WritingPrompt,
 )
 
 log = logging.getLogger(__name__)
@@ -75,7 +79,7 @@ async def _upsert_lesson(session: AsyncSession, raw: dict[str, Any]) -> Lesson:
 
 async def _replace_descriptive(session: AsyncSession, lesson: Lesson, raw: dict[str, Any]) -> None:
     """Objetivos, gramática, frases e pronúncia: apaga e reinsere."""
-    for model in (LessonGoal, GrammarBlock, Phrase, PronunciationNote):
+    for model in (LessonGoal, GrammarBlock, Phrase, PronunciationNote, LessonMedia):
         await session.execute(delete(model).where(model.lesson_id == lesson.id))
     await session.flush()
 
@@ -116,6 +120,31 @@ async def _replace_descriptive(session: AsyncSession, lesson: Lesson, raw: dict[
                 explanation=n["explanation"],
             )
         )
+
+    for m in raw.get("media", []):
+        media = LessonMedia(
+            lesson_id=lesson.id,
+            position=m["position"],
+            kind=m["kind"],
+            label=m["label"],
+            source_url=m["source_url"],
+            duration_seconds=m.get("duration_seconds"),
+            listening_exercise_position=m.get("listening_exercise_position"),
+        )
+        session.add(media)
+        await session.flush()
+        for cue in m.get("cues", []):
+            session.add(
+                TranscriptCue(
+                    media_id=media.id,
+                    position=cue["position"],
+                    start_seconds=cue["start_seconds"],
+                    end_seconds=cue["end_seconds"],
+                    speaker=cue["speaker"],
+                    text_en=cue["text_en"],
+                    text_pt=cue["text_pt"],
+                )
+            )
 
 
 async def _upsert_vocab(session: AsyncSession, lesson: Lesson, raw: dict[str, Any]) -> None:
@@ -160,14 +189,48 @@ async def _upsert_exercises(session: AsyncSession, lesson: Lesson, raw: dict[str
         ex.prompt = e["prompt"]
         ex.hint = e["hint"]
         ex.explanation = e["explanation"]
+        ex.activity_type = e.get("activity_type", "gap_fill")
+        ex.skill = e.get("skill", "grammar")
+        ex.options = e.get("options")
         await session.flush()
         await session.execute(delete(ExerciseAnswer).where(ExerciseAnswer.exercise_id == ex.id))
+        await session.execute(delete(ExerciseHint).where(ExerciseHint.exercise_id == ex.id))
         for i, value in enumerate(e["answers"]):
             session.add(ExerciseAnswer(exercise_id=ex.id, position=i, value=value))
+        for level, content in enumerate(e.get("hints", []), start=1):
+            session.add(ExerciseHint(exercise_id=ex.id, level=level, content=content))
         vistas.add(e["position"])
     for position, ex in existentes.items():
         if position not in vistas:
             await session.delete(ex)
+    await session.flush()
+
+
+async def _upsert_writing_prompts(
+    session: AsyncSession, lesson: Lesson, raw: dict[str, Any]
+) -> None:
+    """Upsert por posição para preservar rascunhos e versões do usuário."""
+    existentes = {
+        prompt.position: prompt
+        for prompt in (
+            await session.execute(select(WritingPrompt).where(WritingPrompt.lesson_id == lesson.id))
+        ).scalars()
+    }
+    vistas: set[int] = set()
+    for item in raw.get("writing_prompts", []):
+        prompt = existentes.get(item["position"])
+        if prompt is None:
+            prompt = WritingPrompt(lesson_id=lesson.id, position=item["position"])
+            session.add(prompt)
+        prompt.title = item["title"]
+        prompt.instructions = item["instructions"]
+        prompt.min_words = item["min_words"]
+        prompt.min_sentences = item["min_sentences"]
+        prompt.requirements = item["requirements"]
+        vistas.add(item["position"])
+    for position, prompt in existentes.items():
+        if position not in vistas:
+            await session.delete(prompt)
     await session.flush()
 
 
@@ -179,6 +242,7 @@ async def seed_lessons(session: AsyncSession, path: Path | None = None) -> int:
         await _replace_descriptive(session, lesson, raw)
         await _upsert_vocab(session, lesson, raw)
         await _upsert_exercises(session, lesson, raw)
+        await _upsert_writing_prompts(session, lesson, raw)
     await session.commit()
     log.info("seed aplicado: %d aulas", len(dados))
     return len(dados)

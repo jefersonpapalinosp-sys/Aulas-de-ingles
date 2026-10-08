@@ -13,16 +13,40 @@ const { api } = await import('../api/client')
 const exercicio: Exercise = {
   id: 1,
   position: 0,
+  activity_type: 'gap_fill',
+  skill: 'grammar',
+  options: null,
   prompt: 'A bicycle is `____` (fast) than a taxi.',
   hint: '1 palavra',
+  hint_count: 2,
   explanation: '*fast* tem 1 sílaba → -er + than.',
+}
+
+function feedback(correct: boolean) {
+  return {
+    attempt_id: 10,
+    correct,
+    explanation: correct ? exercicio.explanation : null,
+    feedback: {
+      category: correct ? ('correct' as const) : ('extra_word' as const),
+      message: correct
+        ? 'A resposta corresponde a uma das formas aceitas.'
+        : 'Há uma palavra ou estrutura a mais. Revise os trechos marcados.',
+      tokens: correct
+        ? [{ text: 'faster', status: 'keep' as const }]
+        : [
+            { text: 'more', status: 'review' as const },
+            { text: 'fast', status: 'review' as const },
+          ],
+    },
+  }
 }
 
 function montar(props: Partial<Parameters<typeof ExerciseCard>[0]> = {}) {
   const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
-      <ExerciseCard exercicio={exercicio} numero={1} {...props} />
+      <ExerciseCard exercicio={exercicio} numero={1} userId={7} {...props} />
     </QueryClientProvider>,
   )
 }
@@ -49,7 +73,7 @@ describe('ExerciseCard', () => {
   it('acerto: pede ao servidor e mostra a explicação', async () => {
     const user = userEvent.setup()
     vi.mocked(api.POST).mockResolvedValue({
-      data: { correct: true, explanation: exercicio.explanation },
+      data: feedback(true),
       response: new Response(),
     } as never)
 
@@ -63,14 +87,14 @@ describe('ExerciseCard', () => {
     // A correção é do servidor — o componente não compara nada sozinho.
     expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
       params: { path: { exercise_id: 1 } },
-      body: { answer: 'faster' },
+      body: { answer: 'faster', idempotency_key: expect.any(String) },
     })
   })
 
   it('erro: sugere tentar de novo e não entrega o gabarito', async () => {
     const user = userEvent.setup()
     vi.mocked(api.POST).mockResolvedValue({
-      data: { correct: false, explanation: exercicio.explanation },
+      data: feedback(false),
       response: new Response(),
     } as never)
 
@@ -79,7 +103,8 @@ describe('ExerciseCard', () => {
     await user.click(screen.getByRole('button', { name: 'Verificar' }))
 
     await waitFor(() => expect(screen.getByText('Ainda não')).toBeInTheDocument())
-    expect(screen.getByText(/Tente de novo/)).toBeInTheDocument()
+    expect(screen.getByText(/palavra ou estrutura a mais/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument()
     expect(screen.queryByText('faster')).toBeNull()
   })
 
@@ -99,7 +124,7 @@ describe('ExerciseCard', () => {
     })
   })
 
-  it('API fora do ar vira mensagem, não tela travada', async () => {
+  it('API fora do ar preserva a tentativa para sincronizar depois', async () => {
     const user = userEvent.setup()
     vi.mocked(api.POST).mockResolvedValue({ data: undefined, response: undefined } as never)
 
@@ -107,6 +132,83 @@ describe('ExerciseCard', () => {
     await user.type(screen.getByRole('textbox'), 'faster')
     await user.click(screen.getByRole('button', { name: 'Verificar' }))
 
-    await waitFor(() => expect(screen.getByText('Erro')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Na fila')).toBeInTheDocument())
+    expect(screen.getByText(/salva neste dispositivo/)).toBeInTheDocument()
+  })
+
+  it('libera as dicas em níveis e exige tentativa antes da segunda', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.GET)
+      .mockResolvedValueOnce({
+        data: { level: 1, content: 'Pense no comparativo curto.' },
+        response: new Response(),
+      } as never)
+      .mockResolvedValueOnce({
+        data: { level: 2, content: 'Adicione a terminação *-er*.' },
+        response: new Response(),
+      } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() } as never)
+
+    montar()
+    await user.click(screen.getByRole('button', { name: 'Dica 1' }))
+    expect(await screen.findByText('Pense no comparativo curto.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dica 2' })).toBeDisabled()
+
+    await user.type(screen.getByRole('textbox'), 'more fast')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Dica 2' })).toBeEnabled())
+    await user.click(screen.getByRole('button', { name: 'Dica 2' }))
+
+    expect(await screen.findByText(/Adicione a terminação/)).toBeInTheDocument()
+    expect(api.GET).toHaveBeenLastCalledWith('/api/exercises/{exercise_id}/hints/{level}', {
+      params: { path: { exercise_id: 1, level: 2 } },
+    })
+  })
+
+  it('renderiza atividade de múltipla escolha sem campo de texto', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() } as never)
+    montar({
+      exercicio: {
+        ...exercicio,
+        activity_type: 'multiple_choice',
+        skill: 'listening',
+        options: ['bus', 'taxi', 'Metro'],
+      },
+    })
+
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('radio', { name: 'Metro' }))
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+
+    await waitFor(() => expect(screen.getByText('Correto')).toBeInTheDocument())
+    expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
+      params: { path: { exercise_id: 1 } },
+      body: { answer: 'Metro', idempotency_key: expect.any(String) },
+    })
+  })
+
+  it('monta uma frase ordenando palavras pelo teclado ou clique', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() } as never)
+    montar({
+      exercicio: {
+        ...exercicio,
+        activity_type: 'reorder',
+        options: ['You', 'should', 'study'],
+      },
+    })
+
+    for (const word of ['You', 'should', 'study']) {
+      await user.click(screen.getByRole('button', { name: `Adicionar ${word}` }))
+    }
+    expect(screen.getByLabelText('Frase montada')).toHaveTextContent('Youshouldstudy')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+
+    await waitFor(() => expect(api.POST).toHaveBeenCalled())
+    expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
+      params: { path: { exercise_id: 1 } },
+      body: { answer: 'You should study', idempotency_key: expect.any(String) },
+    })
   })
 })

@@ -4,9 +4,10 @@ App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
 Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: v1.0 — as cinco sprints fechadas.** O programa está completo: o
-caderno, a conta, o progresso e a revisão espaçada funcionam, com E2E do
-fluxo inteiro rodando contra o empacotamento de produção.
+**Estado: v1.4 — Sprints 6–14 concluídas no piloto.** O caderno, a conta, o progresso, o painel
+Hoje, a revisão multimodal e o modo offline instalável funcionam. A Aula 31 também possui uma
+jornada guiada com áudio, escrita, speaking e assistência opcional. Os recursos assistidos
+ficam desligados por padrão até passarem pela avaliação humana.
 
 ---
 
@@ -120,17 +121,30 @@ docker start aulas-db
 lesson ─┬─ lesson_goal
         ├─ grammar_block ── grammar_row
         ├─ phrase
+        ├─ lesson_media ── transcript_cue
+        ├─ writing_prompt
         ├─ vocab_item
         ├─ pronunciation_note
-        └─ exercise ── exercise_answer
+        └─ exercise ─┬─ exercise_answer
+                     └─ exercise_hint
+
+app_user ─┬─ study_session_progress ─┬─ lesson
+          │                          └─ step_progress
+          ├─ study_plan
+          ├─ skill_evidence
+          ├─ review_item ── lesson / origem da atividade
+          ├─ speaking_attempt ── transcription_job
+          └─ writing_draft ─┬─ writing_revision
+                            └─ writing_feedback
 ```
 
 `exercise_answer` é tabela à parte porque um exercício aceita mais de uma
 resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
 O que está carregado hoje: **10 aulas**, 40 objetivos, 31 blocos de gramática
-com 156 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia
-e **62 exercícios** com 84 respostas aceitas.
+com 152 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia,
+**1 áudio oficial**, 11 trechos sincronizados, **1 proposta de escrita** e **65 exercícios**
+com 88 respostas aceitas e 18 dicas graduais no piloto da Aula 31.
 
 ### Formato do texto
 
@@ -144,7 +158,7 @@ payload.
 
 `seed/lessons.json` é a fonte do conteúdo. `make seed` é idempotente:
 
-- `lesson`, `vocab_item` e `exercise` são atualizados no lugar, pela chave
+- `lesson`, `vocab_item`, `exercise` e `writing_prompt` são atualizados no lugar, pela chave
   natural. A partir da S3 as tentativas e as cartas de revisão apontam para
   esses ids, e eles não podem trocar a cada novo seed.
 - O resto é descritivo: apaga e reinsere.
@@ -181,9 +195,33 @@ Recarregar a página perde o access token (ele é de memória) e a aplicação
 pede um `/refresh` automaticamente. Se o cookie ainda valer, a sessão volta
 sem passar pela tela de login.
 
+## Instalação e modo offline
+
+O build de produção é uma PWA. Depois da primeira visita, o navegador pode instalar o app e
+reabrir o shell e aulas públicas já visitadas sem conexão. O aviso de conectividade mostra
+quantas tentativas aguardam envio; ao voltar à rede, a sessão é renovada e a fila sincroniza
+automaticamente com a chave idempotente original.
+
+O access token continua apenas em memória. O navegador guarda somente o perfil mínimo do
+último aluno para associar corretamente a fila. Dados privados, gabaritos, progresso, revisão,
+escrita, speaking, áudio e vídeo não entram no cache. A política completa e a auditoria WCAG
+estão em `docs/auditoria_sprint13_qualidade_offline.md`.
+
 O browser fala com a API pelo proxy do Vite, na mesma origem. Isso não é
 detalhe de conforto: cookie `httpOnly` com `credentials` **não funciona** com
 `allow_origins=["*"]`, então a saída certa é a mesma origem, não CORS aberto.
+
+## Assistência opcional
+
+Speech-to-text e feedback aberto de escrita são experimentos por opt-in e ficam desativados por
+padrão. Sem eles, a autoavaliação oral e a rubrica determinística continuam funcionando. Quando
+ativados, a interface identifica o conteúdo automatizado, destaca confiança inferior a 75%,
+mostra a cota restante e permite avaliar ou excluir a transcrição sem apagar o áudio.
+
+A API controla feature flags, cota diária, custo e retenção. Em produção, gateways precisam usar
+HTTPS e token; texto e áudio não entram nos logs. Configuração, contrato HTTP, política de
+privacidade, fallback e gate de avaliação humana estão em
+`docs/avaliacao_sprint14_assistencia.md`.
 
 ### Correção de exercício
 
@@ -193,8 +231,13 @@ navegador para o JavaScript comparar seria publicar o gabarito. Então:
 | Ação | Endpoint |
 |---|---|
 | Responder (confere e **grava**) | `POST /api/exercises/{id}/attempt` |
+| Pedir dica gradual | `GET /api/exercises/{id}/hints/{level}` |
 | Ver o gabarito (o usuário pede) | `GET /api/exercises/{id}/answer` |
 | Marcar / desmarcar aula | `PUT` / `DELETE /api/lessons/{n}/studied` |
+| Ler / salvar retomada | `GET` / `PUT /api/lessons/{n}/study-session` |
+| Ler / salvar rascunho | `GET` / `PUT /api/writing/prompts/{id}/draft` |
+| Criar versão do texto | `POST /api/writing/prompts/{id}/versions` |
+| Analisar critérios | `POST /api/writing/prompts/{id}/feedback` |
 | Meu progresso | `GET /api/me/progress` |
 
 Ler o conteúdo das aulas é público; responder e marcar exigem conta.
@@ -204,6 +247,16 @@ na S4, descobrir *qual* item a pessoa erra, e não só que ela errou.
 A comparação vive em `app/domain/answers.py`, isolada de banco e de HTTP:
 ignora caixa, pontuação, espaço sobrando e tipo de apóstrofo — digitar
 `Won't`, `wont` ou `won’t` não pode ser a diferença entre acerto e erro.
+Quando há erro, o mesmo domínio o classifica como palavra faltando, palavra
+extra, ordem, ortografia ou escolha de palavra. O cliente recebe marcações
+somente sobre o que digitou; a resposta esperada continua protegida. Cada
+requisição também leva uma chave de idempotência, evitando duplicar tentativas
+quando a conexão oscila.
+
+Na Aula 31, o motor já renderiza lacuna, múltipla escolha, transformação, ditado e ordenação.
+A primeira dica
+pode ser aberta diretamente; a segunda exige uma tentativa errada. O gabarito
+continua em uma ação separada e explícita.
 
 ### Markdown no frontend
 
@@ -246,7 +299,7 @@ Dois detalhes que mudam o resultado e por isso estão fixados em teste:
 | Errar um exercício cuja resposta é um termo do vocabulário | aquele item |
 
 O terceiro gatilho estava no plano como a fonte principal, mas vale para
-**4 dos 62 exercícios** do bloco: eles treinam gramática, não palavra. O
+**4 dos 63 exercícios** do bloco: eles treinam gramática, não palavra. O
 grosso do deck vem de marcar a aula como estudada.
 
 Adicionar é idempotente: um item que já está no deck não tem o agendamento
@@ -307,13 +360,42 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 82 testes, 96% de cobertura, contra o Postgres do compose | `make test-api` |
-| vitest | 27 testes de componente e de parser | `make test-web` |
-| Playwright | 4 cenários do fluxo inteiro, contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 125 testes contra o Postgres do compose | `make test-api` |
+| vitest | 64 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 10 cenários em desktop e mobile (20 execuções), contra **produção** | `make prod-up && make test-e2e` |
+
+O frontend também possui um piloto de **jornada guiada** na Aula 31. Ele divide o estudo em
+preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
+permitindo continuar em outro navegador. Em “Assistir”, um player usa o áudio oficial da VOA,
+guarda a posição e oferece
+velocidade, saltos de cinco segundos, repetição A–B e 11 trechos sincronizados com tradução
+opcional. Uma atividade de compreensão é corrigida pela API sem enviar o gabarito antes da
+resposta. Na revisão, o aluno pode praticar *shadowing*, gravar a voz localmente, comparar com
+o modelo e salvar uma autoavaliação. O áudio permanece local por padrão; somente após
+consentimento explícito pode ser salvo no volume privado da conta, ouvido no histórico e
+excluído junto com seus metadados. Essa etapa também oferece produção escrita com autosave,
+backup local em caso de falha, checklist de critérios e histórico de versões privado por
+conta, incluindo comparação visual entre versões. O **Caderno** centraliza notas por aula,
+frases favoritas, exemplos, erros, perguntas, textos e gravações; o aluno também pode exportar
+seus dados em JSON. A página completa da aula continua disponível durante a evolução do novo
+fluxo.
+
+Na entrada, o painel **Hoje** sugere deterministicamente revisar itens vencidos, retomar a
+sessão mais recente ou começar a próxima aula — e sempre explica o motivo. O plano semanal é
+editável e não bloqueia a navegação livre. Gramática, listening, escrita e fala acumulam
+evidências separadas; para evitar falsa precisão, o percentual de uma competência só aparece
+depois de três evidências. Tempo aproximado, conclusão e retomada são registrados por etapa.
+
+A revisão usa uma fila única para vocabulário, erros gramaticais, listening, frases favoritas,
+prompts de escrita e trechos de speaking. O aluno pode filtrar por tipo, competência e duração,
+entender por que cada item voltou e suspender, reativar ou excluir uma revisão. O intervalo SM-2
+continua orientado pelo desempenho, com ajuste por tipo de atividade. A migração copia IDs,
+intervalos, facilidade, repetições, lapsos e vencimentos do deck antigo sem recalculá-los.
 
 O CI roda os três, mais: `ruff`, `mypy --strict`, `eslint`, `tsc`, o build de
 produção, migrations para frente e para trás, seed rodado duas vezes, piso de
-**90% de cobertura**, e a suíte inteira de novo sob `TZ=Pacific/Kiritimati`.
+**90% de cobertura**, orçamento de bundle e a suíte inteira de novo sob
+`TZ=Pacific/Kiritimati`.
 
 ## Como adicionar uma aula nova
 
@@ -333,7 +415,8 @@ backend/   app/{api,core,db,domain,schemas}  — FastAPI, uv, pytest
            openapi.json                — baseline do contrato
 frontend/  src/api/                    — cliente tipado + schema GERADO
            src/components/             — Markdown, gramática, exercício
-           src/pages/                  — mapa, aula, revisão, prova
+           src/features/               — jornada guiada, mídia, speaking e writing
+           src/pages/                  — mapa, aula, estudo, revisão, prova
 infra/     compose.yml                 — dev: db + api + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
@@ -349,4 +432,4 @@ seed/      lessons.json                — conteúdo das 10 aulas
   conta como teste de integração.
 - Tag `sN` a cada sprint fechada.
 
-O plano completo das seis sprints está no roadmap do projeto.
+O plano completo das Sprints 6–14 está no roadmap do projeto.

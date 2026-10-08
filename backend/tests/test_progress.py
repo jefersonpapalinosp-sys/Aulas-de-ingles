@@ -24,14 +24,85 @@ async def primeiro_exercicio(client: AsyncClient, aula: int = 31) -> dict[str, o
     return itens[0]
 
 
+def tentativa(answer: str, key: int = 1) -> dict[str, str]:
+    return {
+        "answer": answer,
+        "idempotency_key": f"00000000-0000-4000-8000-{key:012d}",
+    }
+
+
 @pytest.mark.asyncio
 async def test_tentativa_exige_login(client: AsyncClient) -> None:
     ex = await primeiro_exercicio(client)
-    r = await client.post(f"/api/exercises/{ex['id']}/attempt", json={"answer": "faster"})
+    r = await client.post(f"/api/exercises/{ex['id']}/attempt", json=tentativa("faster"))
     assert r.status_code == 401
     assert (await client.get(f"/api/exercises/{ex['id']}/answer")).status_code == 401
+    assert (await client.get(f"/api/exercises/{ex['id']}/hints/1")).status_code == 401
     assert (await client.get("/api/me/progress")).status_code == 401
     assert (await client.put("/api/lessons/31/studied")).status_code == 401
+    assert (await client.get("/api/lessons/31/study-session")).status_code == 401
+    assert (
+        await client.put(
+            "/api/lessons/31/study-session",
+            json={"current_step": "assistir", "completed_steps": ["preparar"]},
+        )
+    ).status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_jornada_guiada_salva_e_normaliza_as_etapas(client: AsyncClient) -> None:
+    h = await conta(client, "jornada")
+    inicial = (await client.get("/api/lessons/31/study-session", headers=h)).json()
+    assert inicial == {
+        "lesson_number": 31,
+        "current_step": "preparar",
+        "completed_steps": [],
+        "started_at": None,
+        "updated_at": None,
+        "completed_at": None,
+        "total_seconds": 0,
+    }
+
+    salvo = await client.put(
+        "/api/lessons/31/study-session",
+        headers=h,
+        json={
+            "current_step": "praticar",
+            "completed_steps": ["estudar", "preparar", "assistir", "preparar"],
+        },
+    )
+    assert salvo.status_code == 200
+    assert salvo.json()["completed_steps"] == ["preparar", "assistir", "estudar"]
+    assert salvo.json()["updated_at"] is not None
+
+    retomada = (await client.get("/api/lessons/31/study-session", headers=h)).json()
+    assert retomada["current_step"] == "praticar"
+    assert retomada["completed_steps"] == ["preparar", "assistir", "estudar"]
+
+
+@pytest.mark.asyncio
+async def test_jornada_e_isolada_por_conta_e_valida_etapa(client: AsyncClient) -> None:
+    ana = await conta(client, "jornada-ana")
+    await client.put(
+        "/api/lessons/31/study-session",
+        headers=ana,
+        json={"current_step": "assistir", "completed_steps": ["preparar"]},
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=create_app()), base_url="http://test"
+    ) as outro:
+        bruno = await conta(outro, "jornada-bruno")
+        estado = (await outro.get("/api/lessons/31/study-session", headers=bruno)).json()
+        invalido = await outro.put(
+            "/api/lessons/31/study-session",
+            headers=bruno,
+            json={"current_step": "inexistente", "completed_steps": []},
+        )
+
+    assert estado["current_step"] == "preparar"
+    assert estado["updated_at"] is None
+    assert invalido.status_code == 422
 
 
 @pytest.mark.asyncio
@@ -41,16 +112,19 @@ async def test_correcao_acontece_no_servidor(client: AsyncClient) -> None:
     ex = await primeiro_exercicio(client)
 
     certo = await client.post(
-        f"/api/exercises/{ex['id']}/attempt", json={"answer": "Faster."}, headers=h
+        f"/api/exercises/{ex['id']}/attempt", json=tentativa("Faster."), headers=h
     )
     assert certo.status_code == 200
     assert certo.json()["correct"] is True
     assert certo.json()["explanation"]
 
     errado = await client.post(
-        f"/api/exercises/{ex['id']}/attempt", json={"answer": "more fast"}, headers=h
+        f"/api/exercises/{ex['id']}/attempt", json=tentativa("more fast", 2), headers=h
     )
     assert errado.json()["correct"] is False
+    assert errado.json()["explanation"] is None
+    assert errado.json()["feedback"]["category"] == "extra_word"
+    assert errado.json()["feedback"]["message"]
     # Errar não entrega o gabarito de brinde.
     assert "faster" not in errado.text.lower()
 
@@ -59,7 +133,7 @@ async def test_correcao_acontece_no_servidor(client: AsyncClient) -> None:
 async def test_tentativa_errada_fica_gravada_com_o_que_foi_digitado(client: AsyncClient) -> None:
     h = await conta(client, "grava")
     ex = await primeiro_exercicio(client)
-    await client.post(f"/api/exercises/{ex['id']}/attempt", json={"answer": "more fast"}, headers=h)
+    await client.post(f"/api/exercises/{ex['id']}/attempt", json=tentativa("more fast"), headers=h)
 
     p = (await client.get("/api/me/progress", headers=h)).json()
     aula31 = next(linha for linha in p["lessons"] if linha["lesson_number"] == 31)
@@ -80,7 +154,7 @@ async def test_gabarito_so_sai_quando_pedido(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_exercicio_inexistente_devolve_404(client: AsyncClient) -> None:
     h = await conta(client, "quatrocentos")
-    r = await client.post("/api/exercises/99999/attempt", json={"answer": "x"}, headers=h)
+    r = await client.post("/api/exercises/99999/attempt", json=tentativa("x"), headers=h)
     assert r.status_code == 404
     assert (await client.get("/api/exercises/99999/answer", headers=h)).status_code == 404
 
@@ -134,7 +208,7 @@ async def test_duas_contas_nao_veem_o_progresso_uma_da_outra(client: AsyncClient
 
         await client.put("/api/lessons/31/studied", headers=ana)
         await client.post(
-            f"/api/exercises/{ex['id']}/attempt", json={"answer": "faster"}, headers=ana
+            f"/api/exercises/{ex['id']}/attempt", json=tentativa("faster"), headers=ana
         )
 
         p_ana = (await client.get("/api/me/progress", headers=ana)).json()
@@ -167,3 +241,47 @@ async def test_progresso_sobrevive_a_outro_navegador(client: AsyncClient) -> Non
         p = (await outro_navegador.get("/api/me/progress", headers=h2)).json()
 
     assert next(linha for linha in p["lessons"] if linha["lesson_number"] == 38)["studied"] is True
+
+
+@pytest.mark.asyncio
+async def test_tentativa_repetida_com_a_mesma_chave_nao_duplica(client: AsyncClient) -> None:
+    headers = await conta(client, "idempotente")
+    ex = await primeiro_exercicio(client)
+    body = tentativa("more fast", 77)
+
+    first = await client.post(f"/api/exercises/{ex['id']}/attempt", json=body, headers=headers)
+    repeated = await client.post(f"/api/exercises/{ex['id']}/attempt", json=body, headers=headers)
+    conflict = await client.post(
+        f"/api/exercises/{ex['id']}/attempt",
+        json={**body, "answer": "faster"},
+        headers=headers,
+    )
+    progress = (await client.get("/api/me/progress", headers=headers)).json()
+
+    assert first.status_code == repeated.status_code == 200
+    assert first.json()["attempt_id"] == repeated.json()["attempt_id"]
+    assert progress["attempts"] == 1
+    assert conflict.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_dicas_sao_liberadas_progressivamente(client: AsyncClient) -> None:
+    headers = await conta(client, "dicas")
+    ex = await primeiro_exercicio(client)
+    base = f"/api/exercises/{ex['id']}/hints"
+
+    first = await client.get(f"{base}/1", headers=headers)
+    blocked = await client.get(f"{base}/2", headers=headers)
+    await client.post(
+        f"/api/exercises/{ex['id']}/attempt",
+        json=tentativa("more fast", 88),
+        headers=headers,
+    )
+    second = await client.get(f"{base}/2", headers=headers)
+
+    assert first.status_code == 200
+    assert first.json()["level"] == 1
+    assert blocked.status_code == 409
+    assert second.status_code == 200
+    assert second.json()["level"] == 2
+    assert "faster" not in (first.text + second.text).lower()

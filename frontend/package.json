@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit && vite build",
+    "check:budget": "node scripts/check-bundle-budget.mjs",
     "check:api": "npm run gen:api && git diff --exit-code src/api/schema.d.ts",
     "dev": "vite",
     "gen:api": "openapi-typescript ../backend/openapi.json -o src/api/schema.d.ts",

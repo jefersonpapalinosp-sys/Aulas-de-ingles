@@ -1,20 +1,39 @@
-"""Schemas do deck de revisão."""
+"""Contratos da fila de revisão multimodal."""
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
+ReviewItemType = Literal[
+    "vocabulary",
+    "grammar_error",
+    "phrase",
+    "listening",
+    "writing_prompt",
+    "speaking_prompt",
+]
+ReviewItemStatus = Literal["active", "suspended"]
+
 
 class CardOut(BaseModel):
-    """Frente e verso da carta, mais o estado do agendamento."""
+    """Frente, verso, mídia e estado de um item da fila."""
 
     id: int
-    vocab_item_id: int
-    term: str
-    ipa: str
-    translation_pt: str
-    example_en: str
+    item_type: ReviewItemType
+    skill: str
+    prompt: str
+    prompt_note: str | None
+    answer: str
+    context: str | None
     lesson_number: int
+    reason: str
+    estimated_seconds: int
+    media_url: str | None
+    cue_start_seconds: float | None
+    cue_end_seconds: float | None
+    status: ReviewItemStatus
+    vocab_item_id: int | None
 
     ease_factor: float
     interval_days: int
@@ -38,7 +57,13 @@ class GradeOut(BaseModel):
     due_at: datetime
 
 
+class ReviewItemStatusIn(BaseModel):
+    status: ReviewItemStatus
+
+
 class DeckSummaryOut(BaseModel):
     due_now: int
     total_cards: int
-    added: int = Field(default=0, description="Quantas cartas a última ação criou.")
+    suspended: int = 0
+    by_type: dict[str, int] = Field(default_factory=dict)
+    added: int = Field(default=0, description="Quantos itens a última ação criou.")

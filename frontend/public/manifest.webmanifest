@@ -1,0 +1,19 @@
+{
+  "name": "Aulas de Inglês",
+  "short_name": "Inglês",
+  "description": "Estudo teórico e prático de inglês com texto, áudio e revisão.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f7",
+  "theme_color": "#2c4a9e",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

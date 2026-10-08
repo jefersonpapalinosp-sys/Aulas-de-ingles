@@ -7,7 +7,18 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, health, lessons, progress, review
+from app.api import (
+    assist,
+    auth,
+    dashboard,
+    health,
+    lessons,
+    me,
+    progress,
+    review,
+    speaking,
+    writing,
+)
 from app.core.config import get_settings
 from app.core.logging import configurar, middleware_request_id
 from app.db.session import dispose_engine
@@ -45,6 +56,11 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix="/api")
     app.include_router(progress.router, prefix="/api")
     app.include_router(review.router, prefix="/api")
+    app.include_router(writing.router, prefix="/api")
+    app.include_router(speaking.router, prefix="/api")
+    app.include_router(me.router, prefix="/api")
+    app.include_router(dashboard.router, prefix="/api")
+    app.include_router(assist.router, prefix="/api")
     return app
 
 

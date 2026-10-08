@@ -4,7 +4,16 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Exercise, ExerciseAnswer, Lesson, VocabItem
+from app.db.models import (
+    Exercise,
+    ExerciseAnswer,
+    ExerciseHint,
+    Lesson,
+    LessonMedia,
+    TranscriptCue,
+    VocabItem,
+    WritingPrompt,
+)
 from app.db.seed import load_seed, seed_lessons
 
 
@@ -12,9 +21,13 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
     saida = {}
     for nome, modelo in (
         ("lesson", Lesson),
+        ("lesson_media", LessonMedia),
+        ("transcript_cue", TranscriptCue),
         ("vocab_item", VocabItem),
         ("exercise", Exercise),
         ("exercise_answer", ExerciseAnswer),
+        ("exercise_hint", ExerciseHint),
+        ("writing_prompt", WritingPrompt),
     ):
         saida[nome] = (await session.execute(select(func.count()).select_from(modelo))).scalar_one()
     return saida
@@ -25,7 +38,11 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     dados = load_seed()
     assert [d["number"] for d in dados] == list(range(31, 41))
     assert sum(len(d["vocab"]) for d in dados) == 115
-    assert sum(len(d["exercises"]) for d in dados) == 62
+    assert sum(len(d["exercises"]) for d in dados) == 65
+    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 18
+    assert sum(len(d.get("media", [])) for d in dados) == 1
+    assert sum(len(d.get("writing_prompts", [])) for d in dados) == 1
+    assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 11
 
 
 @pytest.mark.asyncio
