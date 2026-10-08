@@ -976,9 +976,9 @@ As Sprints 6–14 estão encerradas no bloco das Aulas 31–40 e o Pull Request 
 mesclado. A ordem abaixo é o backlog canônico para fechar as expansões restantes; um item só
 avança para concluído quando produzir a evidência indicada.
 
-1. **Em andamento — validação manual de acessibilidade.** O zoom de 200% está aprovado para
-   login e cadastro. Ainda faltam VoiceOver no macOS/iOS, TalkBack no Android, contraste
-   forçado e o percurso completo com Tab/Enter/Espaço. A matriz e o registro ficam em
+1. **Em andamento — validação manual de acessibilidade.** Zoom de 200% e percurso por teclado
+   estão aprovados. O contraste forçado passou por emulação e ainda requer confirmação visual
+   em Windows real. Faltam VoiceOver no macOS/iOS e TalkBack no Android. A matriz fica em
    `docs/validacao_manual_acessibilidade_2026-10-08.md`.
 2. **Pendente — aprofundamento pedagógico das Aulas 32–40.** Adicionar transcrições integrais,
    mais atividades de listening por aula, propostas de escrita e ampliar ditado, ordenação,

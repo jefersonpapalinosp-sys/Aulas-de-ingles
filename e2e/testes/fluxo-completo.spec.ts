@@ -12,13 +12,22 @@ import AxeBuilder from '@axe-core/playwright'
  * permite exercitar a semeadura do deck pelo erro.
  */
 
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 function emailUnico() {
   return `e2e-${Date.now()}-${Math.floor(Math.random() * 1000)}@exemplo.com`
 }
 
 const SENHA = 'senha-bem-grande'
+
+async function tabAte(page: Page, alvo: Locator, limite = 80): Promise<void> {
+  await expect(alvo).toBeVisible()
+  for (let tentativa = 0; tentativa < limite; tentativa += 1) {
+    await page.keyboard.press('Tab')
+    if (await alvo.evaluate((element) => element === document.activeElement)) return
+  }
+  throw new Error(`O foco não alcançou o controle após ${limite} acionamentos de Tab.`)
+}
 
 /** Cria a conta e espera a aplicação terminar a transição pós-login.
  *  Navegar antes disso cai de volta na tela de entrada. */
@@ -463,6 +472,155 @@ test('cadastro permanece acessível em viewport equivalente a zoom de 200%', asy
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
   ).toBeTruthy()
+})
+
+test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByLabel('E-mail')).toBeVisible()
+
+  await page.keyboard.press('Tab')
+  await expect(page.getByLabel('E-mail')).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByLabel('Senha')).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(page.getByLabel('E-mail')).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByLabel('E-mail')).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByLabel('Senha')).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Entrar' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Ainda não tenho conta' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.getByLabel('Nome')).toBeFocused()
+
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Já tenho conta' })).toBeFocused()
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('button', { name: 'Ainda não tenho conta' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.getByLabel('Nome')).toBeFocused()
+
+  await page.keyboard.type('Teclado E2E')
+  await page.keyboard.press('Tab')
+  await page.keyboard.type(emailUnico())
+  await page.keyboard.press('Tab')
+  await page.keyboard.type(SENHA)
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Criar conta' })).toBeFocused()
+  await page.keyboard.press('Enter')
+
+  await expect(page.getByRole('heading', { name: 'Mapa do bloco 31–40' })).toBeVisible()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#main-content')).toBeFocused()
+
+  await page.goto('/aulas/31')
+  await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#main-content')).toBeFocused()
+
+  const comecar = page.getByRole('link', { name: 'Começar estudo' })
+  await tabAte(page, comecar)
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/aulas\/31\/estudar\/preparar$/)
+
+  const avancar = page.getByRole('button', { name: 'Concluir e ir para Assistir' })
+  await tabAte(page, avancar)
+  await page.keyboard.press('Space')
+  await expect(page).toHaveURL(/\/aulas\/31\/estudar\/assistir$/)
+  await expect(page.getByRole('heading', { name: 'Escute primeiro pelo contexto' })).toBeVisible()
+
+  await page.goto('/aulas/31')
+  await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+  const resposta = page.getByLabel('Resposta do exercício 1')
+  await tabAte(page, resposta)
+  await page.keyboard.type('faster')
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Verificar' }).first()).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.getByText('Correto').first()).toBeVisible()
+
+  const caderno = page.getByRole('link', { name: 'Caderno' })
+  await tabAte(page, caderno)
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('heading', { name: 'Caderno de inglês' })).toBeVisible()
+
+  const anotacao = page.getByLabel('Conteúdo')
+  await tabAte(page, anotacao)
+  await page.keyboard.type('Comparatives use than.')
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Salvar no caderno' })).toBeFocused()
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('status')).toHaveText('Anotação salva no seu caderno.')
+
+  const revisar = page.getByRole('link', { name: /Revisar/ })
+  await tabAte(page, revisar)
+  await page.keyboard.press('Enter')
+  await expect(
+    page.getByRole('heading', { name: /Revisar|Nada para revisar agora|Nenhum item/ }),
+  ).toBeVisible()
+
+  const tipo = page.getByLabel('Tipo')
+  await tabAte(page, tipo)
+  await page.keyboard.press('v')
+  await expect(tipo).toHaveValue('vocabulary')
+})
+
+test('login e cadastro preservam controles em contraste forçado', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' })
+  await page.goto('/')
+
+  expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBeTruthy()
+  await expect(page.getByLabel('E-mail')).toBeVisible()
+  await expect(page.getByLabel('Senha')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
+
+  await page.keyboard.press('Tab')
+  await expect(page.getByLabel('E-mail')).toBeFocused()
+  expect(
+    await page.getByLabel('E-mail').evaluate((element) => getComputedStyle(element).outlineStyle),
+  ).not.toBe('none')
+
+  await page.getByRole('button', { name: 'Ainda não tenho conta' }).click()
+  await expect(page.getByLabel('Nome')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Criar conta' })).toBeVisible()
+
+  const resultado = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(
+    resultado.violations.filter(
+      ({ impact }) => impact === 'serious' || impact === 'critical',
+    ),
+  ).toEqual([])
+
+  await criarConta(page, 'Contraste E2E')
+  for (const rota of [
+    '/',
+    '/aulas/31',
+    '/aulas/40/estudar/assistir',
+    '/revisar',
+    '/caderno',
+  ]) {
+    await page.goto(rota)
+    await expect(page.locator('#main-content')).toBeVisible()
+    const pagina = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+    expect(
+      pagina.violations.filter(
+        ({ impact }) => impact === 'serious' || impact === 'critical',
+      ),
+    ).toEqual([])
+  }
 })
 
 test('painel e aula não têm violações WCAG sérias ou críticas', async ({ page }) => {

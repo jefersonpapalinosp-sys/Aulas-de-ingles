@@ -366,7 +366,7 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 |---|---|---|
 | pytest | 129 testes contra o Postgres do compose | `make test-api` |
 | vitest | 65 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 13 cenários em desktop e mobile (26 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| Playwright | 15 cenários em desktop e mobile (30 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
 O frontend possui uma **jornada guiada** em todas as Aulas 31–40. Ela divide o estudo em
 preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,

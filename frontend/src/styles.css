@@ -284,6 +284,20 @@ input[type='text']::placeholder { color: var(--ink-3); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
+@media (forced-colors: active) {
+  :focus-visible { outline-color: Highlight; }
+  a { color: LinkText; }
+  button, .btn, .watch {
+    border-color: ButtonText !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+  }
+  button:disabled { border-color: GrayText !important; color: GrayText !important; }
+  .nav-item.active, .flat.active { border-left-color: Highlight; }
+  .choice-options input:checked + span, .today-days input:checked + span,
+  .shadowing-result fieldset button.selected { border-color: Highlight; }
+}
+
 /* ---------- sessão ---------- */
 .booting { padding: 60px; color: var(--ink-3); font-family: var(--mono); font-size: 13px; }
 

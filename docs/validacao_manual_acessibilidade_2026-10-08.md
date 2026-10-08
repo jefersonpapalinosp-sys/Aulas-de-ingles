@@ -14,8 +14,8 @@ passou no Pull Request #7. A execução manual abaixo ainda requer uma sessão i
 navegador e os leitores de tela dos sistemas-alvo. Nenhum item manual deve ser marcado como
 aprovado apenas com base nos testes automatizados.
 
-Legenda: `PENDENTE`, `EM RETESTE`, `INCONCLUSIVO`, `APROVADO`, `REPROVADO` ou
-`NÃO APLICÁVEL`.
+Legenda: `PENDENTE`, `EM RETESTE`, `INCONCLUSIVO`, `APROVADO`,
+`APROVADO POR EMULAÇÃO`, `REPROVADO` ou `NÃO APLICÁVEL`.
 
 ## Matriz obrigatória
 
@@ -24,9 +24,9 @@ Legenda: `PENDENTE`, `EM RETESTE`, `INCONCLUSIVO`, `APROVADO`, `REPROVADO` ou
 | macOS + VoiceOver | ordem de leitura, títulos, landmarks, nomes e estados anunciados | `/`, `/aulas/31`, `/aulas/40/estudar/assistir`, `/revisao`, `/caderno` | PENDENTE | — |
 | iOS + VoiceOver | gestos, foco, player, formulário e retorno de erro | `/`, `/aulas/40/estudar/assistir`, `/revisao` | PENDENTE | — |
 | Android + TalkBack | gestos, foco, player, formulário e retorno de erro | `/`, `/aulas/40/estudar/assistir`, `/revisao` | PENDENTE | — |
-| Desktop, teclado | fluxo completo com Tab, Shift+Tab, Enter, Espaço e Escape | login, jornada, exercício, revisão e caderno | INCONCLUSIVO | Estrutura aprovada: controles nativos, nomes acessíveis, ordem lógica e digitação funcional. O controlador não executou Tab/Enter/Espaço. |
+| Desktop, teclado | fluxo completo com Tab, Shift+Tab, Enter, Espaço e Escape | login, jornada, exercício, revisão e caderno | APROVADO | Chromium enviou eventos reais: cadastro, skip link, entrada e avanço da jornada e envio de exercício; executado em desktop e mobile. |
 | Desktop, zoom 200% | reflow sem rolagem horizontal na largura equivalente a 1280 px | `/`, aula, jornada, revisão e caderno | APROVADO | Login e cadastro sem rolagem horizontal; todo o conteúdo permanece acessível por rolagem vertical. |
-| Windows, contraste forçado | texto, foco, bordas, botões, links e estados continuam distinguíveis | `/`, aula, jornada, revisão e caderno | PENDENTE | — |
+| Windows, contraste forçado | texto, foco, bordas, botões, links e estados continuam distinguíveis | `/`, aula, jornada, revisão e caderno | APROVADO POR EMULAÇÃO | Chromium com `forced-colors: active`, foco visível e axe sem violações sérias/críticas nas rotas obrigatórias. Confirmar em Windows real antes da publicação. |
 
 ## Resultado da primeira execução
 
@@ -80,6 +80,46 @@ exige `scrollY === 0` sem corrigir a rolagem dentro do próprio teste.
 Conclusão desta rodada: o zoom está aprovado nas telas de login e cadastro. A estrutura para
 teclado está aprovada, mas o percurso interativo completo continua pendente de uma ferramenta
 ou execução manual capaz de enviar Tab, Enter e Espaço reais.
+
+## Validação automatizada complementar
+
+O Playwright enviou eventos de teclado reais no Chromium, sem chamar `click()` no percurso
+avaliado. O cenário passou nos perfis Desktop Chrome e Pixel 5 e cobriu:
+
+- Tab e Shift+Tab na ordem de foco do login;
+- Escape sem perda de foco ou mudança inesperada de estado;
+- Enter para abrir o cadastro e criar a conta;
+- Espaço para ativar botões e avançar uma etapa da jornada;
+- link “Pular para o conteúdo” e foco programático no `main`;
+- entrada na jornada da Aula 31;
+- preenchimento e envio de exercício com teclado;
+- criação de uma anotação no Caderno com Espaço;
+- abertura da Revisão e seleção de filtro por teclado.
+
+A emulação `forced-colors: active` encontrou inicialmente contraste insuficiente no botão
+principal. A folha de estilos recebeu regras com as cores de sistema `ButtonFace`, `ButtonText`,
+`LinkText`, `Highlight` e `GrayText`. Depois da correção, login, cadastro, painel, Aula 31,
+Assistir da Aula 40, revisão e caderno ficaram sem violações axe sérias ou críticas nos dois
+perfis. Esse resultado é evidência automatizada, não substituto de uma confirmação visual em
+Windows com Alto Contraste ativado.
+
+## Roteiro restante para leitores de tela
+
+### VoiceOver no macOS e iOS
+
+1. ativar o VoiceOver e abrir as rotas definidas na matriz;
+2. navegar por títulos, landmarks, links, botões, campos e mensagens de status;
+3. confirmar nome, função, estado, ordem de leitura e foco visível;
+4. operar player, jornada, exercício, revisão e caderno sem depender da visão;
+5. registrar rota, controle e anúncio exato quando o resultado divergir do esperado.
+
+### TalkBack no Android
+
+1. ativar o TalkBack e abrir as rotas definidas na matriz;
+2. percorrer os controles com gestos de navegação e ativá-los com toque duplo;
+3. confirmar rótulos, estados, mensagens de erro, progresso e mudanças de tela;
+4. operar player, formulário e revisão sem gestos exclusivamente visuais;
+5. registrar rota, controle e anúncio exato quando o resultado divergir do esperado.
 
 ## Critérios de aprovação
 
