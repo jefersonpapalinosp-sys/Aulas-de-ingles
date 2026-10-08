@@ -25,7 +25,7 @@ Legenda: `PENDENTE`, `EM RETESTE`, `INCONCLUSIVO`, `APROVADO`, `REPROVADO` ou
 | iOS + VoiceOver | gestos, foco, player, formulário e retorno de erro | `/`, `/aulas/40/estudar/assistir`, `/revisao` | PENDENTE | — |
 | Android + TalkBack | gestos, foco, player, formulário e retorno de erro | `/`, `/aulas/40/estudar/assistir`, `/revisao` | PENDENTE | — |
 | Desktop, teclado | fluxo completo com Tab, Shift+Tab, Enter, Espaço e Escape | login, jornada, exercício, revisão e caderno | INCONCLUSIVO | A primeira execução não conseguiu confirmar eventos reais de Tab/Enter. |
-| Desktop, zoom 200% | reflow sem rolagem horizontal na largura equivalente a 1280 px | `/`, aula, jornada, revisão e caderno | EM RETESTE | Login aprovado. Cadastro revelou os dois defeitos descritos abaixo; correção automatizada aguarda confirmação manual. |
+| Desktop, zoom 200% | reflow sem rolagem horizontal na largura equivalente a 1280 px | `/`, aula, jornada, revisão e caderno | EM RETESTE | Login aprovado. O segundo teste confirmou o campo Nome, mas encontrou o topo do cadastro em `-135px`; a nova correção aguarda confirmação manual. |
 | Windows, contraste forçado | texto, foco, bordas, botões, links e estados continuam distinguíveis | `/`, aula, jornada, revisão e caderno | PENDENTE | — |
 
 ## Resultado da primeira execução
@@ -46,6 +46,23 @@ Ao trocar para o cadastro, o foco segue para o novo campo Nome em vez de permane
 inferior. Em viewports baixos, todo o início do formulário permanece alcançável. Um teste
 E2E cobre altura do campo Nome, posição do cartão e ausência de overflow horizontal em viewport
 de 640 × 360, equivalente ao reflow esperado em 200% sobre 1280 × 720.
+
+## Resultado da segunda execução
+
+- login aprovado em equivalente a 200%, sem rolagem horizontal e com todos os controles
+  alcançáveis por rolagem vertical;
+- cadastro reprovado porque o topo do cartão ficou em `-135px`, cortando o título e parte da
+  introdução;
+- o campo Nome permaneceu com altura normal; a altura de aproximadamente 220 px não voltou a
+  ocorrer;
+- campos e botões são nativos, possuem nomes acessíveis e participam da ordem de foco;
+- o percurso efetivo com Tab, Enter e Espaço continuou inconclusivo por limitação do
+  controlador utilizado;
+- a aba terminou limpa, no tamanho normal e na tela inicial.
+
+A causa remanescente era a rolagem automática de `focus()` ao mover o foco para Nome. A segunda
+correção usa `focus({ preventScroll: true })` e posiciona a janela no topo. A regressão E2E agora
+exige `scrollY === 0` sem corrigir a rolagem dentro do próprio teste.
 
 ## Critérios de aprovação
 

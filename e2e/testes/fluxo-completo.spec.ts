@@ -458,7 +458,6 @@ test('cadastro permanece acessível em viewport equivalente a zoom de 200%', asy
   await expect(nome).toBeFocused()
 
   expect(await nome.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(60)
-  await page.evaluate(() => window.scrollTo(0, 0))
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
   expect(await caixa.evaluate((element) => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(0)
   expect(

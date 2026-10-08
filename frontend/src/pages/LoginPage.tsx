@@ -12,7 +12,10 @@ export function LoginPage() {
   const nomeInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (modo === 'criar') nomeInputRef.current?.focus()
+    if (modo === 'criar') {
+      nomeInputRef.current?.focus({ preventScroll: true })
+      window.scrollTo({ top: 0, left: 0 })
+    }
   }, [modo])
 
   async function enviar(e: React.FormEvent) {
