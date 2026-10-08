@@ -80,7 +80,7 @@ Saídas do processo:
 5. Coletar no mínimo 30 avaliações humanas daquela modalidade.
 6. Rodar o gate e revisar os bloqueios.
 7. Desligar a flag ao primeiro incidente de privacidade ou desvio de custo.
-8. Implementar a fila durável do item 4 antes de ampliar o uso.
+8. Confirmar em homologação que o gateway respeita `Idempotency-Key` antes de ampliar o uso.
 
 ## Resultado nesta data
 

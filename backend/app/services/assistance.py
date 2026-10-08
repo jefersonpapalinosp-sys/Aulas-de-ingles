@@ -43,10 +43,13 @@ def _post_json(
     content_type: str,
     token: str | None,
     timeout: int,
+    extra_headers: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     headers = {"Accept": "application/json", "Content-Type": content_type}
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    if extra_headers:
+        headers.update(extra_headers)
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
@@ -67,6 +70,7 @@ def call_transcription_provider(
     *,
     token: str | None,
     timeout: int,
+    idempotency_key: str | None = None,
 ) -> TranscriptionResult:
     payload = _post_json(
         url,
@@ -74,6 +78,9 @@ def call_transcription_provider(
         content_type=mime_type,
         token=token,
         timeout=timeout,
+        extra_headers=(
+            {"Idempotency-Key": idempotency_key} if idempotency_key is not None else None
+        ),
     )
     text = payload.get("text")
     raw_words = payload.get("words")

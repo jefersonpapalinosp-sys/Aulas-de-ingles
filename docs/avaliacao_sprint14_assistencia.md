@@ -108,10 +108,11 @@ configurado atende a esses requisitos.
 | baixa confiança | mostra alerta e palavras abaixo de 75%; não transforma o valor em nota |
 | exclusão da transcrição | remove resultado assistido, mas mantém a produção oral |
 
-A transcrição usa uma tarefa de fundo do processo da API, suficiente para o piloto local. Antes
-de liberação ampla, ela deve migrar para uma fila durável com retomada de jobs interrompidos,
-tentativas limitadas e idempotência no gateway. Uma reinicialização durante o processamento
-pode deixar um job em `queued` ou `processing`; isso é uma limitação conhecida do piloto.
+A transcrição usa uma fila durável no PostgreSQL e um processo worker separado da API. O worker
+reivindica jobs com `FOR UPDATE SKIP LOCKED`, retoma registros `processing` que excederam o
+timeout, limita tentativas e aplica backoff exponencial. Uma chave persistida é enviada no header
+`Idempotency-Key` em todas as tentativas do mesmo job, permitindo deduplicação pelo gateway.
+Resultados atrasados só são gravados se o worker ainda possuir o número daquela tentativa.
 
 ## Gate de avaliação humana
 
@@ -143,8 +144,8 @@ operacional explícita e revisável.
 
 ## Evidência automatizada
 
-- 125 testes backend, incluindo gateway, cotas, custo, retenção, falha e preservação da produção;
-- 64 testes frontend, incluindo opt-in, identificação de automação, baixa confiança e avaliação;
+- 151 testes backend, incluindo fila, concorrência, retomada, gateway, cotas e preservação;
+- 67 testes frontend, incluindo estado de retry, opt-in, automação, baixa confiança e avaliação;
 - 10 cenários E2E em Desktop Chrome e Pixel 5, totalizando 20 execuções aprovadas;
 - contrato OpenAPI e tipos TypeScript regenerados;
 - migração aplicada e comparada aos modelos sem operações pendentes;

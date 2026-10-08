@@ -15,6 +15,7 @@ from app.services.assist_gate import (
     evaluate_gate,
     load_provider_review,
 )
+from app.services.transcription_queue import run_transcription_worker
 
 
 async def _seed() -> None:
@@ -62,8 +63,10 @@ def main_com_argumentos(argumentos: list[str]) -> None:
             raise SystemExit(2) from None
         if not approved:
             raise SystemExit(1)
+    elif comando == "assist-worker":
+        asyncio.run(run_transcription_worker(once="--once" in argumentos[1:]))
     else:
-        print("uso: python -m app.cli seed | assist-gate", file=sys.stderr)
+        print("uso: python -m app.cli seed | assist-gate | assist-worker [--once]", file=sys.stderr)
         raise SystemExit(2)
 
 

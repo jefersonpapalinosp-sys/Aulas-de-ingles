@@ -105,6 +105,13 @@ def test_manifesto_rejeita_campos_de_privacidade_ambiguos(tmp_path: Path) -> Non
     ("overrides", "message"),
     [
         ({"assist_timeout_seconds": 0}, "ASSIST_TIMEOUT_SECONDS"),
+        ({"assist_job_max_attempts": 0}, "ASSIST_JOB_MAX_ATTEMPTS"),
+        ({"assist_job_retry_base_seconds": -1}, "ASSIST_JOB_RETRY_BASE_SECONDS"),
+        (
+            {"assist_timeout_seconds": 20, "assist_job_stale_seconds": 19},
+            "ASSIST_JOB_STALE_SECONDS",
+        ),
+        ({"assist_worker_poll_seconds": 0}, "ASSIST_WORKER_POLL_SECONDS"),
         ({"assist_provider_name": ""}, "ASSIST_PROVIDER_NAME"),
         ({"assist_provider_name": "x" * 81}, "ASSIST_PROVIDER_NAME"),
         (

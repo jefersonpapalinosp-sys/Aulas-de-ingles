@@ -24,6 +24,9 @@ class TranscriptionJobOut(BaseModel):
     attempt_id: int
     status: Literal["queued", "processing", "completed", "failed"]
     provider: str
+    attempt_count: int
+    max_attempts: int
+    next_attempt_at: datetime
     automated: Literal[True] = True
     evaluation_only: Literal[True] = True
     expected_text: str

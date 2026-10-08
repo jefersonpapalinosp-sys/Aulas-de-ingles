@@ -279,6 +279,8 @@ class TranscriptionJob(Base):
             name="ck_transcription_similarity",
         ),
         CheckConstraint("cost_microusd >= 0", name="ck_transcription_cost_nonnegative"),
+        CheckConstraint("attempt_count >= 0", name="ck_transcription_attempt_count"),
+        CheckConstraint("max_attempts > 0", name="ck_transcription_max_attempts"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -288,6 +290,15 @@ class TranscriptionJob(Base):
     )
     status: Mapped[str] = mapped_column(String(20), default="queued", index=True)
     provider: Mapped[str] = mapped_column(String(80))
+    idempotency_key: Mapped[str] = mapped_column(String(64), unique=True)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer, default=3)
+    next_attempt_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
+    processing_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=None
+    )
     transcript_text: Mapped[str | None] = mapped_column(Text, default=None)
     words: Mapped[list[dict[str, object]] | None] = mapped_column(JSONB, default=None)
     mean_confidence: Mapped[float | None] = mapped_column(Float, default=None)

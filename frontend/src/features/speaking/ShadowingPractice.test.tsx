@@ -212,6 +212,9 @@ describe('ShadowingPractice', () => {
       attempt_id: 15,
       status: 'completed',
       provider: 'provider-test',
+      attempt_count: 1,
+      max_attempts: 3,
+      next_attempt_at: '2026-10-07T23:50:00Z',
       automated: true,
       evaluation_only: true,
       expected_text: media.cues[0]!.text_en,
@@ -274,5 +277,69 @@ describe('ShadowingPractice', () => {
       '/api/speaking/transcriptions/{job_id}/rating',
       { params: { path: { job_id: 55 } }, body: { rating: 'helpful' } },
     )
+  })
+
+  it('explica quando o worker agendou uma nova tentativa', async () => {
+    clientMocks.GET.mockImplementation(async (path) =>
+      path === '/api/assist/status'
+        ? {
+            data: {
+              transcription_enabled: true,
+              writing_enabled: false,
+              evaluation_only: true,
+              daily_quota: 5,
+              used_today: 1,
+              remaining_today: 4,
+              retention_days: 30,
+              cost_microusd_today: 0,
+            },
+          }
+        : {
+            data: [
+              {
+                id: 15,
+                lesson_number: 31,
+                cue_id: 21,
+                cue_text: media.cues[0]!.text_en,
+                duration_ms: 1500,
+                self_rating: 'almost',
+                consented_at: '2026-10-07T23:50:00Z',
+                status: 'ready',
+                mime_type: 'audio/webm',
+                file_size: 5,
+                created_at: '2026-10-07T23:50:00Z',
+                transcription: {
+                  id: 55,
+                  attempt_id: 15,
+                  status: 'queued',
+                  provider: 'provider-test',
+                  attempt_count: 1,
+                  max_attempts: 3,
+                  next_attempt_at: '2026-10-07T23:50:05Z',
+                  automated: true,
+                  evaluation_only: true,
+                  expected_text: media.cues[0]!.text_en,
+                  transcript_text: null,
+                  words: [],
+                  mean_confidence: null,
+                  similarity_score: null,
+                  low_confidence: false,
+                  error_code: 'provider_unavailable',
+                  cost_microusd: 0,
+                  human_rating: null,
+                  requested_at: '2026-10-07T23:50:00Z',
+                  completed_at: null,
+                  expires_at: '2026-11-06T23:50:00Z',
+                },
+              },
+            ],
+          },
+    )
+
+    renderPractice()
+
+    expect(
+      await screen.findByText(/Nova tentativa será feita automaticamente \(1 de 3 realizadas\)/),
+    ).toBeInTheDocument()
   })
 })

@@ -49,7 +49,7 @@ Para mudar, edite o `.env` — nada está fixo no código.
 make help       # lista tudo
 
 # desenvolvimento
-make up         # sobe db + api + web, migra e semeia
+make up         # sobe db + api + worker + web, migra e semeia
 make down       # derruba (mantém o banco)
 make reset      # derruba e apaga o volume do banco
 make logs       # acompanha os logs
@@ -136,7 +136,7 @@ app_user ─┬─ study_session_progress ─┬─ lesson
           ├─ skill_evidence
           ├─ review_item ── lesson / origem da atividade
           ├─ media_progress ── lesson_media
-          ├─ speaking_attempt ── transcription_job
+          ├─ speaking_attempt ── transcription_job ── worker PostgreSQL
           └─ writing_draft ─┬─ writing_revision
                             └─ writing_feedback
 ```
@@ -241,6 +241,17 @@ make assist-gate modality=transcription review=../config/assist-provider-review.
 O comando só produz métricas agregadas e retorna código `0` quando todos os critérios passam,
 `1` quando a liberação continua bloqueada e `2` para configuração inválida. Ele não altera a
 feature flag.
+
+As transcrições usam uma fila durável no PostgreSQL. A API responde `202` depois de persistir o
+job, e o serviço `worker` do Compose faz o processamento. Jobs interrompidos voltam para a fila,
+falhas transitórias usam backoff e cada tentativa envia a mesma chave `Idempotency-Key` ao
+gateway. Os limites são configurados por `ASSIST_JOB_MAX_ATTEMPTS`,
+`ASSIST_JOB_RETRY_BASE_SECONDS`, `ASSIST_JOB_STALE_SECONDS` e
+`ASSIST_WORKER_POLL_SECONDS`. Para consumir uma única pendência manualmente, use:
+
+```bash
+make assist-worker
+```
 
 ### Ollama local para escrita
 
@@ -458,7 +469,7 @@ frontend/  src/api/                    — cliente tipado + schema GERADO
            src/components/             — Markdown, gramática, exercício
            src/features/               — jornada guiada, mídia, speaking e writing
            src/pages/                  — mapa, aula, estudo, revisão, prova
-infra/     compose.yml                 — dev: db + api + web
+infra/     compose.yml                 — dev: db + api + worker + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
 seed/      lessons.json                — conteúdo das 10 aulas

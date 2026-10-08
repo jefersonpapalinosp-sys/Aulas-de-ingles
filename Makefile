@@ -5,7 +5,8 @@ COMPOSE := docker compose --env-file .env -f infra/compose.yml
 .DEFAULT_GOAL := help
 
 .PHONY: help up down logs ps reset api web test test-api test-web test-e2e lint fmt health \
-        migrate migration seed openapi assist-gate prod-up prod-down prod-logs prod-seed backup restore cov
+        migrate migration seed openapi assist-gate assist-worker prod-up prod-down prod-logs \
+        prod-seed backup restore cov
 
 help: ## Lista os comandos
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -13,7 +14,7 @@ help: ## Lista os comandos
 .env:
 	@cp .env.example .env && echo "✓ .env criado a partir do .env.example"
 
-up: .env ## Sobe db + api + web, aplica migrations e carrega o seed
+up: .env ## Sobe db + api + worker + web, aplica migrations e carrega o seed
 	# Renova o volume anônimo de node_modules depois de reconstruir a imagem web.
 	$(COMPOSE) up -d --build --renew-anon-volumes
 	$(COMPOSE) exec -T api alembic upgrade head
@@ -81,6 +82,9 @@ openapi: ## Regrava o baseline do contrato em backend/openapi.json
 assist-gate: ## Avalia o piloto: make assist-gate modality=writing review=../config/assist-provider-review.json
 	cd backend && uv run python -m app.cli assist-gate \
 		--modality "$(modality)" --review-file "$(review)"
+
+assist-worker: ## Processa um job pendente da fila assistida
+	$(COMPOSE) exec -T worker python -m app.cli assist-worker --once
 
 # ---------- produção local ----------
 

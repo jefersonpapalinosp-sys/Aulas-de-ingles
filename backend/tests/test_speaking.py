@@ -1,12 +1,16 @@
 """Consentimento, persistência e isolamento das gravações de speaking."""
 
+import asyncio
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.services import assistance
+from app.db.models import TranscriptionJob
+from app.services import assistance, transcription_queue
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -203,6 +207,9 @@ async def test_transcricao_assistida_expoe_confianca_comparacao_custo_e_avaliaca
         f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers
     )
     assert requested.status_code == 202
+    assert requested.json()["status"] == "queued"
+    assert requested.json()["attempt_count"] == 0
+    assert await transcription_queue.process_next_transcription() is True
     listed = (await client.get("/api/speaking/attempts?lesson=31", headers=headers)).json()
     transcription = listed[0]["transcription"]
     assert transcription["status"] == "completed"
@@ -240,6 +247,7 @@ async def test_falha_do_provedor_mantem_audio_e_autoavaliacao(
     monkeypatch.setattr(settings, "speaking_storage_dir", str(tmp_path))
     monkeypatch.setattr(settings, "assisted_features_enabled", True)
     monkeypatch.setattr(settings, "assist_transcription_url", "http://provider.test/stt")
+    monkeypatch.setattr(settings, "assist_job_max_attempts", 1)
 
     def fail(*args: object, **kwargs: object) -> assistance.TranscriptionResult:
         raise assistance.ProviderFailure("provider_unavailable")
@@ -264,9 +272,188 @@ async def test_falha_do_provedor_mantem_audio_e_autoavaliacao(
         content=b"voice",
     )
     await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
+    assert await transcription_queue.process_next_transcription() is True
     item = (await client.get("/api/speaking/attempts", headers=headers)).json()[0]
     assert item["transcription"]["status"] == "failed"
     assert item["transcription"]["error_code"] == "provider_unavailable"
     assert (
         await client.get(f"/api/speaking/attempts/{attempt['id']}/audio", headers=headers)
     ).content == b"voice"
+
+
+@pytest.mark.asyncio
+async def test_worker_repete_com_backoff_e_chave_idempotente(
+    client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    settings = get_settings()
+    monkeypatch.setattr(settings, "speaking_storage_dir", str(tmp_path))
+    monkeypatch.setattr(settings, "assisted_features_enabled", True)
+    monkeypatch.setattr(settings, "assist_transcription_url", "http://provider.test/stt")
+    monkeypatch.setattr(settings, "assist_job_max_attempts", 3)
+    monkeypatch.setattr(settings, "assist_job_retry_base_seconds", 0)
+    keys: list[str | None] = []
+
+    def flaky(*args: object, **kwargs: object) -> assistance.TranscriptionResult:
+        keys.append(kwargs.get("idempotency_key"))  # type: ignore[arg-type]
+        if len(keys) == 1:
+            raise assistance.ProviderFailure("provider_unavailable")
+        return assistance.TranscriptionResult(
+            text="A taxi is faster than a bus.",
+            words=[{"text": "taxi", "start_ms": 0, "end_ms": 200, "confidence": 0.9}],
+            mean_confidence=0.9,
+            cost_microusd=10,
+        )
+
+    monkeypatch.setattr(assistance, "call_transcription_provider", flaky)
+    headers = await conta(client, "retry-worker")
+    attempt = (
+        await client.post(
+            "/api/speaking/attempts",
+            headers=headers,
+            json={
+                "cue_id": await cue_id(client),
+                "duration_ms": 900,
+                "self_rating": "almost",
+                "consent": True,
+            },
+        )
+    ).json()
+    await client.put(
+        f"/api/speaking/attempts/{attempt['id']}/audio",
+        headers={**headers, "Content-Type": "audio/webm"},
+        content=b"voice",
+    )
+    requested = (
+        await client.post(
+            f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers
+        )
+    ).json()
+
+    assert await transcription_queue.process_next_transcription() is True
+    after_failure = (await client.get("/api/speaking/attempts", headers=headers)).json()[0][
+        "transcription"
+    ]
+    assert after_failure["status"] == "queued"
+    assert after_failure["attempt_count"] == 1
+    assert after_failure["error_code"] == "provider_unavailable"
+
+    assert await transcription_queue.process_next_transcription() is True
+    completed = (await client.get("/api/speaking/attempts", headers=headers)).json()[0][
+        "transcription"
+    ]
+    assert completed["status"] == "completed"
+    assert completed["attempt_count"] == 2
+    assert keys == [keys[0], keys[0]]
+    assert isinstance(keys[0], str)
+    assert requested["max_attempts"] == 3
+
+
+@pytest.mark.asyncio
+async def test_workers_concorrentes_reivindicam_job_uma_unica_vez(
+    client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    settings = get_settings()
+    monkeypatch.setattr(settings, "speaking_storage_dir", str(tmp_path))
+    monkeypatch.setattr(settings, "assisted_features_enabled", True)
+    monkeypatch.setattr(settings, "assist_transcription_url", "http://provider.test/stt")
+    calls = 0
+
+    def transcribe(*args: object, **kwargs: object) -> assistance.TranscriptionResult:
+        nonlocal calls
+        calls += 1
+        return assistance.TranscriptionResult(
+            text="A taxi is faster.",
+            words=[{"text": "taxi", "start_ms": 0, "end_ms": 100, "confidence": 0.9}],
+            mean_confidence=0.9,
+            cost_microusd=0,
+        )
+
+    monkeypatch.setattr(assistance, "call_transcription_provider", transcribe)
+    headers = await conta(client, "workers-concorrentes")
+    attempt = (
+        await client.post(
+            "/api/speaking/attempts",
+            headers=headers,
+            json={
+                "cue_id": await cue_id(client),
+                "duration_ms": 900,
+                "self_rating": "almost",
+                "consent": True,
+            },
+        )
+    ).json()
+    await client.put(
+        f"/api/speaking/attempts/{attempt['id']}/audio",
+        headers={**headers, "Content-Type": "audio/webm"},
+        content=b"voice",
+    )
+    await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
+
+    results = await asyncio.gather(
+        transcription_queue.process_next_transcription(),
+        transcription_queue.process_next_transcription(),
+    )
+
+    assert sorted(results) == [False, True]
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_worker_retoma_job_interrompido_apos_timeout(
+    client: AsyncClient,
+    session: AsyncSession,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = get_settings()
+    monkeypatch.setattr(settings, "speaking_storage_dir", str(tmp_path))
+    monkeypatch.setattr(settings, "assisted_features_enabled", True)
+    monkeypatch.setattr(settings, "assist_transcription_url", "http://provider.test/stt")
+    monkeypatch.setattr(
+        assistance,
+        "call_transcription_provider",
+        lambda *args, **kwargs: assistance.TranscriptionResult(
+            text="A taxi is faster.",
+            words=[{"text": "taxi", "start_ms": 0, "end_ms": 100, "confidence": 0.9}],
+            mean_confidence=0.9,
+            cost_microusd=0,
+        ),
+    )
+    headers = await conta(client, "retomada-worker")
+    attempt = (
+        await client.post(
+            "/api/speaking/attempts",
+            headers=headers,
+            json={
+                "cue_id": await cue_id(client),
+                "duration_ms": 900,
+                "self_rating": "almost",
+                "consent": True,
+            },
+        )
+    ).json()
+    await client.put(
+        f"/api/speaking/attempts/{attempt['id']}/audio",
+        headers={**headers, "Content-Type": "audio/webm"},
+        content=b"voice",
+    )
+    requested = (
+        await client.post(
+            f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers
+        )
+    ).json()
+    job = await session.get(TranscriptionJob, requested["id"])
+    assert job is not None
+    job.status = "processing"
+    job.attempt_count = 1
+    job.processing_started_at = datetime.now(UTC) - timedelta(
+        seconds=settings.assist_job_stale_seconds + 1
+    )
+    await session.commit()
+
+    assert await transcription_queue.process_next_transcription() is True
+    resumed = (await client.get("/api/speaking/attempts", headers=headers)).json()[0][
+        "transcription"
+    ]
+    assert resumed["status"] == "completed"
+    assert resumed["attempt_count"] == 2

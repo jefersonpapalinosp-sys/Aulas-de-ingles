@@ -26,10 +26,11 @@ class FakeResponse:
 def test_gateway_normaliza_transcricao_e_calcula_semelhanca(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(
-        assistance.urllib.request,
-        "urlopen",
-        lambda *args, **kwargs: FakeResponse(
+    captured: dict[str, str | None] = {}
+
+    def respond(request: urllib.request.Request, **_kwargs: object) -> FakeResponse:
+        captured["idempotency_key"] = request.get_header("Idempotency-key")
+        return FakeResponse(
             {
                 "text": "A taxi is faster than a bus",
                 "words": [
@@ -38,7 +39,12 @@ def test_gateway_normaliza_transcricao_e_calcula_semelhanca(
                 ],
                 "cost_microusd": 90,
             }
-        ),
+        )
+
+    monkeypatch.setattr(
+        assistance.urllib.request,
+        "urlopen",
+        respond,
     )
     result = assistance.call_transcription_provider(
         "https://provider.test/stt",
@@ -46,10 +52,12 @@ def test_gateway_normaliza_transcricao_e_calcula_semelhanca(
         "audio/webm",
         token="secret",
         timeout=2,
+        idempotency_key="transcription-stable-key",
     )
     assert result.mean_confidence == 0.8
     assert result.words[0]["confidence"] == 1.0
     assert result.cost_microusd == 90
+    assert captured["idempotency_key"] == "transcription-stable-key"
     assert assistance.compare_transcript("A taxi is faster than a bus.", result.text) == 1.0
 
 

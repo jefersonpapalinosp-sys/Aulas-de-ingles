@@ -847,7 +847,7 @@ de pronúncia. A escrita mantém a rubrica determinística e oferece análise ab
 opt-in. Ambos os fluxos identificam automação e baixa confiança, registram avaliação humana,
 cota e custo, possuem retenção configurável e preservam a produção quando o gateway falha. As
 features ficam desligadas por padrão; critérios de liberação, privacidade, contrato do gateway e
-a limitação da fila em processo estão em `docs/avaliacao_sprint14_assistencia.md`.
+a fila durável estão em `docs/avaliacao_sprint14_assistencia.md`.
 
 - speech-to-text assíncrono com confiança por palavra;
 - comparação entre transcrição e frase esperada;
@@ -877,7 +877,7 @@ Aceite:
 ### Fazer depois
 
 - avaliar o speech-to-text e o feedback textual com usuários antes da liberação ampla;
-- mover jobs assistidos para uma fila durável;
+- homologar a deduplicação por `Idempotency-Key` no gateway de transcrição;
 - alinhamento fonético;
 - recomendações adaptativas mais sofisticadas;
 - modo offline de mídia.
@@ -990,8 +990,10 @@ avança para concluído quando produzir a evidência indicada.
    e contratar o provedor, preencher a homologação e obter 30 avaliações humanas por modalidade;
    as feature flags permanecem desligadas. O procedimento está em
    `docs/homologacao_assistencia_ia_2026-10-08.md`.
-4. **Pendente antes de escalar a assistência — fila durável.** Persistir jobs, retomar após
-   reinício, limitar tentativas e garantir idempotência no gateway.
+4. **Concluído — fila durável de transcrição.** Jobs ficam no PostgreSQL, um worker separado
+   reivindica registros com bloqueio concorrente, retoma processamento interrompido, limita
+   tentativas com backoff e reutiliza uma chave de idempotência estável no gateway. O desenho,
+   operação e evidências estão em `docs/fila_duravel_assistencia_2026-10-08.md`.
 5. **Pendente — acabamento operacional.** Definir licença e política para áudio offline,
    revisar a documentação ao fim de cada etapa e adotar Storybook somente se o catálogo de
    componentes justificar.

@@ -504,12 +504,24 @@ export function ShadowingPractice({
                 {attempt.transcription && (
                   <div className={`transcription-result ${attempt.transcription.status}`}>
                     <p className="assist-label">Automatizado · somente avaliação</p>
-                    {['queued', 'processing'].includes(attempt.transcription.status) && (
-                      <p role="status">Transcrição em processamento…</p>
+                    {attempt.transcription.status === 'queued' && (
+                      <p role="status">
+                        {attempt.transcription.attempt_count === 0
+                          ? 'Transcrição aguardando processamento…'
+                          : `O provedor não respondeu. Nova tentativa será feita automaticamente (${attempt.transcription.attempt_count} de ${attempt.transcription.max_attempts} realizadas).`}
+                      </p>
+                    )}
+                    {attempt.transcription.status === 'processing' && (
+                      <p role="status">
+                        Transcrição em processamento · tentativa{' '}
+                        {attempt.transcription.attempt_count} de {attempt.transcription.max_attempts}.
+                      </p>
                     )}
                     {attempt.transcription.status === 'failed' && (
                       <p role="alert">
-                        A transcrição falhou. A gravação e sua autoavaliação não foram perdidas.
+                        A transcrição falhou após {attempt.transcription.attempt_count}{' '}
+                        {attempt.transcription.attempt_count === 1 ? 'tentativa' : 'tentativas'}.
+                        A gravação e sua autoavaliação não foram perdidas.
                       </p>
                     )}
                     {attempt.transcription.status === 'completed' && (

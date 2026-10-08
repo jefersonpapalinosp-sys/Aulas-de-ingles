@@ -1,12 +1,11 @@
 """Gravações opcionais da prática oral e transcrição experimental."""
 
-import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Body,
     Depends,
     HTTPException,
@@ -31,10 +30,9 @@ from app.db.models import (
     TranscriptCue,
     TranscriptionJob,
 )
-from app.db.session import get_session, get_sessionmaker
+from app.db.session import get_session
 from app.schemas.assist import HumanRatingIn, TranscriptionJobOut, TranscriptionWordOut
 from app.schemas.speaking import SpeakingAttemptIn, SpeakingAttemptOut
-from app.services import assistance
 from app.services.audio_storage import AudioStorage, normalized_mime_type
 
 router = APIRouter(prefix="/speaking", tags=["speaking"])
@@ -54,6 +52,9 @@ def _transcription_out(job: TranscriptionJob, expected_text: str) -> Transcripti
         attempt_id=job.speaking_attempt_id,
         status=job.status,  # type: ignore[arg-type]
         provider=job.provider,
+        attempt_count=job.attempt_count,
+        max_attempts=job.max_attempts,
+        next_attempt_at=job.next_attempt_at,
         expected_text=expected_text,
         transcript_text=job.transcript_text,
         words=[TranscriptionWordOut.model_validate(word) for word in (job.words or [])],
@@ -97,72 +98,6 @@ async def _purge_expired_transcriptions(session: AsyncSession, user_id: int) -> 
             TranscriptionJob.expires_at < datetime.now(UTC),
         )
     )
-
-
-async def _process_transcription(job_id: int) -> None:
-    settings = get_settings()
-    async with get_sessionmaker()() as session:
-        job = (
-            await session.execute(select(TranscriptionJob).where(TranscriptionJob.id == job_id))
-        ).scalar_one_or_none()
-        if job is None or job.status != "queued":
-            return
-        attempt = await _owned_attempt(session, job.speaking_attempt_id, job.user_id)
-        job.status = "processing"
-        await session.commit()
-
-        if (
-            not attempt.storage_key
-            or not attempt.mime_type
-            or not settings.assist_transcription_url
-        ):
-            job.status = "failed"
-            job.error_code = "audio_unavailable"
-            job.completed_at = datetime.now(UTC)
-            await session.commit()
-            return
-        path = AudioStorage(settings.speaking_storage_dir).path(attempt.storage_key)
-        if path is None:
-            job.status = "failed"
-            job.error_code = "audio_unavailable"
-            job.completed_at = datetime.now(UTC)
-            await session.commit()
-            return
-
-        try:
-            result = await asyncio.to_thread(
-                assistance.call_transcription_provider,
-                settings.assist_transcription_url,
-                path.read_bytes(),
-                attempt.mime_type,
-                token=settings.assist_provider_token,
-                timeout=settings.assist_timeout_seconds,
-            )
-        except assistance.ProviderFailure as error:
-            job.status = "failed"
-            job.error_code = error.code
-            job.completed_at = datetime.now(UTC)
-            await session.commit()
-            return
-        except Exception:
-            # O conteúdo e a exceção do provedor não entram no log nem na API.
-            # O código estável é suficiente para suporte e preserva a privacidade.
-            job.status = "failed"
-            job.error_code = "internal_provider_error"
-            job.completed_at = datetime.now(UTC)
-            await session.commit()
-            return
-
-        job.status = "completed"
-        job.transcript_text = result.text
-        job.words = result.words
-        job.mean_confidence = result.mean_confidence
-        job.similarity_score = assistance.compare_transcript(attempt.cue.text_en, result.text)
-        job.low_confidence = result.mean_confidence < 0.75
-        job.cost_microusd = result.cost_microusd
-        job.error_code = None
-        job.completed_at = datetime.now(UTC)
-        await session.commit()
 
 
 async def _owned_attempt(session: AsyncSession, attempt_id: int, user_id: int) -> SpeakingAttempt:
@@ -330,7 +265,6 @@ async def listar_tentativas(
 )
 async def solicitar_transcricao(
     attempt_id: int,
-    background_tasks: BackgroundTasks,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> TranscriptionJobOut:
@@ -369,12 +303,14 @@ async def solicitar_transcricao(
         speaking_attempt_id=attempt.id,
         provider=settings.assist_provider_name,
         status="queued",
+        idempotency_key=f"transcription-{uuid4().hex}",
+        max_attempts=settings.assist_job_max_attempts,
+        next_attempt_at=datetime.now(UTC),
         expires_at=datetime.now(UTC) + timedelta(days=settings.assist_retention_days),
     )
     session.add(job)
     await session.commit()
     await session.refresh(job)
-    background_tasks.add_task(_process_transcription, job.id)
     return _transcription_out(job, attempt.cue.text_en)
 
 

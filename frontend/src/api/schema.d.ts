@@ -1625,6 +1625,8 @@ export interface components {
         };
         /** TranscriptionJobOut */
         TranscriptionJobOut: {
+            /** Attempt Count */
+            attempt_count: number;
             /** Attempt Id */
             attempt_id: number;
             /**
@@ -1658,8 +1660,15 @@ export interface components {
             id: number;
             /** Low Confidence */
             low_confidence: boolean;
+            /** Max Attempts */
+            max_attempts: number;
             /** Mean Confidence */
             mean_confidence: number | null;
+            /**
+             * Next Attempt At
+             * Format: date-time
+             */
+            next_attempt_at: string;
             /** Provider */
             provider: string;
             /**

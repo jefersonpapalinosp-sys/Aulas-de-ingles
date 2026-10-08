@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     assist_daily_quota: int = 5
     assist_retention_days: int = 30
     assist_timeout_seconds: int = 20
+    assist_job_max_attempts: int = 3
+    assist_job_retry_base_seconds: int = 5
+    assist_job_stale_seconds: int = 120
+    assist_worker_poll_seconds: float = 1.0
 
     # Origens aceitas pelo CORS. Em dev a lista fica vazia de propósito:
     # o browser fala com /api na mesma origem, via proxy do Vite.
@@ -70,6 +74,16 @@ class Settings(BaseSettings):
             raise RuntimeError("ASSIST_RETENTION_DAYS precisa ser positivo.")
         if self.assist_timeout_seconds < 1:
             raise RuntimeError("ASSIST_TIMEOUT_SECONDS precisa ser positivo.")
+        if self.assist_job_max_attempts < 1:
+            raise RuntimeError("ASSIST_JOB_MAX_ATTEMPTS precisa ser positivo.")
+        if self.assist_job_retry_base_seconds < 0:
+            raise RuntimeError("ASSIST_JOB_RETRY_BASE_SECONDS não pode ser negativo.")
+        if self.assist_job_stale_seconds < self.assist_timeout_seconds:
+            raise RuntimeError(
+                "ASSIST_JOB_STALE_SECONDS precisa ser maior ou igual a ASSIST_TIMEOUT_SECONDS."
+            )
+        if self.assist_worker_poll_seconds <= 0:
+            raise RuntimeError("ASSIST_WORKER_POLL_SECONDS precisa ser positivo.")
         if not self.assist_provider_name.strip() or len(self.assist_provider_name) > 80:
             raise RuntimeError("ASSIST_PROVIDER_NAME precisa ter entre 1 e 80 caracteres.")
         if self.assist_provider_kind == "ollama":

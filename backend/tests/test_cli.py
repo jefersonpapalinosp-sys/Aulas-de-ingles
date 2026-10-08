@@ -36,3 +36,15 @@ def test_gate_assistido_falha_fechado(
             ["assist-gate", "--modality", "writing", "--review-file", str(review)]
         )
     assert saida.value.code == 1
+
+
+def test_worker_pode_processar_uma_unica_iteracao(monkeypatch: pytest.MonkeyPatch) -> None:
+    chamado: list[bool] = []
+
+    async def worker(*, once: bool = False) -> None:
+        chamado.append(once)
+
+    monkeypatch.setattr(cli, "run_transcription_worker", worker)
+    cli.main_com_argumentos(["assist-worker", "--once"])
+
+    assert chamado == [True]

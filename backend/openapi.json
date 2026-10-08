@@ -2206,6 +2206,10 @@
             },
             "TranscriptionJobOut": {
                 "properties": {
+                    "attempt_count": {
+                        "title": "Attempt Count",
+                        "type": "integer"
+                    },
                     "attempt_id": {
                         "title": "Attempt Id",
                         "type": "integer"
@@ -2281,6 +2285,10 @@
                         "title": "Low Confidence",
                         "type": "boolean"
                     },
+                    "max_attempts": {
+                        "title": "Max Attempts",
+                        "type": "integer"
+                    },
                     "mean_confidence": {
                         "anyOf": [
                             {
@@ -2291,6 +2299,11 @@
                             }
                         ],
                         "title": "Mean Confidence"
+                    },
+                    "next_attempt_at": {
+                        "format": "date-time",
+                        "title": "Next Attempt At",
+                        "type": "string"
                     },
                     "provider": {
                         "title": "Provider",
@@ -2346,6 +2359,9 @@
                     "attempt_id",
                     "status",
                     "provider",
+                    "attempt_count",
+                    "max_attempts",
+                    "next_attempt_at",
                     "expected_text",
                     "transcript_text",
                     "words",

@@ -48,6 +48,10 @@ services:
       ASSIST_DAILY_QUOTA: ${ASSIST_DAILY_QUOTA:-5}
       ASSIST_RETENTION_DAYS: ${ASSIST_RETENTION_DAYS:-30}
       ASSIST_TIMEOUT_SECONDS: ${ASSIST_TIMEOUT_SECONDS:-20}
+      ASSIST_JOB_MAX_ATTEMPTS: ${ASSIST_JOB_MAX_ATTEMPTS:-3}
+      ASSIST_JOB_RETRY_BASE_SECONDS: ${ASSIST_JOB_RETRY_BASE_SECONDS:-5}
+      ASSIST_JOB_STALE_SECONDS: ${ASSIST_JOB_STALE_SECONDS:-120}
+      ASSIST_WORKER_POLL_SECONDS: ${ASSIST_WORKER_POLL_SECONDS:-1}
     volumes:
       - speaking_data_prod:/app/data/speaking
     expose:
@@ -61,6 +65,34 @@ services:
       timeout: 3s
       retries: 12
       start_period: 10s
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile.prod
+    container_name: aulas-prod-worker
+    command: ["python", "-m", "app.cli", "assist-worker"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?defina DATABASE_URL}
+      APP_ENV: ${APP_ENV:-prod}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET com pelo menos 32 bytes}
+      SPEAKING_STORAGE_DIR: /app/data/speaking
+      ASSISTED_FEATURES_ENABLED: ${ASSISTED_FEATURES_ENABLED:-false}
+      ASSIST_TRANSCRIPTION_URL: ${ASSIST_TRANSCRIPTION_URL:-}
+      ASSIST_PROVIDER_NAME: ${ASSIST_PROVIDER_NAME:-external}
+      ASSIST_PROVIDER_TOKEN: ${ASSIST_PROVIDER_TOKEN:-}
+      ASSIST_TIMEOUT_SECONDS: ${ASSIST_TIMEOUT_SECONDS:-20}
+      ASSIST_JOB_MAX_ATTEMPTS: ${ASSIST_JOB_MAX_ATTEMPTS:-3}
+      ASSIST_JOB_RETRY_BASE_SECONDS: ${ASSIST_JOB_RETRY_BASE_SECONDS:-5}
+      ASSIST_JOB_STALE_SECONDS: ${ASSIST_JOB_STALE_SECONDS:-120}
+      ASSIST_WORKER_POLL_SECONDS: ${ASSIST_WORKER_POLL_SECONDS:-1}
+    volumes:
+      - speaking_data_prod:/app/data/speaking
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
