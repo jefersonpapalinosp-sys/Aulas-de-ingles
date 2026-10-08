@@ -89,8 +89,8 @@ async def _sync_editorial(session: AsyncSession, lesson: Lesson, raw: dict[str, 
             "VOA Learning English",
             str(raw["voa_url"]),
             (
-                "Referência e mídia mantidas na origem. Confirmar os termos da VOA antes de "
-                "redistribuir arquivos."
+                "Texto e MP3 da VOA Learning English em domínio público, com crédito à fonte; "
+                "materiais identificados como provenientes de agências terceiras não se incluem."
             ),
         ),
         (
@@ -207,6 +207,7 @@ async def _upsert_media(session: AsyncSession, lesson: Lesson, raw: dict[str, An
         media.source_url = raw_media["source_url"]
         media.duration_seconds = raw_media.get("duration_seconds")
         media.listening_exercise_position = raw_media.get("listening_exercise_position")
+        media.transcript = raw_media.get("transcript", [])
         await session.flush()
 
         existing_cues = {

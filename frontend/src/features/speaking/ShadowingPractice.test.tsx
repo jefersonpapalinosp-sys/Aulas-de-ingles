@@ -41,6 +41,7 @@ const media: LessonMedia = {
       text_pt: 'Não pegue o ônibus. Um táxi é mais rápido que um ônibus.',
     },
   ],
+  transcript: [],
 }
 
 class FakeMediaRecorder {

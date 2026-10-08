@@ -452,6 +452,12 @@ input[type='text']::placeholder { color: var(--ink-3); }
 .cue-copy { display: grid; gap: 3px; line-height: 1.45; }
 .cue-copy strong { color: var(--ink-2); font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
 .cue-copy small { color: var(--ink-3); font-size: 12.5px; }
+.transcript-credit { margin-top: 14px; color: var(--ink-3); font-size: 12.5px; }
+.full-transcript-lines { display: grid; max-height: 480px; overflow-y: auto; gap: 0; margin: 12px 0 0; padding: 0; border: 1px solid var(--rule-soft); border-radius: 5px; list-style: none; }
+.full-transcript-lines li { display: grid; grid-template-columns: minmax(90px, 0.22fr) minmax(0, 1fr); gap: 14px; padding: 11px 12px; background: var(--paper); line-height: 1.5; }
+.full-transcript-lines li + li { border-top: 1px solid var(--rule-soft); }
+.full-transcript-lines strong { color: var(--accent); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+.full-transcript-lines span { color: var(--ink); font-size: 13.5px; }
 .listening-check { padding: 22px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
 .listening-check .ex { margin-top: 17px; }
 
@@ -608,6 +614,7 @@ input[type='text']::placeholder { color: var(--ink-3); }
   .audio-toolbar label { width: 100%; margin-left: 0; margin-top: 3px; }
   .audio-transcript-head { align-items: flex-start; flex-direction: column; gap: 8px; }
   .transcript-cues { max-height: 280px; }
+  .full-transcript-lines li { grid-template-columns: 1fr; gap: 4px; }
   .shadowing-card { padding: 19px 16px; }
   .shadowing-actions .btn { width: 100%; }
   .speaking-save-actions .btn { width: 100%; }

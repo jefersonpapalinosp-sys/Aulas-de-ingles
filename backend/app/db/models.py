@@ -171,6 +171,7 @@ class LessonMedia(Base):
     source_url: Mapped[str] = mapped_column(String(1000))
     duration_seconds: Mapped[int | None] = mapped_column(Integer, default=None)
     listening_exercise_position: Mapped[int | None] = mapped_column(Integer, default=None)
+    transcript: Mapped[list[dict[str, object]]] = mapped_column(JSONB, default=list)
 
     lesson: Mapped[Lesson] = relationship(back_populates="media")
     cues: Mapped[list["TranscriptCue"]] = relationship(

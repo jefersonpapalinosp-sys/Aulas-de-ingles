@@ -12,7 +12,15 @@ export function formatAudioTime(seconds: number): string {
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`
 }
 
-export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userId: number }) {
+export function LessonAudioPlayer({
+  media,
+  userId,
+  sourcePageUrl,
+}: {
+  media: LessonMedia
+  userId: number
+  sourcePageUrl: string
+}) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const lastSavedAt = useRef(0)
   const [position, setPosition] = useState(0)
@@ -23,6 +31,7 @@ export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userI
   const [failed, setFailed] = useState(false)
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [translationOpen, setTranslationOpen] = useState(false)
+  const [fullTranscriptOpen, setFullTranscriptOpen] = useState(false)
   const remotePosition = useMediaPosition(media.id, userId)
   const saveRemotePosition = useSaveMediaPosition(media.id, userId)
   const clearRemotePosition = useClearMediaPosition(media.id, userId)
@@ -256,6 +265,45 @@ export function LessonAudioPlayer({ media, userId }: { media: LessonMedia; userI
                     </li>
                   )
                 })}
+              </ol>
+            </>
+          )}
+        </div>
+      )}
+
+      {media.transcript.length > 0 && (
+        <div className="audio-transcript full-transcript">
+          <div className="audio-transcript-head">
+            <div>
+              <p className="study-kicker">Conversa completa</p>
+              <h3>Transcrição integral em inglês</h3>
+            </div>
+            <button
+              type="button"
+              className="transcript-toggle"
+              aria-expanded={fullTranscriptOpen}
+              onClick={() => setFullTranscriptOpen((open) => !open)}
+            >
+              {fullTranscriptOpen ? 'Ocultar texto integral' : 'Mostrar texto integral'}
+            </button>
+          </div>
+
+          {fullTranscriptOpen && (
+            <>
+              <p className="transcript-credit">
+                Fonte: conteúdo em domínio público da{' '}
+                <a href={sourcePageUrl} target="_blank" rel="noopener noreferrer">
+                  VOA Learning English
+                </a>
+                .
+              </p>
+              <ol className="full-transcript-lines" lang="en">
+                {media.transcript.map((line) => (
+                  <li key={line.position}>
+                    <strong>{line.speaker}</strong>
+                    <span>{line.text_en}</span>
+                  </li>
+                ))}
               </ol>
             </>
           )}

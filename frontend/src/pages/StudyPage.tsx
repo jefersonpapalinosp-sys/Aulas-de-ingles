@@ -87,7 +87,13 @@ function StepContent({
     const listeningExercises = lesson.exercises.filter((exercise) => exercise.skill === 'listening')
     return (
       <>
-        {conversationAudio && <LessonAudioPlayer media={conversationAudio} userId={userId} />}
+        {conversationAudio && (
+          <LessonAudioPlayer
+            media={conversationAudio}
+            userId={userId}
+            sourcePageUrl={lesson.voa_url}
+          />
+        )}
         {listeningExercises.length > 0 && (
           <div className="study-section listening-check">
             <p className="study-kicker">Compreensão geral</p>

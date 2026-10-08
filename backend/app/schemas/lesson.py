@@ -59,6 +59,12 @@ class TranscriptCueOut(ORMModel):
     text_pt: str
 
 
+class TranscriptLineOut(BaseModel):
+    position: int
+    speaker: str
+    text_en: str
+
+
 class LessonMediaOut(ORMModel):
     id: int
     kind: str
@@ -67,6 +73,7 @@ class LessonMediaOut(ORMModel):
     duration_seconds: int | None
     listening_exercise_position: int | None
     cues: list[TranscriptCueOut]
+    transcript: list[TranscriptLineOut]
 
 
 class ContentSourceOut(ORMModel):

@@ -35,6 +35,7 @@ async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     official = next(source for source in a["content_sources"] if source["kind"] == "official")
     assert official["publisher"] == "VOA Learning English"
     assert official["url"] == a["voa_url"]
+    assert "domínio público" in official["license_note"]
     assert a["versions"][0]["version"] == 1
     assert a["versions"][0]["status"] == "reviewed"
     assert a["versions"][0]["learning_strategy"] == "visualizar"
@@ -81,7 +82,7 @@ async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> No
     assert a["grammar_blocks"][0]["heading"].startswith("Objeto direto")
     assert a["grammar_blocks"][1]["heading"].startswith("Objeto indireto")
     assert any("woo-hoo" in note["label"] for note in a["pronunciation"])
-    assert len(a["exercises"]) == 7
+    assert len(a["exercises"]) == 11
     assert len(a["media"]) == 1
     assert a["media"][0]["duration_seconds"] == 228
     assert len(a["media"][0]["cues"]) == 4
@@ -105,10 +106,31 @@ async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient)
             for exercise in lesson["exercises"]
             if exercise["skill"] == "listening"
         ]
-        assert listening
+        assert len(listening) >= 2
         assert media["listening_exercise_position"] in {
             exercise["position"] for exercise in listening
         }
+
+
+@pytest.mark.asyncio
+async def test_aulas_32_a_40_tem_pratica_multimodal_completa(client: AsyncClient) -> None:
+    for number in range(32, 41):
+        lesson = (await client.get(f"/api/lessons/{number}")).json()
+        activity_types = {exercise["activity_type"] for exercise in lesson["exercises"]}
+
+        assert {"dictation", "reorder", "transformation", "multiple_choice"} <= activity_types
+        assert len(
+            [exercise for exercise in lesson["exercises"] if exercise["skill"] == "listening"]
+        ) == 3
+        assert len(lesson["writing_prompts"]) == 1
+        transcript = lesson["media"][0]["transcript"]
+        assert len(transcript) >= 20
+        assert [line["position"] for line in transcript] == list(range(len(transcript)))
+        assert all(line["speaker"] and line["text_en"] for line in transcript)
+        prompt = lesson["writing_prompts"][0]
+        assert prompt["min_words"] >= 40
+        assert prompt["min_sentences"] >= 5
+        assert len(prompt["requirements"]) >= 2
 
 
 @pytest.mark.asyncio
@@ -182,7 +204,7 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
-    assert len(todos) == 74
+    assert len(todos) == 110
     assert {e["lesson_number"] for e in todos} == set(range(31, 41))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
@@ -194,5 +216,5 @@ async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_exercicios_filtra_por_aula(client: AsyncClient) -> None:
     da_39 = (await client.get("/api/exercises?lesson=39")).json()
-    assert len(da_39) == 8
+    assert len(da_39) == 12
     assert {e["lesson_number"] for e in da_39} == {39}

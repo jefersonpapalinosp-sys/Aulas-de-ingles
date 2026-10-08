@@ -611,6 +611,228 @@
             "text_en": "I'd like to know -- how do you play baseball?",
             "text_pt": "Eu gostaria de saber: como se joga beisebol?"
           }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Hello! Today is a big day. My first children’s show is on television! Woo-hoo! I’m excited and nervous."
+          },
+          {
+            "position": 1,
+            "speaker": "Ms. Weaver",
+            "text_en": "Hello, Anna."
+          },
+          {
+            "position": 2,
+            "speaker": "Anna",
+            "text_en": "Hello, Ms. Weaver!"
+          },
+          {
+            "position": 3,
+            "speaker": "Ms. Weaver",
+            "text_en": "Some people are going to watch your children’s show. After they watch it, they’ll tell me what they liked, and what they didn’t like."
+          },
+          {
+            "position": 4,
+            "speaker": "Anna",
+            "text_en": "Oh, dear."
+          },
+          {
+            "position": 5,
+            "speaker": "Ms. Weaver",
+            "text_en": "They’re in the conference room. They’re in the conference room."
+          },
+          {
+            "position": 6,
+            "speaker": "Anna",
+            "text_en": "Hello, everyone. I’m Anna, and thanks for coming!"
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "Today you are going to watch my new show. I hope you like it"
+          },
+          {
+            "position": 8,
+            "speaker": "Coworker 2",
+            "text_en": "What is the show about?"
+          },
+          {
+            "position": 9,
+            "speaker": "Anna",
+            "text_en": "It’s a children’s show."
+          },
+          {
+            "position": 10,
+            "speaker": "Coworker 1",
+            "text_en": "But we are not children!"
+          },
+          {
+            "position": 11,
+            "speaker": "Anna",
+            "text_en": "This children's show is different. I hope."
+          },
+          {
+            "position": 12,
+            "speaker": "Coworker 3",
+            "text_en": "I don’t really like children's shows."
+          },
+          {
+            "position": 13,
+            "speaker": "Anna",
+            "text_en": "Shhh, please. The show is starting!"
+          },
+          {
+            "position": 14,
+            "speaker": "Anna",
+            "text_en": "Oh, hi! Just give me one minute ….oops! Oh well. I can fix that later."
+          },
+          {
+            "position": 15,
+            "speaker": "Anna",
+            "text_en": "Hello, I’m Anna! Welcome to “The Time Traveling Treehouse!” This is not a usual treehouse. It can time travel! That is why it’s called \"The Time Traveling Treehouse.\""
+          },
+          {
+            "position": 16,
+            "speaker": "MINDY",
+            "text_en": "Anna, do not forget me."
+          },
+          {
+            "position": 17,
+            "speaker": "Anna",
+            "text_en": "Of course not! This is my partner, MINDY!"
+          },
+          {
+            "position": 18,
+            "speaker": "MINDY",
+            "text_en": "My name means Massive Information Navigation Device, for You!"
+          },
+          {
+            "position": 19,
+            "speaker": "Anna",
+            "text_en": "That means we can travel to many places and learn many things. Kids from all over the world ask us questions. We find them answers!"
+          },
+          {
+            "position": 20,
+            "speaker": "MINDY",
+            "text_en": "Woo-hoo! That is right, Anna."
+          },
+          {
+            "position": 21,
+            "speaker": "Anna",
+            "text_en": "MINDY, what is our first question?"
+          },
+          {
+            "position": 22,
+            "speaker": "MINDY",
+            "text_en": "Layla asks us this question."
+          },
+          {
+            "position": 23,
+            "speaker": "Layla",
+            "text_en": "Hello, Anna! Hello, MINDY! I'd like to know -- how do you play baseball?"
+          },
+          {
+            "position": 24,
+            "speaker": "Anna",
+            "text_en": "That is a great question! MINDY, we need to find her an answer!"
+          },
+          {
+            "position": 25,
+            "speaker": "MINDY",
+            "text_en": "I know that we can find it, Anna!"
+          },
+          {
+            "position": 26,
+            "speaker": "Anna",
+            "text_en": "Where am I now? MINDY, now I am on a snowy mountain!"
+          },
+          {
+            "position": 27,
+            "speaker": "MINDY",
+            "text_en": "That is a good place to learn how to ski."
+          },
+          {
+            "position": 28,
+            "speaker": "Anna",
+            "text_en": "Yes, MINDY, but it cannot teach us about baseball! And I don’t know how to ski!"
+          },
+          {
+            "position": 29,
+            "speaker": "MINDY",
+            "text_en": "Sorry, Anna. Let’s try again."
+          },
+          {
+            "position": 30,
+            "speaker": "Anna",
+            "text_en": "Where I am now!? MINDY, I am in the ocean! An ocean cannot teach us about baseball!"
+          },
+          {
+            "position": 31,
+            "speaker": "MINDY",
+            "text_en": "Please don’t yell, Anna. The ocean can teach us about surfing."
+          },
+          {
+            "position": 32,
+            "speaker": "Anna",
+            "text_en": "Yes, MINDY, it can teach us about surfing … and sharks! Ahhh!"
+          },
+          {
+            "position": 33,
+            "speaker": "MINDY",
+            "text_en": "Anna, please wait. I need to fix my navigation device"
+          },
+          {
+            "position": 34,
+            "speaker": "Anna",
+            "text_en": "MINDY, please fix it faster. And get me out of here … now!"
+          },
+          {
+            "position": 35,
+            "speaker": "Announcer",
+            "text_en": "Whoa! Is Anna going to be lost forever? Next week, you can watch part two of “The Time Traveling Treehouse!”"
+          },
+          {
+            "position": 36,
+            "speaker": "Coworker 1",
+            "text_en": "Aw, man! Will the shark eat her?"
+          },
+          {
+            "position": 37,
+            "speaker": "Coworker 2",
+            "text_en": "Will Anna find the answer?"
+          },
+          {
+            "position": 38,
+            "speaker": "Coworker 3",
+            "text_en": "Please tell me the ending!"
+          },
+          {
+            "position": 39,
+            "speaker": "Anna",
+            "text_en": "So, you liked it?"
+          },
+          {
+            "position": 40,
+            "speaker": "Coworkers",
+            "text_en": "Yes!"
+          },
+          {
+            "position": 41,
+            "speaker": "Anna",
+            "text_en": "Well, you can watch the ending next week!"
+          },
+          {
+            "position": 42,
+            "speaker": "Coworkers",
+            "text_en": "Noooooo!"
+          },
+          {
+            "position": 43,
+            "speaker": "Anna",
+            "text_en": "Don’t forget to watch next week!"
+          }
         ]
       }
     ],
@@ -624,7 +846,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "monitorar",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Estreia do programa infantil da Anna, *The Time Traveling Treehouse*. Crianças fazem perguntas e Anna e MINDY procuram respostas. A aula mostra **quem recebe a ação** com objetos diretos e indiretos, como pedir informação e como interjeições mudam a emoção da fala.",
     "goals": [
       "Reconhecer o **objeto direto**, que recebe diretamente a ação do verbo: *ask a question*.",
@@ -991,6 +1213,109 @@
         "answers": [
           "her partner"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva a frase que explica quem envia as perguntas para Anna e MINDY.",
+        "hint": "9 palavras",
+        "explanation": "A frase preserva os dois objetos: **us** recebe e **questions** é aquilo que é perguntado.",
+        "hints": [
+          "Comece com *Kids from all over the world...*.",
+          "Depois de *ask*, use o objeto indireto antes do direto: *us questions*."
+        ],
+        "answers": [
+          "Kids from all over the world ask us questions"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "how to play baseball",
+          "how to build a treehouse",
+          "where MINDY lives"
+        ],
+        "prompt": "Listening: What would Layla like to know?",
+        "hint": "Ouça a pergunta apresentada por Anna.",
+        "explanation": "Layla pergunta **how do you play baseball?**",
+        "hints": [
+          "A pergunta é sobre um esporte.",
+          "O esporte usa *bat*, *ball* e *glove*."
+        ],
+        "answers": [
+          "how to play baseball"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "Layla",
+          "asks",
+          "us",
+          "this",
+          "question"
+        ],
+        "prompt": "Ordene as palavras colocando a pessoa antes da coisa.",
+        "hint": null,
+        "explanation": "Com *ask*, podemos usar sujeito + verbo + objeto indireto + objeto direto.",
+        "hints": [
+          "Comece por *Layla asks*.",
+          "Coloque *us* antes de *this question*."
+        ],
+        "answers": [
+          "Layla asks us this question"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Reescreva sem *for*: We find an answer for her. → We `____`.",
+        "hint": null,
+        "explanation": "Na estrutura com dois objetos, a pessoa vem antes da coisa: **find her an answer**.",
+        "hints": [
+          "Mantenha *find* e mova *her* para logo depois do verbo.",
+          "Complete com *find + pessoa + coisa*."
+        ],
+        "answers": [
+          "find her an answer"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma pergunta para a treehouse",
+        "instructions": "Write 5 to 7 sentences. Introduce a question from a student, explain how you would find them an answer and include a natural reaction.",
+        "min_words": 40,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "uma estrutura com dois objetos",
+            "terms": [
+              "ask us",
+              "tell me",
+              "find them",
+              "give her",
+              "show him"
+            ]
+          },
+          {
+            "label": "uma reação ou interjeição",
+            "terms": [
+              "whoa",
+              "oops",
+              "woo-hoo",
+              "aw",
+              "shh"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -1009,7 +1334,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "sequenciar",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "MINDY finalmente acerta o destino e Anna ensina beisebol num campo de verdade. A aula é um **texto explicativo**: presente simples para descrever como as coisas funcionam, marcadores de sequência, e o truque de transformar verbo em profissão com **-er**.",
     "goals": [
       "Explicar um processo com **presente simples** + *First… Then… Each time… At the end…*",
@@ -1327,6 +1652,143 @@
             "text_en": "There are nine innings in a game.",
             "text_pt": "Há nove entradas em um jogo."
           }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Coworker 2",
+            "text_en": "It is time for part two of the children’s show!"
+          },
+          {
+            "position": 1,
+            "speaker": "Coworker 1",
+            "text_en": "It’s time! It’s time! I can’t wait!"
+          },
+          {
+            "position": 2,
+            "speaker": "Coworker 3",
+            "text_en": "Shh! I can’t hear it!"
+          },
+          {
+            "position": 3,
+            "speaker": "Announcer",
+            "text_en": "Last time on \"The Time Traveling Treehouse,\" Anna was lost, really lost. She wants to learn about baseball. But her computer, MINDY, sent her to many wrong places."
+          },
+          {
+            "position": 4,
+            "speaker": "Anna",
+            "text_en": "MINDY! Help me! I am in the ocean with a shark!"
+          },
+          {
+            "position": 5,
+            "speaker": "MINDY",
+            "text_en": "I will try one more time, Anna."
+          },
+          {
+            "position": 6,
+            "speaker": "Anna",
+            "text_en": "Please try harder, MINDY!"
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "Now, where am I? I am at a playground with a baseball field! Yes! I can teach children about baseball here! MINDY, MINDY, it took you a long time. But you did it!"
+          },
+          {
+            "position": 8,
+            "speaker": "MINDY",
+            "text_en": "Thanks, Anna. Give me a call when you find the answer."
+          },
+          {
+            "position": 9,
+            "speaker": "Anna",
+            "text_en": "Okay. Come with me. Let’s learn how to play baseball! This is a baseball field. This is a pitcher's mound. This is first base! This is second base! This is third base! This is home plate!"
+          },
+          {
+            "position": 10,
+            "speaker": "Anna",
+            "text_en": "To play baseball, you really only need a bat, a ball and a glove. Each team has many players."
+          },
+          {
+            "position": 11,
+            "speaker": "On-screen text",
+            "text_en": "Pitchers pitch the ball."
+          },
+          {
+            "position": 12,
+            "speaker": "On-screen text",
+            "text_en": "Catchers catch the ball."
+          },
+          {
+            "position": 13,
+            "speaker": "On-screen text",
+            "text_en": "Batters bat the ball."
+          },
+          {
+            "position": 14,
+            "speaker": "On-screen text",
+            "text_en": "Runners run the bases."
+          },
+          {
+            "position": 15,
+            "speaker": "On-screen text",
+            "text_en": "Fielders field the ball."
+          },
+          {
+            "position": 16,
+            "speaker": "Anna",
+            "text_en": "First, the pitcher pitches the ball to the batter. The batter bats the ball. Then, the runner runs to first base."
+          },
+          {
+            "position": 17,
+            "speaker": "Anna",
+            "text_en": "Each time a batter bats, the runners run around the bases. Each time a runner runs across home plate, they score a run! There are nine innings in a game. The team with the most runs at the end of nine innings wins the game!"
+          },
+          {
+            "position": 18,
+            "speaker": "Anna",
+            "text_en": "MINDY, MINDY, we found the answer! It’s time to return to the treehouse."
+          },
+          {
+            "position": 19,
+            "speaker": "MINDY",
+            "text_en": "Good job! That was fast."
+          },
+          {
+            "position": 20,
+            "speaker": "Coworker 3",
+            "text_en": "Good job Anna. You know, I still don't like children's shows, but I like this children's show."
+          },
+          {
+            "position": 21,
+            "speaker": "Coworker 2",
+            "text_en": "I liked the time travel."
+          },
+          {
+            "position": 22,
+            "speaker": "Coworker 1",
+            "text_en": "But time travel is not real. You’re so silly, Anna."
+          },
+          {
+            "position": 23,
+            "speaker": "Anna",
+            "text_en": "Yeah, time travel is so silly. Thanks, goodbye. Bye, thank you."
+          },
+          {
+            "position": 24,
+            "speaker": "Anna",
+            "text_en": "Hello, MINDY? Are you there?"
+          },
+          {
+            "position": 25,
+            "speaker": "MINDY",
+            "text_en": "Hello, Anna."
+          },
+          {
+            "position": 26,
+            "speaker": "Anna",
+            "text_en": "MINDY, I want to go to China! Until next time …"
+          }
         ]
       }
     ],
@@ -1407,6 +1869,111 @@
         "answers": [
           "The batter bats the ball"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva a primeira etapa da explicação sobre beisebol.",
+        "hint": "9 palavras",
+        "explanation": "O marcador **First** abre a sequência e *pitcher pitches* mostra agente e ação.",
+        "hints": [
+          "Comece com *First, the pitcher...*.",
+          "O verbo recebe **-es**: *pitches*."
+        ],
+        "answers": [
+          "First the pitcher pitches the ball to the batter"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "runs around the bases",
+          "throws the bat to the pitcher",
+          "leaves the game"
+        ],
+        "prompt": "Listening: What does the batter do after hitting the ball?",
+        "hint": "A ação inicia o caminho para marcar um ponto.",
+        "explanation": "Depois de rebater, o jogador **runs around the bases**.",
+        "hints": [
+          "A resposta envolve movimento.",
+          "O jogador passa pelas *bases*."
+        ],
+        "answers": [
+          "runs around the bases"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "The",
+          "team",
+          "with",
+          "the",
+          "most",
+          "runs",
+          "wins"
+        ],
+        "prompt": "Ordene as palavras para concluir a regra do jogo.",
+        "hint": null,
+        "explanation": "O sujeito completo é **The team with the most runs**; depois vem *wins*.",
+        "hints": [
+          "Comece com *The team*.",
+          "Termine com o verbo na 3ª pessoa: *wins*."
+        ],
+        "answers": [
+          "The team with the most runs wins"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Transforme a ação em agente: A person who pitches is a `____`.",
+        "hint": null,
+        "explanation": "Acrescente **-er** a *pitch*: **pitcher**.",
+        "hints": [
+          "Use a mesma formação de *teach → teacher*.",
+          "A palavra termina em *-er*."
+        ],
+        "answers": [
+          "pitcher"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Explique um jogo passo a passo",
+        "instructions": "Write 5 to 7 sentences explaining how to play a sport or game. Make the order clear to a beginner.",
+        "min_words": 45,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "dois marcadores de sequência",
+            "terms": [
+              "first",
+              "then",
+              "next",
+              "finally",
+              "at the end"
+            ]
+          },
+          {
+            "label": "um agente terminado em -er",
+            "terms": [
+              "player",
+              "runner",
+              "pitcher",
+              "batter",
+              "kicker"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -1425,7 +1992,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "inferir",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Halloween. Anna se veste de gênio e finge ler mentes — e descobre que dizer *might* para quem quer certeza é um desastre diplomático. A aula gira em torno do contraste **will (certeza) × might (possibilidade)** e das **tag questions**.",
     "goals": [
       "Expressar possibilidade com **might / might not** e certeza com **will / won't**.",
@@ -1772,6 +2339,268 @@
             "text_en": "She won't say no, will she?",
             "text_pt": "Ela não vai dizer não, vai?"
           }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Hello! Halloween is very popular in the United States."
+          },
+          {
+            "position": 1,
+            "speaker": "Anna",
+            "text_en": "Children trick-or-treat. They ask people for candy. Children and adults wear costumes and go to parties!"
+          },
+          {
+            "position": 2,
+            "speaker": "Anna",
+            "text_en": "In fact, there is a Halloween party tonight. I need my friend, Genie. Genie!"
+          },
+          {
+            "position": 3,
+            "speaker": "Anna",
+            "text_en": "Hi!"
+          },
+          {
+            "position": 4,
+            "speaker": "Genie",
+            "text_en": "Hi, Anna! What do you need?"
+          },
+          {
+            "position": 5,
+            "speaker": "Anna",
+            "text_en": "Tonight, there is a Halloween party."
+          },
+          {
+            "position": 6,
+            "speaker": "Genie",
+            "text_en": "I love Halloween! Are you going?"
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "I might go. I might not go. I don’t have a costume. Can you help me?"
+          },
+          {
+            "position": 8,
+            "speaker": "Genie",
+            "text_en": "Dress as a genie!"
+          },
+          {
+            "position": 9,
+            "speaker": "Anna",
+            "text_en": "Great idea! I can do a genie trick like read minds!"
+          },
+          {
+            "position": 10,
+            "speaker": "Genie",
+            "text_en": "Anna, be careful. Things might go wrong."
+          },
+          {
+            "position": 11,
+            "speaker": "Anna",
+            "text_en": "What can go wrong?"
+          },
+          {
+            "position": 12,
+            "speaker": "Genie",
+            "text_en": "Okay."
+          },
+          {
+            "position": 13,
+            "speaker": "Anna",
+            "text_en": "Hey, look! I’m a genie! This is going to be fun!"
+          },
+          {
+            "position": 14,
+            "speaker": "Genie",
+            "text_en": "Remember, Anna. Be careful!"
+          },
+          {
+            "position": 15,
+            "speaker": "Anna",
+            "text_en": "Don’t worry, Genie! I will!"
+          },
+          {
+            "position": 16,
+            "speaker": "Rebecca",
+            "text_en": "Excuse me, are you really a mind reader?"
+          },
+          {
+            "position": 17,
+            "speaker": "Anna",
+            "text_en": "I might be."
+          },
+          {
+            "position": 18,
+            "speaker": "Rebecca",
+            "text_en": "Okay, tell me what I am thinking."
+          },
+          {
+            "position": 19,
+            "speaker": "Anna",
+            "text_en": "Sure! First, what do you do?"
+          },
+          {
+            "position": 20,
+            "speaker": "Rebecca",
+            "text_en": "I study. I'm a junior in college."
+          },
+          {
+            "position": 21,
+            "speaker": "Anna",
+            "text_en": "What do you study?"
+          },
+          {
+            "position": 22,
+            "speaker": "Rebecca",
+            "text_en": "I study journalism."
+          },
+          {
+            "position": 23,
+            "speaker": "Anna",
+            "text_en": "Okay. Wait. You are thinking … you will graduate from college in about one year."
+          },
+          {
+            "position": 24,
+            "speaker": "Rebecca",
+            "text_en": "Well, yeah. That’s the plan. I told you, I’m a junior in college."
+          },
+          {
+            "position": 25,
+            "speaker": "Anna",
+            "text_en": "Right, um, wait. There’s more. You are thinking … you might get a job writing the news."
+          },
+          {
+            "position": 26,
+            "speaker": "Rebecca",
+            "text_en": "I MIGHT get a job writing the news? I MIGHT! That means I might not. And I'm studying really hard."
+          },
+          {
+            "position": 27,
+            "speaker": "Anna",
+            "text_en": "No, no, no, no. Uh, no, you will! You WILL get a job writing the news."
+          },
+          {
+            "position": 28,
+            "speaker": "Rebecca",
+            "text_en": "I will?"
+          },
+          {
+            "position": 29,
+            "speaker": "Anna",
+            "text_en": "You will."
+          },
+          {
+            "position": 30,
+            "speaker": "Rebecca",
+            "text_en": "I will. I think."
+          },
+          {
+            "position": 31,
+            "speaker": "Anna",
+            "text_en": "'Bye. Happy to help!"
+          },
+          {
+            "position": 32,
+            "speaker": "Kaveh",
+            "text_en": "Can you really read minds?"
+          },
+          {
+            "position": 33,
+            "speaker": "Anna",
+            "text_en": "I might."
+          },
+          {
+            "position": 34,
+            "speaker": "Kaveh",
+            "text_en": "Well, today, I will ask my girlfriend to marry me. What am I thinking?"
+          },
+          {
+            "position": 35,
+            "speaker": "Anna",
+            "text_en": "Wait. Wait, you are thinking ... you might have a wedding very soon!"
+          },
+          {
+            "position": 36,
+            "speaker": "Kaveh",
+            "text_en": "Might? MIGHT? She won’t say \"no,\" will she?"
+          },
+          {
+            "position": 37,
+            "speaker": "Anna",
+            "text_en": "No, no! She WILL say “yes”!"
+          },
+          {
+            "position": 38,
+            "speaker": "Kaveh",
+            "text_en": "I will have a wedding, won’t I?"
+          },
+          {
+            "position": 39,
+            "speaker": "Anna",
+            "text_en": "You will. You will!"
+          },
+          {
+            "position": 40,
+            "speaker": "Kaveh",
+            "text_en": "Thanks. I think."
+          },
+          {
+            "position": 41,
+            "speaker": "Anna",
+            "text_en": "Good luck!"
+          },
+          {
+            "position": 42,
+            "speaker": "Anna",
+            "text_en": "This is hard. Genie! Genie!"
+          },
+          {
+            "position": 43,
+            "speaker": "Genie",
+            "text_en": "Anna, what’s wrong?"
+          },
+          {
+            "position": 44,
+            "speaker": "Anna",
+            "text_en": "I don’t want to be a genie for Halloween. I might not go to the party."
+          },
+          {
+            "position": 45,
+            "speaker": "Genie",
+            "text_en": "Of course you will go. I have another costume for you!"
+          },
+          {
+            "position": 46,
+            "speaker": "Anna",
+            "text_en": "I’m a rock star! You read my mind!"
+          },
+          {
+            "position": 47,
+            "speaker": "Genie",
+            "text_en": "No. You told me you like rock music."
+          },
+          {
+            "position": 48,
+            "speaker": "Anna",
+            "text_en": "Oh, right. Well, I love it!"
+          },
+          {
+            "position": 49,
+            "speaker": "Genie",
+            "text_en": "Have fun, Anna!"
+          },
+          {
+            "position": 50,
+            "speaker": "Anna",
+            "text_en": "Thanks, Genie!!"
+          },
+          {
+            "position": 51,
+            "speaker": "Anna",
+            "text_en": "I am ready for the Halloween party! But I am not going to read minds. I might play some rock music! Or I might not. Until next time …"
+          }
         ]
       }
     ],
@@ -1854,6 +2683,114 @@
         "answers": [
           "Rebecca"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva as duas possibilidades opostas sobre a festa.",
+        "hint": "7 palavras",
+        "explanation": "A repetição de **might / might not** mostra que a decisão ainda está aberta.",
+        "hints": [
+          "As duas frases começam com *I might*.",
+          "Na segunda frase, acrescente *not*."
+        ],
+        "answers": [
+          "I might go I might not go"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "It leaves open the chance that she will not get the job.",
+          "It guarantees that she will get the job.",
+          "It means she already refused the job."
+        ],
+        "prompt": "Listening: Why does the word *might* bother Anna?",
+        "hint": "Compare *might* with the certainty of *will*.",
+        "explanation": "*Might* expressa possibilidade, inclusive a possibilidade de o emprego não acontecer.",
+        "hints": [
+          "A palavra não comunica certeza.",
+          "Anna ouve também a possibilidade negativa."
+        ],
+        "answers": [
+          "It leaves open the chance that she will not get the job."
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "She",
+          "won't",
+          "say",
+          "no",
+          "will",
+          "she"
+        ],
+        "prompt": "Ordene a frase e sua *tag question*.",
+        "hint": null,
+        "explanation": "Uma oração negativa com *won't* recebe a tag afirmativa **will she?**",
+        "hints": [
+          "Monte primeiro *She won't say no*.",
+          "A tag troca para a forma afirmativa."
+        ],
+        "answers": [
+          "She won't say no will she"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Expresse possibilidade: Maybe I will get the job. → I `____` get the job.",
+        "hint": null,
+        "explanation": "**Might** substitui *maybe* para marcar possibilidade.",
+        "hints": [
+          "Use um modal sem *to*.",
+          "A palavra procurada começa com *m*."
+        ],
+        "answers": [
+          "might"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Planos certos e incertos",
+        "instructions": "Write 5 to 7 sentences about one plan that is certain and two possibilities that are still open. Finish with a tag question.",
+        "min_words": 45,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "possibilidade com might",
+            "terms": [
+              "might"
+            ]
+          },
+          {
+            "label": "certeza com will ou won’t",
+            "terms": [
+              "will",
+              "won't"
+            ]
+          },
+          {
+            "label": "uma tag question",
+            "terms": [
+              "won't i",
+              "will you",
+              "will she",
+              "will he",
+              "won't we",
+              "won't they"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -1872,7 +2809,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "cooperar",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Marsha cozinha, Anna faz as compras — com a lista errada. A aula é a aula das **unidades de embalagem** (*a bag of*, *a jar of*, *a loaf of*) e de **too much / too many**, que é como o inglês diz \"demais\".",
     "goals": [
       "Usar as **unidades de medida e embalagem** que o inglês exige antes de incontáveis: *a bag of coffee*, não \"a coffee\".",
@@ -2219,6 +3156,138 @@
             "text_en": "This is the shopping list for breakfast.",
             "text_pt": "Esta é a lista de compras do café da manhã."
           }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Hi there! Washington, D.C. has many fun places to eat. But, sometimes it's more fun to cook. In fact, tonight Marsha and I are cooking for friends. Well, she is cooking. I am doing the shopping."
+          },
+          {
+            "position": 1,
+            "speaker": "Stage direction",
+            "text_en": "(phone rings) It’s Marsha. Hi, Marsha."
+          },
+          {
+            "position": 2,
+            "speaker": "Marsha",
+            "text_en": "Hi, Anna. Do you have the shopping list?"
+          },
+          {
+            "position": 3,
+            "speaker": "Anna",
+            "text_en": "Yes, I told you: I have the shopping list. Can you hear it?"
+          },
+          {
+            "position": 4,
+            "speaker": "Marsha",
+            "text_en": "Okay, good. I hear the list. Anna, please buy all the ingredients on the list."
+          },
+          {
+            "position": 5,
+            "speaker": "Anna",
+            "text_en": "Yes, Marsha, I will."
+          },
+          {
+            "position": 6,
+            "speaker": "Marsha",
+            "text_en": "And do not spend too much time shopping."
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "No, Marsha, I won’t. See you later."
+          },
+          {
+            "position": 8,
+            "speaker": "Anna",
+            "text_en": "Sometimes, Marsha worries too much. I love shopping! And, I did not spend too much money. Oh, no! But I did spend too much time! I have to return home now!"
+          },
+          {
+            "position": 9,
+            "speaker": "Marsha",
+            "text_en": "Anna, what took you so long? Our guests will be here soon!"
+          },
+          {
+            "position": 10,
+            "speaker": "Anna",
+            "text_en": "Don’t worry, Marsha. I bought everything on the list."
+          },
+          {
+            "position": 11,
+            "speaker": "Marsha",
+            "text_en": "Let me see. You bought a bunch of bananas, a box of pancake mix, a bag of coffee … Anna, this is all wrong!"
+          },
+          {
+            "position": 12,
+            "speaker": "Anna",
+            "text_en": "What do you mean wrong? I bought a jar of peanut butter and a loaf of bread … no, wait … two loaves of bread."
+          },
+          {
+            "position": 13,
+            "speaker": "Marsha",
+            "text_en": "Anna, these are the wrong ingredients!"
+          },
+          {
+            "position": 14,
+            "speaker": "Anna",
+            "text_en": "These ingredients are all on the list! I took this list from the counter."
+          },
+          {
+            "position": 15,
+            "speaker": "Marsha",
+            "text_en": "Anna, this is the shopping list for breakfast. I said, take the shopping list - on the refrigerator - for dinner!"
+          },
+          {
+            "position": 16,
+            "speaker": "Anna",
+            "text_en": "Marsha, there was no shopping list - on the refrigerator - for dinner!"
+          },
+          {
+            "position": 17,
+            "speaker": "Marsha",
+            "text_en": "Oh no! It’s on the floor!!"
+          },
+          {
+            "position": 18,
+            "speaker": "Anna/Marsha",
+            "text_en": "Ahh!!! Ahh!!!"
+          },
+          {
+            "position": 19,
+            "speaker": "Marsha",
+            "text_en": "What are we going to do?"
+          },
+          {
+            "position": 20,
+            "speaker": "Anna",
+            "text_en": "When do our guests arrive?"
+          },
+          {
+            "position": 21,
+            "speaker": "Marsha",
+            "text_en": "They arrive in 30 minutes!"
+          },
+          {
+            "position": 22,
+            "speaker": "Anna",
+            "text_en": "I can fix this. Do you trust me?"
+          },
+          {
+            "position": 23,
+            "speaker": "Marsha",
+            "text_en": "Do I have to?"
+          },
+          {
+            "position": 24,
+            "speaker": "Anna",
+            "text_en": "Yes."
+          },
+          {
+            "position": 25,
+            "speaker": "Stage direction",
+            "text_en": "(The story continues next week)"
+          }
         ]
       }
     ],
@@ -2297,6 +3366,109 @@
         "answers": [
           "the breakfast shopping list"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva as duas embalagens compradas por Anna.",
+        "hint": "12 palavras",
+        "explanation": "Incontáveis recebem unidades: **a jar of** peanut butter e **a loaf of** bread.",
+        "hints": [
+          "Comece com *I bought a jar...*.",
+          "A segunda unidade é *a loaf of bread*."
+        ],
+        "answers": [
+          "I bought a jar of peanut butter and a loaf of bread"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "in 30 minutes",
+          "in two hours",
+          "the next morning"
+        ],
+        "prompt": "Listening: When do the guests arrive?",
+        "hint": "Marsha gives an exact amount of time.",
+        "explanation": "Os convidados chegam **in 30 minutes**.",
+        "hints": [
+          "A resposta está em minutos.",
+          "O número é trinta."
+        ],
+        "answers": [
+          "in 30 minutes"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "I",
+          "did",
+          "not",
+          "spend",
+          "too",
+          "much",
+          "money"
+        ],
+        "prompt": "Ordene a frase sobre uma quantidade incontável.",
+        "hint": null,
+        "explanation": "Na negativa do passado: sujeito + **did not** + verbo-base; *money* pede **too much**.",
+        "hints": [
+          "Comece com *I did not spend*.",
+          "Use *too much* antes de *money*."
+        ],
+        "answers": [
+          "I did not spend too much money"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Corrija o plural: two loafs of bread → two `____` of bread.",
+        "hint": null,
+        "explanation": "O plural irregular de *loaf* é **loaves**.",
+        "hints": [
+          "O final *-f* muda.",
+          "Use *-ves* no plural."
+        ],
+        "answers": [
+          "loaves"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Planeje uma lista de compras",
+        "instructions": "Write 5 to 7 sentences for a dinner shopping plan. Name at least three items with their containers or units and mention one quantity problem.",
+        "min_words": 45,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "duas unidades ou embalagens",
+            "terms": [
+              "a bag of",
+              "a box of",
+              "a jar of",
+              "a loaf of",
+              "a bunch of",
+              "a bottle of"
+            ]
+          },
+          {
+            "label": "too much ou too many",
+            "terms": [
+              "too much",
+              "too many"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -2315,7 +3487,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "substituir",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Anna salva o jantar virando a lista errada em \"panquecas de pasta de amendoim com banana\". A aula é construída sobre **onde estão as coisas** — preposições de lugar na cozinha — e sobre o **will de oferta**, decidido na hora.",
     "goals": [
       "Dizer onde algo está com **in, inside, on, under** e perguntar com *Where is / Where are*.",
@@ -2657,6 +3829,113 @@
             "text_en": "I'll answer the door.",
             "text_pt": "Eu atendo a porta."
           }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Last time on Let’s Learn English, Marsha and I invited friends to a dinner party but I shopped with the wrong list. Guests are coming soon. Marsha is worried but I have a plan. Let’s see what it is."
+          },
+          {
+            "position": 1,
+            "speaker": "Anna",
+            "text_en": "I just need a couple of ingredients. Marsha, please hand me the flour."
+          },
+          {
+            "position": 2,
+            "speaker": "Marsha",
+            "text_en": "Anna, where is the flour? It's not in the cabinets."
+          },
+          {
+            "position": 3,
+            "speaker": "Anna",
+            "text_en": "I put the flour inside the refrigerator."
+          },
+          {
+            "position": 4,
+            "speaker": "Marsha",
+            "text_en": "Why?"
+          },
+          {
+            "position": 5,
+            "speaker": "Anna",
+            "text_en": "It’s cold and dry in the refrigerator. See, it says: “Put in a cold, dry place.” Okay, now, Marsha, please hand me the eggs."
+          },
+          {
+            "position": 6,
+            "speaker": "Marsha",
+            "text_en": "Anna, where are the eggs?"
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "The eggs are inside the cabinet under the sink."
+          },
+          {
+            "position": 8,
+            "speaker": "Marsha",
+            "text_en": "Anna, why are the eggs in here?"
+          },
+          {
+            "position": 9,
+            "speaker": "Anna",
+            "text_en": "On the farm, we always put the eggs there. How else can the chickens see them? Okay. You clean the living room. I will make dinner."
+          },
+          {
+            "position": 10,
+            "speaker": "Marsha",
+            "text_en": "What are you going to make with these ingredients?"
+          },
+          {
+            "position": 11,
+            "speaker": "Anna",
+            "text_en": "I have a plan."
+          },
+          {
+            "position": 12,
+            "speaker": "Marsha",
+            "text_en": "Okay, the apartment is clean. The kitchen is not. What are you cooking?"
+          },
+          {
+            "position": 13,
+            "speaker": "Anna",
+            "text_en": "I made my favorite recipe: peanut-butter-banana pancakes!"
+          },
+          {
+            "position": 14,
+            "speaker": "Marsha",
+            "text_en": "You made breakfast."
+          },
+          {
+            "position": 15,
+            "speaker": "Anna",
+            "text_en": "Yes! I call it let’s-eat-breakfast-for-dinner dinner!"
+          },
+          {
+            "position": 16,
+            "speaker": "Marsha",
+            "text_en": "Anna! Mmm! Hey, this tastes good! Anna, you made it work!"
+          },
+          {
+            "position": 17,
+            "speaker": "Anna",
+            "text_en": "That’s our guests!"
+          },
+          {
+            "position": 18,
+            "speaker": "Marsha",
+            "text_en": "I’ll answer the door."
+          },
+          {
+            "position": 19,
+            "speaker": "Anna",
+            "text_en": "I’ll finish here."
+          },
+          {
+            "position": 20,
+            "speaker": "Anna",
+            "text_en": "Like I said, sometimes Marsha worries too much. When something goes wrong with your plan, just change the plan! Till next time!"
+          }
         ]
       }
     ],
@@ -2737,6 +4016,103 @@
         "answers": [
           "inside the refrigerator"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva onde Anna colocou a farinha.",
+        "hint": "7 palavras",
+        "explanation": "**Inside the refrigerator** indica que a farinha foi colocada dentro da geladeira.",
+        "hints": [
+          "Comece com *I put the flour...*.",
+          "Termine com *inside the refrigerator*."
+        ],
+        "answers": [
+          "I put the flour inside the refrigerator"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "inside the cabinet under the sink",
+          "on top of the refrigerator",
+          "under the table"
+        ],
+        "prompt": "Listening: Where are the eggs?",
+        "hint": "A resposta combina duas relações de lugar.",
+        "explanation": "Os ovos estão **inside the cabinet under the sink**.",
+        "hints": [
+          "Primeiro, pense em qual móvel contém os ovos.",
+          "Depois, localize esse móvel em relação à pia."
+        ],
+        "answers": [
+          "inside the cabinet under the sink"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "I'll",
+          "answer",
+          "the",
+          "door"
+        ],
+        "prompt": "Ordene as palavras para fazer uma oferta imediata.",
+        "hint": null,
+        "explanation": "**I'll** expressa uma decisão tomada no momento da fala.",
+        "hints": [
+          "Comece pela contração de *I will*.",
+          "Termine com *the door*."
+        ],
+        "answers": [
+          "I'll answer the door"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Reescreva com dois objetos: Please hand the flour to me. → Please hand `____`.",
+        "hint": null,
+        "explanation": "Sem *to*, o objeto indireto vem primeiro: **me the flour**.",
+        "hints": [
+          "Coloque a pessoa logo depois de *hand*.",
+          "Complete com *me + the flour*."
+        ],
+        "answers": [
+          "me the flour"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Onde estão os ingredientes?",
+        "instructions": "Write 5 to 7 sentences explaining where four kitchen items are. End by offering to solve one problem immediately.",
+        "min_words": 40,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "duas preposições de lugar",
+            "terms": [
+              "inside",
+              "in",
+              "on",
+              "under"
+            ]
+          },
+          {
+            "label": "uma oferta com I’ll",
+            "terms": [
+              "i'll"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -2755,7 +4131,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "personalizar",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Anna acha uma bolsa perdida e pergunta de quem é — e depois discute cidade × campo com o dono. Duas camadas: os **pronomes possessivos** (*mine, yours, his, hers*) e a **linguagem de concordar e discordar**, que é a habilidade mais útil desta aula para reunião de trabalho.",
     "goals": [
       "Diferenciar **adjetivo possessivo** (*my bag*) de **pronome possessivo** (*mine*), que substitui o substantivo.",
@@ -3107,9 +4483,8 @@
           {
             "position": 0,
             "start_seconds": 21,
-            "end_seconds": 26,
-            "speaker": "Anna e Dr. Jill",
             "end_seconds": 23,
+            "speaker": "Anna e Dr. Jill",
             "text_en": "Is this bag yours?",
             "text_pt": "Esta bolsa é sua?"
           },
@@ -3136,6 +4511,138 @@
             "speaker": "Anna",
             "text_en": "You can always agree to disagree!",
             "text_pt": "Sempre podemos concordar em discordar!"
+          }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "You know, I am from the country and sometimes I miss it. But I really like life in the city! I love the city. Oh, look. Someone lost a bag. Maybe it's theirs. Excuse me. Is this bag yours?"
+          },
+          {
+            "position": 1,
+            "speaker": "Dr. Jill",
+            "text_en": "No. It's not mine. It might be hers."
+          },
+          {
+            "position": 2,
+            "speaker": "Anna",
+            "text_en": "Excuse me. Is this bag yours?"
+          },
+          {
+            "position": 3,
+            "speaker": "Sarah",
+            "text_en": "No. It's not mine. It might be his."
+          },
+          {
+            "position": 4,
+            "speaker": "Anna",
+            "text_en": "Thank you. Hello. Is this bag yours?"
+          },
+          {
+            "position": 5,
+            "speaker": "Phil",
+            "text_en": "Yes, that's mine. These are all my travel things. Thank you, thank you!"
+          },
+          {
+            "position": 6,
+            "speaker": "Anna",
+            "text_en": "Are you okay? You seem ... nervous."
+          },
+          {
+            "position": 7,
+            "speaker": "Phil",
+            "text_en": "Well, this is my first visit to Washington, D.C. I'm from a small town in the country. I feel a little lost."
+          },
+          {
+            "position": 8,
+            "speaker": "Anna",
+            "text_en": "I am from the country too! And I understand. When I first came here, I felt lost ... all the time."
+          },
+          {
+            "position": 9,
+            "speaker": "Phil",
+            "text_en": "So, do you like living in the country or in the city?"
+          },
+          {
+            "position": 10,
+            "speaker": "Anna",
+            "text_en": "I like to live in the city."
+          },
+          {
+            "position": 11,
+            "speaker": "Phil",
+            "text_en": "Why?"
+          },
+          {
+            "position": 12,
+            "speaker": "Anna",
+            "text_en": "The city is exciting! It has more culture than the country. There are many museums and restaurants. Every night, there is theater and music. And, there are more jobs. That is why I'm here."
+          },
+          {
+            "position": 13,
+            "speaker": "Phil",
+            "text_en": "Well, I agree. There is more culture in the city and there might be more jobs. But the country has more nature! It's peaceful and beautiful. There are more trees and mountains. The air is clean. You can go hiking and camping. The city is not beautiful. It's noisy and dirty."
+          },
+          {
+            "position": 14,
+            "speaker": "Anna",
+            "text_en": "I disagree. I think all the different buildings are beautiful. And I like to watch all the different people."
+          },
+          {
+            "position": 15,
+            "speaker": "Phil",
+            "text_en": "That's another thing that is different. People in the country are friendly. They always say \"hello!\" Here, no one says \"hello.\" I think city people are rude."
+          },
+          {
+            "position": 16,
+            "speaker": "Anna",
+            "text_en": "Well, I agree. Country people are friendly. But I don't think city people are rude. I think they're just busy."
+          },
+          {
+            "position": 17,
+            "speaker": "Phil",
+            "text_en": "That's a good point."
+          },
+          {
+            "position": 18,
+            "speaker": "Anna",
+            "text_en": "Look at me. I live in the city and I said \"hello\" to you."
+          },
+          {
+            "position": 19,
+            "speaker": "Phil",
+            "text_en": "But you are from the country."
+          },
+          {
+            "position": 20,
+            "speaker": "Anna",
+            "text_en": "I have an idea. Let's say \"hello!\" to people -- to many people!"
+          },
+          {
+            "position": 21,
+            "speaker": "Phil",
+            "text_en": "What? Why?"
+          },
+          {
+            "position": 22,
+            "speaker": "Anna",
+            "text_en": "Well, if we say \"hello,\" maybe they will say \"hello\" to other people ... Hello!"
+          },
+          {
+            "position": 23,
+            "speaker": "Phil",
+            "text_en": "... and they will say \"hello\" to more people! That's a great idea! I'm glad you found my bag."
+          },
+          {
+            "position": 24,
+            "speaker": "Anna",
+            "text_en": "Come on. Let's go say \"hello\" to people."
+          },
+          {
+            "position": 25,
+            "speaker": "Anna",
+            "text_en": "We don't have to agree with people. They have their opinions. We have ours. And as we like to say, you can always agree to disagree! Until next time...! Hello!"
           }
         ]
       }
@@ -3214,6 +4721,117 @@
         "answers": [
           "There are more jobs"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva como a dona da bolsa identifica seus objetos.",
+        "hint": "6 palavras",
+        "explanation": "**My** acompanha *travel things*; o pronome **mine** apareceria sem substantivo.",
+        "hints": [
+          "Comece com *These are all...*.",
+          "Use o adjetivo possessivo antes de *travel things*."
+        ],
+        "answers": [
+          "These are all my travel things"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "They have different opinions about city and country life.",
+          "They cannot find the travel bag.",
+          "They both want to leave the city."
+        ],
+        "prompt": "Listening: Why do Anna and her friend agree to disagree?",
+        "hint": "Observe os argumentos que começam com *I agree* e *I disagree*.",
+        "explanation": "Elas valorizam aspectos diferentes da vida na cidade e no interior.",
+        "hints": [
+          "A expressão encerra uma discussão de opiniões.",
+          "Uma prefere cultura; a outra destaca natureza."
+        ],
+        "answers": [
+          "They have different opinions about city and country life."
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "I",
+          "don't",
+          "think",
+          "city",
+          "people",
+          "are",
+          "rude"
+        ],
+        "prompt": "Ordene a discordância educada.",
+        "hint": null,
+        "explanation": "O inglês normalmente nega **think**: *I don't think...*",
+        "hints": [
+          "Comece com *I don't think*.",
+          "A oração seguinte é *city people are rude*."
+        ],
+        "answers": [
+          "I don't think city people are rude"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Substitua o substantivo pelo pronome possessivo: This is my bag. → This bag is `____`.",
+        "hint": null,
+        "explanation": "**Mine** substitui *my bag* e não recebe substantivo depois.",
+        "hints": [
+          "Não use *my* sozinho.",
+          "O pronome começa com *m* e termina em *-ine*."
+        ],
+        "answers": [
+          "mine"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Cidade ou interior?",
+        "instructions": "Write 5 to 7 sentences comparing city and country life. State one agreement, one respectful disagreement and your own preference.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "comparação com more … than",
+            "terms": [
+              "more"
+            ]
+          },
+          {
+            "label": "linguagem de opinião",
+            "terms": [
+              "i agree",
+              "i disagree",
+              "i don't think",
+              "in my opinion"
+            ]
+          },
+          {
+            "label": "um pronome possessivo",
+            "terms": [
+              "mine",
+              "yours",
+              "his",
+              "hers",
+              "ours",
+              "theirs"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -3232,7 +4850,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "avaliar",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Penelope, a melhor amiga de infância, visita Washington e Anna descreve todas as pessoas da sua vida — cada uma com um **superlativo**. A aula é uma coleção quase completa das formas de superlativo do inglês, incluindo as irregulares.",
     "goals": [
       "Formar o superlativo com **the + adjetivo + -est** (curtos) e **the most + adjetivo** (longos).",
@@ -3622,9 +5240,8 @@
           {
             "position": 0,
             "start_seconds": 59,
-            "end_seconds": 72,
-            "speaker": "Anna",
             "end_seconds": 64,
+            "speaker": "Anna",
             "text_en": "Marsha is the nicest person.",
             "text_pt": "Marsha é a pessoa mais gentil."
           },
@@ -3651,6 +5268,158 @@
             "speaker": "Anna",
             "text_en": "I am the luckiest woman in Washington, D.C.",
             "text_pt": "Sou a mulher mais sortuda de Washington."
+          }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Hello! I have great news. My best friend from my hometown is coming here -- to Washington, D.C.! I can’t wait to catch up with her! Oh! I gotta go. Her train arrives in 10 minutes!"
+          },
+          {
+            "position": 1,
+            "speaker": "Anna",
+            "text_en": "Penelope!"
+          },
+          {
+            "position": 2,
+            "speaker": "Penelope",
+            "text_en": "Anna! I am really happy to see you!"
+          },
+          {
+            "position": 3,
+            "speaker": "Anna",
+            "text_en": "Me too! How was your trip?"
+          },
+          {
+            "position": 4,
+            "speaker": "Penelope",
+            "text_en": "It was fine."
+          },
+          {
+            "position": 5,
+            "speaker": "Anna",
+            "text_en": "Let me help you with your bags."
+          },
+          {
+            "position": 6,
+            "speaker": "Penelope",
+            "text_en": "I’m really excited to be in Washington, D.C.! I can’t wait to hear about … everything!"
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "I have so much to tell you. Let’s go to my apartment. We can talk over a hot cup of tea."
+          },
+          {
+            "position": 8,
+            "speaker": "Penelope",
+            "text_en": "I love your apartment building, Anna. Is your rent expensive?"
+          },
+          {
+            "position": 9,
+            "speaker": "Anna",
+            "text_en": "Well, I have a roommate. So, we split the rent."
+          },
+          {
+            "position": 10,
+            "speaker": "Penelope",
+            "text_en": "Oh, that’s right. Is your roommate nice?"
+          },
+          {
+            "position": 11,
+            "speaker": "Anna",
+            "text_en": "Marsha is the nicest person I know in this city. Sometimes she worries too much. And she says I’m the messiest cook she knows. But we are great roommates."
+          },
+          {
+            "position": 12,
+            "speaker": "Penelope",
+            "text_en": "So, Anna, is it hard to make friends in D.C.?"
+          },
+          {
+            "position": 13,
+            "speaker": "Anna",
+            "text_en": "At first it was hard. But now, Marsha is a good friend. And there’s Pete. Of all the people I know in D.C., Pete is the most serious and also the silliest."
+          },
+          {
+            "position": 14,
+            "speaker": "Penelope",
+            "text_en": "He sounds … interesting."
+          },
+          {
+            "position": 15,
+            "speaker": "Anna",
+            "text_en": "Jonathan and Ashley are two other good friends of mine. In the city, they are the friendliest people I know. They always help me when I need it."
+          },
+          {
+            "position": 16,
+            "speaker": "Penelope",
+            "text_en": "Your friends sound great! So, tell me about your job."
+          },
+          {
+            "position": 17,
+            "speaker": "Anna",
+            "text_en": "I love my work! I make a children’s show called the “Time Traveling Treehouse.”"
+          },
+          {
+            "position": 18,
+            "speaker": "Penelope",
+            "text_en": "Anna, that is the best job for you! Do you remember when we were little? We played in that old treehouse behind my family’s house for hours!"
+          },
+          {
+            "position": 19,
+            "speaker": "Anna",
+            "text_en": "I forgot about that! We thought it really time traveled! It is really good to talk to you. New friends are good. But old friends are the best."
+          },
+          {
+            "position": 20,
+            "speaker": "Penelope",
+            "text_en": "I know. Our hometown isn’t the same now. You are not there."
+          },
+          {
+            "position": 21,
+            "speaker": "Anna",
+            "text_en": "No crying. No crying. Penelope, why don't you move here and live with me and Marsha?"
+          },
+          {
+            "position": 22,
+            "speaker": "Penelope",
+            "text_en": "Anna, I can’t leave our hometown. You forget -- I love my job, too."
+          },
+          {
+            "position": 23,
+            "speaker": "Anna",
+            "text_en": "I didn’t forget. You are the most famous turkey farmer I know!"
+          },
+          {
+            "position": 24,
+            "speaker": "Penelope",
+            "text_en": "Thanks, Anna."
+          },
+          {
+            "position": 25,
+            "speaker": "Anna",
+            "text_en": "Come on. Let’s go eat dinner at one of D.C.’s most famous restaurants."
+          },
+          {
+            "position": 26,
+            "speaker": "Penelope",
+            "text_en": "Awesome!"
+          },
+          {
+            "position": 27,
+            "speaker": "Anna",
+            "text_en": "I have a great apartment. I love my work. And I have awesome friends. I am the luckiest woman in Washington, D.C."
+          },
+          {
+            "position": 28,
+            "speaker": "Stage direction",
+            "text_en": "(sound of thunder)"
+          },
+          {
+            "position": 29,
+            "speaker": "Anna",
+            "text_en": "Until next time?"
           }
         ]
       }
@@ -3729,6 +5498,114 @@
         "answers": [
           "Marsha"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva como Anna descreve Marsha.",
+        "hint": "10 palavras",
+        "explanation": "**The nicest** é o superlativo curto delimitado por *in this city*.",
+        "hints": [
+          "Comece com *Marsha is the nicest...*.",
+          "Termine com *I know in this city*."
+        ],
+        "answers": [
+          "Marsha is the nicest person I know in this city"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "They are roommates and split the rent.",
+          "They work at the same restaurant.",
+          "They travel together every week."
+        ],
+        "prompt": "Listening: Why do Anna and Marsha split the rent?",
+        "hint": "Anna explains who lives with her.",
+        "explanation": "Marsha é sua **roommate**, por isso elas dividem o aluguel.",
+        "hints": [
+          "A resposta envolve a casa.",
+          "Procure a palavra *roommate*."
+        ],
+        "answers": [
+          "They are roommates and split the rent."
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "Old",
+          "friends",
+          "are",
+          "the",
+          "best"
+        ],
+        "prompt": "Ordene a frase com o superlativo irregular de *good*.",
+        "hint": null,
+        "explanation": "O superlativo irregular de *good* é **the best**.",
+        "hints": [
+          "Comece com *Old friends*.",
+          "Termine com *the best*."
+        ],
+        "answers": [
+          "Old friends are the best"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Corrija: She is the most friendly person here. → She is `____` person here.",
+        "hint": null,
+        "explanation": "*Friendly* muda **y → iest**: **the friendliest**.",
+        "hints": [
+          "Não use *most* neste caso.",
+          "Troque o *y* final por *-iest*."
+        ],
+        "answers": [
+          "the friendliest"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma pessoa marcante",
+        "instructions": "Write 5 to 7 sentences describing a friend or relative and compare this person with a clear group.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "um superlativo curto",
+            "terms": [
+              "the nicest",
+              "the funniest",
+              "the friendliest",
+              "the luckiest",
+              "the best"
+            ]
+          },
+          {
+            "label": "um superlativo com the most",
+            "terms": [
+              "the most"
+            ]
+          },
+          {
+            "label": "um grupo de comparação",
+            "terms": [
+              "i know",
+              "in my family",
+              "in my city",
+              "of all"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -3747,7 +5624,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "perguntar para esclarecer",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Pete anuncia um produto milagroso para cabelo, Anna compra e o resultado é um desastre. A aula constrói o diálogo inteiro em torno dos **prefixos negativos**: *untidy, uncomfortable, inexpensive, imperfect, dishonest, unbelievable*.",
     "goals": [
       "Negar um adjetivo com prefixo: **un-, in-, im-, dis-** — e saber que a escolha é por costume, não por regra lógica.",
@@ -4151,6 +6028,173 @@
             "text_en": "It was dishonest!",
             "text_pt": "Foi desonesto!"
           }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Hello! Winter weather in Washington, D.C. can be really windy. And wind messes up my hair. It is really windy today. Look at my hair. Will it be windy this weekend? I’ll listen to the news. I am tired of my untidy hair."
+          },
+          {
+            "position": 1,
+            "speaker": "Pete",
+            "text_en": "Are you tired of your untidy hair?"
+          },
+          {
+            "position": 2,
+            "speaker": "Anna",
+            "text_en": "Yes. Yes, I am. And it’s … uncomfortable."
+          },
+          {
+            "position": 3,
+            "speaker": "Pete",
+            "text_en": "Is it … uncomfortable?"
+          },
+          {
+            "position": 4,
+            "speaker": "Anna",
+            "text_en": "Yes. Yes, it is! Hey, is that … Pete?"
+          },
+          {
+            "position": 5,
+            "speaker": "Pete",
+            "text_en": "Hi. I’m Pete. And I have the perfect product for you -- Hair Be Good!"
+          },
+          {
+            "position": 6,
+            "speaker": "Pete",
+            "text_en": "Just spray Hair Be Good on your hair … wrap in a towel … and you are done! Hair Be Good works and it’s inexpensive. One can costs only $10! So, go online and order your Hair Be Good today!"
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "Hair Be Good sounds perfect! And I can trust Pete! I am buying some right now. Okay, I will order one can of Hair Be Good for $10. I’ll pay with a credit card. My delivery will arrive in 2 days. Awesome!"
+          },
+          {
+            "position": 8,
+            "speaker": "Anna",
+            "text_en": "It arrived! I'll use it before I go to work. Okay, Hair Be Good, make my untidy hair tidy! No, make it … fabulous!"
+          },
+          {
+            "position": 9,
+            "speaker": "Amelia",
+            "text_en": "Hi, Anna."
+          },
+          {
+            "position": 10,
+            "speaker": "Anna",
+            "text_en": "Hello, Amelia!"
+          },
+          {
+            "position": 11,
+            "speaker": "Amelia",
+            "text_en": "Anna, you look … different."
+          },
+          {
+            "position": 12,
+            "speaker": "Anna",
+            "text_en": "Thanks! I used a new product called Hair Be Good."
+          },
+          {
+            "position": 13,
+            "speaker": "Amelia",
+            "text_en": "Well, it’s not."
+          },
+          {
+            "position": 14,
+            "speaker": "Anna",
+            "text_en": "It’s not what?"
+          },
+          {
+            "position": 15,
+            "speaker": "Amelia",
+            "text_en": "Good. Your hair does not look good."
+          },
+          {
+            "position": 16,
+            "speaker": "Anna",
+            "text_en": "Oh, no! This is not good."
+          },
+          {
+            "position": 17,
+            "speaker": "Amelia",
+            "text_en": "Why don’t you go home and take care of … this."
+          },
+          {
+            "position": 18,
+            "speaker": "Anna",
+            "text_en": "Good idea."
+          },
+          {
+            "position": 19,
+            "speaker": "Pete",
+            "text_en": "Hi, Anna!"
+          },
+          {
+            "position": 20,
+            "speaker": "Anna",
+            "text_en": "Hello, Pete."
+          },
+          {
+            "position": 21,
+            "speaker": "Pete",
+            "text_en": "Is something wrong?"
+          },
+          {
+            "position": 22,
+            "speaker": "Anna",
+            "text_en": "This is wrong!"
+          },
+          {
+            "position": 23,
+            "speaker": "Pete",
+            "text_en": "What did you do to your hair?"
+          },
+          {
+            "position": 24,
+            "speaker": "Anna",
+            "text_en": "Hair Be Good did this to my hair."
+          },
+          {
+            "position": 25,
+            "speaker": "Pete",
+            "text_en": "Ah, you bought it!"
+          },
+          {
+            "position": 26,
+            "speaker": "Anna",
+            "text_en": "Yes, I bought it. You said in your ad it was a perfect product. This is not perfect. This is imperfect!"
+          },
+          {
+            "position": 27,
+            "speaker": "Pete",
+            "text_en": "It’s unbelievable!"
+          },
+          {
+            "position": 28,
+            "speaker": "Anna",
+            "text_en": "I believed your ad, Pete. It was dishonest!"
+          },
+          {
+            "position": 29,
+            "speaker": "Pete",
+            "text_en": "Anna, you don’t believe everything you see in ads, do you?"
+          },
+          {
+            "position": 30,
+            "speaker": "Anna",
+            "text_en": "No, Pete. Just the ones with my friends."
+          },
+          {
+            "position": 31,
+            "speaker": "Pete",
+            "text_en": "Your hair will be okay. Just wash it ... a couple of times."
+          },
+          {
+            "position": 32,
+            "speaker": "Anna",
+            "text_en": "Thanks. Thanks a lot, Pete! Here, here's your product! You should call it \"Hair Be Really, Really Bad!\" Until next time, Pete! Till next time."
+          }
         ]
       }
     ],
@@ -4237,6 +6281,114 @@
         "answers": [
           "$10"
         ]
+      },
+      {
+        "position": 8,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva por que Anna quer resolver o problema do cabelo.",
+        "hint": "7 palavras",
+        "explanation": "**Be tired of** indica cansaço ou irritação; *untidy* usa o prefixo negativo **un-**.",
+        "hints": [
+          "Comece com *I am tired of...*.",
+          "O adjetivo final é o oposto de *tidy*."
+        ],
+        "answers": [
+          "I am tired of my untidy hair"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "in two days",
+          "in ten minutes",
+          "at the end of winter"
+        ],
+        "prompt": "Listening: When will Anna’s delivery arrive?",
+        "hint": "Listen for the number after *in*.",
+        "explanation": "Anna informa que a entrega chegará **in two days**.",
+        "hints": [
+          "A unidade de tempo é *days*.",
+          "O número é dois."
+        ],
+        "answers": [
+          "in two days"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "You",
+          "don't",
+          "believe",
+          "everything",
+          "you",
+          "see",
+          "in",
+          "ads"
+        ],
+        "prompt": "Ordene a afirmação que prepara a *tag question*.",
+        "hint": null,
+        "explanation": "A oração principal negativa é seguida pela relativa **you see in ads**.",
+        "hints": [
+          "Comece com *You don't believe*.",
+          "Termine com *you see in ads*."
+        ],
+        "answers": [
+          "You don't believe everything you see in ads"
+        ]
+      },
+      {
+        "position": 11,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Troque a negação pelo prefixo correto: It is not perfect. → It is `____`.",
+        "hint": null,
+        "explanation": "O oposto convencional de *perfect* é **imperfect**.",
+        "hints": [
+          "O prefixo não é *un-* neste adjetivo.",
+          "Use o prefixo *im-*."
+        ],
+        "answers": [
+          "imperfect"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Avalie uma compra online",
+        "instructions": "Write 5 to 7 sentences reviewing a product bought online. Explain the advertisement, what happened and whether you recommend it.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "dois verbos no passado",
+            "terms": [
+              "bought",
+              "believed",
+              "arrived",
+              "worked",
+              "looked",
+              "was",
+              "were"
+            ]
+          },
+          {
+            "label": "um adjetivo com prefixo negativo",
+            "terms": [
+              "untidy",
+              "inexpensive",
+              "imperfect",
+              "dishonest",
+              "unbelievable"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -4255,7 +6407,7 @@
     "content_version": 1,
     "editorial_status": "reviewed",
     "learning_strategy": "autoavaliar",
-    "source_accessed_at": "2026-10-07",
+    "source_accessed_at": "2026-10-08",
     "lead": "Ano novo, resolução nova: Anna faz um teste para uma peça de teatro. O diretor corrige **como** ela fala e **como** ela anda — e por isso a aula inteira é feita de **advérbios de modo**, do comparativo deles e do par *too* / *enough*.",
     "goals": [
       "Formar advérbio de modo com **adjetivo + -ly** e saber quando o *y* vira *i*.",
@@ -4695,9 +6847,8 @@
           {
             "position": 0,
             "start_seconds": 83,
-            "end_seconds": 93,
-            "speaker": "Director",
             "end_seconds": 86,
+            "speaker": "Director",
             "text_en": "You are speaking too softly.",
             "text_pt": "Você está falando baixo demais."
           },
@@ -4732,6 +6883,158 @@
             "speaker": "Anna",
             "text_en": "I'm a tree.",
             "text_pt": "Sou uma árvore."
+          }
+        ],
+        "transcript": [
+          {
+            "position": 0,
+            "speaker": "Anna",
+            "text_en": "Happy New Year! Some people, at the start of a new year, make a resolution -- a promise to yourself to be better. I thought about my resolution carefully. I want to be an actor on the stage! Today I will audition for a show called \"The Woods Are Alive!\" Wish me luck!"
+          },
+          {
+            "position": 1,
+            "speaker": "Director",
+            "text_en": "Next! What is your name?"
+          },
+          {
+            "position": 2,
+            "speaker": "Anna",
+            "text_en": "My name is Anna Matteo."
+          },
+          {
+            "position": 3,
+            "speaker": "Director",
+            "text_en": "Are you ready to audition?"
+          },
+          {
+            "position": 4,
+            "speaker": "Anna",
+            "text_en": "(warms up voice) Yes."
+          },
+          {
+            "position": 5,
+            "speaker": "Director",
+            "text_en": "Great. Let's begin on page 1. Here is the story. You are lost in the woods. You are searching desperately for a way out. Suddenly, you hear something."
+          },
+          {
+            "position": 6,
+            "speaker": "Director",
+            "text_en": "Now, say your line."
+          },
+          {
+            "position": 7,
+            "speaker": "Anna",
+            "text_en": "'What was that? Hello. Is someone there?'"
+          },
+          {
+            "position": 8,
+            "speaker": "Director",
+            "text_en": "Anna, you are speaking too softly. Can you speak more loudly and a little more, um, seriously?"
+          },
+          {
+            "position": 9,
+            "speaker": "Anna",
+            "text_en": "Yes, of course I can. 'What was that? Hello. Is someone there?' Is that loud enough?"
+          },
+          {
+            "position": 10,
+            "speaker": "Director",
+            "text_en": "Yes, that is loud enough. Let's turn to page 25. In this scene, you are moving slowly and quietly through the woods."
+          },
+          {
+            "position": 11,
+            "speaker": "Director",
+            "text_en": "Anna. Anna! You are walking quickly and loudly. Walk slowly and quietly."
+          },
+          {
+            "position": 12,
+            "speaker": "Anna",
+            "text_en": "I'm walking slowly and quietly. I am walking…"
+          },
+          {
+            "position": 13,
+            "speaker": "Director",
+            "text_en": "Anna. Anna. You don't need to say \"slowly\" and \"quietly.\" Alright, let's try the last scene. Turn to page 48. I say my line first, then you say your line."
+          },
+          {
+            "position": 14,
+            "speaker": "Director",
+            "text_en": "'You will never get out of these woods alive! Mwa-ha-ha-ha-ha Mwa-ha-ha-ha-ha!'"
+          },
+          {
+            "position": 15,
+            "speaker": "Anna",
+            "text_en": "'Yes, I will.'"
+          },
+          {
+            "position": 16,
+            "speaker": "Director",
+            "text_en": "Okay, Anna, you said that line -- you said that line really late. You need to say it earlier."
+          },
+          {
+            "position": 17,
+            "speaker": "Anna",
+            "text_en": "Sorry. Sorry. Let me try again."
+          },
+          {
+            "position": 18,
+            "speaker": "Director",
+            "text_en": "'You will never …'"
+          },
+          {
+            "position": 19,
+            "speaker": "Anna",
+            "text_en": "'Yes, I will.'"
+          },
+          {
+            "position": 20,
+            "speaker": "Director",
+            "text_en": "'… get out of the woods alive.'"
+          },
+          {
+            "position": 21,
+            "speaker": "Anna",
+            "text_en": "I was too early, wasn't I?"
+          },
+          {
+            "position": 22,
+            "speaker": "Director",
+            "text_en": "Yes. Yes, you were."
+          },
+          {
+            "position": 23,
+            "speaker": "Anna",
+            "text_en": "Director, how am I doing?"
+          },
+          {
+            "position": 24,
+            "speaker": "Director",
+            "text_en": "You know, Anna. I think that I have the perfect part for you."
+          },
+          {
+            "position": 25,
+            "speaker": "Director",
+            "text_en": "The costume is in the back. Please go try it on."
+          },
+          {
+            "position": 26,
+            "speaker": "Anna",
+            "text_en": "Awesome! (Anna returns as a tree.)"
+          },
+          {
+            "position": 27,
+            "speaker": "Director",
+            "text_en": "Oh, Anna, that fits you perfectly!"
+          },
+          {
+            "position": 28,
+            "speaker": "Anna",
+            "text_en": "I'm a tree. I'm a tree in … \"The Woods Are Alive!\" Yes!"
+          },
+          {
+            "position": 29,
+            "speaker": "Anna",
+            "text_en": "My new year is starting awesomely! Excuse me, Director! I have a great idea for my tree. Oh, wait! Until next time!"
           }
         ]
       }
@@ -4820,6 +7123,116 @@
         "explanation": "Depois de vestir o figurino, Anna comemora: **I'm a tree!**",
         "answers": [
           "a tree"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado: escreva os dois modos como Anna está caminhando.",
+        "hint": "6 palavras",
+        "explanation": "**Quickly** e **loudly** descrevem como a ação acontece.",
+        "hints": [
+          "Comece com *You are walking...*.",
+          "Os dois advérbios terminam em *-ly*."
+        ],
+        "answers": [
+          "You are walking quickly and loudly"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "more loudly and more seriously",
+          "more softly and more quickly",
+          "earlier and more quietly"
+        ],
+        "prompt": "Listening: How does the director ask Anna to speak?",
+        "hint": "A orientação compara duas maneiras de falar.",
+        "explanation": "O diretor pede que ela fale **more loudly and more seriously**.",
+        "hints": [
+          "A primeira mudança aumenta o volume.",
+          "A segunda pede uma atuação menos brincalhona."
+        ],
+        "answers": [
+          "more loudly and more seriously"
+        ]
+      },
+      {
+        "position": 10,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "Walk",
+          "slowly",
+          "and",
+          "quietly"
+        ],
+        "prompt": "Ordene a direção de palco com dois advérbios.",
+        "hint": null,
+        "explanation": "No imperativo, o verbo vem primeiro e os advérbios descrevem a ação.",
+        "hints": [
+          "Comece pelo verbo *Walk*.",
+          "Ligue os dois advérbios com *and*."
+        ],
+        "answers": [
+          "Walk slowly and quietly"
+        ]
+      },
+      {
+        "position": 11,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "prompt": "Corrija: Can you speak more loud? → Can you speak `____`?",
+        "hint": null,
+        "explanation": "Para modificar *speak*, use o advérbio **loudly**: *more loudly*.",
+        "hints": [
+          "A palavra descreve o verbo *speak*.",
+          "Acrescente *-ly* ao adjetivo."
+        ],
+        "answers": [
+          "more loudly"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Direções para uma cena",
+        "instructions": "Write 5 to 7 sentences directing an actor in a short scene. Explain how to move and speak, then correct one performance problem.",
+        "min_words": 45,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "dois advérbios terminados em -ly",
+            "terms": [
+              "quickly",
+              "slowly",
+              "quietly",
+              "loudly",
+              "carefully",
+              "seriously",
+              "perfectly"
+            ]
+          },
+          {
+            "label": "too ou enough",
+            "terms": [
+              "too ",
+              "enough"
+            ]
+          },
+          {
+            "label": "uma comparação de modo",
+            "terms": [
+              "more loudly",
+              "more seriously",
+              "earlier",
+              "later"
+            ]
+          }
         ]
       }
     ]

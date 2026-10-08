@@ -146,8 +146,10 @@ resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
 O que está carregado hoje: **10 aulas**, 40 objetivos, 31 blocos de gramática
 com 152 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia,
-**10 áudios oficiais**, 48 trechos selecionados, **1 proposta de escrita** e **74 exercícios**
-com 97 respostas aceitas e 35 dicas graduais nas Aulas 31–40. As dez aulas também
+**10 áudios oficiais**, 48 trechos selecionados, 289 falas de transcrição integral,
+**10 propostas de escrita** e **110 exercícios**
+com 133 respostas aceitas e 107 dicas graduais nas Aulas 31–40. As Aulas 32–40 possuem
+três práticas de listening e atividades de ditado, ordenação e transformação. As dez aulas também
 possuem fonte oficial/autoral, estratégia, versão e status editorial explícitos.
 
 ### Formato do texto

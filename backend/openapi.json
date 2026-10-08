@@ -948,6 +948,13 @@
                     "source_url": {
                         "title": "Source Url",
                         "type": "string"
+                    },
+                    "transcript": {
+                        "items": {
+                            "$ref": "#/components/schemas/TranscriptLineOut"
+                        },
+                        "title": "Transcript",
+                        "type": "array"
                     }
                 },
                 "required": [
@@ -957,7 +964,8 @@
                     "source_url",
                     "duration_seconds",
                     "listening_exercise_position",
-                    "cues"
+                    "cues",
+                    "transcript"
                 ],
                 "title": "LessonMediaOut",
                 "type": "object"
@@ -2171,6 +2179,29 @@
                     "text_pt"
                 ],
                 "title": "TranscriptCueOut",
+                "type": "object"
+            },
+            "TranscriptLineOut": {
+                "properties": {
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "speaker": {
+                        "title": "Speaker",
+                        "type": "string"
+                    },
+                    "text_en": {
+                        "title": "Text En",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "position",
+                    "speaker",
+                    "text_en"
+                ],
+                "title": "TranscriptLineOut",
                 "type": "object"
             },
             "TranscriptionJobOut": {

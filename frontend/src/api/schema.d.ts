@@ -1159,6 +1159,8 @@ export interface components {
             listening_exercise_position: number | null;
             /** Source Url */
             source_url: string;
+            /** Transcript */
+            transcript: components["schemas"]["TranscriptLineOut"][];
         };
         /** LessonProgressOut */
         LessonProgressOut: {
@@ -1611,6 +1613,15 @@ export interface components {
             text_en: string;
             /** Text Pt */
             text_pt: string;
+        };
+        /** TranscriptLineOut */
+        TranscriptLineOut: {
+            /** Position */
+            position: number;
+            /** Speaker */
+            speaker: string;
+            /** Text En */
+            text_en: string;
         };
         /** TranscriptionJobOut */
         TranscriptionJobOut: {

@@ -35,7 +35,13 @@ const media: LessonMedia = {
       text_pt: 'Não pegue o ônibus. Um táxi é mais rápido que um ônibus.',
     },
   ],
+  transcript: [
+    { position: 0, speaker: 'Jonathan', text_en: 'Do not take the bus.' },
+    { position: 1, speaker: 'Anna', text_en: 'A taxi is faster than a bus.' },
+  ],
 }
+
+const sourcePageUrl = 'https://learningenglish.voanews.com/a/lesson-31/123.html'
 
 afterEach(() => {
   window.localStorage.clear()
@@ -45,7 +51,9 @@ afterEach(() => {
 
 describe('LessonAudioPlayer', () => {
   it('mostra o áudio oficial com duração conhecida', () => {
-    const { container } = render(<LessonAudioPlayer media={media} userId={7} />)
+    const { container } = render(
+      <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,
+    )
 
     expect(screen.getByRole('heading', { name: media.label })).toBeInTheDocument()
     expect(screen.getByText('0:00 / 3:29')).toBeInTheDocument()
@@ -62,7 +70,9 @@ describe('LessonAudioPlayer', () => {
 
   it('abre a transcrição, navega até o trecho e revela a tradução', async () => {
     const user = userEvent.setup()
-    const { container } = render(<LessonAudioPlayer media={media} userId={7} />)
+    const { container } = render(
+      <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,
+    )
     const audio = container.querySelector('audio')
     const cue = media.cues[0]
     if (!audio) throw new Error('elemento de áudio não renderizado')
@@ -80,9 +90,26 @@ describe('LessonAudioPlayer', () => {
     expect(screen.getByText('0:31 / 3:29')).toBeInTheDocument()
   })
 
+  it('abre a transcrição integral e credita a página oficial', async () => {
+    const user = userEvent.setup()
+    render(<LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />)
+
+    expect(screen.queryByText(media.transcript[0]?.text_en ?? '')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Mostrar texto integral' }))
+
+    expect(screen.getByText(media.transcript[0]?.text_en ?? '')).toBeInTheDocument()
+    expect(screen.getByText(media.transcript[1]?.text_en ?? '')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'VOA Learning English' })).toHaveAttribute(
+      'href',
+      sourcePageUrl,
+    )
+  })
+
   it('avança, muda a velocidade e marca um trecho A-B', async () => {
     const user = userEvent.setup()
-    const { container } = render(<LessonAudioPlayer media={media} userId={7} />)
+    const { container } = render(
+      <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,
+    )
     const audio = container.querySelector('audio')
     if (!audio) throw new Error('elemento de áudio não renderizado')
 
@@ -104,7 +131,9 @@ describe('LessonAudioPlayer', () => {
   })
 
   it('limpa a retomada local e remota ao terminar', () => {
-    const { container } = render(<LessonAudioPlayer media={media} userId={7} />)
+    const { container } = render(
+      <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,
+    )
     const audio = container.querySelector('audio')
     if (!audio) throw new Error('elemento de áudio não renderizado')
     window.localStorage.setItem('aulas-ingles:media-position:v1:7:9', '200')
