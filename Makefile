@@ -14,7 +14,8 @@ help: ## Lista os comandos
 	@cp .env.example .env && echo "✓ .env criado a partir do .env.example"
 
 up: .env ## Sobe db + api + web, aplica migrations e carrega o seed
-	$(COMPOSE) up -d --build
+	# Renova o volume anônimo de node_modules depois de reconstruir a imagem web.
+	$(COMPOSE) up -d --build --renew-anon-volumes
 	$(COMPOSE) exec -T api alembic upgrade head
 	$(COMPOSE) exec -T api python -m app.cli seed
 	@echo ""

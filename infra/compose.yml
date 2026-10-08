@@ -70,9 +70,11 @@ services:
     ports:
       - "127.0.0.1:${WEB_HOST_PORT:-5180}:5180"
     volumes:
-      - ../frontend/src:/app/src
-      - ../frontend/index.html:/app/index.html
-      - ../frontend/vite.config.ts:/app/vite.config.ts
+      # Montar a raiz evita que um checkout do Git invalide bind mounts de
+      # arquivos individuais (index.html/vite.config.ts) enquanto o Vite roda.
+      - ../frontend:/app
+      # As dependências vêm da imagem, não do node_modules do host.
+      - /app/node_modules
     depends_on:
       api:
         condition: service_started
