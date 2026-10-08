@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSessao } from '../api/auth'
 
 export function LoginPage() {
@@ -9,6 +9,11 @@ export function LoginPage() {
   const [nome, setNome] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
+  const nomeInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (modo === 'criar') nomeInputRef.current?.focus()
+  }, [modo])
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault()
@@ -40,6 +45,7 @@ export function LoginPage() {
             <label>
               Nome
               <input
+                ref={nomeInputRef}
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}

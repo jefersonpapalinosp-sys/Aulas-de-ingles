@@ -44,6 +44,7 @@ describe('LoginPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ainda não tenho conta' }))
     expect(screen.getByLabelText('Nome')).toBeInTheDocument()
+    expect(screen.getByLabelText('Nome')).toHaveFocus()
     expect(screen.getByText('No mínimo 8 caracteres.')).toBeInTheDocument()
   })
 })

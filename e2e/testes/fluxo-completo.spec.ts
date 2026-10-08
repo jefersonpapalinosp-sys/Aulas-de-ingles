@@ -446,6 +446,26 @@ test('sem sessão, a aplicação pede login', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 })
 
+test('cadastro permanece acessível em viewport equivalente a zoom de 200%', async ({ page }) => {
+  await page.setViewportSize({ width: 640, height: 360 })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Ainda não tenho conta' }).click()
+
+  const caixa = page.locator('.login-caixa')
+  const nome = page.getByLabel('Nome')
+  await expect(caixa).toBeVisible()
+  await expect(nome).toBeVisible()
+  await expect(nome).toBeFocused()
+
+  expect(await nome.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(60)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+  expect(await caixa.evaluate((element) => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(0)
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+  ).toBeTruthy()
+})
+
 test('painel e aula não têm violações WCAG sérias ou críticas', async ({ page }) => {
   await criarConta(page, 'Acessibilidade E2E')
 
