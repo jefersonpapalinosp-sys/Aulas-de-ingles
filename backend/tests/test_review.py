@@ -7,7 +7,14 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import ReviewCard
+from app.db.models import ReviewItem
+
+
+def tentativa(answer: str, key: int = 1) -> dict[str, str]:
+    return {
+        "answer": answer,
+        "idempotency_key": f"10000000-0000-4000-8000-{key:012d}",
+    }
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -64,10 +71,10 @@ async def test_errar_exercicio_de_vocabulario_poe_a_palavra_no_deck(client: Asyn
     exercicios = (await client.get("/api/exercises?lesson=39")).json()
     ex = next(e for e in exercicios if "honest" in e["prompt"])
 
-    await client.post(f"/api/exercises/{ex['id']}/attempt", json={"answer": "nada"}, headers=h)
+    await client.post(f"/api/exercises/{ex['id']}/attempt", json=tentativa("nada"), headers=h)
 
     cartas = (await client.get("/api/review/due", headers=h)).json()
-    assert [c["term"] for c in cartas] == ["dishonest"]
+    assert [c["prompt"] for c in cartas] == ["dishonest"]
 
 
 @pytest.mark.asyncio
@@ -76,7 +83,7 @@ async def test_acertar_nao_poe_nada_no_deck(client: AsyncClient) -> None:
     exercicios = (await client.get("/api/exercises?lesson=39")).json()
     ex = next(e for e in exercicios if "honest" in e["prompt"])
 
-    await client.post(f"/api/exercises/{ex['id']}/attempt", json={"answer": "dishonest"}, headers=h)
+    await client.post(f"/api/exercises/{ex['id']}/attempt", json=tentativa("dishonest"), headers=h)
     assert (await client.get("/api/review/summary", headers=h)).json()["total_cards"] == 0
 
 
@@ -86,10 +93,22 @@ async def test_adicionar_item_avulso_e_idempotente(client: AsyncClient) -> None:
     item = (await client.get("/api/vocab?lesson=31")).json()[0]
 
     primeiro = (await client.post(f"/api/review/items/{item['id']}", headers=h)).json()
-    assert primeiro == {"due_now": 1, "total_cards": 1, "added": 1}
+    assert primeiro == {
+        "due_now": 1,
+        "total_cards": 1,
+        "suspended": 0,
+        "by_type": {"vocabulary": 1},
+        "added": 1,
+    }
 
     segundo = (await client.post(f"/api/review/items/{item['id']}", headers=h)).json()
-    assert segundo == {"due_now": 1, "total_cards": 1, "added": 0}
+    assert segundo == {
+        "due_now": 1,
+        "total_cards": 1,
+        "suspended": 0,
+        "by_type": {"vocabulary": 1},
+        "added": 0,
+    }
 
 
 @pytest.mark.asyncio
@@ -157,7 +176,7 @@ async def test_deck_so_traz_carta_vencida(client: AsyncClient, session: AsyncSes
     await client.post("/api/review/lessons/36", headers=h)
 
     # Empurra todas para daqui a uma semana.
-    cartas = list((await session.execute(select(ReviewCard))).scalars())
+    cartas = list((await session.execute(select(ReviewItem))).scalars())
     for c in cartas:
         c.due_at = datetime.now(UTC) + timedelta(days=7)
     await session.commit()
@@ -196,3 +215,105 @@ async def test_progresso_mostra_o_deck(client: AsyncClient) -> None:
     p = (await client.get("/api/me/progress", headers=h)).json()
     assert p["review_cards"] == 11
     assert p["review_due"] == 11
+
+
+@pytest.mark.asyncio
+async def test_erro_gramatical_gera_um_item_sem_duplicar(client: AsyncClient) -> None:
+    headers = await conta(client, "erro-gramatical")
+    exercise = (await client.get("/api/exercises?lesson=31")).json()[0]
+
+    for key, answer in ((301, "more fast"), (302, "fastest")):
+        response = await client.post(
+            f"/api/exercises/{exercise['id']}/attempt",
+            headers=headers,
+            json=tentativa(answer, key),
+        )
+        assert response.status_code == 200
+
+    items = (await client.get("/api/review/due", headers=headers)).json()
+    assert len(items) == 1
+    assert items[0]["item_type"] == "grammar_error"
+    assert items[0]["skill"] == "grammar"
+    assert "resposta incorreta" in items[0]["reason"]
+    assert items[0]["prompt_note"].endswith("fastest")
+
+
+@pytest.mark.asyncio
+async def test_filtros_encontram_listening_por_tipo_competencia_e_duracao(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "filtros")
+    exercises = (await client.get("/api/exercises?lesson=31")).json()
+    dictation = next(item for item in exercises if item["position"] == 7)
+    await client.post(
+        f"/api/exercises/{dictation['id']}/attempt",
+        headers=headers,
+        json=tentativa("wrong sentence", 401),
+    )
+
+    matching = await client.get(
+        "/api/review/due?item_type=listening&skill=listening&max_minutes=2",
+        headers=headers,
+    )
+    excluded = await client.get(
+        "/api/review/due?item_type=grammar_error",
+        headers=headers,
+    )
+    assert matching.status_code == 200
+    assert [item["item_type"] for item in matching.json()] == ["listening"]
+    assert excluded.json() == []
+
+
+@pytest.mark.asyncio
+async def test_item_pode_ser_suspenso_reativado_e_excluido(client: AsyncClient) -> None:
+    owner = await conta(client, "gerencia")
+    await client.post("/api/review/lessons/31", headers=owner)
+    item = (await client.get("/api/review/due?limit=1", headers=owner)).json()[0]
+
+    suspended = await client.patch(
+        f"/api/review/{item['id']}", headers=owner, json={"status": "suspended"}
+    )
+    assert suspended.status_code == 200
+    assert suspended.json()["status"] == "suspended"
+    due_after_suspend = (await client.get("/api/review/due", headers=owner)).json()
+    assert item["id"] not in [row["id"] for row in due_after_suspend]
+    listed = (await client.get("/api/review/items?status=suspended", headers=owner)).json()
+    assert [row["id"] for row in listed] == [item["id"]]
+    assert (
+        await client.post(f"/api/review/{item['id']}/grade", headers=owner, json={"quality": 4})
+    ).status_code == 409
+
+    intruder = await conta(client, "gerencia-intruso")
+    assert (
+        await client.patch(f"/api/review/{item['id']}", headers=intruder, json={"status": "active"})
+    ).status_code == 404
+
+    reactivated = await client.patch(
+        f"/api/review/{item['id']}", headers=owner, json={"status": "active"}
+    )
+    assert reactivated.json()["status"] == "active"
+    assert (await client.delete(f"/api/review/{item['id']}", headers=owner)).status_code == 204
+    assert (
+        await client.patch(f"/api/review/{item['id']}", headers=owner, json={"status": "active"})
+    ).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_tipo_dificil_encurta_o_intervalo_sem_mudar_sm2(client: AsyncClient) -> None:
+    headers = await conta(client, "intervalo-tipo")
+    exercise = (await client.get("/api/exercises?lesson=31")).json()[0]
+    await client.post(
+        f"/api/exercises/{exercise['id']}/attempt",
+        headers=headers,
+        json=tentativa("more fast", 501),
+    )
+    item = (await client.get("/api/review/due", headers=headers)).json()[0]
+
+    first = await client.post(
+        f"/api/review/{item['id']}/grade", headers=headers, json={"quality": 4}
+    )
+    second = await client.post(
+        f"/api/review/{item['id']}/grade", headers=headers, json={"quality": 4}
+    )
+    assert first.json()["interval_days"] == 1
+    assert second.json()["interval_days"] == 5  # base SM-2 6 × fator 0,8

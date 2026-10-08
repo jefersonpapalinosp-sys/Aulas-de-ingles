@@ -4,7 +4,8 @@ Todo campo de texto vem em subconjunto de Markdown (ver app/db/models.py).
 O cliente é quem decide como renderizar.
 """
 
-from typing import Any
+from datetime import date, datetime
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -48,6 +49,59 @@ class PronunciationNoteOut(ORMModel):
     explanation: str
 
 
+class TranscriptCueOut(ORMModel):
+    id: int
+    position: int
+    start_seconds: float
+    end_seconds: float
+    speaker: str
+    text_en: str
+    text_pt: str
+
+
+class LessonMediaOut(ORMModel):
+    id: int
+    kind: str
+    label: str
+    source_url: str
+    duration_seconds: int | None
+    listening_exercise_position: int | None
+    cues: list[TranscriptCueOut]
+
+
+class ContentSourceOut(ORMModel):
+    kind: Literal["official", "authorial"]
+    title: str
+    publisher: str
+    url: str | None
+    license_note: str
+    accessed_at: date
+
+
+class LessonVersionOut(ORMModel):
+    version: int
+    status: Literal["draft", "reviewed", "published"]
+    learning_strategy: str
+    review_note: str
+    reviewed_at: datetime
+    published_at: datetime | None
+
+
+class WritingRequirementOut(BaseModel):
+    label: str
+    terms: list[str]
+
+
+class WritingPromptOut(ORMModel):
+    id: int
+    position: int
+    title: str
+    instructions: str
+    min_words: int
+    min_sentences: int
+    requirements: list[WritingRequirementOut]
+
+
 class ExerciseOut(ORMModel):
     """Exercício como ele chega ao cliente.
 
@@ -58,8 +112,12 @@ class ExerciseOut(ORMModel):
 
     id: int
     position: int
+    activity_type: str
+    skill: str
+    options: list[str] | None
     prompt: str
     hint: str | None
+    hint_count: int
     explanation: str
 
 
@@ -95,4 +153,8 @@ class LessonDetailOut(LessonSummaryOut):
     phrases: list[PhraseOut]
     vocab: list[VocabItemOut]
     pronunciation: list[PronunciationNoteOut]
+    media: list[LessonMediaOut]
+    content_sources: list[ContentSourceOut]
+    versions: list[LessonVersionOut]
+    writing_prompts: list[WritingPromptOut]
     exercises: list[ExerciseOut]

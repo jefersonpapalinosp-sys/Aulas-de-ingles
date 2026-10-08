@@ -24,12 +24,17 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 
-RUN useradd --create-home --uid 10001 app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gosu \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 10001 app
 WORKDIR /app
 COPY --from=build --chown=app:app /app /app
+COPY backend/docker-entrypoint.prod.sh /usr/local/bin/aulas-entrypoint
+RUN chmod 755 /usr/local/bin/aulas-entrypoint
 
-USER app
 EXPOSE 8000
 # Workers de verdade; o reload do dev some.
+ENTRYPOINT ["aulas-entrypoint"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", \
      "--proxy-headers", "--forwarded-allow-ips", "*"]

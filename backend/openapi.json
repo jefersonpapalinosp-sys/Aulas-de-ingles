@@ -1,6 +1,89 @@
 {
     "components": {
         "schemas": {
+            "AssistStatusOut": {
+                "properties": {
+                    "cost_microusd_today": {
+                        "title": "Cost Microusd Today",
+                        "type": "integer"
+                    },
+                    "daily_quota": {
+                        "title": "Daily Quota",
+                        "type": "integer"
+                    },
+                    "evaluation_only": {
+                        "const": true,
+                        "default": true,
+                        "title": "Evaluation Only",
+                        "type": "boolean"
+                    },
+                    "remaining_today": {
+                        "title": "Remaining Today",
+                        "type": "integer"
+                    },
+                    "retention_days": {
+                        "title": "Retention Days",
+                        "type": "integer"
+                    },
+                    "transcription_enabled": {
+                        "title": "Transcription Enabled",
+                        "type": "boolean"
+                    },
+                    "used_today": {
+                        "title": "Used Today",
+                        "type": "integer"
+                    },
+                    "writing_enabled": {
+                        "title": "Writing Enabled",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "transcription_enabled",
+                    "writing_enabled",
+                    "daily_quota",
+                    "used_today",
+                    "remaining_today",
+                    "retention_days",
+                    "cost_microusd_today"
+                ],
+                "title": "AssistStatusOut",
+                "type": "object"
+            },
+            "AttemptFeedbackOut": {
+                "properties": {
+                    "category": {
+                        "enum": [
+                            "correct",
+                            "missing_word",
+                            "extra_word",
+                            "word_order",
+                            "spelling",
+                            "word_choice"
+                        ],
+                        "title": "Category",
+                        "type": "string"
+                    },
+                    "message": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "tokens": {
+                        "items": {
+                            "$ref": "#/components/schemas/FeedbackTokenOut"
+                        },
+                        "title": "Tokens",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "category",
+                    "message",
+                    "tokens"
+                ],
+                "title": "AttemptFeedbackOut",
+                "type": "object"
+            },
             "AttemptIn": {
                 "properties": {
                     "answer": {
@@ -8,35 +91,94 @@
                         "maxLength": 200,
                         "title": "Answer",
                         "type": "string"
+                    },
+                    "idempotency_key": {
+                        "format": "uuid",
+                        "title": "Idempotency Key",
+                        "type": "string"
                     }
                 },
                 "required": [
-                    "answer"
+                    "answer",
+                    "idempotency_key"
                 ],
                 "title": "AttemptIn",
                 "type": "object"
             },
             "AttemptOut": {
                 "properties": {
+                    "attempt_id": {
+                        "title": "Attempt Id",
+                        "type": "integer"
+                    },
                     "correct": {
                         "title": "Correct",
                         "type": "boolean"
                     },
                     "explanation": {
-                        "title": "Explanation",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Explanation"
+                    },
+                    "feedback": {
+                        "$ref": "#/components/schemas/AttemptFeedbackOut"
                     }
                 },
                 "required": [
+                    "attempt_id",
                     "correct",
-                    "explanation"
+                    "explanation",
+                    "feedback"
                 ],
                 "title": "AttemptOut",
                 "type": "object"
             },
             "CardOut": {
-                "description": "Frente e verso da carta, mais o estado do agendamento.",
+                "description": "Frente, verso, mídia e estado de um item da fila.",
                 "properties": {
+                    "answer": {
+                        "title": "Answer",
+                        "type": "string"
+                    },
+                    "context": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Context"
+                    },
+                    "cue_end_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cue End Seconds"
+                    },
+                    "cue_start_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cue Start Seconds"
+                    },
                     "due_at": {
                         "format": "date-time",
                         "title": "Due At",
@@ -46,9 +188,9 @@
                         "title": "Ease Factor",
                         "type": "number"
                     },
-                    "example_en": {
-                        "title": "Example En",
-                        "type": "string"
+                    "estimated_seconds": {
+                        "title": "Estimated Seconds",
+                        "type": "integer"
                     },
                     "id": {
                         "title": "Id",
@@ -58,8 +200,16 @@
                         "title": "Interval Days",
                         "type": "integer"
                     },
-                    "ipa": {
-                        "title": "Ipa",
+                    "item_type": {
+                        "enum": [
+                            "vocabulary",
+                            "grammar_error",
+                            "phrase",
+                            "listening",
+                            "writing_prompt",
+                            "speaking_prompt"
+                        ],
+                        "title": "Item Type",
                         "type": "string"
                     },
                     "lapses": {
@@ -70,31 +220,80 @@
                         "title": "Lesson Number",
                         "type": "integer"
                     },
+                    "media_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Media Url"
+                    },
+                    "prompt": {
+                        "title": "Prompt",
+                        "type": "string"
+                    },
+                    "prompt_note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Prompt Note"
+                    },
+                    "reason": {
+                        "title": "Reason",
+                        "type": "string"
+                    },
                     "repetitions": {
                         "title": "Repetitions",
                         "type": "integer"
                     },
-                    "term": {
-                        "title": "Term",
+                    "skill": {
+                        "title": "Skill",
                         "type": "string"
                     },
-                    "translation_pt": {
-                        "title": "Translation Pt",
+                    "status": {
+                        "enum": [
+                            "active",
+                            "suspended"
+                        ],
+                        "title": "Status",
                         "type": "string"
                     },
                     "vocab_item_id": {
-                        "title": "Vocab Item Id",
-                        "type": "integer"
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Vocab Item Id"
                     }
                 },
                 "required": [
                     "id",
-                    "vocab_item_id",
-                    "term",
-                    "ipa",
-                    "translation_pt",
-                    "example_en",
+                    "item_type",
+                    "skill",
+                    "prompt",
+                    "prompt_note",
+                    "answer",
+                    "context",
                     "lesson_number",
+                    "reason",
+                    "estimated_seconds",
+                    "media_url",
+                    "cue_start_seconds",
+                    "cue_end_seconds",
+                    "status",
+                    "vocab_item_id",
                     "ease_factor",
                     "interval_days",
                     "repetitions",
@@ -104,16 +303,78 @@
                 "title": "CardOut",
                 "type": "object"
             },
+            "ContentSourceOut": {
+                "properties": {
+                    "accessed_at": {
+                        "format": "date",
+                        "title": "Accessed At",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "official",
+                            "authorial"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "license_note": {
+                        "title": "License Note",
+                        "type": "string"
+                    },
+                    "publisher": {
+                        "title": "Publisher",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Url"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "title",
+                    "publisher",
+                    "url",
+                    "license_note",
+                    "accessed_at"
+                ],
+                "title": "ContentSourceOut",
+                "type": "object"
+            },
             "DeckSummaryOut": {
                 "properties": {
                     "added": {
                         "default": 0,
-                        "description": "Quantas cartas a última ação criou.",
+                        "description": "Quantos itens a última ação criou.",
                         "title": "Added",
                         "type": "integer"
                     },
+                    "by_type": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "title": "By Type",
+                        "type": "object"
+                    },
                     "due_now": {
                         "title": "Due Now",
+                        "type": "integer"
+                    },
+                    "suspended": {
+                        "default": 0,
+                        "title": "Suspended",
                         "type": "integer"
                     },
                     "total_cards": {
@@ -128,9 +389,31 @@
                 "title": "DeckSummaryOut",
                 "type": "object"
             },
+            "ExerciseHintOut": {
+                "properties": {
+                    "content": {
+                        "title": "Content",
+                        "type": "string"
+                    },
+                    "level": {
+                        "title": "Level",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "level",
+                    "content"
+                ],
+                "title": "ExerciseHintOut",
+                "type": "object"
+            },
             "ExerciseOut": {
                 "description": "Exercício como ele chega ao cliente.\n\nA resposta certa **não** faz parte deste schema. Na S3 a correção passa a\nser feita pelo servidor; até lá o cliente corrige, mas o contrato já nasce\nno formato certo para não ter que mudar depois.",
                 "properties": {
+                    "activity_type": {
+                        "title": "Activity Type",
+                        "type": "string"
+                    },
                     "explanation": {
                         "title": "Explanation",
                         "type": "string"
@@ -146,9 +429,27 @@
                         ],
                         "title": "Hint"
                     },
+                    "hint_count": {
+                        "title": "Hint Count",
+                        "type": "integer"
+                    },
                     "id": {
                         "title": "Id",
                         "type": "integer"
+                    },
+                    "options": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Options"
                     },
                     "position": {
                         "title": "Position",
@@ -157,13 +458,21 @@
                     "prompt": {
                         "title": "Prompt",
                         "type": "string"
+                    },
+                    "skill": {
+                        "title": "Skill",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "id",
                     "position",
+                    "activity_type",
+                    "skill",
+                    "options",
                     "prompt",
                     "hint",
+                    "hint_count",
                     "explanation"
                 ],
                 "title": "ExerciseOut",
@@ -171,6 +480,10 @@
             },
             "ExerciseWithLessonOut": {
                 "properties": {
+                    "activity_type": {
+                        "title": "Activity Type",
+                        "type": "string"
+                    },
                     "explanation": {
                         "title": "Explanation",
                         "type": "string"
@@ -185,6 +498,10 @@
                             }
                         ],
                         "title": "Hint"
+                    },
+                    "hint_count": {
+                        "title": "Hint Count",
+                        "type": "integer"
                     },
                     "id": {
                         "title": "Id",
@@ -194,6 +511,20 @@
                         "title": "Lesson Number",
                         "type": "integer"
                     },
+                    "options": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Options"
+                    },
                     "position": {
                         "title": "Position",
                         "type": "integer"
@@ -201,17 +532,47 @@
                     "prompt": {
                         "title": "Prompt",
                         "type": "string"
+                    },
+                    "skill": {
+                        "title": "Skill",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "id",
                     "position",
+                    "activity_type",
+                    "skill",
+                    "options",
                     "prompt",
                     "hint",
+                    "hint_count",
                     "explanation",
                     "lesson_number"
                 ],
                 "title": "ExerciseWithLessonOut",
+                "type": "object"
+            },
+            "FeedbackTokenOut": {
+                "properties": {
+                    "status": {
+                        "enum": [
+                            "keep",
+                            "review"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "text": {
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text",
+                    "status"
+                ],
+                "title": "FeedbackTokenOut",
                 "type": "object"
             },
             "GradeIn": {
@@ -386,8 +747,32 @@
                 "title": "HealthOut",
                 "type": "object"
             },
+            "HumanRatingIn": {
+                "properties": {
+                    "rating": {
+                        "enum": [
+                            "helpful",
+                            "not_helpful"
+                        ],
+                        "title": "Rating",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "rating"
+                ],
+                "title": "HumanRatingIn",
+                "type": "object"
+            },
             "LessonDetailOut": {
                 "properties": {
+                    "content_sources": {
+                        "items": {
+                            "$ref": "#/components/schemas/ContentSourceOut"
+                        },
+                        "title": "Content Sources",
+                        "type": "array"
+                    },
                     "exercises": {
                         "items": {
                             "$ref": "#/components/schemas/ExerciseOut"
@@ -423,6 +808,13 @@
                     "lead": {
                         "title": "Lead",
                         "type": "string"
+                    },
+                    "media": {
+                        "items": {
+                            "$ref": "#/components/schemas/LessonMediaOut"
+                        },
+                        "title": "Media",
+                        "type": "array"
                     },
                     "number": {
                         "title": "Number",
@@ -461,6 +853,13 @@
                         "title": "Title Pt",
                         "type": "string"
                     },
+                    "versions": {
+                        "items": {
+                            "$ref": "#/components/schemas/LessonVersionOut"
+                        },
+                        "title": "Versions",
+                        "type": "array"
+                    },
                     "voa_url": {
                         "title": "Voa Url",
                         "type": "string"
@@ -470,6 +869,13 @@
                             "$ref": "#/components/schemas/VocabItemOut"
                         },
                         "title": "Vocab",
+                        "type": "array"
+                    },
+                    "writing_prompts": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingPromptOut"
+                        },
+                        "title": "Writing Prompts",
                         "type": "array"
                     }
                 },
@@ -487,9 +893,73 @@
                     "phrases",
                     "vocab",
                     "pronunciation",
+                    "media",
+                    "content_sources",
+                    "versions",
+                    "writing_prompts",
                     "exercises"
                 ],
                 "title": "LessonDetailOut",
+                "type": "object"
+            },
+            "LessonMediaOut": {
+                "properties": {
+                    "cues": {
+                        "items": {
+                            "$ref": "#/components/schemas/TranscriptCueOut"
+                        },
+                        "title": "Cues",
+                        "type": "array"
+                    },
+                    "duration_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Duration Seconds"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "kind": {
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Label",
+                        "type": "string"
+                    },
+                    "listening_exercise_position": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Listening Exercise Position"
+                    },
+                    "source_url": {
+                        "title": "Source Url",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "kind",
+                    "label",
+                    "source_url",
+                    "duration_seconds",
+                    "listening_exercise_position",
+                    "cues"
+                ],
+                "title": "LessonMediaOut",
                 "type": "object"
             },
             "LessonProgressOut": {
@@ -582,6 +1052,58 @@
                 "title": "LessonSummaryOut",
                 "type": "object"
             },
+            "LessonVersionOut": {
+                "properties": {
+                    "learning_strategy": {
+                        "title": "Learning Strategy",
+                        "type": "string"
+                    },
+                    "published_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Published At"
+                    },
+                    "review_note": {
+                        "title": "Review Note",
+                        "type": "string"
+                    },
+                    "reviewed_at": {
+                        "format": "date-time",
+                        "title": "Reviewed At",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "draft",
+                            "reviewed",
+                            "published"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "version",
+                    "status",
+                    "learning_strategy",
+                    "review_note",
+                    "reviewed_at",
+                    "published_at"
+                ],
+                "title": "LessonVersionOut",
+                "type": "object"
+            },
             "LoginIn": {
                 "properties": {
                     "email": {
@@ -600,6 +1122,292 @@
                     "password"
                 ],
                 "title": "LoginIn",
+                "type": "object"
+            },
+            "MediaPositionIn": {
+                "properties": {
+                    "position_seconds": {
+                        "minimum": 0.0,
+                        "title": "Position Seconds",
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "position_seconds"
+                ],
+                "title": "MediaPositionIn",
+                "type": "object"
+            },
+            "MediaPositionOut": {
+                "properties": {
+                    "media_id": {
+                        "title": "Media Id",
+                        "type": "integer"
+                    },
+                    "position_seconds": {
+                        "minimum": 0.0,
+                        "title": "Position Seconds",
+                        "type": "number"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    }
+                },
+                "required": [
+                    "position_seconds",
+                    "media_id",
+                    "updated_at"
+                ],
+                "title": "MediaPositionOut",
+                "type": "object"
+            },
+            "NotebookEntryIn": {
+                "properties": {
+                    "content": {
+                        "maxLength": 2000,
+                        "minLength": 1,
+                        "title": "Content",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "note",
+                            "favorite_phrase",
+                            "personal_example",
+                            "recurring_error",
+                            "teacher_question"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "lesson_number": {
+                        "minimum": 1.0,
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "lesson_number",
+                    "kind",
+                    "content"
+                ],
+                "title": "NotebookEntryIn",
+                "type": "object"
+            },
+            "NotebookEntryOut": {
+                "properties": {
+                    "content": {
+                        "title": "Content",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "format": "date-time",
+                        "title": "Created At",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "kind": {
+                        "enum": [
+                            "note",
+                            "favorite_phrase",
+                            "personal_example",
+                            "recurring_error",
+                            "teacher_question"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "lesson_title": {
+                        "title": "Lesson Title",
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "format": "date-time",
+                        "title": "Updated At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "lesson_number",
+                    "lesson_title",
+                    "kind",
+                    "content",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "NotebookEntryOut",
+                "type": "object"
+            },
+            "NotebookEntryUpdate": {
+                "properties": {
+                    "content": {
+                        "maxLength": 2000,
+                        "minLength": 1,
+                        "title": "Content",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "note",
+                            "favorite_phrase",
+                            "personal_example",
+                            "recurring_error",
+                            "teacher_question"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "content"
+                ],
+                "title": "NotebookEntryUpdate",
+                "type": "object"
+            },
+            "PersonalDataExportOut": {
+                "properties": {
+                    "exercise_attempts": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Exercise Attempts",
+                        "type": "array"
+                    },
+                    "exported_at": {
+                        "format": "date-time",
+                        "title": "Exported At",
+                        "type": "string"
+                    },
+                    "lesson_progress": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Lesson Progress",
+                        "type": "array"
+                    },
+                    "media_progress": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Media Progress",
+                        "type": "array"
+                    },
+                    "notebook": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Notebook",
+                        "type": "array"
+                    },
+                    "profile": {
+                        "additionalProperties": true,
+                        "title": "Profile",
+                        "type": "object"
+                    },
+                    "review_items": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Review Items",
+                        "type": "array"
+                    },
+                    "schema_version": {
+                        "title": "Schema Version",
+                        "type": "string"
+                    },
+                    "skill_evidence": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Skill Evidence",
+                        "type": "array"
+                    },
+                    "speaking": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Speaking",
+                        "type": "array"
+                    },
+                    "step_progress": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Step Progress",
+                        "type": "array"
+                    },
+                    "study_plan": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Study Plan"
+                    },
+                    "study_sessions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Study Sessions",
+                        "type": "array"
+                    },
+                    "writing": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Writing",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "schema_version",
+                    "exported_at",
+                    "profile",
+                    "lesson_progress",
+                    "study_sessions",
+                    "study_plan",
+                    "step_progress",
+                    "media_progress",
+                    "skill_evidence",
+                    "exercise_attempts",
+                    "review_items",
+                    "writing",
+                    "speaking",
+                    "notebook"
+                ],
+                "title": "PersonalDataExportOut",
                 "type": "object"
             },
             "PhraseOut": {
@@ -691,6 +1499,95 @@
                 "title": "PronunciationNoteOut",
                 "type": "object"
             },
+            "RecentSessionOut": {
+                "properties": {
+                    "completed_steps": {
+                        "title": "Completed Steps",
+                        "type": "integer"
+                    },
+                    "current_step": {
+                        "title": "Current Step",
+                        "type": "string"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "lesson_title": {
+                        "title": "Lesson Title",
+                        "type": "string"
+                    },
+                    "total_minutes": {
+                        "title": "Total Minutes",
+                        "type": "integer"
+                    },
+                    "updated_at": {
+                        "format": "date-time",
+                        "title": "Updated At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "lesson_number",
+                    "lesson_title",
+                    "current_step",
+                    "completed_steps",
+                    "total_minutes",
+                    "updated_at"
+                ],
+                "title": "RecentSessionOut",
+                "type": "object"
+            },
+            "RecommendationOut": {
+                "properties": {
+                    "estimated_minutes": {
+                        "title": "Estimated Minutes",
+                        "type": "integer"
+                    },
+                    "href": {
+                        "title": "Href",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "review",
+                            "continue_lesson",
+                            "start_lesson",
+                            "practice"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "lesson_number": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lesson Number"
+                    },
+                    "reason": {
+                        "title": "Reason",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "title",
+                    "reason",
+                    "href",
+                    "estimated_minutes"
+                ],
+                "title": "RecommendationOut",
+                "type": "object"
+            },
             "RegistroIn": {
                 "properties": {
                     "display_name": {
@@ -742,6 +1639,472 @@
                 "title": "RevealAnswerOut",
                 "type": "object"
             },
+            "ReviewItemStatusIn": {
+                "properties": {
+                    "status": {
+                        "enum": [
+                            "active",
+                            "suspended"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ],
+                "title": "ReviewItemStatusIn",
+                "type": "object"
+            },
+            "SkillSummaryOut": {
+                "properties": {
+                    "fragile_topics": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Fragile Topics",
+                        "type": "array"
+                    },
+                    "label": {
+                        "title": "Label",
+                        "type": "string"
+                    },
+                    "samples": {
+                        "title": "Samples",
+                        "type": "integer"
+                    },
+                    "score_percent": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Score Percent"
+                    },
+                    "skill": {
+                        "title": "Skill",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "insufficient",
+                            "developing",
+                            "steady",
+                            "strong"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "skill",
+                    "label",
+                    "samples",
+                    "score_percent",
+                    "status",
+                    "fragile_topics"
+                ],
+                "title": "SkillSummaryOut",
+                "type": "object"
+            },
+            "SpeakingAttemptIn": {
+                "properties": {
+                    "consent": {
+                        "const": true,
+                        "title": "Consent",
+                        "type": "boolean"
+                    },
+                    "cue_id": {
+                        "title": "Cue Id",
+                        "type": "integer"
+                    },
+                    "duration_ms": {
+                        "maximum": 30000.0,
+                        "minimum": 1.0,
+                        "title": "Duration Ms",
+                        "type": "integer"
+                    },
+                    "self_rating": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "repeat",
+                                    "almost",
+                                    "confident"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Self Rating"
+                    }
+                },
+                "required": [
+                    "cue_id",
+                    "duration_ms",
+                    "consent"
+                ],
+                "title": "SpeakingAttemptIn",
+                "type": "object"
+            },
+            "SpeakingAttemptOut": {
+                "properties": {
+                    "consented_at": {
+                        "format": "date-time",
+                        "title": "Consented At",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "format": "date-time",
+                        "title": "Created At",
+                        "type": "string"
+                    },
+                    "cue_id": {
+                        "title": "Cue Id",
+                        "type": "integer"
+                    },
+                    "cue_text": {
+                        "title": "Cue Text",
+                        "type": "string"
+                    },
+                    "duration_ms": {
+                        "title": "Duration Ms",
+                        "type": "integer"
+                    },
+                    "file_size": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "File Size"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "mime_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Mime Type"
+                    },
+                    "self_rating": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "repeat",
+                                    "almost",
+                                    "confident"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Self Rating"
+                    },
+                    "status": {
+                        "enum": [
+                            "pending",
+                            "ready"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "transcription": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TranscriptionJobOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "lesson_number",
+                    "cue_id",
+                    "cue_text",
+                    "duration_ms",
+                    "self_rating",
+                    "consented_at",
+                    "status",
+                    "mime_type",
+                    "file_size",
+                    "created_at"
+                ],
+                "title": "SpeakingAttemptOut",
+                "type": "object"
+            },
+            "StudyPlanIn": {
+                "properties": {
+                    "goal": {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "title": "Goal",
+                        "type": "string"
+                    },
+                    "preferred_days": {
+                        "items": {
+                            "enum": [
+                                "mon",
+                                "tue",
+                                "wed",
+                                "thu",
+                                "fri",
+                                "sat",
+                                "sun"
+                            ],
+                            "type": "string"
+                        },
+                        "maxItems": 7,
+                        "minItems": 1,
+                        "title": "Preferred Days",
+                        "type": "array"
+                    },
+                    "weekly_minutes": {
+                        "maximum": 600.0,
+                        "minimum": 30.0,
+                        "title": "Weekly Minutes",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "weekly_minutes",
+                    "preferred_days",
+                    "goal"
+                ],
+                "title": "StudyPlanIn",
+                "type": "object"
+            },
+            "StudyPlanOut": {
+                "properties": {
+                    "goal": {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "title": "Goal",
+                        "type": "string"
+                    },
+                    "preferred_days": {
+                        "items": {
+                            "enum": [
+                                "mon",
+                                "tue",
+                                "wed",
+                                "thu",
+                                "fri",
+                                "sat",
+                                "sun"
+                            ],
+                            "type": "string"
+                        },
+                        "maxItems": 7,
+                        "minItems": 1,
+                        "title": "Preferred Days",
+                        "type": "array"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    },
+                    "weekly_minutes": {
+                        "maximum": 600.0,
+                        "minimum": 30.0,
+                        "title": "Weekly Minutes",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "weekly_minutes",
+                    "preferred_days",
+                    "goal",
+                    "updated_at"
+                ],
+                "title": "StudyPlanOut",
+                "type": "object"
+            },
+            "StudySessionIn": {
+                "properties": {
+                    "completed_steps": {
+                        "items": {
+                            "enum": [
+                                "preparar",
+                                "assistir",
+                                "estudar",
+                                "praticar",
+                                "revisar"
+                            ],
+                            "type": "string"
+                        },
+                        "maxItems": 5,
+                        "title": "Completed Steps",
+                        "type": "array"
+                    },
+                    "current_step": {
+                        "enum": [
+                            "preparar",
+                            "assistir",
+                            "estudar",
+                            "praticar",
+                            "revisar"
+                        ],
+                        "title": "Current Step",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "current_step",
+                    "completed_steps"
+                ],
+                "title": "StudySessionIn",
+                "type": "object"
+            },
+            "StudySessionOut": {
+                "properties": {
+                    "completed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed At"
+                    },
+                    "completed_steps": {
+                        "items": {
+                            "enum": [
+                                "preparar",
+                                "assistir",
+                                "estudar",
+                                "praticar",
+                                "revisar"
+                            ],
+                            "type": "string"
+                        },
+                        "maxItems": 5,
+                        "title": "Completed Steps",
+                        "type": "array"
+                    },
+                    "current_step": {
+                        "enum": [
+                            "preparar",
+                            "assistir",
+                            "estudar",
+                            "praticar",
+                            "revisar"
+                        ],
+                        "title": "Current Step",
+                        "type": "string"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "started_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Started At"
+                    },
+                    "total_seconds": {
+                        "title": "Total Seconds",
+                        "type": "integer"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    }
+                },
+                "required": [
+                    "current_step",
+                    "completed_steps",
+                    "lesson_number",
+                    "started_at",
+                    "updated_at",
+                    "completed_at",
+                    "total_seconds"
+                ],
+                "title": "StudySessionOut",
+                "type": "object"
+            },
+            "TodayOut": {
+                "properties": {
+                    "plan": {
+                        "$ref": "#/components/schemas/StudyPlanOut"
+                    },
+                    "recent_session": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/RecentSessionOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "recommendation": {
+                        "$ref": "#/components/schemas/RecommendationOut"
+                    },
+                    "recorded_minutes_this_week": {
+                        "title": "Recorded Minutes This Week",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "recommendation",
+                    "plan",
+                    "recorded_minutes_this_week",
+                    "recent_session"
+                ],
+                "title": "TodayOut",
+                "type": "object"
+            },
             "TokenOut": {
                 "description": "O access token volta no corpo; o refresh vai em cookie httpOnly.",
                 "properties": {
@@ -765,6 +2128,239 @@
                     "expires_in"
                 ],
                 "title": "TokenOut",
+                "type": "object"
+            },
+            "TranscriptCueOut": {
+                "properties": {
+                    "end_seconds": {
+                        "title": "End Seconds",
+                        "type": "number"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "speaker": {
+                        "title": "Speaker",
+                        "type": "string"
+                    },
+                    "start_seconds": {
+                        "title": "Start Seconds",
+                        "type": "number"
+                    },
+                    "text_en": {
+                        "title": "Text En",
+                        "type": "string"
+                    },
+                    "text_pt": {
+                        "title": "Text Pt",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "position",
+                    "start_seconds",
+                    "end_seconds",
+                    "speaker",
+                    "text_en",
+                    "text_pt"
+                ],
+                "title": "TranscriptCueOut",
+                "type": "object"
+            },
+            "TranscriptionJobOut": {
+                "properties": {
+                    "attempt_id": {
+                        "title": "Attempt Id",
+                        "type": "integer"
+                    },
+                    "automated": {
+                        "const": true,
+                        "default": true,
+                        "title": "Automated",
+                        "type": "boolean"
+                    },
+                    "completed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed At"
+                    },
+                    "cost_microusd": {
+                        "title": "Cost Microusd",
+                        "type": "integer"
+                    },
+                    "error_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Error Code"
+                    },
+                    "evaluation_only": {
+                        "const": true,
+                        "default": true,
+                        "title": "Evaluation Only",
+                        "type": "boolean"
+                    },
+                    "expected_text": {
+                        "title": "Expected Text",
+                        "type": "string"
+                    },
+                    "expires_at": {
+                        "format": "date-time",
+                        "title": "Expires At",
+                        "type": "string"
+                    },
+                    "human_rating": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "helpful",
+                                    "not_helpful"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Human Rating"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "low_confidence": {
+                        "title": "Low Confidence",
+                        "type": "boolean"
+                    },
+                    "mean_confidence": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Mean Confidence"
+                    },
+                    "provider": {
+                        "title": "Provider",
+                        "type": "string"
+                    },
+                    "requested_at": {
+                        "format": "date-time",
+                        "title": "Requested At",
+                        "type": "string"
+                    },
+                    "similarity_score": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Similarity Score"
+                    },
+                    "status": {
+                        "enum": [
+                            "queued",
+                            "processing",
+                            "completed",
+                            "failed"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "transcript_text": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Transcript Text"
+                    },
+                    "words": {
+                        "items": {
+                            "$ref": "#/components/schemas/TranscriptionWordOut"
+                        },
+                        "title": "Words",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "id",
+                    "attempt_id",
+                    "status",
+                    "provider",
+                    "expected_text",
+                    "transcript_text",
+                    "words",
+                    "mean_confidence",
+                    "similarity_score",
+                    "low_confidence",
+                    "error_code",
+                    "cost_microusd",
+                    "human_rating",
+                    "requested_at",
+                    "completed_at",
+                    "expires_at"
+                ],
+                "title": "TranscriptionJobOut",
+                "type": "object"
+            },
+            "TranscriptionWordOut": {
+                "properties": {
+                    "confidence": {
+                        "maximum": 1.0,
+                        "minimum": 0.0,
+                        "title": "Confidence",
+                        "type": "number"
+                    },
+                    "end_ms": {
+                        "minimum": 0.0,
+                        "title": "End Ms",
+                        "type": "integer"
+                    },
+                    "start_ms": {
+                        "minimum": 0.0,
+                        "title": "Start Ms",
+                        "type": "integer"
+                    },
+                    "text": {
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text",
+                    "start_ms",
+                    "end_ms",
+                    "confidence"
+                ],
+                "title": "TranscriptionWordOut",
                 "type": "object"
             },
             "UsuarioOut": {
@@ -900,6 +2496,403 @@
                 ],
                 "title": "VocabItemWithLessonOut",
                 "type": "object"
+            },
+            "WritingDraftIn": {
+                "properties": {
+                    "text": {
+                        "maxLength": 5000,
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "title": "WritingDraftIn",
+                "type": "object"
+            },
+            "WritingDraftOut": {
+                "properties": {
+                    "prompt_id": {
+                        "title": "Prompt Id",
+                        "type": "integer"
+                    },
+                    "revisions": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingRevisionOut"
+                        },
+                        "title": "Revisions",
+                        "type": "array"
+                    },
+                    "text": {
+                        "title": "Text",
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    }
+                },
+                "required": [
+                    "prompt_id",
+                    "text",
+                    "updated_at",
+                    "revisions"
+                ],
+                "title": "WritingDraftOut",
+                "type": "object"
+            },
+            "WritingFeedbackCheckOut": {
+                "properties": {
+                    "code": {
+                        "title": "Code",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Label",
+                        "type": "string"
+                    },
+                    "passed": {
+                        "title": "Passed",
+                        "type": "boolean"
+                    },
+                    "suggestion": {
+                        "title": "Suggestion",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "label",
+                    "passed",
+                    "suggestion"
+                ],
+                "title": "WritingFeedbackCheckOut",
+                "type": "object"
+            },
+            "WritingFeedbackIn": {
+                "properties": {
+                    "assisted": {
+                        "default": false,
+                        "title": "Assisted",
+                        "type": "boolean"
+                    },
+                    "text": {
+                        "maxLength": 5000,
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "title": "WritingFeedbackIn",
+                "type": "object"
+            },
+            "WritingFeedbackOut": {
+                "properties": {
+                    "analysis_mode": {
+                        "enum": [
+                            "deterministic",
+                            "assisted",
+                            "fallback"
+                        ],
+                        "title": "Analysis Mode",
+                        "type": "string"
+                    },
+                    "assisted_confidence": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Assisted Confidence"
+                    },
+                    "assisted_cost_microusd": {
+                        "title": "Assisted Cost Microusd",
+                        "type": "integer"
+                    },
+                    "assisted_error_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Assisted Error Code"
+                    },
+                    "assisted_suggestions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Assisted Suggestions",
+                        "type": "array"
+                    },
+                    "assisted_summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Assisted Summary"
+                    },
+                    "automated": {
+                        "const": true,
+                        "default": true,
+                        "title": "Automated",
+                        "type": "boolean"
+                    },
+                    "checks": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingFeedbackCheckOut"
+                        },
+                        "title": "Checks",
+                        "type": "array"
+                    },
+                    "created_at": {
+                        "format": "date-time",
+                        "title": "Created At",
+                        "type": "string"
+                    },
+                    "evaluation_only": {
+                        "title": "Evaluation Only",
+                        "type": "boolean"
+                    },
+                    "human_rating": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "helpful",
+                                    "not_helpful"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Human Rating"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "low_confidence": {
+                        "title": "Low Confidence",
+                        "type": "boolean"
+                    },
+                    "provider": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Provider"
+                    },
+                    "ready": {
+                        "title": "Ready",
+                        "type": "boolean"
+                    },
+                    "sentence_count": {
+                        "title": "Sentence Count",
+                        "type": "integer"
+                    },
+                    "word_count": {
+                        "title": "Word Count",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "word_count",
+                    "sentence_count",
+                    "ready",
+                    "checks",
+                    "analysis_mode",
+                    "evaluation_only",
+                    "provider",
+                    "assisted_summary",
+                    "assisted_suggestions",
+                    "assisted_confidence",
+                    "low_confidence",
+                    "assisted_cost_microusd",
+                    "assisted_error_code",
+                    "human_rating",
+                    "created_at"
+                ],
+                "title": "WritingFeedbackOut",
+                "type": "object"
+            },
+            "WritingHistoryItemOut": {
+                "properties": {
+                    "draft_text": {
+                        "title": "Draft Text",
+                        "type": "string"
+                    },
+                    "feedbacks": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingFeedbackOut"
+                        },
+                        "title": "Feedbacks",
+                        "type": "array"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "lesson_title": {
+                        "title": "Lesson Title",
+                        "type": "string"
+                    },
+                    "prompt_id": {
+                        "title": "Prompt Id",
+                        "type": "integer"
+                    },
+                    "prompt_title": {
+                        "title": "Prompt Title",
+                        "type": "string"
+                    },
+                    "revisions": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingRevisionOut"
+                        },
+                        "title": "Revisions",
+                        "type": "array"
+                    },
+                    "updated_at": {
+                        "format": "date-time",
+                        "title": "Updated At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "prompt_id",
+                    "lesson_number",
+                    "lesson_title",
+                    "prompt_title",
+                    "draft_text",
+                    "updated_at",
+                    "revisions",
+                    "feedbacks"
+                ],
+                "title": "WritingHistoryItemOut",
+                "type": "object"
+            },
+            "WritingPromptOut": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "instructions": {
+                        "title": "Instructions",
+                        "type": "string"
+                    },
+                    "min_sentences": {
+                        "title": "Min Sentences",
+                        "type": "integer"
+                    },
+                    "min_words": {
+                        "title": "Min Words",
+                        "type": "integer"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "requirements": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingRequirementOut"
+                        },
+                        "title": "Requirements",
+                        "type": "array"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "position",
+                    "title",
+                    "instructions",
+                    "min_words",
+                    "min_sentences",
+                    "requirements"
+                ],
+                "title": "WritingPromptOut",
+                "type": "object"
+            },
+            "WritingRequirementOut": {
+                "properties": {
+                    "label": {
+                        "title": "Label",
+                        "type": "string"
+                    },
+                    "terms": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Terms",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "label",
+                    "terms"
+                ],
+                "title": "WritingRequirementOut",
+                "type": "object"
+            },
+            "WritingRevisionOut": {
+                "properties": {
+                    "created_at": {
+                        "format": "date-time",
+                        "title": "Created At",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "text": {
+                        "title": "Text",
+                        "type": "string"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "version",
+                    "text",
+                    "created_at"
+                ],
+                "title": "WritingRevisionOut",
+                "type": "object"
             }
         }
     },
@@ -909,6 +2902,27 @@
     },
     "openapi": "3.1.0",
     "paths": {
+        "/api/assist/status": {
+            "get": {
+                "operationId": "status_assistencia_api_assist_status_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssistStatusOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Status Assistencia",
+                "tags": [
+                    "assist"
+                ]
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "operationId": "entrar_api_auth_login_post",
@@ -1201,6 +3215,58 @@
                 ]
             }
         },
+        "/api/exercises/{exercise_id}/hints/{level}": {
+            "get": {
+                "description": "Libera dicas em ordem; a segunda exige ao menos uma tentativa errada.",
+                "operationId": "obter_dica_api_exercises__exercise_id__hints__level__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "exercise_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Exercise Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "level",
+                        "required": true,
+                        "schema": {
+                            "title": "Level",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExerciseHintOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Dica",
+                "tags": [
+                    "progress"
+                ]
+            }
+        },
         "/api/health": {
             "get": {
                 "description": "Readiness.\n\nAbre uma conexão de verdade e pergunta a versão ao Postgres. Se o banco\nnão responder, devolve 503 — é isso que faz o healthcheck valer alguma coisa.",
@@ -1361,6 +3427,100 @@
                 ]
             }
         },
+        "/api/lessons/{number}/study-session": {
+            "get": {
+                "description": "Devolve o ponto salvo ou o início da jornada quando ela ainda não existe.",
+                "operationId": "obter_sessao_de_estudo_api_lessons__number__study_session_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudySessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Sessao De Estudo",
+                "tags": [
+                    "progress"
+                ]
+            },
+            "put": {
+                "description": "Cria ou atualiza a retomada da jornada, isolada por conta e aula.",
+                "operationId": "salvar_sessao_de_estudo_api_lessons__number__study_session_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudySessionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudySessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Salvar Sessao De Estudo",
+                "tags": [
+                    "progress"
+                ]
+            }
+        },
         "/api/live": {
             "get": {
                 "description": "Liveness: o processo está de pé. Não toca em dependência nenhuma.",
@@ -1387,6 +3547,228 @@
                 ]
             }
         },
+        "/api/me/export": {
+            "get": {
+                "operationId": "exportar_dados_api_me_export_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PersonalDataExportOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Exportar Dados",
+                "tags": [
+                    "me"
+                ]
+            }
+        },
+        "/api/me/notebook": {
+            "get": {
+                "operationId": "listar_caderno_api_me_notebook_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "minimum": 1,
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Lesson"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "kind",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "note",
+                                        "favorite_phrase",
+                                        "personal_example",
+                                        "recurring_error",
+                                        "teacher_question"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Kind"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/NotebookEntryOut"
+                                    },
+                                    "title": "Response Listar Caderno Api Me Notebook Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Listar Caderno",
+                "tags": [
+                    "me"
+                ]
+            },
+            "post": {
+                "operationId": "criar_anotacao_api_me_notebook_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotebookEntryIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotebookEntryOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Criar Anotacao",
+                "tags": [
+                    "me"
+                ]
+            }
+        },
+        "/api/me/notebook/{entry_id}": {
+            "delete": {
+                "operationId": "excluir_anotacao_api_me_notebook__entry_id__delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "entry_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Entry Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Excluir Anotacao",
+                "tags": [
+                    "me"
+                ]
+            },
+            "put": {
+                "operationId": "atualizar_anotacao_api_me_notebook__entry_id__put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "entry_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Entry Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotebookEntryUpdate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotebookEntryOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Atualizar Anotacao",
+                "tags": [
+                    "me"
+                ]
+            }
+        },
         "/api/me/progress": {
             "get": {
                 "description": "Uma linha por aula, sempre as dez — aula sem atividade vem zerada.",
@@ -1409,9 +3791,239 @@
                 ]
             }
         },
+        "/api/me/skills": {
+            "get": {
+                "operationId": "minhas_competencias_api_me_skills_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/SkillSummaryOut"
+                                    },
+                                    "title": "Response Minhas Competencias Api Me Skills Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Minhas Competencias",
+                "tags": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/api/me/study-plan": {
+            "get": {
+                "operationId": "obter_plano_api_me_study_plan_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudyPlanOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Obter Plano",
+                "tags": [
+                    "dashboard"
+                ]
+            },
+            "put": {
+                "operationId": "salvar_plano_api_me_study_plan_put",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudyPlanIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudyPlanOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Salvar Plano",
+                "tags": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/api/me/today": {
+            "get": {
+                "operationId": "painel_hoje_api_me_today_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TodayOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Painel Hoje",
+                "tags": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/api/media/{media_id}/position": {
+            "delete": {
+                "operationId": "limpar_posicao_api_media__media_id__position_delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "media_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Media Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Limpar Posicao",
+                "tags": [
+                    "media"
+                ]
+            },
+            "get": {
+                "operationId": "obter_posicao_api_media__media_id__position_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "media_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Media Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MediaPositionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Posicao",
+                "tags": [
+                    "media"
+                ]
+            },
+            "put": {
+                "operationId": "salvar_posicao_api_media__media_id__position_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "media_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Media Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MediaPositionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MediaPositionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Salvar Posicao",
+                "tags": [
+                    "media"
+                ]
+            }
+        },
         "/api/review/due": {
             "get": {
-                "description": "Cartas do usuário logado cujo prazo já chegou, da mais atrasada primeiro.",
                 "operationId": "vencidas_api_review_due_get",
                 "parameters": [
                     {
@@ -1424,6 +4036,65 @@
                             "minimum": 1,
                             "title": "Limit",
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "item_type",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "vocabulary",
+                                        "grammar_error",
+                                        "phrase",
+                                        "listening",
+                                        "writing_prompt",
+                                        "speaking_prompt"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Item Type"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "skill",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 40,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Skill"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "max_minutes",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maximum": 30,
+                                    "minimum": 1,
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Max Minutes"
                         }
                     }
                 ],
@@ -1459,9 +4130,59 @@
                 ]
             }
         },
+        "/api/review/items": {
+            "get": {
+                "operationId": "listar_itens_api_review_items_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "default": "suspended",
+                            "enum": [
+                                "active",
+                                "suspended"
+                            ],
+                            "title": "Status",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CardOut"
+                                    },
+                                    "title": "Response Listar Itens Api Review Items Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Listar Itens",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
         "/api/review/items/{vocab_item_id}": {
             "post": {
-                "description": "Põe um item de vocabulário no deck.",
                 "operationId": "adicionar_item_api_review_items__vocab_item_id__post",
                 "parameters": [
                     {
@@ -1504,7 +4225,6 @@
         },
         "/api/review/lessons/{number}": {
             "post": {
-                "description": "Põe todo o vocabulário de uma aula no deck.",
                 "operationId": "adicionar_aula_api_review_lessons__number__post",
                 "parameters": [
                     {
@@ -1566,17 +4286,101 @@
                 ]
             }
         },
-        "/api/review/{card_id}/grade": {
-            "post": {
-                "description": "Aplica o SM-2 à carta e reagenda.",
-                "operationId": "avaliar_api_review__card_id__grade_post",
+        "/api/review/{item_id}": {
+            "delete": {
+                "operationId": "excluir_item_api_review__item_id__delete",
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "card_id",
+                        "name": "item_id",
                         "required": true,
                         "schema": {
-                            "title": "Card Id",
+                            "title": "Item Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Excluir Item",
+                "tags": [
+                    "review"
+                ]
+            },
+            "patch": {
+                "operationId": "alterar_status_api_review__item_id__patch",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "item_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Item Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReviewItemStatusIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Alterar Status",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
+        "/api/review/{item_id}/grade": {
+            "post": {
+                "operationId": "avaliar_api_review__item_id__grade_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "item_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Item Id",
                             "type": "integer"
                         }
                     }
@@ -1616,6 +4420,343 @@
                 "summary": "Avaliar",
                 "tags": [
                     "review"
+                ]
+            }
+        },
+        "/api/speaking/attempts": {
+            "get": {
+                "operationId": "listar_tentativas_api_speaking_attempts_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "minimum": 1,
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Lesson"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/SpeakingAttemptOut"
+                                    },
+                                    "title": "Response Listar Tentativas Api Speaking Attempts Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Listar Tentativas",
+                "tags": [
+                    "speaking"
+                ]
+            },
+            "post": {
+                "operationId": "criar_tentativa_api_speaking_attempts_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SpeakingAttemptIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SpeakingAttemptOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Criar Tentativa",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/attempts/{attempt_id}": {
+            "delete": {
+                "operationId": "excluir_tentativa_api_speaking_attempts__attempt_id__delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "attempt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Attempt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Excluir Tentativa",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/attempts/{attempt_id}/audio": {
+            "get": {
+                "operationId": "obter_audio_api_speaking_attempts__attempt_id__audio_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "attempt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Attempt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Audio",
+                "tags": [
+                    "speaking"
+                ]
+            },
+            "put": {
+                "operationId": "enviar_audio_api_speaking_attempts__attempt_id__audio_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "attempt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Attempt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SpeakingAttemptOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Enviar Audio",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/attempts/{attempt_id}/transcription": {
+            "post": {
+                "operationId": "solicitar_transcricao_api_speaking_attempts__attempt_id__transcription_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "attempt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Attempt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TranscriptionJobOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Solicitar Transcricao",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/transcriptions/{job_id}": {
+            "delete": {
+                "operationId": "excluir_transcricao_api_speaking_transcriptions__job_id__delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "job_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Job Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Excluir Transcricao",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/transcriptions/{job_id}/rating": {
+            "put": {
+                "operationId": "avaliar_transcricao_api_speaking_transcriptions__job_id__rating_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "job_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Job Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HumanRatingIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TranscriptionJobOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Avaliar Transcricao",
+                "tags": [
+                    "speaking"
                 ]
             }
         },
@@ -1672,6 +4813,279 @@
                 "summary": "Listar Vocabulario",
                 "tags": [
                     "lessons"
+                ]
+            }
+        },
+        "/api/writing/feedback/{feedback_id}/rating": {
+            "put": {
+                "operationId": "avaliar_feedback_api_writing_feedback__feedback_id__rating_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "feedback_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Feedback Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HumanRatingIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingFeedbackOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Avaliar Feedback",
+                "tags": [
+                    "writing"
+                ]
+            }
+        },
+        "/api/writing/history": {
+            "get": {
+                "operationId": "historico_de_escrita_api_writing_history_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/WritingHistoryItemOut"
+                                    },
+                                    "title": "Response Historico De Escrita Api Writing History Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "Historico De Escrita",
+                "tags": [
+                    "writing"
+                ]
+            }
+        },
+        "/api/writing/prompts/{prompt_id}/draft": {
+            "get": {
+                "operationId": "obter_rascunho_api_writing_prompts__prompt_id__draft_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "prompt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Prompt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingDraftOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Rascunho",
+                "tags": [
+                    "writing"
+                ]
+            },
+            "put": {
+                "operationId": "salvar_rascunho_api_writing_prompts__prompt_id__draft_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "prompt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Prompt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WritingDraftIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingDraftOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Salvar Rascunho",
+                "tags": [
+                    "writing"
+                ]
+            }
+        },
+        "/api/writing/prompts/{prompt_id}/feedback": {
+            "post": {
+                "operationId": "analisar_texto_api_writing_prompts__prompt_id__feedback_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "prompt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Prompt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WritingFeedbackIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingFeedbackOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Analisar Texto",
+                "tags": [
+                    "writing"
+                ]
+            }
+        },
+        "/api/writing/prompts/{prompt_id}/versions": {
+            "post": {
+                "operationId": "criar_versao_api_writing_prompts__prompt_id__versions_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "prompt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Prompt Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WritingDraftIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingRevisionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Criar Versao",
+                "tags": [
+                    "writing"
                 ]
             }
         }

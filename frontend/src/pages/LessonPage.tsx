@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { useSessao } from '../api/auth'
 import { useLesson } from '../api/queries'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { GrammarBlockView } from '../components/GrammarBlockView'
@@ -19,6 +20,7 @@ function Secao({ n, titulo, children }: { n: string; titulo: string; children: R
 }
 
 export function LessonPage() {
+  const { usuario } = useSessao()
   const { numero } = useParams()
   const n = Number(numero)
   const { data, isPending, error, refetch } = useLesson(n)
@@ -26,6 +28,7 @@ export function LessonPage() {
   if (!Number.isInteger(n)) return <p className="erro">Número de aula inválido.</p>
   if (isPending) return <Carregando oque={`a aula ${n}`} />
   if (error) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
+  const currentVersion = data.versions[0]
 
   return (
     <>
@@ -46,6 +49,52 @@ export function LessonPage() {
           </span>
         ))}
       </div>
+
+      <section className="lesson-editorial" aria-label="Origem e revisão do conteúdo">
+        <div>
+          <span>Estratégia de estudo</span>
+          <strong>{currentVersion?.learning_strategy ?? 'não informada'}</strong>
+        </div>
+        <div>
+          <span>Revisão editorial</span>
+          <strong>
+            {currentVersion
+              ? `v${currentVersion.version} · ${currentVersion.status === 'reviewed' ? 'revisada' : currentVersion.status}`
+              : 'não informada'}
+          </strong>
+        </div>
+        <div>
+          <span>Fontes</span>
+          <strong>
+            {data.content_sources.map((source, index) => (
+              <span key={source.kind}>
+                {index > 0 && ' · '}
+                {source.url ? (
+                  <a href={source.url} target="_blank" rel="noopener noreferrer">
+                    {source.kind === 'official' ? 'VOA oficial' : source.publisher}
+                  </a>
+                ) : source.kind === 'authorial' ? (
+                  'explicação autoral'
+                ) : (
+                  source.publisher
+                )}
+              </span>
+            ))}
+          </strong>
+        </div>
+      </section>
+
+      {data.media.some((media) => media.kind === 'conversation_audio') && (
+        <div className="study-entry">
+          <div>
+            <p className="study-kicker">Jornada guiada</p>
+            <strong>Estude em cinco etapas e continue de onde parou.</strong>
+          </div>
+          <Link className="btn" to={`/aulas/${data.number}/estudar`}>
+            Começar estudo
+          </Link>
+        </div>
+      )}
 
       <a className="watch" href={data.voa_url} target="_blank" rel="noopener noreferrer">
         Assistir e ouvir no VOA ↗
@@ -84,7 +133,7 @@ export function LessonPage() {
       <Secao n="06" titulo="Exercícios">
         <div className="stack tight">
           {data.exercises.map((e, i) => (
-            <ExerciseCard exercicio={e} numero={i + 1} key={e.id} />
+            <ExerciseCard exercicio={e} numero={i + 1} userId={usuario?.id ?? 0} key={e.id} />
           ))}
         </div>
       </Secao>

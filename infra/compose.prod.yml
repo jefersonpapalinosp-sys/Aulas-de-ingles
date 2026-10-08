@@ -36,6 +36,17 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET com pelo menos 32 bytes}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SPEAKING_STORAGE_DIR: /app/data/speaking
+      ASSISTED_FEATURES_ENABLED: ${ASSISTED_FEATURES_ENABLED:-false}
+      ASSIST_TRANSCRIPTION_URL: ${ASSIST_TRANSCRIPTION_URL:-}
+      ASSIST_WRITING_URL: ${ASSIST_WRITING_URL:-}
+      ASSIST_PROVIDER_NAME: ${ASSIST_PROVIDER_NAME:-external}
+      ASSIST_PROVIDER_TOKEN: ${ASSIST_PROVIDER_TOKEN:-}
+      ASSIST_DAILY_QUOTA: ${ASSIST_DAILY_QUOTA:-5}
+      ASSIST_RETENTION_DAYS: ${ASSIST_RETENTION_DAYS:-30}
+      ASSIST_TIMEOUT_SECONDS: ${ASSIST_TIMEOUT_SECONDS:-20}
+    volumes:
+      - speaking_data_prod:/app/data/speaking
     expose:
       - "8000"
     depends_on:
@@ -64,3 +75,5 @@ services:
 volumes:
   pgdata_prod:
     name: aulas-ingles-pgdata-prod
+  speaking_data_prod:
+    name: aulas-ingles-speaking-data-prod

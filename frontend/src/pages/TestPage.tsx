@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSessao } from '../api/auth'
 import { useAllExercises } from '../api/queries'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { Carregando, Erro } from '../components/States'
@@ -14,6 +15,7 @@ function umaPorAula<T extends { lesson_number: number; position: number }>(todos
 }
 
 export function TestPage() {
+  const { usuario } = useSessao()
   const { data, isPending, error, refetch } = useAllExercises()
   const [respondidos, setRespondidos] = useState<Record<number, boolean>>({})
 
@@ -41,6 +43,7 @@ export function TestPage() {
             <ExerciseCard
               exercicio={q}
               numero={i + 1}
+              userId={usuario?.id ?? 0}
               aoResponder={(ok) => setRespondidos((r) => ({ ...r, [q.id]: ok }))}
             />
           </div>

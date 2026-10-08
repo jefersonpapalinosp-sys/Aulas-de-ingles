@@ -92,6 +92,8 @@ jobs:
         run: npm run test
       - name: build de produção
         run: npm run build
+      - name: orçamento de performance
+        run: npm run check:budget
 
   e2e:
     name: e2e · fluxo completo contra o compose de produção

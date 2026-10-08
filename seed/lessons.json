@@ -4,6 +4,130 @@
     "title": "Take Me Out to the Ball Game",
     "title_pt": "Me leva pro jogo de beisebol",
     "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-31-take-me-out-to-the-ball-game/3535235.html",
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 31",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/06/81890cf1-5a16-4426-87db-fdb240c750cc_hq.mp3",
+        "duration_seconds": 209,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 0,
+            "end_seconds": 14,
+            "speaker": "Anna",
+            "text_en": "Baseball is America's sport. Today, I am going to Nationals Park.",
+            "text_pt": "O beisebol é o esporte dos Estados Unidos. Hoje, vou ao Nationals Park."
+          },
+          {
+            "position": 1,
+            "start_seconds": 31,
+            "end_seconds": 38,
+            "speaker": "Jonathan",
+            "text_en": "Don't take the bus. A taxi is faster than a bus.",
+            "text_pt": "Não pegue o ônibus. Um táxi é mais rápido que um ônibus."
+          },
+          {
+            "position": 2,
+            "start_seconds": 65,
+            "end_seconds": 79,
+            "speaker": "Anna",
+            "text_en": "I am at home plate. I wait for the pitch. The ball comes. I swing. It's a hit!",
+            "text_pt": "Estou na base principal. Espero o arremesso. A bola vem. Dou a tacada. Acertei!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 112,
+            "end_seconds": 120,
+            "speaker": "Ashley",
+            "text_en": "Anna, you should go a lot earlier than 7 o'clock.",
+            "text_pt": "Anna, você deveria ir muito mais cedo que às sete."
+          },
+          {
+            "position": 4,
+            "start_seconds": 126,
+            "end_seconds": 133,
+            "speaker": "Ashley",
+            "text_en": "A bicycle is faster than a taxi.",
+            "text_pt": "Uma bicicleta é mais rápida que um táxi."
+          },
+          {
+            "position": 5,
+            "start_seconds": 139,
+            "end_seconds": 150,
+            "speaker": "Ashley",
+            "text_en": "In D.C. traffic sometimes a bicycle is faster than a car.",
+            "text_pt": "No trânsito de Washington, às vezes uma bicicleta é mais rápida que um carro."
+          },
+          {
+            "position": 6,
+            "start_seconds": 171,
+            "end_seconds": 183,
+            "speaker": "Ashley",
+            "text_en": "The Metro is faster than a taxi and a bicycle. You ought to take the Metro.",
+            "text_pt": "O metrô é mais rápido que um táxi e uma bicicleta. Você deveria pegar o metrô."
+          },
+          {
+            "position": 7,
+            "start_seconds": 186,
+            "end_seconds": 194,
+            "speaker": "Anna",
+            "text_en": "The Metro was a lot faster than a bus, taxi or bike.",
+            "text_pt": "O metrô foi muito mais rápido que ônibus, táxi ou bicicleta."
+          },
+          {
+            "position": 8,
+            "start_seconds": 194,
+            "end_seconds": 200,
+            "speaker": "Anna",
+            "text_en": "The tickets are sold out? Nooooooo!",
+            "text_pt": "Os ingressos estão esgotados? Nããããão!"
+          },
+          {
+            "position": 9,
+            "start_seconds": 200,
+            "end_seconds": 205,
+            "speaker": "Fan",
+            "text_en": "Next time, you should buy your ticket online.",
+            "text_pt": "Da próxima vez, você deveria comprar seu ingresso online."
+          },
+          {
+            "position": 10,
+            "start_seconds": 205,
+            "end_seconds": 209,
+            "speaker": "Anna",
+            "text_en": "Being early is better than being late.",
+            "text_pt": "Chegar cedo é melhor que chegar tarde."
+          }
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Compare caminhos para o estádio",
+        "instructions": "Write 4 to 6 sentences comparing two ways to travel in your city. Say which one is faster and give one piece of advice to a visitor.",
+        "min_words": 35,
+        "min_sentences": 4,
+        "requirements": [
+          {
+            "label": "um comparativo com than",
+            "terms": [
+              "than"
+            ]
+          },
+          {
+            "label": "um conselho com should ou ought to",
+            "terms": [
+              "should",
+              "ought"
+            ]
+          }
+        ]
+      }
+    ],
     "grammar_tag": "Comparativos + conselho",
     "focus_points": [
       "should / ought to",
@@ -11,6 +135,10 @@
       "a lot + comparativo"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "visualizar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Anna quer ver um jogo dos Washington Nationals. Todo mundo que ela encontra tem uma opinião sobre qual transporte é mais rápido — e ela chega tarde demais, quando os ingressos já estão esgotados. A aula inteira é construída sobre **comparar duas coisas** e **dar conselho**.",
     "goals": [
       "Comparar duas coisas com **-er than** (adjetivos curtos) e **more … than** (adjetivos longos).",
@@ -300,6 +428,10 @@
         "prompt": "A bicycle is `____` (fast) than a taxi.",
         "hint": null,
         "explanation": "*fast* tem 1 sílaba → -er + than.",
+        "hints": [
+          "Pense no comparativo curto do adjetivo *fast*.",
+          "Adicione a terminação *-er*; o *than* já está fora da lacuna."
+        ],
         "answers": [
           "faster"
         ]
@@ -309,6 +441,10 @@
         "prompt": "Baseball is `____` (exciting) than golf.",
         "hint": "2 palavras",
         "explanation": "*exciting* tem 3 sílabas → more + adjetivo.",
+        "hints": [
+          "Adjetivos longos usam uma palavra antes deles no comparativo.",
+          "Use a estrutura *more + adjective*."
+        ],
         "answers": [
           "more exciting"
         ]
@@ -318,6 +454,10 @@
         "prompt": "Being early is `____` (good) than being late.",
         "hint": null,
         "explanation": "*good* é irregular: good → better → the best.",
+        "hints": [
+          "O comparativo de *good* é irregular.",
+          "A forma procurada começa com a letra **b**."
+        ],
         "answers": [
           "better"
         ]
@@ -327,6 +467,10 @@
         "prompt": "Você quer dar um conselho: \"Você deveria comprar online.\" → You `____` buy it online.",
         "hint": null,
         "explanation": "*should* + verbo, ou *ought to* + verbo. Os dois valem.",
+        "hints": [
+          "Use um modal ou uma expressão de conselho.",
+          "Uma resposta tem uma palavra; a outra termina em *to*."
+        ],
         "answers": [
           "should",
           "ought to"
@@ -337,6 +481,10 @@
         "prompt": "Complete com o intensificador correto: The Metro is `____` faster than a bus.",
         "hint": "não use \"very\"",
         "explanation": "Comparativo aceita *a lot / much / far*, nunca *very*.",
+        "hints": [
+          "Comparativos usam intensificadores diferentes de *very*.",
+          "Pense em *much*, *far* ou na expressão de duas palavras *a lot*."
+        ],
         "answers": [
           "a lot",
           "much",
@@ -345,11 +493,74 @@
       },
       {
         "position": 5,
+        "activity_type": "transformation",
         "prompt": "Corrija: \"A taxi is more faster than a bus.\" → A taxi is `____` than a bus.",
         "hint": null,
         "explanation": "Nunca junte *more* com a terminação *-er*.",
+        "hints": [
+          "Não combine *more* com uma palavra terminada em *-er*.",
+          "Use somente o comparativo curto de *fast*."
+        ],
         "answers": [
           "faster"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "bus",
+          "taxi",
+          "Metro"
+        ],
+        "prompt": "Listening: Anna finalmente pega o `____` para chegar ao Nationals Park.",
+        "hint": "ouça antes de abrir a transcrição",
+        "explanation": "Ashley aconselha Anna a pegar o **Metro**; depois Anna confirma que ele foi muito mais rápido.",
+        "hints": [
+          "É um transporte que circula sobre trilhos.",
+          "A palavra começa com a letra **M**."
+        ],
+        "answers": [
+          "Metro",
+          "the Metro"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "prompt": "Ditado do trecho 0:31: escreva a frase completa que compara táxi e ônibus.",
+        "hint": "7 palavras",
+        "explanation": "A frase usa o comparativo curto: **A taxi is faster than a bus.**",
+        "hints": [
+          "A frase começa com *A taxi is...*.",
+          "Depois de *is*, use o comparativo de *fast*, seguido de *than a bus*."
+        ],
+        "answers": [
+          "A taxi is faster than a bus"
+        ]
+      },
+      {
+        "position": 8,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "options": [
+          "You",
+          "should",
+          "buy",
+          "it",
+          "online"
+        ],
+        "prompt": "Ordene as palavras para formar um conselho completo.",
+        "hint": null,
+        "explanation": "O modal vem depois do sujeito e antes do verbo: **You should buy it online.**",
+        "hints": [
+          "Comece pelo sujeito e coloque o modal logo depois.",
+          "A ordem é: sujeito + *should* + verbo + objeto + lugar."
+        ],
+        "answers": [
+          "You should buy it online"
         ]
       }
     ]
@@ -359,176 +570,192 @@
     "title": "Welcome to the Treehouse!",
     "title_pt": "Bem-vindo à casa na árvore!",
     "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-32-welcome-treehouse/3547306.html",
-    "grammar_tag": "Futuro: going to / will",
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 32",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/13/054d9504-47b3-4cc2-80d1-cb66fff404e4_hq.mp3",
+        "duration_seconds": 228,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 0,
+            "end_seconds": 10,
+            "speaker": "Anna",
+            "text_en": "I'm excited and nervous.",
+            "text_pt": "Estou animada e nervosa."
+          },
+          {
+            "position": 1,
+            "start_seconds": 76,
+            "end_seconds": 83,
+            "speaker": "Anna",
+            "text_en": "This is my partner, MINDY!",
+            "text_pt": "Esta é minha parceira, MINDY!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 91,
+            "end_seconds": 98,
+            "speaker": "Anna",
+            "text_en": "We find them answers!",
+            "text_pt": "Nós encontramos respostas para elas!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 104,
+            "end_seconds": 114,
+            "speaker": "Layla",
+            "text_en": "I'd like to know -- how do you play baseball?",
+            "text_pt": "Eu gostaria de saber: como se joga beisebol?"
+          }
+        ]
+      }
+    ],
+    "grammar_tag": "Objetos diretos e indiretos + interjeições",
     "focus_points": [
-      "be going to",
-      "will / 'll",
-      "can · cannot"
+      "direct object",
+      "indirect object",
+      "interjections"
     ],
     "story_note": "Parte 1 de 2 · continua na 33",
-    "lead": "Estreia do programa infantil da Anna, *The Time Traveling Treehouse*. Os colegas assistem e comentam. É a aula do **futuro**: tudo que vai acontecer no programa é anunciado com *going to* ou *will* — e MINDY, o computador, só fala de **capacidade** com *can*.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "monitorar",
+    "source_accessed_at": "2026-10-07",
+    "lead": "Estreia do programa infantil da Anna, *The Time Traveling Treehouse*. Crianças fazem perguntas e Anna e MINDY procuram respostas. A aula mostra **quem recebe a ação** com objetos diretos e indiretos, como pedir informação e como interjeições mudam a emoção da fala.",
     "goals": [
-      "Usar **be going to** para plano já decidido e para previsão com evidência.",
-      "Usar **will / 'll** para previsão, promessa e decisão tomada na hora.",
-      "Fazer perguntas de futuro: *Will the shark eat her?* / *Is Anna going to be lost forever?*",
-      "Distinguir **can** (capacidade/possibilidade) de **cannot** e usar *that*-clause depois de *know*, *think*, *hope*."
+      "Reconhecer o **objeto direto**, que recebe diretamente a ação do verbo: *ask a question*.",
+      "Usar o **objeto indireto** para indicar a pessoa que recebe algo ou se beneficia da ação: *ask us a question*.",
+      "Pedir ajuda ou informação com **I'd like to know**, imperativos e pedidos com *please*.",
+      "Usar e interpretar interjeições como **woo-hoo, oops, aw, whoa** e **shh** pela entonação."
     ],
     "grammar_blocks": [
       {
         "position": 0,
-        "heading": "going to vs. will: os dois são futuro, mas não são iguais",
-        "why": "Esta é a confusão número um de quem fala português, porque nós temos uma forma só (\"vou assistir\"). Em inglês a escolha informa **quando** a decisão foi tomada.",
-        "warning": "**Regra prática** Se você já tinha decidido antes de falar, use *going to*. Se decidiu agora, enquanto falava, use *will*.",
+        "heading": "Objeto direto: o que recebe a ação",
+        "why": "O objeto direto responde **o quê?** ou **quem?** depois do verbo. Em *Layla asks this question*, o que ela pergunta? *this question*. O inglês normalmente coloca esse objeto logo depois do verbo.",
+        "warning": "**Não procure só pela posição.** Primeiro encontre o verbo e pergunte o que recebe a ação.",
         "table_head": [
-          "Uso",
-          "Forma",
-          "Frase da aula"
+          "Sujeito + verbo",
+          "Objeto direto",
+          "Pergunta de verificação"
         ],
         "rows": [
           {
             "position": 0,
             "cells": [
-              "plano já decidido",
-              "be going to",
-              "Today you **are going to watch** my new show."
+              "Kids ask",
+              "**questions**",
+              "ask o quê?"
             ]
           },
           {
             "position": 1,
             "cells": [
-              "previsão com evidência",
-              "be going to",
-              "**Is** Anna **going to be** lost forever?"
+              "We find",
+              "**answers**",
+              "find o quê?"
             ]
           },
           {
             "position": 2,
             "cells": [
-              "previsão / opinião",
-              "will",
-              "After they watch it, **they'll tell** me what they liked."
-            ]
-          },
-          {
-            "position": 3,
-            "cells": [
-              "decisão na hora",
-              "will",
-              "— Where's the flour? — **I'll get** it."
-            ]
-          },
-          {
-            "position": 4,
-            "cells": [
-              "pergunta com will",
-              "Will + sujeito + verbo",
-              "**Will** the shark **eat** her?"
+              "Layla asks",
+              "**this question**",
+              "asks o quê?"
             ]
           }
         ]
       },
       {
         "position": 1,
-        "heading": "Contrações: é assim que soa de verdade",
-        "why": "Ninguém diz *they will* numa conversa. Treine ouvindo e repetindo a forma contraída — é o que aparece no vídeo.",
-        "warning": null,
+        "heading": "Objeto indireto: para quem a ação é feita",
+        "why": "O objeto indireto identifica quem recebe algo ou se beneficia da ação. No padrão de dois objetos, ele costuma vir antes do objeto direto: *We find **them** answers.*",
+        "warning": "**Ordem mais comum** verbo + pessoa + coisa: *ask **us** questions*, não *ask questions us*.",
         "table_head": [
-          "Completa",
-          "Contraída",
-          "Som"
+          "Frase da aula",
+          "Objeto indireto",
+          "Objeto direto"
         ],
         "rows": [
           {
             "position": 0,
             "cells": [
-              "I will",
-              "I'll",
-              "/aɪl/"
+              "Kids ask **us** questions.",
+              "us",
+              "questions"
             ]
           },
           {
             "position": 1,
             "cells": [
-              "you will",
-              "you'll",
-              "/juːl/"
+              "We find **them** answers.",
+              "them",
+              "answers"
             ]
           },
           {
             "position": 2,
             "cells": [
-              "they will",
-              "they'll",
-              "/ðeɪl/"
+              "Layla asks **us** this question.",
+              "us",
+              "this question"
             ]
           },
           {
             "position": 3,
             "cells": [
-              "will not",
-              "won't",
-              "/woʊnt/"
-            ]
-          },
-          {
-            "position": 4,
-            "cells": [
-              "I would like",
-              "I'd like",
-              "/aɪd laɪk/"
-            ]
-          },
-          {
-            "position": 5,
-            "cells": [
-              "going to (fala rápida)",
-              "gonna",
-              "/ˈɡʌnə/"
+              "We need to find **her** an answer.",
+              "her",
+              "an answer"
             ]
           }
         ]
       },
       {
         "position": 2,
-        "heading": "can / cannot + that-clause",
-        "why": "*can* nunca muda de forma (não existe \"cans\", não existe \"to can\") e o verbo depois dele fica no infinitivo sem *to*. E depois de *know / think / hope* entra uma oração com *that* — que pode ser omitido.",
-        "warning": "**Cuidado** \"She can to travel\" e \"She cans travel\" estão errados. Modal nunca leva *to* nem *-s*.",
+        "heading": "Pedidos, imperativos e interjeições",
+        "why": "A cena alterna pedidos de informação com comandos e reações emocionais. A palavra curta da interjeição não basta: a entonação mostra celebração, surpresa, erro ou frustração.",
+        "warning": "**Tom importa.** *Please don't yell* é um pedido; *Don't yell!* pode soar como ordem. *I'd like to know* deixa a pergunta mais educada.",
         "table_head": [
-          "Estrutura",
-          "Frase da aula",
-          "Observação"
+          "Forma",
+          "Exemplo",
+          "Função"
         ],
         "rows": [
           {
             "position": 0,
             "cells": [
-              "can + verbo",
-              "It **can time travel**.",
-              "capacidade"
+              "I'd like to know…",
+              "**I'd like to know** how you play baseball.",
+              "pedir informação"
             ]
           },
           {
             "position": 1,
             "cells": [
-              "cannot + verbo",
-              "An ocean **cannot teach** us about baseball.",
-              "*cannot* = can't /kænt/"
+              "please + imperativo",
+              "**Please don't yell**, Anna.",
+              "pedido educado"
             ]
           },
           {
             "position": 2,
             "cells": [
-              "know + that + oração",
-              "I know **that** we can find it.",
-              "o *that* é opcional"
+              "woo-hoo / yay",
+              "**Woo-hoo!** That is right, Anna.",
+              "celebração"
             ]
           },
           {
             "position": 3,
             "cells": [
-              "hope + oração",
-              "I hope you like it.",
-              "*that* omitido"
+              "oops / aw / whoa / shh",
+              "**Oops!** / **Aw, man!** / **Whoa!** / **Shh!**",
+              "erro / decepção / surpresa / silêncio"
             ]
           }
         ]
@@ -537,45 +764,45 @@
     "phrases": [
       {
         "position": 0,
-        "text_en": "Some people *are going to watch* your children's show.",
-        "text_pt": "Algumas pessoas vão assistir ao seu programa infantil.",
-        "note": "Plano já marcado → going to."
+        "text_en": "Kids from all over the world *ask us questions*.",
+        "text_pt": "Crianças do mundo inteiro fazem perguntas para nós.",
+        "note": "*us* é o objeto indireto; *questions* é o objeto direto."
       },
       {
         "position": 1,
-        "text_en": "After they watch it, *they'll tell* me what they liked.",
-        "text_pt": "Depois que assistirem, eles vão me dizer o que gostaram.",
-        "note": "Depois de *after* o verbo fica no presente, mesmo falando do futuro."
+        "text_en": "We *find them answers*.",
+        "text_pt": "Nós encontramos respostas para elas.",
+        "note": "Pessoa antes da coisa: *them* + *answers*."
       },
       {
         "position": 2,
-        "text_en": "My name means Massive Information Navigation Device, for You!",
-        "text_pt": "Meu nome significa Dispositivo Massivo de Navegação de Informação, para Você!",
-        "note": "MINDY é um acrônimo — piada recorrente da série."
+        "text_en": "Layla *asks us this question*.",
+        "text_pt": "Layla nos faz esta pergunta.",
+        "note": "*us* recebe a pergunta; *this question* recebe a ação de *ask*."
       },
       {
         "position": 3,
-        "text_en": "I know *that* we *can* find it, Anna!",
-        "text_pt": "Eu sei que a gente consegue achar, Anna!",
-        "note": "*can* aqui é \"conseguir\", não \"poder\"."
+        "text_en": "*I'd like to know* — how do you play baseball?",
+        "text_pt": "Eu gostaria de saber: como se joga beisebol?",
+        "note": "*I'd like to know* introduz uma pergunta de modo mais educado."
       },
       {
         "position": 4,
-        "text_en": "An ocean *cannot* teach us about baseball!",
-        "text_pt": "Um oceano não pode nos ensinar sobre beisebol!",
-        "note": "*cannot* junto, uma palavra só, é a forma enfática."
+        "text_en": "We need to *find her an answer*.",
+        "text_pt": "Precisamos encontrar uma resposta para ela.",
+        "note": "*her* é objeto indireto e *an answer* é objeto direto."
       },
       {
         "position": 5,
-        "text_en": "*Is* Anna *going to be* lost forever?",
-        "text_pt": "A Anna vai ficar perdida para sempre?",
-        "note": "Pergunta com *going to*: inverte o verbo *be*, não o *going*."
+        "text_en": "*Please don't yell*, Anna.",
+        "text_pt": "Por favor, não grite, Anna.",
+        "note": "Pedido negativo: *please + don't + verbo*."
       },
       {
         "position": 6,
-        "text_en": "Next week, you *can watch* part two of \"The Time Traveling Treehouse!\"",
-        "text_pt": "Semana que vem vocês podem assistir à parte dois.",
-        "note": "Aqui *can* = possibilidade/permissão."
+        "text_en": "*Whoa!* Is Anna going to be lost forever?",
+        "text_pt": "Uau! A Anna vai ficar perdida para sempre?",
+        "note": "*Whoa!* marca surpresa; o futuro permanece como contexto, não como foco gramatical."
       }
     ],
     "vocab": [
@@ -667,83 +894,102 @@
     "pronunciation": [
       {
         "position": 0,
-        "label": "they'll /ðeɪl/",
-        "explanation": "Uma sílaba só. Brasileiro tende a dizer \"dei-ul\" — junte tudo e mantenha o *th* sonoro."
+        "label": "woo-hoo! /ˈwuː huː/",
+        "explanation": "Celebração com energia e curva de voz ascendente. Compare com uma leitura neutra: a entonação carrega a emoção."
       },
       {
         "position": 1,
-        "label": "won't /woʊnt/ ≠ want /wɑːnt/",
-        "explanation": "*won't* tem o ditongo /oʊ/ (boca em O); *want* tem /ɑː/ aberto. Trocar os dois muda completamente a frase."
+        "label": "aw /ɔː/ × oh /oʊ/",
+        "explanation": "*Aw…* costuma mostrar decepção ou ternura; *oh* reage a uma informação. Alongar o som torna a emoção mais clara."
       },
       {
         "position": 2,
-        "label": "going to → gonna",
-        "explanation": "Em *you are going to watch*, a fala rápida vira \"you're gonna watch\". Reconhecer isso é 90% da dificuldade de listening."
+        "label": "oops /uːps/ · whoa /woʊ/",
+        "explanation": "*Oops!* reage a um erro. *Whoa!* reage a surpresa ou pede que algo pare. Treine como unidades curtas, não palavra por palavra."
       },
       {
         "position": 3,
-        "label": "cannot → can't /kænt/",
-        "explanation": "No inglês americano o *t* final quase desaparece e o que marca a negativa é a vogal mais longa e a sílaba **tônica**: *I CAN'T go* (ênfase) vs *I can GO* (can fraco, /kən/)."
+        "label": "shh! /ʃː/",
+        "explanation": "Som contínuo de /sh/, sem vogal no final. É um pedido imediato de silêncio e a duração indica a intensidade."
       }
     ],
     "exercises": [
       {
         "position": 0,
-        "prompt": "Plano já decidido: Tonight I `____` watch the show.",
-        "hint": "3 palavras",
-        "explanation": "Plano combinado antes de falar → be going to.",
+        "prompt": "Objeto direto: Kids ask us `____`.",
+        "hint": "o que as crianças fazem?",
+        "explanation": "*questions* recebe diretamente a ação de *ask*; é o objeto direto.",
         "answers": [
-          "am going to",
-          "'m going to"
+          "questions"
         ]
       },
       {
         "position": 1,
-        "prompt": "Decisão tomada na hora: — The phone is ringing! — OK, `____` answer it.",
-        "hint": "2 palavras, contraído",
-        "explanation": "Decisão no momento da fala → *will*, normalmente contraído: *I'll*.",
+        "prompt": "Objeto indireto: Layla asks `____` this question.",
+        "hint": "pronome que significa 'a nós'",
+        "explanation": "*us* indica quem recebe a pergunta; é o objeto indireto.",
         "answers": [
-          "i'll",
-          "ill"
+          "us"
         ]
       },
       {
         "position": 2,
-        "prompt": "Contraia: She **will not** say no. → She `____` say no.",
-        "hint": null,
-        "explanation": "will not → won't.",
+        "prompt": "Pessoa antes da coisa: We find `____` answers.",
+        "hint": "pronome que significa 'para elas/eles'",
+        "explanation": "No padrão de dois objetos, *them* vem antes do objeto direto *answers*.",
         "answers": [
-          "won't",
-          "wont"
+          "them"
         ]
       },
       {
         "position": 3,
-        "prompt": "Complete: An ocean `____` teach us about baseball.",
-        "hint": "negativa de can",
-        "explanation": "*cannot* / *can't* + verbo no infinitivo sem *to*.",
+        "prompt": "Interjeição para reagir a um erro: `____`! I pressed the wrong button.",
+        "hint": null,
+        "explanation": "*Oops!* é a reação comum a um erro pequeno ou acidente.",
         "answers": [
-          "cannot",
-          "can't",
-          "cant"
+          "oops",
+          "ops"
         ]
       },
       {
         "position": 4,
-        "prompt": "Pergunta de futuro: `____` the shark eat her?",
-        "hint": null,
-        "explanation": "Will + sujeito + verbo.",
+        "prompt": "Interjeição de celebração: `____`! That is right, Anna.",
+        "hint": "duas partes",
+        "explanation": "*Woo-hoo!* mostra alegria ou celebração.",
         "answers": [
-          "will"
+          "woo hoo",
+          "woo-hoo",
+          "woohoo"
         ]
       },
       {
         "position": 5,
-        "prompt": "Corrija: \"MINDY cans find the answer.\" → MINDY `____` find the answer.",
-        "hint": null,
-        "explanation": "Modal não recebe *-s* na 3ª pessoa.",
+        "prompt": "Pedido educado: `____` like to know how you play baseball.",
+        "hint": "contração de I would",
+        "explanation": "*I'd like to know…* introduz um pedido de informação com educação.",
         "answers": [
-          "can"
+          "i'd",
+          "id",
+          "i would"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "her partner",
+          "her teacher",
+          "her neighbor"
+        ],
+        "prompt": "Listening: Who is MINDY to Anna?",
+        "hint": "Ouça como Anna apresenta MINDY.",
+        "hints": [
+          "A palavra aparece logo depois de 'my'."
+        ],
+        "explanation": "Anna apresenta MINDY como *my partner*.",
+        "answers": [
+          "her partner"
         ]
       }
     ]
@@ -760,6 +1006,10 @@
       "regras do beisebol"
     ],
     "story_note": "Parte 2 de 2 · continua a 32",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "sequenciar",
+    "source_accessed_at": "2026-10-07",
     "lead": "MINDY finalmente acerta o destino e Anna ensina beisebol num campo de verdade. A aula é um **texto explicativo**: presente simples para descrever como as coisas funcionam, marcadores de sequência, e o truque de transformar verbo em profissão com **-er**.",
     "goals": [
       "Explicar um processo com **presente simples** + *First… Then… Each time… At the end…*",
@@ -1036,6 +1286,50 @@
         "explanation": "Rima com *love*, não com *go*. O *o* aqui é /ʌ/."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 33",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/21/f7144253-3403-4acd-9e09-9c31443113f7_hq.mp3",
+        "duration_seconds": 228,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 124,
+            "end_seconds": 127,
+            "speaker": "Anna",
+            "text_en": "Pitchers pitch the ball.",
+            "text_pt": "Arremessadores lançam a bola."
+          },
+          {
+            "position": 1,
+            "start_seconds": 128,
+            "end_seconds": 131,
+            "speaker": "Anna",
+            "text_en": "Catchers catch the ball.",
+            "text_pt": "Receptores pegam a bola."
+          },
+          {
+            "position": 2,
+            "start_seconds": 147,
+            "end_seconds": 150,
+            "speaker": "Anna",
+            "text_en": "Then, the runner runs to first base.",
+            "text_pt": "Depois, o corredor vai para a primeira base."
+          },
+          {
+            "position": 3,
+            "start_seconds": 160,
+            "end_seconds": 162,
+            "speaker": "Anna",
+            "text_en": "There are nine innings in a game.",
+            "text_pt": "Há nove entradas em um jogo."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -1093,6 +1387,26 @@
           "nine",
           "9"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "The batter bats the ball",
+          "The runner leaves the field",
+          "The catcher scores a run"
+        ],
+        "prompt": "Listening: What happens immediately after the pitcher pitches the ball?",
+        "hint": "Ouça o trecho que começa com *First*.",
+        "hints": [
+          "A ação seguinte é feita pelo *batter*.",
+          "O verbo tem a mesma raiz de *batter*."
+        ],
+        "explanation": "Anna explica a sequência: o arremessador lança e, em seguida, **the batter bats the ball**.",
+        "answers": [
+          "The batter bats the ball"
+        ]
       }
     ]
   },
@@ -1108,6 +1422,10 @@
       "won't she?"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "inferir",
+    "source_accessed_at": "2026-10-07",
     "lead": "Halloween. Anna se veste de gênio e finge ler mentes — e descobre que dizer *might* para quem quer certeza é um desastre diplomático. A aula gira em torno do contraste **will (certeza) × might (possibilidade)** e das **tag questions**.",
     "goals": [
       "Expressar possibilidade com **might / might not** e certeza com **will / won't**.",
@@ -1413,6 +1731,50 @@
         "explanation": "Em \"You WILL get a job\", a força vai no modal. Em inglês, mover a tônica muda o significado da frase sem mudar nenhuma palavra — vale treinar isso em voz alta."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 34",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/10/26/a9095f28-b489-4110-98fd-7ce6be485793_hq.mp3",
+        "duration_seconds": 244,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 31,
+            "end_seconds": 38,
+            "speaker": "Anna",
+            "text_en": "I might go. I might not go.",
+            "text_pt": "Talvez eu vá. Talvez eu não vá."
+          },
+          {
+            "position": 1,
+            "start_seconds": 48,
+            "end_seconds": 52,
+            "speaker": "Genie",
+            "text_en": "Things might go wrong.",
+            "text_pt": "As coisas podem dar errado."
+          },
+          {
+            "position": 2,
+            "start_seconds": 108,
+            "end_seconds": 114,
+            "speaker": "Anna",
+            "text_en": "You might get a job.",
+            "text_pt": "Talvez você consiga um emprego."
+          },
+          {
+            "position": 3,
+            "start_seconds": 161,
+            "end_seconds": 169,
+            "speaker": "Kaveh",
+            "text_en": "She won't say no, will she?",
+            "text_pt": "Ela não vai dizer não, vai?"
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -1472,6 +1834,26 @@
           "might",
           "may"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "Rebecca",
+          "Genie",
+          "Anna"
+        ],
+        "prompt": "Listening: Who might get a job writing the news?",
+        "hint": "Anna está tentando ler a mente de uma estudante de jornalismo.",
+        "hints": [
+          "A pessoa diz que está no terceiro ano da faculdade.",
+          "O nome dela é dito antes da conversa sobre jornalismo."
+        ],
+        "explanation": "Anna prevê que **Rebecca** talvez consiga um emprego escrevendo notícias.",
+        "answers": [
+          "Rebecca"
+        ]
       }
     ]
   },
@@ -1487,6 +1869,10 @@
       "will / won't de promessa"
     ],
     "story_note": "Parte 1 de 2 · continua na 36",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "cooperar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Marsha cozinha, Anna faz as compras — com a lista errada. A aula é a aula das **unidades de embalagem** (*a bag of*, *a jar of*, *a loaf of*) e de **too much / too many**, que é como o inglês diz \"demais\".",
     "goals": [
       "Usar as **unidades de medida e embalagem** que o inglês exige antes de incontáveis: *a bag of coffee*, não \"a coffee\".",
@@ -1792,6 +2178,50 @@
         "explanation": "Três palavras, um som. O contexto resolve — mas **você** precisa escolher a grafia certa ao escrever."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 35",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/11/02/0c67a47c-b66d-4d36-85f5-41dca2d12bde_hq.mp3",
+        "duration_seconds": 167,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 44,
+            "end_seconds": 50,
+            "speaker": "Marsha e Anna",
+            "text_en": "Do not spend too much time.",
+            "text_pt": "Não passe tempo demais."
+          },
+          {
+            "position": 1,
+            "start_seconds": 80,
+            "end_seconds": 89,
+            "speaker": "Marsha",
+            "text_en": "A bunch of bananas.",
+            "text_pt": "Um cacho de bananas."
+          },
+          {
+            "position": 2,
+            "start_seconds": 94,
+            "end_seconds": 101,
+            "speaker": "Anna",
+            "text_en": "A jar of peanut butter.",
+            "text_pt": "Um pote de pasta de amendoim."
+          },
+          {
+            "position": 3,
+            "start_seconds": 120,
+            "end_seconds": 125,
+            "speaker": "Marsha",
+            "text_en": "This is the shopping list for breakfast.",
+            "text_pt": "Esta é a lista de compras do café da manhã."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -1847,6 +2277,26 @@
           "won't",
           "wont"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "the breakfast shopping list",
+          "the dinner shopping list",
+          "the dessert shopping list"
+        ],
+        "prompt": "Listening: Which shopping list did Anna accidentally use?",
+        "hint": "Os ingredientes incluem bananas, mistura para panquecas e café.",
+        "hints": [
+          "Marsha explica para qual refeição era aquela lista.",
+          "A refeição vem antes do almoço."
+        ],
+        "explanation": "Anna pegou por engano **the breakfast shopping list** no balcão.",
+        "answers": [
+          "the breakfast shopping list"
+        ]
       }
     ]
   },
@@ -1862,6 +2312,10 @@
       "I'll answer the door"
     ],
     "story_note": "Parte 2 de 2 · continua a 35",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "substituir",
+    "source_accessed_at": "2026-10-07",
     "lead": "Anna salva o jantar virando a lista errada em \"panquecas de pasta de amendoim com banana\". A aula é construída sobre **onde estão as coisas** — preposições de lugar na cozinha — e sobre o **will de oferta**, decidido na hora.",
     "goals": [
       "Dizer onde algo está com **in, inside, on, under** e perguntar com *Where is / Where are*.",
@@ -2162,6 +2616,50 @@
         "explanation": "Na fala rápida vira 2 sílabas: \"CAB-nət\"."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 36",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/11/14/65b768cd-1b20-4074-beb4-3279d8f8e715_hq.mp3",
+        "duration_seconds": 123,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 22,
+            "end_seconds": 24,
+            "speaker": "Anna e Marsha",
+            "text_en": "Please hand me the flour.",
+            "text_pt": "Por favor, passe-me a farinha."
+          },
+          {
+            "position": 1,
+            "start_seconds": 29,
+            "end_seconds": 32,
+            "speaker": "Anna",
+            "text_en": "I put the flour inside the refrigerator.",
+            "text_pt": "Coloquei a farinha dentro da geladeira."
+          },
+          {
+            "position": 2,
+            "start_seconds": 48,
+            "end_seconds": 52,
+            "speaker": "Anna",
+            "text_en": "The eggs are inside the cabinet under the sink.",
+            "text_pt": "Os ovos estão dentro do armário sob a pia."
+          },
+          {
+            "position": 3,
+            "start_seconds": 108,
+            "end_seconds": 110,
+            "speaker": "Marsha",
+            "text_en": "I'll answer the door.",
+            "text_pt": "Eu atendo a porta."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -2219,6 +2717,26 @@
           "i'll",
           "ill"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "inside the refrigerator",
+          "under the sink",
+          "on the counter"
+        ],
+        "prompt": "Listening: Where did Anna put the flour?",
+        "hint": "Ela interpreta literalmente *a cold, dry place*.",
+        "hints": [
+          "Não é o mesmo lugar onde ela colocou os ovos.",
+          "É o eletrodoméstico usado para manter alimentos frios."
+        ],
+        "explanation": "Anna diz: **I put the flour inside the refrigerator.**",
+        "answers": [
+          "inside the refrigerator"
+        ]
       }
     ]
   },
@@ -2234,6 +2752,10 @@
       "I agree / I disagree"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "personalizar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Anna acha uma bolsa perdida e pergunta de quem é — e depois discute cidade × campo com o dono. Duas camadas: os **pronomes possessivos** (*mine, yours, his, hers*) e a **linguagem de concordar e discordar**, que é a habilidade mais útil desta aula para reunião de trabalho.",
     "goals": [
       "Diferenciar **adjetivo possessivo** (*my bag*) de **pronome possessivo** (*mine*), que substitui o substantivo.",
@@ -2573,6 +3095,51 @@
         "explanation": "O *r* americano é retroflexo, com a língua curvada para trás sem tocar o céu da boca — não é o *r* vibrado do português."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 37",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/11/17/a0f8f1e0-4d24-425c-8db5-0322d86f3de9_hq.mp3",
+        "duration_seconds": 218,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 21,
+            "end_seconds": 26,
+            "speaker": "Anna e Dr. Jill",
+            "end_seconds": 23,
+            "text_en": "Is this bag yours?",
+            "text_pt": "Esta bolsa é sua?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 24,
+            "end_seconds": 26,
+            "speaker": "Dr. Jill",
+            "text_en": "It might be hers.",
+            "text_pt": "Talvez seja dela."
+          },
+          {
+            "position": 2,
+            "start_seconds": 85,
+            "end_seconds": 89,
+            "speaker": "Anna",
+            "text_en": "It has more culture than the country.",
+            "text_pt": "Tem mais cultura que o campo."
+          },
+          {
+            "position": 3,
+            "start_seconds": 209,
+            "end_seconds": 214,
+            "speaker": "Anna",
+            "text_en": "You can always agree to disagree!",
+            "text_pt": "Sempre podemos concordar em discordar!"
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -2627,6 +3194,26 @@
         "answers": [
           "i disagree"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "There are more jobs",
+          "She wants to go camping",
+          "She is looking for a bag"
+        ],
+        "prompt": "Listening: According to Anna, why is she in the city?",
+        "hint": "Ela menciona cultura, museus e uma razão ligada ao trabalho.",
+        "hints": [
+          "A resposta usa o comparativo *more*.",
+          "A última palavra da resposta é *jobs*."
+        ],
+        "explanation": "Anna conclui: **There are more jobs. That is why I'm here.**",
+        "answers": [
+          "There are more jobs"
+        ]
       }
     ]
   },
@@ -2642,6 +3229,10 @@
       "the best"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "avaliar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Penelope, a melhor amiga de infância, visita Washington e Anna descreve todas as pessoas da sua vida — cada uma com um **superlativo**. A aula é uma coleção quase completa das formas de superlativo do inglês, incluindo as irregulares.",
     "goals": [
       "Formar o superlativo com **the + adjetivo + -est** (curtos) e **the most + adjetivo** (longos).",
@@ -3019,6 +3610,51 @@
         "explanation": "\"Ó-ssəm\". Palavra onipresente no inglês americano informal — aparece em quase toda aula da série."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 38",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/12/01/7b357de6-9247-45fd-8e49-77197599f6d5_hq.mp3",
+        "duration_seconds": 211,
+        "listening_exercise_position": 6,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 59,
+            "end_seconds": 72,
+            "speaker": "Anna",
+            "end_seconds": 64,
+            "text_en": "Marsha is the nicest person.",
+            "text_pt": "Marsha é a pessoa mais gentil."
+          },
+          {
+            "position": 1,
+            "start_seconds": 67,
+            "end_seconds": 72,
+            "speaker": "Anna",
+            "text_en": "I'm the messiest cook she knows.",
+            "text_pt": "Sou a cozinheira mais bagunceira que ela conhece."
+          },
+          {
+            "position": 2,
+            "start_seconds": 90,
+            "end_seconds": 93,
+            "speaker": "Anna",
+            "text_en": "Pete is the most serious.",
+            "text_pt": "Pete é o mais sério."
+          },
+          {
+            "position": 3,
+            "start_seconds": 195,
+            "end_seconds": 199,
+            "speaker": "Anna",
+            "text_en": "I am the luckiest woman in Washington, D.C.",
+            "text_pt": "Sou a mulher mais sortuda de Washington."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -3073,6 +3709,26 @@
         "answers": [
           "the friendliest"
         ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "Marsha",
+          "Penelope",
+          "Pete"
+        ],
+        "prompt": "Listening: Who is the nicest person Anna knows in the city?",
+        "hint": "Anna está descrevendo sua colega de apartamento.",
+        "hints": [
+          "A pessoa divide o aluguel com Anna.",
+          "O nome começa com **M**."
+        ],
+        "explanation": "Anna afirma: **Marsha is the nicest person I know in this city.**",
+        "answers": [
+          "Marsha"
+        ]
       }
     ]
   },
@@ -3088,6 +3744,10 @@
       "do you?"
     ],
     "story_note": null,
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "perguntar para esclarecer",
+    "source_accessed_at": "2026-10-07",
     "lead": "Pete anuncia um produto milagroso para cabelo, Anna compra e o resultado é um desastre. A aula constrói o diálogo inteiro em torno dos **prefixos negativos**: *untidy, uncomfortable, inexpensive, imperfect, dishonest, unbelievable*.",
     "goals": [
       "Negar um adjetivo com prefixo: **un-, in-, im-, dis-** — e saber que a escolha é por costume, não por regra lógica.",
@@ -3450,6 +4110,50 @@
         "explanation": "Homófonos. E *advertisement* muda de tônica entre países: AmE /ˌædvərˈtaɪzmənt/, BrE /ədˈvɜːtɪsmənt/."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 39",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/12/02/5fd0aa74-ef38-40c2-85fb-47f536c14e28_hq.mp3",
+        "duration_seconds": 207,
+        "listening_exercise_position": 7,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 50,
+            "end_seconds": 54,
+            "speaker": "Pete",
+            "text_en": "I have the perfect product for you.",
+            "text_pt": "Tenho o produto perfeito para você."
+          },
+          {
+            "position": 1,
+            "start_seconds": 68,
+            "end_seconds": 71,
+            "speaker": "Pete",
+            "text_en": "One can costs only $10!",
+            "text_pt": "Uma lata custa apenas dez dólares!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 110,
+            "end_seconds": 113,
+            "speaker": "Anna",
+            "text_en": "Make my untidy hair tidy!",
+            "text_pt": "Deixe meu cabelo desarrumado arrumado!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 176,
+            "end_seconds": 178,
+            "speaker": "Anna",
+            "text_en": "It was dishonest!",
+            "text_pt": "Foi desonesto!"
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -3513,6 +4217,26 @@
         "answers": [
           "do you"
         ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "$10",
+          "$20",
+          "$2"
+        ],
+        "prompt": "Listening: How much does one can of Hair Be Good cost?",
+        "hint": "O preço aparece no anúncio de Pete.",
+        "hints": [
+          "Pete diz *only* antes do valor.",
+          "O valor tem dois algarismos."
+        ],
+        "explanation": "No anúncio, Pete diz: **One can costs only $10.**",
+        "answers": [
+          "$10"
+        ]
       }
     ]
   },
@@ -3528,6 +4252,10 @@
       "too … / … enough"
     ],
     "story_note": "Fecha o bloco",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "autoavaliar",
+    "source_accessed_at": "2026-10-07",
     "lead": "Ano novo, resolução nova: Anna faz um teste para uma peça de teatro. O diretor corrige **como** ela fala e **como** ela anda — e por isso a aula inteira é feita de **advérbios de modo**, do comparativo deles e do par *too* / *enough*.",
     "goals": [
       "Formar advérbio de modo com **adjetivo + -ly** e saber quando o *y* vira *i*.",
@@ -3955,6 +4683,59 @@
         "explanation": "Três sílabas, começando com o som /ɜːr/ de *her*. Não é \"ir-li-ér\"."
       }
     ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 40",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/12/29/b24ae633-80a3-46e9-afc8-5e2719ed1fa7_hq.mp3",
+        "duration_seconds": 251,
+        "listening_exercise_position": 7,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 83,
+            "end_seconds": 93,
+            "speaker": "Director",
+            "end_seconds": 86,
+            "text_en": "You are speaking too softly.",
+            "text_pt": "Você está falando baixo demais."
+          },
+          {
+            "position": 1,
+            "start_seconds": 87,
+            "end_seconds": 90,
+            "speaker": "Director",
+            "text_en": "Can you speak more loudly?",
+            "text_pt": "Pode falar mais alto?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 102,
+            "end_seconds": 104,
+            "speaker": "Anna",
+            "text_en": "Is that loud enough?",
+            "text_pt": "Está alto o suficiente?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 131,
+            "end_seconds": 136,
+            "speaker": "Director",
+            "text_en": "Walk slowly and quietly.",
+            "text_pt": "Ande devagar e silenciosamente."
+          },
+          {
+            "position": 4,
+            "start_seconds": 227,
+            "end_seconds": 229,
+            "speaker": "Anna",
+            "text_en": "I'm a tree.",
+            "text_pt": "Sou uma árvore."
+          }
+        ]
+      }
+    ],
     "exercises": [
       {
         "position": 0,
@@ -4019,6 +4800,26 @@
         "answers": [
           "wasn't i",
           "wasnt i"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "options": [
+          "a tree",
+          "the director",
+          "a lost traveler"
+        ],
+        "prompt": "Listening: What part does the director give Anna?",
+        "hint": "O figurino fica nos bastidores.",
+        "hints": [
+          "Anna repete o nome do papel duas vezes.",
+          "É algo que vive na floresta."
+        ],
+        "explanation": "Depois de vestir o figurino, Anna comemora: **I'm a tree!**",
+        "answers": [
+          "a tree"
         ]
       }
     ]

@@ -26,7 +26,7 @@ export function VocabTable({ itens }: { itens: VocabItem[] }) {
   const [postos, setPostos] = useState<Set<number>>(new Set())
 
   return (
-    <div className="tw">
+    <div className="tw" role="region" aria-label="Vocabulário da aula" tabIndex={0}>
       <table className="vocab">
         <thead>
           <tr>
