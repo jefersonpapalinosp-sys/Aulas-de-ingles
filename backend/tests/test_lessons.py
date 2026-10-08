@@ -23,7 +23,7 @@ async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     assert len(a["grammar_blocks"]) == 3
     assert len(a["phrases"]) == 6
     assert len(a["vocab"]) == 11
-    assert len(a["exercises"]) == 9
+    assert len(a["exercises"]) == 10
     assert len(a["goals"]) == 4
     assert all(isinstance(g, str) for g in a["goals"])
     assert len(a["media"]) == 1
@@ -36,7 +36,7 @@ async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     assert official["publisher"] == "VOA Learning English"
     assert official["url"] == a["voa_url"]
     assert "domínio público" in official["license_note"]
-    assert a["versions"][0]["version"] == 1
+    assert a["versions"][0]["version"] == 2
     assert a["versions"][0]["status"] == "reviewed"
     assert a["versions"][0]["learning_strategy"] == "visualizar"
     assert a["writing_prompts"][0] == {
@@ -151,12 +151,15 @@ async def test_resposta_certa_nao_vaza_no_contrato(client: AsyncClient) -> None:
             "position",
             "activity_type",
             "skill",
+            "objective",
             "options",
             "prompt",
             "hint",
             "hint_count",
             "explanation",
         }
+        assert exercicio["hint"] is None
+        assert exercicio["explanation"] is None
 
 
 @pytest.mark.asyncio
@@ -204,7 +207,7 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
-    assert len(todos) == 110
+    assert len(todos) == 111
     assert {e["lesson_number"] for e in todos} == set(range(31, 41))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]

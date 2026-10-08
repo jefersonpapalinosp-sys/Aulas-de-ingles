@@ -2,7 +2,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ATTEMPT_QUEUE_EVENT,
-  listQueuedAttempts,
+  discardBlockedAttempts,
+  getAttemptQueueStats,
   syncAttemptQueue,
 } from './attemptQueue'
 
@@ -20,14 +21,14 @@ export function ConnectivityStatus({
 }) {
   const qc = useQueryClient()
   const [online, setOnline] = useState(() => navigator.onLine)
-  const [pending, setPending] = useState(() => listQueuedAttempts(userId).length)
+  const [queue, setQueue] = useState(() => getAttemptQueueStats(userId))
   const [syncing, setSyncing] = useState(false)
   const syncingRef = useRef(false)
   const [message, setMessage] = useState('')
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
 
   const refreshPending = useCallback(
-    () => setPending(listQueuedAttempts(userId).length),
+    () => setQueue(getAttemptQueueStats(userId)),
     [userId],
   )
 
@@ -38,7 +39,11 @@ export function ConnectivityStatus({
     setMessage('')
     try {
       const result = await syncAttemptQueue(userId)
-      setPending(result.pending)
+      setQueue({
+        pending: result.pending,
+        blocked: result.blocked,
+        total: result.pending + result.blocked,
+      })
       if (result.synced > 0) {
         setMessage(
           result.synced === 1
@@ -50,7 +55,11 @@ export function ConnectivityStatus({
           qc.invalidateQueries({ queryKey: ['review'] }),
           qc.invalidateQueries({ queryKey: ['skills'] }),
           qc.invalidateQueries({ queryKey: ['today'] }),
+          qc.invalidateQueries({ queryKey: ['practice-session'] }),
+          qc.invalidateQueries({ queryKey: ['practice-session-active'] }),
         ])
+      } else if (result.rejectedAttempts.length > 0) {
+        setMessage('Uma tentativa antiga ficou incompatível com o conteúdo atual.')
       }
     } finally {
       syncingRef.current = false
@@ -78,21 +87,36 @@ export function ConnectivityStatus({
   }, [refreshPending])
 
   useEffect(() => {
-    if (online && !offlineSession && pending > 0) void sync()
-  }, [online, offlineSession, pending, sync])
+    if (online && !offlineSession && queue.pending > 0) void sync()
+  }, [online, offlineSession, queue.pending, sync])
 
-  if (online && pending === 0 && !message && !installPrompt) return null
+  if (online && queue.total === 0 && !message && !installPrompt) return null
+
+  const queueMessage =
+    !online || offlineSession
+      ? `Você está offline${queue.total ? ` · ${queue.total} tentativa${queue.total === 1 ? '' : 's'} na fila` : ''}.`
+      : queue.blocked > 0
+        ? `${message ? `${message} ` : ''}${queue.blocked} tentativa${queue.blocked === 1 ? '' : 's'} precisa${queue.blocked === 1 ? '' : 'm'} ser refeita${queue.blocked === 1 ? '' : 's'} após a atualização.${queue.pending > 0 ? ` ${queue.pending} ainda aguarda${queue.pending === 1 ? '' : 'm'} sincronização.` : ''}`
+        : message ||
+          `${queue.pending} tentativa${queue.pending === 1 ? '' : 's'} aguardando sincronização.`
 
   return (
     <div className={`connectivity ${online ? 'online' : 'offline'}`} role="status" aria-live="polite">
-      <span>
-        {!online || offlineSession
-          ? `Você está offline${pending ? ` · ${pending} tentativa${pending === 1 ? '' : 's'} na fila` : ''}.`
-          : message || `${pending} tentativa${pending === 1 ? '' : 's'} aguardando sincronização.`}
-      </span>
-      {online && !offlineSession && pending > 0 && (
+      <span>{queueMessage}</span>
+      {online && !offlineSession && queue.pending > 0 && (
         <button type="button" onClick={() => void sync()} disabled={syncing}>
           {syncing ? 'Sincronizando…' : 'Sincronizar agora'}
+        </button>
+      )}
+      {queue.blocked > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            discardBlockedAttempts(userId)
+            setMessage('Tentativas incompatíveis removidas deste dispositivo.')
+          }}
+        >
+          Descartar incompatíveis
         </button>
       )}
       {installPrompt && (

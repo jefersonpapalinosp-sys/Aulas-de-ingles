@@ -14,6 +14,10 @@ export function lessonPath(courseSlug: string, lessonNumber: number): string {
   return `${coursePath(courseSlug)}/aulas/${lessonNumber}`
 }
 
+export function practicePath(courseSlug: string, lessonNumber: number): string {
+  return `${lessonPath(courseSlug, lessonNumber)}/exercicios`
+}
+
 export function studyPath(
   courseSlug: string,
   lessonNumber: number,

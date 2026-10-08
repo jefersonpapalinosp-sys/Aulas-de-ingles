@@ -15,11 +15,13 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -34,9 +36,7 @@ class Course(Base):
     __table_args__ = (
         CheckConstraint("position > 0", name="ck_course_position_positive"),
         CheckConstraint("total_lessons > 0", name="ck_course_total_lessons_positive"),
-        CheckConstraint(
-            "status IN ('planned', 'published', 'archived')", name="ck_course_status"
-        ),
+        CheckConstraint("status IN ('planned', 'published', 'archived')", name="ck_course_status"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -74,21 +74,15 @@ class CourseUnit(Base):
         UniqueConstraint("course_id", "position", name="uq_course_unit_course_position"),
         CheckConstraint("position > 0", name="ck_course_unit_position_positive"),
         CheckConstraint("lesson_start > 0", name="ck_course_unit_lesson_start_positive"),
-        CheckConstraint(
-            "lesson_end >= lesson_start", name="ck_course_unit_lesson_range"
-        ),
-        CheckConstraint(
-            "total_lessons > 0", name="ck_course_unit_total_lessons_positive"
-        ),
+        CheckConstraint("lesson_end >= lesson_start", name="ck_course_unit_lesson_range"),
+        CheckConstraint("total_lessons > 0", name="ck_course_unit_total_lessons_positive"),
         CheckConstraint(
             "status IN ('planned', 'published', 'archived')", name="ck_course_unit_status"
         ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    course_id: Mapped[int] = mapped_column(
-        ForeignKey("course.id", ondelete="CASCADE"), index=True
-    )
+    course_id: Mapped[int] = mapped_column(ForeignKey("course.id", ondelete="CASCADE"), index=True)
     slug: Mapped[str] = mapped_column(String(100))
     title: Mapped[str] = mapped_column(String(200))
     position: Mapped[int] = mapped_column(Integer)
@@ -126,9 +120,7 @@ class Lesson(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    course_id: Mapped[int] = mapped_column(
-        ForeignKey("course.id", ondelete="RESTRICT"), index=True
-    )
+    course_id: Mapped[int] = mapped_column(ForeignKey("course.id", ondelete="RESTRICT"), index=True)
     unit_id: Mapped[int] = mapped_column(Integer, index=True)
     number: Mapped[int] = mapped_column(Integer, index=True)
     slug: Mapped[str] = mapped_column(String(120))
@@ -574,6 +566,10 @@ class Exercise(Base):
     __tablename__ = "exercise"
     __table_args__ = (
         UniqueConstraint("lesson_id", "position", name="uq_exercise_lesson_position"),
+        CheckConstraint(
+            "objective IN ('recognize', 'apply', 'correct', 'produce', 'listen')",
+            name="ck_exercise_objective",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -581,6 +577,7 @@ class Exercise(Base):
     position: Mapped[int] = mapped_column(Integer)
     activity_type: Mapped[str] = mapped_column(String(40), default="gap_fill")
     skill: Mapped[str] = mapped_column(String(40), default="grammar")
+    objective: Mapped[str] = mapped_column(String(20), default="apply")
     options: Mapped[list[str] | None] = mapped_column(JSONB, default=None)
     prompt: Mapped[str] = mapped_column(Text)
     hint: Mapped[str | None] = mapped_column(String(200), default=None)
@@ -918,6 +915,117 @@ class SkillEvidence(Base):
     )
 
 
+class PracticeSession(Base):
+    """Seleção imutável de exercícios que pode ser retomada entre dispositivos."""
+
+    __tablename__ = "practice_session"
+    __table_args__ = (
+        UniqueConstraint("user_id", "idempotency_key", name="uq_practice_session_user_idempotency"),
+        Index(
+            "uq_practice_session_active_user_lesson",
+            "user_id",
+            "lesson_id",
+            unique=True,
+            postgresql_where=text("status = 'active'"),
+        ),
+        CheckConstraint("mode IN ('guided', 'quick', 'mistakes')", name="ck_practice_session_mode"),
+        CheckConstraint(
+            "status IN ('active', 'completed', 'abandoned')",
+            name="ck_practice_session_status",
+        ),
+        CheckConstraint("current_position >= 0", name="ck_practice_session_position_nonnegative"),
+        CheckConstraint("total_items > 0", name="ck_practice_session_total_positive"),
+        CheckConstraint("state_revision > 0", name="ck_practice_session_revision_positive"),
+        CheckConstraint(
+            "objective IS NULL OR objective IN "
+            "('recognize', 'apply', 'correct', 'produce', 'listen')",
+            name="ck_practice_session_objective",
+        ),
+        CheckConstraint(
+            "(mode = 'mistakes' AND source_session_id IS NOT NULL) OR "
+            "(mode != 'mistakes' AND source_session_id IS NULL)",
+            name="ck_practice_session_source_by_mode",
+        ),
+        CheckConstraint(
+            "current_position < total_items",
+            name="ck_practice_session_position_in_range",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
+    source_session_id: Mapped[int | None] = mapped_column(
+        ForeignKey("practice_session.id", ondelete="CASCADE"), default=None
+    )
+    idempotency_key: Mapped[str] = mapped_column(String(36))
+    mode: Mapped[str] = mapped_column(String(20))
+    activity_type: Mapped[str | None] = mapped_column(String(40), default=None)
+    skill: Mapped[str | None] = mapped_column(String(40), default=None)
+    objective: Mapped[str | None] = mapped_column(String(20), default=None)
+    lesson_version: Mapped[int] = mapped_column(Integer)
+    content_fingerprint: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    current_position: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    total_items: Mapped[int] = mapped_column(Integer)
+    state_revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    last_state_key: Mapped[str | None] = mapped_column(String(36), default=None)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+    lesson: Mapped[Lesson] = relationship(lazy="joined")
+    items: Mapped[list["PracticeSessionItem"]] = relationship(
+        back_populates="practice_session",
+        cascade="all, delete-orphan",
+        order_by="PracticeSessionItem.position",
+        lazy="selectin",
+    )
+
+
+class PracticeSessionItem(Base):
+    """Estado permitido de um exercício dentro de uma sessão específica."""
+
+    __tablename__ = "practice_session_item"
+    __table_args__ = (
+        UniqueConstraint(
+            "practice_session_id", "exercise_id", name="uq_practice_item_session_exercise"
+        ),
+        UniqueConstraint(
+            "practice_session_id", "position", name="uq_practice_item_session_position"
+        ),
+        CheckConstraint("position >= 0", name="ck_practice_item_position_nonnegative"),
+        CheckConstraint("attempt_count >= 0", name="ck_practice_item_attempts_nonnegative"),
+        CheckConstraint("highest_hint_level >= 0", name="ck_practice_item_hint_nonnegative"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    practice_session_id: Mapped[int] = mapped_column(
+        ForeignKey("practice_session.id", ondelete="CASCADE"), index=True
+    )
+    exercise_id: Mapped[int] = mapped_column(
+        ForeignKey("exercise.id", ondelete="RESTRICT"), index=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    first_try_correct: Mapped[bool | None] = mapped_column(Boolean, default=None)
+    highest_hint_level: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    answer_revealed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=None
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+    practice_session: Mapped[PracticeSession] = relationship(back_populates="items")
+    exercise: Mapped[Exercise] = relationship(lazy="selectin")
+    attempts: Mapped[list["ExerciseAttempt"]] = relationship(
+        back_populates="practice_session_item",
+        order_by="ExerciseAttempt.id",
+        lazy="selectin",
+    )
+
+
 class ExerciseAttempt(Base):
     """Cada tentativa, certa ou errada, com o que foi digitado.
 
@@ -935,12 +1043,20 @@ class ExerciseAttempt(Base):
     exercise_id: Mapped[int] = mapped_column(
         ForeignKey("exercise.id", ondelete="CASCADE"), index=True
     )
+    practice_session_item_id: Mapped[int | None] = mapped_column(
+        ForeignKey("practice_session_item.id", ondelete="SET NULL"),
+        index=True,
+        default=None,
+    )
     idempotency_key: Mapped[str | None] = mapped_column(String(36), default=None)
     answer: Mapped[str] = mapped_column(String(200))
     correct: Mapped[bool] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     exercise: Mapped[Exercise] = relationship(lazy="selectin")
+    practice_session_item: Mapped[PracticeSessionItem | None] = relationship(
+        back_populates="attempts"
+    )
 
 
 class ReviewCardLegacy(Base):

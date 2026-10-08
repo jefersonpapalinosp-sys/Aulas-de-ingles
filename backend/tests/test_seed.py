@@ -48,9 +48,9 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     dados = load_seed()
     assert [d["number"] for d in dados] == list(range(31, 41))
     assert sum(len(d["vocab"]) for d in dados) == 115
-    assert sum(len(d["exercises"]) for d in dados) == 110
-    assert sum(len(e.get("answers", [])) for d in dados for e in d["exercises"]) == 133
-    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 107
+    assert sum(len(d["exercises"]) for d in dados) == 111
+    assert sum(len(e.get("answers", [])) for d in dados for e in d["exercises"]) == 132
+    assert sum(len(e.get("hints", [])) for d in dados for e in d["exercises"]) == 135
     assert sum(len(d.get("media", [])) for d in dados) == 10
     assert sum(len(d.get("writing_prompts", [])) for d in dados) == 10
     assert sum(len(m.get("cues", [])) for d in dados for m in d.get("media", [])) == 48
@@ -66,6 +66,18 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     assert all(d["unit_slug"] == "31-40" for d in dados)
     assert [d["position"] for d in dados] == list(range(1, 11))
     assert all(d["warmup_prompt"] and d["listening_focus"] for d in dados)
+
+    pilots = [lesson for lesson in dados if lesson["number"] in {31, 38, 40}]
+    allowed_objectives = {"recognize", "apply", "correct", "produce", "listen"}
+    assert all(8 <= len(lesson["exercises"]) <= 12 for lesson in pilots)
+    assert all(lesson["content_version"] == 2 for lesson in pilots)
+    assert all(lesson.get("review_note", "").startswith("Sprint 21:") for lesson in pilots)
+    assert all(
+        exercise.get("objective") in allowed_objectives
+        and len(exercise.get("hints", [])) == 2
+        for lesson in pilots
+        for exercise in lesson["exercises"]
+    )
 
 
 @pytest.mark.asyncio
@@ -161,8 +173,8 @@ async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) 
 
 @pytest.mark.asyncio
 async def test_exercicio_com_mais_de_uma_resposta_certa(session: AsyncSession) -> None:
-    """`should` e `ought to` precisam valer igual — por isso a tabela separada."""
+    """Variantes corretas compartilham o mesmo exercício e o mesmo histórico."""
     lesson = (await session.execute(select(Lesson).where(Lesson.number == 31))).scalar_one()
-    exercicio = next(e for e in lesson.exercises if e.position == 3)
+    exercicio = next(e for e in lesson.exercises if e.position == 4)
     valores = {a.value for a in exercicio.answers}
-    assert valores == {"should", "ought to"}
+    assert valores == {"a lot", "much", "far"}

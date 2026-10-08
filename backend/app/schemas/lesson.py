@@ -120,20 +120,21 @@ class WritingPromptOut(ORMModel):
 class ExerciseOut(ORMModel):
     """Exercício como ele chega ao cliente.
 
-    A resposta certa **não** faz parte deste schema. Na S3 a correção passa a
-    ser feita pelo servidor; até lá o cliente corrige, mas o contrato já nasce
-    no formato certo para não ter que mudar depois.
+    A resposta certa **não** faz parte deste schema. Dica e explicação mantêm
+    as chaves legadas, mas chegam nulas na leitura inicial; o servidor só as
+    libera pelos fluxos autenticados de tentativa, dica ou revelação.
     """
 
     id: int
     position: int
     activity_type: str
     skill: str
+    objective: Literal["recognize", "apply", "correct", "produce", "listen"]
     options: list[str] | None
     prompt: str
     hint: str | None
     hint_count: int
-    explanation: str
+    explanation: str | None
 
 
 class ExerciseWithLessonOut(ExerciseOut):
@@ -212,3 +213,27 @@ class LessonDetailOut(LessonSummaryOut):
     versions: list[LessonVersionOut]
     writing_prompts: list[WritingPromptOut]
     exercises: list[ExerciseOut]
+
+    @field_validator("exercises", mode="before")
+    @classmethod
+    def _ocultar_feedback_inicial(cls, value: Any) -> Any:
+        """Dicas e explicação só saem pelos endpoints autenticados de feedback."""
+        if not isinstance(value, list):
+            return value
+        return [exercise_public_payload(item) for item in value]
+
+
+def exercise_public_payload(exercise: Any) -> dict[str, Any]:
+    """Serializa um exercício sem gabarito, dica ou explicação antecipada."""
+    return {
+        "id": exercise.id,
+        "position": exercise.position,
+        "activity_type": exercise.activity_type,
+        "skill": exercise.skill,
+        "objective": exercise.objective,
+        "options": exercise.options,
+        "prompt": exercise.prompt,
+        "hint": None,
+        "hint_count": exercise.hint_count,
+        "explanation": None,
+    }

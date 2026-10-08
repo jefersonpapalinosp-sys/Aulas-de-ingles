@@ -171,10 +171,10 @@ async def test_tentativa_errada_fica_gravada_com_o_que_foi_digitado(client: Asyn
 async def test_gabarito_so_sai_quando_pedido(client: AsyncClient) -> None:
     h = await conta(client, "gabarito")
     itens = (await client.get("/api/exercises?lesson=31")).json()
-    ex = next(e for e in itens if e["position"] == 3)
+    ex = next(e for e in itens if e["position"] == 4)
     r = await client.get(f"/api/exercises/{ex['id']}/answer", headers=h)
     assert r.status_code == 200
-    assert set(r.json()["answers"]) == {"should", "ought to"}
+    assert set(r.json()["answers"]) == {"a lot", "much", "far"}
 
 
 @pytest.mark.asyncio

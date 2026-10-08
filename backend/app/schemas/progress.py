@@ -19,6 +19,7 @@ STUDY_STEPS: tuple[StudyStep, ...] = (
 class AttemptIn(BaseModel):
     answer: str = Field(max_length=200, description="O que o usuário digitou.")
     idempotency_key: UUID
+    practice_session_id: int | None = Field(default=None, gt=0)
 
 
 class FeedbackTokenOut(BaseModel):
@@ -34,11 +35,22 @@ class AttemptFeedbackOut(BaseModel):
     tokens: list[FeedbackTokenOut]
 
 
+class PracticeAttemptStateOut(BaseModel):
+    session_id: int
+    item_position: int
+    attempt_count: int
+    first_try_correct: bool | None
+    outcome: Literal["pending", "first_try_correct", "corrected", "revealed"]
+    completed_at: datetime | None
+    session_status: Literal["active", "completed", "abandoned"]
+
+
 class AttemptOut(BaseModel):
     attempt_id: int
     correct: bool
     explanation: str | None
     feedback: AttemptFeedbackOut
+    session: PracticeAttemptStateOut | None = None
 
 
 class ExerciseHintOut(BaseModel):

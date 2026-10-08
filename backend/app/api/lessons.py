@@ -15,6 +15,7 @@ from app.schemas.lesson import (
     LessonSummaryOut,
     VocabItemOut,
     VocabItemWithLessonOut,
+    exercise_public_payload,
 )
 from app.services.curriculum import (
     DEFAULT_COURSE_SLUG,
@@ -101,6 +102,9 @@ async def listar_exercicios(
     if lesson is not None:
         stmt = stmt.where(Lesson.number == lesson)
     return [
-        ExerciseWithLessonOut(**ExerciseOut.model_validate(item).model_dump(), lesson_number=numero)
+        ExerciseWithLessonOut(
+            **ExerciseOut.model_validate(exercise_public_payload(item)).model_dump(),
+            lesson_number=numero,
+        )
         for item, numero in (await session.execute(stmt)).all()
     ]

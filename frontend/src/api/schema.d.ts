@@ -169,6 +169,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/courses/{course_slug}/lessons/{number}/exercises": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Lesson Exercises
+         * @description Lista pública e filtrável; não publica dica, explicação nem gabarito.
+         */
+        get: operations["list_lesson_exercises_api_courses__course_slug__lessons__number__exercises_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/lessons/{number}/practice-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Practice Session */
+        post: operations["create_practice_session_api_courses__course_slug__lessons__number__practice_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/lessons/{number}/practice-sessions/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Active Practice Session */
+        get: operations["get_active_practice_session_api_courses__course_slug__lessons__number__practice_sessions_active_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/courses/{course_slug}/lessons/{number}/studied": {
         parameters: {
             query?: never;
@@ -556,6 +610,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/practice-sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Practice Session */
+        get: operations["get_practice_session_api_practice_sessions__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice-sessions/{session_id}/items/{exercise_id}/hints/{level}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open Practice Hint */
+        post: operations["open_practice_hint_api_practice_sessions__session_id__items__exercise_id__hints__level__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice-sessions/{session_id}/items/{exercise_id}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reveal Practice Answer */
+        post: operations["reveal_practice_answer_api_practice_sessions__session_id__items__exercise_id__reveal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/practice-sessions/{session_id}/position": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Practice Position */
+        put: operations["update_practice_position_api_practice_sessions__session_id__position_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/review/due": {
         parameters: {
             query?: never;
@@ -937,6 +1059,8 @@ export interface components {
              * Format: uuid
              */
             idempotency_key: string;
+            /** Practice Session Id */
+            practice_session_id?: number | null;
         };
         /** AttemptOut */
         AttemptOut: {
@@ -947,6 +1071,7 @@ export interface components {
             /** Explanation */
             explanation: string | null;
             feedback: components["schemas"]["AttemptFeedbackOut"];
+            session?: components["schemas"]["PracticeAttemptStateOut"] | null;
         };
         /**
          * CardOut
@@ -1117,21 +1242,26 @@ export interface components {
          * ExerciseOut
          * @description Exercício como ele chega ao cliente.
          *
-         *     A resposta certa **não** faz parte deste schema. Na S3 a correção passa a
-         *     ser feita pelo servidor; até lá o cliente corrige, mas o contrato já nasce
-         *     no formato certo para não ter que mudar depois.
+         *     A resposta certa **não** faz parte deste schema. Dica e explicação mantêm
+         *     as chaves legadas, mas chegam nulas na leitura inicial; o servidor só as
+         *     libera pelos fluxos autenticados de tentativa, dica ou revelação.
          */
         ExerciseOut: {
             /** Activity Type */
             activity_type: string;
             /** Explanation */
-            explanation: string;
+            explanation: string | null;
             /** Hint */
             hint: string | null;
             /** Hint Count */
             hint_count: number;
             /** Id */
             id: number;
+            /**
+             * Objective
+             * @enum {string}
+             */
+            objective: "recognize" | "apply" | "correct" | "produce" | "listen";
             /** Options */
             options: string[] | null;
             /** Position */
@@ -1146,7 +1276,7 @@ export interface components {
             /** Activity Type */
             activity_type: string;
             /** Explanation */
-            explanation: string;
+            explanation: string | null;
             /** Hint */
             hint: string | null;
             /** Hint Count */
@@ -1155,6 +1285,11 @@ export interface components {
             id: number;
             /** Lesson Number */
             lesson_number: number;
+            /**
+             * Objective
+             * @enum {string}
+             */
+            objective: "recognize" | "apply" | "correct" | "produce" | "listen";
             /** Options */
             options: string[] | null;
             /** Position */
@@ -1539,6 +1674,174 @@ export interface components {
             text_en: string;
             /** Text Pt */
             text_pt: string;
+        };
+        /** PracticeAttemptStateOut */
+        PracticeAttemptStateOut: {
+            /** Attempt Count */
+            attempt_count: number;
+            /** Completed At */
+            completed_at: string | null;
+            /** First Try Correct */
+            first_try_correct: boolean | null;
+            /** Item Position */
+            item_position: number;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "pending" | "first_try_correct" | "corrected" | "revealed";
+            /** Session Id */
+            session_id: number;
+            /**
+             * Session Status
+             * @enum {string}
+             */
+            session_status: "active" | "completed" | "abandoned";
+        };
+        /** PracticeHintOut */
+        PracticeHintOut: {
+            /** Content */
+            content: string;
+            item: components["schemas"]["PracticeSessionItemOut"];
+            /** Level */
+            level: number;
+        };
+        /** PracticePositionIn */
+        PracticePositionIn: {
+            /** Current Position */
+            current_position: number;
+            /** Expected Revision */
+            expected_revision: number;
+            /**
+             * Idempotency Key
+             * Format: uuid
+             */
+            idempotency_key: string;
+        };
+        /** PracticeRevealOut */
+        PracticeRevealOut: {
+            /** Answers */
+            answers: string[];
+            /** Explanation */
+            explanation: string;
+            item: components["schemas"]["PracticeSessionItemOut"];
+        };
+        /** PracticeSessionCreateIn */
+        PracticeSessionCreateIn: {
+            /** Activity Type */
+            activity_type?: ("gap_fill" | "multiple_choice" | "transformation" | "reorder" | "dictation") | null;
+            /**
+             * Idempotency Key
+             * Format: uuid
+             */
+            idempotency_key: string;
+            /**
+             * Mode
+             * @default guided
+             * @enum {string}
+             */
+            mode: "guided" | "quick" | "mistakes";
+            /** Objective */
+            objective?: ("recognize" | "apply" | "correct" | "produce" | "listen") | null;
+            /** Skill */
+            skill?: ("grammar" | "listening") | null;
+            /** Source Session Id */
+            source_session_id?: number | null;
+        };
+        /** PracticeSessionItemOut */
+        PracticeSessionItemOut: {
+            /** Answer Revealed */
+            answer_revealed: boolean;
+            /** Answers */
+            answers: string[] | null;
+            /** Attempt Count */
+            attempt_count: number;
+            /** Completed At */
+            completed_at: string | null;
+            exercise: components["schemas"]["ExerciseOut"];
+            /** Explanation */
+            explanation: string | null;
+            /** First Try Correct */
+            first_try_correct: boolean | null;
+            /** Highest Hint Level */
+            highest_hint_level: number;
+            last_feedback: components["schemas"]["AttemptFeedbackOut"] | null;
+            /** Opened Hints */
+            opened_hints: components["schemas"]["ExerciseHintOut"][];
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "pending" | "first_try_correct" | "corrected" | "revealed";
+            /** Position */
+            position: number;
+        };
+        /** PracticeSessionOut */
+        PracticeSessionOut: {
+            /** Activity Type */
+            activity_type: string | null;
+            /** Completed At */
+            completed_at: string | null;
+            /** Content Changed */
+            content_changed: boolean;
+            /** Content Version */
+            content_version: number;
+            /** Course Slug */
+            course_slug: string;
+            /** Current Position */
+            current_position: number;
+            /** Id */
+            id: number;
+            /** Items */
+            items: components["schemas"]["PracticeSessionItemOut"][];
+            /** Lesson Number */
+            lesson_number: number;
+            /** Lesson Title */
+            lesson_title: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "guided" | "quick" | "mistakes";
+            /** Objective */
+            objective: ("recognize" | "apply" | "correct" | "produce" | "listen") | null;
+            /** Skill */
+            skill: string | null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** State Revision */
+            state_revision: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "completed" | "abandoned";
+            summary: components["schemas"]["PracticeSummaryOut"];
+            /** Unit Slug */
+            unit_slug: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** PracticeSummaryOut */
+        PracticeSummaryOut: {
+            /** Completed */
+            completed: number;
+            /** Corrected */
+            corrected: number;
+            /** First Try Correct */
+            first_try_correct: number;
+            /** Pending */
+            pending: number;
+            /** Revealed */
+            revealed: number;
+            /** Total */
+            total: number;
         };
         /** ProgressOut */
         ProgressOut: {
@@ -2310,6 +2613,126 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["LessonDetailOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_lesson_exercises_api_courses__course_slug__lessons__number__exercises_get: {
+        parameters: {
+            query?: {
+                activity_type?: ("gap_fill" | "multiple_choice" | "transformation" | "reorder" | "dictation") | null;
+                skill?: ("grammar" | "listening") | null;
+                objective?: ("recognize" | "apply" | "correct" | "produce" | "listen") | null;
+            };
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExerciseOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_practice_session_api_courses__course_slug__lessons__number__practice_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeSessionCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Sessão idempotente ou sessão ativa compatível retomada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSessionOut"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_active_practice_session_api_courses__course_slug__lessons__number__practice_sessions_active_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSessionOut"];
+                };
+            };
+            /** @description Nenhuma sessão ativa. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -3168,6 +3591,137 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_session_api_practice_sessions__session_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_practice_hint_api_practice_sessions__session_id__items__exercise_id__hints__level__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+                exercise_id: number;
+                level: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeHintOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reveal_practice_answer_api_practice_sessions__session_id__items__exercise_id__reveal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+                exercise_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeRevealOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_practice_position_api_practice_sessions__session_id__position_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticePositionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSessionOut"];
+                };
             };
             /** @description Validation Error */
             422: {

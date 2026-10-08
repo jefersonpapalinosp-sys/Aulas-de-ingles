@@ -129,6 +129,7 @@ const lesson = {
       position: 6,
       activity_type: 'multiple_choice',
       skill: 'listening',
+      objective: 'listen',
       options: ['bus', 'taxi', 'Metro'],
       prompt: 'Listening: Anna finalmente pega o `____`.',
       hint: 'ouça primeiro',
@@ -144,6 +145,12 @@ vi.mock('../api/queries', () => ({
 
 vi.mock('../features/writing/WritingWorkspace', () => ({
   WritingWorkspace: () => <div>Área de escrita guiada</div>,
+}))
+
+vi.mock('../features/practice/PracticeRunner', () => ({
+  PracticeRunner: ({ variant }: { variant?: string }) => (
+    <div data-testid="shared-practice-runner">Runner compartilhado · {variant}</div>
+  ),
 }))
 
 function renderStudy(route: string) {
@@ -244,6 +251,21 @@ describe('StudyPage', () => {
     expect(screen.getByRole('link', { name: 'Retomar a aula' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-1/aulas/31/estudar',
+    )
+  })
+
+  it('reutiliza o runner do laboratório na etapa Praticar', () => {
+    window.localStorage.setItem(
+      studyProgressKey(7, 31),
+      JSON.stringify({
+        currentStep: 'praticar',
+        completedSteps: ['preparar', 'assistir', 'estudar'],
+      }),
+    )
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/praticar')
+
+    expect(screen.getByTestId('shared-practice-runner')).toHaveTextContent(
+      'Runner compartilhado · embedded',
     )
   })
 })

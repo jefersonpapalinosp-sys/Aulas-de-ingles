@@ -372,6 +372,16 @@ async def _upsert_exercises(session: AsyncSession, lesson: Lesson, raw: dict[str
         ex.explanation = e["explanation"]
         ex.activity_type = e.get("activity_type", "gap_fill")
         ex.skill = e.get("skill", "grammar")
+        ex.objective = e.get(
+            "objective",
+            "listen"
+            if ex.skill == "listening"
+            else "correct"
+            if ex.activity_type == "transformation"
+            else "recognize"
+            if ex.activity_type == "multiple_choice"
+            else "apply",
+        )
         ex.options = e.get("options")
         await session.flush()
         await session.execute(delete(ExerciseAnswer).where(ExerciseAnswer.exercise_id == ex.id))

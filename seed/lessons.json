@@ -145,9 +145,10 @@
       "a lot + comparativo"
     ],
     "story_note": null,
-    "content_version": 1,
+    "content_version": 2,
     "editorial_status": "reviewed",
     "learning_strategy": "visualizar",
+    "review_note": "Sprint 21: pack de comparativos revisado com exemplos neutros, ortografia, uso de than e objetivos explícitos.",
     "source_accessed_at": "2026-10-07",
     "lead": "Anna quer ver um jogo dos Washington Nationals. Todo mundo que ela encontra tem uma opinião sobre qual transporte é mais rápido — e ela chega tarde demais, quando os ingressos já estão esgotados. A aula inteira é construída sobre **comparar duas coisas** e **dar conselho**.",
     "warmup_prompt": "Como você compararia duas formas de transporte?",
@@ -437,12 +438,13 @@
     "exercises": [
       {
         "position": 0,
-        "prompt": "A bicycle is `____` (fast) than a taxi.",
+        "objective": "apply",
+        "prompt": "Complete the grammar pattern: fast → `____` than.",
         "hint": null,
-        "explanation": "*fast* tem 1 sílaba → -er + than.",
+        "explanation": "O adjetivo curto *fast* recebe **-er** antes de *than*: **faster than**.",
         "hints": [
-          "Pense no comparativo curto do adjetivo *fast*.",
-          "Adicione a terminação *-er*; o *than* já está fora da lacuna."
+          "A forma pedida vem antes de *than*.",
+          "Acrescente *-er* ao adjetivo curto *fast*."
         ],
         "answers": [
           "faster"
@@ -450,52 +452,55 @@
       },
       {
         "position": 1,
-        "prompt": "Baseball is `____` (exciting) than golf.",
-        "hint": "2 palavras",
-        "explanation": "*exciting* tem 3 sílabas → more + adjetivo.",
+        "objective": "apply",
+        "prompt": "For this passenger, the train seat is `____` (comfortable) than the bicycle seat.",
+        "hint": null,
+        "explanation": "Adjetivos longos, como *comfortable*, formam o comparativo com **more ... than**.",
         "hints": [
-          "Adjetivos longos usam uma palavra antes deles no comparativo.",
-          "Use a estrutura *more + adjective*."
+          "Use uma palavra antes do adjetivo e outra depois dele.",
+          "A estrutura é *more + adjective + than*."
         ],
         "answers": [
-          "more exciting"
+          "more comfortable"
         ]
       },
       {
         "position": 2,
-        "prompt": "Being early is `____` (good) than being late.",
+        "objective": "apply",
+        "prompt": "A caixa azul mede 40 cm e a vermelha mede 20 cm. Complete: The blue box is `____` the red box.",
         "hint": null,
-        "explanation": "*good* é irregular: good → better → the best.",
+        "explanation": "Em *big*, a consoante final dobra antes de **-er**; **than** liga os dois objetos: **bigger than**.",
         "hints": [
-          "O comparativo de *good* é irregular.",
-          "A forma procurada começa com a letra **b**."
+          "Os números deixam claro qual caixa é maior.",
+          "Dobre o *g*, acrescente *-er* e conecte os objetos com *than*."
+        ],
+        "answers": [
+          "bigger than"
+        ]
+      },
+      {
+        "position": 3,
+        "objective": "apply",
+        "prompt": "This route is `____` (good) than the old route.",
+        "hint": null,
+        "explanation": "O comparativo de *good* é irregular: **better**.",
+        "hints": [
+          "A forma não é criada acrescentando *-er* a *good*.",
+          "O comparativo irregular começa com **b**."
         ],
         "answers": [
           "better"
         ]
       },
       {
-        "position": 3,
-        "prompt": "Você quer dar um conselho: \"Você deveria comprar online.\" → You `____` buy it online.",
-        "hint": null,
-        "explanation": "*should* + verbo, ou *ought to* + verbo. Os dois valem.",
-        "hints": [
-          "Use um modal ou uma expressão de conselho.",
-          "Uma resposta tem uma palavra; a outra termina em *to*."
-        ],
-        "answers": [
-          "should",
-          "ought to"
-        ]
-      },
-      {
         "position": 4,
+        "objective": "apply",
         "prompt": "Complete com o intensificador correto: The Metro is `____` faster than a bus.",
-        "hint": "não use \"very\"",
-        "explanation": "Comparativo aceita *a lot / much / far*, nunca *very*.",
+        "hint": null,
+        "explanation": "Comparativos podem ser intensificados por *a lot*, *much* ou *far*; *very faster* não é a estrutura padrão.",
         "hints": [
-          "Comparativos usam intensificadores diferentes de *very*.",
-          "Pense em *much*, *far* ou na expressão de duas palavras *a lot*."
+          "Escolha um intensificador próprio de comparativos.",
+          "*Much*, *far* e a expressão *a lot* funcionam antes de *faster*."
         ],
         "answers": [
           "a lot",
@@ -506,6 +511,8 @@
       {
         "position": 5,
         "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
         "prompt": "Corrija: \"A taxi is more faster than a bus.\" → A taxi is `____` than a bus.",
         "hint": null,
         "explanation": "Nunca junte *more* com a terminação *-er*.",
@@ -521,6 +528,7 @@
         "position": 6,
         "activity_type": "multiple_choice",
         "skill": "listening",
+        "objective": "listen",
         "options": [
           "bus",
           "taxi",
@@ -542,6 +550,7 @@
         "position": 7,
         "activity_type": "dictation",
         "skill": "listening",
+        "objective": "listen",
         "prompt": "Ditado do trecho 0:31: escreva a frase completa que compara táxi e ônibus.",
         "hint": "7 palavras",
         "explanation": "A frase usa o comparativo curto: **A taxi is faster than a bus.**",
@@ -557,22 +566,42 @@
         "position": 8,
         "activity_type": "reorder",
         "skill": "grammar",
+        "objective": "produce",
         "options": [
-          "You",
-          "should",
-          "buy",
-          "it",
-          "online"
+          "A",
+          "train",
+          "is",
+          "more",
+          "comfortable",
+          "than",
+          "a",
+          "bicycle"
         ],
-        "prompt": "Ordene as palavras para formar um conselho completo.",
+        "prompt": "Ordene as palavras para formar uma comparação completa.",
         "hint": null,
-        "explanation": "O modal vem depois do sujeito e antes do verbo: **You should buy it online.**",
+        "explanation": "A frase segue sujeito + *be* + **more + adjective + than** + segundo elemento.",
         "hints": [
-          "Comece pelo sujeito e coloque o modal logo depois.",
-          "A ordem é: sujeito + *should* + verbo + objeto + lugar."
+          "Comece com *A train is*.",
+          "Mantenha *more comfortable than* nessa ordem."
         ],
         "answers": [
-          "You should buy it online"
+          "A train is more comfortable than a bicycle"
+        ]
+      },
+      {
+        "position": 9,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija a comparação incompleta: \"A bus is bigger a bicycle.\" → A bus is `____` a bicycle.",
+        "hint": null,
+        "explanation": "O comparativo **bigger** precisa de **than** antes do segundo elemento da comparação.",
+        "hints": [
+          "A forma *bigger* está correta; falta conectar os dois objetos.",
+          "Use a palavra que normalmente vem depois de um comparativo."
+        ],
+        "answers": [
+          "bigger than"
         ]
       }
     ]
@@ -4935,9 +4964,10 @@
       "the best"
     ],
     "story_note": null,
-    "content_version": 1,
+    "content_version": 2,
     "editorial_status": "reviewed",
     "learning_strategy": "avaliar",
+    "review_note": "Sprint 21: pack de superlativos revisado com formas irregulares, contraste com comparativos e correções linguisticamente seguras.",
     "source_accessed_at": "2026-10-08",
     "lead": "Penelope, a melhor amiga de infância, visita Washington e Anna descreve todas as pessoas da sua vida — cada uma com um **superlativo**. A aula é uma coleção quase completa das formas de superlativo do inglês, incluindo as irregulares.",
     "warmup_prompt": "Como você descreveria seu melhor amigo usando superlativos?",
@@ -5523,54 +5553,86 @@
     "exercises": [
       {
         "position": 0,
+        "objective": "apply",
         "prompt": "Superlativo de *nice*: Marsha is `____` person I know.",
-        "hint": "2 palavras, com artigo",
+        "hint": null,
         "explanation": "1 sílaba → the + -est.",
+        "hints": [
+          "A frase destaca uma pessoa dentro do grupo *people I know*.",
+          "Use o artigo *the* e acrescente *-st* a *nice*."
+        ],
         "answers": [
           "the nicest"
         ]
       },
       {
         "position": 1,
+        "objective": "apply",
         "prompt": "Superlativo de *messy*: I'm `____` cook she knows.",
-        "hint": "2 palavras",
+        "hint": null,
         "explanation": "messy → y vira i + est.",
+        "hints": [
+          "A comparação envolve todo o grupo de cozinheiros que ela conhece.",
+          "Troque o *y* final por *i* antes de *-est* e inclua o artigo."
+        ],
         "answers": [
           "the messiest"
         ]
       },
       {
         "position": 2,
+        "objective": "apply",
         "prompt": "Superlativo de *serious*: Pete is `____` person here.",
-        "hint": "3 palavras",
+        "hint": null,
         "explanation": "3 sílabas → the most + adjetivo.",
+        "hints": [
+          "Adjetivos longos não recebem *-est* neste padrão.",
+          "Use *the most* antes de *serious*."
+        ],
         "answers": [
           "the most serious"
         ]
       },
       {
         "position": 3,
+        "objective": "apply",
         "prompt": "Superlativo de *good*: Old friends are `____`.",
-        "hint": "2 palavras",
+        "hint": null,
         "explanation": "good → better → the best.",
+        "hints": [
+          "O superlativo de *good* é irregular.",
+          "A expressão começa com *the* e termina em **best**."
+        ],
         "answers": [
           "the best"
         ]
       },
       {
         "position": 4,
-        "prompt": "Superlativo de *lucky*: I am `____` woman in D.C.",
-        "hint": "2 palavras",
-        "explanation": "lucky → luckiest.",
+        "objective": "apply",
+        "prompt": "Superlativo de *bad*: That was `____` delay of the day.",
+        "hint": null,
+        "explanation": "O superlativo de *bad* é irregular: **the worst**.",
+        "hints": [
+          "A forma não é *the baddest* neste uso padrão.",
+          "O superlativo irregular termina em **worst**."
+        ],
         "answers": [
-          "the luckiest"
+          "the worst"
         ]
       },
       {
         "position": 5,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
         "prompt": "Corrija: \"They are the most friendliest people.\" → They are `____` people.",
-        "hint": "2 palavras",
+        "hint": null,
         "explanation": "Nunca junte *most* com *-est*.",
+        "hints": [
+          "A frase usa duas marcas de superlativo ao mesmo tempo.",
+          "Mantenha o artigo e apenas a forma terminada em *-iest*."
+        ],
         "answers": [
           "the friendliest"
         ]
@@ -5579,6 +5641,7 @@
         "position": 6,
         "activity_type": "multiple_choice",
         "skill": "listening",
+        "objective": "listen",
         "options": [
           "Marsha",
           "Penelope",
@@ -5599,6 +5662,7 @@
         "position": 7,
         "activity_type": "dictation",
         "skill": "listening",
+        "objective": "listen",
         "prompt": "Ditado: escreva como Anna descreve Marsha.",
         "hint": "10 palavras",
         "explanation": "**The nicest** é o superlativo curto delimitado por *in this city*.",
@@ -5614,6 +5678,7 @@
         "position": 8,
         "activity_type": "multiple_choice",
         "skill": "listening",
+        "objective": "listen",
         "options": [
           "They are roommates and split the rent.",
           "They work at the same restaurant.",
@@ -5634,6 +5699,7 @@
         "position": 9,
         "activity_type": "reorder",
         "skill": "grammar",
+        "objective": "produce",
         "options": [
           "Old",
           "friends",
@@ -5654,17 +5720,23 @@
       },
       {
         "position": 10,
-        "activity_type": "transformation",
+        "activity_type": "multiple_choice",
         "skill": "grammar",
-        "prompt": "Corrija: She is the most friendly person here. → She is `____` person here.",
+        "objective": "recognize",
+        "options": [
+          "shorter",
+          "the shortest",
+          "the shorter"
+        ],
+        "prompt": "Há três rotas. Complete: This is `____` route of the three.",
         "hint": null,
-        "explanation": "*Friendly* muda **y → iest**: **the friendliest**.",
+        "explanation": "Ao destacar uma rota dentro de um grupo de três, usamos o superlativo **the shortest**, não o comparativo *shorter*.",
         "hints": [
-          "Não use *most* neste caso.",
-          "Troque o *y* final por *-iest*."
+          "A expressão *of the three* define um grupo, não apenas dois elementos.",
+          "Use *the* e a forma de *short* terminada em *-est*."
         ],
         "answers": [
-          "the friendliest"
+          "the shortest"
         ]
       }
     ],
@@ -6516,9 +6588,10 @@
       "too … / … enough"
     ],
     "story_note": "Fecha o bloco",
-    "content_version": 1,
+    "content_version": 2,
     "editorial_status": "reviewed",
     "learning_strategy": "autoavaliar",
+    "review_note": "Sprint 21: pack de adjetivos e advérbios revisado por função, registro e exceções, com objetivos explícitos.",
     "source_accessed_at": "2026-10-08",
     "lead": "Ano novo, resolução nova: Anna faz um teste para uma peça de teatro. O diretor corrige **como** ela fala e **como** ela anda — e por isso a aula inteira é feita de **advérbios de modo**, do comparativo deles e do par *too* / *enough*.",
     "warmup_prompt": "Como você pediria para alguém falar mais alto ou andar mais devagar?",
@@ -6962,7 +7035,7 @@
         "offline_policy": "network_only",
         "license_reviewed_at": "2026-10-08",
         "duration_seconds": 251,
-        "listening_exercise_position": 7,
+        "listening_exercise_position": 8,
         "cues": [
           {
             "position": 0,
@@ -7162,73 +7235,162 @@
     "exercises": [
       {
         "position": 0,
-        "prompt": "Adjetivo → advérbio: speak (loud) → speak `____`.",
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "adjective, describing the soup",
+          "adverb, describing smells",
+          "noun, naming the soup"
+        ],
+        "prompt": "In “The soup smells wonderful,” what is the function of *wonderful*?",
         "hint": null,
-        "explanation": "loud + -ly.",
+        "explanation": "Depois do verbo de ligação *smells*, **wonderful** é um adjetivo que descreve *the soup*.",
+        "hints": [
+          "Pergunte se a palavra descreve uma ação ou o sujeito.",
+          "Verbos de ligação como *smell* podem ligar o sujeito a um adjetivo."
+        ],
         "answers": [
-          "loudly"
+          "adjective, describing the soup"
         ]
       },
       {
         "position": 1,
-        "prompt": "Adjetivo → advérbio: walk (quiet) → walk `____`.",
+        "objective": "apply",
+        "prompt": "She smiled `____` (happy) when she heard the news.",
         "hint": null,
-        "explanation": "quiet + -ly.",
+        "explanation": "*Happy* troca **y** por **i** antes de *-ly*: **happily**.",
+        "hints": [
+          "A lacuna descreve como ela sorriu.",
+          "Troque o *y* final por *i* antes de acrescentar *-ly*."
+        ],
         "answers": [
-          "quietly"
+          "happily"
         ]
       },
       {
         "position": 2,
-        "prompt": "Comparativo de advérbio: Can you speak `____`?",
-        "hint": "2 palavras — mais alto",
-        "explanation": "Advérbio em -ly usa *more*. *louder* também circula na fala informal.",
+        "objective": "apply",
+        "prompt": "The room is noisy. Can you speak `____`?",
+        "hint": null,
+        "explanation": "Tanto **louder** quanto **more loudly** podem modificar *speak*; a segunda forma é mais explicitamente adverbial.",
+        "hints": [
+          "A frase pede maior volume em comparação ao volume atual.",
+          "Aceitam-se a forma comparativa curta e a estrutura *more + loudly*."
+        ],
         "answers": [
-          "more loudly",
-          "louder"
+          "louder",
+          "more loudly"
         ]
       },
       {
         "position": 3,
-        "prompt": "Demais: You are speaking `____`.",
-        "hint": "2 palavras — baixo demais",
-        "explanation": "*too* vem antes do advérbio.",
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "Maya is a good singer, and she sings well.",
+          "Maya is a well singer, and she sings good.",
+          "Maya is a good singer, and she sings good."
+        ],
+        "prompt": "Choose the sentence that uses *good* and *well* in their standard functions.",
+        "hint": null,
+        "explanation": "**Good** descreve o substantivo *singer*; **well** modifica o verbo *sings*.",
+        "hints": [
+          "Um espaço descreve uma pessoa; o outro descreve a ação de cantar.",
+          "Use o adjetivo com o substantivo e o advérbio com o verbo."
+        ],
         "answers": [
-          "too softly"
+          "Maya is a good singer, and she sings well."
         ]
       },
       {
         "position": 4,
-        "prompt": "Suficiente: Is that `____`?",
-        "hint": "2 palavras — alto o suficiente",
-        "explanation": "*enough* vem **depois** do adjetivo.",
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "adjective",
+          "adverb formed with -ly",
+          "verb"
+        ],
+        "prompt": "In “Our friendly guide spoke clearly,” what kind of word is *friendly*?",
+        "hint": null,
+        "explanation": "Apesar de terminar em *-ly*, **friendly** é um adjetivo e descreve o substantivo *guide*.",
+        "hints": [
+          "A terminação sozinha não determina a função da palavra.",
+          "Observe que *friendly* vem antes do substantivo *guide*."
+        ],
         "answers": [
-          "loud enough"
+          "adjective"
         ]
       },
       {
         "position": 5,
-        "prompt": "Comparativo irregular: good → advérbio é `____`.",
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "adjective, then adverb",
+          "two adjectives",
+          "two adverbs"
+        ],
+        "prompt": "In “The fast train arrived late,” what are the functions of *fast* and *late*, in that order?",
         "hint": null,
-        "explanation": "O advérbio de *good* é *well*, não \"goodly\".",
+        "explanation": "**Fast** descreve o substantivo *train*; **late** modifica a ação *arrived*.",
+        "hints": [
+          "Veja qual palavra aparece junto de *train* e qual aparece depois do verbo.",
+          "A primeira descreve um substantivo; a segunda diz quando a ação ocorreu."
+        ],
         "answers": [
-          "well"
+          "adjective, then adverb"
         ]
       },
       {
         "position": 6,
-        "prompt": "Tag question no passado: I was too early, `____`?",
-        "hint": "2 palavras",
-        "explanation": "Afirmativa no passado com *was* → tag *wasn't I?*",
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "They",
+          "work",
+          "hard",
+          "and",
+          "arrive",
+          "early"
+        ],
+        "prompt": "Ordene a frase em que *hard* e *early* modificam ações.",
+        "hint": null,
+        "explanation": "**Hard** e **early** podem funcionar como advérbios sem receber *-ly*.",
+        "hints": [
+          "Comece pelo sujeito e pelo primeiro verbo.",
+          "Ligue as duas ações com *and*."
+        ],
         "answers": [
-          "wasn't i",
-          "wasnt i"
+          "They work hard and arrive early"
         ]
       },
       {
         "position": 7,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "correct",
+        "prompt": "Corrija: “The actor sang beautiful.” → The actor sang `____`.",
+        "hint": null,
+        "explanation": "Para modificar a ação *sang*, use o advérbio **beautifully**.",
+        "hints": [
+          "A palavra precisa dizer como o ator cantou.",
+          "Acrescente *-ly* a *beautiful*."
+        ],
+        "answers": [
+          "beautifully"
+        ]
+      },
+      {
+        "position": 8,
         "activity_type": "multiple_choice",
         "skill": "listening",
+        "objective": "listen",
         "options": [
           "a tree",
           "the director",
@@ -7246,9 +7408,10 @@
         ]
       },
       {
-        "position": 8,
+        "position": 9,
         "activity_type": "dictation",
         "skill": "listening",
+        "objective": "listen",
         "prompt": "Ditado: escreva os dois modos como Anna está caminhando.",
         "hint": "6 palavras",
         "explanation": "**Quickly** e **loudly** descrevem como a ação acontece.",
@@ -7261,9 +7424,10 @@
         ]
       },
       {
-        "position": 9,
+        "position": 10,
         "activity_type": "multiple_choice",
         "skill": "listening",
+        "objective": "listen",
         "options": [
           "more loudly and more seriously",
           "more softly and more quickly",
@@ -7281,9 +7445,10 @@
         ]
       },
       {
-        "position": 10,
+        "position": 11,
         "activity_type": "reorder",
         "skill": "grammar",
+        "objective": "produce",
         "options": [
           "Walk",
           "slowly",
@@ -7299,21 +7464,6 @@
         ],
         "answers": [
           "Walk slowly and quietly"
-        ]
-      },
-      {
-        "position": 11,
-        "activity_type": "transformation",
-        "skill": "grammar",
-        "prompt": "Corrija: Can you speak more loud? → Can you speak `____`?",
-        "hint": null,
-        "explanation": "Para modificar *speak*, use o advérbio **loudly**: *more loudly*.",
-        "hints": [
-          "A palavra descreve o verbo *speak*.",
-          "Acrescente *-ly* ao adjetivo."
-        ],
-        "answers": [
-          "more loudly"
         ]
       }
     ],

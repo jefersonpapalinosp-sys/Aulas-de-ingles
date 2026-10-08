@@ -12,6 +12,7 @@ import { Carregando, Erro } from '../components/States'
 import { StepNavigator } from '../features/study-session/StepNavigator'
 import { LessonAudioPlayer } from '../features/media/LessonAudioPlayer'
 import { ShadowingPractice } from '../features/speaking/ShadowingPractice'
+import { PracticeRunner } from '../features/practice/PracticeRunner'
 import { WritingWorkspace } from '../features/writing/WritingWorkspace'
 import {
   isStudyStep,
@@ -140,18 +141,16 @@ function StepContent({
           Responda antes de pedir o gabarito. A correção acontece no servidor e cada tentativa
           fica registrada no seu progresso.
         </p>
-        <div className="stack tight">
-          {lesson.exercises
-            .filter((exercise) => exercise.skill !== 'listening')
-            .map((exercise, index) => (
-              <ExerciseCard
-                exercicio={exercise}
-                numero={index + 1}
-                userId={userId}
-                key={exercise.id}
-              />
-            ))}
-        </div>
+        <PracticeRunner
+          key={`${lesson.course_slug}:${lesson.number}`}
+          courseSlug={lesson.course_slug}
+          lessonNumber={lesson.number}
+          lessonTitle={lesson.title}
+          userId={userId}
+          variant="embedded"
+          initialFilters={{ skill: 'grammar' }}
+          lockFilters
+        />
       </div>
     )
   }

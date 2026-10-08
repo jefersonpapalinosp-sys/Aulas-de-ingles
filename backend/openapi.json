@@ -96,6 +96,18 @@
                         "format": "uuid",
                         "title": "Idempotency Key",
                         "type": "string"
+                    },
+                    "practice_session_id": {
+                        "anyOf": [
+                            {
+                                "exclusiveMinimum": 0.0,
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Practice Session Id"
                     }
                 },
                 "required": [
@@ -128,6 +140,16 @@
                     },
                     "feedback": {
                         "$ref": "#/components/schemas/AttemptFeedbackOut"
+                    },
+                    "session": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PracticeAttemptStateOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
                     }
                 },
                 "required": [
@@ -562,15 +584,22 @@
                 "type": "object"
             },
             "ExerciseOut": {
-                "description": "Exercício como ele chega ao cliente.\n\nA resposta certa **não** faz parte deste schema. Na S3 a correção passa a\nser feita pelo servidor; até lá o cliente corrige, mas o contrato já nasce\nno formato certo para não ter que mudar depois.",
+                "description": "Exercício como ele chega ao cliente.\n\nA resposta certa **não** faz parte deste schema. Dica e explicação mantêm\nas chaves legadas, mas chegam nulas na leitura inicial; o servidor só as\nlibera pelos fluxos autenticados de tentativa, dica ou revelação.",
                 "properties": {
                     "activity_type": {
                         "title": "Activity Type",
                         "type": "string"
                     },
                     "explanation": {
-                        "title": "Explanation",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Explanation"
                     },
                     "hint": {
                         "anyOf": [
@@ -590,6 +619,17 @@
                     "id": {
                         "title": "Id",
                         "type": "integer"
+                    },
+                    "objective": {
+                        "enum": [
+                            "recognize",
+                            "apply",
+                            "correct",
+                            "produce",
+                            "listen"
+                        ],
+                        "title": "Objective",
+                        "type": "string"
                     },
                     "options": {
                         "anyOf": [
@@ -623,6 +663,7 @@
                     "position",
                     "activity_type",
                     "skill",
+                    "objective",
                     "options",
                     "prompt",
                     "hint",
@@ -639,8 +680,15 @@
                         "type": "string"
                     },
                     "explanation": {
-                        "title": "Explanation",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Explanation"
                     },
                     "hint": {
                         "anyOf": [
@@ -665,6 +713,17 @@
                         "title": "Lesson Number",
                         "type": "integer"
                     },
+                    "objective": {
+                        "enum": [
+                            "recognize",
+                            "apply",
+                            "correct",
+                            "produce",
+                            "listen"
+                        ],
+                        "title": "Objective",
+                        "type": "string"
+                    },
                     "options": {
                         "anyOf": [
                             {
@@ -697,6 +756,7 @@
                     "position",
                     "activity_type",
                     "skill",
+                    "objective",
                     "options",
                     "prompt",
                     "hint",
@@ -1718,6 +1778,540 @@
                     "note"
                 ],
                 "title": "PhraseOut",
+                "type": "object"
+            },
+            "PracticeAttemptStateOut": {
+                "properties": {
+                    "attempt_count": {
+                        "title": "Attempt Count",
+                        "type": "integer"
+                    },
+                    "completed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed At"
+                    },
+                    "first_try_correct": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "First Try Correct"
+                    },
+                    "item_position": {
+                        "title": "Item Position",
+                        "type": "integer"
+                    },
+                    "outcome": {
+                        "enum": [
+                            "pending",
+                            "first_try_correct",
+                            "corrected",
+                            "revealed"
+                        ],
+                        "title": "Outcome",
+                        "type": "string"
+                    },
+                    "session_id": {
+                        "title": "Session Id",
+                        "type": "integer"
+                    },
+                    "session_status": {
+                        "enum": [
+                            "active",
+                            "completed",
+                            "abandoned"
+                        ],
+                        "title": "Session Status",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "session_id",
+                    "item_position",
+                    "attempt_count",
+                    "first_try_correct",
+                    "outcome",
+                    "completed_at",
+                    "session_status"
+                ],
+                "title": "PracticeAttemptStateOut",
+                "type": "object"
+            },
+            "PracticeHintOut": {
+                "properties": {
+                    "content": {
+                        "title": "Content",
+                        "type": "string"
+                    },
+                    "item": {
+                        "$ref": "#/components/schemas/PracticeSessionItemOut"
+                    },
+                    "level": {
+                        "title": "Level",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "level",
+                    "content",
+                    "item"
+                ],
+                "title": "PracticeHintOut",
+                "type": "object"
+            },
+            "PracticePositionIn": {
+                "properties": {
+                    "current_position": {
+                        "minimum": 0.0,
+                        "title": "Current Position",
+                        "type": "integer"
+                    },
+                    "expected_revision": {
+                        "exclusiveMinimum": 0.0,
+                        "title": "Expected Revision",
+                        "type": "integer"
+                    },
+                    "idempotency_key": {
+                        "format": "uuid",
+                        "title": "Idempotency Key",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "current_position",
+                    "expected_revision",
+                    "idempotency_key"
+                ],
+                "title": "PracticePositionIn",
+                "type": "object"
+            },
+            "PracticeRevealOut": {
+                "properties": {
+                    "answers": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Answers",
+                        "type": "array"
+                    },
+                    "explanation": {
+                        "title": "Explanation",
+                        "type": "string"
+                    },
+                    "item": {
+                        "$ref": "#/components/schemas/PracticeSessionItemOut"
+                    }
+                },
+                "required": [
+                    "answers",
+                    "explanation",
+                    "item"
+                ],
+                "title": "PracticeRevealOut",
+                "type": "object"
+            },
+            "PracticeSessionCreateIn": {
+                "properties": {
+                    "activity_type": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "gap_fill",
+                                    "multiple_choice",
+                                    "transformation",
+                                    "reorder",
+                                    "dictation"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Activity Type"
+                    },
+                    "idempotency_key": {
+                        "format": "uuid",
+                        "title": "Idempotency Key",
+                        "type": "string"
+                    },
+                    "mode": {
+                        "default": "guided",
+                        "enum": [
+                            "guided",
+                            "quick",
+                            "mistakes"
+                        ],
+                        "title": "Mode",
+                        "type": "string"
+                    },
+                    "objective": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "recognize",
+                                    "apply",
+                                    "correct",
+                                    "produce",
+                                    "listen"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Objective"
+                    },
+                    "skill": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "grammar",
+                                    "listening"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Skill"
+                    },
+                    "source_session_id": {
+                        "anyOf": [
+                            {
+                                "exclusiveMinimum": 0.0,
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Source Session Id"
+                    }
+                },
+                "required": [
+                    "idempotency_key"
+                ],
+                "title": "PracticeSessionCreateIn",
+                "type": "object"
+            },
+            "PracticeSessionItemOut": {
+                "properties": {
+                    "answer_revealed": {
+                        "title": "Answer Revealed",
+                        "type": "boolean"
+                    },
+                    "answers": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Answers"
+                    },
+                    "attempt_count": {
+                        "title": "Attempt Count",
+                        "type": "integer"
+                    },
+                    "completed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed At"
+                    },
+                    "exercise": {
+                        "$ref": "#/components/schemas/ExerciseOut"
+                    },
+                    "explanation": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Explanation"
+                    },
+                    "first_try_correct": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "First Try Correct"
+                    },
+                    "highest_hint_level": {
+                        "title": "Highest Hint Level",
+                        "type": "integer"
+                    },
+                    "last_feedback": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AttemptFeedbackOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "opened_hints": {
+                        "items": {
+                            "$ref": "#/components/schemas/ExerciseHintOut"
+                        },
+                        "title": "Opened Hints",
+                        "type": "array"
+                    },
+                    "outcome": {
+                        "enum": [
+                            "pending",
+                            "first_try_correct",
+                            "corrected",
+                            "revealed"
+                        ],
+                        "title": "Outcome",
+                        "type": "string"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "position",
+                    "exercise",
+                    "attempt_count",
+                    "first_try_correct",
+                    "highest_hint_level",
+                    "opened_hints",
+                    "answer_revealed",
+                    "completed_at",
+                    "outcome",
+                    "last_feedback",
+                    "answers",
+                    "explanation"
+                ],
+                "title": "PracticeSessionItemOut",
+                "type": "object"
+            },
+            "PracticeSessionOut": {
+                "properties": {
+                    "activity_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Activity Type"
+                    },
+                    "completed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed At"
+                    },
+                    "content_changed": {
+                        "title": "Content Changed",
+                        "type": "boolean"
+                    },
+                    "content_version": {
+                        "title": "Content Version",
+                        "type": "integer"
+                    },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
+                    "current_position": {
+                        "title": "Current Position",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/PracticeSessionItemOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "lesson_title": {
+                        "title": "Lesson Title",
+                        "type": "string"
+                    },
+                    "mode": {
+                        "enum": [
+                            "guided",
+                            "quick",
+                            "mistakes"
+                        ],
+                        "title": "Mode",
+                        "type": "string"
+                    },
+                    "objective": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "recognize",
+                                    "apply",
+                                    "correct",
+                                    "produce",
+                                    "listen"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Objective"
+                    },
+                    "skill": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Skill"
+                    },
+                    "started_at": {
+                        "format": "date-time",
+                        "title": "Started At",
+                        "type": "string"
+                    },
+                    "state_revision": {
+                        "title": "State Revision",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "enum": [
+                            "active",
+                            "completed",
+                            "abandoned"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "summary": {
+                        "$ref": "#/components/schemas/PracticeSummaryOut"
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "format": "date-time",
+                        "title": "Updated At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "course_slug",
+                    "unit_slug",
+                    "lesson_number",
+                    "lesson_title",
+                    "content_version",
+                    "mode",
+                    "status",
+                    "activity_type",
+                    "skill",
+                    "objective",
+                    "content_changed",
+                    "current_position",
+                    "state_revision",
+                    "started_at",
+                    "updated_at",
+                    "completed_at",
+                    "summary",
+                    "items"
+                ],
+                "title": "PracticeSessionOut",
+                "type": "object"
+            },
+            "PracticeSummaryOut": {
+                "properties": {
+                    "completed": {
+                        "title": "Completed",
+                        "type": "integer"
+                    },
+                    "corrected": {
+                        "title": "Corrected",
+                        "type": "integer"
+                    },
+                    "first_try_correct": {
+                        "title": "First Try Correct",
+                        "type": "integer"
+                    },
+                    "pending": {
+                        "title": "Pending",
+                        "type": "integer"
+                    },
+                    "revealed": {
+                        "title": "Revealed",
+                        "type": "integer"
+                    },
+                    "total": {
+                        "title": "Total",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "total",
+                    "completed",
+                    "first_try_correct",
+                    "corrected",
+                    "revealed",
+                    "pending"
+                ],
+                "title": "PracticeSummaryOut",
                 "type": "object"
             },
             "ProgressOut": {
@@ -3525,6 +4119,253 @@
                 ]
             }
         },
+        "/api/courses/{course_slug}/lessons/{number}/exercises": {
+            "get": {
+                "description": "Lista pública e filtrável; não publica dica, explicação nem gabarito.",
+                "operationId": "list_lesson_exercises_api_courses__course_slug__lessons__number__exercises_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "activity_type",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "gap_fill",
+                                        "multiple_choice",
+                                        "transformation",
+                                        "reorder",
+                                        "dictation"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Activity Type"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "skill",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "grammar",
+                                        "listening"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Skill"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "objective",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "recognize",
+                                        "apply",
+                                        "correct",
+                                        "produce",
+                                        "listen"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Objective"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ExerciseOut"
+                                    },
+                                    "title": "Response List Lesson Exercises Api Courses  Course Slug  Lessons  Number  Exercises Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "List Lesson Exercises",
+                "tags": [
+                    "practice"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/lessons/{number}/practice-sessions": {
+            "post": {
+                "operationId": "create_practice_session_api_courses__course_slug__lessons__number__practice_sessions_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PracticeSessionCreateIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão idempotente ou sessão ativa compatível retomada."
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Create Practice Session",
+                "tags": [
+                    "practice"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/lessons/{number}/practice-sessions/active": {
+            "get": {
+                "operationId": "get_active_practice_session_api_courses__course_slug__lessons__number__practice_sessions_active_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "204": {
+                        "description": "Nenhuma sessão ativa."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Get Active Practice Session",
+                "tags": [
+                    "practice"
+                ]
+            }
+        },
         "/api/courses/{course_slug}/lessons/{number}/studied": {
             "delete": {
                 "operationId": "desmarcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_delete",
@@ -4740,6 +5581,211 @@
                 "summary": "Salvar Posicao",
                 "tags": [
                     "media"
+                ]
+            }
+        },
+        "/api/practice-sessions/{session_id}": {
+            "get": {
+                "operationId": "get_practice_session_api_practice_sessions__session_id__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Get Practice Session",
+                "tags": [
+                    "practice"
+                ]
+            }
+        },
+        "/api/practice-sessions/{session_id}/items/{exercise_id}/hints/{level}": {
+            "post": {
+                "operationId": "open_practice_hint_api_practice_sessions__session_id__items__exercise_id__hints__level__post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "exercise_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Exercise Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "level",
+                        "required": true,
+                        "schema": {
+                            "title": "Level",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeHintOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Open Practice Hint",
+                "tags": [
+                    "practice"
+                ]
+            }
+        },
+        "/api/practice-sessions/{session_id}/items/{exercise_id}/reveal": {
+            "post": {
+                "operationId": "reveal_practice_answer_api_practice_sessions__session_id__items__exercise_id__reveal_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "exercise_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Exercise Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeRevealOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Reveal Practice Answer",
+                "tags": [
+                    "practice"
+                ]
+            }
+        },
+        "/api/practice-sessions/{session_id}/position": {
+            "put": {
+                "operationId": "update_practice_position_api_practice_sessions__session_id__position_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PracticePositionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PracticeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Update Practice Position",
+                "tags": [
+                    "practice"
                 ]
             }
         },

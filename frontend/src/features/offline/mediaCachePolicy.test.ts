@@ -17,5 +17,6 @@ describe('política de cache de mídia', () => {
     expect(source).toContain("url.pathname === '/api/courses'")
     expect(source).toContain('/api\\/courses\\/[^/]+\\/curriculum')
     expect(source).toContain('/api\\/courses\\/[^/]+\\/lessons\\/\\d+')
+    expect(source).toContain('/lessons\\/\\d+\\/exercises')
   })
 })

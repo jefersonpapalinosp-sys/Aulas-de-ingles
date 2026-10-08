@@ -5,6 +5,7 @@ import { LegacyLessonRedirect } from '../App'
 import {
   canonicalizeLegacyHref,
   lessonPath,
+  practicePath,
   studyPath,
 } from './courseRoutes'
 
@@ -19,6 +20,9 @@ describe('rotas de curso', () => {
     expect(lessonPath('voa-level-2', 1)).toBe('/cursos/voa-level-2/aulas/1')
     expect(studyPath('voa-level-2', 1, 'assistir')).toBe(
       '/cursos/voa-level-2/aulas/1/estudar/assistir',
+    )
+    expect(practicePath('voa-level-2', 1)).toBe(
+      '/cursos/voa-level-2/aulas/1/exercicios',
     )
   })
 

@@ -3,8 +3,9 @@
 from datetime import UTC, datetime
 from typing import Annotated, cast
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
 from sqlalchemy import delete, func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
@@ -17,6 +18,8 @@ from app.db.models import (
     ExerciseHint,
     Lesson,
     LessonProgress,
+    PracticeSession,
+    PracticeSessionItem,
     ReviewItem,
     SkillEvidence,
     StepProgress,
@@ -41,6 +44,14 @@ from app.schemas.progress import (
     StudyStep,
 )
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
+from app.services.practice import (
+    complete_session_if_ready,
+    ensure_session_content_current,
+    ensure_session_mutable,
+    get_owned_practice_session,
+    get_practice_item,
+    practice_attempt_state,
+)
 
 router = APIRouter(tags=["progress"])
 
@@ -67,7 +78,12 @@ async def _exercicio_por_id(session: AsyncSession, exercise_id: int) -> Exercise
     return exercicio
 
 
-def _attempt_out(attempt: ExerciseAttempt, exercise: Exercise) -> AttemptOut:
+def _attempt_out(
+    attempt: ExerciseAttempt,
+    exercise: Exercise,
+    practice: PracticeSession | None = None,
+    item: PracticeSessionItem | None = None,
+) -> AttemptOut:
     feedback = analisar_resposta(attempt.answer, [answer.value for answer in exercise.answers])
     return AttemptOut(
         attempt_id=attempt.id,
@@ -79,6 +95,11 @@ def _attempt_out(attempt: ExerciseAttempt, exercise: Exercise) -> AttemptOut:
             tokens=[
                 FeedbackTokenOut(text=token.text, status=token.status) for token in feedback.tokens
             ],
+        ),
+        session=(
+            practice_attempt_state(practice, item)
+            if practice is not None and item is not None
+            else None
         ),
     )
 
@@ -318,9 +339,7 @@ async def salvar_sessao_de_estudo(
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[StudySessionIn, Body()],
 ) -> StudySessionOut:
-    return await _salvar_sessao_de_estudo(
-        number, DEFAULT_COURSE_SLUG, usuario, session, corpo
-    )
+    return await _salvar_sessao_de_estudo(number, DEFAULT_COURSE_SLUG, usuario, session, corpo)
 
 
 @router.put(
@@ -343,6 +362,7 @@ async def tentar(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[AttemptIn, Body()],
+    response: Response,
 ) -> AttemptOut:
     """Confere a resposta e grava a tentativa.
 
@@ -351,8 +371,23 @@ async def tentar(
     o gabarito. A comparação é a mesma de `app/domain/answers.py` — a regra
     mora num lugar só.
     """
+    response.headers["Cache-Control"] = "private, no-store"
     exercicio = await _exercicio_por_id(session, exercise_id)
     key = str(corpo.idempotency_key)
+    practice: PracticeSession | None = None
+    practice_item: PracticeSessionItem | None = None
+    if corpo.practice_session_id is not None:
+        practice = await get_owned_practice_session(
+            session,
+            corpo.practice_session_id,
+            usuario.id,
+            for_update=True,
+        )
+        practice_item = get_practice_item(practice, exercicio.id)
+
+    # Em tentativas ligadas ao laboratório, a consulta acontece depois do
+    # lock. Assim, duas requisições simultâneas com a mesma chave também são
+    # idempotentes quando a primeira delas acaba de concluir a sessão.
     existente = (
         await session.execute(
             select(ExerciseAttempt).where(
@@ -362,25 +397,91 @@ async def tentar(
         )
     ).scalar_one_or_none()
     if existente is not None:
-        if existente.exercise_id != exercicio.id or existente.answer != corpo.answer[:200]:
+        requested_item_id = practice_item.id if practice_item is not None else None
+        if (
+            existente.exercise_id != exercicio.id
+            or existente.answer != corpo.answer[:200]
+            or existente.practice_session_item_id != requested_item_id
+        ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="A chave de idempotência já foi usada em outra tentativa.",
             )
-        return _attempt_out(existente, exercicio)
+        if practice is not None and practice_item is not None:
+            ensure_session_content_current(practice)
+            # As entidades podem ter sido carregadas antes de a aba vencedora
+            # confirmar a transação; atualize os contadores antes de responder.
+            await session.refresh(practice_item)
+            await session.refresh(practice)
+        return _attempt_out(existente, exercicio, practice, practice_item)
+
+    if practice is not None:
+        ensure_session_mutable(practice)
 
     feedback = analisar_resposta(corpo.answer, [a.value for a in exercicio.answers])
     certo = feedback.category == "correct"
 
-    tentativa = ExerciseAttempt(
-        user_id=usuario.id,
-        exercise_id=exercicio.id,
-        idempotency_key=key,
-        answer=corpo.answer[:200],
-        correct=certo,
-    )
-    session.add(tentativa)
-    await session.flush()
+    attempt_id = (
+        await session.execute(
+            insert(ExerciseAttempt)
+            .values(
+                user_id=usuario.id,
+                exercise_id=exercicio.id,
+                practice_session_item_id=(practice_item.id if practice_item is not None else None),
+                idempotency_key=key,
+                answer=corpo.answer[:200],
+                correct=certo,
+            )
+            .on_conflict_do_nothing(index_elements=["user_id", "idempotency_key"])
+            .returning(ExerciseAttempt.id)
+        )
+    ).scalar_one_or_none()
+    if attempt_id is None:
+        # Outra aba ou a fila offline gravou a mesma tentativa enquanto esta
+        # requisição aguardava o banco. O vencedor é a resposta idempotente.
+        existente = (
+            await session.execute(
+                select(ExerciseAttempt).where(
+                    ExerciseAttempt.user_id == usuario.id,
+                    ExerciseAttempt.idempotency_key == key,
+                )
+            )
+        ).scalar_one()
+        if corpo.practice_session_id is not None:
+            practice = await get_owned_practice_session(
+                session,
+                corpo.practice_session_id,
+                usuario.id,
+                for_update=True,
+            )
+            practice_item = get_practice_item(practice, exercicio.id)
+        requested_item_id = practice_item.id if practice_item is not None else None
+        if (
+            existente.exercise_id != exercicio.id
+            or existente.answer != corpo.answer[:200]
+            or existente.practice_session_item_id != requested_item_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A chave de idempotência já foi usada em outra tentativa.",
+            )
+        if practice is not None and practice_item is not None:
+            ensure_session_content_current(practice)
+            await session.refresh(practice_item)
+            await session.refresh(practice)
+        return _attempt_out(existente, exercicio, practice, practice_item)
+    tentativa = (
+        await session.execute(select(ExerciseAttempt).where(ExerciseAttempt.id == attempt_id))
+    ).scalar_one()
+
+    if practice is not None and practice_item is not None:
+        practice_item.attempt_count += 1
+        if practice_item.first_try_correct is None:
+            practice_item.first_try_correct = certo
+        if certo and practice_item.completed_at is None:
+            practice_item.completed_at = datetime.now(UTC)
+        practice.updated_at = datetime.now(UTC)
+        complete_session_if_ready(practice)
     session.add(
         SkillEvidence(
             user_id=usuario.id,
@@ -411,7 +512,7 @@ async def tentar(
             )
     await session.commit()
     await session.refresh(tentativa)
-    return _attempt_out(tentativa, exercicio)
+    return _attempt_out(tentativa, exercicio, practice, practice_item)
 
 
 @router.get("/exercises/{exercise_id}/hints/{level}", response_model=ExerciseHintOut)
@@ -420,8 +521,10 @@ async def obter_dica(
     level: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
 ) -> ExerciseHintOut:
     """Libera dicas em ordem; a segunda exige ao menos uma tentativa errada."""
+    response.headers["Cache-Control"] = "private, no-store"
     exercise = await _exercicio_por_id(session, exercise_id)
     hint = (
         await session.execute(
@@ -483,8 +586,10 @@ async def revelar_resposta(
     exercise_id: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
 ) -> RevealAnswerOut:
     """Entrega o gabarito — só quando o usuário pede, e só se estiver logado."""
+    response.headers["Cache-Control"] = "private, no-store"
     _ = usuario
     exercicio = await _exercicio_por_id(session, exercise_id)
     return RevealAnswerOut(

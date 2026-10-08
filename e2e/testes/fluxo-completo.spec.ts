@@ -30,6 +30,10 @@ function lessonPath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
   return `${coursePath(courseSlug)}/aulas/${lessonNumber}`
 }
 
+function practicePath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
+  return `${lessonPath(lessonNumber, courseSlug)}/exercicios`
+}
+
 function studyPath(
   lessonNumber: number,
   step?: 'preparar' | 'assistir' | 'estudar' | 'praticar' | 'revisar',
@@ -50,6 +54,12 @@ async function expectNoHorizontalScroll(page: Page): Promise<void> {
 
 async function ensureTrailVisible(page: Page): Promise<Locator | null> {
   const openDrawer = page.getByRole('button', { name: /Abrir trilha de aulas/ })
+  const desktopShortcuts = page.getByRole('navigation', { name: 'Atalhos', exact: true })
+  // Após reload, o React pode ainda não ter montado o shell. `isVisible()` não
+  // espera e fazia o helper concluir incorretamente que estava no desktop.
+  await expect
+    .poll(async () => (await openDrawer.isVisible()) || (await desktopShortcuts.isVisible()))
+    .toBe(true)
   if (!(await openDrawer.isVisible())) return null
   if ((await openDrawer.getAttribute('aria-expanded')) !== 'true') await openDrawer.click()
   const dialog = page.getByRole('dialog', { name: 'Trilha de estudo' })
@@ -59,7 +69,7 @@ async function ensureTrailVisible(page: Page): Promise<Locator | null> {
 
 async function globalLink(page: Page, name: RegExp): Promise<Locator> {
   const dialog = await ensureTrailVisible(page)
-  const scope = dialog ?? page.getByRole('navigation', { name: 'Atalhos' })
+  const scope = dialog ?? page.getByRole('navigation', { name: 'Atalhos', exact: true })
   return scope.getByRole('link', { name })
 }
 
@@ -96,6 +106,57 @@ async function criarConta(page: Page, nome: string): Promise<string> {
   return email
 }
 
+type PracticeSessionE2E = {
+  items: Array<{ exercise: { prompt: string } }>
+}
+
+async function iniciarPraticaGuiada(
+  page: Page,
+  lessonNumber: number,
+  courseSlug = LEVEL_1_SLUG,
+): Promise<PracticeSessionE2E> {
+  const sessaoCriada = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        `/api/courses/${courseSlug}/lessons/${lessonNumber}/practice-sessions` &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  )
+  const iniciar = page.getByRole('button', { name: 'Começar Prática guiada' })
+  await expect(iniciar).toBeEnabled()
+  await iniciar.click()
+  const sessao = (await (await sessaoCriada).json()) as PracticeSessionE2E
+  await expect(page.locator('.practice-question')).toBeVisible()
+  return sessao
+}
+
+async function avancarAteEnunciado(
+  page: Page,
+  sessao: PracticeSessionE2E,
+  enunciado: RegExp,
+): Promise<Locator> {
+  const indice = sessao.items.findIndex((item) => enunciado.test(item.exercise.prompt))
+  if (indice < 0) throw new Error(`A sessão não contém o exercício ${enunciado}.`)
+
+  for (let atual = 0; atual < indice; atual += 1) {
+    const questao = page.locator('.practice-question')
+    await questao.getByRole('button', { name: 'Resposta' }).click()
+    await expect(questao.getByText('Resposta', { exact: true })).toBeVisible()
+    const proxima = page
+      .getByRole('navigation', { name: 'Questões da sessão' })
+      .getByRole('button', { name: 'Próxima →' })
+    await expect(proxima).toBeEnabled()
+    await proxima.click()
+    await expect(page.locator('.practice-runner-head')).toContainText(
+      `Questão ${atual + 2} de`,
+    )
+  }
+
+  const questao = page.locator('.practice-question')
+  await expect(questao.getByRole('heading', { level: 3 })).toContainText(enunciado)
+  return questao
+}
+
 test('do cadastro à primeira revisão', async ({ page }) => {
   await test.step('cria a conta', async () => {
     await criarConta(page, 'Jeferson')
@@ -113,7 +174,9 @@ test('do cadastro à primeira revisão', async ({ page }) => {
   })
 
   await test.step('errar um exercício de vocabulário põe a palavra no deck', async () => {
-    const exercicio = page.locator('.ex').filter({ hasText: 'honest' }).first()
+    await page.goto(practicePath(39))
+    const sessao = await iniciarPraticaGuiada(page, 39)
+    const exercicio = await avancarAteEnunciado(page, sessao, /honest/i)
     await exercicio.getByRole('textbox').fill('resposta errada')
     await exercicio.getByRole('button', { name: 'Verificar' }).click()
     await expect(exercicio.getByText('Ainda não')).toBeVisible()
@@ -155,9 +218,10 @@ test('do cadastro à primeira revisão', async ({ page }) => {
 test('acertar não enche o deck', async ({ page }) => {
   await criarConta(page, 'Certeira')
 
-  await page.goto(lessonPath(39))
+  await page.goto(practicePath(39))
   await expect(page.getByRole('heading', { name: "It's Unbelievable!" })).toBeVisible()
-  const exercicio = page.locator('.ex').filter({ hasText: 'honest' }).first()
+  const sessao = await iniciarPraticaGuiada(page, 39)
+  const exercicio = await avancarAteEnunciado(page, sessao, /honest/i)
   await exercicio.getByRole('textbox').fill('dishonest')
   await exercicio.getByRole('button', { name: 'Verificar' }).click()
   await expect(exercicio.getByText('Correto')).toBeVisible()
@@ -200,15 +264,16 @@ test('a jornada guiada retoma e conclui a aula 31', async ({ page }) => {
 
   await page.getByRole('button', { name: /Concluir e ir para Estudar/ }).click()
   await page.getByRole('button', { name: /Concluir e ir para Praticar/ }).click()
-  const practice = page.locator('.ex').first()
+  await iniciarPraticaGuiada(page, 31)
+  const practice = page.locator('.practice-question')
   await practice.getByRole('button', { name: 'Dica 1' }).click()
-  await expect(practice.getByText('Pense no comparativo curto do adjetivo')).toBeVisible()
+  await expect(practice.getByText(/A forma pedida vem antes de/)).toBeVisible()
   await practice.getByRole('textbox').fill('more fast')
   await practice.getByRole('button', { name: 'Verificar' }).click()
   await expect(practice.getByText('Ainda não')).toBeVisible()
   await expect(practice.getByText(/palavra ou estrutura a mais/)).toBeVisible()
   await practice.getByRole('button', { name: 'Dica 2' }).click()
-  await expect(practice.getByText(/Adicione a terminação/)).toBeVisible()
+  await expect(practice.getByText(/Acrescente.*-er.*adjetivo curto/)).toBeVisible()
   await expect(practice.getByRole('button', { name: 'Tentar novamente' })).toBeVisible()
   await page.getByRole('button', { name: /Concluir e ir para Revisar/ }).click()
   const writing = page.locator('.writing-workspace')
@@ -429,8 +494,9 @@ test('painel Hoje orienta, salva o plano e só calcula competência com amostra'
   )
   await expect(page.getByLabel('Minutos por semana')).toHaveValue('120')
 
-  await page.goto(lessonPath(31))
-  const exercise = page.locator('.ex').first()
+  await page.goto(practicePath(31))
+  await iniciarPraticaGuiada(page, 31)
+  const exercise = page.locator('.practice-question')
   for (const answer of ['more fast', 'fastest', 'faster']) {
     await exercise.getByRole('textbox').fill(answer)
     await exercise.getByRole('button', { name: 'Verificar' }).click()
@@ -450,9 +516,10 @@ test('painel Hoje orienta, salva o plano e só calcula competência com amostra'
 
 test('revisão multimodal filtra e permite suspender, reativar e excluir', async ({ page }) => {
   await criarConta(page, 'Revisão multimodal E2E')
-  await page.goto(lessonPath(31))
+  await page.goto(practicePath(31))
 
-  const exercise = page.locator('.ex').first()
+  await iniciarPraticaGuiada(page, 31)
+  const exercise = page.locator('.practice-question')
   await exercise.getByRole('textbox').fill('more fast')
   await exercise.getByRole('button', { name: 'Verificar' }).click()
   await expect(exercise.getByText('Ainda não')).toBeVisible()
@@ -480,7 +547,7 @@ test('revisão multimodal filtra e permite suspender, reativar e excluir', async
   await expect(page.getByRole('heading', { name: 'Nenhum item com estes filtros' })).toBeVisible()
 })
 
-test('PWA mantém a aula e sincroniza uma tentativa feita offline', async ({ page, context }) => {
+test('PWA mantém a aula pública disponível offline', async ({ page, context }) => {
   await criarConta(page, 'Offline E2E')
   await page.goto(lessonPath(31))
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
@@ -499,26 +566,262 @@ test('PWA mantém a aula e sincroniza uma tentativa feita offline', async ({ pag
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
 
   await context.setOffline(true)
-  await page.reload()
-  await expect(page.getByText(/Você está offline/)).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+  try {
+    await page.reload()
+    await expect(page.getByText(/Você está offline/)).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Abrir laboratório' })).toHaveAttribute(
+      'href',
+      practicePath(31),
+    )
+  } finally {
+    await context.setOffline(false)
+  }
+})
 
-  const exercise = page.locator('.ex').first()
-  await exercise.getByRole('textbox').fill('faster')
-  await exercise.getByRole('button', { name: 'Verificar' }).click()
-  await expect(exercise.getByText('Na fila')).toBeVisible()
-  await expect(page.getByText(/1 tentativa na fila/)).toBeVisible()
+test.describe('laboratório de exercícios por aula', () => {
+  test('abre o pack autoral da Aula 31 pela página da aula', async ({ page }) => {
+    await criarConta(page, 'Laboratório Aula 31')
+    await page.goto(lessonPath(31))
 
-  const synchronized = page.waitForResponse(
-    (response) =>
-      response.url().includes('/api/exercises/') &&
-      response.url().endsWith('/attempt') &&
-      response.request().method() === 'POST' &&
-      response.ok(),
-  )
-  await context.setOffline(false)
-  await synchronized
-  await expect(page.getByText('1 tentativa foi sincronizada.')).toBeVisible()
+    const abrirLaboratorio = page.getByRole('link', { name: 'Abrir laboratório' })
+    await expect(abrirLaboratorio).toHaveAttribute('href', practicePath(31))
+    await abrirLaboratorio.click()
+
+    await expect(page).toHaveURL(new RegExp(`${practicePath(31)}$`))
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Take Me Out to the Ball Game' }),
+    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Escolha como praticar' })).toBeVisible()
+    await expect(
+      page.getByRole('status').filter({ hasText: 'atividades disponíveis neste recorte' }),
+    ).toHaveText('10 de 10 atividades disponíveis neste recorte.')
+  })
+
+  test('corrige com dica e retoma a sessão guiada na questão salva', async ({ page }) => {
+    await criarConta(page, 'Prática guiada E2E')
+    await page.goto(practicePath(31))
+    await page.getByRole('button', { name: 'Começar Prática guiada' }).click()
+
+    const questao = page.locator('.practice-question')
+    const resposta = questao.getByRole('textbox', { name: 'Resposta do exercício 1' })
+    await resposta.fill('more fast')
+    await questao.getByRole('button', { name: 'Verificar' }).click()
+    await expect(questao.getByText('Ainda não', { exact: true })).toBeVisible()
+
+    await questao.getByRole('button', { name: 'Dica 1' }).click()
+    await expect(questao.getByRole('list', { name: 'Dicas abertas' })).toContainText('Dica 1')
+    await questao.getByRole('button', { name: 'Tentar novamente' }).click()
+    await expect(resposta).toBeFocused()
+    await resposta.fill('faster')
+    await questao.getByRole('button', { name: 'Verificar' }).click()
+    await expect(questao.getByText('Correto', { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('progressbar', { name: 'Progresso da sessão de exercícios' }),
+    ).toHaveAttribute('aria-valuenow', '1')
+
+    const proxima = page
+      .getByRole('navigation', { name: 'Questões da sessão' })
+      .getByRole('button', { name: 'Próxima →' })
+    await expect(proxima).toBeEnabled()
+    const posicaoSalva = page.waitForResponse(
+      (response) =>
+        /\/api\/practice-sessions\/\d+\/position$/.test(new URL(response.url()).pathname) &&
+        response.request().method() === 'PUT' &&
+        response.ok(),
+    )
+    await proxima.click()
+    await posicaoSalva
+    await expect(page.getByRole('textbox', { name: 'Resposta do exercício 2' })).toBeVisible()
+
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Continue de onde parou' })).toBeVisible()
+    await page.getByRole('button', { name: 'Retomar sessão' }).click()
+    await expect(page.getByRole('textbox', { name: 'Resposta do exercício 2' })).toBeVisible()
+    await expect(page.locator('.practice-question').getByRole('heading', { level: 3 })).toBeFocused()
+  })
+
+  test('revelar respostas conclui itens sem contar domínio na primeira tentativa', async ({
+    page,
+  }) => {
+    await criarConta(page, 'Resposta revelada E2E')
+    await page.goto(practicePath(31))
+    await page.getByLabel('Objetivo').selectOption('correct')
+    await expect(
+      page.getByRole('status').filter({ hasText: 'atividades disponíveis neste recorte' }),
+    ).toHaveText('2 de 10 atividades disponíveis neste recorte.')
+    await page.getByRole('button', { name: 'Começar Prática guiada' }).click()
+
+    let questao = page.locator('.practice-question')
+    await questao.getByRole('button', { name: 'Resposta' }).click()
+    await expect(questao.getByText('Resposta', { exact: true })).toBeVisible()
+
+    const proxima = page
+      .getByRole('navigation', { name: 'Questões da sessão' })
+      .getByRole('button', { name: 'Próxima →' })
+    await expect(proxima).toBeEnabled()
+    await proxima.click()
+    await expect(page.getByRole('textbox', { name: 'Resposta do exercício 2' })).toBeVisible()
+
+    questao = page.locator('.practice-question')
+    await questao.getByRole('button', { name: 'Resposta' }).click()
+    await page
+      .getByRole('navigation', { name: 'Questões da sessão' })
+      .getByRole('button', { name: 'Ver resumo' })
+      .click()
+    const resumo = page.getByRole('region', { name: 'Resumo da sua prática' })
+    await expect(resumo).toBeVisible()
+    const primeiraTentativa = resumo.locator('dt').filter({ hasText: /^Primeira tentativa$/ })
+    const respostasReveladas = resumo.locator('dt').filter({ hasText: /^Respostas reveladas$/ })
+    await expect(primeiraTentativa.locator('..').locator('dd')).toHaveText('0')
+    await expect(respostasReveladas.locator('..').locator('dd')).toHaveText('2')
+    await expect(resumo).toContainText(
+      'Respostas reveladas ajudam a aprender, mas não são contadas como domínio na primeira tentativa.',
+    )
+  })
+
+  test('avança pelo teclado e move o foco para o enunciado seguinte', async ({ page }) => {
+    await criarConta(page, 'Teclado do laboratório E2E')
+    await page.goto(practicePath(31))
+    await page.getByLabel('Objetivo').selectOption('correct')
+    await page.getByRole('button', { name: 'Começar Prática guiada' }).click()
+
+    const resposta = page.getByRole('textbox', { name: 'Resposta do exercício 1' })
+    await tabAte(page, resposta)
+    await page.keyboard.type('faster')
+    await page.keyboard.press('Enter')
+    await expect(page.locator('.practice-question').getByText('Correto', { exact: true })).toBeVisible()
+
+    const proxima = page
+      .getByRole('navigation', { name: 'Questões da sessão' })
+      .getByRole('button', { name: 'Próxima →' })
+    await expect(proxima).toBeEnabled()
+    await tabAte(page, proxima)
+    await page.keyboard.press('Enter')
+
+    await expect(page.getByRole('textbox', { name: 'Resposta do exercício 2' })).toBeVisible()
+    await expect(page.locator('.practice-question').getByRole('heading', { level: 3 })).toBeFocused()
+  })
+
+  test('packs das Aulas 38 e 40 carregam e aplicam filtros combináveis', async ({ page }) => {
+    await criarConta(page, 'Packs 38 e 40 E2E')
+
+    for (const pack of [
+      { number: 38, title: "She's My Best Friend!", total: 11, recognize: 1 },
+      { number: 40, title: 'The Woods Are Alive', total: 12, recognize: 4 },
+    ]) {
+      await page.goto(practicePath(pack.number))
+      await expect(page.getByRole('heading', { level: 1, name: pack.title })).toBeVisible()
+      const contador = page
+        .getByRole('status')
+        .filter({ hasText: 'atividades disponíveis neste recorte' })
+      await expect(contador).toHaveText(
+        `${pack.total} de ${pack.total} atividades disponíveis neste recorte.`,
+      )
+
+      await page.getByLabel('Competência').selectOption('listening')
+      await expect(contador).toHaveText(`3 de ${pack.total} atividades disponíveis neste recorte.`)
+      await page.getByLabel('Objetivo').selectOption('listen')
+      await expect(contador).toHaveText(`3 de ${pack.total} atividades disponíveis neste recorte.`)
+
+      await page.getByLabel('Competência').selectOption('')
+      await page.getByLabel('Objetivo').selectOption('recognize')
+      await expect(contador).toHaveText(
+        `${pack.recognize} de ${pack.total} atividades disponíveis neste recorte.`,
+      )
+    }
+  })
+
+  test('tentativa offline preserva idempotência e contexto da sessão ao sincronizar', async ({
+    page,
+    context,
+  }) => {
+    await criarConta(page, 'Fila da prática E2E')
+    await page.goto(practicePath(31))
+    await page.getByRole('radio', { name: /Desafio rápido/ }).check()
+
+    const sessaoCriada = page.waitForResponse(
+      (response) =>
+        response.url().endsWith('/api/courses/voa-level-1/lessons/31/practice-sessions') &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
+    await page.getByRole('button', { name: 'Começar Desafio rápido' }).click()
+    const sessao = (await (await sessaoCriada).json()) as {
+      id: number
+      items: Array<{ exercise: { id: number } }>
+    }
+    await expect(
+      page.getByRole('progressbar', { name: 'Progresso da sessão de exercícios' }),
+    ).toBeVisible()
+
+    let offline = true
+    await context.setOffline(true)
+    try {
+      await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false)
+      await expect(page.getByRole('status').filter({ hasText: 'Você está offline' })).toBeVisible()
+      const questao = page.locator('.practice-question')
+      await questao.getByRole('textbox', { name: 'Resposta do exercício 1' }).fill('faster')
+      await questao.getByRole('button', { name: 'Verificar' }).click()
+      await expect(questao.getByText('Na fila', { exact: true })).toBeVisible()
+
+      const armazenamento = (await page.evaluate(() => {
+        const raw = localStorage.getItem('aulas:offline-attempts:v2')
+        return raw ? JSON.parse(raw) : null
+      })) as {
+        version: number
+        attempts: Array<{
+          userId: number
+          exerciseId: number
+          answer: string
+          idempotencyKey: string
+          sessionId?: number
+          courseSlug?: string
+          lessonNumber?: number
+        }>
+      } | null
+      expect(armazenamento).not.toBeNull()
+      expect(armazenamento?.version).toBe(2)
+      expect(armazenamento?.attempts).toHaveLength(1)
+      const tentativa = armazenamento!.attempts[0]!
+      expect(tentativa.userId).toBeGreaterThan(0)
+      expect(tentativa.exerciseId).toBe(sessao.items[0]?.exercise.id)
+      expect(tentativa.answer).toBe('faster')
+      expect(tentativa.idempotencyKey).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      )
+      expect(tentativa.sessionId).toBe(sessao.id)
+      expect(tentativa.courseSlug).toBe(LEVEL_1_SLUG)
+      expect(tentativa.lessonNumber).toBe(31)
+
+      const sincronizacao = page.waitForRequest(
+        (request) =>
+          /\/api\/exercises\/\d+\/attempt$/.test(new URL(request.url()).pathname) &&
+          request.method() === 'POST',
+      )
+      await context.setOffline(false)
+      offline = false
+      const requisicao = await sincronizacao
+      expect(requisicao.postDataJSON()).toMatchObject({
+        answer: 'faster',
+        idempotency_key: tentativa.idempotencyKey,
+        practice_session_id: sessao.id,
+      })
+      await expect(page.getByText('1 tentativa foi sincronizada.')).toBeVisible()
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const raw = localStorage.getItem('aulas:offline-attempts:v2')
+            if (!raw) return 0
+            const parsed = JSON.parse(raw) as { attempts?: unknown[] }
+            return parsed.attempts?.length ?? 0
+          }),
+        )
+        .toBe(0)
+    } finally {
+      if (offline) await context.setOffline(false)
+    }
+  })
 })
 
 test('sem sessão, a aplicação pede login', async ({ page }) => {
@@ -748,8 +1051,12 @@ test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', as
   await expect(page).toHaveURL(new RegExp(`${studyPath(31, 'assistir')}$`))
   await expect(page.getByRole('heading', { name: 'Escute primeiro pelo contexto' })).toBeVisible()
 
-  await page.goto(lessonPath(31))
+  await page.goto(practicePath(31))
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+  const iniciarPratica = page.getByRole('button', { name: 'Começar Prática guiada' })
+  await tabAte(page, iniciarPratica)
+  await page.keyboard.press('Enter')
+  await expect(page.locator('.practice-question')).toBeVisible()
   const resposta = page.getByLabel('Resposta do exercício 1')
   await tabAte(page, resposta)
   await page.keyboard.type('faster')

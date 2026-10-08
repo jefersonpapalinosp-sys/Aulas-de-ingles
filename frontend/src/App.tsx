@@ -6,6 +6,7 @@ import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
 import { NotebookPage } from './pages/NotebookPage'
+import { PracticePage } from './pages/PracticePage'
 import { ReviewPage } from './pages/ReviewPage'
 import { StudyPage } from './pages/StudyPage'
 import { TestPage } from './pages/TestPage'
@@ -49,6 +50,10 @@ export default function App() {
               element={<MapPage />}
             />
             <Route path="/cursos/:courseSlug/aulas/:numero" element={<LessonPage />} />
+            <Route
+              path="/cursos/:courseSlug/aulas/:numero/exercicios"
+              element={<PracticePage />}
+            />
             <Route
               path="/cursos/:courseSlug/aulas/:numero/estudar"
               element={<StudyPage />}

@@ -1,8 +1,8 @@
 # Plano das Sprints 20–25 — frontend escalável, cursos e exercícios
 
 Data da análise: 8 de outubro de 2026  
-Estado: Sprint 20 implementada e validada; Sprints 21–25 permanecem planejadas  
-Próxima prioridade: Sprint 21 — laboratório de exercícios por aula
+Estado: Sprints 20 e 21 implementadas e validadas; Sprints 22–25 permanecem planejadas
+Próxima prioridade: Sprint 22 — Level 1, unidade 40–44
 
 ## 1. Objetivo
 
@@ -478,8 +478,8 @@ payload inicial.
 | Sprint | Resultado principal | Dependência | Estado |
 |---|---|---|---|
 | 20 | navegação e catálogo escaláveis, com identidade multi-curso | nenhuma nova aula deve entrar antes dela | concluída |
-| 21 | página de exercícios por aula e packs 31/38/40 | contrato da Sprint 20 | próxima |
-| 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | planejada |
+| 21 | página de exercícios por aula e packs 31/38/40 | contrato da Sprint 20 | concluída |
+| 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | próxima |
 | 23 | unidade Level 1 45–49 e revisão | Sprint 22 | planejada |
 | 24 | unidade Level 1 50–52, conclusão e transição | Sprint 23 | planejada |
 | 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | planejada |
@@ -575,6 +575,8 @@ eles não foram substituídos pelos testes automatizados.
 
 ## 10. Sprint 21 — laboratório de exercícios por aula
 
+**Estado:** concluída e validada em 8 de outubro de 2026.
+
 **Objetivo:** criar uma experiência reutilizável, curta e explicativa para exercícios por aula,
 sem copiar Wordwall e sem duplicar o motor atual.
 
@@ -622,6 +624,34 @@ sem copiar Wordwall e sem duplicar o motor atual.
 - tentativa offline sincroniza com a mesma chave idempotente;
 - testes cobrem carregamento, vazio, erro, offline, correta, incorreta, dica, revelação e conclusão;
 - nenhum texto, opção, imagem ou layout do Wordwall é reproduzido.
+
+### Registro de conclusão
+
+- foi criada a rota canônica `/cursos/:courseSlug/aulas/:numero/exercicios`, com uma questão por
+  vez e o mesmo runner reutilizado na etapa **Praticar**;
+- a página da aula deixou de repetir todos os cards e agora apresenta um resumo com CTA para o
+  laboratório;
+- prática guiada, desafio rápido e repetição de erros materializam uma ordem estável no servidor;
+- filtros por tipo, competência e objetivo mostram simultaneamente o recorte e o total real do
+  pack;
+- sessão, posição, primeira tentativa, dicas, revelação e conclusão são sincronizadas por conta;
+- um fingerprint interno detecta alteração de conteúdo sem publicar hashes do gabarito;
+- leitura inicial não entrega resposta, dica nem explicação; a explicação só aparece depois de
+  acerto ou revelação explícita;
+- `ExerciseCard` continua sendo o único motor para lacuna, escolha, transformação, ordenação por
+  botões e ditado;
+- a fila offline v2 preserva a mesma chave idempotente e o contexto de sessão, curso e aula; uma
+  queda durante envio ou sincronização não perde a tentativa;
+- foco vai para o novo enunciado, progresso e feedback possuem anúncios acessíveis, e tentativa
+  ainda não corrigida fica separada do total confirmado;
+- packs autorais revisados foram publicados como versão 2: Aula 31 com 10 itens, Aula 38 com 11 e
+  Aula 40 com 12, todos com objetivo explícito e duas dicas progressivas;
+- a migração preserva IDs e tentativas anteriores e foi validada em instalação limpa e no ciclo
+  `upgrade → downgrade → upgrade`;
+- OpenAPI, tipos TypeScript e cache público dos enunciados foram atualizados; sessões e feedback
+  privado permanecem `no-store`;
+- validação final: 174 testes backend, 111 testes frontend e 50 execuções E2E em desktop/mobile;
+- lint, mypy, TypeScript, build, axe/WCAG e orçamento de 141,3 KiB gzip foram aprovados.
 
 ### Fora do escopo
 
@@ -817,6 +847,7 @@ O ciclo 20–25 estará concluído quando:
 
 ## 19. Próxima ação recomendada
 
-Iniciar a Sprint 21 sobre o contrato multi-curso já validado, criando o laboratório reutilizável de
-exercícios e os packs autorais das Aulas 31, 38 e 40. A pesquisa editorial das Aulas 41–44 pode
-continuar em paralelo, mas o conteúdo novo só deve entrar no seed principal na Sprint 22.
+Iniciar a Sprint 22 sobre o laboratório e o contrato multi-curso já validados, publicando as Aulas
+41–44 e o primeiro checkpoint da unidade 40–44. A pesquisa editorial pode continuar em paralelo,
+mas cada aula nova só deve entrar no seed principal depois da auditoria de fonte, mídia, licença e
+conteúdo autoral prevista nessa sprint.

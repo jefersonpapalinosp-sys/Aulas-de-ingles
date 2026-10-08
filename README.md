@@ -4,11 +4,11 @@ App de estudo construído sobre a série *Let's Learn English* da VOA. O catálo
 níveis 1 e 2, com unidades navegáveis, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: Sprints 6–14 e 20 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e da
-jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável e
-rotas canônicas por curso. As Aulas 31–40 estão publicadas no Level 1; o restante do Level 1 e o
-Level 2 aparecem como planejamento, sem conteúdo fictício. Os recursos assistidos ficam desligados
-por padrão até passarem pela avaliação humana.
+**Estado: Sprints 6–14 e 20–21 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
+da jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável,
+rotas canônicas por curso e um laboratório retomável de exercícios por aula. As Aulas 31–40 estão
+publicadas no Level 1; o restante do Level 1 e o Level 2 aparecem como planejamento, sem conteúdo
+fictício. Os recursos assistidos ficam desligados por padrão até passarem pela avaliação humana.
 
 ---
 
@@ -133,6 +133,8 @@ course ── course_unit ── lesson ─┬─ lesson_goal
 
 app_user ─┬─ study_session_progress ─┬─ lesson
           │                          └─ step_progress
+          ├─ practice_session ─ practice_session_item ─┬─ exercise
+          │                                             └─ exercise_attempt
           ├─ study_plan
           ├─ skill_evidence
           ├─ review_item ── lesson / origem da atividade
@@ -148,10 +150,15 @@ resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 O que está carregado hoje: **10 aulas**, 40 objetivos, 31 blocos de gramática
 com 152 linhas, 76 frases, **115 itens de vocabulário**, 45 notas de pronúncia,
 **10 áudios oficiais**, 48 trechos selecionados, 289 falas de transcrição integral,
-**10 propostas de escrita** e **110 exercícios**
-com 133 respostas aceitas e 107 dicas graduais nas Aulas 31–40. As Aulas 32–40 possuem
+**10 propostas de escrita** e **111 exercícios**
+com 132 respostas aceitas e 135 dicas graduais nas Aulas 31–40. As Aulas 32–40 possuem
 três práticas de listening e atividades de ditado, ordenação e transformação. As dez aulas também
 possuem fonte oficial/autoral, estratégia, versão e status editorial explícitos.
+
+Os packs autorais das Aulas 31, 38 e 40 estão na versão 2 e possuem objetivo pedagógico
+explícito (`recognize`, `apply`, `correct`, `produce` ou `listen`) e duas dicas progressivas por
+item. O payload inicial nunca inclui gabarito, texto da dica ou explicação; esses dados só são
+liberados pelas ações autenticadas adequadas.
 
 ### Formato do texto
 
@@ -169,6 +176,9 @@ payload.
 - `lesson`, `vocab_item`, `exercise` e `writing_prompt` são atualizados no lugar, pela chave
   natural. A partir da S3 as tentativas e as cartas de revisão apontam para
   esses ids, e eles não podem trocar a cada novo seed.
+- sessões de prática guardam a versão editorial e um fingerprint interno do recorte. Se o seed
+  alterar enunciado, opção, dica, explicação ou resposta, a sessão antiga é detectada e não mistura
+  correções de versões diferentes.
 - O resto é descritivo: apaga e reinsere.
 
 ### Contrato
@@ -211,7 +221,9 @@ quantas tentativas aguardam envio; ao voltar à rede, a sessão é renovada e a 
 automaticamente com a chave idempotente original.
 
 O access token continua apenas em memória. O navegador guarda somente o perfil mínimo do
-último aluno para associar corretamente a fila. Dados privados, gabaritos, progresso, revisão,
+último aluno para associar corretamente a fila. Cada tentativa pendente preserva a chave
+idempotente e, quando aplicável, sessão, curso e aula para reconciliar o runner depois da volta da
+rede. Dados privados, gabaritos, progresso, revisão,
 escrita, speaking, áudio e vídeo não entram no cache. Cada mídia declara licença, atribuição,
 data de revisão e política offline na API. A política operacional está em
 `docs/politica_midia_offline_2026-10-08.md`; a auditoria PWA e WCAG está em
@@ -417,9 +429,9 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 160 testes contra o Postgres do compose | `make test-api` |
-| vitest | 85 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 19 cenários em desktop e mobile (38 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 174 testes contra o Postgres do compose | `make test-api` |
+| vitest | 111 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 25 cenários em desktop e mobile (50 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
 O frontend possui uma **jornada guiada** em todas as Aulas 31–40. Ela divide o estudo em
 preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,

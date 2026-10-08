@@ -1,7 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { useSessao } from '../api/auth'
 import { useCourseCurriculum, useLesson } from '../api/queries'
-import { ExerciseCard } from '../components/ExerciseCard'
 import { GrammarBlockView } from '../components/GrammarBlockView'
 import { PhraseList, PronunciationList, VocabTable } from '../components/LessonSections'
 import { Markdown } from '../components/Markdown'
@@ -11,6 +9,7 @@ import {
   coursePath,
   DEFAULT_COURSE_SLUG,
   lessonPath,
+  practicePath,
   studyPath,
   unitPath,
 } from '../routing/courseRoutes'
@@ -28,7 +27,6 @@ function Secao({ n, titulo, children }: { n: string; titulo: string; children: R
 }
 
 export function LessonPage() {
-  const { usuario } = useSessao()
   const { courseSlug = DEFAULT_COURSE_SLUG, numero } = useParams()
   const n = Number(numero)
   const { data, isPending, error, refetch } = useLesson(courseSlug, n)
@@ -145,10 +143,16 @@ export function LessonPage() {
       </Secao>
 
       <Secao n="06" titulo="Exercícios">
-        <div className="stack tight">
-          {data.exercises.map((e, i) => (
-            <ExerciseCard exercicio={e} numero={i + 1} userId={usuario?.id ?? 0} key={e.id} />
-          ))}
+        <div className="practice-entry">
+          <div>
+            <p className="study-kicker">Uma questão por vez</p>
+            <strong>
+              {data.exercises.length} atividades com retomada, filtros e resumo final.
+            </strong>
+          </div>
+          <Link className="btn" to={practicePath(courseSlug, data.number)}>
+            Abrir laboratório
+          </Link>
         </div>
       </Secao>
 

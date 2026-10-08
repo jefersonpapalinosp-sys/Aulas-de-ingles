@@ -1,4 +1,4 @@
-const VERSION = 'aulas-v20-1'
+const VERSION = 'aulas-v21-1'
 const SHELL_CACHE = `${VERSION}-shell`
 const TEXT_CACHE = `${VERSION}-text`
 const STATIC_CACHE = `${VERSION}-static`
@@ -44,6 +44,7 @@ function isPublicTextApi(url) {
     url.pathname === '/api/courses' ||
     /^\/api\/courses\/[^/]+\/curriculum$/.test(url.pathname) ||
     /^\/api\/courses\/[^/]+\/lessons\/\d+$/.test(url.pathname) ||
+    /^\/api\/courses\/[^/]+\/lessons\/\d+\/exercises$/.test(url.pathname) ||
     url.pathname === '/api/lessons' ||
     /^\/api\/lessons\/\d+$/.test(url.pathname) ||
     url.pathname === '/api/exercises' ||
