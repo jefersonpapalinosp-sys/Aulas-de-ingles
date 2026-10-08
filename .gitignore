@@ -19,6 +19,7 @@ dist/
 .env
 .env.local
 .env.prod
+config/assist-provider-review.json
 
 # Backups do banco
 backups/

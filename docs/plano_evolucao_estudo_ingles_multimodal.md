@@ -984,9 +984,12 @@ avança para concluído quando produzir a evidência indicada.
    transcrição integral creditada, três atividades de listening, proposta de escrita guiada,
    ditado, ordenação e transformação. Seus trechos cronometrados alimentam speaking e shadowing.
    Evidências e critérios estão em `docs/expansao_pedagogica_aulas_32_40_2026-10-08.md`.
-3. **Pendente e opcional — assistência por IA.** Contratar/configurar gateways de transcrição
-   e escrita, validar privacidade e executar o gate humano definido para a Sprint 14 antes de
-   ligar as feature flags.
+3. **Preparado, aguardando piloto externo — assistência por IA.** O gate humano agora é
+   executável por modalidade, falha fechado e cruza métricas agregadas com o manifesto de
+   privacidade, contrato, região, retenção, treinamento e orçamento. Ainda é necessário escolher
+   e contratar o provedor, preencher a homologação e obter 30 avaliações humanas por modalidade;
+   as feature flags permanecem desligadas. O procedimento está em
+   `docs/homologacao_assistencia_ia_2026-10-08.md`.
 4. **Pendente antes de escalar a assistência — fila durável.** Persistir jobs, retomar após
    reinício, limitar tentativas e garantir idempotência no gateway.
 5. **Pendente — acabamento operacional.** Definir licença e política para áudio offline,

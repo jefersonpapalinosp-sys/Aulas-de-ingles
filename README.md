@@ -229,6 +229,19 @@ HTTPS e token; texto e áudio não entram nos logs. Configuração, contrato HTT
 privacidade, fallback e gate de avaliação humana estão em
 `docs/avaliacao_sprint14_assistencia.md`.
 
+O gate é executável e falha fechado. Copie
+`config/assist-provider-review.example.json` para o arquivo local ignorado
+`config/assist-provider-review.json`, preencha a homologação e rode uma modalidade por vez:
+
+```bash
+make assist-gate modality=writing review=../config/assist-provider-review.json
+make assist-gate modality=transcription review=../config/assist-provider-review.json
+```
+
+O comando só produz métricas agregadas e retorna código `0` quando todos os critérios passam,
+`1` quando a liberação continua bloqueada e `2` para configuração inválida. Ele não altera a
+feature flag.
+
 ### Correção de exercício
 
 A resposta certa **não** faz parte do contrato de leitura. Mandá-la ao

@@ -113,6 +113,18 @@ Os botões “Foi útil” e “Não foi útil” alimentam `human_rating`. Cust
 microunidades de dólar para evitar arredondamento e somado no status diário. Esses dados apoiam
 a decisão, mas não autorizam automaticamente a feature flag.
 
+### Gate operacional acrescentado no fechamento
+
+O comando `python -m app.cli assist-gate` transforma os critérios acima em uma decisão que falha
+fechado, separada para `writing` e `transcription`. Ele combina somente métricas agregadas do
+banco com um manifesto local de homologação baseado em
+`config/assist-provider-review.example.json`.
+
+O relatório não contém texto, áudio, transcrição, e-mail nem identificador de aluno. Mesmo quando
+todos os critérios passam, o comando apenas retorna aprovação; ele não liga
+`ASSISTED_FEATURES_ENABLED` automaticamente. A decisão de ativar continua sendo uma mudança
+operacional explícita e revisável.
+
 ## Evidência automatizada
 
 - 125 testes backend, incluindo gateway, cotas, custo, retenção, falha e preservação da produção;

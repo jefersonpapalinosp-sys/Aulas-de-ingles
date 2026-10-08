@@ -5,7 +5,7 @@ COMPOSE := docker compose --env-file .env -f infra/compose.yml
 .DEFAULT_GOAL := help
 
 .PHONY: help up down logs ps reset api web test test-api test-web test-e2e lint fmt health \
-        migrate migration seed openapi prod-up prod-down prod-logs prod-seed backup restore cov
+        migrate migration seed openapi assist-gate prod-up prod-down prod-logs prod-seed backup restore cov
 
 help: ## Lista os comandos
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -77,6 +77,10 @@ seed: ## Carrega seed/lessons.json (idempotente)
 
 openapi: ## Regrava o baseline do contrato em backend/openapi.json
 	cd backend && uv run python -m app.openapi_dump
+
+assist-gate: ## Avalia o piloto: make assist-gate modality=writing review=../config/assist-provider-review.json
+	cd backend && uv run python -m app.cli assist-gate \
+		--modality "$(modality)" --review-file "$(review)"
 
 # ---------- produção local ----------
 

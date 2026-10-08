@@ -1,0 +1,12 @@
+{
+  "provider_name": "external",
+  "data_processing_agreement": false,
+  "legal_basis_approved": false,
+  "region_approved": false,
+  "provider_retention_days": null,
+  "provider_uses_data_for_training": null,
+  "privacy_incidents": null,
+  "budget_microusd": null,
+  "safety_review_approved": false,
+  "automation_notice_understood": false
+}

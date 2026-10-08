@@ -58,6 +58,10 @@ class Settings(BaseSettings):
             raise RuntimeError("ASSIST_DAILY_QUOTA precisa ser positivo.")
         if self.assist_retention_days < 1:
             raise RuntimeError("ASSIST_RETENTION_DAYS precisa ser positivo.")
+        if self.assist_timeout_seconds < 1:
+            raise RuntimeError("ASSIST_TIMEOUT_SECONDS precisa ser positivo.")
+        if not self.assist_provider_name.strip() or len(self.assist_provider_name) > 80:
+            raise RuntimeError("ASSIST_PROVIDER_NAME precisa ter entre 1 e 80 caracteres.")
         if self.app_env == "prod" and self.assisted_features_enabled:
             urls = [url for url in [self.assist_transcription_url, self.assist_writing_url] if url]
             if any(not url.startswith("https://") for url in urls):
