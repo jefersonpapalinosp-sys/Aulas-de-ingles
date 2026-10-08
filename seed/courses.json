@@ -1,0 +1,118 @@
+[
+  {
+    "slug": "voa-level-1",
+    "title": "Let's Learn English — Level 1",
+    "level": "1",
+    "proficiency_label": "Iniciante",
+    "provider": "VOA Learning English",
+    "source_url": "https://learningenglish.voanews.com/p/5644.html",
+    "position": 1,
+    "status": "published",
+    "total_lessons": 52,
+    "units": [
+      {
+        "slug": "31-40",
+        "title": "Aulas 31–40",
+        "position": 1,
+        "status": "published",
+        "lesson_start": 31,
+        "lesson_end": 40,
+        "total_lessons": 10
+      },
+      {
+        "slug": "40-44",
+        "title": "Aulas 40–44",
+        "position": 2,
+        "status": "planned",
+        "lesson_start": 40,
+        "lesson_end": 44,
+        "total_lessons": 5
+      },
+      {
+        "slug": "45-49",
+        "title": "Aulas 45–49",
+        "position": 3,
+        "status": "planned",
+        "lesson_start": 45,
+        "lesson_end": 49,
+        "total_lessons": 5
+      },
+      {
+        "slug": "50-52",
+        "title": "Aulas 50–52",
+        "position": 4,
+        "status": "planned",
+        "lesson_start": 50,
+        "lesson_end": 52,
+        "total_lessons": 3
+      }
+    ]
+  },
+  {
+    "slug": "voa-level-2",
+    "title": "Let's Learn English — Level 2",
+    "level": "2",
+    "proficiency_label": "Intermediário",
+    "provider": "VOA Learning English",
+    "source_url": "https://learningenglish.voanews.com/p/6765.html",
+    "position": 2,
+    "status": "planned",
+    "total_lessons": 30,
+    "units": [
+      {
+        "slug": "1-5",
+        "title": "Aulas 1–5",
+        "position": 1,
+        "status": "planned",
+        "lesson_start": 1,
+        "lesson_end": 5,
+        "total_lessons": 5
+      },
+      {
+        "slug": "6-10",
+        "title": "Aulas 6–10",
+        "position": 2,
+        "status": "planned",
+        "lesson_start": 6,
+        "lesson_end": 10,
+        "total_lessons": 5
+      },
+      {
+        "slug": "11-15",
+        "title": "Aulas 11–15",
+        "position": 3,
+        "status": "planned",
+        "lesson_start": 11,
+        "lesson_end": 15,
+        "total_lessons": 5
+      },
+      {
+        "slug": "16-20",
+        "title": "Aulas 16–20",
+        "position": 4,
+        "status": "planned",
+        "lesson_start": 16,
+        "lesson_end": 20,
+        "total_lessons": 5
+      },
+      {
+        "slug": "21-25",
+        "title": "Aulas 21–25",
+        "position": 5,
+        "status": "planned",
+        "lesson_start": 21,
+        "lesson_end": 25,
+        "total_lessons": 5
+      },
+      {
+        "slug": "26-30",
+        "title": "Aulas 26–30",
+        "position": 6,
+        "status": "planned",
+        "lesson_start": 26,
+        "lesson_end": 30,
+        "total_lessons": 5
+      }
+    ]
+  }
+]

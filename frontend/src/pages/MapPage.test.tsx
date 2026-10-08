@@ -6,19 +6,78 @@ import { MapPage } from './MapPage'
 
 const savePlan = vi.fn()
 
+const lesson = {
+  id: 31,
+  course_slug: 'voa-level-1',
+  unit_slug: '31-40',
+  slug: 'take-me-out-to-the-ball-game',
+  position: 1,
+  number: 31,
+  title: 'Take Me Out to the Ball Game',
+  title_pt: 'Leve-me ao jogo',
+  grammar_tag: 'Comparativos',
+  focus_points: ['faster than'],
+  story_note: 'Transportation',
+}
+
 vi.mock('../api/queries', () => ({
-  useLessons: () => ({
-    data: [
-      {
-        number: 31,
-        title: 'Take Me Out to the Ball Game',
-        grammar_tag: 'Comparativos',
-        story_note: 'Transportation',
+  useCourseCurriculum: () => ({
+    data: {
+      course: {
+        id: 1,
+        slug: 'voa-level-1',
+        title: "Let's Learn English — Level 1",
+        level: 'Level 1',
+        proficiency_label: 'Iniciante',
+        provider: 'VOA Learning English',
+        source_url: 'https://example.com',
+        position: 1,
+        status: 'published',
+        total_lessons: 52,
+        published_lessons: 10,
       },
-    ],
+      units: [
+        {
+          id: 1,
+          slug: '31-40',
+          title: 'Unidade 31–40',
+          position: 1,
+          status: 'published',
+          lesson_start: 31,
+          lesson_end: 40,
+          total_lessons: 10,
+          published_lessons: 1,
+          lessons: [lesson],
+        },
+      ],
+    },
     isPending: false,
     error: null,
     refetch: vi.fn(),
+  }),
+}))
+
+vi.mock('../api/progress', () => ({
+  useProgress: () => ({
+    data: {
+      studied_count: 0,
+      total_lessons: 1,
+      attempts: 0,
+      correct: 0,
+      review_due: 0,
+      review_cards: 0,
+      lessons: [
+        {
+          course_slug: 'voa-level-1',
+          unit_slug: '31-40',
+          lesson_number: 31,
+          studied: false,
+          studied_at: null,
+          attempts: 0,
+          correct: 0,
+        },
+      ],
+    },
   }),
 }))
 
@@ -87,27 +146,27 @@ vi.mock('../api/dashboard', () => ({
 describe('MapPage / painel Hoje', () => {
   beforeEach(() => savePlan.mockReset())
 
-  it('explica a recomendação e esconde percentual com pouca amostra', () => {
-    render(<MapPage />, { wrapper: MemoryRouter })
+  it('explica a recomendação e converte o link antigo para a rota canônica', () => {
+    render(<MapPage showToday />, { wrapper: MemoryRouter })
 
     expect(screen.getByRole('heading', { name: 'Hoje' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Continuar a Aula 31' })).toBeInTheDocument()
     expect(screen.getByText(/retomar preserva o contexto/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Estudar agora' })).toHaveAttribute(
       'href',
-      '/aulas/31/estudar/assistir',
+      '/cursos/voa-level-1/aulas/31/estudar/assistir',
     )
     const grammar = screen.getByText('Gramática').closest('li')
     expect(grammar).not.toBeNull()
     expect(within(grammar!).getByText('Dados insuficientes (2/3)')).toBeInTheDocument()
     expect(within(grammar!).queryByText(/%/)).not.toBeInTheDocument()
     expect(screen.getByText('80%')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Mapa do bloco 31–40' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Mapa do curso' })).toBeInTheDocument()
   })
 
-  it('permite editar a meta sem bloquear o mapa', async () => {
+  it('permite editar a meta sem bloquear o catálogo de unidades', async () => {
     const user = userEvent.setup()
-    render(<MapPage />, { wrapper: MemoryRouter })
+    render(<MapPage showToday />, { wrapper: MemoryRouter })
 
     await user.clear(screen.getByLabelText('Meta'))
     await user.type(screen.getByLabelText('Meta'), 'Inglês para viagem')
@@ -122,6 +181,6 @@ describe('MapPage / painel Hoje', () => {
       preferred_days: ['mon', 'fri', 'sat'],
       goal: 'Inglês para viagem',
     })
-    expect(screen.getByRole('link', { name: /Take Me Out/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Unidade 31–40/ })).toBeInTheDocument()
   })
 })

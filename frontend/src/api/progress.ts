@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type StudySessionInput } from './client'
 
-export function useProgress() {
+export function useProgress(courseSlug?: string) {
   return useQuery({
-    queryKey: ['progress'],
+    queryKey: ['progress', courseSlug ?? 'all'],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/me/progress')
+      const { data, response } = await api.GET('/api/me/progress', {
+        params: { query: { course: courseSlug } },
+      })
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar progresso.`)
       return data
     },
@@ -14,13 +16,13 @@ export function useProgress() {
 }
 
 /** Marca ou desmarca uma aula; a lista de progresso é invalidada em seguida. */
-export function useMarcarEstudada() {
+export function useMarcarEstudada(courseSlug: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async ({ numero, estudada }: { numero: number; estudada: boolean }) => {
       const op = estudada ? api.PUT : api.DELETE
-      const { response } = await op('/api/lessons/{number}/studied', {
-        params: { path: { number: numero } },
+      const { response } = await op('/api/courses/{course_slug}/lessons/{number}/studied', {
+        params: { path: { course_slug: courseSlug, number: numero } },
       })
       if (!response?.ok) throw new Error('Não foi possível salvar a marcação.')
     },
@@ -28,13 +30,16 @@ export function useMarcarEstudada() {
   })
 }
 
-export function useStudySession(numero: number, enabled = true) {
+export function useStudySession(courseSlug: string, numero: number, enabled = true) {
   return useQuery({
-    queryKey: ['study-session', numero],
+    queryKey: ['study-session', courseSlug, numero],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/lessons/{number}/study-session', {
-        params: { path: { number: numero } },
-      })
+      const { data, response } = await api.GET(
+        '/api/courses/{course_slug}/lessons/{number}/study-session',
+        {
+          params: { path: { course_slug: courseSlug, number: numero } },
+        },
+      )
       if (!data) {
         throw new Error(
           `A API respondeu ${response?.status ?? 'nada'} ao buscar a sessão de estudo.`,
@@ -42,20 +47,23 @@ export function useStudySession(numero: number, enabled = true) {
       }
       return data
     },
-    enabled,
+    enabled: enabled && Boolean(courseSlug),
     staleTime: 0,
   })
 }
 
-export function useSalvarStudySession(numero: number) {
+export function useSalvarStudySession(courseSlug: string, numero: number) {
   const qc = useQueryClient()
   return useMutation({
-    scope: { id: `study-session-${numero}` },
+    scope: { id: `study-session-${courseSlug}-${numero}` },
     mutationFn: async (body: StudySessionInput) => {
-      const { data, response } = await api.PUT('/api/lessons/{number}/study-session', {
-        params: { path: { number: numero } },
-        body,
-      })
+      const { data, response } = await api.PUT(
+        '/api/courses/{course_slug}/lessons/{number}/study-session',
+        {
+          params: { path: { course_slug: courseSlug, number: numero } },
+          body,
+        },
+      )
       if (!data) {
         throw new Error(
           `A API respondeu ${response?.status ?? 'nada'} ao salvar a sessão de estudo.`,
@@ -63,6 +71,6 @@ export function useSalvarStudySession(numero: number) {
       }
       return data
     },
-    onSuccess: (data) => qc.setQueryData(['study-session', numero], data),
+    onSuccess: (data) => qc.setQueryData(['study-session', courseSlug, numero], data),
   })
 }

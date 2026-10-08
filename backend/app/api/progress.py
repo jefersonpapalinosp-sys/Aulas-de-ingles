@@ -3,13 +3,15 @@
 from datetime import UTC, datetime
 from typing import Annotated, cast
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_cartas, adicionar_item_revisao
 from app.db.models import (
+    Course,
+    CourseUnit,
     Exercise,
     ExerciseAttempt,
     ExerciseHint,
@@ -38,14 +40,15 @@ from app.schemas.progress import (
     StudySessionOut,
     StudyStep,
 )
+from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
 
 router = APIRouter(tags=["progress"])
 
 
-async def _aula_por_numero(session: AsyncSession, number: int) -> Lesson:
-    aula = (
-        await session.execute(select(Lesson).where(Lesson.number == number))
-    ).scalar_one_or_none()
+async def _aula_por_numero(
+    session: AsyncSession, number: int, course_slug: str = DEFAULT_COURSE_SLUG
+) -> Lesson:
+    aula = await lesson_by_course_number(session, course_slug, number)
     if aula is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Aula {number} não existe."
@@ -80,18 +83,18 @@ def _attempt_out(attempt: ExerciseAttempt, exercise: Exercise) -> AttemptOut:
     )
 
 
-@router.put("/lessons/{number}/studied", status_code=status.HTTP_204_NO_CONTENT)
-async def marcar_estudada(
+async def _marcar_estudada(
     number: int,
+    course_slug: str,
     usuario: UsuarioAtual,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: AsyncSession,
 ) -> None:
     """Marca a aula e põe o vocabulário dela no deck de revisão.
 
     Idempotente nas duas pontas: marcar duas vezes não cria duas linhas nem
     reinicia o agendamento de cartas que já existem.
     """
-    aula = await _aula_por_numero(session, number)
+    aula = await _aula_por_numero(session, number, course_slug)
     ja = (
         await session.execute(
             select(LessonProgress).where(
@@ -105,13 +108,35 @@ async def marcar_estudada(
     await session.commit()
 
 
-@router.delete("/lessons/{number}/studied", status_code=status.HTTP_204_NO_CONTENT)
-async def desmarcar_estudada(
+@router.put("/lessons/{number}/studied", status_code=status.HTTP_204_NO_CONTENT)
+async def marcar_estudada(
     number: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> None:
-    aula = await _aula_por_numero(session, number)
+    await _marcar_estudada(number, DEFAULT_COURSE_SLUG, usuario, session)
+
+
+@router.put(
+    "/courses/{course_slug}/lessons/{number}/studied",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def marcar_estudada_no_curso(
+    course_slug: str,
+    number: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> None:
+    await _marcar_estudada(number, course_slug, usuario, session)
+
+
+async def _desmarcar_estudada(
+    number: int,
+    course_slug: str,
+    usuario: UsuarioAtual,
+    session: AsyncSession,
+) -> None:
+    aula = await _aula_por_numero(session, number, course_slug)
     await session.execute(
         delete(LessonProgress).where(
             LessonProgress.user_id == usuario.id, LessonProgress.lesson_id == aula.id
@@ -120,14 +145,36 @@ async def desmarcar_estudada(
     await session.commit()
 
 
-@router.get("/lessons/{number}/study-session", response_model=StudySessionOut)
-async def obter_sessao_de_estudo(
+@router.delete("/lessons/{number}/studied", status_code=status.HTTP_204_NO_CONTENT)
+async def desmarcar_estudada(
     number: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+) -> None:
+    await _desmarcar_estudada(number, DEFAULT_COURSE_SLUG, usuario, session)
+
+
+@router.delete(
+    "/courses/{course_slug}/lessons/{number}/studied",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def desmarcar_estudada_no_curso(
+    course_slug: str,
+    number: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> None:
+    await _desmarcar_estudada(number, course_slug, usuario, session)
+
+
+async def _obter_sessao_de_estudo(
+    number: int,
+    course_slug: str,
+    usuario: UsuarioAtual,
+    session: AsyncSession,
 ) -> StudySessionOut:
     """Devolve o ponto salvo ou o início da jornada quando ela ainda não existe."""
-    aula = await _aula_por_numero(session, number)
+    aula = await _aula_por_numero(session, number, course_slug)
     progresso = (
         await session.execute(
             select(StudySessionProgress).where(
@@ -157,15 +204,37 @@ async def obter_sessao_de_estudo(
     )
 
 
-@router.put("/lessons/{number}/study-session", response_model=StudySessionOut)
-async def salvar_sessao_de_estudo(
+@router.get("/lessons/{number}/study-session", response_model=StudySessionOut)
+async def obter_sessao_de_estudo(
     number: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+) -> StudySessionOut:
+    return await _obter_sessao_de_estudo(number, DEFAULT_COURSE_SLUG, usuario, session)
+
+
+@router.get(
+    "/courses/{course_slug}/lessons/{number}/study-session",
+    response_model=StudySessionOut,
+)
+async def obter_sessao_de_estudo_no_curso(
+    course_slug: str,
+    number: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> StudySessionOut:
+    return await _obter_sessao_de_estudo(number, course_slug, usuario, session)
+
+
+async def _salvar_sessao_de_estudo(
+    number: int,
+    course_slug: str,
+    usuario: UsuarioAtual,
+    session: AsyncSession,
     corpo: Annotated[StudySessionIn, Body()],
 ) -> StudySessionOut:
     """Cria ou atualiza a retomada da jornada, isolada por conta e aula."""
-    aula = await _aula_por_numero(session, number)
+    aula = await _aula_por_numero(session, number, course_slug)
     progresso = (
         await session.execute(
             select(StudySessionProgress).where(
@@ -240,6 +309,32 @@ async def salvar_sessao_de_estudo(
         completed_at=progresso.completed_at,
         total_seconds=progresso.total_seconds,
     )
+
+
+@router.put("/lessons/{number}/study-session", response_model=StudySessionOut)
+async def salvar_sessao_de_estudo(
+    number: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    corpo: Annotated[StudySessionIn, Body()],
+) -> StudySessionOut:
+    return await _salvar_sessao_de_estudo(
+        number, DEFAULT_COURSE_SLUG, usuario, session, corpo
+    )
+
+
+@router.put(
+    "/courses/{course_slug}/lessons/{number}/study-session",
+    response_model=StudySessionOut,
+)
+async def salvar_sessao_de_estudo_no_curso(
+    course_slug: str,
+    number: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    corpo: Annotated[StudySessionIn, Body()],
+) -> StudySessionOut:
+    return await _salvar_sessao_de_estudo(number, course_slug, usuario, session, corpo)
 
 
 @router.post("/exercises/{exercise_id}/attempt", response_model=AttemptOut)
@@ -361,9 +456,9 @@ async def _cartas_do_erro(session: AsyncSession, usuario: User, exercicio: Exerc
     """Errar um exercício põe no deck o item de vocabulário que ele cobra.
 
     Vale para a minoria de exercícios cuja resposta certa é, literalmente, um
-    termo do vocabulário da aula — 4 dos 65 no bloco 31-40, porque o resto
-    treina gramática, não palavra. Quando não casa, nada acontece: o grosso do
-    deck vem de marcar a aula como estudada.
+    termo do vocabulário da aula; a maior parte treina gramática, não palavra.
+    Quando não casa, nada acontece: o grosso do deck vem de marcar a aula como
+    estudada.
     """
     aceitas = {normalizar(a.value) for a in exercicio.answers}
     itens = list(
@@ -401,8 +496,12 @@ async def revelar_resposta(
 async def meu_progresso(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    course: Annotated[
+        str | None,
+        Query(description="Limita aulas e denominadores ao slug de um curso."),
+    ] = None,
 ) -> ProgressOut:
-    """Uma linha por aula, sempre as dez — aula sem atividade vem zerada."""
+    """Uma linha por aula publicada, opcionalmente limitada a um curso."""
     estudadas = {
         p.lesson_id: p.studied_at
         for p in (
@@ -426,9 +525,19 @@ async def meu_progresso(
     ).all()
     por_aula = {lesson_id: (total, certos) for lesson_id, total, certos in tentativas}
 
-    aulas = list((await session.execute(select(Lesson).order_by(Lesson.number))).scalars())
+    lessons_stmt = (
+        select(Lesson)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .order_by(Course.position, CourseUnit.position, Lesson.position)
+    )
+    if course is not None:
+        lessons_stmt = lessons_stmt.where(Course.slug == course)
+    aulas = list((await session.execute(lessons_stmt)).scalars())
     linhas = [
         LessonProgressOut(
+            course_slug=a.course_slug,
+            unit_slug=a.unit_slug,
             lesson_number=a.number,
             studied=a.id in estudadas,
             studied_at=estudadas.get(a.id),

@@ -22,6 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
     ContentSource,
+    Course,
+    CourseUnit,
     Exercise,
     ExerciseAnswer,
     ExerciseHint,
@@ -62,13 +64,90 @@ def load_seed(path: Path | None = None) -> list[dict[str, Any]]:
     return data
 
 
+def load_course_seed(path: Path | None = None) -> list[dict[str, Any]]:
+    if path is None:
+        if env := os.getenv("COURSE_SEED_FILE"):
+            path = Path(env)
+        else:
+            path = find_seed_file().with_name("courses.json")
+    data: list[dict[str, Any]] = json.loads(path.read_text(encoding="utf-8"))
+    return data
+
+
+async def _upsert_catalog(session: AsyncSession, courses: list[dict[str, Any]]) -> None:
+    """Cria cursos e unidades antes das aulas que dependem deles."""
+    for raw in courses:
+        course = (
+            await session.execute(select(Course).where(Course.slug == raw["slug"]))
+        ).scalar_one_or_none()
+        if course is None:
+            course = Course(slug=raw["slug"])
+            session.add(course)
+        course.title = raw["title"]
+        course.level = raw["level"]
+        course.proficiency_label = raw["proficiency_label"]
+        course.provider = raw["provider"]
+        course.source_url = raw["source_url"]
+        course.position = raw["position"]
+        course.status = raw["status"]
+        course.total_lessons = raw["total_lessons"]
+        await session.flush()
+
+        existing_units = {
+            unit.slug: unit
+            for unit in (
+                await session.execute(
+                    select(CourseUnit).where(CourseUnit.course_id == course.id)
+                )
+            ).scalars()
+        }
+        for raw_unit in raw["units"]:
+            unit = existing_units.get(raw_unit["slug"])
+            if unit is None:
+                unit = CourseUnit(course_id=course.id, slug=raw_unit["slug"])
+                session.add(unit)
+            unit.title = raw_unit["title"]
+            unit.position = raw_unit["position"]
+            unit.status = raw_unit["status"]
+            unit.lesson_start = raw_unit["lesson_start"]
+            unit.lesson_end = raw_unit["lesson_end"]
+            unit.total_lessons = raw_unit["total_lessons"]
+        await session.flush()
+
+
 async def _upsert_lesson(session: AsyncSession, raw: dict[str, Any]) -> Lesson:
+    course_slug = str(raw["course_slug"])
+    unit_slug = str(raw["unit_slug"])
+    course = (
+        await session.execute(select(Course).where(Course.slug == course_slug))
+    ).scalar_one_or_none()
+    if course is None:
+        raise ValueError(f"Curso {course_slug!r} não existe no catálogo.")
+    unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == course.id,
+                CourseUnit.slug == unit_slug,
+            )
+        )
+    ).scalar_one_or_none()
+    if unit is None:
+        raise ValueError(f"Unidade {course_slug}/{unit_slug} não existe no catálogo.")
     lesson = (
-        await session.execute(select(Lesson).where(Lesson.number == raw["number"]))
+        await session.execute(
+            select(Lesson).where(
+                Lesson.course_id == course.id,
+                Lesson.number == raw["number"],
+            )
+        )
     ).scalar_one_or_none()
     if lesson is None:
-        lesson = Lesson(number=raw["number"])
+        lesson = Lesson(course_id=course.id, unit_id=unit.id, number=raw["number"])
         session.add(lesson)
+    lesson.course_id = course.id
+    lesson.unit_id = unit.id
+    lesson.slug = raw["slug"]
+    lesson.position = raw["position"]
     lesson.title = raw["title"]
     lesson.title_pt = raw["title_pt"]
     lesson.voa_url = raw["voa_url"]
@@ -76,6 +155,8 @@ async def _upsert_lesson(session: AsyncSession, raw: dict[str, Any]) -> Lesson:
     lesson.focus_points = raw["focus_points"]
     lesson.story_note = raw["story_note"]
     lesson.lead = raw["lead"]
+    lesson.warmup_prompt = raw["warmup_prompt"]
+    lesson.listening_focus = raw["listening_focus"]
     await session.flush()
     return lesson
 
@@ -336,6 +417,8 @@ async def _upsert_writing_prompts(
 
 async def seed_lessons(session: AsyncSession, path: Path | None = None) -> int:
     """Aplica o seed e devolve quantas aulas foram processadas."""
+    catalog_path = path.with_name("courses.json") if path is not None else None
+    await _upsert_catalog(session, load_course_seed(catalog_path))
     dados = load_seed(path)
     for raw in dados:
         lesson = await _upsert_lesson(session, raw)

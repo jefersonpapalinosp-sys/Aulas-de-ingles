@@ -15,7 +15,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
-from sqlalchemy import Select, delete, select
+from sqlalchemy import Select, and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -24,6 +24,7 @@ from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
 from app.db.models import (
+    Lesson,
     LessonMedia,
     SkillEvidence,
     SpeakingAttempt,
@@ -34,6 +35,7 @@ from app.db.session import get_session
 from app.schemas.assist import HumanRatingIn, TranscriptionJobOut, TranscriptionWordOut
 from app.schemas.speaking import SpeakingAttemptIn, SpeakingAttemptOut
 from app.services.audio_storage import AudioStorage, normalized_mime_type
+from app.services.curriculum import DEFAULT_COURSE_SLUG
 
 router = APIRouter(prefix="/speaking", tags=["speaking"])
 
@@ -238,7 +240,14 @@ async def listar_tentativas(
         query = (
             query.join(SpeakingAttempt.cue)
             .join(TranscriptCue.media)
-            .where(LessonMedia.lesson.has(number=lesson))
+            .where(
+                LessonMedia.lesson.has(
+                    and_(
+                        Lesson.number == lesson,
+                        Lesson.course.has(slug=DEFAULT_COURSE_SLUG),
+                    )
+                )
+            )
         )
     attempts = list(
         (await session.execute(query.order_by(SpeakingAttempt.created_at.desc()))).scalars()

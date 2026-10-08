@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import (
     assist,
     auth,
+    courses,
     dashboard,
     health,
     lessons,
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
     app.include_router(health.router, prefix="/api")
+    app.include_router(courses.router, prefix="/api")
     app.include_router(lessons.router, prefix="/api")
     app.include_router(media.router, prefix="/api")
     app.include_router(auth.router, prefix="/api")

@@ -140,9 +140,28 @@ class ExerciseWithLessonOut(ExerciseOut):
     lesson_number: int
 
 
+class CourseSummaryOut(ORMModel):
+    id: int
+    slug: str
+    title: str
+    level: str
+    proficiency_label: str
+    provider: str
+    source_url: str
+    position: int
+    status: Literal["planned", "published", "archived"]
+    total_lessons: int
+    published_lessons: int
+
+
 class LessonSummaryOut(ORMModel):
     """O que a trilha de navegação precisa — sem carregar a aula inteira."""
 
+    id: int
+    course_slug: str
+    unit_slug: str
+    slug: str
+    position: int
     number: int
     title: str
     title_pt: str
@@ -151,9 +170,29 @@ class LessonSummaryOut(ORMModel):
     story_note: str | None
 
 
+class CourseUnitOut(ORMModel):
+    id: int
+    slug: str
+    title: str
+    position: int
+    status: Literal["planned", "published", "archived"]
+    lesson_start: int
+    lesson_end: int
+    total_lessons: int
+    published_lessons: int
+    lessons: list[LessonSummaryOut]
+
+
+class CourseCurriculumOut(BaseModel):
+    course: CourseSummaryOut
+    units: list[CourseUnitOut]
+
+
 class LessonDetailOut(LessonSummaryOut):
     voa_url: str
     lead: str
+    warmup_prompt: str
+    listening_focus: str
     goals: list[str]
 
     @field_validator("goals", mode="before")

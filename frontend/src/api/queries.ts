@@ -19,16 +19,45 @@ export function useLessons() {
   })
 }
 
-export function useLesson(number: number) {
+export function useCourses() {
   return useQuery({
-    queryKey: ['lesson', number],
+    queryKey: ['courses'],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/lessons/{number}', {
-        params: { path: { number } },
+      const { data, response } = await api.GET('/api/courses')
+      if (!data) throw falhou(response?.status, 'o catálogo de cursos')
+      return data
+    },
+  })
+}
+
+export function useCourseCurriculum(courseSlug: string, enabled = true) {
+  return useQuery({
+    queryKey: ['course-curriculum', courseSlug],
+    queryFn: async () => {
+      const { data, response } = await api.GET('/api/courses/{course_slug}/curriculum', {
+        params: { path: { course_slug: courseSlug } },
       })
+      if (!data) throw falhou(response?.status, `o currículo de ${courseSlug}`)
+      return data
+    },
+    enabled: enabled && Boolean(courseSlug),
+  })
+}
+
+export function useLesson(courseSlug: string, number: number) {
+  return useQuery({
+    queryKey: ['lesson', courseSlug, number],
+    queryFn: async () => {
+      const { data, response } = await api.GET(
+        '/api/courses/{course_slug}/lessons/{number}',
+        {
+          params: { path: { course_slug: courseSlug, number } },
+        },
+      )
       if (!data) throw falhou(response?.status, `a aula ${number}`)
       return data
     },
+    enabled: Boolean(courseSlug) && Number.isInteger(number),
   })
 }
 

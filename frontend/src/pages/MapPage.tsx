@@ -1,9 +1,18 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import type { StudyPlan, StudyPlanInput } from '../api/client'
 import { useSaveStudyPlan, useSkills, useToday } from '../api/dashboard'
-import { useLessons } from '../api/queries'
+import { useProgress } from '../api/progress'
+import { useCourseCurriculum } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
+import { lessonProgressKey } from '../features/curriculum/curriculum'
+import {
+  canonicalizeLegacyHref,
+  coursePath,
+  DEFAULT_COURSE_SLUG,
+  lessonPath,
+  unitPath,
+} from '../routing/courseRoutes'
 
 const DAYS = [
   ['mon', 'Seg'],
@@ -84,8 +93,16 @@ function PlanEditor({ plan }: { plan: StudyPlan }) {
           ))}
         </div>
       </fieldset>
-      {save.isSuccess && <p className="today-save ok" role="status">Plano salvo.</p>}
-      {save.isError && <p className="today-save erro" role="alert">Não foi possível salvar.</p>}
+      {save.isSuccess && (
+        <p className="today-save ok" role="status">
+          Plano salvo.
+        </p>
+      )}
+      {save.isError && (
+        <p className="today-save erro" role="alert">
+          Não foi possível salvar.
+        </p>
+      )}
     </form>
   )
 }
@@ -95,13 +112,19 @@ function TodayPanel() {
   const skills = useSkills()
 
   if (today.isPending || skills.isPending) return <Carregando oque="seu painel de hoje" />
-  if (today.error) return <Erro erro={today.error} aoTentarDeNovo={() => void today.refetch()} />
-  if (skills.error) return <Erro erro={skills.error} aoTentarDeNovo={() => void skills.refetch()} />
+  if (today.error) {
+    return <Erro erro={today.error} aoTentarDeNovo={() => void today.refetch()} />
+  }
+  if (skills.error) {
+    return <Erro erro={skills.error} aoTentarDeNovo={() => void skills.refetch()} />
+  }
 
   const recommendation = today.data.recommendation
   const progress = Math.min(
     100,
-    Math.round((today.data.recorded_minutes_this_week / today.data.plan.weekly_minutes) * 100),
+    Math.round(
+      (today.data.recorded_minutes_this_week / today.data.plan.weekly_minutes) * 100,
+    ),
   )
 
   return (
@@ -114,17 +137,23 @@ function TodayPanel() {
         <div className="today-week" aria-label={`${progress}% da meta semanal registrada`}>
           <strong>{today.data.recorded_minutes_this_week} min</strong>
           <span>de {today.data.plan.weekly_minutes} min nesta semana</span>
-          <div><i style={{ width: `${progress}%` }} /></div>
+          <div>
+            <i style={{ width: `${progress}%` }} />
+          </div>
         </div>
       </div>
 
       <article className="today-recommendation">
         <div>
-          <p className="eyebrow">Próxima atividade · cerca de {recommendation.estimated_minutes} min</p>
+          <p className="eyebrow">
+            Próxima atividade · cerca de {recommendation.estimated_minutes} min
+          </p>
           <h2>{recommendation.title}</h2>
           <p>{recommendation.reason}</p>
         </div>
-        <Link className="btn" to={recommendation.href}>Estudar agora</Link>
+        <Link className="btn" to={canonicalizeLegacyHref(recommendation.href)}>
+          Estudar agora
+        </Link>
       </article>
 
       {today.data.recent_session && (
@@ -149,12 +178,18 @@ function TodayPanel() {
               <li key={skill.skill}>
                 <div>
                   <strong>{skill.label}</strong>
-                  <small>{skill.samples} {skill.samples === 1 ? 'evidência' : 'evidências'}</small>
+                  <small>
+                    {skill.samples} {skill.samples === 1 ? 'evidência' : 'evidências'}
+                  </small>
                 </div>
                 {skill.score_percent === null ? (
-                  <span className="skill-insufficient">Dados insuficientes ({skill.samples}/3)</span>
+                  <span className="skill-insufficient">
+                    Dados insuficientes ({skill.samples}/3)
+                  </span>
                 ) : (
-                  <span className={`skill-score ${skill.status}`}>{skill.score_percent}%</span>
+                  <span className={`skill-score ${skill.status}`}>
+                    {skill.score_percent}%
+                  </span>
                 )}
                 {skill.fragile_topics.length > 0 && (
                   <p>Tópico para reforçar: {skill.fragile_topics.join(', ')}</p>
@@ -168,40 +203,135 @@ function TodayPanel() {
   )
 }
 
-export function MapPage() {
-  const { data, isPending, error, refetch } = useLessons()
+export function MapPage({ showToday = false }: { showToday?: boolean }) {
+  const params = useParams()
+  const courseSlug = params.courseSlug ?? DEFAULT_COURSE_SLUG
+  const unitSlug = params.unitSlug
+  const curriculum = useCourseCurriculum(courseSlug)
+  const progress = useProgress(courseSlug)
 
-  if (isPending) return <Carregando oque="as aulas" />
-  if (error) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
+  if (curriculum.isPending) return <Carregando oque="o mapa do curso" />
+  if (curriculum.error) {
+    return (
+      <Erro erro={curriculum.error} aoTentarDeNovo={() => void curriculum.refetch()} />
+    )
+  }
+
+  const studied = new Set(
+    progress.data?.lessons
+      .filter((lesson) => lesson.studied)
+      .map((lesson) => lessonProgressKey(lesson.course_slug, lesson.lesson_number)) ?? [],
+  )
+  const selectedUnit = unitSlug
+    ? curriculum.data.units.find((unit) => unit.slug === unitSlug)
+    : undefined
+
+  if (unitSlug && !selectedUnit) {
+    return (
+      <div className="estado-erro" role="alert">
+        <p>Esta unidade não existe neste curso.</p>
+        <Link className="btn ghost" to={coursePath(courseSlug)}>
+          Ver unidades
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <>
-      <TodayPanel />
-      <section className="map-section" aria-labelledby="map-title">
-      <p className="eyebrow">Let's Learn English · Level 1 · VOA Learning English</p>
-      <h2 id="map-title" className="map-title">Mapa do bloco 31–40</h2>
-      <p className="lead">
-        Dez aulas que montam, em sequência, o sistema de comparação e o sistema de futuro do inglês.
-        A 31 abre com o comparativo, a 38 fecha com o superlativo e a 40 estende tudo para os
-        advérbios — vale estudar na ordem.
-      </p>
-
-      <div className="arc">
-        <div className="ahead">
-          <span>Aula</span>
-          <span>Título</span>
-          <span>Foco gramatical</span>
-          <span>Série</span>
+      {showToday && <TodayPanel />}
+      <section
+        className={showToday ? 'map-section course-map' : 'course-map'}
+        aria-labelledby="map-title"
+      >
+        <p className="eyebrow">
+          {curriculum.data.course.title} · {curriculum.data.course.proficiency_label} ·{' '}
+          {curriculum.data.course.provider}
+        </p>
+        <div className="course-map-title">
+          <div>
+            <h1 id="map-title">
+              {selectedUnit ? selectedUnit.title : 'Mapa do curso'}
+            </h1>
+            <p className="lead">
+              {selectedUnit
+                ? `${selectedUnit.published_lessons} aulas disponíveis nesta unidade.`
+                : 'Abra uma unidade para ver uma lista curta de aulas e continuar sem percorrer o curso inteiro.'}
+            </p>
+          </div>
+          {selectedUnit && (
+            <Link to={coursePath(courseSlug)} className="btn ghost">
+              Todas as unidades
+            </Link>
+          )}
         </div>
-        {data.map((a) => (
-          <Link className="arow" key={a.number} to={`/aulas/${a.number}`}>
-            <span className="an">{a.number}</span>
-            <span className="at">{a.title}</span>
-            <span className="ag">{a.grammar_tag}</span>
-            <span className="ap">{a.story_note ?? '—'}</span>
-          </Link>
-        ))}
-      </div>
+
+        <div className="unit-card-grid">
+          {curriculum.data.units.map((unit) => {
+            const completed = unit.lessons.filter((lesson) =>
+              studied.has(lessonProgressKey(courseSlug, lesson.number)),
+            ).length
+            const state =
+              unit.published_lessons === 0
+                ? unit.status === 'planned'
+                  ? 'Em preparação'
+                  : 'Sem aulas publicadas'
+                : completed === 0
+                ? 'Não iniciada'
+                : completed === unit.lessons.length
+                  ? 'Concluída'
+                  : 'Em andamento'
+            return (
+              <Link
+                className={`unit-card${unit.slug === unitSlug ? ' active' : ''}`}
+                key={unit.id}
+                to={unitPath(courseSlug, unit.slug)}
+                aria-current={unit.slug === unitSlug ? 'page' : undefined}
+              >
+                <span>
+                  <strong>{unit.title}</strong>
+                  <small>
+                    Aulas {unit.lesson_start}–{unit.lesson_end}
+                  </small>
+                </span>
+                <span>
+                  <small>{state}</small>
+                  <strong>
+                    {completed}/{unit.lessons.length}
+                  </strong>
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+
+        {selectedUnit && (
+          <div className="arc course-unit-lessons">
+            <div className="ahead">
+              <span>Aula</span>
+              <span>Título</span>
+              <span>Foco gramatical</span>
+              <span>Estado</span>
+            </div>
+            {selectedUnit.lessons.map((lesson) => {
+              const isStudied = studied.has(lessonProgressKey(courseSlug, lesson.number))
+              return (
+                <Link
+                  className="arow"
+                  key={lesson.id}
+                  to={lessonPath(courseSlug, lesson.number)}
+                >
+                  <span className="an">{lesson.number}</span>
+                  <span className="at">{lesson.title}</span>
+                  <span className="ag">{lesson.grammar_tag}</span>
+                  <span className={`ap ${isStudied ? 'is-studied' : ''}`}>
+                    {isStudied ? 'Estudada' : 'Pendente'}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </section>
     </>
   )

@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom'
+import { studyPath } from '../../routing/courseRoutes'
 import { STUDY_STEPS, type StudyStepSlug } from './studyProgress'
 
 export function StepNavigator({
+  courseSlug,
   lessonNumber,
   currentStep,
   completedSteps,
 }: {
+  courseSlug: string
   lessonNumber: number
   currentStep: StudyStepSlug
   completedSteps: StudyStepSlug[]
@@ -21,7 +24,7 @@ export function StepNavigator({
           return (
             <li key={step.slug} className={active ? 'active' : done ? 'complete' : ''}>
               <Link
-                to={`/aulas/${lessonNumber}/estudar/${step.slug}`}
+                to={studyPath(courseSlug, lessonNumber, step.slug)}
                 aria-current={active ? 'step' : undefined}
                 aria-label={`${index + 1}. ${step.title}${done ? ', concluída' : ''}`}
               >

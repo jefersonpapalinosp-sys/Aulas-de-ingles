@@ -1,5 +1,9 @@
 [
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-31",
+    "position": 1,
     "number": 31,
     "title": "Take Me Out to the Ball Game",
     "title_pt": "Me leva pro jogo de beisebol",
@@ -146,6 +150,8 @@
     "learning_strategy": "visualizar",
     "source_accessed_at": "2026-10-07",
     "lead": "Anna quer ver um jogo dos Washington Nationals. Todo mundo que ela encontra tem uma opinião sobre qual transporte é mais rápido — e ela chega tarde demais, quando os ingressos já estão esgotados. A aula inteira é construída sobre **comparar duas coisas** e **dar conselho**.",
+    "warmup_prompt": "Como você compararia duas formas de transporte?",
+    "listening_focus": "os transportes comparados e o conselho final",
     "goals": [
       "Comparar duas coisas com **-er than** (adjetivos curtos) e **more … than** (adjetivos longos).",
       "Dar conselho com **should** e **ought to** — os dois significam a mesma coisa, mas *ought to* é mais formal e mais raro na fala.",
@@ -572,6 +578,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-32",
+    "position": 2,
     "number": 32,
     "title": "Welcome to the Treehouse!",
     "title_pt": "Bem-vindo à casa na árvore!",
@@ -860,6 +870,8 @@
     "learning_strategy": "monitorar",
     "source_accessed_at": "2026-10-08",
     "lead": "Estreia do programa infantil da Anna, *The Time Traveling Treehouse*. Crianças fazem perguntas e Anna e MINDY procuram respostas. A aula mostra **quem recebe a ação** com objetos diretos e indiretos, como pedir informação e como interjeições mudam a emoção da fala.",
+    "warmup_prompt": "Como você pediria uma informação e responderia com entusiasmo?",
+    "listening_focus": "quem recebe cada pergunta ou resposta e as interjeições",
     "goals": [
       "Reconhecer o **objeto direto**, que recebe diretamente a ação do verbo: *ask a question*.",
       "Usar o **objeto indireto** para indicar a pessoa que recebe algo ou se beneficia da ação: *ask us a question*.",
@@ -1332,6 +1344,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-33",
+    "position": 3,
     "number": 33,
     "title": "Learning America's Sport",
     "title_pt": "Aprendendo o esporte dos Estados Unidos",
@@ -1348,6 +1364,8 @@
     "learning_strategy": "sequenciar",
     "source_accessed_at": "2026-10-08",
     "lead": "MINDY finalmente acerta o destino e Anna ensina beisebol num campo de verdade. A aula é um **texto explicativo**: presente simples para descrever como as coisas funcionam, marcadores de sequência, e o truque de transformar verbo em profissão com **-er**.",
+    "warmup_prompt": "Como você explicaria, em ordem, as regras de um esporte?",
+    "listening_focus": "os marcadores de sequência e quem realiza cada ação no beisebol",
     "goals": [
       "Explicar um processo com **presente simples** + *First… Then… Each time… At the end…*",
       "Formar o substantivo de quem faz a ação acrescentando **-er** ao verbo: *pitch → pitcher*.",
@@ -1996,6 +2014,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-34",
+    "position": 4,
     "number": 34,
     "title": "What Will I Do?",
     "title_pt": "O que eu vou fazer?",
@@ -2012,6 +2034,8 @@
     "learning_strategy": "inferir",
     "source_accessed_at": "2026-10-08",
     "lead": "Halloween. Anna se veste de gênio e finge ler mentes — e descobre que dizer *might* para quem quer certeza é um desastre diplomático. A aula gira em torno do contraste **will (certeza) × might (possibilidade)** e das **tag questions**.",
+    "warmup_prompt": "Como você falaria sobre um plano futuro que ainda não é certo?",
+    "listening_focus": "a diferença de certeza entre *might* e *will*",
     "goals": [
       "Expressar possibilidade com **might / might not** e certeza com **will / won't**.",
       "Perceber que *might* soa evasivo em inglês — a aula é literalmente sobre o desconforto que ele causa.",
@@ -2819,6 +2843,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-35",
+    "position": 5,
     "number": 35,
     "title": "Let's Make Dinner!",
     "title_pt": "Vamos fazer o jantar!",
@@ -2835,6 +2863,8 @@
     "learning_strategy": "cooperar",
     "source_accessed_at": "2026-10-08",
     "lead": "Marsha cozinha, Anna faz as compras — com a lista errada. A aula é a aula das **unidades de embalagem** (*a bag of*, *a jar of*, *a loaf of*) e de **too much / too many**, que é como o inglês diz \"demais\".",
+    "warmup_prompt": "Como você pediria quantidades e embalagens em uma lista de compras?",
+    "listening_focus": "as embalagens, quantidades e a lista de compras errada",
     "goals": [
       "Usar as **unidades de medida e embalagem** que o inglês exige antes de incontáveis: *a bag of coffee*, não \"a coffee\".",
       "Distinguir **too much** (incontável) de **too many** (contável) e de *very*.",
@@ -3503,6 +3533,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-36",
+    "position": 6,
     "number": 36,
     "title": "I Can Fix This!",
     "title_pt": "Eu consigo resolver isso!",
@@ -3519,6 +3553,8 @@
     "learning_strategy": "substituir",
     "source_accessed_at": "2026-10-08",
     "lead": "Anna salva o jantar virando a lista errada em \"panquecas de pasta de amendoim com banana\". A aula é construída sobre **onde estão as coisas** — preposições de lugar na cozinha — e sobre o **will de oferta**, decidido na hora.",
+    "warmup_prompt": "Como você diria onde estão os ingredientes e se ofereceria para ajudar?",
+    "listening_focus": "as preposições de lugar e as decisões com *I’ll*",
     "goals": [
       "Dizer onde algo está com **in, inside, on, under** e perguntar com *Where is / Where are*.",
       "Usar o verbo com **dois objetos**: *hand me the flour* (= hand the flour to me).",
@@ -4153,6 +4189,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-37",
+    "position": 7,
     "number": 37,
     "title": "Let's Agree to Disagree",
     "title_pt": "Vamos concordar em discordar",
@@ -4169,6 +4209,8 @@
     "learning_strategy": "personalizar",
     "source_accessed_at": "2026-10-08",
     "lead": "Anna acha uma bolsa perdida e pergunta de quem é — e depois discute cidade × campo com o dono. Duas camadas: os **pronomes possessivos** (*mine, yours, his, hers*) e a **linguagem de concordar e discordar**, que é a habilidade mais útil desta aula para reunião de trabalho.",
+    "warmup_prompt": "Como você concordaria ou discordaria de uma opinião com educação?",
+    "listening_focus": "os possessivos e as frases usadas para concordar ou discordar",
     "goals": [
       "Diferenciar **adjetivo possessivo** (*my bag*) de **pronome possessivo** (*mine*), que substitui o substantivo.",
       "Perguntar de quem é algo: *Is this bag yours?* / *Whose bag is this?*",
@@ -4878,6 +4920,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-38",
+    "position": 8,
     "number": 38,
     "title": "She's My Best Friend!",
     "title_pt": "Ela é minha melhor amiga!",
@@ -4894,6 +4940,8 @@
     "learning_strategy": "avaliar",
     "source_accessed_at": "2026-10-08",
     "lead": "Penelope, a melhor amiga de infância, visita Washington e Anna descreve todas as pessoas da sua vida — cada uma com um **superlativo**. A aula é uma coleção quase completa das formas de superlativo do inglês, incluindo as irregulares.",
+    "warmup_prompt": "Como você descreveria seu melhor amigo usando superlativos?",
+    "listening_focus": "os superlativos empregados para descrever cada amigo",
     "goals": [
       "Formar o superlativo com **the + adjetivo + -est** (curtos) e **the most + adjetivo** (longos).",
       "Aplicar a mudança ortográfica **y → iest**: *messy → messiest*, *friendly → friendliest*.",
@@ -5658,6 +5706,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-39",
+    "position": 9,
     "number": 39,
     "title": "It's Unbelievable!",
     "title_pt": "É inacreditável!",
@@ -5674,6 +5726,8 @@
     "learning_strategy": "perguntar para esclarecer",
     "source_accessed_at": "2026-10-08",
     "lead": "Pete anuncia um produto milagroso para cabelo, Anna compra e o resultado é um desastre. A aula constrói o diálogo inteiro em torno dos **prefixos negativos**: *untidy, uncomfortable, inexpensive, imperfect, dishonest, unbelievable*.",
+    "warmup_prompt": "Como você explicaria que um produto não cumpriu o que prometeu?",
+    "listening_focus": "os prefixos negativos e as pistas que revelam o problema do produto",
     "goals": [
       "Negar um adjetivo com prefixo: **un-, in-, im-, dis-** — e saber que a escolha é por costume, não por regra lógica.",
       "Narrar o que aconteceu em **passado simples**, regular e irregular.",
@@ -6447,6 +6501,10 @@
     ]
   },
   {
+    "course_slug": "voa-level-1",
+    "unit_slug": "31-40",
+    "slug": "lesson-40",
+    "position": 10,
     "number": 40,
     "title": "The Woods Are Alive",
     "title_pt": "A floresta está viva",
@@ -6463,6 +6521,8 @@
     "learning_strategy": "autoavaliar",
     "source_accessed_at": "2026-10-08",
     "lead": "Ano novo, resolução nova: Anna faz um teste para uma peça de teatro. O diretor corrige **como** ela fala e **como** ela anda — e por isso a aula inteira é feita de **advérbios de modo**, do comparativo deles e do par *too* / *enough*.",
+    "warmup_prompt": "Como você pediria para alguém falar mais alto ou andar mais devagar?",
+    "listening_focus": "os advérbios que mudam a maneira e o momento de cada ação",
     "goals": [
       "Formar advérbio de modo com **adjetivo + -ly** e saber quando o *y* vira *i*.",
       "Comparar advérbios: **more loudly**, **earlier**, **later**.",

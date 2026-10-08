@@ -8,7 +8,7 @@ from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
-from app.db.models import Lesson, ReviewItem, User, VocabItem
+from app.db.models import ReviewItem, User, VocabItem
 from app.db.session import get_session
 from app.domain.sm2 import Estado, revisar
 from app.schemas.review import (
@@ -20,6 +20,7 @@ from app.schemas.review import (
     ReviewItemStatusIn,
     ReviewItemType,
 )
+from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
 
 router = APIRouter(prefix="/review", tags=["review"])
 
@@ -396,9 +397,7 @@ async def adicionar_aula(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> DeckSummaryOut:
-    lesson = (
-        await session.execute(select(Lesson).where(Lesson.number == number))
-    ).scalar_one_or_none()
+    lesson = await lesson_by_course_number(session, DEFAULT_COURSE_SLUG, number)
     if lesson is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aula não existe.")
     created = await adicionar_cartas(session, usuario, list(lesson.vocab))

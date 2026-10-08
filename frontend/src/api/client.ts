@@ -40,6 +40,9 @@ api.use(autenticacao)
 
 export type LessonSummary = components['schemas']['LessonSummaryOut']
 export type LessonDetail = components['schemas']['LessonDetailOut']
+export type CourseSummary = components['schemas']['CourseSummaryOut']
+export type CourseUnit = components['schemas']['CourseUnitOut']
+export type CourseCurriculum = components['schemas']['CourseCurriculumOut']
 export type GrammarBlock = components['schemas']['GrammarBlockOut']
 export type Phrase = components['schemas']['PhraseOut']
 export type VocabItem = components['schemas']['VocabItemOut']

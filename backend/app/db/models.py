@@ -14,6 +14,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
     Text,
@@ -26,13 +27,112 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 
+class Course(Base):
+    """Curso independente, com numeração de aulas própria."""
+
+    __tablename__ = "course"
+    __table_args__ = (
+        CheckConstraint("position > 0", name="ck_course_position_positive"),
+        CheckConstraint("total_lessons > 0", name="ck_course_total_lessons_positive"),
+        CheckConstraint(
+            "status IN ('planned', 'published', 'archived')", name="ck_course_status"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slug: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    level: Mapped[str] = mapped_column(String(40))
+    proficiency_label: Mapped[str] = mapped_column(String(80))
+    provider: Mapped[str] = mapped_column(String(120))
+    source_url: Mapped[str] = mapped_column(String(500))
+    position: Mapped[int] = mapped_column(Integer, unique=True)
+    status: Mapped[str] = mapped_column(String(20), default="planned")
+    total_lessons: Mapped[int] = mapped_column(Integer)
+
+    units: Mapped[list["CourseUnit"]] = relationship(
+        back_populates="course",
+        cascade="all, delete-orphan",
+        order_by="CourseUnit.position",
+        lazy="raise",
+    )
+    lessons: Mapped[list["Lesson"]] = relationship(
+        back_populates="course",
+        order_by="Lesson.position",
+        lazy="raise",
+        overlaps="lessons,unit",
+    )
+
+
+class CourseUnit(Base):
+    """Unidade navegável de um curso, publicada ou ainda planejada."""
+
+    __tablename__ = "course_unit"
+    __table_args__ = (
+        UniqueConstraint("id", "course_id", name="uq_course_unit_id_course"),
+        UniqueConstraint("course_id", "slug", name="uq_course_unit_course_slug"),
+        UniqueConstraint("course_id", "position", name="uq_course_unit_course_position"),
+        CheckConstraint("position > 0", name="ck_course_unit_position_positive"),
+        CheckConstraint("lesson_start > 0", name="ck_course_unit_lesson_start_positive"),
+        CheckConstraint(
+            "lesson_end >= lesson_start", name="ck_course_unit_lesson_range"
+        ),
+        CheckConstraint(
+            "total_lessons > 0", name="ck_course_unit_total_lessons_positive"
+        ),
+        CheckConstraint(
+            "status IN ('planned', 'published', 'archived')", name="ck_course_unit_status"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    course_id: Mapped[int] = mapped_column(
+        ForeignKey("course.id", ondelete="CASCADE"), index=True
+    )
+    slug: Mapped[str] = mapped_column(String(100))
+    title: Mapped[str] = mapped_column(String(200))
+    position: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20), default="planned")
+    lesson_start: Mapped[int] = mapped_column(Integer)
+    lesson_end: Mapped[int] = mapped_column(Integer)
+    total_lessons: Mapped[int] = mapped_column(Integer)
+
+    course: Mapped[Course] = relationship(back_populates="units")
+    lessons: Mapped[list["Lesson"]] = relationship(
+        back_populates="unit",
+        order_by="Lesson.position",
+        lazy="raise",
+        overlaps="course,lessons",
+    )
+
+
 class Lesson(Base):
     """Uma aula da série Let's Learn English."""
 
     __tablename__ = "lesson"
 
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["unit_id", "course_id"],
+            ["course_unit.id", "course_unit.course_id"],
+            name="fk_lesson_unit_course",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("course_id", "number", name="uq_lesson_course_number"),
+        UniqueConstraint("course_id", "slug", name="uq_lesson_course_slug"),
+        UniqueConstraint("unit_id", "position", name="uq_lesson_unit_position"),
+        CheckConstraint("number > 0", name="ck_lesson_number_positive"),
+        CheckConstraint("position > 0", name="ck_lesson_position_positive"),
+    )
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    number: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    course_id: Mapped[int] = mapped_column(
+        ForeignKey("course.id", ondelete="RESTRICT"), index=True
+    )
+    unit_id: Mapped[int] = mapped_column(Integer, index=True)
+    number: Mapped[int] = mapped_column(Integer, index=True)
+    slug: Mapped[str] = mapped_column(String(120))
+    position: Mapped[int] = mapped_column(Integer)
     title: Mapped[str] = mapped_column(String(200))
     title_pt: Mapped[str] = mapped_column(String(200))
     voa_url: Mapped[str] = mapped_column(String(500))
@@ -41,10 +141,27 @@ class Lesson(Base):
     focus_points: Mapped[list[str]] = mapped_column(JSONB, default=list)
     story_note: Mapped[str | None] = mapped_column(String(200), default=None)
     lead: Mapped[str] = mapped_column(Text)
+    warmup_prompt: Mapped[str] = mapped_column(Text)
+    listening_focus: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    course: Mapped[Course] = relationship(
+        back_populates="lessons", lazy="joined", overlaps="lessons,unit"
+    )
+    unit: Mapped[CourseUnit] = relationship(
+        back_populates="lessons", lazy="joined", overlaps="course,lessons"
+    )
+
+    @property
+    def course_slug(self) -> str:
+        return self.course.slug
+
+    @property
+    def unit_slug(self) -> str:
+        return self.unit.slug
 
     goals: Mapped[list["LessonGoal"]] = relationship(
         back_populates="lesson",

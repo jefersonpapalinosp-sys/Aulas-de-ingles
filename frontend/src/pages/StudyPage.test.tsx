@@ -45,6 +45,11 @@ vi.mock('../api/progress', () => ({
 }))
 
 const lesson = {
+  id: 31,
+  course_slug: 'voa-level-1',
+  unit_slug: '31-40',
+  slug: 'take-me-out-to-the-ball-game',
+  position: 31,
   number: 31,
   title: 'Take Me Out to the Ball Game',
   title_pt: 'Leve-me ao jogo de beisebol',
@@ -53,6 +58,8 @@ const lesson = {
   focus_points: ['faster than'],
   story_note: null,
   lead: 'Compare transportes e dê conselhos.',
+  warmup_prompt: 'Como você compararia duas formas de transporte?',
+  listening_focus: 'os transportes comparados e o conselho final',
   goals: ['Comparar duas coisas com **-er than**.', 'Dar conselho com **should**.'],
   grammar_blocks: [],
   versions: [
@@ -145,8 +152,14 @@ function renderStudy(route: string) {
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={[route]}>
         <Routes>
-          <Route path="/aulas/:numero/estudar" element={<StudyPage />} />
-          <Route path="/aulas/:numero/estudar/:etapa" element={<StudyPage />} />
+          <Route
+            path="/cursos/:courseSlug/aulas/:numero/estudar"
+            element={<StudyPage />}
+          />
+          <Route
+            path="/cursos/:courseSlug/aulas/:numero/estudar/:etapa"
+            element={<StudyPage />}
+          />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -160,7 +173,7 @@ afterEach(() => {
 
 describe('StudyPage', () => {
   it('apresenta a aula como uma jornada de cinco etapas', () => {
-    renderStudy('/aulas/31/estudar/preparar')
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/preparar')
 
     expect(screen.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeInTheDocument()
     const navigation = screen.getByRole('navigation', { name: 'Etapas desta aula' })
@@ -173,7 +186,7 @@ describe('StudyPage', () => {
   it('conclui a etapa, avança e persiste o ponto de retomada', async () => {
     const user = userEvent.setup()
     Object.defineProperty(window, 'scrollTo', { value: vi.fn(), writable: true })
-    renderStudy('/aulas/31/estudar/preparar')
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/preparar')
 
     await user.click(screen.getByRole('button', { name: /Concluir e ir para Assistir/i }))
 
@@ -196,7 +209,7 @@ describe('StudyPage', () => {
       studyProgressKey(7, 31),
       JSON.stringify({ currentStep: 'estudar', completedSteps: ['preparar', 'assistir'] }),
     )
-    renderStudy('/aulas/31/estudar')
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar')
 
     expect(await screen.findByText('Etapa 3 de 5')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Comparativos + conselho' })).toBeInTheDocument()
@@ -211,7 +224,7 @@ describe('StudyPage', () => {
         completedSteps: ['preparar', 'assistir', 'estudar', 'praticar'],
       }),
     )
-    renderStudy('/aulas/31/estudar/revisar')
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/revisar')
 
     expect(
       screen.getByRole('heading', { name: 'Escute, repita e compare sua voz' }),
@@ -225,12 +238,12 @@ describe('StudyPage', () => {
   })
 
   it('oferece recuperação quando a etapa da URL não existe', () => {
-    renderStudy('/aulas/31/estudar/inexistente')
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/inexistente')
 
     expect(screen.getByRole('alert')).toHaveTextContent('Esta etapa de estudo não existe.')
     expect(screen.getByRole('link', { name: 'Retomar a aula' })).toHaveAttribute(
       'href',
-      '/aulas/31/estudar',
+      '/cursos/voa-level-1/aulas/31/estudar',
     )
   })
 })

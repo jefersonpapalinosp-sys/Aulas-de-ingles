@@ -18,16 +18,50 @@ export function isStudyStep(value: string | undefined): value is StudyStepSlug {
   return STUDY_STEPS.some((step) => step.slug === value)
 }
 
-export function studyProgressKey(userId: number, lessonNumber: number): string {
-  return `aulas-ingles:study-progress:v1:${userId}:${lessonNumber}`
+function progressIdentity(
+  courseSlugOrLessonNumber: string | number,
+  lessonNumber?: number,
+): { courseSlug: string; lessonNumber: number } {
+  return typeof courseSlugOrLessonNumber === 'string'
+    ? { courseSlug: courseSlugOrLessonNumber, lessonNumber: lessonNumber ?? Number.NaN }
+    : { courseSlug: 'voa-level-1', lessonNumber: courseSlugOrLessonNumber }
 }
 
-export function loadStudyProgress(userId: number, lessonNumber: number): StudyProgress {
+export function studyProgressKey(
+  userId: number,
+  courseSlugOrLessonNumber: string | number,
+  lessonNumber?: number,
+): string {
+  const identity = progressIdentity(courseSlugOrLessonNumber, lessonNumber)
+  return `aulas-ingles:study-progress:v2:${userId}:${identity.courseSlug}:${identity.lessonNumber}`
+}
+
+export function loadStudyProgress(userId: number, lessonNumber: number): StudyProgress
+export function loadStudyProgress(
+  userId: number,
+  courseSlug: string,
+  lessonNumber: number,
+): StudyProgress
+export function loadStudyProgress(
+  userId: number,
+  courseSlugOrLessonNumber: string | number,
+  maybeLessonNumber?: number,
+): StudyProgress {
   const initial: StudyProgress = { currentStep: FIRST_STEP, completedSteps: [] }
   if (typeof window === 'undefined') return initial
 
   try {
-    const raw = window.localStorage.getItem(studyProgressKey(userId, lessonNumber))
+    const { courseSlug, lessonNumber } = progressIdentity(
+      courseSlugOrLessonNumber,
+      maybeLessonNumber,
+    )
+    const key = studyProgressKey(userId, courseSlug, lessonNumber)
+    let raw = window.localStorage.getItem(key)
+    // Migração transparente dos dados locais anteriores à identidade multi-curso.
+    if (!raw && courseSlug === 'voa-level-1') {
+      raw = window.localStorage.getItem(`aulas-ingles:study-progress:v1:${userId}:${lessonNumber}`)
+      if (raw) window.localStorage.setItem(key, raw)
+    }
     if (!raw) return initial
 
     const parsed: unknown = JSON.parse(raw)
@@ -54,7 +88,29 @@ export function saveStudyProgress(
   userId: number,
   lessonNumber: number,
   progress: StudyProgress,
+): void
+export function saveStudyProgress(
+  userId: number,
+  courseSlug: string,
+  lessonNumber: number,
+  progress: StudyProgress,
+): void
+export function saveStudyProgress(
+  userId: number,
+  courseSlugOrLessonNumber: string | number,
+  lessonNumberOrProgress: number | StudyProgress,
+  maybeProgress?: StudyProgress,
 ): void {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(studyProgressKey(userId, lessonNumber), JSON.stringify(progress))
+  const legacyCall = typeof courseSlugOrLessonNumber === 'number'
+  const courseSlug = legacyCall ? 'voa-level-1' : courseSlugOrLessonNumber
+  const lessonNumber = legacyCall
+    ? courseSlugOrLessonNumber
+    : (lessonNumberOrProgress as number)
+  const progress = legacyCall ? (lessonNumberOrProgress as StudyProgress) : maybeProgress
+  if (!progress) return
+  window.localStorage.setItem(
+    studyProgressKey(userId, courseSlug, lessonNumber),
+    JSON.stringify(progress),
+  )
 }

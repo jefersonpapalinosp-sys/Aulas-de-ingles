@@ -29,6 +29,33 @@ describe('progresso da jornada guiada', () => {
     expect(loadStudyProgress(7, 32).currentStep).toBe('preparar')
   })
 
+  it('isola aulas com o mesmo número em cursos diferentes', () => {
+    saveStudyProgress(7, 'voa-level-1', 1, {
+      currentStep: 'assistir',
+      completedSteps: ['preparar'],
+    })
+    saveStudyProgress(7, 'voa-level-2', 1, {
+      currentStep: 'praticar',
+      completedSteps: ['preparar', 'assistir', 'estudar'],
+    })
+
+    expect(loadStudyProgress(7, 'voa-level-1', 1).currentStep).toBe('assistir')
+    expect(loadStudyProgress(7, 'voa-level-2', 1).currentStep).toBe('praticar')
+    expect(studyProgressKey(7, 'voa-level-1', 1)).not.toBe(
+      studyProgressKey(7, 'voa-level-2', 1),
+    )
+  })
+
+  it('migra o progresso local legado para o Level 1', () => {
+    window.localStorage.setItem(
+      'aulas-ingles:study-progress:v1:7:31',
+      JSON.stringify({ currentStep: 'estudar', completedSteps: ['preparar', 'assistir'] }),
+    )
+
+    expect(loadStudyProgress(7, 'voa-level-1', 31).currentStep).toBe('estudar')
+    expect(window.localStorage.getItem(studyProgressKey(7, 'voa-level-1', 31))).not.toBeNull()
+  })
+
   it('ignora dados inválidos sem impedir que a aula abra', () => {
     window.localStorage.setItem(
       studyProgressKey(7, 31),

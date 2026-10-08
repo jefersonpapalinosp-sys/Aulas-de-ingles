@@ -4,7 +4,7 @@ import { useAllExercises } from '../api/queries'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { Carregando, Erro } from '../components/States'
 
-/** Uma questão por aula: a primeira de cada uma, para cobrir o bloco inteiro. */
+/** Uma questão por aula: a primeira de cada uma, para cobrir o escopo disponível. */
 function umaPorAula<T extends { lesson_number: number; position: number }>(todos: T[]): T[] {
   const porAula = new Map<number, T>()
   for (const e of todos) {
@@ -21,7 +21,7 @@ export function TestPage() {
 
   const questoes = useMemo(() => (data ? umaPorAula(data) : []), [data])
 
-  if (isPending) return <Carregando oque="a prova do bloco" />
+  if (isPending) return <Carregando oque="a avaliação" />
   if (error) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
 
   const acertos = Object.values(respondidos).filter(Boolean).length
@@ -29,11 +29,11 @@ export function TestPage() {
 
   return (
     <>
-      <p className="eyebrow">Fechamento do bloco</p>
-      <h1>Prova do bloco 31–40</h1>
+      <p className="eyebrow">Fechamento da unidade</p>
+      <h1>Avaliação das aulas disponíveis</h1>
       <p className="lead">
         Uma questão de cada aula. O número ao lado diz de onde ela vem — se errar, volte para aquela
-        aula na barra lateral. A correção é feita pelo servidor.
+        aula na trilha. A correção é feita pelo servidor.
       </p>
 
       <div className="stack tight" style={{ marginTop: 26 }}>

@@ -45,7 +45,9 @@ async def test_today_explains_first_recommendation_and_has_safe_defaults(
     today = (await client.get("/api/me/today", headers=headers)).json()
 
     assert today["recommendation"]["kind"] == "start_lesson"
+    assert today["recommendation"]["course_slug"] == "voa-level-1"
     assert today["recommendation"]["lesson_number"] == 31
+    assert today["recommendation"]["href"] == "/cursos/voa-level-1/aulas/31/estudar"
     assert today["recommendation"]["reason"]
     assert today["plan"] == {
         "weekly_minutes": 90,
@@ -88,6 +90,8 @@ async def test_recommendation_prioritizes_due_review_then_resume(client: AsyncCl
     )
     resumed = (await client.get("/api/me/today", headers=headers)).json()["recommendation"]
     assert resumed["kind"] == "continue_lesson"
+    assert resumed["course_slug"] == "voa-level-1"
+    assert resumed["href"].startswith("/cursos/voa-level-1/aulas/31/estudar/")
     assert resumed["href"].endswith("/assistir")
     assert "parou" in resumed["reason"].lower()
 
@@ -180,6 +184,7 @@ async def test_session_records_time_steps_and_completion(
     today = (await client.get("/api/me/today", headers=headers)).json()
     assert today["recorded_minutes_this_week"] == 2
     assert today["recent_session"]["completed_steps"] == 5
+    assert today["recent_session"]["course_slug"] == "voa-level-1"
 
 
 @pytest.mark.asyncio

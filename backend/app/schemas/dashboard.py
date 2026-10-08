@@ -42,10 +42,12 @@ class RecommendationOut(BaseModel):
     reason: str
     href: str
     estimated_minutes: int
+    course_slug: str | None = None
     lesson_number: int | None = None
 
 
 class RecentSessionOut(BaseModel):
+    course_slug: str
     lesson_number: int
     lesson_title: str
     current_step: str

@@ -353,6 +353,160 @@
                 "title": "ContentSourceOut",
                 "type": "object"
             },
+            "CourseCurriculumOut": {
+                "properties": {
+                    "course": {
+                        "$ref": "#/components/schemas/CourseSummaryOut"
+                    },
+                    "units": {
+                        "items": {
+                            "$ref": "#/components/schemas/CourseUnitOut"
+                        },
+                        "title": "Units",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "course",
+                    "units"
+                ],
+                "title": "CourseCurriculumOut",
+                "type": "object"
+            },
+            "CourseSummaryOut": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "level": {
+                        "title": "Level",
+                        "type": "string"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "proficiency_label": {
+                        "title": "Proficiency Label",
+                        "type": "string"
+                    },
+                    "provider": {
+                        "title": "Provider",
+                        "type": "string"
+                    },
+                    "published_lessons": {
+                        "title": "Published Lessons",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "source_url": {
+                        "title": "Source Url",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "planned",
+                            "published",
+                            "archived"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "total_lessons": {
+                        "title": "Total Lessons",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "slug",
+                    "title",
+                    "level",
+                    "proficiency_label",
+                    "provider",
+                    "source_url",
+                    "position",
+                    "status",
+                    "total_lessons",
+                    "published_lessons"
+                ],
+                "title": "CourseSummaryOut",
+                "type": "object"
+            },
+            "CourseUnitOut": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "lesson_end": {
+                        "title": "Lesson End",
+                        "type": "integer"
+                    },
+                    "lesson_start": {
+                        "title": "Lesson Start",
+                        "type": "integer"
+                    },
+                    "lessons": {
+                        "items": {
+                            "$ref": "#/components/schemas/LessonSummaryOut"
+                        },
+                        "title": "Lessons",
+                        "type": "array"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "published_lessons": {
+                        "title": "Published Lessons",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "planned",
+                            "published",
+                            "archived"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "total_lessons": {
+                        "title": "Total Lessons",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "slug",
+                    "title",
+                    "position",
+                    "status",
+                    "lesson_start",
+                    "lesson_end",
+                    "total_lessons",
+                    "published_lessons",
+                    "lessons"
+                ],
+                "title": "CourseUnitOut",
+                "type": "object"
+            },
             "DeckSummaryOut": {
                 "properties": {
                     "added": {
@@ -773,6 +927,10 @@
                         "title": "Content Sources",
                         "type": "array"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
                     "exercises": {
                         "items": {
                             "$ref": "#/components/schemas/ExerciseOut"
@@ -805,8 +963,16 @@
                         "title": "Grammar Tag",
                         "type": "string"
                     },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
                     "lead": {
                         "title": "Lead",
+                        "type": "string"
+                    },
+                    "listening_focus": {
+                        "title": "Listening Focus",
                         "type": "string"
                     },
                     "media": {
@@ -827,12 +993,20 @@
                         "title": "Phrases",
                         "type": "array"
                     },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
                     "pronunciation": {
                         "items": {
                             "$ref": "#/components/schemas/PronunciationNoteOut"
                         },
                         "title": "Pronunciation",
                         "type": "array"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
                     },
                     "story_note": {
                         "anyOf": [
@@ -853,6 +1027,10 @@
                         "title": "Title Pt",
                         "type": "string"
                     },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    },
                     "versions": {
                         "items": {
                             "$ref": "#/components/schemas/LessonVersionOut"
@@ -871,6 +1049,10 @@
                         "title": "Vocab",
                         "type": "array"
                     },
+                    "warmup_prompt": {
+                        "title": "Warmup Prompt",
+                        "type": "string"
+                    },
                     "writing_prompts": {
                         "items": {
                             "$ref": "#/components/schemas/WritingPromptOut"
@@ -880,6 +1062,11 @@
                     }
                 },
                 "required": [
+                    "id",
+                    "course_slug",
+                    "unit_slug",
+                    "slug",
+                    "position",
                     "number",
                     "title",
                     "title_pt",
@@ -888,6 +1075,8 @@
                     "story_note",
                     "voa_url",
                     "lead",
+                    "warmup_prompt",
+                    "listening_focus",
                     "goals",
                     "grammar_blocks",
                     "phrases",
@@ -1035,6 +1224,10 @@
                         "title": "Correct",
                         "type": "integer"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
                     "lesson_number": {
                         "title": "Lesson Number",
                         "type": "integer"
@@ -1054,9 +1247,15 @@
                             }
                         ],
                         "title": "Studied At"
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
                     }
                 },
                 "required": [
+                    "course_slug",
+                    "unit_slug",
                     "lesson_number",
                     "studied",
                     "studied_at",
@@ -1069,6 +1268,10 @@
             "LessonSummaryOut": {
                 "description": "O que a trilha de navegação precisa — sem carregar a aula inteira.",
                 "properties": {
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
                     "focus_points": {
                         "items": {
                             "type": "string"
@@ -1080,9 +1283,21 @@
                         "title": "Grammar Tag",
                         "type": "string"
                     },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
                     "number": {
                         "title": "Number",
                         "type": "integer"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
                     },
                     "story_note": {
                         "anyOf": [
@@ -1102,9 +1317,18 @@
                     "title_pt": {
                         "title": "Title Pt",
                         "type": "string"
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
                     }
                 },
                 "required": [
+                    "id",
+                    "course_slug",
+                    "unit_slug",
+                    "slug",
+                    "position",
                     "number",
                     "title",
                     "title_pt",
@@ -1568,6 +1792,10 @@
                         "title": "Completed Steps",
                         "type": "integer"
                     },
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
                     "current_step": {
                         "title": "Current Step",
                         "type": "string"
@@ -1591,6 +1819,7 @@
                     }
                 },
                 "required": [
+                    "course_slug",
                     "lesson_number",
                     "lesson_title",
                     "current_step",
@@ -1603,6 +1832,17 @@
             },
             "RecommendationOut": {
                 "properties": {
+                    "course_slug": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Course Slug"
+                    },
                     "estimated_minutes": {
                         "title": "Estimated Minutes",
                         "type": "integer"
@@ -3165,6 +3405,322 @@
                 ]
             }
         },
+        "/api/courses": {
+            "get": {
+                "description": "Lista cursos publicados e planejados sem materializar aulas completas.",
+                "operationId": "list_courses_api_courses_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CourseSummaryOut"
+                                    },
+                                    "title": "Response List Courses Api Courses Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    }
+                },
+                "summary": "List Courses",
+                "tags": [
+                    "courses"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/curriculum": {
+            "get": {
+                "description": "Unidades e resumos de aula ordenados para montar catálogo e rail.",
+                "operationId": "get_curriculum_api_courses__course_slug__curriculum_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseCurriculumOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Get Curriculum",
+                "tags": [
+                    "courses"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/lessons/{number}": {
+            "get": {
+                "operationId": "get_course_lesson_api_courses__course_slug__lessons__number__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonDetailOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Get Course Lesson",
+                "tags": [
+                    "courses"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/lessons/{number}/studied": {
+            "delete": {
+                "operationId": "desmarcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Desmarcar Estudada No Curso",
+                "tags": [
+                    "progress"
+                ]
+            },
+            "put": {
+                "operationId": "marcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Marcar Estudada No Curso",
+                "tags": [
+                    "progress"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/lessons/{number}/study-session": {
+            "get": {
+                "operationId": "obter_sessao_de_estudo_no_curso_api_courses__course_slug__lessons__number__study_session_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudySessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Obter Sessao De Estudo No Curso",
+                "tags": [
+                    "progress"
+                ]
+            },
+            "put": {
+                "operationId": "salvar_sessao_de_estudo_no_curso_api_courses__course_slug__lessons__number__study_session_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "number",
+                        "required": true,
+                        "schema": {
+                            "title": "Number",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudySessionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudySessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Salvar Sessao De Estudo No Curso",
+                "tags": [
+                    "progress"
+                ]
+            }
+        },
         "/api/exercises": {
             "get": {
                 "description": "Exercícios de uma aula, ou do bloco inteiro.\n\nÉ o que a prova do bloco consome: sem isso a tela teria que baixar as dez\naulas inteiras para montar uma lista de exercícios.",
@@ -3186,6 +3742,18 @@
                             ],
                             "description": "Filtra por número da aula.",
                             "title": "Lesson"
+                        }
+                    },
+                    {
+                        "description": "Slug do curso; o padrão mantém a consulta no Level 1.",
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "default": "voa-level-1",
+                            "description": "Slug do curso; o padrão mantém a consulta no Level 1.",
+                            "title": "Course",
+                            "type": "string"
                         }
                     }
                 ],
@@ -3395,6 +3963,20 @@
             "get": {
                 "description": "Todas as aulas, em ordem, com o mínimo para montar a navegação.",
                 "operationId": "listar_aulas_api_lessons_get",
+                "parameters": [
+                    {
+                        "description": "Slug do curso; o padrão mantém o endpoint legado no Level 1.",
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "default": "voa-level-1",
+                            "description": "Slug do curso; o padrão mantém o endpoint legado no Level 1.",
+                            "title": "Course",
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -3409,6 +3991,16 @@
                             }
                         },
                         "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
                     }
                 },
                 "summary": "Listar Aulas",
@@ -3495,7 +4087,6 @@
                 ]
             },
             "put": {
-                "description": "Marca a aula e põe o vocabulário dela no deck de revisão.\n\nIdempotente nas duas pontas: marcar duas vezes não cria duas linhas nem\nreinicia o agendamento de cartas que já existem.",
                 "operationId": "marcar_estudada_api_lessons__number__studied_put",
                 "parameters": [
                     {
@@ -3531,7 +4122,6 @@
         },
         "/api/lessons/{number}/study-session": {
             "get": {
-                "description": "Devolve o ponto salvo ou o início da jornada quando ela ainda não existe.",
                 "operationId": "obter_sessao_de_estudo_api_lessons__number__study_session_get",
                 "parameters": [
                     {
@@ -3572,7 +4162,6 @@
                 ]
             },
             "put": {
-                "description": "Cria ou atualiza a retomada da jornada, isolada por conta e aula.",
                 "operationId": "salvar_sessao_de_estudo_api_lessons__number__study_session_put",
                 "parameters": [
                     {
@@ -3873,8 +4462,28 @@
         },
         "/api/me/progress": {
             "get": {
-                "description": "Uma linha por aula, sempre as dez — aula sem atividade vem zerada.",
+                "description": "Uma linha por aula publicada, opcionalmente limitada a um curso.",
                 "operationId": "meu_progresso_api_me_progress_get",
+                "parameters": [
+                    {
+                        "description": "Limita aulas e denominadores ao slug de um curso.",
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Limita aulas e denominadores ao slug de um curso.",
+                            "title": "Course"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -3885,6 +4494,16 @@
                             }
                         },
                         "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
                     }
                 },
                 "summary": "Meu Progresso",
@@ -4883,6 +5502,18 @@
                             ],
                             "description": "Filtra por número da aula.",
                             "title": "Lesson"
+                        }
+                    },
+                    {
+                        "description": "Slug do curso; o padrão mantém a consulta no Level 1.",
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "default": "voa-level-1",
+                            "description": "Slug do curso; o padrão mantém a consulta no Level 1.",
+                            "title": "Course",
+                            "type": "string"
                         }
                     }
                 ],

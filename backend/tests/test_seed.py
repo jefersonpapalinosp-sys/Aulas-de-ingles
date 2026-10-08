@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
     ContentSource,
+    Course,
+    CourseUnit,
     Exercise,
     ExerciseAnswer,
     ExerciseHint,
@@ -18,12 +20,14 @@ from app.db.models import (
     VocabItem,
     WritingPrompt,
 )
-from app.db.seed import load_seed, seed_lessons
+from app.db.seed import load_course_seed, load_seed, seed_lessons
 
 
 async def _contagens(session: AsyncSession) -> dict[str, int]:
     saida = {}
     for nome, modelo in (
+        ("course", Course),
+        ("course_unit", CourseUnit),
         ("lesson", Lesson),
         ("lesson_media", LessonMedia),
         ("content_source", ContentSource),
@@ -58,17 +62,48 @@ async def test_arquivo_de_seed_tem_as_dez_aulas() -> None:
     assert all(item["license_reviewed_at"] == "2026-10-08" for item in media)
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
+    assert all(d["course_slug"] == "voa-level-1" for d in dados)
+    assert all(d["unit_slug"] == "31-40" for d in dados)
+    assert [d["position"] for d in dados] == list(range(1, 11))
+    assert all(d["warmup_prompt"] and d["listening_focus"] for d in dados)
+
+
+@pytest.mark.asyncio
+async def test_seed_de_cursos_planeja_os_dois_niveis() -> None:
+    courses = load_course_seed()
+
+    assert [course["slug"] for course in courses] == ["voa-level-1", "voa-level-2"]
+    assert [course["total_lessons"] for course in courses] == [52, 30]
+    assert [len(course["units"]) for course in courses] == [4, 6]
 
 
 @pytest.mark.asyncio
 async def test_seed_rodado_de_novo_nao_duplica(session: AsyncSession) -> None:
     antes = await _contagens(session)
+    assert antes["course"] == 2
+    assert antes["course_unit"] == 10
     assert antes["lesson"] == 10
 
     await seed_lessons(session)
 
     depois = await _contagens(session)
     assert depois == antes
+
+
+@pytest.mark.asyncio
+async def test_ids_de_aula_sobrevivem_ao_reseed(session: AsyncSession) -> None:
+    before = {
+        (lesson.course_slug, lesson.number): lesson.id
+        for lesson in (await session.execute(select(Lesson))).scalars()
+    }
+
+    await seed_lessons(session)
+
+    after = {
+        (lesson.course_slug, lesson.number): lesson.id
+        for lesson in (await session.execute(select(Lesson))).scalars()
+    }
+    assert after == before
 
 
 @pytest.mark.asyncio

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -38,6 +38,7 @@ from app.schemas.notebook import (
     NotebookKind,
     PersonalDataExportOut,
 )
+from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -77,7 +78,14 @@ async def listar_caderno(
 ) -> list[NotebookEntryOut]:
     query = select(NotebookEntry).where(NotebookEntry.user_id == usuario.id)
     if lesson is not None:
-        query = query.where(NotebookEntry.lesson.has(number=lesson))
+        query = query.where(
+            NotebookEntry.lesson.has(
+                and_(
+                    Lesson.number == lesson,
+                    Lesson.course.has(slug=DEFAULT_COURSE_SLUG),
+                )
+            )
+        )
     if kind is not None:
         query = query.where(NotebookEntry.kind == kind)
     entries = (await session.execute(query.order_by(NotebookEntry.updated_at.desc()))).scalars()
@@ -90,9 +98,7 @@ async def criar_anotacao(
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[NotebookEntryIn, Body()],
 ) -> NotebookEntryOut:
-    lesson = (
-        await session.execute(select(Lesson).where(Lesson.number == corpo.lesson_number))
-    ).scalar_one_or_none()
+    lesson = await lesson_by_course_number(session, DEFAULT_COURSE_SLUG, corpo.lesson_number)
     if lesson is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aula não existe.")
     entry = NotebookEntry(

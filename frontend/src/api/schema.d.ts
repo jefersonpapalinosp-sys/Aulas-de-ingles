@@ -112,6 +112,99 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Courses
+         * @description Lista cursos publicados e planejados sem materializar aulas completas.
+         */
+        get: operations["list_courses_api_courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/curriculum": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Curriculum
+         * @description Unidades e resumos de aula ordenados para montar catálogo e rail.
+         */
+        get: operations["get_curriculum_api_courses__course_slug__curriculum_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/lessons/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Course Lesson */
+        get: operations["get_course_lesson_api_courses__course_slug__lessons__number__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/lessons/{number}/studied": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Marcar Estudada No Curso */
+        put: operations["marcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_put"];
+        post?: never;
+        /** Desmarcar Estudada No Curso */
+        delete: operations["desmarcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{course_slug}/lessons/{number}/study-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Sessao De Estudo No Curso */
+        get: operations["obter_sessao_de_estudo_no_curso_api_courses__course_slug__lessons__number__study_session_get"];
+        /** Salvar Sessao De Estudo No Curso */
+        put: operations["salvar_sessao_de_estudo_no_curso_api_courses__course_slug__lessons__number__study_session_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/exercises": {
         parameters: {
             query?: never;
@@ -271,13 +364,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /**
-         * Marcar Estudada
-         * @description Marca a aula e põe o vocabulário dela no deck de revisão.
-         *
-         *     Idempotente nas duas pontas: marcar duas vezes não cria duas linhas nem
-         *     reinicia o agendamento de cartas que já existem.
-         */
+        /** Marcar Estudada */
         put: operations["marcar_estudada_api_lessons__number__studied_put"];
         post?: never;
         /** Desmarcar Estudada */
@@ -294,15 +381,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Obter Sessao De Estudo
-         * @description Devolve o ponto salvo ou o início da jornada quando ela ainda não existe.
-         */
+        /** Obter Sessao De Estudo */
         get: operations["obter_sessao_de_estudo_api_lessons__number__study_session_get"];
-        /**
-         * Salvar Sessao De Estudo
-         * @description Cria ou atualiza a retomada da jornada, isolada por conta e aula.
-         */
+        /** Salvar Sessao De Estudo */
         put: operations["salvar_sessao_de_estudo_api_lessons__number__study_session_put"];
         post?: never;
         delete?: never;
@@ -393,7 +474,7 @@ export interface paths {
         };
         /**
          * Meu Progresso
-         * @description Uma linha por aula, sempre as dez — aula sem atividade vem zerada.
+         * @description Uma linha por aula publicada, opcionalmente limitada a um curso.
          */
         get: operations["meu_progresso_api_me_progress_get"];
         put?: never;
@@ -943,6 +1024,66 @@ export interface components {
             /** Url */
             url: string | null;
         };
+        /** CourseCurriculumOut */
+        CourseCurriculumOut: {
+            course: components["schemas"]["CourseSummaryOut"];
+            /** Units */
+            units: components["schemas"]["CourseUnitOut"][];
+        };
+        /** CourseSummaryOut */
+        CourseSummaryOut: {
+            /** Id */
+            id: number;
+            /** Level */
+            level: string;
+            /** Position */
+            position: number;
+            /** Proficiency Label */
+            proficiency_label: string;
+            /** Provider */
+            provider: string;
+            /** Published Lessons */
+            published_lessons: number;
+            /** Slug */
+            slug: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "archived";
+            /** Title */
+            title: string;
+            /** Total Lessons */
+            total_lessons: number;
+        };
+        /** CourseUnitOut */
+        CourseUnitOut: {
+            /** Id */
+            id: number;
+            /** Lesson End */
+            lesson_end: number;
+            /** Lesson Start */
+            lesson_start: number;
+            /** Lessons */
+            lessons: components["schemas"]["LessonSummaryOut"][];
+            /** Position */
+            position: number;
+            /** Published Lessons */
+            published_lessons: number;
+            /** Slug */
+            slug: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "archived";
+            /** Title */
+            title: string;
+            /** Total Lessons */
+            total_lessons: number;
+        };
         /** DeckSummaryOut */
         DeckSummaryOut: {
             /**
@@ -1108,6 +1249,8 @@ export interface components {
         LessonDetailOut: {
             /** Content Sources */
             content_sources: components["schemas"]["ContentSourceOut"][];
+            /** Course Slug */
+            course_slug: string;
             /** Exercises */
             exercises: components["schemas"]["ExerciseOut"][];
             /** Focus Points */
@@ -1118,28 +1261,40 @@ export interface components {
             grammar_blocks: components["schemas"]["GrammarBlockOut"][];
             /** Grammar Tag */
             grammar_tag: string;
+            /** Id */
+            id: number;
             /** Lead */
             lead: string;
+            /** Listening Focus */
+            listening_focus: string;
             /** Media */
             media: components["schemas"]["LessonMediaOut"][];
             /** Number */
             number: number;
             /** Phrases */
             phrases: components["schemas"]["PhraseOut"][];
+            /** Position */
+            position: number;
             /** Pronunciation */
             pronunciation: components["schemas"]["PronunciationNoteOut"][];
+            /** Slug */
+            slug: string;
             /** Story Note */
             story_note: string | null;
             /** Title */
             title: string;
             /** Title Pt */
             title_pt: string;
+            /** Unit Slug */
+            unit_slug: string;
             /** Versions */
             versions: components["schemas"]["LessonVersionOut"][];
             /** Voa Url */
             voa_url: string;
             /** Vocab */
             vocab: components["schemas"]["VocabItemOut"][];
+            /** Warmup Prompt */
+            warmup_prompt: string;
             /** Writing Prompts */
             writing_prompts: components["schemas"]["WritingPromptOut"][];
         };
@@ -1186,30 +1341,44 @@ export interface components {
             attempts: number;
             /** Correct */
             correct: number;
+            /** Course Slug */
+            course_slug: string;
             /** Lesson Number */
             lesson_number: number;
             /** Studied */
             studied: boolean;
             /** Studied At */
             studied_at: string | null;
+            /** Unit Slug */
+            unit_slug: string;
         };
         /**
          * LessonSummaryOut
          * @description O que a trilha de navegação precisa — sem carregar a aula inteira.
          */
         LessonSummaryOut: {
+            /** Course Slug */
+            course_slug: string;
             /** Focus Points */
             focus_points: string[];
             /** Grammar Tag */
             grammar_tag: string;
+            /** Id */
+            id: number;
             /** Number */
             number: number;
+            /** Position */
+            position: number;
+            /** Slug */
+            slug: string;
             /** Story Note */
             story_note: string | null;
             /** Title */
             title: string;
             /** Title Pt */
             title_pt: string;
+            /** Unit Slug */
+            unit_slug: string;
         };
         /** LessonVersionOut */
         LessonVersionOut: {
@@ -1407,6 +1576,8 @@ export interface components {
         RecentSessionOut: {
             /** Completed Steps */
             completed_steps: number;
+            /** Course Slug */
+            course_slug: string;
             /** Current Step */
             current_step: string;
             /** Lesson Number */
@@ -1423,6 +1594,8 @@ export interface components {
         };
         /** RecommendationOut */
         RecommendationOut: {
+            /** Course Slug */
+            course_slug?: string | null;
             /** Estimated Minutes */
             estimated_minutes: number;
             /** Href */
@@ -2066,11 +2239,224 @@ export interface operations {
             };
         };
     };
+    list_courses_api_courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSummaryOut"][];
+                };
+            };
+        };
+    };
+    get_curriculum_api_courses__course_slug__curriculum_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseCurriculumOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_course_lesson_api_courses__course_slug__lessons__number__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    marcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    desmarcar_estudada_no_curso_api_courses__course_slug__lessons__number__studied_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    obter_sessao_de_estudo_no_curso_api_courses__course_slug__lessons__number__study_session_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudySessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    salvar_sessao_de_estudo_no_curso_api_courses__course_slug__lessons__number__study_session_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudySessionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudySessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     listar_exercicios_api_exercises_get: {
         parameters: {
             query?: {
                 /** @description Filtra por número da aula. */
                 lesson?: number | null;
+                /** @description Slug do curso; o padrão mantém a consulta no Level 1. */
+                course?: string;
             };
             header?: never;
             path?: never;
@@ -2218,7 +2604,10 @@ export interface operations {
     };
     listar_aulas_api_lessons_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Slug do curso; o padrão mantém o endpoint legado no Level 1. */
+                course?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2232,6 +2621,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LessonSummaryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2564,7 +2962,10 @@ export interface operations {
     };
     meu_progresso_api_me_progress_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Limita aulas e denominadores ao slug de um curso. */
+                course?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2578,6 +2979,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProgressOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -3271,6 +3681,8 @@ export interface operations {
             query?: {
                 /** @description Filtra por número da aula. */
                 lesson?: number | null;
+                /** @description Slug do curso; o padrão mantém a consulta no Level 1. */
+                course?: string;
             };
             header?: never;
             path?: never;

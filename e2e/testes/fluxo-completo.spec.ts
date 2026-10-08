@@ -19,6 +19,58 @@ function emailUnico() {
 }
 
 const SENHA = 'senha-bem-grande'
+const LEVEL_1_SLUG = 'voa-level-1'
+const LEVEL_2_SLUG = 'voa-level-2'
+
+function coursePath(courseSlug: string): string {
+  return `/cursos/${courseSlug}`
+}
+
+function lessonPath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
+  return `${coursePath(courseSlug)}/aulas/${lessonNumber}`
+}
+
+function studyPath(
+  lessonNumber: number,
+  step?: 'preparar' | 'assistir' | 'estudar' | 'praticar' | 'revisar',
+): string {
+  const base = `${lessonPath(lessonNumber)}/estudar`
+  return step ? `${base}/${step}` : base
+}
+
+async function expectNoHorizontalScroll(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    )
+    .toBeTruthy()
+}
+
+async function ensureTrailVisible(page: Page): Promise<Locator | null> {
+  const openDrawer = page.getByRole('button', { name: /Abrir trilha de aulas/ })
+  if (!(await openDrawer.isVisible())) return null
+  if ((await openDrawer.getAttribute('aria-expanded')) !== 'true') await openDrawer.click()
+  const dialog = page.getByRole('dialog', { name: 'Trilha de estudo' })
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+async function globalLink(page: Page, name: RegExp): Promise<Locator> {
+  const dialog = await ensureTrailVisible(page)
+  const scope = dialog ?? page.getByRole('navigation', { name: 'Atalhos' })
+  return scope.getByRole('link', { name })
+}
+
+async function expectCourseProgress(page: Page, completed: number): Promise<void> {
+  const dialog = await ensureTrailVisible(page)
+  const scope = dialog ?? page
+  await expect(scope.getByRole('progressbar', { name: 'Progresso do curso' })).toHaveAttribute(
+    'aria-valuenow',
+    String(completed),
+  )
+}
 
 async function tabAte(page: Page, alvo: Locator, limite = 80): Promise<void> {
   await expect(alvo).toBeVisible()
@@ -39,7 +91,8 @@ async function criarConta(page: Page, nome: string): Promise<string> {
   await page.getByLabel('E-mail').fill(email)
   await page.getByLabel('Senha').fill(SENHA)
   await page.getByRole('button', { name: 'Criar conta' }).click()
-  await expect(page.getByRole('heading', { name: 'Mapa do bloco 31–40' })).toBeVisible()
+  await expect(page).toHaveURL(/\/inicio$/)
+  await expect(page.getByRole('heading', { name: 'Hoje' })).toBeVisible()
   return email
 }
 
@@ -48,11 +101,15 @@ test('do cadastro à primeira revisão', async ({ page }) => {
     await criarConta(page, 'Jeferson')
   })
 
-  await test.step('o conteúdo das dez aulas vem da API', async () => {
-    await expect(page.locator('.arow')).toHaveCount(10)
-    await page.getByRole('link', { name: /It's Unbelievable/ }).first().click()
+  await test.step('o currículo do curso e da unidade vem da API', async () => {
+    await page.goto(coursePath(LEVEL_1_SLUG))
+    const main = page.locator('#main-content')
+    await main.getByRole('link', { name: /Aulas/ }).first().click()
+    const lessonLink = main.getByRole('link', { name: /It's Unbelievable/ })
+    await expect(lessonLink).toHaveAttribute('href', lessonPath(39))
+    await lessonLink.click()
     await expect(page.getByRole('heading', { name: "It's Unbelievable!" })).toBeVisible()
-    await expect(page.getByText('Prefixos negativos').first()).toBeVisible()
+    await expect(main.getByText('Prefixos negativos').first()).toBeVisible()
   })
 
   await test.step('errar um exercício de vocabulário põe a palavra no deck', async () => {
@@ -62,11 +119,11 @@ test('do cadastro à primeira revisão', async ({ page }) => {
     await expect(exercicio.getByText('Ainda não')).toBeVisible()
 
     // O contador de revisão aparece na trilha.
-    await expect(page.locator('a[href="/revisar"] .badge')).toHaveText('1')
+    await expect(await globalLink(page, /^Revisar/)).toContainText('1')
   })
 
   await test.step('revisar a carta e reagendá-la', async () => {
-    await page.getByRole('link', { name: /Revisar/ }).click()
+    await (await globalLink(page, /^Revisar/)).click()
     await expect(page.locator('.carta-termo')).toHaveText('dishonest')
     // A tradução não aparece antes de virar.
     await expect(page.locator('.carta-traducao')).toHaveCount(0)
@@ -80,36 +137,38 @@ test('do cadastro à primeira revisão', async ({ page }) => {
   })
 
   await test.step('marcar a aula semeia o vocabulário inteiro', async () => {
-    await page.getByRole('button', { name: 'Marcar aula 39 como estudada' }).click()
-    await expect(page.locator('.prog-top')).toContainText('1/10')
+    const dialog = await ensureTrailVisible(page)
+    const scope = dialog ?? page
+    await scope.getByRole('button', { name: 'Marcar aula 39 como estudada' }).click()
+    await expectCourseProgress(page, 1)
     // 13 itens na aula 39, menos o `dishonest` que já foi revisado hoje.
-    await expect(page.locator('a[href="/revisar"] .badge')).toHaveText('12')
+    await expect(await globalLink(page, /^Revisar/)).toContainText('12')
   })
 
   await test.step('o progresso sobrevive ao recarregar', async () => {
     await page.reload()
-    await expect(page.locator('.prog-top')).toContainText('1/10')
-    await expect(page.locator('a[href="/revisar"] .badge')).toHaveText('12')
+    await expectCourseProgress(page, 1)
+    await expect(await globalLink(page, /^Revisar/)).toContainText('12')
   })
 })
 
 test('acertar não enche o deck', async ({ page }) => {
   await criarConta(page, 'Certeira')
 
-  await page.goto('/aulas/39')
+  await page.goto(lessonPath(39))
   await expect(page.getByRole('heading', { name: "It's Unbelievable!" })).toBeVisible()
   const exercicio = page.locator('.ex').filter({ hasText: 'honest' }).first()
   await exercicio.getByRole('textbox').fill('dishonest')
   await exercicio.getByRole('button', { name: 'Verificar' }).click()
   await expect(exercicio.getByText('Correto')).toBeVisible()
 
-  await expect(page.locator('a[href="/revisar"] .badge')).toHaveCount(0)
+  await expect(await globalLink(page, /^Revisar/)).toHaveText('Revisar')
 })
 
 test('a jornada guiada retoma e conclui a aula 31', async ({ page }) => {
   await criarConta(page, 'Estudante guiada')
 
-  await page.goto('/aulas/31')
+  await page.goto(lessonPath(31))
   await page.getByRole('link', { name: 'Começar estudo' }).click()
   await expect(page.getByText('Etapa 1 de 5')).toBeVisible()
 
@@ -136,7 +195,7 @@ test('a jornada guiada retoma e conclui a aula 31', async ({ page }) => {
   // estado acessível ainda confirma que o servidor terminou de salvar.
   await expect(page.getByText('Progresso sincronizado.')).toHaveText('Progresso sincronizado.')
   await page.evaluate(() => window.localStorage.clear())
-  await page.goto('/aulas/31/estudar')
+  await page.goto(studyPath(31))
   await expect(page.getByText('Etapa 2 de 5')).toBeVisible()
 
   await page.getByRole('button', { name: /Concluir e ir para Estudar/ }).click()
@@ -190,12 +249,16 @@ test('a jornada guiada retoma e conclui a aula 31', async ({ page }) => {
   await page.getByRole('button', { name: 'Concluir aula' }).click()
 
   await expect(page.getByRole('status')).toContainText('Você percorreu as cinco etapas')
-  await expect(page.locator('.prog-top')).toContainText('1/10')
+  await expectCourseProgress(page, 1)
 })
 
 test('a correção acontece no servidor: o gabarito não viaja antes', async ({ request }) => {
   // Direto no contrato, sem depender de quando o browser dispara a chamada.
-  for (const rota of ['/api/lessons/31', '/api/lessons/39', '/api/exercises?lesson=31']) {
+  for (const rota of [
+    `/api/courses/${LEVEL_1_SLUG}/lessons/31`,
+    `/api/courses/${LEVEL_1_SLUG}/lessons/39`,
+    '/api/exercises?lesson=31',
+  ]) {
     const r = await request.get(rota)
     expect(r.ok()).toBeTruthy()
     const corpo = await r.text()
@@ -214,7 +277,9 @@ test('metadados editoriais e posição de mídia atravessam a API', async ({ req
   })
   expect(register.status()).toBe(201)
   const headers = { Authorization: `Bearer ${(await register.json()).access_token as string}` }
-  const lesson = await (await request.get('/api/lessons/32')).json()
+  const lesson = await (
+    await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/32`)
+  ).json()
 
   expect(lesson.versions[0]).toMatchObject({
     version: 1,
@@ -226,8 +291,19 @@ test('metadados editoriais e posição de mídia atravessam a API', async ({ req
   )
   expect(lesson.media[0].cues).toHaveLength(4)
 
-  for (const number of Array.from({ length: 10 }, (_, index) => index + 31)) {
-    const current = await (await request.get(`/api/lessons/${number}`)).json()
+  const curriculum = await (
+    await request.get(`/api/courses/${LEVEL_1_SLUG}/curriculum`)
+  ).json()
+  const lessonNumbers = curriculum.units.flatMap(
+    (unit: { lessons: Array<{ number: number }> }) =>
+      unit.lessons.map((currentLesson) => currentLesson.number),
+  ) as number[]
+  expect(lessonNumbers.length).toBeGreaterThan(0)
+
+  for (const number of lessonNumbers) {
+    const current = await (
+      await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/${number}`)
+    ).json()
     expect(current.media).toHaveLength(1)
     expect(current.media[0].source_url).toContain('voa-audio.voanews.eu')
     expect(current.media[0].cues.length).toBeGreaterThanOrEqual(4)
@@ -272,7 +348,9 @@ test('gravação oral exige consentimento e pode ser excluída', async ({ reques
     writing_enabled: false,
     used_today: 0,
   })
-  const lesson = await (await request.get('/api/lessons/31')).json()
+  const lesson = await (
+    await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/31`)
+  ).json()
   const cueId = lesson.media[0].cues[0].id as number
 
   const withoutConsent = await request.post('/api/speaking/attempts', {
@@ -303,7 +381,7 @@ test('gravação oral exige consentimento e pode ser excluída', async ({ reques
 
 test('caderno pessoal persiste, edita, exporta e exclui uma anotação', async ({ page }) => {
   await criarConta(page, 'Caderno E2E')
-  await page.getByRole('link', { name: 'Caderno' }).click()
+  await (await globalLink(page, /^Caderno$/)).click()
   await expect(page.getByRole('heading', { name: 'Caderno de inglês' })).toBeVisible()
   await expect(page.getByText(/Estas anotações pertencem somente à sua conta/)).toBeVisible()
 
@@ -351,7 +429,7 @@ test('painel Hoje orienta, salva o plano e só calcula competência com amostra'
   )
   await expect(page.getByLabel('Minutos por semana')).toHaveValue('120')
 
-  await page.goto('/aulas/31')
+  await page.goto(lessonPath(31))
   const exercise = page.locator('.ex').first()
   for (const answer of ['more fast', 'fastest', 'faster']) {
     await exercise.getByRole('textbox').fill(answer)
@@ -372,14 +450,14 @@ test('painel Hoje orienta, salva o plano e só calcula competência com amostra'
 
 test('revisão multimodal filtra e permite suspender, reativar e excluir', async ({ page }) => {
   await criarConta(page, 'Revisão multimodal E2E')
-  await page.goto('/aulas/31')
+  await page.goto(lessonPath(31))
 
   const exercise = page.locator('.ex').first()
   await exercise.getByRole('textbox').fill('more fast')
   await exercise.getByRole('button', { name: 'Verificar' }).click()
   await expect(exercise.getByText('Ainda não')).toBeVisible()
 
-  await page.getByRole('link', { name: /Revisar/ }).click()
+  await (await globalLink(page, /^Revisar/)).click()
   await expect(page.getByRole('heading', { name: 'Revisar' })).toBeVisible()
   await expect(page.getByText('Por que voltou?')).toBeVisible()
   await expect(page.getByText(/resposta incorreta/)).toBeVisible()
@@ -404,12 +482,8 @@ test('revisão multimodal filtra e permite suspender, reativar e excluir', async
 
 test('PWA mantém a aula e sincroniza uma tentativa feita offline', async ({ page, context }) => {
   await criarConta(page, 'Offline E2E')
-  await page.goto('/aulas/31')
+  await page.goto(lessonPath(31))
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused()
-  await page.keyboard.press('Enter')
-  await expect(page.locator('#main-content')).toBeFocused()
 
   // Aguarda o worker assumir a página e recarrega online para colocar a aula
   // pública e o bundle versionado no cache da instalação.
@@ -453,6 +527,145 @@ test('sem sessão, a aplicação pede login', async ({ page }) => {
   // Rota interna também cai no login.
   await page.goto('/revisar')
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
+})
+
+test('rotas legadas redirecionam ao Level 1 e preservam etapa, busca e fragmento', async ({
+  page,
+}) => {
+  await criarConta(page, 'Compatibilidade E2E')
+
+  await page.goto('/aulas/31?origem=e2e#objetivos')
+  await expect(page).toHaveURL(
+    new RegExp(`${lessonPath(31)}\\?origem=e2e#objetivos$`),
+  )
+
+  for (const step of ['preparar', 'assistir', 'estudar', 'praticar', 'revisar'] as const) {
+    await page.goto(`/aulas/31/estudar/${step}?origem=e2e#etapa`)
+    await expect(page).toHaveURL(
+      new RegExp(`${studyPath(31, step)}\\?origem=e2e#etapa$`),
+    )
+  }
+})
+
+test('catálogo apresenta Level 1 canônico e Level 2 vazio em preparação', async ({ page }) => {
+  await criarConta(page, 'Catálogo E2E')
+  await page.goto('/cursos')
+
+  await expect(page.getByRole('heading', { name: 'Cursos de inglês' })).toBeVisible()
+  const level1Card = page
+    .getByRole('article')
+    .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 1" }) })
+  const level2Card = page
+    .getByRole('article')
+    .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 2" }) })
+
+  await expect(level1Card.getByText('1 · Iniciante')).toBeVisible()
+  await expect(level1Card.getByRole('link', { name: 'Ver unidades' })).toHaveAttribute(
+    'href',
+    coursePath(LEVEL_1_SLUG),
+  )
+  await expect(level2Card.getByText('2 · Intermediário')).toBeVisible()
+  await expect(level2Card.getByText('0/30', { exact: true })).toBeVisible()
+  await expect(level2Card.getByText('Em preparação', { exact: true })).toBeVisible()
+
+  await level2Card.getByRole('link', { name: 'Ver unidades' }).click()
+  await expect(page).toHaveURL(new RegExp(`${coursePath(LEVEL_2_SLUG)}$`))
+  await expect(page.getByRole('heading', { name: 'Mapa do curso' })).toBeVisible()
+  await expect(page.getByText(/Level 2 · Intermediário · VOA Learning English/)).toBeVisible()
+  await expect(page.locator('#main-content a[href*="/aulas/"]')).toHaveCount(0)
+})
+
+test('rota canônica mantém aula ativa e navegação completa por teclado', async ({ page }) => {
+  await criarConta(page, 'Navegação E2E')
+  await page.goto(lessonPath(31))
+
+  await expect(page).toHaveURL(new RegExp(`${lessonPath(31)}$`))
+  await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+  const dialog = await ensureTrailVisible(page)
+  const navigation = dialog ?? page.getByRole('complementary', { name: 'Navegação do curso' })
+  const activeLesson = navigation.getByRole('link', {
+    name: /31.*Take Me Out to the Ball Game/,
+  })
+  await expect(activeLesson).toHaveAttribute('aria-current', 'page')
+
+  const shortcuts = navigation.getByRole('navigation', { name: 'Atalhos' })
+  for (const name of ['Hoje', 'Cursos', 'Revisar', 'Caderno', 'Avaliação']) {
+    await expect(shortcuts.getByRole('link', { name: new RegExp(`^${name}`) })).toBeVisible()
+  }
+  expect(
+    await shortcuts.evaluate(
+      (navigation) => {
+        const unitButton = navigation
+          .closest('.trail-panel')
+          ?.querySelector('button[aria-controls*="-trail-unit-"]')
+        return (
+          unitButton !== null &&
+          Boolean(
+            navigation.compareDocumentPosition(unitButton) & Node.DOCUMENT_POSITION_FOLLOWING,
+          )
+        )
+      },
+    ),
+  ).toBeTruthy()
+
+  const courseSelector = navigation.getByRole('combobox', { name: 'Curso' })
+  await courseSelector.focus()
+  for (const name of ['Hoje', 'Cursos', 'Revisar', 'Caderno', 'Avaliação', 'Mapa da unidade']) {
+    await page.keyboard.press('Tab')
+    await expect(shortcuts.getByRole('link', { name: new RegExp(`^${name}`) })).toBeFocused()
+  }
+  await page.keyboard.press('Tab')
+  const search = navigation.getByRole('searchbox', { name: 'Buscar aula' })
+  await expect(search).toBeFocused()
+  await page.keyboard.type('The Woods Are Alive')
+  const lesson40 = navigation.getByRole('link', { name: /40.*The Woods Are Alive/ })
+  await tabAte(page, lesson40, 10)
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(new RegExp(`${lessonPath(40)}$`))
+  await expect(page.getByRole('heading', { name: 'The Woods Are Alive' })).toBeVisible()
+})
+
+test('drawer da trilha preserva foco e reflow nos viewports críticos', async ({ page }) => {
+  await criarConta(page, 'Drawer E2E')
+  const viewports = [
+    { name: '320 px', width: 320, height: 640 },
+    { name: '360 px', width: 360, height: 740 },
+    { name: '768 px', width: 768, height: 1024 },
+    { name: 'zoom equivalente a 200%', width: 640, height: 360 },
+  ]
+
+  for (const viewport of viewports) {
+    await test.step(viewport.name, async () => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height })
+      await page.goto(lessonPath(31))
+      await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
+      await expectNoHorizontalScroll(page)
+
+      const openDrawer = page.getByRole('button', { name: /Abrir trilha de aulas/ })
+      await expect(openDrawer).toHaveAttribute('aria-expanded', 'false')
+      await openDrawer.focus()
+      await page.keyboard.press('Enter')
+
+      const dialog = page.getByRole('dialog', { name: 'Trilha de estudo' })
+      await expect(dialog).toBeVisible()
+      await expect(openDrawer).toHaveAttribute('aria-expanded', 'true')
+      await expect(dialog.getByRole('searchbox', { name: 'Buscar aula' })).toBeFocused()
+      await expectNoHorizontalScroll(page)
+
+      for (let index = 0; index < 24; index += 1) {
+        await page.keyboard.press('Tab')
+        expect(
+          await dialog.evaluate((element) => element.contains(document.activeElement)),
+        ).toBeTruthy()
+      }
+
+      await page.keyboard.press('Escape')
+      await expect(dialog).toHaveCount(0)
+      await expect(openDrawer).toHaveAttribute('aria-expanded', 'false')
+      await expect(openDrawer).toBeFocused()
+      await expectNoHorizontalScroll(page)
+    })
+  }
 })
 
 test('cadastro permanece acessível em viewport equivalente a zoom de 200%', async ({ page }) => {
@@ -514,31 +727,28 @@ test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', as
   await expect(page.getByRole('button', { name: 'Criar conta' })).toBeFocused()
   await page.keyboard.press('Enter')
 
-  await expect(page.getByRole('heading', { name: 'Mapa do bloco 31–40' })).toBeVisible()
+  await expect(page).toHaveURL(/\/inicio$/)
+  await expect(page.getByRole('heading', { name: 'Hoje' })).toBeVisible()
   await page.keyboard.press('Tab')
   await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.locator('#main-content')).toBeFocused()
 
-  await page.goto('/aulas/31')
+  await page.goto(lessonPath(31))
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused()
-  await page.keyboard.press('Enter')
-  await expect(page.locator('#main-content')).toBeFocused()
 
   const comecar = page.getByRole('link', { name: 'Começar estudo' })
   await tabAte(page, comecar)
   await page.keyboard.press('Enter')
-  await expect(page).toHaveURL(/\/aulas\/31\/estudar\/preparar$/)
+  await expect(page).toHaveURL(new RegExp(`${studyPath(31, 'preparar')}$`))
 
   const avancar = page.getByRole('button', { name: 'Concluir e ir para Assistir' })
   await tabAte(page, avancar)
   await page.keyboard.press('Space')
-  await expect(page).toHaveURL(/\/aulas\/31\/estudar\/assistir$/)
+  await expect(page).toHaveURL(new RegExp(`${studyPath(31, 'assistir')}$`))
   await expect(page.getByRole('heading', { name: 'Escute primeiro pelo contexto' })).toBeVisible()
 
-  await page.goto('/aulas/31')
+  await page.goto(lessonPath(31))
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
   const resposta = page.getByLabel('Resposta do exercício 1')
   await tabAte(page, resposta)
@@ -548,7 +758,17 @@ test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', as
   await page.keyboard.press('Enter')
   await expect(page.getByText('Correto').first()).toBeVisible()
 
-  const caderno = page.getByRole('link', { name: 'Caderno' })
+  const compactOpen = page.getByRole('button', { name: /Abrir trilha de aulas/ })
+  let caderno: Locator
+  if (await compactOpen.isVisible()) {
+    await tabAte(page, compactOpen)
+    await page.keyboard.press('Enter')
+    const dialog = page.getByRole('dialog', { name: 'Trilha de estudo' })
+    await expect(dialog).toBeVisible()
+    caderno = dialog.getByRole('link', { name: 'Caderno' })
+  } else {
+    caderno = page.getByRole('link', { name: 'Caderno' })
+  }
   await tabAte(page, caderno)
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { name: 'Caderno de inglês' })).toBeVisible()
@@ -561,7 +781,16 @@ test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', as
   await page.keyboard.press('Space')
   await expect(page.getByRole('status')).toHaveText('Anotação salva no seu caderno.')
 
-  const revisar = page.getByRole('link', { name: /Revisar/ })
+  let revisar: Locator
+  if (await compactOpen.isVisible()) {
+    await tabAte(page, compactOpen)
+    await page.keyboard.press('Enter')
+    const dialog = page.getByRole('dialog', { name: 'Trilha de estudo' })
+    await expect(dialog).toBeVisible()
+    revisar = dialog.getByRole('link', { name: /^Revisar/ })
+  } else {
+    revisar = page.getByRole('link', { name: /^Revisar/ })
+  }
   await tabAte(page, revisar)
   await page.keyboard.press('Enter')
   await expect(
@@ -605,8 +834,8 @@ test('login e cadastro preservam controles em contraste forçado', async ({ page
   await criarConta(page, 'Contraste E2E')
   for (const rota of [
     '/',
-    '/aulas/31',
-    '/aulas/40/estudar/assistir',
+    lessonPath(31),
+    studyPath(40, 'assistir'),
     '/revisar',
     '/caderno',
   ]) {
@@ -632,13 +861,13 @@ test('painel e aula não têm violações WCAG sérias ou críticas', async ({ p
   expect(painel.violations.filter(({ impact }) => impact === 'serious' || impact === 'critical'))
     .toEqual([])
 
-  await page.goto('/aulas/40')
+  await page.goto(lessonPath(40))
   await expect(page.getByRole('heading', { name: 'The Woods Are Alive' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Começar estudo' })).toHaveAttribute(
     'href',
-    '/aulas/40/estudar',
+    studyPath(40),
   )
-  await page.goto('/aulas/40/estudar/assistir')
+  await page.goto(studyPath(40, 'assistir'))
   await expect(page.getByRole('heading', { name: 'Conversa da Aula 40' })).toBeVisible()
   await expect(page.getByText('What part does the director give Anna?')).toBeVisible()
   const aula = await new AxeBuilder({ page })

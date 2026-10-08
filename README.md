@@ -1,13 +1,14 @@
 # Aulas de Inglês
 
-App de estudo construído sobre a série *Let's Learn English* (VOA, nível 1).
-Catálogo de aulas, vocabulário com IPA, exercícios corrigidos no servidor,
+App de estudo construído sobre a série *Let's Learn English* da VOA. O catálogo já representa os
+níveis 1 e 2, com unidades navegáveis, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: v1.4 — Sprints 6–14 concluídas no piloto.** O caderno, a conta, o progresso, o painel
-Hoje, a revisão multimodal e o modo offline instalável funcionam. A Aula 31 também possui uma
-jornada guiada com áudio, escrita, speaking e assistência opcional. Os recursos assistidos
-ficam desligados por padrão até passarem pela avaliação humana.
+**Estado: Sprints 6–14 e 20 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e da
+jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável e
+rotas canônicas por curso. As Aulas 31–40 estão publicadas no Level 1; o restante do Level 1 e o
+Level 2 aparecem como planejamento, sem conteúdo fictício. Os recursos assistidos ficam desligados
+por padrão até passarem pela avaliação humana.
 
 ---
 
@@ -118,17 +119,17 @@ docker start aulas-db
 ### Modelo
 
 ```
-lesson ─┬─ lesson_goal
-        ├─ content_source
-        ├─ lesson_version
-        ├─ grammar_block ── grammar_row
-        ├─ phrase
-        ├─ lesson_media ── transcript_cue
-        ├─ writing_prompt
-        ├─ vocab_item
-        ├─ pronunciation_note
-        └─ exercise ─┬─ exercise_answer
-                     └─ exercise_hint
+course ── course_unit ── lesson ─┬─ lesson_goal
+                                 ├─ content_source
+                                 ├─ lesson_version
+                                 ├─ grammar_block ── grammar_row
+                                 ├─ phrase
+                                 ├─ lesson_media ── transcript_cue
+                                 ├─ writing_prompt
+                                 ├─ vocab_item
+                                 ├─ pronunciation_note
+                                 └─ exercise ─┬─ exercise_answer
+                                              └─ exercise_hint
 
 app_user ─┬─ study_session_progress ─┬─ lesson
           │                          └─ step_progress
@@ -162,7 +163,8 @@ payload.
 
 ### Seed
 
-`seed/lessons.json` é a fonte do conteúdo. `make seed` é idempotente:
+`seed/courses.json` define cursos e unidades; `seed/lessons.json` guarda o conteúdo publicado.
+`make seed` aplica os dois arquivos de forma idempotente:
 
 - `lesson`, `vocab_item`, `exercise` e `writing_prompt` são atualizados no lugar, pela chave
   natural. A partir da S3 as tentativas e as cartas de revisão apontam para
@@ -287,14 +289,15 @@ navegador para o JavaScript comparar seria publicar o gabarito. Então:
 | Responder (confere e **grava**) | `POST /api/exercises/{id}/attempt` |
 | Pedir dica gradual | `GET /api/exercises/{id}/hints/{level}` |
 | Ver o gabarito (o usuário pede) | `GET /api/exercises/{id}/answer` |
-| Marcar / desmarcar aula | `PUT` / `DELETE /api/lessons/{n}/studied` |
-| Ler / salvar retomada | `GET` / `PUT /api/lessons/{n}/study-session` |
+| Marcar / desmarcar aula | `PUT` / `DELETE /api/courses/{curso}/lessons/{n}/studied` |
+| Ler / salvar retomada | `GET` / `PUT /api/courses/{curso}/lessons/{n}/study-session` |
 | Ler / salvar rascunho | `GET` / `PUT /api/writing/prompts/{id}/draft` |
 | Criar versão do texto | `POST /api/writing/prompts/{id}/versions` |
 | Analisar critérios | `POST /api/writing/prompts/{id}/feedback` |
 | Meu progresso | `GET /api/me/progress` |
 
 Ler o conteúdo das aulas é público; responder e marcar exigem conta.
+Os endpoints antigos em `/api/lessons/...` permanecem compatíveis e resolvem o Level 1.
 Cada tentativa guarda **o texto exato digitado** — é isso que vai permitir,
 na S4, descobrir *qual* item a pessoa erra, e não só que ela errou.
 
@@ -414,9 +417,9 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 129 testes contra o Postgres do compose | `make test-api` |
-| vitest | 65 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 15 cenários em desktop e mobile (30 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 160 testes contra o Postgres do compose | `make test-api` |
+| vitest | 85 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 19 cenários em desktop e mobile (38 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
 O frontend possui uma **jornada guiada** em todas as Aulas 31–40. Ela divide o estudo em
 preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
@@ -453,12 +456,13 @@ produção, migrations para frente e para trás, seed rodado duas vezes, piso de
 
 ## Como adicionar uma aula nova
 
-1. Acrescente o objeto em `seed/lessons.json` seguindo o formato das outras
-   (texto em Markdown, nunca HTML).
-2. `make seed` — é idempotente, as aulas existentes não são tocadas.
-3. Se o modelo mudou: `make migration m="o que mudou"`, confira o arquivo
+1. Confirme ou crie o curso e a unidade em `seed/courses.json`.
+2. Acrescente o objeto em `seed/lessons.json`, incluindo `course_slug`, `unit_slug`, `slug` e
+   `position` (texto em Markdown, nunca HTML).
+3. `make seed` — é idempotente, as aulas existentes não são recriadas.
+4. Se o modelo mudou: `make migration m="o que mudou"`, confira o arquivo
    gerado, e `make migrate`.
-4. Se a API mudou: `make openapi` e, no frontend, `npm run gen:api`. Os dois
+5. Se a API mudou: `make openapi` e, no frontend, `npm run gen:api`. Os dois
    arquivos entram no mesmo commit que a mudança.
 
 ## Estrutura
@@ -474,7 +478,8 @@ frontend/  src/api/                    — cliente tipado + schema GERADO
 infra/     compose.yml                 — dev: db + api + worker + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
-seed/      lessons.json                — conteúdo das 10 aulas
+seed/      courses.json                — catálogo de cursos e unidades
+           lessons.json                — conteúdo das 10 aulas publicadas
 ```
 
 ## Convenções
@@ -486,4 +491,5 @@ seed/      lessons.json                — conteúdo das 10 aulas
   conta como teste de integração.
 - Tag `sN` a cada sprint fechada.
 
-O plano completo das Sprints 6–14 está no roadmap do projeto.
+O plano das Sprints 20–25 está em
+[docs/plano_sprints_20_25_frontend_cursos_exercicios_2026-10-08.md](docs/plano_sprints_20_25_frontend_cursos_exercicios_2026-10-08.md).

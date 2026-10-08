@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
 from app.db.models import (
+    Course,
+    CourseUnit,
     Exercise,
     ExerciseAttempt,
     Lesson,
@@ -120,8 +122,12 @@ async def _recommendation(
             kind="continue_lesson",
             title=f"Continuar a Aula {lesson.number}",
             reason=f"Você parou na etapa {study.current_step}; retomar preserva o contexto.",
-            href=f"/aulas/{lesson.number}/estudar/{study.current_step}",
+            href=(
+                f"/cursos/{lesson.course_slug}/aulas/{lesson.number}/estudar/"
+                f"{study.current_step}"
+            ),
             estimated_minutes=10,
+            course_slug=lesson.course_slug,
             lesson_number=lesson.number,
         )
 
@@ -129,8 +135,10 @@ async def _recommendation(
     next_lesson = (
         await session.execute(
             select(Lesson)
+            .join(Course, Lesson.course_id == Course.id)
+            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
             .where(Lesson.id.not_in(studied_lesson_ids))
-            .order_by(Lesson.number)
+            .order_by(Course.position, CourseUnit.position, Lesson.position)
             .limit(1)
         )
     ).scalar_one_or_none()
@@ -139,8 +147,9 @@ async def _recommendation(
             kind="start_lesson",
             title=f"Começar a Aula {next_lesson.number}",
             reason="É a próxima aula ainda não concluída na sequência do bloco.",
-            href=f"/aulas/{next_lesson.number}/estudar",
+            href=f"/cursos/{next_lesson.course_slug}/aulas/{next_lesson.number}/estudar",
             estimated_minutes=20,
+            course_slug=next_lesson.course_slug,
             lesson_number=next_lesson.number,
         )
 
@@ -194,6 +203,7 @@ async def painel_hoje(
     if latest is not None:
         study, lesson = latest
         recent = RecentSessionOut(
+            course_slug=lesson.course_slug,
             lesson_number=lesson.number,
             lesson_title=lesson.title,
             current_step=study.current_step,

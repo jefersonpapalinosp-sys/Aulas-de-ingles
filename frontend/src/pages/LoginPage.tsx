@@ -35,7 +35,7 @@ export function LoginPage() {
   return (
     <div className="login-tela">
       <div className="login-caixa">
-        <p className="brand">VOA · Let's Learn English · Level 1</p>
+        <p className="brand">Trilhas de estudo · inglês</p>
         <h1>Aulas de Inglês</h1>
         <p className="lead">
           {modo === 'entrar'

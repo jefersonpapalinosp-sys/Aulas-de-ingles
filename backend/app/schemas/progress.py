@@ -56,6 +56,8 @@ class RevealAnswerOut(BaseModel):
 class LessonProgressOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    course_slug: str
+    unit_slug: str
     lesson_number: int
     studied: bool
     studied_at: datetime | None

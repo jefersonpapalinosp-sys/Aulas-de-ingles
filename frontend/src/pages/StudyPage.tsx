@@ -20,32 +20,11 @@ import {
   STUDY_STEPS,
   type StudyStepSlug,
 } from '../features/study-session/studyProgress'
-
-const WARMUP_BY_LESSON: Record<number, string> = {
-  31: 'Como você compararia duas formas de transporte?',
-  32: 'Como você pediria uma informação e responderia com entusiasmo?',
-  33: 'Como você explicaria, em ordem, as regras de um esporte?',
-  34: 'Como você falaria sobre um plano futuro que ainda não é certo?',
-  35: 'Como você pediria quantidades e embalagens em uma lista de compras?',
-  36: 'Como você diria onde estão os ingredientes e se ofereceria para ajudar?',
-  37: 'Como você concordaria ou discordaria de uma opinião com educação?',
-  38: 'Como você descreveria seu melhor amigo usando superlativos?',
-  39: 'Como você explicaria que um produto não cumpriu o que prometeu?',
-  40: 'Como você pediria para alguém falar mais alto ou andar mais devagar?',
-}
-
-const LISTENING_FOCUS_BY_LESSON: Record<number, string> = {
-  31: 'os transportes comparados e o conselho final',
-  32: 'quem recebe cada pergunta ou resposta e as interjeições',
-  33: 'os marcadores de sequência e quem realiza cada ação no beisebol',
-  34: 'a diferença de certeza entre *might* e *will*',
-  35: 'as embalagens, quantidades e a lista de compras errada',
-  36: 'as preposições de lugar e as decisões com *I’ll*',
-  37: 'os possessivos e as frases usadas para concordar ou discordar',
-  38: 'os superlativos empregados para descrever cada amigo',
-  39: 'os prefixos negativos e as pistas que revelam o problema do produto',
-  40: 'os advérbios que mudam a maneira e o momento de cada ação',
-}
+import {
+  DEFAULT_COURSE_SLUG,
+  lessonPath,
+  studyPath,
+} from '../routing/courseRoutes'
 
 function StepContent({
   lesson,
@@ -72,7 +51,7 @@ function StepContent({
         </div>
         <aside className="study-prompt" aria-labelledby="study-warmup-title">
           <p className="study-kicker">Aquecimento · responda em voz alta</p>
-          <h3 id="study-warmup-title">{WARMUP_BY_LESSON[lesson.number]}</h3>
+          <h3 id="study-warmup-title">{lesson.warmup_prompt}</h3>
           <p>
             Tente usar uma frase curta em inglês. Não precisa acertar de primeira — volte a esta
             pergunta depois da prática.
@@ -122,7 +101,7 @@ function StepContent({
           <ol>
             <li>Na primeira vez, não pause: identifique as pessoas, o lugar e o problema.</li>
             <li>
-              Na segunda, concentre-se em {LISTENING_FOCUS_BY_LESSON[lesson.number]}.
+              Na segunda, concentre-se em {lesson.listening_focus}.
             </li>
             <li>Depois, abra os trechos selecionados e confira o que conseguiu reconhecer.</li>
           </ol>
@@ -210,13 +189,14 @@ function StepContent({
 }
 
 export function StudyPage() {
-  const { numero, etapa } = useParams()
+  const { courseSlug = DEFAULT_COURSE_SLUG, numero, etapa } = useParams()
   const lessonNumber = Number(numero)
   const navigate = useNavigate()
   const { usuario } = useSessao()
-  const { data: lesson, isPending, error, refetch } = useLesson(lessonNumber)
-  const marcarEstudada = useMarcarEstudada()
+  const { data: lesson, isPending, error, refetch } = useLesson(courseSlug, lessonNumber)
+  const marcarEstudada = useMarcarEstudada(courseSlug)
   const serverSession = useStudySession(
+    courseSlug,
     lessonNumber,
     Boolean(usuario) && Number.isInteger(lessonNumber),
   )
@@ -225,10 +205,10 @@ export function StudyPage() {
     isPending: sincronizando,
     isError: sincronizacaoFalhou,
     isSuccess: sincronizado,
-  } = useSalvarStudySession(lessonNumber)
+  } = useSalvarStudySession(courseSlug, lessonNumber)
   const stored = useMemo(
-    () => loadStudyProgress(usuario?.id ?? 0, lessonNumber),
-    [usuario?.id, lessonNumber],
+    () => loadStudyProgress(usuario?.id ?? 0, courseSlug, lessonNumber),
+    [usuario?.id, courseSlug, lessonNumber],
   )
   const [completedSteps, setCompletedSteps] = useState<StudyStepSlug[]>(stored.completedSteps)
   const [resumeStep, setResumeStep] = useState<StudyStepSlug>(stored.currentStep)
@@ -254,24 +234,32 @@ export function StudyPage() {
 
   useEffect(() => {
     if (!usuario || !hydrated || !Number.isInteger(lessonNumber) || !isStudyStep(etapa)) return
-    saveStudyProgress(usuario.id, lessonNumber, {
+    saveStudyProgress(usuario.id, courseSlug, lessonNumber, {
       currentStep: etapa,
       completedSteps,
     })
     sincronizarSessao({ current_step: etapa, completed_steps: completedSteps })
-  }, [usuario, hydrated, lessonNumber, etapa, completedSteps, sincronizarSessao])
+  }, [
+    usuario,
+    hydrated,
+    courseSlug,
+    lessonNumber,
+    etapa,
+    completedSteps,
+    sincronizarSessao,
+  ])
 
   if (!Number.isInteger(lessonNumber)) return <p className="erro">Número de aula inválido.</p>
   if (!usuario) return null
   if (!etapa) {
     if (serverSession.isPending || !hydrated) return <Carregando oque="seu ponto de retomada" />
-    return <Navigate to={`/aulas/${lessonNumber}/estudar/${resumeStep}`} replace />
+    return <Navigate to={studyPath(courseSlug, lessonNumber, resumeStep)} replace />
   }
   if (!isStudyStep(etapa)) {
     return (
       <div className="estado-erro" role="alert">
         <p>Esta etapa de estudo não existe.</p>
-        <Link className="btn ghost" to={`/aulas/${lessonNumber}/estudar`}>
+        <Link className="btn ghost" to={studyPath(courseSlug, lessonNumber)}>
           Retomar a aula
         </Link>
       </div>
@@ -290,7 +278,7 @@ export function StudyPage() {
   const isComplete = STUDY_STEPS.every((step) => completedSteps.includes(step.slug))
 
   function persist(currentStep: StudyStepSlug, completed: StudyStepSlug[]) {
-    saveStudyProgress(userId, lessonNumber, {
+    saveStudyProgress(userId, courseSlug, lessonNumber, {
       currentStep,
       completedSteps: completed,
     })
@@ -304,7 +292,7 @@ export function StudyPage() {
 
     if (next) {
       persist(next.slug, completed)
-      navigate(`/aulas/${lessonNumber}/estudar/${next.slug}`)
+      navigate(studyPath(courseSlug, lessonNumber, next.slug))
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
@@ -316,7 +304,7 @@ export function StudyPage() {
   function goBack() {
     if (!previous) return
     persist(previous.slug, completedSteps)
-    navigate(`/aulas/${lessonNumber}/estudar/${previous.slug}`)
+    navigate(studyPath(courseSlug, lessonNumber, previous.slug))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -330,7 +318,10 @@ export function StudyPage() {
             <em>{lesson.title_pt}</em> · {lesson.grammar_tag}
           </p>
         </div>
-        <Link className="study-overview-link" to={`/aulas/${lesson.number}`}>
+        <Link
+          className="study-overview-link"
+          to={lessonPath(courseSlug, lesson.number)}
+        >
           Ver aula completa
         </Link>
       </header>
@@ -347,6 +338,7 @@ export function StudyPage() {
       </div>
 
       <StepNavigator
+        courseSlug={courseSlug}
         lessonNumber={lessonNumber}
         currentStep={currentStep}
         completedSteps={completedSteps}
@@ -379,7 +371,7 @@ export function StudyPage() {
             ← {previous.shortTitle}
           </button>
         ) : (
-          <Link className="btn ghost" to={`/aulas/${lesson.number}`}>
+          <Link className="btn ghost" to={lessonPath(courseSlug, lesson.number)}>
             ← Sair da jornada
           </Link>
         )}

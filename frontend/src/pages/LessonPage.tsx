@@ -1,11 +1,19 @@
 import { Link, useParams } from 'react-router-dom'
 import { useSessao } from '../api/auth'
-import { useLesson } from '../api/queries'
+import { useCourseCurriculum, useLesson } from '../api/queries'
 import { ExerciseCard } from '../components/ExerciseCard'
 import { GrammarBlockView } from '../components/GrammarBlockView'
 import { PhraseList, PronunciationList, VocabTable } from '../components/LessonSections'
 import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
+import { adjacentLessons } from '../features/curriculum/curriculum'
+import {
+  coursePath,
+  DEFAULT_COURSE_SLUG,
+  lessonPath,
+  studyPath,
+  unitPath,
+} from '../routing/courseRoutes'
 
 function Secao({ n, titulo, children }: { n: string; titulo: string; children: React.ReactNode }) {
   return (
@@ -21,19 +29,25 @@ function Secao({ n, titulo, children }: { n: string; titulo: string; children: R
 
 export function LessonPage() {
   const { usuario } = useSessao()
-  const { numero } = useParams()
+  const { courseSlug = DEFAULT_COURSE_SLUG, numero } = useParams()
   const n = Number(numero)
-  const { data, isPending, error, refetch } = useLesson(n)
+  const { data, isPending, error, refetch } = useLesson(courseSlug, n)
+  const curriculum = useCourseCurriculum(courseSlug)
 
   if (!Number.isInteger(n)) return <p className="erro">Número de aula inválido.</p>
   if (isPending) return <Carregando oque={`a aula ${n}`} />
   if (error) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
   const currentVersion = data.versions[0]
+  const { previous, next } = adjacentLessons(curriculum.data, data.id)
+  const courseTitle = curriculum.data?.course.title ?? courseSlug
+  const unit = curriculum.data?.units.find((candidate) =>
+    candidate.lessons.some((lesson) => lesson.id === data.id),
+  )
 
   return (
     <>
       <p className="eyebrow">
-        Lesson {data.number} · Let's Learn English Level 1
+        Aula {data.number} · {courseTitle}
         {data.story_note && <> · {data.story_note}</>}
       </p>
       <h1>{data.title}</h1>
@@ -90,7 +104,7 @@ export function LessonPage() {
             <p className="study-kicker">Jornada guiada</p>
             <strong>Estude em cinco etapas e continue de onde parou.</strong>
           </div>
-          <Link className="btn" to={`/aulas/${data.number}/estudar`}>
+          <Link className="btn" to={studyPath(courseSlug, data.number)}>
             Começar estudo
           </Link>
         </div>
@@ -139,22 +153,25 @@ export function LessonPage() {
       </Secao>
 
       <nav className="navbtns">
-        {data.number > 31 ? (
-          <Link className="btn ghost" to={`/aulas/${data.number - 1}`}>
-            ← Aula {data.number - 1}
+        {previous ? (
+          <Link className="btn ghost" to={lessonPath(courseSlug, previous.number)}>
+            ← Aula {previous.number}
           </Link>
         ) : (
-          <Link className="btn ghost" to="/">
-            ← Mapa do bloco
+          <Link
+            className="btn ghost"
+            to={unit ? unitPath(courseSlug, unit.slug) : coursePath(courseSlug)}
+          >
+            ← Mapa do curso
           </Link>
         )}
-        {data.number < 40 ? (
-          <Link className="btn ghost" to={`/aulas/${data.number + 1}`}>
-            Aula {data.number + 1} →
+        {next ? (
+          <Link className="btn ghost" to={lessonPath(courseSlug, next.number)}>
+            Aula {next.number} →
           </Link>
         ) : (
-          <Link className="btn ghost" to="/prova">
-            Prova do bloco →
+          <Link className="btn ghost" to={coursePath(courseSlug)}>
+            Concluir no mapa →
           </Link>
         )}
       </nav>

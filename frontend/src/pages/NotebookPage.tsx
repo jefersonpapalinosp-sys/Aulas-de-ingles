@@ -8,6 +8,7 @@ import {
   type NotebookKind,
 } from '../api/client'
 import { useLessons } from '../api/queries'
+import { DEFAULT_COURSE_SLUG, studyPath } from '../routing/courseRoutes'
 
 const KINDS: readonly { value: NotebookKind; label: string }[] = [
   { value: 'note', label: 'Anotação livre' },
@@ -26,7 +27,7 @@ export function NotebookPage() {
   const { data: lessons = [] } = useLessons()
   const [lessonFilter, setLessonFilter] = useState<'all' | number>('all')
   const [kindFilter, setKindFilter] = useState<'all' | NotebookKind>('all')
-  const [lessonNumber, setLessonNumber] = useState(31)
+  const [lessonNumber, setLessonNumber] = useState(0)
   const [kind, setKind] = useState<NotebookKind>('note')
   const [content, setContent] = useState('')
   const [editing, setEditing] = useState<NotebookEntry | null>(null)
@@ -78,12 +79,16 @@ export function NotebookPage() {
     [recordingUrl],
   )
 
+  useEffect(() => {
+    if (lessonNumber === 0 && lessons[0]) setLessonNumber(lessons[0].number)
+  }, [lessonNumber, lessons])
+
   async function refreshNotebook() {
     await queryClient.invalidateQueries({ queryKey: ['notebook'] })
   }
 
   async function createEntry() {
-    if (!content.trim()) return
+    if (!content.trim() || lessonNumber === 0) return
     setSaving(true)
     setMessage('')
     try {
@@ -321,7 +326,11 @@ export function NotebookPage() {
                 <strong>{item.prompt_title}</strong>
                 <small>{item.revisions.length} versões · {item.feedbacks.length} análises</small>
               </div>
-              <Link to={`/aulas/${item.lesson_number}/estudar/revisar`}>Abrir texto</Link>
+              <Link
+                to={studyPath(DEFAULT_COURSE_SLUG, item.lesson_number, 'revisar')}
+              >
+                Abrir texto
+              </Link>
             </li>
           ))}
         </ul>

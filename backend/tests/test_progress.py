@@ -81,6 +81,32 @@ async def test_jornada_guiada_salva_e_normaliza_as_etapas(client: AsyncClient) -
 
 
 @pytest.mark.asyncio
+async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncClient) -> None:
+    headers = await conta(client, "curso-canonico")
+    base = "/api/courses/voa-level-1/lessons/32"
+
+    assert (await client.put(f"{base}/studied", headers=headers)).status_code == 204
+    saved = await client.put(
+        f"{base}/study-session",
+        headers=headers,
+        json={"current_step": "assistir", "completed_steps": ["preparar"]},
+    )
+    resumed = await client.get(f"{base}/study-session", headers=headers)
+    level_1 = await client.get("/api/me/progress?course=voa-level-1", headers=headers)
+    level_2 = await client.get("/api/me/progress?course=voa-level-2", headers=headers)
+
+    assert saved.status_code == resumed.status_code == 200
+    assert resumed.json()["current_step"] == "assistir"
+    assert level_1.json()["total_lessons"] == 10
+    assert level_1.json()["studied_count"] == 1
+    row = next(item for item in level_1.json()["lessons"] if item["lesson_number"] == 32)
+    assert row["course_slug"] == "voa-level-1"
+    assert row["unit_slug"] == "31-40"
+    assert level_2.json()["total_lessons"] == 0
+    assert level_2.json()["lessons"] == []
+
+
+@pytest.mark.asyncio
 async def test_jornada_e_isolada_por_conta_e_valida_etapa(client: AsyncClient) -> None:
     ana = await conta(client, "jornada-ana")
     await client.put(
