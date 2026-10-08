@@ -24,8 +24,8 @@ Legenda: `PENDENTE`, `EM RETESTE`, `INCONCLUSIVO`, `APROVADO`, `REPROVADO` ou
 | macOS + VoiceOver | ordem de leitura, títulos, landmarks, nomes e estados anunciados | `/`, `/aulas/31`, `/aulas/40/estudar/assistir`, `/revisao`, `/caderno` | PENDENTE | — |
 | iOS + VoiceOver | gestos, foco, player, formulário e retorno de erro | `/`, `/aulas/40/estudar/assistir`, `/revisao` | PENDENTE | — |
 | Android + TalkBack | gestos, foco, player, formulário e retorno de erro | `/`, `/aulas/40/estudar/assistir`, `/revisao` | PENDENTE | — |
-| Desktop, teclado | fluxo completo com Tab, Shift+Tab, Enter, Espaço e Escape | login, jornada, exercício, revisão e caderno | INCONCLUSIVO | A primeira execução não conseguiu confirmar eventos reais de Tab/Enter. |
-| Desktop, zoom 200% | reflow sem rolagem horizontal na largura equivalente a 1280 px | `/`, aula, jornada, revisão e caderno | EM RETESTE | Login aprovado. O segundo teste confirmou o campo Nome, mas encontrou o topo do cadastro em `-135px`; a nova correção aguarda confirmação manual. |
+| Desktop, teclado | fluxo completo com Tab, Shift+Tab, Enter, Espaço e Escape | login, jornada, exercício, revisão e caderno | INCONCLUSIVO | Estrutura aprovada: controles nativos, nomes acessíveis, ordem lógica e digitação funcional. O controlador não executou Tab/Enter/Espaço. |
+| Desktop, zoom 200% | reflow sem rolagem horizontal na largura equivalente a 1280 px | `/`, aula, jornada, revisão e caderno | APROVADO | Login e cadastro sem rolagem horizontal; todo o conteúdo permanece acessível por rolagem vertical. |
 | Windows, contraste forçado | texto, foco, bordas, botões, links e estados continuam distinguíveis | `/`, aula, jornada, revisão e caderno | PENDENTE | — |
 
 ## Resultado da primeira execução
@@ -47,7 +47,7 @@ inferior. Em viewports baixos, todo o início do formulário permanece alcançá
 E2E cobre altura do campo Nome, posição do cartão e ausência de overflow horizontal em viewport
 de 640 × 360, equivalente ao reflow esperado em 200% sobre 1280 × 720.
 
-## Resultado da segunda execução
+## Resultado da segunda execução — conclusão posteriormente corrigida
 
 - login aprovado em equivalente a 200%, sem rolagem horizontal e com todos os controles
   alcançáveis por rolagem vertical;
@@ -63,6 +63,23 @@ de 640 × 360, equivalente ao reflow esperado em 200% sobre 1280 × 720.
 A causa remanescente era a rolagem automática de `focus()` ao mover o foco para Nome. A segunda
 correção usa `focus({ preventScroll: true })` e posiciona a janela no topo. A regressão E2E agora
 exige `scrollY === 0` sem corrigir a rolagem dentro do próprio teste.
+
+## Resultado da terceira execução
+
+- login aprovado em equivalente a 200%;
+- cadastro aprovado em equivalente a 200%;
+- nenhuma rolagem horizontal foi encontrada;
+- todo o conteúdo permaneceu acessível por rolagem vertical;
+- o aparente corte registrado na segunda execução era a posição de rolagem da página, não uma
+  falha remanescente de layout;
+- campos e botões são elementos nativos, possuem nomes acessíveis e seguem ordem lógica no HTML;
+- digitação comum pelo teclado funcionou;
+- o percurso efetivo com Tab e a ativação com Enter/Espaço permaneceram inconclusivos porque o
+  controlador não executou esses comandos.
+
+Conclusão desta rodada: o zoom está aprovado nas telas de login e cadastro. A estrutura para
+teclado está aprovada, mas o percurso interativo completo continua pendente de uma ferramenta
+ou execução manual capaz de enviar Tab, Enter e Espaço reais.
 
 ## Critérios de aprovação
 
