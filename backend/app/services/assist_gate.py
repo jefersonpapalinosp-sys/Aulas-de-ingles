@@ -179,13 +179,13 @@ def evaluate_gate(
     review: ProviderReview,
     settings: Settings,
 ) -> GateReport:
-    provider_url = (
-        settings.assist_transcription_url
+    provider_configured = (
+        bool(settings.assist_transcription_url)
         if modality == "transcription"
-        else settings.assist_writing_url
+        else settings.writing_assist_configured
     )
     criteria = {
-        "provider_configured": bool(provider_url),
+        "provider_configured": provider_configured,
         "provider_name_matches": review.provider_name == settings.assist_provider_name,
         "data_processing_agreement": review.data_processing_agreement,
         "legal_basis_approved": review.legal_basis_approved,

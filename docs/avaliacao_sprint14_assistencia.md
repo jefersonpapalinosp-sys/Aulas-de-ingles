@@ -23,8 +23,11 @@ Variáveis disponíveis em `.env.example` e `.env.prod.example`:
 | `ASSISTED_FEATURES_ENABLED` | `false` | chave geral dos experimentos |
 | `ASSIST_TRANSCRIPTION_URL` | vazio | gateway de speech-to-text |
 | `ASSIST_WRITING_URL` | vazio | gateway de análise de escrita |
+| `ASSIST_PROVIDER_KIND` | `gateway` | `gateway` externo ou `ollama` local |
 | `ASSIST_PROVIDER_NAME` | `external` | identificação exibida e persistida |
 | `ASSIST_PROVIDER_TOKEN` | vazio | bearer token enviado ao gateway |
+| `ASSIST_OLLAMA_BASE_URL` | host Docker, porta 11434 | API local do Ollama |
+| `ASSIST_OLLAMA_MODEL` | `qwen2.5:7b` | modelo local para feedback de escrita |
 | `ASSIST_DAILY_QUOTA` | `5` | chamadas assistidas por aluno e por dia |
 | `ASSIST_RETENTION_DAYS` | `30` | retenção dos resultados de transcrição |
 | `ASSIST_TIMEOUT_SECONDS` | `20` | limite de espera por chamada |
@@ -32,6 +35,19 @@ Variáveis disponíveis em `.env.example` e `.env.prod.example`:
 Em produção, os gateways configurados precisam usar HTTPS e possuir token. Uma URL pode ficar
 vazia para habilitar apenas uma das modalidades. O endpoint autenticado `GET /api/assist/status`
 informa disponibilidade, cota usada/restante, retenção e custo acumulado no dia.
+
+Quando `ASSIST_PROVIDER_KIND=ollama`, somente a assistência de escrita usa a API local
+`/api/chat`; `ASSIST_WRITING_URL` e token permanecem vazios. O backend exige que o Ollama fique
+em `localhost`, `127.0.0.1` ou `host.docker.internal` em produção. O modelo recebe um JSON Schema,
+temperatura zero e instrução para não atribuir nota nem repetir o texto completo. Como a API não
+fornece probabilidade calibrada para esse feedback, a confiança é registrada conservadoramente
+como `0.5`, mantendo visível o aviso de baixa confiança.
+
+Antes da chamada, a rubrica determinística é calculada no servidor. O Ollama recebe somente os
+checks com `passed: false`; o schema permite apenas os códigos desses checks e a resposta é
+filtrada novamente no backend. Critérios inventados e comentários sobre checks aprovados são
+descartados. Quando não há pendências objetivas, o servidor devolve uma confirmação local e não
+chama o modelo. O provedor continua sem poder alterar `ready`, progresso ou nota.
 
 ## Contrato do gateway
 

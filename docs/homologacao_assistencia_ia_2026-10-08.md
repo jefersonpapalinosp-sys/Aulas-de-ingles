@@ -84,6 +84,16 @@ Saídas do processo:
 
 ## Resultado nesta data
 
-Sem fornecedor configurado, manifesto aprovado ou avaliações humanas, o resultado esperado é
-`approved: false`. Isso é o comportamento correto: a preparação local foi concluída, mas a
-liberação depende de evidência real e autorização explícita.
+O provedor escolhido para o piloto local de escrita é Ollama `0.31.2`, usando `qwen2.5:7b` no
+próprio Mac. A API local e uma inferência estruturada foram validadas. Não há provedor de
+transcrição: essa modalidade continua desligada e exigirá Whisper ou serviço equivalente.
+
+O primeiro ensaio expôs uma correção contraditória fora da decisão determinística. Como
+contenção, o adaptador passou a enviar somente checks reprovados, restringir o schema aos códigos
+desses checks e descartar critérios inventados na resposta. No novo ensaio, o modelo comentou
+apenas `word_count` e `sentence_count`; comparação e uso de `should`, já aprovados, não receberam
+sugestões. Essa contenção foi coberta por testes automatizados, mas não substitui a amostra humana.
+
+Ollama local reduz a exposição externa, mas não substitui o gate: ainda faltam o manifesto
+aprovado e 30 avaliações humanas da escrita. Portanto, para liberação além do ambiente de
+desenvolvimento, o resultado esperado continua sendo `approved: false`.

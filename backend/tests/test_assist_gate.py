@@ -107,6 +107,14 @@ def test_manifesto_rejeita_campos_de_privacidade_ambiguos(tmp_path: Path) -> Non
         ({"assist_timeout_seconds": 0}, "ASSIST_TIMEOUT_SECONDS"),
         ({"assist_provider_name": ""}, "ASSIST_PROVIDER_NAME"),
         ({"assist_provider_name": "x" * 81}, "ASSIST_PROVIDER_NAME"),
+        (
+            {"assist_provider_kind": "ollama", "assist_ollama_base_url": "arquivo-local"},
+            "ASSIST_OLLAMA_BASE_URL",
+        ),
+        (
+            {"assist_provider_kind": "ollama", "assist_ollama_model": ""},
+            "ASSIST_OLLAMA_MODEL",
+        ),
     ],
 )
 def test_configuracao_assistida_recusa_limites_invalidos(

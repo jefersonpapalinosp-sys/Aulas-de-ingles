@@ -191,7 +191,7 @@ async def analisar_texto(
     assisted_error: str | None = None
     if corpo.assisted:
         mode = "fallback"
-        if not settings.assisted_features_enabled or not settings.assist_writing_url:
+        if not settings.assisted_features_enabled or not settings.writing_assist_configured:
             assisted_error = "feature_disabled"
         else:
             used, _ = await assisted_usage(session, usuario.id)
@@ -199,20 +199,41 @@ async def analisar_texto(
                 assisted_error = "quota_exceeded"
             else:
                 provider = settings.assist_provider_name
+                # O provedor recebe o resultado da rubrica local, não uma
+                # segunda cópia incompleta das regras. Assim ele só explica
+                # pendências já detectadas deterministicamente e nunca cria
+                # novos critérios ou altera a prontidão do texto.
                 rubric = [
-                    {"code": "word_count", "minimum": prompt.min_words},
-                    {"code": "sentence_count", "minimum": prompt.min_sentences},
-                    *prompt.requirements,
+                    {
+                        "code": check.code,
+                        "label": check.label,
+                        "passed": check.passed,
+                        "suggestion": check.suggestion,
+                    }
+                    for check in checks
                 ]
                 try:
-                    assisted = await asyncio.to_thread(
-                        assistance.call_writing_provider,
-                        settings.assist_writing_url,
-                        corpo.text,
-                        rubric,
-                        token=settings.assist_provider_token,
-                        timeout=settings.assist_timeout_seconds,
-                    )
+                    if settings.assist_provider_kind == "ollama":
+                        assisted = await asyncio.to_thread(
+                            assistance.call_ollama_writing_provider,
+                            settings.assist_ollama_base_url,
+                            settings.assist_ollama_model,
+                            corpo.text,
+                            rubric,
+                            timeout=settings.assist_timeout_seconds,
+                        )
+                    else:
+                        gateway_url = settings.assist_writing_url
+                        if not gateway_url:
+                            raise assistance.ProviderFailure("provider_unavailable")
+                        assisted = await asyncio.to_thread(
+                            assistance.call_writing_provider,
+                            gateway_url,
+                            corpo.text,
+                            rubric,
+                            token=settings.assist_provider_token,
+                            timeout=settings.assist_timeout_seconds,
+                        )
                 except assistance.ProviderFailure as error:
                     assisted_error = error.code
                 except Exception:

@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 from typing import Literal
+from urllib.parse import urlparse
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,8 +39,11 @@ class Settings(BaseSettings):
     assisted_features_enabled: bool = False
     assist_transcription_url: str | None = None
     assist_writing_url: str | None = None
+    assist_provider_kind: Literal["gateway", "ollama"] = "gateway"
     assist_provider_name: str = "external"
     assist_provider_token: str | None = None
+    assist_ollama_base_url: str = "http://host.docker.internal:11434"
+    assist_ollama_model: str = "qwen2.5:7b"
     assist_daily_quota: int = 5
     assist_retention_days: int = 30
     assist_timeout_seconds: int = 20
@@ -47,6 +51,12 @@ class Settings(BaseSettings):
     # Origens aceitas pelo CORS. Em dev a lista fica vazia de propósito:
     # o browser fala com /api na mesma origem, via proxy do Vite.
     cors_origins: list[str] = []
+
+    @property
+    def writing_assist_configured(self) -> bool:
+        if self.assist_provider_kind == "ollama":
+            return bool(self.assist_ollama_base_url.strip() and self.assist_ollama_model.strip())
+        return bool(self.assist_writing_url)
 
     def validar(self) -> None:
         """Erros de configuração que só podem estourar no boot, nunca em produção silenciosa."""
@@ -62,11 +72,23 @@ class Settings(BaseSettings):
             raise RuntimeError("ASSIST_TIMEOUT_SECONDS precisa ser positivo.")
         if not self.assist_provider_name.strip() or len(self.assist_provider_name) > 80:
             raise RuntimeError("ASSIST_PROVIDER_NAME precisa ter entre 1 e 80 caracteres.")
+        if self.assist_provider_kind == "ollama":
+            parsed = urlparse(self.assist_ollama_base_url)
+            if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+                raise RuntimeError("ASSIST_OLLAMA_BASE_URL precisa ser uma URL HTTP válida.")
+            if not self.assist_ollama_model.strip() or len(self.assist_ollama_model) > 120:
+                raise RuntimeError("ASSIST_OLLAMA_MODEL precisa ter entre 1 e 120 caracteres.")
+            if self.app_env == "prod" and parsed.hostname not in {
+                "127.0.0.1",
+                "localhost",
+                "host.docker.internal",
+            }:
+                raise RuntimeError("Ollama precisa permanecer no host local em produção.")
         if self.app_env == "prod" and self.assisted_features_enabled:
             urls = [url for url in [self.assist_transcription_url, self.assist_writing_url] if url]
             if any(not url.startswith("https://") for url in urls):
                 raise RuntimeError("Provedores assistidos precisam usar HTTPS em produção.")
-            if urls and not self.assist_provider_token:
+            if self.assist_provider_kind == "gateway" and urls and not self.assist_provider_token:
                 raise RuntimeError("ASSIST_PROVIDER_TOKEN é obrigatório em produção.")
 
 

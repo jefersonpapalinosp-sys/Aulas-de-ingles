@@ -218,3 +218,62 @@ async def test_feedback_assistido_e_opcional_avaliavel_e_tem_fallback(
     ).json()
     assert quota["analysis_mode"] == "fallback"
     assert quota["assisted_error_code"] == "quota_exceeded"
+
+
+@pytest.mark.asyncio
+async def test_feedback_assistido_pode_usar_ollama_local(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict[str, object] = {}
+
+    def local_feedback(
+        base_url: str,
+        model: str,
+        text: str,
+        rubric: list[dict[str, object]],
+        *,
+        timeout: int,
+    ) -> assistance.WritingAssistResult:
+        captured.update(
+            base_url=base_url,
+            model=model,
+            text=text,
+            rubric=rubric,
+            timeout=timeout,
+        )
+        return assistance.WritingAssistResult(
+            summary="Feedback local em português.",
+            suggestions=[{"criterion": "word_count", "message": "Acrescente detalhes."}],
+            confidence=0.5,
+            cost_microusd=0,
+        )
+
+    settings = get_settings()
+    monkeypatch.setattr(settings, "assisted_features_enabled", True)
+    monkeypatch.setattr(settings, "assist_provider_kind", "ollama")
+    monkeypatch.setattr(settings, "assist_provider_name", "ollama-qwen2.5-7b")
+    monkeypatch.setattr(settings, "assist_ollama_base_url", "http://ollama.test:11434")
+    monkeypatch.setattr(settings, "assist_ollama_model", "qwen2.5:7b")
+    monkeypatch.setattr(assistance, "call_ollama_writing_provider", local_feedback)
+
+    headers = await conta(client, "ollama-local")
+    prompt = await proposta(client)
+    response = await client.post(
+        f"/api/writing/prompts/{prompt['id']}/feedback",
+        headers=headers,
+        json={"text": "The Metro is faster than the bus.", "assisted": True},
+    )
+
+    assert response.status_code == 200
+    feedback = response.json()
+    assert feedback["analysis_mode"] == "assisted"
+    assert feedback["provider"] == "ollama-qwen2.5-7b"
+    assert feedback["assisted_summary"] == "Feedback local em português."
+    assert feedback["assisted_confidence"] == 0.5
+    assert feedback["assisted_cost_microusd"] == 0
+    rubric = captured["rubric"]
+    assert isinstance(rubric, list)
+    checks = {item["code"]: item for item in rubric}
+    assert checks["word_count"]["passed"] is False
+    assert checks["requirement_0"]["passed"] is True
+    assert all({"code", "label", "passed", "suggestion"} <= item.keys() for item in rubric)

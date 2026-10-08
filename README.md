@@ -242,6 +242,28 @@ O comando só produz métricas agregadas e retorna código `0` quando todos os c
 `1` quando a liberação continua bloqueada e `2` para configuração inválida. Ele não altera a
 feature flag.
 
+### Ollama local para escrita
+
+O backend também adapta diretamente a API local do Ollama. Para um piloto de desenvolvimento:
+
+```dotenv
+ASSISTED_FEATURES_ENABLED=true
+ASSIST_PROVIDER_KIND=ollama
+ASSIST_PROVIDER_NAME=ollama-qwen2.5-7b
+ASSIST_OLLAMA_BASE_URL=http://host.docker.internal:11434
+ASSIST_OLLAMA_MODEL=qwen2.5:7b
+ASSIST_TRANSCRIPTION_URL=
+```
+
+Ollama atende somente ao feedback aberto de escrita neste projeto. Speaking, gravação,
+autoavaliação e shadowing continuam locais, mas transcrição automática permanece indisponível
+até existir um gateway de speech-to-text separado.
+
+O modelo não decide se o texto está correto ou pronto. Primeiro, a aplicação executa a rubrica
+determinística; o Ollama recebe somente os critérios reprovados e pode explicá-los. O JSON Schema
+restringe a resposta a esses códigos, e o backend descarta sugestões inventadas ou relacionadas
+a critérios que já passaram. Se todos os critérios passarem, nenhuma inferência é executada.
+
 ### Correção de exercício
 
 A resposta certa **não** faz parte do contrato de leitura. Mandá-la ao

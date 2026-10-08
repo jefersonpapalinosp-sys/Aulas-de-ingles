@@ -51,7 +51,7 @@ async def status_assistencia(
     enabled = settings.assisted_features_enabled
     return AssistStatusOut(
         transcription_enabled=enabled and bool(settings.assist_transcription_url),
-        writing_enabled=enabled and bool(settings.assist_writing_url),
+        writing_enabled=enabled and settings.writing_assist_configured,
         daily_quota=settings.assist_daily_quota,
         used_today=used,
         remaining_today=max(0, settings.assist_daily_quota - used),
