@@ -29,10 +29,80 @@ export function authenticatedFetch(path: string, init: RequestInit = {}): Promis
   return fetch(path, { ...init, headers, credentials: 'same-origin' })
 }
 
-const autenticacao: Middleware = {
+/** Avisado quando o refresh falha e a sessão realmente acabou. */
+let aoPerderSessao: (() => void) | null = null
+
+export function onSessaoPerdida(callback: (() => void) | null): void {
+  aoPerderSessao = callback
+}
+
+/**
+ * Renova o access token, no máximo uma vez por vez.
+ *
+ * Várias requisições podem levar 401 ao mesmo tempo — uma tela de aula
+ * dispara várias. Sem este single-flight, cada uma chamaria /refresh, e como
+ * o refresh **rotaciona** (usar um revoga o anterior), a segunda chamada
+ * invalidaria a sessão que a primeira acabou de renovar.
+ */
+let renovacaoEmCurso: Promise<string | null> | null = null
+
+async function renovarToken(): Promise<string | null> {
+  if (!renovacaoEmCurso) {
+    renovacaoEmCurso = (async () => {
+      try {
+        const resposta = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'same-origin',
+        })
+        if (!resposta.ok) return null
+        const corpo = (await resposta.json()) as { access_token?: string }
+        return corpo.access_token ?? null
+      } catch {
+        return null
+      } finally {
+        // Libera a próxima tentativa só depois que esta terminar.
+        queueMicrotask(() => {
+          renovacaoEmCurso = null
+        })
+      }
+    })()
+  }
+  return renovacaoEmCurso
+}
+
+const CABECALHO_RETENTATIVA = 'X-Retry-After-Refresh'
+
+/** Exportado para o teste montar um cliente com base absoluta. */
+export const autenticacao: Middleware = {
   onRequest({ request }) {
     if (accessToken) request.headers.set('Authorization', `Bearer ${accessToken}`)
     return request
+  },
+
+  /**
+   * O access token vive 15 minutos. Sem isto, depois desse prazo toda escrita
+   * falhava com 401 e a interface continuava mostrando o usuário logado — o
+   * progresso ficava só no dispositivo, com "sincronização pendente".
+   */
+  async onResponse({ request, response }) {
+    if (response.status !== 401) return response
+    // A própria rota de refresh não é retentada, e cada requisição só tenta
+    // uma vez: sem essas duas guardas, um refresh inválido vira laço infinito.
+    if (new URL(request.url).pathname.startsWith('/api/auth/')) return response
+    if (request.headers.get(CABECALHO_RETENTATIVA)) return response
+
+    const novo = await renovarToken()
+    if (!novo) {
+      accessToken = null
+      aoPerderSessao?.()
+      return response
+    }
+    accessToken = novo
+
+    const retentativa = request.clone()
+    retentativa.headers.set('Authorization', `Bearer ${novo}`)
+    retentativa.headers.set(CABECALHO_RETENTATIVA, '1')
+    return fetch(retentativa)
   },
 }
 

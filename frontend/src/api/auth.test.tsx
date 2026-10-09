@@ -13,6 +13,8 @@ const { post, get, setAccessToken } = vi.hoisted(() => ({
 vi.mock('./client', () => ({
   api: { POST: post, GET: get },
   setAccessToken,
+  // Registrado pelo provider para saber quando o refresh falhou de vez.
+  onSessaoPerdida: vi.fn(),
 }))
 
 function EstadoDaSessao() {
