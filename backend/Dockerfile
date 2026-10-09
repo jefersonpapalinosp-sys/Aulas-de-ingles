@@ -1,6 +1,6 @@
 # Imagem de desenvolvimento: uv + hot reload.
 # A de produção entra na S5, junto com o compose.prod.yml.
-FROM python:3.12-slim
+FROM public.ecr.aws/docker/library/python:3.12-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
 
