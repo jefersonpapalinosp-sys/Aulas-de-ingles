@@ -228,9 +228,7 @@ async def test_listagem_isola_gravacoes_quando_numero_da_aula_se_repete(
                 headers=headers,
             )
         ).json()
-        legacy_items = (
-            await client.get("/api/speaking/attempts?lesson=1", headers=headers)
-        ).json()
+        legacy_items = (await client.get("/api/speaking/attempts?lesson=1", headers=headers)).json()
 
         assert [item["course_slug"] for item in level_1_items] == ["voa-level-1"]
         assert [item["course_slug"] for item in level_2_items] == ["voa-level-2"]
@@ -459,9 +457,7 @@ async def test_worker_repete_com_backoff_e_chave_idempotente(
         content=b"voice",
     )
     requested = (
-        await client.post(
-            f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers
-        )
+        await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
     ).json()
 
     assert await transcription_queue.process_next_transcription() is True
@@ -573,9 +569,7 @@ async def test_worker_retoma_job_interrompido_apos_timeout(
         content=b"voice",
     )
     requested = (
-        await client.post(
-            f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers
-        )
+        await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
     ).json()
     job = await session.get(TranscriptionJob, requested["id"])
     assert job is not None

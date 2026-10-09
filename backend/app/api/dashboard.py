@@ -127,8 +127,7 @@ async def _recommendation(
             title=f"Continuar a Aula {lesson.number}",
             reason=f"Você parou na etapa {study.current_step}; retomar preserva o contexto.",
             href=(
-                f"/cursos/{lesson.course_slug}/aulas/{lesson.number}/estudar/"
-                f"{study.current_step}"
+                f"/cursos/{lesson.course_slug}/aulas/{lesson.number}/estudar/{study.current_step}"
             ),
             estimated_minutes=10,
             course_slug=lesson.course_slug,
@@ -187,9 +186,7 @@ async def _recommendation(
                 kind="course_review",
                 title=f"{course_review.title} · {level_label}",
                 reason="Você concluiu as aulas da unidade; agora consolide o bloco.",
-                href=(
-                    f"/cursos/{review_course.slug}/unidades/{unit.slug}/checkpoint"
-                ),
+                href=(f"/cursos/{review_course.slug}/unidades/{unit.slug}/checkpoint"),
                 estimated_minutes=course_review.estimated_minutes,
                 course_slug=review_course.slug,
             )

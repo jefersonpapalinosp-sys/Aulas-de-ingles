@@ -20,7 +20,12 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.add_column(
         "study_session_progress",
-        sa.Column("started_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "started_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
     )
     op.add_column(
         "study_session_progress",
@@ -38,8 +43,18 @@ def upgrade() -> None:
         sa.Column("weekly_minutes", sa.Integer(), nullable=False),
         sa.Column("preferred_days", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("goal", sa.String(length=200), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.CheckConstraint(
             "weekly_minutes >= 30 AND weekly_minutes <= 600",
             name="ck_study_plan_weekly_minutes",
@@ -57,7 +72,12 @@ def upgrade() -> None:
         sa.Column("step", sa.String(length=20), nullable=False),
         sa.Column("seconds_spent", sa.Integer(), server_default=sa.text("0"), nullable=False),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.CheckConstraint("seconds_spent >= 0", name="ck_step_progress_seconds_nonnegative"),
         sa.ForeignKeyConstraint(
             ["study_session_id"], ["study_session_progress.id"], ondelete="CASCADE"
@@ -79,13 +99,16 @@ def upgrade() -> None:
         sa.Column("source_type", sa.String(length=40), nullable=False),
         sa.Column("source_id", sa.Integer(), nullable=False),
         sa.Column("score", sa.Float(), nullable=False),
-        sa.Column("occurred_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "occurred_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.CheckConstraint("score >= 0 AND score <= 1", name="ck_skill_evidence_score"),
         sa.ForeignKeyConstraint(["user_id"], ["app_user.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "user_id", "source_type", "source_id", name="uq_skill_evidence_source"
-        ),
+        sa.UniqueConstraint("user_id", "source_type", "source_id", name="uq_skill_evidence_source"),
     )
     op.create_index(op.f("ix_skill_evidence_skill"), "skill_evidence", ["skill"])
     op.create_index(op.f("ix_skill_evidence_user_id"), "skill_evidence", ["user_id"])

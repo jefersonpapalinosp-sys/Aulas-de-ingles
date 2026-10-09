@@ -9,7 +9,7 @@ from app.db.models import Course, CourseUnit, Lesson
 
 
 @pytest.mark.asyncio
-async def test_catalogo_publica_as_quatro_primeiras_unidades_do_level_2(
+async def test_catalogo_publica_as_cinco_primeiras_unidades_do_level_2(
     client: AsyncClient,
 ) -> None:
     response = await client.get("/api/courses")
@@ -31,7 +31,7 @@ async def test_catalogo_publica_as_quatro_primeiras_unidades_do_level_2(
         "published_lessons": 22,
     }
     assert courses[1]["total_lessons"] == 30
-    assert courses[1]["published_lessons"] == 20
+    assert courses[1]["published_lessons"] == 25
     assert courses[1]["status"] == "published"
 
 
@@ -103,7 +103,7 @@ async def test_curso_inexistente_devolve_404(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_curriculo_level_2_publica_1_a_20_e_mantem_futuras_em_preparacao(
+async def test_curriculo_level_2_publica_1_a_25_e_mantem_futuras_em_preparacao(
     client: AsyncClient,
 ) -> None:
     response = await client.get("/api/courses/voa-level-2/curriculum")
@@ -111,7 +111,7 @@ async def test_curriculo_level_2_publica_1_a_20_e_mantem_futuras_em_preparacao(
     assert response.status_code == 200
     curriculum = response.json()
     assert curriculum["course"]["status"] == "published"
-    assert curriculum["course"]["published_lessons"] == 20
+    assert curriculum["course"]["published_lessons"] == 25
     assert [unit["slug"] for unit in curriculum["units"]] == [
         "1-5",
         "6-10",
@@ -120,7 +120,7 @@ async def test_curriculo_level_2_publica_1_a_20_e_mantem_futuras_em_preparacao(
         "21-25",
         "26-30",
     ]
-    first, second, third, fourth_unit, *future = curriculum["units"]
+    first, second, third, fourth_unit, fifth_unit, *future = curriculum["units"]
     assert first["status"] == "published"
     assert [lesson["number"] for lesson in first["lessons"]] == [1, 2, 3, 4, 5]
     assert first["review"]["slug"] == "checkpoint-1-5"
@@ -142,11 +142,18 @@ async def test_curriculo_level_2_publica_1_a_20_e_mantem_futuras_em_preparacao(
     assert fourth["review"]["slug"] == "checkpoint-16-20"
     assert fourth["review"]["review_lesson_number"] == 20
     assert fourth["review"]["question_count"] == 6
+    fifth = fifth_unit
+    assert fifth["status"] == "published"
+    assert [lesson["number"] for lesson in fifth["lessons"]] == [21, 22, 23, 24, 25]
+    assert all(lesson["unit_slug"] == "21-25" for lesson in fifth["lessons"])
+    assert fifth["review"]["slug"] == "checkpoint-21-25"
+    assert fifth["review"]["review_lesson_number"] == 25
+    assert fifth["review"]["question_count"] == 6
     assert all(unit["status"] == "planned" for unit in future)
     assert all(unit["published_lessons"] == 0 and unit["lessons"] == [] for unit in future)
     assert curriculum["units"][-1]["review"] is None
-    assert (await client.get("/api/courses/voa-level-2/lessons/20")).status_code == 200
-    assert (await client.get("/api/courses/voa-level-2/lessons/21")).status_code == 404
+    assert (await client.get("/api/courses/voa-level-2/lessons/25")).status_code == 200
+    assert (await client.get("/api/courses/voa-level-2/lessons/26")).status_code == 404
 
 
 @pytest.mark.asyncio
@@ -215,14 +222,14 @@ async def test_aula_em_unidade_planejada_nao_vaza_nas_rotas_publicas(
         await session.execute(
             select(CourseUnit).where(
                 CourseUnit.course_id == level_2.id,
-                CourseUnit.slug == "21-25",
+                CourseUnit.slug == "26-30",
             )
         )
     ).scalar_one()
     accidental = Lesson(
         course_id=level_2.id,
         unit_id=future_unit.id,
-        number=21,
+        number=26,
         slug="unpublished-fixture",
         position=1,
         title="Unpublished fixture",
@@ -239,11 +246,11 @@ async def test_aula_em_unidade_planejada_nao_vaza_nas_rotas_publicas(
 
     try:
         curriculum = (await client.get("/api/courses/voa-level-2/curriculum")).json()
-        unit = next(item for item in curriculum["units"] if item["slug"] == "21-25")
+        unit = next(item for item in curriculum["units"] if item["slug"] == "26-30")
         assert unit["published_lessons"] == 0
         assert unit["lessons"] == []
-        assert (await client.get("/api/courses/voa-level-2/lessons/21")).status_code == 404
-        assert (await client.get("/api/exercises?course=voa-level-2&lesson=21")).json() == []
+        assert (await client.get("/api/courses/voa-level-2/lessons/26")).status_code == 404
+        assert (await client.get("/api/exercises?course=voa-level-2&lesson=26")).json() == []
     finally:
         await session.execute(delete(Lesson).where(Lesson.id == accidental.id))
         await session.commit()

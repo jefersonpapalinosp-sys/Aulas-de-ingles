@@ -136,9 +136,9 @@ def test_ollama_usa_schema_estrito_e_confiança_conservadora(
     assert body["model"] == "qwen2.5:7b"
     assert body["stream"] is False
     assert isinstance(body["format"], dict)
-    assert body["format"]["properties"]["suggestions"]["items"]["properties"][
-        "criterion"
-    ]["enum"] == ["comparison"]
+    assert body["format"]["properties"]["suggestions"]["items"]["properties"]["criterion"][
+        "enum"
+    ] == ["comparison"]
     assert body["options"] == {"temperature": 0}
     assert result.summary == "A comparação está clara."
     assert result.confidence == 0.5

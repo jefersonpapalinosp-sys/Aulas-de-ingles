@@ -118,9 +118,7 @@ async def collect_gate_metrics(session: AsyncSession, modality: Modality) -> Gat
             await session.execute(
                 select(
                     func.count(TranscriptionJob.id),
-                    func.count(TranscriptionJob.id).filter(
-                        TranscriptionJob.status == "completed"
-                    ),
+                    func.count(TranscriptionJob.id).filter(TranscriptionJob.status == "completed"),
                     func.count(TranscriptionJob.id).filter(TranscriptionJob.status == "failed"),
                     func.count(TranscriptionJob.id).filter(
                         TranscriptionJob.status == "completed",

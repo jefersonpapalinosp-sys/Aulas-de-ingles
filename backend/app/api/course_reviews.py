@@ -37,9 +37,7 @@ def _private(response: Response) -> None:
     response.headers["Cache-Control"] = "private, no-store"
 
 
-async def _review_or_404(
-    session: AsyncSession, course_slug: str, unit_slug: str
-) -> CourseReview:
+async def _review_or_404(session: AsyncSession, course_slug: str, unit_slug: str) -> CourseReview:
     review = (
         await session.execute(
             select(CourseReview)
@@ -65,10 +63,7 @@ async def _review_or_404(
 async def _listening_media(
     session: AsyncSession, course_slug: str, review: CourseReview
 ) -> tuple[LessonMedia | None, str | None]:
-    if (
-        review.listening_lesson_number is None
-        or review.listening_media_position is None
-    ):
+    if review.listening_lesson_number is None or review.listening_media_position is None:
         return None, None
     row = (
         await session.execute(
@@ -136,9 +131,7 @@ async def _latest_attempt(
                 CourseReviewAttempt.user_id == user_id,
                 CourseReviewAttempt.content_version == content_version,
             )
-            .order_by(
-                CourseReviewAttempt.completed_at.desc(), CourseReviewAttempt.id.desc()
-            )
+            .order_by(CourseReviewAttempt.completed_at.desc(), CourseReviewAttempt.id.desc())
             .limit(1)
         )
     ).scalar_one_or_none()
@@ -189,12 +182,8 @@ async def get_course_review(
     """Entrega questões sem gabarito e a tentativa mais recente da conta."""
     _private(response)
     review = await _review_or_404(session, course_slug, unit_slug)
-    media, listening_source_page_url = await _listening_media(
-        session, course_slug, review
-    )
-    latest = await _latest_attempt(
-        session, review.id, usuario.id, review.content_version
-    )
+    media, listening_source_page_url = await _listening_media(session, course_slug, review)
+    latest = await _latest_attempt(session, review.id, usuario.id, review.content_version)
     return _detail_out(review, media, listening_source_page_url, latest)
 
 

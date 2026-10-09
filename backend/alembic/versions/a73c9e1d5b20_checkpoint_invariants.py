@@ -59,9 +59,7 @@ def downgrade() -> None:
         "course_review_question",
         type_="check",
     )
-    op.drop_constraint(
-        "ck_course_review_listening_pair", "course_review", type_="check"
-    )
+    op.drop_constraint("ck_course_review_listening_pair", "course_review", type_="check")
     op.drop_constraint(
         "ck_course_review_listening_position_nonnegative",
         "course_review",
@@ -72,6 +70,4 @@ def downgrade() -> None:
         "course_review",
         type_="check",
     )
-    op.drop_constraint(
-        "ck_course_review_lesson_positive", "course_review", type_="check"
-    )
+    op.drop_constraint("ck_course_review_lesson_positive", "course_review", type_="check")

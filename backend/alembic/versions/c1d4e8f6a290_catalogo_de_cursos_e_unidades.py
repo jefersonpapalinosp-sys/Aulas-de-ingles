@@ -50,15 +50,9 @@ def upgrade() -> None:
         sa.Column("lesson_end", sa.Integer(), nullable=False),
         sa.Column("total_lessons", sa.Integer(), nullable=False),
         sa.CheckConstraint("position > 0", name="ck_course_unit_position_positive"),
-        sa.CheckConstraint(
-            "lesson_start > 0", name="ck_course_unit_lesson_start_positive"
-        ),
-        sa.CheckConstraint(
-            "lesson_end >= lesson_start", name="ck_course_unit_lesson_range"
-        ),
-        sa.CheckConstraint(
-            "total_lessons > 0", name="ck_course_unit_total_lessons_positive"
-        ),
+        sa.CheckConstraint("lesson_start > 0", name="ck_course_unit_lesson_start_positive"),
+        sa.CheckConstraint("lesson_end >= lesson_start", name="ck_course_unit_lesson_range"),
+        sa.CheckConstraint("total_lessons > 0", name="ck_course_unit_total_lessons_positive"),
         sa.CheckConstraint(
             "status IN ('planned', 'published', 'archived')", name="ck_course_unit_status"
         ),
@@ -153,9 +147,7 @@ def upgrade() -> None:
         ["id", "course_id"],
         ondelete="RESTRICT",
     )
-    op.create_unique_constraint(
-        "uq_lesson_course_number", "lesson", ["course_id", "number"]
-    )
+    op.create_unique_constraint("uq_lesson_course_number", "lesson", ["course_id", "number"])
     op.create_unique_constraint("uq_lesson_course_slug", "lesson", ["course_id", "slug"])
     op.create_unique_constraint("uq_lesson_unit_position", "lesson", ["unit_id", "position"])
     op.create_check_constraint("ck_lesson_number_positive", "lesson", "number > 0")

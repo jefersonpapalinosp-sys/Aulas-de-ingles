@@ -190,9 +190,7 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
     assert lesson_response.status_code == 200
     lesson = lesson_response.json()
 
-    studied = await client.put(
-        "/api/courses/voa-level-2/lessons/1/studied", headers=headers
-    )
+    studied = await client.put("/api/courses/voa-level-2/lessons/1/studied", headers=headers)
     study_session = await client.put(
         "/api/courses/voa-level-2/lessons/1/study-session",
         headers=headers,

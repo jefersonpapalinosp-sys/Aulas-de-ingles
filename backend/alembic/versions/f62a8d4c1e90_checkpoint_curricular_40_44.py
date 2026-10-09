@@ -37,12 +37,8 @@ def upgrade() -> None:
         sa.Column("listening_lesson_number", sa.Integer(), nullable=True),
         sa.Column("listening_media_position", sa.Integer(), nullable=True),
         sa.CheckConstraint("position > 0", name="ck_course_review_position_positive"),
-        sa.CheckConstraint(
-            "estimated_minutes > 0", name="ck_course_review_minutes_positive"
-        ),
-        sa.CheckConstraint(
-            "content_version > 0", name="ck_course_review_version_positive"
-        ),
+        sa.CheckConstraint("estimated_minutes > 0", name="ck_course_review_minutes_positive"),
+        sa.CheckConstraint("content_version > 0", name="ck_course_review_version_positive"),
         sa.CheckConstraint(
             "status IN ('planned', 'published', 'archived')",
             name="ck_course_review_status",
@@ -70,9 +66,7 @@ def upgrade() -> None:
         sa.Column("accepted_answers", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("explanation", sa.Text(), nullable=False),
         sa.Column("lesson_numbers", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.CheckConstraint(
-            "position > 0", name="ck_course_review_question_position_positive"
-        ),
+        sa.CheckConstraint("position > 0", name="ck_course_review_question_position_positive"),
         sa.CheckConstraint(
             "activity_type IN ('multiple_choice', 'short_answer')",
             name="ck_course_review_question_activity_type",
@@ -83,9 +77,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["review_id"], ["course_review.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint(
-            "review_id", "position", name="uq_course_review_question_position"
-        ),
+        sa.UniqueConstraint("review_id", "position", name="uq_course_review_question_position"),
     )
     op.create_index(
         op.f("ix_course_review_question_review_id"),
@@ -108,16 +100,10 @@ def upgrade() -> None:
         sa.Column(
             "completed_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
         ),
-        sa.CheckConstraint(
-            "content_version > 0", name="ck_course_review_attempt_version_positive"
-        ),
-        sa.CheckConstraint(
-            "score >= 0", name="ck_course_review_attempt_score_nonnegative"
-        ),
+        sa.CheckConstraint("content_version > 0", name="ck_course_review_attempt_version_positive"),
+        sa.CheckConstraint("score >= 0", name="ck_course_review_attempt_score_nonnegative"),
         sa.CheckConstraint("total > 0", name="ck_course_review_attempt_total_positive"),
-        sa.CheckConstraint(
-            "score <= total", name="ck_course_review_attempt_score_within_total"
-        ),
+        sa.CheckConstraint("score <= total", name="ck_course_review_attempt_score_within_total"),
         sa.ForeignKeyConstraint(["review_id"], ["course_review.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["app_user.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
@@ -138,16 +124,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index(
-        op.f("ix_course_review_attempt_user_id"), table_name="course_review_attempt"
-    )
-    op.drop_index(
-        op.f("ix_course_review_attempt_review_id"), table_name="course_review_attempt"
-    )
+    op.drop_index(op.f("ix_course_review_attempt_user_id"), table_name="course_review_attempt")
+    op.drop_index(op.f("ix_course_review_attempt_review_id"), table_name="course_review_attempt")
     op.drop_table("course_review_attempt")
-    op.drop_index(
-        op.f("ix_course_review_question_review_id"), table_name="course_review_question"
-    )
+    op.drop_index(op.f("ix_course_review_question_review_id"), table_name="course_review_question")
     op.drop_table("course_review_question")
     op.drop_index(op.f("ix_course_review_unit_id"), table_name="course_review")
     op.drop_table("course_review")

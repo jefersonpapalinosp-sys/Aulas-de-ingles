@@ -76,9 +76,7 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_transcription_job_next_attempt_at"), table_name="transcription_job")
     op.drop_constraint("ck_transcription_max_attempts", "transcription_job", type_="check")
     op.drop_constraint("ck_transcription_attempt_count", "transcription_job", type_="check")
-    op.drop_constraint(
-        "uq_transcription_job_idempotency_key", "transcription_job", type_="unique"
-    )
+    op.drop_constraint("uq_transcription_job_idempotency_key", "transcription_job", type_="unique")
     op.drop_column("transcription_job", "processing_started_at")
     op.drop_column("transcription_job", "next_attempt_at")
     op.drop_column("transcription_job", "max_attempts")

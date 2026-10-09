@@ -54,12 +54,12 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
 
 
 @pytest.mark.asyncio
-async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> None:
+async def test_arquivo_de_seed_tem_quarenta_e_sete_aulas_em_dois_cursos() -> None:
     dados = load_seed()
     level_1 = [lesson for lesson in dados if lesson["course_slug"] == "voa-level-1"]
     level_2 = [lesson for lesson in dados if lesson["course_slug"] == "voa-level-2"]
     assert [d["number"] for d in level_1] == list(range(31, 53))
-    assert [d["number"] for d in level_2] == list(range(1, 21))
+    assert [d["number"] for d in level_2] == list(range(1, 26))
 
     # O conteúdo publicado nas Sprints anteriores não pode ser reduzido durante
     # a expansão. As contagens novas são verificadas por aula, evitando acoplar
@@ -133,7 +133,7 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
     assert all(item["offline_policy"] == "network_only" for item in media)
     assert all(item["attribution"] and item["license_url"] for item in media)
     assert sum(item["license_reviewed_at"] == "2026-10-08" for item in media) == 27
-    assert sum(item["license_reviewed_at"] == "2026-10-09" for item in media) == 15
+    assert sum(item["license_reviewed_at"] == "2026-10-09" for item in media) == 20
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
     assert all(d["unit_slug"] == "31-40" for d in level_1[:10])
@@ -147,11 +147,13 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
     assert all(d["unit_slug"] == "1-5" for d in level_2[:5])
     assert all(d["unit_slug"] == "6-10" for d in level_2[5:10])
     assert all(d["unit_slug"] == "11-15" for d in level_2[10:15])
-    assert all(d["unit_slug"] == "16-20" for d in level_2[15:])
+    assert all(d["unit_slug"] == "16-20" for d in level_2[15:20])
+    assert all(d["unit_slug"] == "21-25" for d in level_2[20:])
     assert [d["position"] for d in level_2[:5]] == list(range(1, 6))
     assert [d["position"] for d in level_2[5:10]] == list(range(1, 6))
     assert [d["position"] for d in level_2[10:15]] == list(range(1, 6))
-    assert [d["position"] for d in level_2[15:]] == list(range(1, 6))
+    assert [d["position"] for d in level_2[15:20]] == list(range(1, 6))
+    assert [d["position"] for d in level_2[20:]] == list(range(1, 6))
     assert all(len(d["goals"]) == 4 for d in level_2)
     assert all(len(d["grammar_blocks"]) == 3 for d in level_2)
     assert all(len(d["phrases"]) == 5 for d in level_2)
@@ -169,7 +171,8 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
     assert all(d.get("review_note", "").startswith("Sprint 25:") for d in level_2[:5])
     assert all(d.get("review_note", "").startswith("Sprint 26:") for d in level_2[5:10])
     assert all(d.get("review_note", "").startswith("Sprint 27:") for d in level_2[10:15])
-    assert all(d.get("review_note", "").startswith("Sprint 28:") for d in level_2[15:])
+    assert all(d.get("review_note", "").startswith("Sprint 28:") for d in level_2[15:20])
+    assert all(d.get("review_note", "").startswith("Sprint 29:") for d in level_2[20:])
     assert [d["media"][0]["duration_seconds"] for d in level_2[5:10]] == [
         284,
         237,
@@ -234,7 +237,7 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
             lesson["media"][0]["source_url"],
             lesson["media"][0]["duration_seconds"],
         )
-        for lesson in level_2[15:]
+        for lesson in level_2[15:20]
     ] == [
         (
             16,
@@ -275,6 +278,56 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
             "https://voa-audio.voanews.eu/vle/"
             "2018/02/15/8b42c321-07ea-4eb1-a1f9-e7cc6019606e_hq.mp3",
             281,
+        ),
+    ]
+    assert [
+        (
+            lesson["number"],
+            lesson["voa_url"],
+            lesson["media"][0]["source_url"],
+            lesson["media"][0]["duration_seconds"],
+        )
+        for lesson in level_2[20:]
+    ] == [
+        (
+            21,
+            "https://learningenglish.voanews.com/a/"
+            "lets-learn-english-level-2-lesson-21/4273059.html",
+            "https://voa-audio.voanews.eu/vle/"
+            "2018/03/06/fabffd67-3af1-480c-925c-0b87e11fe82b_hq.mp3",
+            246,
+        ),
+        (
+            22,
+            "https://learningenglish.voanews.com/a/"
+            "lets-learn-english-level-2-lesson-22/4283017.html",
+            "https://voa-audio.voanews.eu/vle/"
+            "2018/03/06/0fd0e840-fff7-4d90-aaeb-eba188526184_hq.mp3",
+            287,
+        ),
+        (
+            23,
+            "https://learningenglish.voanews.com/a/"
+            "lets-learn-english-level-2-lesson-23/4287922.html",
+            "https://voa-audio.voanews.eu/vle/"
+            "2018/03/15/b53a7e2c-2dd1-4623-b4d0-92efba982191_hq.mp3",
+            169,
+        ),
+        (
+            24,
+            "https://learningenglish.voanews.com/a/"
+            "lets-learn-english-level-2-lesson-24/4307612.html",
+            "https://voa-audio.voanews.eu/vle/"
+            "2018/03/23/f1f4841a-c2cb-4ee3-9cbe-2a132ffb5c8e_hq.mp3",
+            288,
+        ),
+        (
+            25,
+            "https://learningenglish.voanews.com/a/"
+            "lets-learn-english-level-2-lesson-25/4322773.html",
+            "https://voa-audio.voanews.eu/vle/"
+            "2018/03/30/a591e14e-e65c-4370-91fb-06e8f9cad590_hq.mp3",
+            285,
         ),
     ]
     assert level_2[7]["media"][0]["source_url"].endswith("_240p.mp4")
@@ -318,10 +371,17 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
     # Sprint 28: todas as cinco aulas trazem uma classificação.
     assert [
         lesson["number"]
-        for lesson in level_2[15:]
+        for lesson in level_2[15:20]
         for exercise in lesson["exercises"]
         if exercise["activity_type"] == "classification"
     ] == [16, 17, 18, 19, 20]
+    # Sprint 29: todas as cinco aulas trazem uma classificação.
+    assert [
+        lesson["number"]
+        for lesson in level_2[20:]
+        for exercise in lesson["exercises"]
+        if exercise["activity_type"] == "classification"
+    ] == [21, 22, 23, 24, 25]
     assert len(sprint_27_classifications) == 3
     assert all(len(exercise["answers"]) == 1 for exercise in sprint_27_classifications)
     assert all(d["warmup_prompt"] and d["listening_focus"] for d in dados)
@@ -339,7 +399,7 @@ async def test_arquivo_de_seed_tem_quarenta_e_duas_aulas_em_dois_cursos() -> Non
 
 
 @pytest.mark.asyncio
-async def test_seed_de_cursos_publica_as_quatro_primeiras_unidades_do_level_2() -> None:
+async def test_seed_de_cursos_publica_as_cinco_primeiras_unidades_do_level_2() -> None:
     courses = load_course_seed()
 
     assert [course["slug"] for course in courses] == ["voa-level-1", "voa-level-2"]
@@ -351,7 +411,7 @@ async def test_seed_de_cursos_publica_as_quatro_primeiras_unidades_do_level_2() 
         "published",
         "published",
         "published",
-        "planned",
+        "published",
         "planned",
     ]
 
@@ -375,6 +435,7 @@ def test_checkpoint_do_seed_valida_referencias_e_gabarito() -> None:
         "checkpoint-6-10",
         "checkpoint-11-15",
         "checkpoint-16-20",
+        "checkpoint-21-25",
     ]
     assert all(len(review["questions"]) == 6 for review in reviews)
 
@@ -438,7 +499,7 @@ def test_catalogo_do_seed_valida_faixa_quantidade_e_posicao_das_aulas() -> None:
 
     leaked_planned = deepcopy(lessons)
     leaked = deepcopy(next(lesson for lesson in lessons if lesson["course_slug"] == "voa-level-2"))
-    leaked.update({"unit_slug": "21-25", "number": 21, "position": 1, "slug": "lesson-21"})
+    leaked.update({"unit_slug": "26-30", "number": 26, "position": 1, "slug": "lesson-26"})
     leaked_planned.append(leaked)
     with pytest.raises(ValueError, match="Unidade em preparação.*não pode conter aulas"):
         validate_course_reviews(courses, leaked_planned)
@@ -449,9 +510,9 @@ async def test_seed_rodado_de_novo_nao_duplica(session: AsyncSession) -> None:
     antes = await _contagens(session)
     assert antes["course"] == 2
     assert antes["course_unit"] == 10
-    assert antes["course_review"] == 7
-    assert antes["course_review_question"] == 42
-    assert antes["lesson"] == 42
+    assert antes["course_review"] == 8
+    assert antes["course_review_question"] == 48
+    assert antes["lesson"] == 47
 
     await seed_lessons(session)
 
@@ -484,8 +545,8 @@ async def test_ids_do_checkpoint_sobrevivem_ao_reseed(session: AsyncSession) -> 
         (item.review_id, item.position): item.id
         for item in (await session.execute(select(CourseReviewQuestion))).scalars()
     }
-    assert len(reviews_before) == 7
-    assert len(questions_before) == 42
+    assert len(reviews_before) == 8
+    assert len(questions_before) == 48
 
     await seed_lessons(session)
 
@@ -543,7 +604,7 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
 async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
     media = list((await session.execute(select(LessonMedia))).scalars())
 
-    assert len(media) == 42
+    assert len(media) == 47
     assert all(item.license_status == "public_domain" for item in media)
     assert all(item.offline_policy == "network_only" for item in media)
     assert all(item.attribution == "Voice of America (VOA Learning English)" for item in media)
@@ -552,7 +613,7 @@ async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) 
         "https://learningenglish.voanews.com/p/6861.html",
     }
     assert sum(item.license_reviewed_at == date(2026, 10, 8) for item in media) == 27
-    assert sum(item.license_reviewed_at == date(2026, 10, 9) for item in media) == 15
+    assert sum(item.license_reviewed_at == date(2026, 10, 9) for item in media) == 20
 
 
 @pytest.mark.asyncio

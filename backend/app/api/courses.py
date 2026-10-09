@@ -97,9 +97,7 @@ def _course_out(course: Course, published_lessons: int) -> CourseSummaryOut:
     )
 
 
-async def _course_with_count(
-    session: AsyncSession, course_slug: str
-) -> tuple[Course, int] | None:
+async def _course_with_count(session: AsyncSession, course_slug: str) -> tuple[Course, int] | None:
     published = (
         select(func.count(Lesson.id))
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
@@ -111,9 +109,7 @@ async def _course_with_count(
         .scalar_subquery()
     )
     row = (
-        await session.execute(
-            select(Course, published).where(Course.slug == course_slug)
-        )
+        await session.execute(select(Course, published).where(Course.slug == course_slug))
     ).one_or_none()
     if row is None:
         return None
@@ -274,8 +270,7 @@ async def get_course_completion(
                     .where(
                         CourseReviewAttempt.user_id == usuario.id,
                         CourseReviewAttempt.review_id.in_(review_ids),
-                        CourseReviewAttempt.content_version
-                        == CourseReview.content_version,
+                        CourseReviewAttempt.content_version == CourseReview.content_version,
                     )
                     .distinct()
                 )
@@ -297,13 +292,9 @@ async def get_course_completion(
     completed_count = len(completed_ids)
     skills = await skill_summaries(session, usuario.id, course.slug)
     has_activity = bool(
-        viewed_count
-        or current_review_ids
-        or any(skill.samples > 0 for skill in skills)
+        viewed_count or current_review_ids or any(skill.samples > 0 for skill in skills)
     )
-    required_lessons = sum(
-        unit.total_lessons for unit in all_units if unit.status != "archived"
-    )
+    required_lessons = sum(unit.total_lessons for unit in all_units if unit.status != "archived")
     declared_units = [unit for unit in all_units if unit.status != "archived"]
     if declared_units:
         scope_start = min(unit.lesson_start for unit in declared_units)
@@ -352,9 +343,7 @@ async def get_course_completion(
         )
         certificate_label = "Continuar estudando"
         certificate_href = (
-            incomplete_units[0].href
-            if incomplete_units
-            else f"/cursos/{course.slug}"
+            incomplete_units[0].href if incomplete_units else f"/cursos/{course.slug}"
         )
     else:
         remaining = required_checkpoints - len(current_review_ids)
@@ -365,9 +354,7 @@ async def get_course_completion(
         )
         certificate_label = "Fazer checkpoint"
         certificate_href = (
-            pending_checkpoints[0].href
-            if pending_checkpoints
-            else f"/cursos/{course.slug}"
+            pending_checkpoints[0].href if pending_checkpoints else f"/cursos/{course.slug}"
         )
 
     next_course = (
@@ -388,9 +375,7 @@ async def get_course_completion(
             title=next_course.title,
             level=next_course.level,
             proficiency_label=next_course.proficiency_label,
-            status=cast(
-                Literal["planned", "published", "archived"], next_course.status
-            ),
+            status=cast(Literal["planned", "published", "archived"], next_course.status),
             href=f"/cursos/{next_course.slug}",
             preview=(
                 f"{next_course.title} · {next_course.proficiency_label}, "
@@ -418,9 +403,7 @@ async def get_course_completion(
             viewed_lessons=viewed_count,
             completed_lessons=completed_count,
             completion_percent=(
-                round((completed_count / published_count) * 100)
-                if published_count
-                else 0
+                round((completed_count / published_count) * 100) if published_count else 0
             ),
             status=_completion_status(published_count, completed_count, has_activity),
         ),
