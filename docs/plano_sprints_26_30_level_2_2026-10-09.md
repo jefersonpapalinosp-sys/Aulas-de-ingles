@@ -223,8 +223,8 @@ na Aula 6 e hope/wish na Aula 10.
 
 **Estado:** conteúdo publicado e mergeado em 9 de outubro de 2026. Catálogo, currículo,
 aulas e checkpoint foram verificados pela API; a suíte comum está verde. Três gates
-continuam abertos e estão listados em "Implementação registrada": o listening do
-checkpoint, a conferência auditiva dos 25 timestamps e a jornada visual.
+continua aberto e está listado em "Implementação registrada": a conferência
+auditiva dos 25 timestamps, que depende de escuta humana.
 
 **Objetivo:** publicar o terceiro bloco do Level 2 e consolidá-lo em um checkpoint próprio,
 reutilizando o motor de exercícios ampliado na Sprint 26.
@@ -256,12 +256,39 @@ A auditoria registrou duas ressalvas:
 - [x] auditar páginas canônicas, lesson plans, review, MP3s, durações e licença;
 - [x] manter as mídias como `network_only`, com crédito e fallback textual;
 - [x] publicar as cinco aulas, com conteúdo e exercícios autorais;
-- [x] publicar o checkpoint autoral 11–15;
-- [ ] **pendente:** anexar o listening da Aula 14 ao checkpoint 11–15 — nenhum dos
-      três checkpoints do Level 2 tem mídia hoje, então isto é um item aberto do
-      bloco inteiro, não uma regressão desta sprint;
-- [ ] **pendente:** conferir por escuta humana os 25 timestamps conservadores;
-- [ ] **pendente:** executar a jornada visual em desktop e mobile.
+- [x] publicar o checkpoint autoral 11–15 com listening da Aula 14, por
+      `listening_lesson_number: 14` — o checkpoint aponta para a mídia da aula em
+      vez de duplicá-la, igual aos checkpoints 1–5 (Aula 3) e 6–10 (Aula 9);
+- [x] validar catálogo, busca, rail, anterior/próxima, progresso e isolamento dos
+      checkpoints;
+- [x] executar a jornada visual em desktop (1280×900) e mobile (390×844);
+- [ ] **pendente:** conferir por escuta humana os 25 timestamps conservadores.
+
+#### Jornada visual — resultado
+
+Doze rotas percorridas nos dois viewports contra o compose de produção, com
+verificação de rolagem lateral, texto cortado, página vazia e erro de JavaScript:
+
+| Rota | Desktop | Mobile |
+|---|:--:|:--:|
+| `/inicio`, `/cursos`, `/cursos/voa-level-2` | ok | ok |
+| `/cursos/voa-level-2/unidades/11-15` | ok | ok |
+| `/cursos/voa-level-2/aulas/11` e `/aulas/15` | ok | ok |
+| `/cursos/voa-level-2/aulas/15/exercicios` | ok | ok |
+| `/cursos/voa-level-2/unidades/11-15/checkpoint` | ok | ok |
+| `/revisar` com deck do Level 2, frente e verso | ok | ok |
+| `/caderno` | ok | ok |
+| Drawer da trilha no mobile, com foco devolvido no `Escape` | — | ok |
+
+Nenhuma rota apresentou rolagem horizontal, texto cortado ou erro de JavaScript.
+
+Duas observações de comportamento registradas durante a jornada, ambas corretas
+por desenho e não defeitos:
+
+- `/revisar` é escopado por curso e abre no Level 1; para ver o deck do Level 2 é
+  preciso trocar o curso no seletor da própria tela;
+- o rótulo `Abrir trilha de aulas` é `sr-only` (1×1 px, recortado de propósito
+  para leitor de tela), e não texto cortado por falha de layout.
 
 ### Escopo
 
