@@ -75,11 +75,12 @@ afterEach(() => {
 
 function renderPractice() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       <ShadowingPractice media={media} userId={7} lessonNumber={31} />
     </QueryClientProvider>,
   )
+  return { ...view, queryClient }
 }
 
 describe('ShadowingPractice', () => {
@@ -123,7 +124,8 @@ describe('ShadowingPractice', () => {
       },
     })
     clientMocks.authenticatedFetch.mockResolvedValue({ ok: true })
-    const { container } = renderPractice()
+    const { container, queryClient } = renderPractice()
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
 
     await user.click(screen.getByRole('button', { name: '1. Ouvir modelo' }))
     expect(play).toHaveBeenCalledOnce()
@@ -165,6 +167,7 @@ describe('ShadowingPractice', () => {
       expect.objectContaining({ method: 'PUT', body: expect.any(Blob) }),
     )
     expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] })
   })
 
   it('reproduz e exclui somente uma gravação escolhida do histórico', async () => {
@@ -195,7 +198,8 @@ describe('ShadowingPractice', () => {
       createObjectURL: vi.fn().mockReturnValue('blob:saved-voice'),
       revokeObjectURL: vi.fn(),
     })
-    renderPractice()
+    const { queryClient } = renderPractice()
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
 
     expect(await screen.findByText('Quase lá', { exact: false })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Ouvir' }))
@@ -208,6 +212,9 @@ describe('ShadowingPractice', () => {
     expect(clientMocks.DELETE).toHaveBeenCalledWith(
       '/api/speaking/attempts/{attempt_id}',
       { params: { path: { attempt_id: 15 } } },
+    )
+    await waitFor(() =>
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] }),
     )
   })
 

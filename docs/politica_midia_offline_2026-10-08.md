@@ -5,12 +5,13 @@ Backlog: item 5 da fila de fechamento
 
 ## Decisão
 
-As dez mídias das Aulas 31–40 pertencem ao curso *Let's Learn English — Level 1* e são
-identificadas como produção da VOA Learning English. Os termos oficiais informam que material
+As 22 mídias das Aulas 31–52 pertencem ao recorte publicado do curso *Let's Learn English —
+Level 1* e são identificadas nas páginas oficiais como produção da VOA Learning English. Os termos
+oficiais informam que material
 produzido exclusivamente pela VOA é domínio público e deve receber crédito; conteúdo de terceiros
 permanece protegido e não pode ser redistribuído sem autorização.
 
-O projeto registra essas dez mídias como `public_domain`, atribui “Voice of America (VOA Learning
+O projeto registra essas 22 mídias como `public_domain`, atribui “Voice of America (VOA Learning
 English)” e mantém `offline_policy=network_only`. A licença compatível é condição necessária, mas
 não suficiente, para armazenamento offline.
 
@@ -75,7 +76,7 @@ Reavaliar a decisão quando ocorrer pelo menos uma destas condições:
 ## Evidência de fechamento
 
 - migration com constraints de licença e política offline;
-- seed das dez mídias com fonte, crédito e data de revisão;
+- seed das 22 mídias com fonte, crédito e data de revisão;
 - contrato OpenAPI e tipos frontend atualizados;
 - player torna origem e política visíveis;
 - teste impede remoção acidental da exclusão de áudio/vídeo do service worker;

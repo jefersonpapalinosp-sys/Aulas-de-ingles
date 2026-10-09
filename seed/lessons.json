@@ -12177,5 +12177,1561 @@
         ]
       }
     ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "50-52",
+    "slug": "lesson-50",
+    "position": 1,
+    "number": 50,
+    "title": "Back to School",
+    "title_pt": "De volta à escola",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-50-back-to-school/3771173.html",
+    "grammar_tag": "Present perfect continuous",
+    "focus_points": [
+      "have/has been + verbo com -ing",
+      "duração com for, since e how long",
+      "monitoramento da própria compreensão"
+    ],
+    "story_note": "Anna volta à universidade, conversa sobre atividades que começaram no passado e continuam agora e apresenta um relatório após monitorar — nem sempre com sucesso — o que ouviu em sala.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "monitorar",
+    "review_note": "Sprint 24: conteúdo autoral conferido documentalmente com a página, a transcrição e a revisão oficial da VOA; imagens do campus e materiais externos não foram incorporados, e os timestamps ainda não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Anna visita uma universidade e percebe que falar sobre atividades em andamento exige mostrar tanto o início quanto a duração até o presente.",
+    "warmup_prompt": "O que você vem estudando ou praticando recentemente? Há quanto tempo?",
+    "listening_focus": "as formas do present perfect continuous, as expressões de duração e os mal-entendidos de Anna na aula",
+    "goals": [
+      "Formar o **present perfect continuous** com *have/has been + verbo-ing*.",
+      "Distinguir o uso de **for** e **since** para expressar duração.",
+      "Perguntar sobre duração com **How long have/has ... been ...?**.",
+      "Monitorar a própria compreensão e identificar pistas de mal-entendidos na conversa."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Atividade que continua até agora",
+        "why": "O present perfect continuous liga uma atividade iniciada no passado ao presente: **have/has been + verbo-ing**.",
+        "warning": "Não omita *been* e não use o verbo na forma base depois dele.",
+        "table_head": [
+          "Sujeito",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I / you / we / they",
+              "have been + -ing",
+              "We have been waiting."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "he / she / it",
+              "has been + -ing",
+              "She has been writing."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "forma reduzida",
+              "'ve / 's been + -ing",
+              "I've been studying."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "For, since e how long",
+        "why": "**For** introduz uma duração; **since** marca o ponto inicial; **how long** pergunta pela duração.",
+        "warning": "Use *since* com um início, como *2015*; use *for* com um período, como *three years*.",
+        "table_head": [
+          "Pista",
+          "Uso",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "for",
+              "período",
+              "They've been waiting for ten minutes."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "since",
+              "ponto inicial",
+              "He has been studying since 2015."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "how long",
+              "pergunta de duração",
+              "How long have you been studying?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Processo × resultado",
+        "why": "O present perfect continuous destaca a atividade e sua duração; o present perfect simples costuma destacar o resultado atual.",
+        "warning": "Observe o contexto: *all night* favorece o processo; *finished* ou uma quantidade concluída favorece o resultado.",
+        "table_head": [
+          "Foco",
+          "Tempo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "processo em curso",
+              "present perfect continuous",
+              "I have been writing since last night."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "resultado",
+              "present perfect",
+              "I have finished my report."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "estado até agora",
+              "present perfect",
+              "I have been happy here."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Students have been studying here since 1792.",
+        "text_pt": "Os estudantes estudam aqui desde 1792.",
+        "note": "*Since* marca o ponto inicial da atividade."
+      },
+      {
+        "position": 1,
+        "text_en": "I have been writing since last night.",
+        "text_pt": "Venho escrevendo desde ontem à noite.",
+        "note": "A atividade começou no passado e ainda importa agora."
+      },
+      {
+        "position": 2,
+        "text_en": "How long has the class been waiting?",
+        "text_pt": "Há quanto tempo a turma está esperando?",
+        "note": "*How long* pede a duração da atividade."
+      },
+      {
+        "position": 3,
+        "text_en": "We've only been waiting for about ten minutes.",
+        "text_pt": "Estamos esperando há apenas cerca de dez minutos.",
+        "note": "*For* introduz o período de dez minutos."
+      },
+      {
+        "position": 4,
+        "text_en": "I've been paying attention.",
+        "text_pt": "Tenho prestado atenção.",
+        "note": "A frase ajuda o estudante a monitorar sua compreensão."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "university",
+        "ipa": "/ˌjuːnɪˈvɜːrsəti/",
+        "translation_pt": "universidade",
+        "example_en": "Anna goes back to a university."
+      },
+      {
+        "position": 1,
+        "term": "religious order",
+        "ipa": "/rɪˈlɪdʒəs ˈɔːrdər/",
+        "translation_pt": "ordem religiosa",
+        "example_en": "The Jesuits are a religious order."
+      },
+      {
+        "position": 2,
+        "term": "professor",
+        "ipa": "/prəˈfesər/",
+        "translation_pt": "professor universitário",
+        "example_en": "The professor arrives after the students."
+      },
+      {
+        "position": 3,
+        "term": "report",
+        "ipa": "/rɪˈpɔːrt/",
+        "translation_pt": "relatório; trabalho",
+        "example_en": "Taylor is finishing a report."
+      },
+      {
+        "position": 4,
+        "term": "topic",
+        "ipa": "/ˈtɑːpɪk/",
+        "translation_pt": "tópico; assunto",
+        "example_en": "The topic is interesting to the class."
+      },
+      {
+        "position": 5,
+        "term": "draft",
+        "ipa": "/dræft/",
+        "translation_pt": "rascunho",
+        "example_en": "Jada brings a draft to class."
+      },
+      {
+        "position": 6,
+        "term": "pencil sharpener",
+        "ipa": "/ˈpensəl ˌʃɑːrpənər/",
+        "translation_pt": "apontador de lápis",
+        "example_en": "Anna looks for a pencil sharpener."
+      },
+      {
+        "position": 7,
+        "term": "patiently",
+        "ipa": "/ˈpeɪʃəntli/",
+        "translation_pt": "pacientemente",
+        "example_en": "The class has been waiting patiently."
+      },
+      {
+        "position": 8,
+        "term": "pay attention",
+        "ipa": "/peɪ əˈtenʃən/",
+        "translation_pt": "prestar atenção",
+        "example_en": "Students should pay attention."
+      },
+      {
+        "position": 9,
+        "term": "violence",
+        "ipa": "/ˈvaɪələns/",
+        "translation_pt": "violência",
+        "example_en": "The assigned topic is violence in the city."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "for → /fər/",
+        "explanation": "Em frases de duração, *for* costuma perder força: *for ten minutes* soa próximo de /fər ten ˈmɪnɪts/."
+      },
+      {
+        "position": 1,
+        "label": "I've been → /aɪv bɪn/",
+        "explanation": "A redução *I've* se liga a *been*; pratique a sequência como uma unidade antes do verbo em *-ing*."
+      },
+      {
+        "position": 2,
+        "label": "How long has → /haʊ lɔːŋəz/",
+        "explanation": "Na fala conectada, *has* pode ficar fraco e se ligar ao final de *long*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 50",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/04/28/c26515f8-0d7c-4fb4-9646-4dfece722172_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Áudio oficial hospedado pela VOA e tratado como produção da VOA Learning English; imagens do campus e materiais externos não foram incorporados. Uso somente online.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 201,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 15,
+            "end_seconds": 27,
+            "speaker": "Anna",
+            "text_en": "Students have been studying here since 1792!",
+            "text_pt": "Os estudantes estudam aqui desde 1792!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 34,
+            "end_seconds": 46,
+            "speaker": "Taylor",
+            "text_en": "I have been writing and re-writing since last night!",
+            "text_pt": "Venho escrevendo e reescrevendo desde ontem à noite!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 55,
+            "end_seconds": 68,
+            "speaker": "Taylor",
+            "text_en": "We've only been waiting for about 10 minutes.",
+            "text_pt": "Estamos esperando há apenas cerca de dez minutos."
+          },
+          {
+            "position": 3,
+            "start_seconds": 91,
+            "end_seconds": 104,
+            "speaker": "Andrew",
+            "text_en": "I've been studying here since 2015.",
+            "text_pt": "Estudo aqui desde 2015."
+          },
+          {
+            "position": 4,
+            "start_seconds": 151,
+            "end_seconds": 166,
+            "speaker": "Dr. Jones",
+            "text_en": "I see you've been waiting very patiently. So, let's get started!",
+            "text_pt": "Vejo que vocês estão esperando com muita paciência. Então, vamos começar!"
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "She `____` her report since last night.",
+        "hint": null,
+        "explanation": "A atividade começou *last night* e segue relevante agora, por isso usamos **has been writing**.",
+        "hints": [
+          "O sujeito é *she*.",
+          "Use *has + been + verbo-ing*."
+        ],
+        "answers": [
+          "has been writing"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "They have been waiting for ten minutes.",
+          "They have been waiting since ten minutes.",
+          "They has waiting for ten minutes."
+        ],
+        "prompt": "Escolha a frase correta para uma duração de dez minutos.",
+        "hint": null,
+        "explanation": "**For** introduz um período; com *they*, usamos **have been**.",
+        "hints": [
+          "Dez minutos é um período, não um ponto inicial.",
+          "Observe a concordância com *they*."
+        ],
+        "answers": [
+          "They have been waiting for ten minutes."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Forme a pergunta de duração: the class / wait → `____`?",
+        "hint": null,
+        "explanation": "Perguntas de duração usam **How long + has/have + sujeito + been + verbo-ing**.",
+        "hints": [
+          "Comece com *How long has*.",
+          "Termine com *been waiting*."
+        ],
+        "answers": [
+          "How long has the class been waiting",
+          "How long has the class been waiting?"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "options": [
+          "I have been studying since 2015.",
+          "I have been studying for 2015.",
+          "I am been studying since 2015."
+        ],
+        "prompt": "Qual frase usa corretamente um ponto inicial?",
+        "hint": null,
+        "explanation": "O ano 2015 é o início da atividade, então a pista correta é **since**.",
+        "hints": [
+          "Um ano funciona como ponto no tempo.",
+          "O auxiliar correto é *have*."
+        ],
+        "answers": [
+          "I have been studying since 2015."
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Since 1792",
+          "For ten years",
+          "Since last night"
+        ],
+        "prompt": "Listening: desde quando estudantes estudam naquela universidade?",
+        "hint": null,
+        "explanation": "Anna usa **since 1792** para marcar o início histórico.",
+        "hints": [
+          "A informação aparece na introdução.",
+          "Escute um ano."
+        ],
+        "answers": [
+          "Since 1792"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a resposta que informa cerca de dez minutos de espera.",
+        "hint": null,
+        "explanation": "A resposta combina a redução **we've**, *been waiting* e **for** com um período.",
+        "hints": [
+          "Comece com *We've only*.",
+          "Use *for about ten minutes*."
+        ],
+        "answers": [
+          "We've only been waiting for about ten minutes",
+          "We have only been waiting for about ten minutes"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She finds an extra pencil sharpener.",
+          "The professor gives her a new laptop.",
+          "Taylor lends her a report."
+        ],
+        "prompt": "Listening: como Anna resolve o problema do apontador?",
+        "hint": null,
+        "explanation": "Depois de pedir um apontador emprestado, Anna encontra um extra que já tinha.",
+        "hints": [
+          "A solução acontece logo depois do pedido.",
+          "Escute *I found my extra one*."
+        ],
+        "answers": [
+          "She finds an extra pencil sharpener."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She confuses violence with violins.",
+          "She presents a report about giraffes.",
+          "She forgets to attend the class."
+        ],
+        "prompt": "Listening: qual mal-entendido aparece na apresentação de Anna?",
+        "hint": null,
+        "explanation": "Anna prepara sua fala sobre *violins*, mas o tópico solicitado era *violence*.",
+        "hints": [
+          "As duas palavras têm sons iniciais parecidos.",
+          "Uma palavra é um instrumento e a outra é um problema social."
+        ],
+        "answers": [
+          "She confuses violence with violins."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Meu progresso recente",
+        "instructions": "Write 5 to 7 sentences in English about something you have been studying or practicing. Explain when it started, how long it has continued, and how you monitor your progress.",
+        "min_words": 60,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "duas formas do present perfect continuous",
+            "terms": [
+              "have been ",
+              "has been ",
+              "'ve been ",
+              "'s been "
+            ]
+          },
+          {
+            "label": "uma expressão com for ou since",
+            "terms": [
+              "for ",
+              "since "
+            ]
+          },
+          {
+            "label": "uma ação de monitoramento",
+            "terms": [
+              "check",
+              "notice",
+              "review",
+              "pay attention"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "50-52",
+    "slug": "lesson-51",
+    "position": 2,
+    "number": 51,
+    "title": "A Good Habit",
+    "title_pt": "Um bom hábito",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-51-a-good-habit/3773577.html",
+    "grammar_tag": "Present perfect, gerunds e infinitives",
+    "focus_points": [
+      "present perfect simples e contínuo",
+      "gerúndios e infinitivos",
+      "hábitos, metas e apreciação"
+    ],
+    "story_note": "Anna decide correr uma maratona. Ashley explica que treinar um pouco todos os dias é um bom hábito, e Anna muda sua meta ao descobrir o objetivo beneficente da corrida.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "estabelecer uma meta",
+    "review_note": "Sprint 24: conteúdo autoral conferido documentalmente com a página, a transcrição e a revisão oficial da VOA; imagens e materiais de marcas externas não foram incorporados, e os timestamps ainda não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Uma meta fica mais realista quando se transforma em hábito. Anna aprende a diferenciar uma ação recente de um processo de treinamento e revê sua razão para participar de uma corrida.",
+    "warmup_prompt": "Escolha uma meta de estudo: qual pequeno hábito diário pode aproximar você dela?",
+    "listening_focus": "a duração do treinamento, os verbos seguidos de gerúndio ou infinitivo e a mudança da meta de Anna",
+    "goals": [
+      "Contrastar o **present perfect** com o **present perfect continuous**.",
+      "Reconhecer verbos seguidos de **gerúndio** e de **infinitivo**.",
+      "Descrever hábitos, preferências e metas pessoais.",
+      "Identificar como a meta de Anna muda durante a conversa."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Resultado × atividade em progresso",
+        "why": "O present perfect simples destaca um resultado; o contínuo destaca a duração ou o processo até agora.",
+        "warning": "Uma pista como *for an hour* costuma destacar duração, enquanto *just* pode introduzir um resultado recente.",
+        "table_head": [
+          "Foco",
+          "Estrutura",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "processo",
+              "have been + -ing",
+              "I have been training for an hour."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "resultado recente",
+              "have + particípio",
+              "I have just found a new goal."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "passado concluído",
+              "simple past",
+              "I started today."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Gerúndio depois de alguns verbos",
+        "why": "Verbos de preferência como *love*, *like* e *enjoy* podem apresentar uma atividade com a forma em **-ing**.",
+        "warning": "Depois de *enjoy*, não use *to + verbo*: diga **enjoy running**.",
+        "table_head": [
+          "Verbo",
+          "Padrão",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "love",
+              "love + -ing",
+              "I love running."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "enjoy",
+              "enjoy + -ing",
+              "She enjoys training."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "dislike",
+              "dislike + -ing",
+              "He dislikes waking up early."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Infinitivo para intenção e objetivo",
+        "why": "Verbos como *want*, *plan* e *hope* são seguidos de **to + verbo** quando expressam intenção ou meta.",
+        "warning": "Não acrescente *-ing* depois de *want* neste padrão: use **want to run**.",
+        "table_head": [
+          "Função",
+          "Padrão",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "desejo",
+              "want to + verbo",
+              "I want to challenge myself."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "plano",
+              "plan to + verbo",
+              "I plan to train every day."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "propósito",
+              "to + verbo",
+              "The race raises money to help children."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I want to challenge myself in a marathon.",
+        "text_pt": "Quero me desafiar em uma maratona.",
+        "note": "*Want* recebe o infinitivo *to challenge*."
+      },
+      {
+        "position": 1,
+        "text_en": "I love running.",
+        "text_pt": "Eu adoro correr.",
+        "note": "*Love* apresenta a atividade com a forma em *-ing*."
+      },
+      {
+        "position": 2,
+        "text_en": "How long have you been training?",
+        "text_pt": "Há quanto tempo você vem treinando?",
+        "note": "A pergunta verifica a duração da preparação."
+      },
+      {
+        "position": 3,
+        "text_en": "Training a little every day is a good habit.",
+        "text_pt": "Treinar um pouco todos os dias é um bom hábito.",
+        "note": "O gerúndio funciona como sujeito da frase."
+      },
+      {
+        "position": 4,
+        "text_en": "I've just found my new goal.",
+        "text_pt": "Acabei de encontrar minha nova meta.",
+        "note": "*Just* marca um resultado muito recente no present perfect."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "marathon",
+        "ipa": "/ˈmærəθɑːn/",
+        "translation_pt": "maratona",
+        "example_en": "Ashley will run her first marathon."
+      },
+      {
+        "position": 1,
+        "term": "race",
+        "ipa": "/reɪs/",
+        "translation_pt": "corrida; competição",
+        "example_en": "Anna arrives to enter the race."
+      },
+      {
+        "position": 2,
+        "term": "charity",
+        "ipa": "/ˈtʃærəti/",
+        "translation_pt": "caridade; instituição beneficente",
+        "example_en": "Many races raise money for charity."
+      },
+      {
+        "position": 3,
+        "term": "fitness",
+        "ipa": "/ˈfɪtnəs/",
+        "translation_pt": "condicionamento físico",
+        "example_en": "A marathon can be a fitness goal."
+      },
+      {
+        "position": 4,
+        "term": "goal",
+        "ipa": "/ɡoʊl/",
+        "translation_pt": "meta; objetivo",
+        "example_en": "Anna changes her goal."
+      },
+      {
+        "position": 5,
+        "term": "challenge",
+        "ipa": "/ˈtʃælɪndʒ/",
+        "translation_pt": "desafiar; desafio",
+        "example_en": "She wants to challenge herself."
+      },
+      {
+        "position": 6,
+        "term": "medal",
+        "ipa": "/ˈmedəl/",
+        "translation_pt": "medalha",
+        "example_en": "Finishers receive a medal."
+      },
+      {
+        "position": 7,
+        "term": "train",
+        "ipa": "/treɪn/",
+        "translation_pt": "treinar",
+        "example_en": "Runners train before a marathon."
+      },
+      {
+        "position": 8,
+        "term": "habit",
+        "ipa": "/ˈhæbɪt/",
+        "translation_pt": "hábito",
+        "example_en": "Daily practice is a good habit."
+      },
+      {
+        "position": 9,
+        "term": "raise money",
+        "ipa": "/reɪz ˈmʌni/",
+        "translation_pt": "arrecadar dinheiro",
+        "example_en": "The event raises money for sick children."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "to → /tə/",
+        "explanation": "Antes do verbo, o infinitivo *to* costuma ser reduzido: *want to run* soa próximo de /wɑːnt tə rʌn/."
+      },
+      {
+        "position": 1,
+        "label": "have you → /həvju/",
+        "explanation": "Em *How long have you been training?*, *have* perde força e se conecta a *you*."
+      },
+      {
+        "position": 2,
+        "label": "training a → /ˈtreɪnɪŋə/",
+        "explanation": "A consoante final de *training* se liga ao *a* fraco da palavra seguinte."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 51",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/04/06/1f484880-f858-47b5-8e0d-37a063b34a07_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Áudio oficial hospedado pela VOA e tratado como produção da VOA Learning English; imagens e materiais de marcas externas não foram incorporados. Uso somente online.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 185,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 10,
+            "end_seconds": 23,
+            "speaker": "Anna",
+            "text_en": "I want to challenge myself in a marathon and maybe win a medal!",
+            "text_pt": "Quero me desafiar em uma maratona e talvez ganhar uma medalha!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 50,
+            "end_seconds": 60,
+            "speaker": "Ashley",
+            "text_en": "I love running. In fact, this weekend, I will run in my first marathon.",
+            "text_pt": "Adoro correr. Na verdade, neste fim de semana correrei minha primeira maratona."
+          },
+          {
+            "position": 2,
+            "start_seconds": 91,
+            "end_seconds": 104,
+            "speaker": "Anna",
+            "text_en": "I've been training for an hour — no, an hour and seven minutes!",
+            "text_pt": "Venho treinando há uma hora — não, uma hora e sete minutos!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 105,
+            "end_seconds": 117,
+            "speaker": "Ashley",
+            "text_en": "Training a little every day is a good habit to get into.",
+            "text_pt": "Treinar um pouco todos os dias é um bom hábito para adquirir."
+          },
+          {
+            "position": 4,
+            "start_seconds": 167,
+            "end_seconds": 180,
+            "speaker": "Anna",
+            "text_en": "I've just found my new goal. And I get to wear a medal.",
+            "text_pt": "Acabei de encontrar minha nova meta. E posso usar uma medalha."
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "I have been training for an hour.",
+          "I trained for an hour tomorrow.",
+          "I have training since an hour."
+        ],
+        "prompt": "Qual frase destaca a duração do treinamento até agora?",
+        "hint": null,
+        "explanation": "**For an hour** e **have been training** destacam a duração da atividade.",
+        "hints": [
+          "Procure *have been + -ing*.",
+          "Uma hora é um período."
+        ],
+        "answers": [
+          "I have been training for an hour."
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Ashley loves `____` every morning.",
+        "hint": null,
+        "explanation": "Depois de *love*, podemos apresentar a atividade com o gerúndio **running**.",
+        "hints": [
+          "Use o verbo *run*.",
+          "Acrescente *-ing* com a grafia correta."
+        ],
+        "answers": [
+          "running"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Anna wants `____` herself in a marathon.",
+        "hint": null,
+        "explanation": "*Want* é seguido de **to + verbo**: *to challenge*.",
+        "hints": [
+          "Use um infinitivo.",
+          "O verbo significa *desafiar*."
+        ],
+        "answers": [
+          "to challenge"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "I've",
+          "just",
+          "found",
+          "my",
+          "new",
+          "goal"
+        ],
+        "prompt": "Ordene a frase sobre um resultado recém-alcançado.",
+        "hint": null,
+        "explanation": "No present perfect, **just** aparece normalmente entre o auxiliar e o particípio.",
+        "hints": [
+          "Comece com *I've just*.",
+          "O particípio é *found*."
+        ],
+        "answers": [
+          "I've just found my new goal"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She wants to challenge herself and perhaps win a medal.",
+          "She has promised to coach Ashley.",
+          "She needs to write a university report."
+        ],
+        "prompt": "Listening: qual é a meta inicial de Anna?",
+        "hint": null,
+        "explanation": "No início, Anna quer se desafiar em uma maratona e imagina ganhar uma medalha.",
+        "hints": [
+          "A resposta aparece antes de Anna chamar Ashley.",
+          "Escute *challenge myself*."
+        ],
+        "answers": [
+          "She wants to challenge herself and perhaps win a medal."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o conselho de Ashley que termina em ‘a good habit to get into’. ",
+        "hint": null,
+        "explanation": "Ashley recomenda constância: **Training a little every day is a good habit to get into**.",
+        "hints": [
+          "Comece com *Training a little*.",
+          "Inclua *every day*."
+        ],
+        "answers": [
+          "Training a little every day is a good habit to get into"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She began training that day.",
+          "She has trained every day for a year.",
+          "She finished a marathon the previous week."
+        ],
+        "prompt": "Listening: por que Ashley considera insuficiente a preparação de Anna?",
+        "hint": null,
+        "explanation": "Anna começou naquele dia e treinou por pouco mais de uma hora, não de forma regular.",
+        "hints": [
+          "Compare *started today* com uma rotina diária.",
+          "Escute a duração exata."
+        ],
+        "answers": [
+          "She began training that day."
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Helping raise money for sick children",
+          "Winning against the children",
+          "Becoming a professional runner"
+        ],
+        "prompt": "Listening: qual nova meta Anna encontra no final?",
+        "hint": null,
+        "explanation": "Ao descobrir o propósito beneficente, Anna decide ajudar a arrecadar dinheiro para crianças doentes.",
+        "hints": [
+          "A organizadora explica o objetivo da corrida.",
+          "A resposta envolve *raise money*."
+        ],
+        "answers": [
+          "Helping raise money for sick children"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma meta sustentada por hábitos",
+        "instructions": "Write 6 to 8 sentences in English about one goal and the daily habit that supports it. Explain what you enjoy doing, what you want to achieve, and how long you have been practicing.",
+        "min_words": 65,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "uma duração no present perfect continuous",
+            "terms": [
+              "have been ",
+              "has been ",
+              "'ve been ",
+              "'s been "
+            ]
+          },
+          {
+            "label": "um gerúndio de preferência",
+            "terms": [
+              "love ",
+              "like ",
+              "enjoy "
+            ]
+          },
+          {
+            "label": "um infinitivo de meta",
+            "terms": [
+              "want to ",
+              "plan to ",
+              "hope to "
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "50-52",
+    "slug": "lesson-52",
+    "position": 3,
+    "number": 52,
+    "title": "Taking Chances",
+    "title_pt": "Arriscando-se",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-52-taking-chances/3805454.html",
+    "grammar_tag": "Phrasal verbs e revisão dos tempos verbais",
+    "focus_points": [
+      "phrasal verbs em contexto",
+      "revisão de passado, presente perfeito e futuro",
+      "realizações, riscos e avaliação do progresso"
+    ],
+    "story_note": "No encerramento do curso, Anna olha para o ano que passou, descreve suas realizações e anuncia novos trabalhos como atriz. Ela avalia os riscos que assumiu e decide continuar tentando.",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "avaliar",
+    "review_note": "Sprint 24: conteúdo autoral conferido documentalmente com a página, a transcrição e a revisão oficial da VOA; o certificado, imagens, marcas e outras mídias de terceiros não foram incorporados e não há registro de validação dos timestamps por escuta humana.",
+    "source_accessed_at": "2026-10-08",
+    "lead": "Anna encerra seu primeiro ano em Washington avaliando conquistas, tentativas e próximos passos. A conversa reúne phrasal verbs e tempos verbais vistos durante o curso.",
+    "warmup_prompt": "Liste três coisas que você realizou desde que começou a estudar inglês e uma que ainda quer realizar.",
+    "listening_focus": "os phrasal verbs, as realizações de Anna e as mudanças entre passado, presente perfeito e futuro",
+    "goals": [
+      "Interpretar **phrasal verbs** pelo contexto da conversa.",
+      "Revisar o contraste entre **simple past**, **present perfect** e formas de futuro.",
+      "Descrever realizações, sucessos, falhas e próximos passos.",
+      "Avaliar o próprio progresso e reconhecer a mensagem final de Anna."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Phrasal verbs em contexto",
+        "why": "Um phrasal verb combina verbo e partícula para criar um sentido próprio. O contexto ajuda a interpretar a expressão completa.",
+        "warning": "Não traduza cada palavra isoladamente: *take off* pode significar decolar, retirar ou, sobre uma carreira, crescer rapidamente.",
+        "table_head": [
+          "Phrasal verb",
+          "Sentido no episódio",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "look back",
+              "relembrar e avaliar",
+              "She looks back over the past year."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "take off",
+              "começar a ter sucesso",
+              "Her acting career has taken off."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "find out",
+              "descobrir",
+              "She had to find out what trees do."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Realização até agora × evento passado",
+        "why": "O present perfect resume experiências e resultados ligados ao presente; o simple past situa um evento concluído em um tempo passado.",
+        "warning": "Com uma referência passada definida, como *last year*, prefira o simple past; com *over the past year* e foco no resultado atual, o present perfect é natural.",
+        "table_head": [
+          "Pista",
+          "Tempo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "over the past year",
+              "present perfect",
+              "I have met people from many countries."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "evento concluído",
+              "simple past",
+              "I took some chances."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "resultado atual",
+              "present perfect",
+              "Her career has taken off."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Planos e previsões futuras",
+        "why": "**Will** anuncia decisões ou fatos futuros; **be going to** apresenta previsões apoiadas na situação atual.",
+        "warning": "Depois de *will*, use o verbo na forma base; no future continuous, mantenha **will be + verbo-ing**.",
+        "table_head": [
+          "Função",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "atividade futura",
+              "will be + -ing",
+              "I will be acting in three movies."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "previsão",
+              "be going to + verbo",
+              "Big things are going to happen."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "decisão duradoura",
+              "will + verbo",
+              "I will never stop trying."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Looking back over the past year, I've done so many amazing things.",
+        "text_pt": "Olhando para o ano que passou, fiz tantas coisas incríveis.",
+        "note": "*Look back* introduz uma avaliação do progresso."
+      },
+      {
+        "position": 1,
+        "text_en": "Her acting career has really taken off.",
+        "text_pt": "A carreira de atriz dela realmente decolou.",
+        "note": "Aqui, *take off* significa começar a ter muito sucesso."
+      },
+      {
+        "position": 2,
+        "text_en": "I will be acting in three movies.",
+        "text_pt": "Estarei atuando em três filmes.",
+        "note": "O future continuous apresenta a nova atividade profissional."
+      },
+      {
+        "position": 3,
+        "text_en": "I had to find out what it was like to be a tree.",
+        "text_pt": "Eu tive que descobrir como era ser uma árvore.",
+        "note": "*Find out* significa descobrir uma informação."
+      },
+      {
+        "position": 4,
+        "text_en": "Sometimes I succeeded. Sometimes I failed. But I will never stop trying.",
+        "text_pt": "Às vezes tive sucesso. Às vezes falhei. Mas nunca vou parar de tentar.",
+        "note": "A sequência avalia o passado e declara uma decisão para o futuro."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "chance",
+        "ipa": "/tʃæns/",
+        "translation_pt": "risco; oportunidade",
+        "example_en": "Anna has taken many chances."
+      },
+      {
+        "position": 1,
+        "term": "accomplishment",
+        "ipa": "/əˈkɑːmplɪʃmənt/",
+        "translation_pt": "realização; conquista",
+        "example_en": "She describes an important accomplishment."
+      },
+      {
+        "position": 2,
+        "term": "career",
+        "ipa": "/kəˈrɪr/",
+        "translation_pt": "carreira",
+        "example_en": "Her acting career is growing."
+      },
+      {
+        "position": 3,
+        "term": "take off",
+        "ipa": "/teɪk ɔːf/",
+        "translation_pt": "decolar; crescer rapidamente",
+        "example_en": "Anna's career has taken off."
+      },
+      {
+        "position": 4,
+        "term": "bring to life",
+        "ipa": "/brɪŋ tə laɪf/",
+        "translation_pt": "dar vida a",
+        "example_en": "She brought the tree role to life."
+      },
+      {
+        "position": 5,
+        "term": "find out",
+        "ipa": "/faɪnd aʊt/",
+        "translation_pt": "descobrir",
+        "example_en": "She found out how to prepare."
+      },
+      {
+        "position": 6,
+        "term": "get around",
+        "ipa": "/ɡet əˈraʊnd/",
+        "translation_pt": "locomover-se",
+        "example_en": "Anna learned how to get around the city."
+      },
+      {
+        "position": 7,
+        "term": "proud",
+        "ipa": "/praʊd/",
+        "translation_pt": "orgulhoso",
+        "example_en": "Her family is proud of her."
+      },
+      {
+        "position": 8,
+        "term": "succeed",
+        "ipa": "/səkˈsiːd/",
+        "translation_pt": "ter sucesso",
+        "example_en": "Sometimes people succeed after taking a chance."
+      },
+      {
+        "position": 9,
+        "term": "fail",
+        "ipa": "/feɪl/",
+        "translation_pt": "falhar",
+        "example_en": "A person can fail and keep trying."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "sit down → /sɪdaʊn/",
+        "explanation": "Na fala conectada, o /t/ final de *sit* se mistura ao /d/ inicial de *down*, criando uma transição curta."
+      },
+      {
+        "position": 1,
+        "label": "take off",
+        "explanation": "Em phrasal verbs, a partícula pode receber destaque: *Her career has taken OFF*."
+      },
+      {
+        "position": 2,
+        "label": "I've /aɪv/ e I'll /aɪl/",
+        "explanation": "Compare a consoante final: *I've done* resume uma realização; *I'll make* anuncia o futuro."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 52",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/04/14/8259e341-9066-4896-af3d-f62d738d0948_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção exclusiva da VOA Learning English em domínio público; certificado, imagens, marcas e outras mídias de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 221,
+        "listening_exercise_position": 4,
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 9,
+            "end_seconds": 26,
+            "speaker": "Anna",
+            "text_en": "Looking back over the past year, I've done so many amazing things!",
+            "text_pt": "Olhando para o ano que passou, fiz tantas coisas incríveis!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 56,
+            "end_seconds": 69,
+            "speaker": "Kelly",
+            "text_en": "Her acting career has really taken off.",
+            "text_pt": "A carreira de atriz dela realmente decolou."
+          },
+          {
+            "position": 2,
+            "start_seconds": 105,
+            "end_seconds": 118,
+            "speaker": "Anna",
+            "text_en": "I will be acting in three movies.",
+            "text_pt": "Estarei atuando em três filmes."
+          },
+          {
+            "position": 3,
+            "start_seconds": 139,
+            "end_seconds": 156,
+            "speaker": "Anna",
+            "text_en": "I had to find out what it was like to be a tree in the world.",
+            "text_pt": "Tive que descobrir como era ser uma árvore no mundo."
+          },
+          {
+            "position": 4,
+            "start_seconds": 191,
+            "end_seconds": 211,
+            "speaker": "Anna",
+            "text_en": "Sometimes I succeeded. Sometimes I failed. But I will never stop trying.",
+            "text_pt": "Às vezes tive sucesso. Às vezes falhei. Mas nunca vou parar de tentar."
+          }
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "Her career has become successful quickly.",
+          "Her plane has left the airport.",
+          "She has removed a costume."
+        ],
+        "prompt": "No contexto da carreira, o que significa ‘has taken off’?",
+        "hint": null,
+        "explanation": "Sobre uma carreira, **take off** significa começar a crescer ou ter sucesso rapidamente.",
+        "hints": [
+          "Use o contexto profissional.",
+          "Não se trata de avião nem de roupa."
+        ],
+        "answers": [
+          "Her career has become successful quickly."
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "recognize",
+        "options": [
+          "I've met many people over the past year.",
+          "I meet many people yesterday.",
+          "I've met many people last Tuesday."
+        ],
+        "prompt": "Escolha a frase que resume uma realização ao longo do último ano.",
+        "hint": null,
+        "explanation": "**Over the past year** cria um período que chega ao presente, adequado ao present perfect.",
+        "hints": [
+          "A realização ainda faz parte do balanço atual.",
+          "Evite present perfect com um dia passado concluído."
+        ],
+        "answers": [
+          "I've met many people over the past year."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Next year, Anna `____` in three movies.",
+        "hint": null,
+        "explanation": "A atividade futura em andamento usa **will be acting**.",
+        "hints": [
+          "Use *will + be*.",
+          "Acrescente *-ing* a *act*."
+        ],
+        "answers": [
+          "will be acting"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "options": [
+          "I",
+          "will",
+          "never",
+          "stop",
+          "trying"
+        ],
+        "prompt": "Ordene a decisão de continuar apesar das falhas.",
+        "hint": null,
+        "explanation": "A decisão futura usa **will never stop trying**.",
+        "hints": [
+          "Comece com *I will*.",
+          "*Never* vem antes do verbo principal."
+        ],
+        "answers": [
+          "I will never stop trying"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "She has met people, made friends and found a great job.",
+          "She has left Washington and stopped working.",
+          "She has studied at Georgetown for ten years."
+        ],
+        "prompt": "Listening: quais realizações Anna resume no início?",
+        "hint": null,
+        "explanation": "Anna cita pessoas que conheceu, amizades que fez e o bom trabalho que tem.",
+        "hints": [
+          "A lista vem depois de *I've done so many amazing things*.",
+          "Escute três resultados positivos."
+        ],
+        "answers": [
+          "She has met people, made friends and found a great job."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Her acting career has become successful.",
+          "She has learned to fly a plane.",
+          "She has stopped acting in plays."
+        ],
+        "prompt": "Listening: o que Kelly quer dizer ao afirmar que a carreira de Anna ‘has taken off’?",
+        "hint": null,
+        "explanation": "Kelly explica que a atuação de Anna abriu novas oportunidades e sua carreira está crescendo.",
+        "hints": [
+          "O contexto é uma entrevista sobre atuação.",
+          "Logo depois, Anna anuncia três filmes."
+        ],
+        "answers": [
+          "Her acting career has become successful."
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o anúncio de Anna sobre os três filmes.",
+        "hint": null,
+        "explanation": "Anna usa o future continuous: **I will be acting in three movies**.",
+        "hints": [
+          "Comece com *I will be*.",
+          "O verbo principal é *acting*."
+        ],
+        "answers": [
+          "I will be acting in three movies"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "options": [
+          "Success and failure are both part of continuing to try.",
+          "A person should avoid every uncertain opportunity.",
+          "Only success can produce meaningful progress."
+        ],
+        "prompt": "Listening: qual ideia resume a avaliação final de Anna?",
+        "hint": null,
+        "explanation": "Anna reconhece que às vezes teve sucesso e às vezes falhou, mas afirma que continuará tentando.",
+        "hints": [
+          "Compare *succeeded*, *failed* e *never stop trying*.",
+          "A mensagem admite resultados diferentes."
+        ],
+        "answers": [
+          "Success and failure are both part of continuing to try."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Avaliação do meu percurso",
+        "instructions": "Write 6 to 9 sentences in English evaluating your English-learning journey. Mention accomplishments, one past difficulty, one useful phrasal verb, and a future step.",
+        "min_words": 75,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "uma realização no present perfect",
+            "terms": [
+              "i have ",
+              "i've "
+            ]
+          },
+          {
+            "label": "um evento concluído no passado",
+            "terms": [
+              "last ",
+              "yesterday",
+              "ago",
+              "when i "
+            ]
+          },
+          {
+            "label": "um próximo passo no futuro",
+            "terms": [
+              "i will ",
+              "i'll ",
+              "going to "
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]

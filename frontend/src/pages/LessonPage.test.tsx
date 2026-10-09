@@ -59,16 +59,38 @@ vi.mock('../api/queries', () => ({
             source_kind: 'mixed',
           },
         },
+        {
+          slug: '50-52',
+          lessons: [
+            {
+              id: 52,
+              number: 52,
+              position: 3,
+              title: 'Taking Chances',
+            },
+          ],
+          review: {
+            id: 52,
+            slug: 'checkpoint-50-52',
+            position: 4,
+            title: 'Checkpoint 50–52',
+            status: 'published',
+            estimated_minutes: 12,
+            question_count: 6,
+            review_lesson_number: 52,
+            source_kind: 'mixed',
+          },
+        },
       ],
     },
   }),
 }))
 
-function renderLesson() {
+function renderLesson(route = '/cursos/voa-level-1/aulas/31') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/cursos/voa-level-1/aulas/31']}>
+      <MemoryRouter initialEntries={[route]}>
         <Routes>
           <Route path="/cursos/:courseSlug/aulas/:numero" element={<LessonPage />} />
         </Routes>
@@ -125,6 +147,24 @@ describe('LessonPage', () => {
     expect(screen.getByRole('link', { name: 'Checkpoint 31–40 →' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-1/unidades/31-40/checkpoint',
+    )
+  })
+
+  it('encadeia a Aula 52 ao checkpoint final do recorte', () => {
+    lessonFixture = {
+      ...lesson,
+      id: 52,
+      unit_slug: '50-52',
+      slug: 'taking-chances',
+      position: 3,
+      number: 52,
+      title: 'Taking Chances',
+    }
+    renderLesson('/cursos/voa-level-1/aulas/52')
+
+    expect(screen.getByRole('link', { name: 'Checkpoint 50–52 →' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/50-52/checkpoint',
     )
   })
 })

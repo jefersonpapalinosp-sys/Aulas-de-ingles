@@ -30,6 +30,7 @@ export function useMarcarEstudada(courseSlug: string) {
       await Promise.all([
         qc.invalidateQueries({ queryKey: ['progress'] }),
         qc.invalidateQueries({ queryKey: ['today'] }),
+        qc.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
       ])
     },
   })
@@ -79,7 +80,10 @@ export function useSalvarStudySession(courseSlug: string, numero: number) {
     },
     onSuccess: async (data) => {
       qc.setQueryData(['study-session', courseSlug, numero], data)
-      await qc.invalidateQueries({ queryKey: ['today'] })
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['today'] }),
+        qc.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
+      ])
     },
   })
 }

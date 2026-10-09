@@ -32,6 +32,8 @@ const unitLessons = Array.from({ length: 4 }, (_, index) => ({
   grammar_tag: 'Gramática da unidade',
 }))
 let studiedLessonNumbers: number[] = []
+let courseStatus: 'planned' | 'published' = 'published'
+let publishedLessonCount = 10
 
 vi.mock('../api/queries', () => ({
   useCourseCurriculum: () => ({
@@ -45,9 +47,9 @@ vi.mock('../api/queries', () => ({
         provider: 'VOA Learning English',
         source_url: 'https://example.com',
         position: 1,
-        status: 'published',
+        status: courseStatus,
         total_lessons: 52,
-        published_lessons: 10,
+        published_lessons: publishedLessonCount,
       },
       units: [
         {
@@ -184,6 +186,8 @@ describe('MapPage / painel Hoje', () => {
   beforeEach(() => {
     savePlan.mockReset()
     studiedLessonNumbers = []
+    courseStatus = 'published'
+    publishedLessonCount = 10
   })
 
   it('explica a recomendação e converte o link antigo para a rota canônica', () => {
@@ -202,6 +206,10 @@ describe('MapPage / painel Hoje', () => {
     expect(within(grammar!).queryByText(/%/)).not.toBeInTheDocument()
     expect(screen.getByText('80%')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Mapa do curso' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ver meu fechamento' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/conclusao',
+    )
   })
 
   it('permite editar a meta sem bloquear o catálogo de unidades', async () => {
@@ -222,6 +230,14 @@ describe('MapPage / painel Hoje', () => {
       goal: 'Inglês para viagem',
     })
     expect(screen.getByRole('link', { name: /Unidade 31–40/ })).toBeInTheDocument()
+  })
+
+  it('não oferece fechamento para curso planejado sem aulas publicadas', () => {
+    courseStatus = 'planned'
+    publishedLessonCount = 0
+    render(<MapPage />, { wrapper: MemoryRouter })
+
+    expect(screen.queryByRole('link', { name: 'Ver meu fechamento' })).not.toBeInTheDocument()
   })
 
   it('apresenta o checkpoint como item próprio no mapa da unidade', () => {

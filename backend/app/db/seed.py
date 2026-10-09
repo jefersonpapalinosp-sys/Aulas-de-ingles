@@ -79,14 +79,58 @@ def load_course_seed(path: Path | None = None) -> list[dict[str, Any]]:
 def validate_course_reviews(
     courses: list[dict[str, Any]], lessons: list[dict[str, Any]]
 ) -> None:
-    """Falha cedo quando um checkpoint referencia conteúdo inexistente/inválido."""
+    """Falha cedo quando catálogo ou checkpoint contradizem o conteúdo semeado."""
     lessons_by_course_number = {
         (str(lesson["course_slug"]), int(lesson["number"])): lesson
         for lesson in lessons
     }
+    catalog_units = {
+        (str(course["slug"]), str(unit["slug"]))
+        for course in courses
+        for unit in course["units"]
+    }
+    for lesson in lessons:
+        unit_key = (str(lesson["course_slug"]), str(lesson["unit_slug"]))
+        if unit_key not in catalog_units:
+            raise ValueError(
+                f"Aula {lesson['number']} referencia unidade inexistente "
+                f"{unit_key[0]}/{unit_key[1]}."
+            )
+
     for course in courses:
         course_slug = str(course["slug"])
         for unit in course["units"]:
+            unit_lessons = [
+                lesson
+                for lesson in lessons
+                if lesson["course_slug"] == course_slug
+                and lesson["unit_slug"] == unit["slug"]
+            ]
+            start = int(unit["lesson_start"])
+            end = int(unit["lesson_end"])
+            outside = [
+                int(lesson["number"])
+                for lesson in unit_lessons
+                if not start <= int(lesson["number"]) <= end
+            ]
+            if outside:
+                raise ValueError(
+                    f"Aula {outside[0]} está fora da faixa {start}–{end} "
+                    f"de {course_slug}/{unit['slug']}."
+                )
+            positions = sorted(int(lesson["position"]) for lesson in unit_lessons)
+            if positions != list(range(1, len(unit_lessons) + 1)):
+                raise ValueError(
+                    f"Unidade {course_slug}/{unit['slug']} tem posições de aula "
+                    "não contíguas."
+                )
+            expected_lessons = int(unit["total_lessons"])
+            if unit["status"] == "published" and len(unit_lessons) != expected_lessons:
+                raise ValueError(
+                    f"Unidade publicada {course_slug}/{unit['slug']} declara "
+                    f"{expected_lessons} aulas, mas possui {len(unit_lessons)}."
+                )
+
             review = unit.get("review")
             if review is None:
                 continue
@@ -161,12 +205,6 @@ def validate_course_reviews(
                         f"Checkpoint {course_slug}/{unit['slug']} deve usar áudio de conversa."
                     )
 
-            unit_lessons = [
-                lesson
-                for lesson in lessons
-                if lesson["course_slug"] == course_slug
-                and lesson["unit_slug"] == unit["slug"]
-            ]
             if unit_lessons and int(review["position"]) <= max(
                 int(lesson["position"]) for lesson in unit_lessons
             ):

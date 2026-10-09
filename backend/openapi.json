@@ -345,6 +345,118 @@
                 "title": "CardOut",
                 "type": "object"
             },
+            "CertificateEligibilityOut": {
+                "properties": {
+                    "automatic_download": {
+                        "const": false,
+                        "default": false,
+                        "title": "Automatic Download",
+                        "type": "boolean"
+                    },
+                    "cta_href": {
+                        "title": "Cta Href",
+                        "type": "string"
+                    },
+                    "cta_label": {
+                        "title": "Cta Label",
+                        "type": "string"
+                    },
+                    "eligible": {
+                        "title": "Eligible",
+                        "type": "boolean"
+                    },
+                    "reason": {
+                        "title": "Reason",
+                        "type": "string"
+                    },
+                    "required_checkpoints": {
+                        "title": "Required Checkpoints",
+                        "type": "integer"
+                    },
+                    "required_lessons": {
+                        "title": "Required Lessons",
+                        "type": "integer"
+                    },
+                    "scope_label": {
+                        "title": "Scope Label",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "eligible",
+                            "ineligible"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "eligible",
+                    "status",
+                    "reason",
+                    "required_lessons",
+                    "required_checkpoints",
+                    "scope_label",
+                    "cta_label",
+                    "cta_href"
+                ],
+                "title": "CertificateEligibilityOut",
+                "type": "object"
+            },
+            "CheckpointCompletionOut": {
+                "properties": {
+                    "current_completed": {
+                        "title": "Current Completed",
+                        "type": "integer"
+                    },
+                    "pending": {
+                        "items": {
+                            "$ref": "#/components/schemas/PendingCheckpointOut"
+                        },
+                        "title": "Pending",
+                        "type": "array"
+                    },
+                    "published": {
+                        "title": "Published",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "published",
+                    "current_completed",
+                    "pending"
+                ],
+                "title": "CheckpointCompletionOut",
+                "type": "object"
+            },
+            "CompletionCourseOut": {
+                "properties": {
+                    "level": {
+                        "title": "Level",
+                        "type": "string"
+                    },
+                    "proficiency_label": {
+                        "title": "Proficiency Label",
+                        "type": "string"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "title",
+                    "level",
+                    "proficiency_label"
+                ],
+                "title": "CompletionCourseOut",
+                "type": "object"
+            },
             "ContentSourceOut": {
                 "properties": {
                     "accessed_at": {
@@ -395,6 +507,95 @@
                 "title": "ContentSourceOut",
                 "type": "object"
             },
+            "CourseCompletionOut": {
+                "properties": {
+                    "certificate": {
+                        "$ref": "#/components/schemas/CertificateEligibilityOut"
+                    },
+                    "checkpoints": {
+                        "$ref": "#/components/schemas/CheckpointCompletionOut"
+                    },
+                    "course": {
+                        "$ref": "#/components/schemas/CompletionCourseOut"
+                    },
+                    "incomplete_units": {
+                        "items": {
+                            "$ref": "#/components/schemas/IncompleteUnitOut"
+                        },
+                        "title": "Incomplete Units",
+                        "type": "array"
+                    },
+                    "next_course": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NextCourseOut"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "progress": {
+                        "$ref": "#/components/schemas/CourseCompletionProgressOut"
+                    },
+                    "skills": {
+                        "items": {
+                            "$ref": "#/components/schemas/SkillSummaryOut"
+                        },
+                        "title": "Skills",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "course",
+                    "progress",
+                    "incomplete_units",
+                    "checkpoints",
+                    "skills",
+                    "certificate",
+                    "next_course"
+                ],
+                "title": "CourseCompletionOut",
+                "type": "object"
+            },
+            "CourseCompletionProgressOut": {
+                "properties": {
+                    "completed_lessons": {
+                        "title": "Completed Lessons",
+                        "type": "integer"
+                    },
+                    "completion_percent": {
+                        "title": "Completion Percent",
+                        "type": "integer"
+                    },
+                    "published_lessons": {
+                        "title": "Published Lessons",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "enum": [
+                            "not_started",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "viewed_lessons": {
+                        "title": "Viewed Lessons",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "published_lessons",
+                    "viewed_lessons",
+                    "completed_lessons",
+                    "completion_percent",
+                    "status"
+                ],
+                "title": "CourseCompletionProgressOut",
+                "type": "object"
+            },
             "CourseCurriculumOut": {
                 "properties": {
                     "course": {
@@ -413,6 +614,29 @@
                     "units"
                 ],
                 "title": "CourseCurriculumOut",
+                "type": "object"
+            },
+            "CourseDiagnosticOut": {
+                "properties": {
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "href": {
+                        "title": "Href",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "title",
+                    "description",
+                    "href"
+                ],
+                "title": "CourseDiagnosticOut",
                 "type": "object"
             },
             "CourseReviewAnswerIn": {
@@ -1461,6 +1685,44 @@
                 "title": "HumanRatingIn",
                 "type": "object"
             },
+            "IncompleteUnitOut": {
+                "properties": {
+                    "completed_lessons": {
+                        "title": "Completed Lessons",
+                        "type": "integer"
+                    },
+                    "href": {
+                        "title": "Href",
+                        "type": "string"
+                    },
+                    "published_lessons": {
+                        "title": "Published Lessons",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "viewed_lessons": {
+                        "title": "Viewed Lessons",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "title",
+                    "published_lessons",
+                    "viewed_lessons",
+                    "completed_lessons",
+                    "href"
+                ],
+                "title": "IncompleteUnitOut",
+                "type": "object"
+            },
             "LessonDetailOut": {
                 "properties": {
                     "content_sources": {
@@ -2000,6 +2262,70 @@
                 "title": "MediaPositionOut",
                 "type": "object"
             },
+            "NextCourseOut": {
+                "properties": {
+                    "diagnostic": {
+                        "$ref": "#/components/schemas/CourseDiagnosticOut"
+                    },
+                    "href": {
+                        "title": "Href",
+                        "type": "string"
+                    },
+                    "level": {
+                        "title": "Level",
+                        "type": "string"
+                    },
+                    "preview": {
+                        "title": "Preview",
+                        "type": "string"
+                    },
+                    "proficiency_label": {
+                        "title": "Proficiency Label",
+                        "type": "string"
+                    },
+                    "recommended": {
+                        "const": true,
+                        "default": true,
+                        "title": "Recommended",
+                        "type": "boolean"
+                    },
+                    "required": {
+                        "const": false,
+                        "default": false,
+                        "title": "Required",
+                        "type": "boolean"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "status": {
+                        "enum": [
+                            "planned",
+                            "published",
+                            "archived"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "title",
+                    "level",
+                    "proficiency_label",
+                    "status",
+                    "href",
+                    "preview",
+                    "diagnostic"
+                ],
+                "title": "NextCourseOut",
+                "type": "object"
+            },
             "NotebookEntryIn": {
                 "properties": {
                     "content": {
@@ -2132,6 +2458,34 @@
                     "content"
                 ],
                 "title": "NotebookEntryUpdate",
+                "type": "object"
+            },
+            "PendingCheckpointOut": {
+                "properties": {
+                    "content_version": {
+                        "title": "Content Version",
+                        "type": "integer"
+                    },
+                    "href": {
+                        "title": "Href",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "unit_slug",
+                    "title",
+                    "content_version",
+                    "href"
+                ],
+                "title": "PendingCheckpointOut",
                 "type": "object"
             },
             "PersonalDataExportOut": {
@@ -4556,6 +4910,49 @@
                     }
                 },
                 "summary": "List Courses",
+                "tags": [
+                    "courses"
+                ]
+            }
+        },
+        "/api/courses/{course_slug}/completion": {
+            "get": {
+                "description": "Resume o recorte publicado sem alterar progresso ou emitir arquivo.\n\n``viewed_lessons`` é a união das aulas com sessão iniciada e das aulas\nconcluídas. ``completed_lessons`` considera exclusivamente\n:class:`LessonProgress`. Um checkpoint só conta quando existe tentativa na\n``content_version`` publicada atualmente.",
+                "operationId": "get_course_completion_api_courses__course_slug__completion_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Course Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseCompletionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    }
+                },
+                "summary": "Get Course Completion",
                 "tags": [
                     "courses"
                 ]

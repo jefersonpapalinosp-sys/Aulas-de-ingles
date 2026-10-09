@@ -171,6 +171,7 @@ export function ExerciseCard({
       void qc.invalidateQueries({ queryKey: ['progress'] })
       void qc.invalidateQueries({ queryKey: ['review'] })
       void qc.invalidateQueries({ queryKey: ['today'] })
+      void qc.invalidateQueries({ queryKey: ['course-completion'] })
     },
     onError: (e: Error) => setVeredito({ tipo: 'falhou', mensagem: e.message }),
   })

@@ -57,6 +57,7 @@ export function ConnectivityStatus({
           qc.invalidateQueries({ queryKey: ['today'] }),
           qc.invalidateQueries({ queryKey: ['practice-session'] }),
           qc.invalidateQueries({ queryKey: ['practice-session-active'] }),
+          qc.invalidateQueries({ queryKey: ['course-completion'] }),
         ])
       } else if (result.rejectedAttempts.length > 0) {
         setMessage('Uma tentativa antiga ficou incompatível com o conteúdo atual.')

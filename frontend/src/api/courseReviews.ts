@@ -44,6 +44,9 @@ export function useSubmitCourseReview(courseSlug: string, unitSlug: string) {
         queryClient.invalidateQueries({
           queryKey: ['course-review', courseSlug, unitSlug],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ['course-completion', courseSlug],
+        }),
         queryClient.invalidateQueries({ queryKey: ['today'] }),
       ])
     },

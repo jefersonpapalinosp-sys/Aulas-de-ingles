@@ -233,7 +233,10 @@ export function ShadowingPractice({
       setSavedCurrent(true)
       setConsent(false)
       setMessage('Gravação salva na sua conta. Você pode ouvi-la ou excluí-la abaixo.')
-      await queryClient.invalidateQueries({ queryKey: historyKey })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: historyKey }),
+        queryClient.invalidateQueries({ queryKey: ['course-completion'] }),
+      ])
     } catch {
       if (attemptId !== null) {
         await api.DELETE('/api/speaking/attempts/{attempt_id}', {
@@ -273,7 +276,10 @@ export function ShadowingPractice({
       setPlayingAttemptId(null)
     }
     setMessage('Gravação excluída da sua conta.')
-    await queryClient.invalidateQueries({ queryKey: historyKey })
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: historyKey }),
+      queryClient.invalidateQueries({ queryKey: ['course-completion'] }),
+    ])
   }
 
   async function requestTranscription(attemptId: number) {

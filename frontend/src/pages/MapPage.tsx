@@ -8,6 +8,7 @@ import { Carregando, Erro } from '../components/States'
 import { lessonProgressKey } from '../features/curriculum/curriculum'
 import {
   canonicalizeLegacyHref,
+  courseCompletionPath,
   coursePath,
   courseReviewPath,
   DEFAULT_COURSE_SLUG,
@@ -313,6 +314,24 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
             )
           })}
         </div>
+
+        {!selectedUnit &&
+          curriculum.data.course.status === 'published' &&
+          curriculum.data.course.published_lessons > 0 && (
+            <section className="course-completion-entry" aria-labelledby="course-completion-title">
+              <div>
+                <p className="eyebrow">Fechamento do recorte publicado</p>
+                <h2 id="course-completion-title">Conclusão do curso</h2>
+                <p>
+                  Confira separadamente o conteúdo disponível, as aulas concluídas e o
+                  desempenho sustentado pelas suas evidências de estudo.
+                </p>
+              </div>
+              <Link className="btn" to={courseCompletionPath(courseSlug)}>
+                Ver meu fechamento
+              </Link>
+            </section>
+          )}
 
         {selectedUnit && (
           <div className="arc course-unit-lessons">

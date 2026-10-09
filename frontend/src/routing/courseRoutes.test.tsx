@@ -5,6 +5,7 @@ import { LegacyLessonRedirect } from '../App'
 import {
   assessmentPath,
   canonicalizeLegacyHref,
+  courseCompletionPath,
   courseReviewPath,
   lessonPath,
   notebookPath,
@@ -36,6 +37,15 @@ describe('rotas de curso', () => {
     )
     expect(courseReviewPath('curso com espaço', 'unidade/avançada')).toBe(
       '/cursos/curso%20com%20espa%C3%A7o/unidades/unidade%2Favan%C3%A7ada/checkpoint',
+    )
+  })
+
+  it('monta a rota de conclusão dentro do curso', () => {
+    expect(courseCompletionPath('voa-level-1')).toBe(
+      '/cursos/voa-level-1/conclusao',
+    )
+    expect(courseCompletionPath('curso com espaço')).toBe(
+      '/cursos/curso%20com%20espa%C3%A7o/conclusao',
     )
   })
 

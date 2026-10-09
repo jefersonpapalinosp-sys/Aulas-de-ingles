@@ -5,11 +5,11 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_lista_as_dezenove_aulas_em_ordem(client: AsyncClient) -> None:
+async def test_lista_as_vinte_e_duas_aulas_em_ordem(client: AsyncClient) -> None:
     r = await client.get("/api/lessons")
     assert r.status_code == 200
     aulas = r.json()
-    assert [a["number"] for a in aulas] == list(range(31, 50))
+    assert [a["number"] for a in aulas] == list(range(31, 53))
     assert aulas[0]["title"] == "Take Me Out to the Ball Game"
     # O resumo não carrega a aula inteira.
     assert "grammar_blocks" not in aulas[0]
@@ -93,7 +93,7 @@ async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> No
 
 @pytest.mark.asyncio
 async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient) -> None:
-    for number in range(31, 50):
+    for number in range(31, 53):
         lesson = (await client.get(f"/api/lessons/{number}")).json()
         assert len(lesson["media"]) == 1
         media = lesson["media"][0]
@@ -199,7 +199,7 @@ async def test_texto_vem_em_markdown_sem_html(client: AsyncClient) -> None:
 async def test_vocabulario_filtra_por_aula(client: AsyncClient) -> None:
     todos = (await client.get("/api/vocab")).json()
     expected = 0
-    for number in range(31, 50):
+    for number in range(31, 53):
         expected += len((await client.get(f"/api/lessons/{number}")).json()["vocab"])
     assert len(todos) == expected
     da_40 = (await client.get("/api/vocab?lesson=40")).json()
@@ -218,10 +218,10 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
     expected = 0
-    for number in range(31, 50):
+    for number in range(31, 53):
         expected += len((await client.get(f"/api/lessons/{number}")).json()["exercises"])
     assert len(todos) == expected
-    assert {e["lesson_number"] for e in todos} == set(range(31, 50))
+    assert {e["lesson_number"] for e in todos} == set(range(31, 53))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
     assert chaves == sorted(chaves)
@@ -240,15 +240,21 @@ async def test_exercicios_filtram_por_curso_e_unidade(client: AsyncClient) -> No
     unit_45_49 = (
         await client.get("/api/exercises?course=voa-level-1&unit=45-49")
     ).json()
+    unit_50_52 = (
+        await client.get("/api/exercises?course=voa-level-1&unit=50-52")
+    ).json()
 
     assert {item["lesson_number"] for item in unit_31_40} == set(range(31, 41))
     assert {item["lesson_number"] for item in unit_40_44} == set(range(41, 45))
     assert {item["lesson_number"] for item in unit_45_49} == set(range(45, 50))
+    assert {item["lesson_number"] for item in unit_50_52} == {50, 51, 52}
     assert len(unit_45_49) == 5 * 8
+    assert len(unit_50_52) == 3 * 8
     for unit_slug, items in (
         ("31-40", unit_31_40),
         ("40-44", unit_40_44),
         ("45-49", unit_45_49),
+        ("50-52", unit_50_52),
     ):
         assert all(item["course_slug"] == "voa-level-1" for item in items)
         assert all(item["unit_slug"] == unit_slug for item in items)

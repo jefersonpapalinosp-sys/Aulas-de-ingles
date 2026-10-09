@@ -244,15 +244,143 @@
           ]
         }
       },
-      {
-        "slug": "50-52",
-        "title": "Aulas 50–52",
+    {
+      "slug": "50-52",
+      "title": "Aulas 50–52",
+      "position": 4,
+      "status": "published",
+      "lesson_start": 50,
+      "lesson_end": 52,
+      "total_lessons": 3,
+      "review": {
+        "slug": "checkpoint-50-52",
+        "title": "Checkpoint 50–52",
         "position": 4,
-        "status": "planned",
-        "lesson_start": 50,
-        "lesson_end": 52,
-        "total_lessons": 3
+        "status": "published",
+        "source_kind": "mixed",
+        "source_title": "VOA Learning English — Review of Lessons 50–52",
+        "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-review-lessons-50-51-52/3805506.html",
+        "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O certificado e mídias de terceiros não foram incorporados.",
+        "intro": "Conclua o Level 1 retomando atividades em duração, hábitos, metas, phrasal verbs e o contraste entre experiências, eventos passados e próximos passos. A escuta da Aula 52 verifica como Anna avalia o próprio percurso.",
+        "estimated_minutes": 12,
+        "content_version": 1,
+        "review_lesson_number": 52,
+        "listening_lesson_number": 52,
+        "listening_media_position": 0,
+        "questions": [
+          {
+            "position": 1,
+            "activity_type": "multiple_choice",
+            "skill": "grammar",
+            "prompt": "A atividade começou ontem à noite e continua agora. Complete: Taylor ____ her report since last night.",
+            "options": [
+              "has been writing",
+              "wrote",
+              "will be writing"
+            ],
+            "accepted_answers": [
+              "has been writing"
+            ],
+            "explanation": "A pista ‘since last night’ marca o início de uma atividade que continua no presente; por isso usamos has been + verbo-ing.",
+            "lesson_numbers": [
+              50
+            ]
+          },
+          {
+            "position": 2,
+            "activity_type": "multiple_choice",
+            "skill": "grammar",
+            "prompt": "Qual frase combina corretamente uma duração e um ponto inicial?",
+            "options": [
+              "We have been waiting for ten minutes, and he has been studying since 2015.",
+              "We have been waiting since ten minutes, and he has been studying for 2015.",
+              "We waited for now, and he studies since three years."
+            ],
+            "accepted_answers": [
+              "We have been waiting for ten minutes, and he has been studying since 2015."
+            ],
+            "explanation": "‘Ten minutes’ é uma duração e pede for; ‘2015’ é o ponto inicial e pede since. As duas atividades chegam até o presente.",
+            "lesson_numbers": [
+              50
+            ]
+          },
+          {
+            "position": 3,
+            "activity_type": "multiple_choice",
+            "skill": "grammar",
+            "prompt": "Escolha a opção correta para preferência e meta: Ashley ____ running, and Anna wants ____ herself.",
+            "options": [
+              "loves · to challenge",
+              "loves to · challenging",
+              "love · challenge to"
+            ],
+            "accepted_answers": [
+              "loves · to challenge"
+            ],
+            "explanation": "‘Love’ pode receber o gerúndio para uma atividade preferida, enquanto ‘want’ pede o infinitivo to + verbo para uma meta.",
+            "lesson_numbers": [
+              51
+            ]
+          },
+          {
+            "position": 4,
+            "activity_type": "multiple_choice",
+            "skill": "grammar",
+            "prompt": "Qual opção contrasta um processo de uma hora com um resultado muito recente?",
+            "options": [
+              "I've been training for an hour; I've just found a new goal.",
+              "I trained since an hour; I just finding a new goal.",
+              "I've trained yesterday; I've been just find a new goal."
+            ],
+            "accepted_answers": [
+              "I've been training for an hour; I've just found a new goal."
+            ],
+            "explanation": "‘For an hour’ destaca a duração do processo com have been training; ‘just’ destaca o resultado recém-concluído com have found.",
+            "lesson_numbers": [
+              51
+            ]
+          },
+          {
+            "position": 5,
+            "activity_type": "multiple_choice",
+            "skill": "listening",
+            "prompt": "Na escuta da Aula 52, como Anna avalia tentativas com resultados diferentes?",
+            "options": [
+              "Sometimes she succeeded, sometimes she failed, but she will never stop trying.",
+              "She always succeeded, so she will stop taking chances.",
+              "She failed once and decided to leave Washington immediately."
+            ],
+            "accepted_answers": [
+              "Sometimes she succeeded, sometimes she failed, but she will never stop trying."
+            ],
+            "explanation": "As formas passadas ‘succeeded’ e ‘failed’ avaliam experiências concluídas; ‘will never stop’ declara a decisão futura de continuar.",
+            "lesson_numbers": [
+              52
+            ]
+          },
+          {
+            "position": 6,
+            "activity_type": "multiple_choice",
+            "skill": "grammar",
+            "prompt": "Qual sequência usa as pistas temporais e o contexto corretamente?",
+            "options": [
+              "She has been training for a month; her career has taken off; next year she will be acting in movies.",
+              "She trained since a month; her career takes off yesterday; next year she acting in movies.",
+              "She has training for a month; her career has take off; next year she was acting in movies."
+            ],
+            "accepted_answers": [
+              "She has been training for a month; her career has taken off; next year she will be acting in movies."
+            ],
+            "explanation": "‘For a month’ pede o processo have been training; o resultado atual da carreira usa has taken off; ‘next year’ aponta para will be acting.",
+            "lesson_numbers": [
+              50,
+              51,
+              52
+            ]
+          }
+        ]
       }
+    }
     ]
   },
   {

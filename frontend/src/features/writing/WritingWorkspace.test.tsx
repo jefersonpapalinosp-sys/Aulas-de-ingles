@@ -28,11 +28,12 @@ const prompt: WritingPrompt = {
 
 function renderWorkspace() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       <WritingWorkspace prompt={prompt} userId={7} />
     </QueryClientProvider>,
   )
+  return { ...view, queryClient }
 }
 
 afterEach(() => {
@@ -106,7 +107,8 @@ describe('WritingWorkspace', () => {
       }
     })
 
-    renderWorkspace()
+    const { queryClient } = renderWorkspace()
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
     const editor = await screen.findByRole('textbox', { name: 'Seu texto em inglês' })
     await waitFor(() => expect(editor).toBeEnabled())
     await user.type(editor, 'The train is faster than the bus.')
@@ -116,6 +118,7 @@ describe('WritingWorkspace', () => {
       await screen.findByRole('heading', { name: 'Texto pronto para uma nova versão' }),
     ).toBeInTheDocument()
     expect(screen.getByText('Pelo menos 35 palavras')).toBeInTheDocument()
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] })
 
     await user.click(screen.getByRole('button', { name: 'Criar versão' }))
     expect(await screen.findByText('Versão 1 criada.')).toBeInTheDocument()

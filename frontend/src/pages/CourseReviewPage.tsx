@@ -7,6 +7,7 @@ import { useCourseCurriculum } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
 import { LessonAudioPlayer } from '../features/media/LessonAudioPlayer'
 import {
+  courseCompletionPath,
   coursePath,
   DEFAULT_COURSE_SLUG,
   lessonPath,
@@ -17,11 +18,13 @@ function ReviewResult({
   result,
   courseSlug,
   nextLessonNumber,
+  completionHref,
   onRetry,
 }: {
   result: CourseReviewAttempt
   courseSlug: string
   nextLessonNumber?: number
+  completionHref?: string
   onRetry: () => void
 }) {
   const consolidated = result.status === 'consolidated'
@@ -88,6 +91,11 @@ function ReviewResult({
             Continuar na Aula {nextLessonNumber}
           </Link>
         )}
+        {completionHref && (
+          <Link className="btn" to={completionHref}>
+            Ver conclusão do curso
+          </Link>
+        )}
         <Link className="btn ghost" to={coursePath(courseSlug)}>
           Voltar ao mapa
         </Link>
@@ -142,6 +150,10 @@ function CourseReviewContent({
       ? curriculum.data?.units
           .slice(currentUnitIndex + 1)
           .find((unit) => unit.lessons.length > 0)?.lessons[0]?.number
+      : undefined
+  const completionHref =
+    currentUnitIndex >= 0 && nextLessonNumber === undefined
+      ? courseCompletionPath(courseSlug)
       : undefined
   const listeningLessonNumber =
     data.listening_lesson_number ?? data.review_lesson_number
@@ -202,6 +214,7 @@ function CourseReviewContent({
           result={result}
           courseSlug={courseSlug}
           nextLessonNumber={nextLessonNumber}
+          completionHref={completionHref}
           onRetry={retry}
         />
       ) : (

@@ -26,6 +26,10 @@ function coursePath(courseSlug: string): string {
   return `/cursos/${courseSlug}`
 }
 
+function courseCompletionPath(courseSlug = LEVEL_1_SLUG): string {
+  return `${coursePath(courseSlug)}/conclusao`
+}
+
 function lessonPath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
   return `${coursePath(courseSlug)}/aulas/${lessonNumber}`
 }
@@ -525,7 +529,7 @@ test('Sprint 23 publica a unidade 45–49 no catálogo sem alongar a trilha', as
   const level1Card = page
     .getByRole('article')
     .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 1" }) })
-  await expect(level1Card.getByText('19/52', { exact: true })).toBeVisible()
+  await expect(level1Card.getByText('22/52', { exact: true })).toBeVisible()
 
   await page.goto(unitPath('45-49'))
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 45–49' })).toBeVisible()
@@ -538,6 +542,134 @@ test('Sprint 23 publica a unidade 45–49 no catálogo sem alongar a trilha', as
     'href',
     courseReviewPath('45-49'),
   )
+})
+
+test('Sprint 24 publica as Aulas 50–52 e o checkpoint final sem inventar transcrições', async ({
+  request,
+}) => {
+  const curriculumResponse = await request.get(`/api/courses/${LEVEL_1_SLUG}/curriculum`)
+  expect(curriculumResponse.ok()).toBeTruthy()
+  const curriculum = (await curriculumResponse.json()) as {
+    course: { published_lessons: number }
+    units: Array<{
+      slug: string
+      published_lessons: number
+      lessons: Array<{ number: number; title: string }>
+      review?: { title: string; question_count: number } | null
+    }>
+  }
+  expect(curriculum.course.published_lessons).toBe(22)
+  const unit = curriculum.units.find((candidate) => candidate.slug === '50-52')
+  expect(unit).toMatchObject({
+    published_lessons: 3,
+    lessons: [
+      { number: 50, title: 'Back to School' },
+      { number: 51, title: 'A Good Habit' },
+      { number: 52, title: 'Taking Chances' },
+    ],
+    review: { title: 'Checkpoint 50–52', question_count: 6 },
+  })
+
+  for (const number of [50, 51, 52]) {
+    const response = await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/${number}`)
+    expect(response.ok()).toBeTruthy()
+    const lesson = (await response.json()) as {
+      media: Array<{
+        source_url: string
+        cues: unknown[]
+        transcript: unknown[]
+        offline_policy: string
+      }>
+      exercises: Array<{ skill: string }>
+      vocab: unknown[]
+    }
+    expect(lesson.media).toHaveLength(1)
+    expect(lesson.media[0]).toMatchObject({
+      source_url: expect.stringContaining('voa-audio.voanews.eu'),
+      offline_policy: 'network_only',
+      transcript: [],
+    })
+    expect(lesson.media[0]?.cues).toHaveLength(5)
+    expect(lesson.exercises).toHaveLength(8)
+    expect(lesson.exercises.filter((exercise) => exercise.skill === 'listening')).toHaveLength(4)
+    expect(lesson.vocab).toHaveLength(10)
+  }
+})
+
+test('concluir somente a Aula 52 não libera certificado nem completa outras unidades', async ({
+  request,
+}) => {
+  const register = await request.post('/api/auth/register', {
+    data: {
+      email: emailUnico(),
+      password: SENHA,
+      display_name: 'Conclusão Sprint 24 E2E',
+    },
+  })
+  expect(register.status()).toBe(201)
+  const token = (await register.json()).access_token as string
+  const headers = { Authorization: `Bearer ${token}` }
+
+  const initialResponse = await request.get(`/api/courses/${LEVEL_1_SLUG}/completion`, {
+    headers,
+  })
+  expect(initialResponse.ok()).toBeTruthy()
+  expect(initialResponse.headers()['cache-control']).toBe('private, no-store')
+  const initial = await initialResponse.json()
+  expect(initial).toMatchObject({
+    progress: {
+      published_lessons: 22,
+      viewed_lessons: 0,
+      completed_lessons: 0,
+      completion_percent: 0,
+      status: 'not_started',
+    },
+    checkpoints: { published: 3, current_completed: 0 },
+    certificate: {
+      eligible: false,
+      required_lessons: 22,
+      required_checkpoints: 3,
+      automatic_download: false,
+    },
+    next_course: {
+      slug: LEVEL_2_SLUG,
+      level: '2',
+      status: 'planned',
+      recommended: true,
+      required: false,
+      href: coursePath(LEVEL_2_SLUG),
+    },
+  })
+  expect(initial.incomplete_units.map((unit: { slug: string }) => unit.slug)).toEqual([
+    '31-40',
+    '40-44',
+    '45-49',
+    '50-52',
+  ])
+  expect(initial.skills).toHaveLength(4)
+  expect(initial.skills.every((skill: { status: string }) => skill.status === 'insufficient'))
+    .toBeTruthy()
+
+  const markOnlyLast = await request.put(
+    `/api/courses/${LEVEL_1_SLUG}/lessons/52/studied`,
+    { headers },
+  )
+  expect(markOnlyLast.status()).toBe(204)
+
+  const after = await (
+    await request.get(`/api/courses/${LEVEL_1_SLUG}/completion`, { headers })
+  ).json()
+  expect(after.progress).toMatchObject({
+    published_lessons: 22,
+    viewed_lessons: 1,
+    completed_lessons: 1,
+    status: 'in_progress',
+  })
+  expect(after.certificate).toMatchObject({ eligible: false, automatic_download: false })
+  expect(after.incomplete_units).toHaveLength(4)
+  expect(
+    after.incomplete_units.find((unit: { slug: string }) => unit.slug === '50-52'),
+  ).toMatchObject({ published_lessons: 3, viewed_lessons: 1, completed_lessons: 1 })
 })
 
 test('Sprint 23 preserva fronteiras de unidade e avaliação escopada a 45–49', async ({
@@ -634,6 +766,164 @@ test('checkpoint 45–49 corrige seis questões, explica pistas temporais e pers
   await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
   await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
   await expect(page.locator('.checkpoint-form')).toHaveCount(0)
+})
+
+test('Sprint 24 preserva fronteiras da unidade final e expõe o fechamento no mapa', async ({
+  page,
+}) => {
+  await criarConta(page, 'Fronteiras Sprint 24 E2E')
+
+  await page.goto(lessonPath(50))
+  await expect(page.getByRole('heading', { name: 'Back to School' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '← Checkpoint 45–49' })).toHaveAttribute(
+    'href',
+    courseReviewPath('45-49'),
+  )
+
+  await page.goto(lessonPath(52))
+  await expect(page.getByRole('heading', { name: 'Taking Chances' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Checkpoint 50–52 →' })).toHaveAttribute(
+    'href',
+    courseReviewPath('50-52'),
+  )
+
+  await page.goto(coursePath(LEVEL_1_SLUG))
+  await expect(page.getByRole('link', { name: 'Ver meu fechamento' })).toHaveAttribute(
+    'href',
+    courseCompletionPath(),
+  )
+})
+
+test('checkpoint 50–52 encerra a revisão oficial e conduz à conclusão', async ({ page }) => {
+  await criarConta(page, 'Checkpoint Sprint 24 E2E')
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+
+  const checkpointPath = courseReviewPath('50-52')
+  await page.goto(checkpointPath)
+  await expect(page.getByRole('heading', { level: 1, name: 'Checkpoint 50–52' })).toBeVisible()
+
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(
+    provenance.getByRole('link', { name: /VOA Learning English — Review of Lessons 50–52/ }),
+  ).toBeVisible()
+  await expect(provenance.getByText('Conteúdo autoral do projeto')).toBeVisible()
+  await expect(provenance).toContainText('O certificado e mídias de terceiros não foram incorporados')
+
+  const checkpointAudio = page.locator('audio[aria-label="Conversa da Aula 52"]')
+  await expect(checkpointAudio).toBeVisible()
+  await expect(checkpointAudio.locator('source')).toHaveAttribute('src', /voa-audio\.voanews\.eu/)
+  expect(await checkpointAudio.getAttribute('autoplay')).toBeNull()
+  await expect(page.getByRole('link', { name: 'Rever Aula 52' })).toHaveAttribute(
+    'href',
+    lessonPath(52),
+  )
+
+  const form = page.locator('.checkpoint-form')
+  await expect(form.getByRole('group')).toHaveCount(6)
+  for (const answer of [
+    'has been writing',
+    'We have been waiting for ten minutes, and he has been studying since 2015.',
+    'loves · to challenge',
+    "I've been training for an hour; I've just found a new goal.",
+    'Sometimes she succeeded, sometimes she failed, but she will never stop trying.',
+    'She has been training for a month; her career has taken off; next year she will be acting in movies.',
+  ]) {
+    await form.getByRole('radio', { name: answer, exact: true }).check()
+  }
+
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        '/api/courses/voa-level-1/units/50-52/review/attempts' &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  )
+  await form.getByRole('button', { name: 'Concluir checkpoint' }).click()
+  expect((await saved).status()).toBe(201)
+
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await expect(page.getByText(/since last night.*continua no presente/i)).toBeVisible()
+  const finalFeedback = page
+    .getByRole('status', { name: 'Bloco consolidado' })
+    .getByRole('listitem')
+    .filter({ hasText: 'has taken off' })
+  await expect(finalFeedback).toContainText('resultado atual da carreira')
+  await expect(finalFeedback).toContainText('has taken off')
+
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.locator('.checkpoint-form')).toHaveCount(0)
+  const completion = page.getByRole('link', { name: 'Ver conclusão do curso' })
+  await expect(completion).toHaveAttribute('href', courseCompletionPath())
+  await completion.click()
+  await expect(page).toHaveURL(new RegExp(`${courseCompletionPath()}$`))
+  await expect(
+    page.getByRole('heading', { level: 1, name: /Conclusão de Let's Learn English — Level 1/ }),
+  ).toBeFocused()
+  await expect(page.getByText('Em andamento', { exact: true })).toBeVisible()
+})
+
+test('conclusão separa progresso, evidência, certificado e Level 2 opcional', async ({ page }) => {
+  await criarConta(page, 'Página de conclusão Sprint 24 E2E')
+  await page.goto(courseCompletionPath())
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: /Conclusão de Let's Learn English — Level 1/ }),
+  ).toBeVisible()
+  const overview = page.getByRole('region', { name: 'Seu percurso no conteúdo publicado' })
+  const metricValue = (label: string) =>
+    overview
+      .locator('dt')
+      .filter({ hasText: new RegExp(`^${label}$`) })
+      .locator('..')
+      .locator('dd')
+      .first()
+  await expect(metricValue('Conteúdo publicado')).toHaveText('22')
+  await expect(metricValue('Aulas vistas')).toHaveText('0 / 22')
+  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 22')
+  await expect(page.getByRole('progressbar', { name: 'Aulas concluídas no recorte publicado' }))
+    .toHaveAttribute('aria-valuenow', '0')
+
+  for (const unit of ['Aulas 31–40', 'Aulas 40–44', 'Aulas 45–49', 'Aulas 50–52']) {
+    await expect(page.getByRole('link', { name: new RegExp(unit) })).toBeVisible()
+  }
+  await expect(
+    page.getByRole('heading', { name: 'Certificado do recorte: ainda não elegível' }),
+  ).toBeVisible()
+  await expect(page.getByText(/Regra deste recorte: 22 aulas e 3 checkpoints/)).toBeVisible()
+  await expect(page.locator('[download], iframe')).toHaveCount(0)
+
+  await expect(page.getByText('Recomendado e opcional.')).toBeVisible()
+  await expect(page.getByText(/Level 2 · Intermediário · Em preparação/)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Conhecer Level 2' })).toHaveAttribute(
+    'href',
+    coursePath(LEVEL_2_SLUG),
+  )
+
+  const diagnostic = page
+    .getByRole('heading', { name: "Preparação para Let's Learn English — Level 2" })
+    .locator('..')
+  await expect(diagnostic.getByText(/não é prova, não gera nota/)).toBeVisible()
+  const guidance = diagnostic.getByRole('button', { name: 'Ver orientação' })
+  await expect(guidance).toBeDisabled()
+  for (const option of await diagnostic.getByLabel('Em parte').all()) await option.check()
+  await expect(guidance).toBeEnabled()
+  await guidance.click()
+  await expect(
+    diagnostic.getByRole('heading', { name: 'Explore Level 2 mantendo revisões' }),
+  ).toBeFocused()
+
+  const accessibility = await new AxeBuilder({ page })
+    .include('.course-completion-page')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(
+    accessibility.violations.filter(
+      ({ impact }) => impact === 'serious' || impact === 'critical',
+    ),
+  ).toEqual([])
+  await expectNoHorizontalScroll(page)
 })
 
 test('gravação oral exige consentimento e pode ser excluída', async ({ request }) => {

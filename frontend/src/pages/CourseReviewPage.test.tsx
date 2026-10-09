@@ -32,6 +32,7 @@ vi.mock('../api/queries', () => ({
       units: [
         { id: 2, slug: '40-44', lessons: [{ number: 41 }] },
         { id: 3, slug: '45-49', lessons: [{ number: 45 }] },
+        { id: 4, slug: '50-52', lessons: [{ number: 50 }] },
       ],
     },
     isPending: false,
@@ -192,6 +193,21 @@ function renderSwitchablePage() {
       <Link to="/cursos/voa-level-1/unidades/45-49/checkpoint">
         Trocar checkpoint
       </Link>
+      <Routes>
+        <Route
+          path="/cursos/:courseSlug/unidades/:unitSlug/checkpoint"
+          element={<CourseReviewPage />}
+        />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+function renderFinalPage() {
+  return render(
+    <MemoryRouter
+      initialEntries={['/cursos/voa-level-1/unidades/50-52/checkpoint']}
+    >
       <Routes>
         <Route
           path="/cursos/:courseSlug/unidades/:unitSlug/checkpoint"
@@ -391,6 +407,29 @@ describe('CourseReviewPage', () => {
         idempotency_key: '223e4567-e89b-12d3-a456-426614174000',
       }),
     )
+  })
+
+  it('leva o resultado do último checkpoint ao fechamento do curso', () => {
+    hooks.useCourseReview.mockReturnValue({
+      data: {
+        ...review,
+        slug: 'checkpoint-50-52',
+        title: 'Checkpoint 50–52',
+        latest_attempt: persistedAttempt,
+      },
+      isPending: false,
+      error: null,
+      refetch: hooks.refetch,
+    })
+
+    renderFinalPage()
+
+    expect(
+      screen.getByRole('link', { name: 'Ver conclusão do curso' }),
+    ).toHaveAttribute('href', '/cursos/voa-level-1/conclusao')
+    expect(
+      screen.queryByRole('link', { name: /Continuar na Aula/ }),
+    ).not.toBeInTheDocument()
   })
 
   it('isola respostas e idempotência ao trocar diretamente de checkpoint', async () => {

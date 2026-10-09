@@ -1035,6 +1035,127 @@ main { max-width: 1180px; }
 .checkpoint-feedback p { margin-top: 4px; font-size: 13px; }
 .checkpoint-feedback small { display: block; margin-top: 5px; color: var(--ink-3); }
 
+/* ---------- conclusão do curso ---------- */
+.course-completion-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 22px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-wash);
+}
+.course-completion-entry h2 { margin-top: 4px; font-size: 20px; }
+.course-completion-entry p:last-child { margin-top: 6px; color: var(--ink-2); font-size: 13px; }
+.course-completion-entry .btn { flex: none; }
+
+.course-completion-page { width: min(100%, 980px); }
+.completion-header { padding-bottom: 28px; border-bottom: 1px solid var(--rule); }
+.completion-map-link { display: inline-block; margin-top: 18px; font: 11.5px var(--mono); }
+.completion-overview, .completion-skills, .completion-certificate,
+.completion-next-course, .completion-diagnostic, .completion-empty {
+  padding: 24px;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--surface);
+}
+.completion-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.completion-section-heading h2, .completion-skills h2, .completion-certificate h2,
+.completion-next-course h2, .completion-diagnostic h2, .completion-empty h2 {
+  margin-top: 5px;
+  font-size: 23px;
+}
+.completion-status {
+  flex: none;
+  padding: 5px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 100px;
+  color: var(--ink-2);
+  font: 10px var(--mono);
+  text-transform: uppercase;
+}
+.completion-status.completed { border-color: var(--ok); background: var(--ok-wash); color: var(--ok); }
+.completion-status.in_progress { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); }
+.completion-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin: 22px 0 0;
+}
+.completion-metrics > div { min-width: 0; padding: 14px; border-radius: 5px; background: var(--paper); }
+.completion-metrics dt { color: var(--ink-3); font: 9.5px var(--mono); text-transform: uppercase; }
+.completion-metrics dd { margin: 5px 0 0; font: 700 24px var(--mono); font-variant-numeric: tabular-nums; }
+.completion-metrics dd span { color: var(--ink-3); font-size: 13px; font-weight: 400; }
+.completion-metrics .completion-metric-definition { margin-top: 8px; color: var(--ink-2); font: 11px/1.45 var(--sans); }
+.completion-progress-copy { display: flex; justify-content: space-between; gap: 16px; margin-top: 20px; color: var(--ink-2); font-size: 12px; }
+.completion-progress-copy strong { color: var(--ink); font: 13px var(--mono); }
+.completion-progress { height: 7px; margin-top: 7px; overflow: hidden; border-radius: 8px; background: var(--rule); }
+.completion-progress span { display: block; height: 100%; background: var(--accent); }
+
+.completion-two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.completion-two-column > section { margin-top: 0; }
+.completion-panel { min-width: 0; padding: 21px; border: 1px solid var(--rule); border-radius: 7px; background: var(--surface); }
+.completion-panel h2 { margin-top: 4px; font-size: 19px; }
+.completion-panel-summary, .completion-preserved-access { margin-top: 9px; color: var(--ink-2); font-size: 12.5px; }
+.completion-link-list { display: grid; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.completion-link-list a { display: grid; gap: 3px; padding: 11px 12px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--paper); color: var(--ink); text-decoration: none; }
+.completion-link-list a:hover { border-color: var(--accent); background: var(--accent-wash); }
+.completion-link-list strong { font-size: 13px; }
+.completion-link-list span { color: var(--ink-3); font: 10px var(--mono); }
+.completion-positive { margin-top: 16px; padding: 11px 12px; border-left: 3px solid var(--ok); background: var(--ok-wash); color: var(--ok); font-size: 13px; }
+
+.completion-section-intro { max-width: 68ch; margin-top: 10px; color: var(--ink-2); font-size: 13.5px; }
+.completion-empty-copy { margin-top: 18px; color: var(--ink-3); }
+.completion-skill-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 20px 0 0; padding: 0; list-style: none; }
+.completion-skill-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px 12px; padding: 14px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--paper); }
+.completion-skill-list li > div { display: grid; }
+.completion-skill-list strong { font-size: 14px; }
+.completion-skill-list li > div span { color: var(--ink-3); font-size: 10px; }
+.completion-skill-list li > p { grid-column: 1 / -1; color: var(--warn); font-size: 11.5px; }
+.completion-skill-state { padding: 4px 7px; border-radius: 100px; background: var(--surface-2); color: var(--ink-2); font: 10px var(--mono); text-align: center; }
+.completion-skill-state.insufficient { color: var(--ink-3); }
+.completion-skill-state.developing { background: var(--bad-wash); color: var(--bad); }
+.completion-skill-state.steady { background: var(--warn-wash); color: var(--warn); }
+.completion-skill-state.strong { background: var(--ok-wash); color: var(--ok); }
+
+.completion-certificate { border-color: var(--warn); background: var(--warn-wash); }
+.completion-certificate.eligible { border-color: var(--ok); background: var(--ok-wash); }
+.completion-certificate > p:not(.eyebrow) { margin-top: 9px; color: var(--ink-2); }
+.completion-certificate-rule, .completion-no-download { font-size: 12.5px; }
+.completion-certificate .btn { margin-top: 18px; }
+.completion-next-course { display: flex; align-items: center; justify-content: space-between; gap: 28px; border-color: var(--accent); background: var(--accent-wash); }
+.completion-next-course > div:first-child { max-width: 64ch; }
+.completion-next-course > div > p:not(.eyebrow) { margin-top: 8px; color: var(--ink-2); }
+.completion-next-meta { font: 11px var(--mono); }
+.completion-optional strong { color: var(--ink); }
+.completion-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+.completion-next-course > .completion-actions { flex: none; flex-direction: column; margin-top: 0; }
+.completion-next-course .btn { text-align: center; }
+
+.completion-diagnostic > p:not(.eyebrow) { margin-top: 9px; color: var(--ink-2); }
+.completion-diagnostic-disclaimer { padding: 10px 12px; border-left: 2px solid var(--accent); background: var(--accent-wash); font-size: 12.5px; }
+.completion-diagnostic form { display: grid; gap: 12px; margin-top: 20px; }
+.completion-diagnostic fieldset { margin: 0; padding: 16px; border: 1px solid var(--rule); border-radius: 5px; }
+.completion-diagnostic legend { display: flex; gap: 9px; width: 100%; padding: 0 3px; font-size: 14px; }
+.completion-diagnostic legend span { flex: none; color: var(--accent); font: 11px var(--mono); }
+.completion-diagnostic-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.completion-diagnostic-options label { position: relative; cursor: pointer; }
+.completion-diagnostic-options input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.completion-diagnostic-options span { display: block; min-width: 96px; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); text-align: center; }
+.completion-diagnostic-options input:checked + span { border-color: var(--accent); background: var(--accent-wash); color: var(--accent-deep); font-weight: 600; }
+.completion-diagnostic-options input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.completion-diagnostic form > .btn { justify-self: start; min-height: 44px; }
+.completion-diagnostic-result { margin-top: 20px; padding: 18px; border: 1px solid var(--ok); border-radius: 5px; background: var(--ok-wash); }
+.completion-diagnostic-result h3 { font-size: 18px; }
+.completion-diagnostic-result > p { margin-top: 7px; color: var(--ink-2); }
+.completion-empty > p:not(.eyebrow) { margin-top: 9px; color: var(--ink-2); }
+
 @media (max-width: 860px) {
   body { overflow-x: hidden; }
   .shell { grid-template-columns: minmax(0, 1fr); }
@@ -1101,6 +1222,10 @@ main { max-width: 1180px; }
   .trail-drawer .trail-panel { min-height: 0; overflow: hidden; }
   .trail-drawer .trail-head { padding-top: 12px; }
   main { max-width: none; }
+  .completion-metrics { grid-template-columns: 1fr 1fr; }
+  .completion-two-column, .completion-skill-list { grid-template-columns: 1fr; }
+  .completion-next-course { align-items: flex-start; flex-direction: column; }
+  .completion-next-course > .completion-actions { align-items: flex-start; flex-direction: row; }
 }
 
 @media (max-width: 600px) {
@@ -1131,6 +1256,20 @@ main { max-width: 1180px; }
   .checkpoint-questions fieldset { padding: 16px 12px; }
   .checkpoint-actions { align-items: stretch; flex-direction: column; }
   .checkpoint-actions .btn { text-align: center; }
+  .course-completion-entry, .completion-section-heading { align-items: stretch; flex-direction: column; }
+  .course-completion-entry .btn { text-align: center; }
+  .completion-overview, .completion-skills, .completion-certificate,
+  .completion-next-course, .completion-diagnostic, .completion-empty { padding: 18px 15px; }
+  .completion-metrics { grid-template-columns: 1fr; }
+  .completion-status { align-self: flex-start; }
+  .completion-skill-list li { grid-template-columns: 1fr; }
+  .completion-skill-list li > p { grid-column: auto; }
+  .completion-skill-state { justify-self: start; text-align: left; }
+  .completion-next-course > .completion-actions, .completion-actions { align-items: stretch; flex-direction: column; width: 100%; }
+  .completion-actions .btn, .completion-next-course .btn { width: 100%; text-align: center; }
+  .completion-diagnostic-options { display: grid; grid-template-columns: 1fr; }
+  .completion-diagnostic-options label, .completion-diagnostic-options span { width: 100%; }
+  .completion-diagnostic form > .btn { justify-self: stretch; width: 100%; }
 }
 
 @media (forced-colors: active) {
@@ -1140,4 +1279,8 @@ main { max-width: 1180px; }
   .practice-progress span { background: Highlight; }
   .checkpoint-options label:has(input:checked) { border: 2px solid Highlight; }
   .checkpoint-progress span { background: Highlight; }
+  .completion-progress span { background: Highlight; }
+  .completion-diagnostic-options input:checked + span { border: 2px solid Highlight; }
+  .completion-status.completed, .completion-status.in_progress,
+  .completion-certificate, .completion-next-course { border-color: CanvasText; }
 }

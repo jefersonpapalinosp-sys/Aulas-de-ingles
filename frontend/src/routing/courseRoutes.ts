@@ -6,6 +6,10 @@ export function coursePath(courseSlug: string): string {
   return `/cursos/${encodeURIComponent(courseSlug)}`
 }
 
+export function courseCompletionPath(courseSlug: string): string {
+  return `${coursePath(courseSlug)}/conclusao`
+}
+
 export function unitPath(courseSlug: string, unitSlug: string): string {
   return `${coursePath(courseSlug)}/unidades/${encodeURIComponent(unitSlug)}`
 }

@@ -47,11 +47,12 @@ function feedback(correct: boolean) {
 
 function montar(props: Partial<Parameters<typeof ExerciseCard>[0]> = {}) {
   const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
-  return render(
+  const view = render(
     <QueryClientProvider client={qc}>
       <ExerciseCard exercicio={exercicio} numero={1} userId={7} {...props} />
     </QueryClientProvider>,
   )
+  return { ...view, queryClient: qc }
 }
 
 beforeEach(() => {
@@ -88,7 +89,8 @@ describe('ExerciseCard', () => {
     } as never)
 
     const aoResponder = vi.fn()
-    montar({ aoResponder })
+    const { queryClient } = montar({ aoResponder })
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
     await user.type(screen.getByRole('textbox'), 'faster')
     await user.click(screen.getByRole('button', { name: 'Verificar' }))
 
@@ -99,6 +101,7 @@ describe('ExerciseCard', () => {
       params: { path: { exercise_id: 1 } },
       body: { answer: 'faster', idempotency_key: expect.any(String) },
     })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] })
   })
 
   it('erro: sugere tentar de novo e não entrega o gabarito', async () => {

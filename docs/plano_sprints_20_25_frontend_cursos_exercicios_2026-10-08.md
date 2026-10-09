@@ -1,8 +1,8 @@
 # Plano das Sprints 20–25 — frontend escalável, cursos e exercícios
 
 Data da análise: 8 de outubro de 2026  
-Estado: Sprints 20–23 implementadas; Sprints 24–25 permanecem planejadas
-Próxima prioridade: Sprint 24 — Level 1, unidade 50–52 e conclusão do recorte
+Estado: Sprints 20–24 implementadas; Sprint 25 permanece planejada
+Próxima prioridade: Sprint 25 — piloto Level 2, unidade 1–5
 
 ## 1. Objetivo
 
@@ -487,8 +487,8 @@ payload inicial.
 | 21 | página de exercícios por aula e packs 31/38/40 | contrato da Sprint 20 | concluída |
 | 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | concluída |
 | 23 | unidade Level 1 45–49 e revisão | Sprint 22 | concluída |
-| 24 | unidade Level 1 50–52, conclusão do recorte e transição | Sprint 23 | próxima |
-| 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | planejada |
+| 24 | unidade Level 1 50–52, conclusão do recorte e transição | Sprint 23 | concluída |
+| 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | próxima |
 
 ## 9. Sprint 20 — navegação escalável e catálogo de cursos
 
@@ -758,8 +758,36 @@ sem copiar Wordwall e sem duplicar o motor atual.
 
 ## 13. Sprint 24 — Level 1, unidade 50–52 e conclusão do recorte
 
+**Estado:** concluída em 8 de outubro de 2026.
+
 **Objetivo:** concluir o recorte curricular 31–52 do Level 1 com revisão cumulativa e transição
 responsável.
+
+### Implementação entregue
+
+- Aulas 50–52 publicadas na unidade `50-52`, totalizando 22 aulas no recorte 31–52, cada uma
+  com teoria, vocabulário, pronúncia, escrita, áudio oficial, cinco trechos selecionados e oito
+  exercícios autorais — quatro deles de listening;
+- `Checkpoint 50–52` publicado como item curricular próprio, com seis questões, retomada do áudio
+  da Aula 52, correção no servidor e procedência que separa a revisão oficial das atividades
+  autorais;
+- nova rota autenticada `/cursos/:courseSlug/conclusao`, acessível pelo mapa e pelo resultado do
+  último checkpoint;
+- resumo de fechamento derivado dos dados existentes, sem efeitos colaterais, distinguindo aulas
+  vistas, aulas explicitamente concluídas e tendências de competência sustentadas por tentativas
+  de exercícios, fala e escrita, com checkpoints apresentados separadamente; o endpoint consulta
+  apenas as colunas necessárias, sem materializar teoria, exercícios e mídias de cada aula;
+- unidades e checkpoints pendentes permanecem navegáveis e concluir somente a Aula 52 não altera
+  qualquer outra aula;
+- elegibilidade do certificado exige as 22 aulas concluídas e tentativas na versão atual dos três
+  checkpoints dentro do recorte; somente então a tela oferece consulta manual à página oficial,
+  avisa que o certificado externo considera o curso completo e nunca inicia download automático;
+  o rótulo do escopo é derivado das unidades do curso, sem fixar `31–52` na tela genérica, e a
+  publicação é conferida unidade por unidade para que faltas e excessos não se compensem;
+- Level 2 apresentado a partir do catálogo atual como intermediário, recomendado e opcional, com
+  autoavaliação curta sem produzir nota ou diagnóstico clínico/pedagógico fictício;
+- contrato OpenAPI, cliente TypeScript, invalidação de cache e testes de backend, frontend e E2E
+  atualizados para o fechamento do recorte.
 
 ### Entregas
 
@@ -898,8 +926,8 @@ O ciclo 20–25 estará concluído quando:
 
 ## 19. Próxima ação recomendada
 
-Iniciar a Sprint 24 sobre o contrato e os filtros contextuais validados na Sprint 23, publicando as
-Aulas 50–52 e a revisão final do recorte 31–52. O fechamento deve distinguir aulas vistas,
-concluídas e competências apoiadas por evidência; a transição para o Level 2 deve permanecer
-recomendada e opcional. Cada aula nova continua condicionada à auditoria de fonte, mídia, licença e
-conteúdo autoral antes de entrar no seed principal.
+Iniciar a Sprint 25 sobre o contrato multi-curso e o fechamento validados na Sprint 24, publicando
+somente as Aulas 1–5 auditadas do Level 2 e seu checkpoint. A numeração reiniciada deve provar o
+isolamento de progresso, caderno, revisão, gravações e recomendações entre os níveis. As demais
+aulas do catálogo continuam em preparação, sem páginas vazias nem conteúdo fictício, e cada novo
+item permanece condicionado à auditoria de fonte, mídia, licença e autoria antes do seed principal.

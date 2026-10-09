@@ -132,6 +132,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/courses/{course_slug}/completion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Course Completion
+         * @description Resume o recorte publicado sem alterar progresso ou emitir arquivo.
+         *
+         *     ``viewed_lessons`` é a união das aulas com sessão iniciada e das aulas
+         *     concluídas. ``completed_lessons`` considera exclusivamente
+         *     :class:`LessonProgress`. Um checkpoint só conta quando existe tentativa na
+         *     ``content_version`` publicada atualmente.
+         */
+        get: operations["get_course_completion_api_courses__course_slug__completion_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/courses/{course_slug}/curriculum": {
         parameters: {
             query?: never;
@@ -1176,6 +1201,54 @@ export interface components {
             /** Vocab Item Id */
             vocab_item_id: number | null;
         };
+        /** CertificateEligibilityOut */
+        CertificateEligibilityOut: {
+            /**
+             * Automatic Download
+             * @default false
+             * @constant
+             */
+            automatic_download: false;
+            /** Cta Href */
+            cta_href: string;
+            /** Cta Label */
+            cta_label: string;
+            /** Eligible */
+            eligible: boolean;
+            /** Reason */
+            reason: string;
+            /** Required Checkpoints */
+            required_checkpoints: number;
+            /** Required Lessons */
+            required_lessons: number;
+            /** Scope Label */
+            scope_label: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "eligible" | "ineligible";
+        };
+        /** CheckpointCompletionOut */
+        CheckpointCompletionOut: {
+            /** Current Completed */
+            current_completed: number;
+            /** Pending */
+            pending: components["schemas"]["PendingCheckpointOut"][];
+            /** Published */
+            published: number;
+        };
+        /** CompletionCourseOut */
+        CompletionCourseOut: {
+            /** Level */
+            level: string;
+            /** Proficiency Label */
+            proficiency_label: string;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+        };
         /** ContentSourceOut */
         ContentSourceOut: {
             /**
@@ -1197,11 +1270,48 @@ export interface components {
             /** Url */
             url: string | null;
         };
+        /** CourseCompletionOut */
+        CourseCompletionOut: {
+            certificate: components["schemas"]["CertificateEligibilityOut"];
+            checkpoints: components["schemas"]["CheckpointCompletionOut"];
+            course: components["schemas"]["CompletionCourseOut"];
+            /** Incomplete Units */
+            incomplete_units: components["schemas"]["IncompleteUnitOut"][];
+            next_course: components["schemas"]["NextCourseOut"] | null;
+            progress: components["schemas"]["CourseCompletionProgressOut"];
+            /** Skills */
+            skills: components["schemas"]["SkillSummaryOut"][];
+        };
+        /** CourseCompletionProgressOut */
+        CourseCompletionProgressOut: {
+            /** Completed Lessons */
+            completed_lessons: number;
+            /** Completion Percent */
+            completion_percent: number;
+            /** Published Lessons */
+            published_lessons: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_started" | "in_progress" | "completed";
+            /** Viewed Lessons */
+            viewed_lessons: number;
+        };
         /** CourseCurriculumOut */
         CourseCurriculumOut: {
             course: components["schemas"]["CourseSummaryOut"];
             /** Units */
             units: components["schemas"]["CourseUnitOut"][];
+        };
+        /** CourseDiagnosticOut */
+        CourseDiagnosticOut: {
+            /** Description */
+            description: string;
+            /** Href */
+            href: string;
+            /** Title */
+            title: string;
         };
         /** CourseReviewAnswerIn */
         CourseReviewAnswerIn: {
@@ -1594,6 +1704,21 @@ export interface components {
              */
             rating: "helpful" | "not_helpful";
         };
+        /** IncompleteUnitOut */
+        IncompleteUnitOut: {
+            /** Completed Lessons */
+            completed_lessons: number;
+            /** Href */
+            href: string;
+            /** Published Lessons */
+            published_lessons: number;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+            /** Viewed Lessons */
+            viewed_lessons: number;
+        };
         /** LessonDetailOut */
         LessonDetailOut: {
             /** Content Sources */
@@ -1774,6 +1899,39 @@ export interface components {
             /** Updated At */
             updated_at: string | null;
         };
+        /** NextCourseOut */
+        NextCourseOut: {
+            diagnostic: components["schemas"]["CourseDiagnosticOut"];
+            /** Href */
+            href: string;
+            /** Level */
+            level: string;
+            /** Preview */
+            preview: string;
+            /** Proficiency Label */
+            proficiency_label: string;
+            /**
+             * Recommended
+             * @default true
+             * @constant
+             */
+            recommended: true;
+            /**
+             * Required
+             * @default false
+             * @constant
+             */
+            required: false;
+            /** Slug */
+            slug: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "planned" | "published" | "archived";
+            /** Title */
+            title: string;
+        };
         /** NotebookEntryIn */
         NotebookEntryIn: {
             /** Content */
@@ -1832,6 +1990,17 @@ export interface components {
              * @enum {string}
              */
             kind: "note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question";
+        };
+        /** PendingCheckpointOut */
+        PendingCheckpointOut: {
+            /** Content Version */
+            content_version: number;
+            /** Href */
+            href: string;
+            /** Title */
+            title: string;
+            /** Unit Slug */
+            unit_slug: string;
         };
         /** PersonalDataExportOut */
         PersonalDataExportOut: {
@@ -2795,6 +2964,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseSummaryOut"][];
+                };
+            };
+        };
+    };
+    get_course_completion_api_courses__course_slug__completion_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseCompletionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

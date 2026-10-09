@@ -133,6 +133,7 @@ export function WritingWorkspace({
       })
       if (!data) throw new Error('Falha ao analisar o texto.')
       setFeedback(data)
+      await queryClient.invalidateQueries({ queryKey: ['course-completion'] })
     } catch {
       setActionMessage('Não foi possível analisar agora. Seu texto continua salvo.')
     } finally {
