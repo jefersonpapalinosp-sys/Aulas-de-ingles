@@ -1,5 +1,5 @@
 # Imagem de desenvolvimento: Vite com hot reload.
-FROM node:24-alpine
+FROM public.ecr.aws/docker/library/node:24-alpine
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci

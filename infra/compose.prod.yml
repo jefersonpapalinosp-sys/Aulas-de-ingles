@@ -4,9 +4,12 @@
 #   docker compose --env-file .env.prod -f infra/compose.prod.yml up -d --build
 name: aulas-ingles-prod
 
+# As imagens vêm do espelho público da AWS, não do Docker Hub: o Hub limita
+# pull anônimo por IP, e o CI compartilha IP com o resto do GitHub Actions.
+# O Postgres está fixado em 16.15 para bater com os volumes já existentes.
 services:
   db:
-    image: postgres:16-alpine
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
     container_name: aulas-prod-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-aulas}
