@@ -1135,10 +1135,136 @@
         "slug": "26-30",
         "title": "Aulas 26–30",
         "position": 6,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 26,
         "lesson_end": 30,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-26-30",
+          "title": "Fechamento 26–30",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "A VOA não publica review das Aulas 26–30: o índice oficial lista a Aula 30 e, em seguida, materiais gerais do curso. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção. Ele não equivale a, nem substitui, uma revisão da VOA, e não confere certificação.",
+          "intro": "Feche o Level 2 revendo comparativos e descrição de pessoas, convites informais, os três graus de obrigação, condicionais e os verbos de sonho e plano. A escuta da Aula 29 verifica condicionais e linguagem de emergência.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 30,
+          "listening_lesson_number": 29,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Antes de adjetivo não entra like. Complete: You ____ serious with that face.",
+              "options": [
+                "look",
+                "look like",
+                "look alike"
+              ],
+              "accepted_answers": [
+                "look"
+              ],
+              "explanation": "look like vem antes de substantivo; antes de adjetivo o verbo vai sozinho.",
+              "lesson_numbers": [
+                26
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Convite informal. Complete: Why don't you ____ us for dinner?",
+              "options": [
+                "join",
+                "to join",
+                "joining"
+              ],
+              "accepted_answers": [
+                "join"
+              ],
+              "explanation": "Depois do sujeito vem o verbo na forma simples, sem to e sem -s.",
+              "lesson_numbers": [
+                27
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Expectativa, não obrigação. Complete: We're ____ counting birds, not ice cream trucks.",
+              "options": [
+                "supposed to be",
+                "have to be",
+                "ought to be"
+              ],
+              "accepted_answers": [
+                "supposed to be"
+              ],
+              "explanation": "be supposed to marca o que se espera de alguém, e admite que não tenha sido cumprido.",
+              "lesson_numbers": [
+                28
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Fórmula do conselho. Complete: If I ____ you, I'd learn as much as possible.",
+              "options": [
+                "were",
+                "was",
+                "am"
+              ],
+              "accepted_answers": [
+                "were"
+              ],
+              "explanation": "O subjuntivo were é a forma correta em if I were you, mesmo com I.",
+              "lesson_numbers": [
+                29
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Cada verbo pede uma forma. Complete: I used to dream ____ a nurse.",
+              "options": [
+                "of being",
+                "to be",
+                "being"
+              ],
+              "accepted_answers": [
+                "of being"
+              ],
+              "explanation": "dream of pede a forma -ing; hope, plan e would love pedem infinitivo com to.",
+              "lesson_numbers": [
+                30
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 29, qual é o conselho de Penelope para Anna?",
+              "options": [
+                "Well then, if I were you, I'd learn as much as possible.",
+                "You have to call the firefighters right now.",
+                "You're supposed to burn the toast."
+              ],
+              "accepted_answers": [
+                "Well then, if I were you, I'd learn as much as possible."
+              ],
+              "explanation": "Ela usa a fórmula if I were you seguida de would contraído.",
+              "lesson_numbers": [
+                29
+              ]
+            }
+          ]
+        }
       }
     ]
   }

@@ -440,20 +440,47 @@ Aula 24, por `listening_lesson_number`.
 
 ## 8. Sprint 30 — Level 2, Aulas 26–30 e fechamento autoral
 
-**Estado:** planejada.
+**Estado:** publicada em 9 de outubro de 2026. O Level 2 está completo: 30 de 30 aulas.
+Resta a conferência auditiva dos 25 timestamps, que depende de escuta humana.
 
 **Objetivo:** publicar as cinco aulas finais do Level 2 e concluir o curso no aplicativo sem
 atribuir à VOA uma revisão que não existe no índice oficial.
 
-### Catálogo oficial confirmado
+### Auditoria oficial confirmada
 
-| Aula | Título confirmado no índice | Foco linguístico |
-|---:|---|---|
-| 26 | *Look-alikes* | a confirmar na auditoria da aula e do lesson plan |
-| 27 | *Fish out of Water* | a confirmar na auditoria da aula e do lesson plan |
-| 28 | *For the Birds* | a confirmar na auditoria da aula e do lesson plan |
-| 29 | *Where There's Smoke...* | a confirmar na auditoria da aula e do lesson plan |
-| 30 | *Dream a Little Dream* | a confirmar na auditoria da aula e do lesson plan |
+Três aulas não trazem o foco no corpo da página; para elas a fonte foi o **lesson plan
+oficial em PDF**, que declara Topics, Goals e Learning Strategy.
+
+| Aula | Foco linguístico | Fonte do foco | MP3 |
+|---:|---|---|---|
+| 26 *Look-alikes* | descrever pessoas + revisão de comparativos | lesson plan | 5:00 |
+| 27 *Fish out of Water* | convites informais com `Why don't…?` | Professor Bot | 4:25 |
+| 28 *For the Birds* | `have to`, `ought to` e `be supposed to` + decepção | lesson plan + Professor Bot | 4:54 |
+| 29 *Where There's Smoke...* | revisão de condicionais + linguagem de emergência | lesson plan + Professor Bot | 4:34 |
+| 30 *Dream a Little Dream* | `dream`, `hope`, `plan`, `would love` | lesson plan | 4:52 |
+
+### O fechamento é autoral, e isso aparece na interface
+
+Confirmado: **a VOA não publica review das Aulas 26–30**. O fechamento do bloco foi criado
+pelo projeto e carrega `source_kind: "authorial"` com `source_url` nulo.
+
+A tela de checkpoint passou a distinguir os dois casos: onde há review oficial o rótulo
+segue **Base curricular**, com link; no fechamento autoral o rótulo é **Origem**, sem link,
+e a nota deixa explícito que não equivale a uma revisão da VOA e **não confere
+certificação**. Há teste de E2E cobrindo exatamente isso.
+
+> O lesson plan da Aula 30 oferece um *Certificate of Completion* para uso em sala. O
+> aplicativo **não** reproduz nem referencia esse certificado, para não sugerir
+> equivalência com uma certificação da VOA.
+
+### Implementação registrada
+
+- [x] auditar as cinco aulas e os lesson plans disponíveis;
+- [x] publicar conteúdo e exercícios autorais segundo os objetivos confirmados;
+- [x] criar o fechamento 26–30 identificado como autoral na API, no banco e na interface;
+- [x] garantir que nenhuma tela promete diploma, equivalência ou certificação da VOA;
+- [x] manter livre o acesso às aulas e unidades concluídas;
+- [ ] **pendente:** conferir por escuta humana os 25 timestamps conservadores.
 
 **Limite editorial:** o índice oficial consultado lista a Aula 30 e, em seguida, materiais gerais
 do curso. Não há **Review of Level 2 Lessons 26–30**. Qualquer checkpoint, revisão cumulativa ou
@@ -498,7 +525,9 @@ fechamento criado pelo projeto deve receber rótulo visível de **conteúdo auto
 
 ## 10. Definição de pronto do ciclo 26–30
 
-O ciclo estará concluído quando:
+**Estado em 9 de outubro de 2026:** todos os itens abaixo estão atendidos, com uma
+exceção explícita — a validação humana de cues segue pendente para as Sprints 27 a 30
+(75 cues no total). O ciclo estará concluído quando:
 
 - as Aulas 6–30 estiverem publicadas a partir de fontes auditadas;
 - os reviews oficiais 6–10, 11–15, 16–20 e 21–25 estiverem referenciados corretamente;
