@@ -16,13 +16,13 @@ async def test_lista_as_vinte_e_duas_aulas_em_ordem(client: AsyncClient) -> None
 
 
 @pytest.mark.asyncio
-async def test_level_2_lista_e_entrega_as_aulas_1_a_20(
+async def test_level_2_lista_e_entrega_as_aulas_1_a_25(
     client: AsyncClient,
 ) -> None:
     response = await client.get("/api/lessons?course=voa-level-2")
     assert response.status_code == 200
     summaries = response.json()
-    assert [item["number"] for item in summaries] == list(range(1, 21))
+    assert [item["number"] for item in summaries] == list(range(1, 26))
     assert [item["title"] for item in summaries] == [
         "Budget Cuts",
         "The Interview",
@@ -44,12 +44,18 @@ async def test_level_2_lista_e_entrega_as_aulas_1_a_20(
         "Flour Baby, Part 2",
         "Movie Night",
         "The Test Drive",
+        "Trash to Treasure, Part 1",
+        "Trash to Treasure, Part 2",
+        "Rock Star",
+        "I Feel Super!",
+        "Only Human",
     ]
     assert all(item["course_slug"] == "voa-level-2" for item in summaries)
     assert all(item["unit_slug"] == "1-5" for item in summaries[:5])
     assert all(item["unit_slug"] == "6-10" for item in summaries[5:10])
     assert all(item["unit_slug"] == "11-15" for item in summaries[10:15])
-    assert all(item["unit_slug"] == "16-20" for item in summaries[15:])
+    assert all(item["unit_slug"] == "16-20" for item in summaries[15:20])
+    assert all(item["unit_slug"] == "21-25" for item in summaries[20:])
 
     durations = [
         247,
@@ -101,16 +107,11 @@ async def test_level_2_lista_e_entrega_as_aulas_1_a_20(
     assert lesson_8["media"][0]["source_url"].endswith("_240p.mp4")
 
     sprint_27_sources = [
-        "https://voa-audio.voanews.eu/vle/2017/11/21/"
-        "0117495a-4165-48c3-8972-61491413ad7a_hq.mp3",
-        "https://voa-audio.voanews.eu/vle/2017/11/28/"
-        "260c25bd-1773-42d0-8b8a-54924d27427c_hq.mp3",
-        "https://voa-audio.voanews.eu/vle/2017/12/01/"
-        "104a6627-290a-4472-911e-3bb9349f44f7_hq.mp3",
-        "https://voa-audio.voanews.eu/vle/2017/12/12/"
-        "e2fe076d-3fa7-495a-83ea-9d4d4cba9fad_hq.mp3",
-        "https://voa-audio.voanews.eu/vle/2018/01/04/"
-        "99ceaa2e-fb25-43a8-8731-0a7f23901d65_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2017/11/21/0117495a-4165-48c3-8972-61491413ad7a_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2017/11/28/260c25bd-1773-42d0-8b8a-54924d27427c_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2017/12/01/104a6627-290a-4472-911e-3bb9349f44f7_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2017/12/12/e2fe076d-3fa7-495a-83ea-9d4d4cba9fad_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2018/01/04/99ceaa2e-fb25-43a8-8731-0a7f23901d65_hq.mp3",
     ]
     for number, source_url in zip(range(11, 16), sprint_27_sources, strict=True):
         detail = (await client.get(f"/api/courses/voa-level-2/lessons/{number}")).json()
@@ -131,7 +132,7 @@ async def test_level_2_lista_e_entrega_as_aulas_1_a_20(
     assert len(sprint_27_classifications) == 3
 
     assert (await client.get("/api/lessons/1")).status_code == 404
-    assert (await client.get("/api/courses/voa-level-2/lessons/21")).status_code == 404
+    assert (await client.get("/api/courses/voa-level-2/lessons/26")).status_code == 404
 
 
 @pytest.mark.asyncio
@@ -356,9 +357,7 @@ async def test_exercicios_filtram_por_curso_e_unidade(client: AsyncClient) -> No
     unit_45_49 = (await client.get("/api/exercises?course=voa-level-1&unit=45-49")).json()
     unit_50_52 = (await client.get("/api/exercises?course=voa-level-1&unit=50-52")).json()
     level_2_unit_6_10 = (await client.get("/api/exercises?course=voa-level-2&unit=6-10")).json()
-    level_2_unit_11_15 = (
-        await client.get("/api/exercises?course=voa-level-2&unit=11-15")
-    ).json()
+    level_2_unit_11_15 = (await client.get("/api/exercises?course=voa-level-2&unit=11-15")).json()
 
     assert {item["lesson_number"] for item in unit_31_40} == set(range(31, 41))
     assert {item["lesson_number"] for item in unit_40_44} == set(range(41, 45))
@@ -388,11 +387,9 @@ async def test_exercicios_filtram_por_curso_e_unidade(client: AsyncClient) -> No
         assert all("answers" not in item for item in items)
 
     assert (await client.get("/api/exercises?course=voa-level-2&unit=45-49")).json() == []
-    assert (await client.get("/api/exercises?course=voa-level-2&unit=21-25")).json() == []
+    assert (await client.get("/api/exercises?course=voa-level-2&unit=26-30")).json() == []
     assert (await client.get("/api/exercises?course=voa-level-1&unit=45-49&lesson=31")).json() == []
-    assert (
-        await client.get("/api/exercises?course=voa-level-2&unit=11-15&lesson=10")
-    ).json() == []
+    assert (await client.get("/api/exercises?course=voa-level-2&unit=11-15&lesson=10")).json() == []
 
 
 @pytest.mark.asyncio

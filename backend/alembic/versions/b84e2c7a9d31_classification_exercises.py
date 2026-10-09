@@ -39,8 +39,7 @@ def upgrade() -> None:
     # estruturadas; degrade-os temporariamente e deixe o seed idempotente
     # recompô-los depois do upgrade.
     op.execute(
-        "UPDATE exercise SET activity_type = 'gap_fill' "
-        "WHERE activity_type = 'classification'"
+        "UPDATE exercise SET activity_type = 'gap_fill' WHERE activity_type = 'classification'"
     )
     op.create_check_constraint(
         "ck_exercise_classification_contract",
@@ -74,12 +73,10 @@ def downgrade() -> None:
     # voltar, degrade o tipo para uma resposta textual e remova filtros de
     # sessões ativas; o próximo seed restaura o contrato estruturado.
     op.execute(
-        "UPDATE practice_session SET activity_type = NULL "
-        "WHERE activity_type = 'classification'"
+        "UPDATE practice_session SET activity_type = NULL WHERE activity_type = 'classification'"
     )
     op.execute(
-        "UPDATE exercise SET activity_type = 'gap_fill' "
-        "WHERE activity_type = 'classification'"
+        "UPDATE exercise SET activity_type = 'gap_fill' WHERE activity_type = 'classification'"
     )
     op.alter_column(
         "exercise_attempt",

@@ -173,9 +173,7 @@ def call_ollama_writing_provider(
     """
 
     failed_checks = [
-        item
-        for item in rubric
-        if item.get("passed") is False and isinstance(item.get("code"), str)
+        item for item in rubric if item.get("passed") is False and isinstance(item.get("code"), str)
     ]
     failed_codes = [str(item["code"]) for item in failed_checks]
     if not failed_codes:
@@ -258,9 +256,7 @@ def call_ollama_writing_provider(
         raise ProviderFailure("invalid_provider_response")
     summary = generated.get("summary")
     raw_suggestions = generated.get("suggestions")
-    if not isinstance(summary, str) or not summary.strip() or not isinstance(
-        raw_suggestions, list
-    ):
+    if not isinstance(summary, str) or not summary.strip() or not isinstance(raw_suggestions, list):
         raise ProviderFailure("invalid_provider_response")
     suggestions: list[dict[str, object]] = []
     for item in raw_suggestions[:8]:

@@ -46,7 +46,12 @@ def upgrade() -> None:
         sa.Column("lapses", sa.Integer(), nullable=False),
         sa.Column("due_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("last_reviewed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.CheckConstraint("estimated_seconds > 0", name="ck_review_item_duration_positive"),
         sa.CheckConstraint("status IN ('active', 'suspended')", name="ck_review_item_status"),
         sa.CheckConstraint(

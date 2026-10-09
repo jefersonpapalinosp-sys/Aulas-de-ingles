@@ -49,15 +49,12 @@ async def _recover_stale_jobs(now: datetime) -> None:
             )
         )
         exhausted = (
-            (
-                (TranscriptionJob.status == "queued")
-                | (
-                    (TranscriptionJob.status == "processing")
-                    & (TranscriptionJob.processing_started_at <= cutoff)
-                )
+            (TranscriptionJob.status == "queued")
+            | (
+                (TranscriptionJob.status == "processing")
+                & (TranscriptionJob.processing_started_at <= cutoff)
             )
-            & (TranscriptionJob.attempt_count >= TranscriptionJob.max_attempts)
-        )
+        ) & (TranscriptionJob.attempt_count >= TranscriptionJob.max_attempts)
         await session.execute(
             update(TranscriptionJob)
             .where(exhausted)

@@ -31,9 +31,7 @@ class CourseReviewAttemptIn(BaseModel):
 
     @field_validator("answers")
     @classmethod
-    def unique_questions(
-        cls, value: list[CourseReviewAnswerIn]
-    ) -> list[CourseReviewAnswerIn]:
+    def unique_questions(cls, value: list[CourseReviewAnswerIn]) -> list[CourseReviewAnswerIn]:
         ids = [answer.question_id for answer in value]
         if len(ids) != len(set(ids)):
             raise ValueError("Cada questão deve ter apenas uma resposta.")

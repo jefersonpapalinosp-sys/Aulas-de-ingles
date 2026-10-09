@@ -325,8 +325,7 @@ async def exportar_dados(
             "created_at": usuario.created_at,
         },
         lesson_progress=[
-            {**_lesson_reference(item.lesson), "studied_at": item.studied_at}
-            for item in progress
+            {**_lesson_reference(item.lesson), "studied_at": item.studied_at} for item in progress
         ],
         study_sessions=[
             {

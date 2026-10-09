@@ -23,9 +23,7 @@ def upgrade() -> None:
             "license_status", sa.String(length=30), server_default="review_required", nullable=False
         ),
     )
-    op.add_column(
-        "lesson_media", sa.Column("license_url", sa.String(length=1000), nullable=True)
-    )
+    op.add_column("lesson_media", sa.Column("license_url", sa.String(length=1000), nullable=True))
     op.add_column(
         "lesson_media",
         sa.Column(
@@ -37,7 +35,9 @@ def upgrade() -> None:
     )
     op.add_column(
         "lesson_media",
-        sa.Column("attribution", sa.String(length=200), server_default="Fonte externa", nullable=False),
+        sa.Column(
+            "attribution", sa.String(length=200), server_default="Fonte externa", nullable=False
+        ),
     )
     op.add_column(
         "lesson_media",
@@ -45,9 +45,7 @@ def upgrade() -> None:
             "offline_policy", sa.String(length=20), server_default="network_only", nullable=False
         ),
     )
-    op.add_column(
-        "lesson_media", sa.Column("license_reviewed_at", sa.Date(), nullable=True)
-    )
+    op.add_column("lesson_media", sa.Column("license_reviewed_at", sa.Date(), nullable=True))
     op.execute(
         "UPDATE lesson_media SET "
         "license_status = 'public_domain', "

@@ -24255,5 +24255,2707 @@
       }
     ],
     "learning_strategy": "separar as peças da oração relatada"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 29: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o review oficial 21-25 da VOA.",
+    "number": 21,
+    "slug": "lesson-21",
+    "position": 1,
+    "title": "Trash to Treasure, Part 1",
+    "title_pt": "De lixo a tesouro, parte 1",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-21/4273059.html",
+    "grammar_tag": "talk × speak",
+    "focus_points": [
+      "talk to / with",
+      "speak to / about",
+      "parte 1 de 2"
+    ],
+    "story_note": "Parte 1 de 2 · continua na 22",
+    "lead": "Anna procura um presente único para o aniversário do Pete. A aula separa dois verbos que o português junta num só: **talk** e **speak** significam *falar*, mas não aparecem nos mesmos lugares.",
+    "warmup_prompt": "Who did you talk to yesterday, and what did you speak about?",
+    "listening_focus": "Anote cada ocorrência de *talk* e de *speak* e veja o que vem depois de cada uma.",
+    "goals": [
+      "Usar **talk** para conversa entre pessoas e situações informais.",
+      "Usar **speak** para fala mais formal, unilateral ou sobre idiomas.",
+      "Reconhecer as locuções fixas: *speaking of*, *speak to someone again*.",
+      "Falar de presentes e de lojas de objetos únicos."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Quando cada um aparece",
+        "why": "O Professor Bot dá a regra prática: *talk* para conversa entre duas ou mais pessoas e situações informais; *speak* para o resto.",
+        "warning": "**Não é regra absoluta** Em muitos casos os dois cabem sem perda de sentido. O que muda é o registro: *speak* soa mais formal.",
+        "table_head": [
+          "Verbo",
+          "Uso típico",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "talk",
+              "conversa entre pessoas",
+              "Are you **talking to** yourself again?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "talk",
+              "situação informal",
+              "I was **talking to** Pete."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "speak",
+              "modo de falar, mais formal",
+              "From the way he **was speaking**, I don't think he likes cake."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "speak",
+              "dirigir a palavra a alguém",
+              "He'll never **speak to** you again."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "As preposições que seguem",
+        "why": "A escolha da preposição muda o sentido mais do que a escolha do verbo.",
+        "warning": null,
+        "table_head": [
+          "Combinação",
+          "Sentido",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "talk **to** someone",
+              "falar com alguém",
+              "I was talking to Pete."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "talk **with** someone",
+              "conversar com (mais mútuo)",
+              "I talked with Ashley about the gift."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "talk **about** something",
+              "falar sobre algo",
+              "We talked about his birthday."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "speak **to / with** someone",
+              "dirigir a palavra",
+              "He'll never speak to you again."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "speak **a language**",
+              "falar um idioma",
+              "She speaks Portuguese and English."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Locuções fixas",
+        "why": "Duas expressões da aula não se montam peça por peça — decore como bloco.",
+        "warning": "**Atenção** *speaking of* não é *talking of* no inglês americano corrente. Use *speaking of* para emendar um assunto.",
+        "table_head": [
+          "Expressão",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "speaking of",
+              "por falar em",
+              "Now, **speaking of** Pete's birthday, what else should I do?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "talk to yourself",
+              "falar sozinho",
+              "Are you **talking to yourself** again?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "a birthday coming up",
+              "aniversário chegando",
+              "He has **a birthday coming up**!"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Are you **talking to** yourself again?",
+        "text_pt": "Você está falando sozinha de novo?",
+        "note": "*talk to yourself* é a locução fixa para falar sozinho."
+      },
+      {
+        "position": 1,
+        "text_en": "No, not this time. I was **talking to** Pete.",
+        "text_pt": "Não, dessa vez não. Eu estava falando com o Pete.",
+        "note": "Conversa entre duas pessoas → *talk*."
+      },
+      {
+        "position": 2,
+        "text_en": "From the way he **was speaking**, I don't think he likes cake or presents or fun.",
+        "text_pt": "Pelo jeito que ele falava, acho que ele não gosta de bolo, presente nem diversão.",
+        "note": "*speak* descreve o **modo** de falar, não a conversa em si."
+      },
+      {
+        "position": 3,
+        "text_en": "Now, **speaking of** Pete's birthday, what else should I do?",
+        "text_pt": "Agora, por falar no aniversário do Pete, o que mais eu deveria fazer?",
+        "note": "*speaking of* emenda um assunto já mencionado."
+      },
+      {
+        "position": 4,
+        "text_en": "Yeah, he'll never **speak to** you again.",
+        "text_pt": "É, ele nunca mais vai falar com você.",
+        "note": "*speak to* aqui carrega o peso de romper relação — mais forte que *talk to*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "trash",
+        "ipa": "/træʃ/",
+        "translation_pt": "lixo",
+        "example_en": "I can't wait to see your trash!"
+      },
+      {
+        "position": 1,
+        "term": "treasure",
+        "ipa": "/ˈtreʒər/",
+        "translation_pt": "tesouro",
+        "example_en": "Sometimes trash is treasure."
+      },
+      {
+        "position": 2,
+        "term": "unique",
+        "ipa": "/juˈniːk/",
+        "translation_pt": "único, singular",
+        "example_en": "Do you know where I can buy something unique?"
+      },
+      {
+        "position": 3,
+        "term": "present",
+        "ipa": "/ˈprezənt/",
+        "translation_pt": "presente (de dar)",
+        "example_en": "I'm getting him a present."
+      },
+      {
+        "position": 4,
+        "term": "coming up",
+        "ipa": "/ˈkʌmɪŋ ʌp/",
+        "translation_pt": "chegando, se aproximando",
+        "example_en": "He has a birthday coming up!"
+      },
+      {
+        "position": 5,
+        "term": "rent",
+        "ipa": "/rent/",
+        "translation_pt": "alugar, contratar",
+        "example_en": "I'll rent him a clown!"
+      },
+      {
+        "position": 6,
+        "term": "clown",
+        "ipa": "/klaʊn/",
+        "translation_pt": "palhaço",
+        "example_en": "I'll rent him a clown!"
+      },
+      {
+        "position": 7,
+        "term": "strange",
+        "ipa": "/streɪndʒ/",
+        "translation_pt": "estranho",
+        "example_en": "He is so strange."
+      },
+      {
+        "position": 8,
+        "term": "definitely",
+        "ipa": "/ˈdefɪnətli/",
+        "translation_pt": "com certeza",
+        "example_en": "You will definitely find something unique there."
+      },
+      {
+        "position": 9,
+        "term": "I don't care",
+        "ipa": "/aɪ doʊnt ker/",
+        "translation_pt": "não me importo",
+        "example_en": "Well, I don't care."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "talk /tɔːk/ — o l é mudo",
+        "explanation": "Soa \"tók\", sem nenhum /l/. Mesma coisa em *walk* e *half*."
+      },
+      {
+        "position": 1,
+        "label": "speak /spiːk/ × speech /spiːtʃ/",
+        "explanation": "O verbo termina em /k/; o substantivo em /tʃ/. Par útil para fixar."
+      },
+      {
+        "position": 2,
+        "label": "unique /juˈniːk/",
+        "explanation": "Tônica na **segunda** sílaba, e o começo soa \"iu\". Não é \"ÚNIK\"."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 21 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/03/06/fabffd67-3af1-480c-925c-0b87e11fe82b_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 246,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 8,
+            "end_seconds": 28,
+            "speaker": "Ashley",
+            "text_en": "Are you talking to yourself again?",
+            "text_pt": "Você está falando sozinha de novo?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 30,
+            "end_seconds": 48,
+            "speaker": "Anna",
+            "text_en": "No, not this time. I was talking to Pete.",
+            "text_pt": "Não, dessa vez não. Eu estava falando com o Pete."
+          },
+          {
+            "position": 2,
+            "start_seconds": 58,
+            "end_seconds": 82,
+            "speaker": "Anna",
+            "text_en": "He has a birthday coming up! But he told me not to tell anyone.",
+            "text_pt": "Ele faz aniversário em breve! Mas pediu para eu não contar a ninguém."
+          },
+          {
+            "position": 3,
+            "start_seconds": 88,
+            "end_seconds": 112,
+            "speaker": "Anna",
+            "text_en": "From the way he was speaking, I don't think he likes cake or presents or fun.",
+            "text_pt": "Pelo jeito que ele falava, acho que ele não gosta de bolo, presente nem diversão."
+          },
+          {
+            "position": 4,
+            "start_seconds": 150,
+            "end_seconds": 172,
+            "speaker": "Ashley",
+            "text_en": "Yeah, he'll never speak to you again.",
+            "text_pt": "É, ele nunca mais vai falar com você."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Conversa informal entre duas pessoas: I was ____ to Pete.",
+        "hint": null,
+        "explanation": "*talk* é o verbo da conversa entre pessoas.",
+        "hints": [
+          "É uma conversa entre dois.",
+          "O registro é informal."
+        ],
+        "answers": [
+          "talking"
+        ],
+        "options": [
+          "talking",
+          "speaking",
+          "saying"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Descrevendo o modo de falar: From the way he was ____, he sounded upset.",
+        "hint": null,
+        "explanation": "*speak* descreve o modo da fala, não a conversa.",
+        "hints": [
+          "Não há troca entre duas pessoas aqui.",
+          "É mais formal."
+        ],
+        "answers": [
+          "speaking"
+        ],
+        "options": [
+          "speaking",
+          "talking",
+          "telling"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Locução fixa: Now, `____` Pete's birthday, what should I buy? (duas palavras)",
+        "hint": "duas palavras",
+        "explanation": "*speaking of* retoma um assunto já mencionado.",
+        "hints": [
+          "Começa com *speaking*.",
+          "Em português: \"por falar em\"."
+        ],
+        "answers": [
+          "speaking of"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "I was ____ to Pete about the party.",
+          "She ____ three languages.",
+          "Are you ____ to yourself again?",
+          "He'll never ____ to you again."
+        ],
+        "classification_categories": [
+          "talk",
+          "speak"
+        ],
+        "prompt": "Classifique cada frase pelo verbo que ela pede.",
+        "hint": null,
+        "explanation": "Conversa informal pede *talk*; idioma e rompimento formal pedem *speak*.",
+        "hints": [
+          "Veja se há troca entre pessoas.",
+          "Idioma sempre pede *speak*."
+        ],
+        "answers": [
+          "{\"I was ____ to Pete about the party.\": \"talk\", \"She ____ three languages.\": \"speak\", \"Are you ____ to yourself again?\": \"talk\", \"He'll never ____ to you again.\": \"speak\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Ashley pergunta quando encontra Anna?",
+        "hint": null,
+        "explanation": "*Are you talking to yourself again?* abre a cena.",
+        "hints": [
+          "É uma brincadeira recorrente.",
+          "Envolve *talking to yourself*."
+        ],
+        "answers": [
+          "se ela está falando sozinha de novo"
+        ],
+        "options": [
+          "se ela está falando sozinha de novo",
+          "se ela viu o Pete",
+          "se ela comprou o presente"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Por que Anna acha que Pete não gosta de festa?",
+        "hint": null,
+        "explanation": "*From the way he was speaking* — o modo da fala é a pista.",
+        "hints": [
+          "A pista está no verbo *speaking*.",
+          "Não é algo que ele disse diretamente."
+        ],
+        "answers": [
+          "pelo jeito que ele estava falando"
+        ],
+        "options": [
+          "pelo jeito que ele estava falando",
+          "porque ele cancelou a festa",
+          "porque ele odeia bolo"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta de Ashley sobre falar sozinha.",
+        "hint": null,
+        "explanation": "*talk to yourself* é locução fixa.",
+        "hints": [
+          "Começa com *Are you*.",
+          "Termina com *again*."
+        ],
+        "answers": [
+          "Are you talking to yourself again"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Anna planeja contratar para o aniversário?",
+        "hint": null,
+        "explanation": "*I'll rent him a clown!* — e Ashley avisa do risco.",
+        "hints": [
+          "Ashley acha péssima ideia.",
+          "É alguém que se contrata para festa."
+        ],
+        "answers": [
+          "um palhaço"
+        ],
+        "options": [
+          "um palhaço",
+          "uma banda",
+          "um mágico"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma conversa recente",
+        "instructions": "Write 7 to 10 sentences in English about a recent conversation. Use talk to and talk about at least once each, speak at least once in a more formal sense, and the phrase speaking of to change topics.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "talk to e talk about",
+            "terms": [
+              "talk to",
+              "talked to",
+              "talk about",
+              "talked about"
+            ]
+          },
+          {
+            "label": "speak num sentido formal",
+            "terms": [
+              "speak",
+              "spoke",
+              "speaking"
+            ]
+          },
+          {
+            "label": "mudar de assunto",
+            "terms": [
+              "speaking of"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "observar o que vem depois do verbo"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 29: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o review oficial 21-25 da VOA.",
+    "number": 22,
+    "slug": "lesson-22",
+    "position": 2,
+    "title": "Trash to Treasure, Part 2",
+    "title_pt": "De lixo a tesouro, parte 2",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-22/4283017.html",
+    "grammar_tag": "tell × say",
+    "focus_points": [
+      "tell + objeto indireto",
+      "say + as palavras",
+      "parte 2 de 2"
+    ],
+    "story_note": "Parte 2 de 2 · continua a 21",
+    "lead": "Anna leva o lixo que \"fala com ela\" para a aula de artesanato, e Sue tem uma opinião diferente. A aula separa **tell** de **say** — a diferença é se a pessoa que ouve aparece na frase.",
+    "warmup_prompt": "Tell me about something you made or fixed yourself.",
+    "listening_focus": "Marque cada *tell* e cada *say* e veja se há alguém recebendo a informação.",
+    "goals": [
+      "Usar **tell** com objeto indireto: *tell **me*** sobre algo.",
+      "Usar **say** focando nas palavras ditas, sem a pessoa logo depois.",
+      "Reconhecer *say to someone* como a alternativa correta a *tell*.",
+      "Descrever objetos e materiais de artesanato."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "A regra em uma linha",
+        "why": "O Prof. Bot define: *tell* é informar ou instruir alguém, e é **quase sempre seguido de objeto indireto*. *say* foca nas palavras usadas.",
+        "warning": "**Erro clássico** *She said me* não existe. Ou *she **told** me*, ou *she **said to** me*.",
+        "table_head": [
+          "Verbo",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "tell",
+              "tell + **pessoa** + algo",
+              "**Tell me** about that."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "say",
+              "say + **as palavras**",
+              "That's what it **said**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "say + to",
+              "say + algo + **to** + pessoa",
+              "This net **said to me**, \"Use me, Anna.\""
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "tell (negativo)",
+              "tell + pessoa + **not to**",
+              "He **told me not to** tell anyone. (aula 21)"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "O objeto indireto do tell",
+        "why": "Quem recebe a informação vem **logo** depois de *tell*, sem preposição.",
+        "warning": null,
+        "table_head": [
+          "Certo",
+          "Errado",
+          "Por quê"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "Tell **me** about that.",
+              "*Tell about that to me.*",
+              "a pessoa vem primeiro"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "She told **us** the truth.",
+              "*She told the truth us.*",
+              "pessoa antes da coisa"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "He told **me** not to tell anyone.",
+              "*He said me not to...*",
+              "*say* não aceita a pessoa direta"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "Say it **to her**.",
+              "*Say her it.*",
+              "com *say*, a pessoa precisa de *to*"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Expressões fixas de cada verbo",
+        "why": "Algumas combinações só aceitam um dos dois, independentemente da regra geral.",
+        "warning": null,
+        "table_head": [
+          "Só com tell",
+          "Só com say",
+          "Observação"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "tell the truth",
+              "say hello / goodbye",
+              "cumprimentar sempre com *say*"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "tell a story",
+              "say a word",
+              "contar história é *tell*"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "tell a lie",
+              "say sorry / thank you",
+              "pedir desculpa é *say*"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "tell the time",
+              "say a prayer",
+              "—"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Oh, okay. Alright, it's a net with a … oh, it's got a hole in it. **Tell me** about that.",
+        "text_pt": "Ah, tá. Bom, é uma rede com um… ah, tem um buraco. Me conta sobre isso.",
+        "note": "*Tell me* — a pessoa vem logo depois do verbo."
+      },
+      {
+        "position": 1,
+        "text_en": "This net **said to me**, \"Anna, I used to catch stuff.\"",
+        "text_pt": "Esta rede me disse: \"Anna, eu pegava coisas.\"",
+        "note": "Com *say*, a pessoa precisa de *to*. E note o *used to* da aula 16."
+      },
+      {
+        "position": 2,
+        "text_en": "That's what it **said**. It **said**, \"Use me, Anna.\"",
+        "text_pt": "Foi isso que ela disse. Ela disse: \"Use-me, Anna.\"",
+        "note": "*say* focado nas palavras exatas, sem ninguém recebendo."
+      },
+      {
+        "position": 3,
+        "text_en": "Anna, this stuff is not **saying** anything to you or me or anyone.",
+        "text_pt": "Anna, essas coisas não estão dizendo nada para você, para mim nem para ninguém.",
+        "note": "*saying something to someone* — a estrutura completa do *say*."
+      },
+      {
+        "position": 4,
+        "text_en": "But you **said** to bring in trash.",
+        "text_pt": "Mas você disse para trazer lixo.",
+        "note": "*say to* + infinitivo: relatar uma instrução."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "net",
+        "ipa": "/net/",
+        "translation_pt": "rede",
+        "example_en": "it's a net with a hole in it"
+      },
+      {
+        "position": 1,
+        "term": "hole",
+        "ipa": "/hoʊl/",
+        "translation_pt": "buraco",
+        "example_en": "it's got a hole in it"
+      },
+      {
+        "position": 2,
+        "term": "helmet",
+        "ipa": "/ˈhelmət/",
+        "translation_pt": "capacete",
+        "example_en": "it's a plastic helmet"
+      },
+      {
+        "position": 3,
+        "term": "broken toy",
+        "ipa": "/ˈbroʊkən tɔɪ/",
+        "translation_pt": "brinquedo quebrado",
+        "example_en": "and a broken toy"
+      },
+      {
+        "position": 4,
+        "term": "garbage",
+        "ipa": "/ˈɡɑːrbɪdʒ/",
+        "translation_pt": "lixo",
+        "example_en": "It's what we like to call in the business … garbage."
+      },
+      {
+        "position": 5,
+        "term": "decoupage",
+        "ipa": "/ˌdeɪkuːˈpɑːʒ/",
+        "translation_pt": "decupagem (artesanato)",
+        "example_en": "Next week, I could teach you decoupage."
+      },
+      {
+        "position": 6,
+        "term": "shoe box",
+        "ipa": "/ʃuː bɑːks/",
+        "translation_pt": "caixa de sapato",
+        "example_en": "All you need to bring is a clean shoe box."
+      },
+      {
+        "position": 7,
+        "term": "catch stuff",
+        "ipa": "/kætʃ stʌf/",
+        "translation_pt": "pegar coisas",
+        "example_en": "I used to catch stuff."
+      },
+      {
+        "position": 8,
+        "term": "I got it",
+        "ipa": "/aɪ ˈɡɑːt ɪt/",
+        "translation_pt": "entendi",
+        "example_en": "I got it. I got it!"
+      },
+      {
+        "position": 9,
+        "term": "in the business",
+        "ipa": "/ɪn ðə ˈbɪznəs/",
+        "translation_pt": "no ramo, na área",
+        "example_en": "what we like to call in the business"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "told /toʊld/ × said /sed/",
+        "explanation": "Os dois passados mais confundidos: *told* tem /oʊ/ longo; *said* tem /e/ curto, como *bed*."
+      },
+      {
+        "position": 1,
+        "label": "garbage /ˈɡɑːrbɪdʒ/",
+        "explanation": "Tônica na primeira sílaba; o final soa /ɪdʒ/, como em *village*."
+      },
+      {
+        "position": 2,
+        "label": "decoupage /ˌdeɪkuːˈpɑːʒ/",
+        "explanation": "Palavra de origem francesa: o final é /ʒ/, o mesmo som do *s* em *measure*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 22 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/03/06/0fd0e840-fff7-4d90-aaeb-eba188526184_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 287,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 10,
+            "end_seconds": 30,
+            "speaker": "Sue",
+            "text_en": "Welcome to class, Anna. I can't wait to see your trash!",
+            "text_pt": "Bem-vinda à aula, Anna. Mal posso esperar para ver seu lixo!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 40,
+            "end_seconds": 62,
+            "speaker": "Sue",
+            "text_en": "It's a net with a hole in it. Tell me about that.",
+            "text_pt": "É uma rede com um buraco. Me conta sobre isso."
+          },
+          {
+            "position": 2,
+            "start_seconds": 65,
+            "end_seconds": 90,
+            "speaker": "Anna",
+            "text_en": "This net said to me, Anna, I used to catch stuff. So, use me, Anna.",
+            "text_pt": "Esta rede me disse: Anna, eu pegava coisas. Então me use, Anna."
+          },
+          {
+            "position": 3,
+            "start_seconds": 130,
+            "end_seconds": 155,
+            "speaker": "Sue",
+            "text_en": "Anna, this stuff is not saying anything to you or me or anyone.",
+            "text_pt": "Anna, essas coisas não estão dizendo nada para você, para mim nem para ninguém."
+          },
+          {
+            "position": 4,
+            "start_seconds": 200,
+            "end_seconds": 222,
+            "speaker": "Sue",
+            "text_en": "All you need to bring is a clean shoe box. A box that held shoes.",
+            "text_pt": "Tudo que você precisa trazer é uma caixa de sapato limpa. Uma caixa que guardou sapatos."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: Sue asked Anna to ____ her about the net.",
+        "hint": null,
+        "explanation": "A pessoa (*her*) vem logo depois: o verbo é *tell*.",
+        "hints": [
+          "Há alguém recebendo a informação.",
+          "Sem preposição antes da pessoa."
+        ],
+        "answers": [
+          "tell"
+        ],
+        "options": [
+          "tell",
+          "say",
+          "speak"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Com preposição: This net `____` to me, \"Use me, Anna.\" (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Com *to* antes da pessoa, o verbo é *say*.",
+        "hints": [
+          "Há um *to* antes de *me*.",
+          "Passado irregular de *say*."
+        ],
+        "answers": [
+          "said"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Corrija: She said me the truth.",
+        "hint": null,
+        "explanation": "*say* não aceita a pessoa direta; com objeto indireto use *tell*.",
+        "hints": [
+          "Só o verbo muda.",
+          "A pessoa vem logo depois."
+        ],
+        "answers": [
+          "She told me the truth"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "____ the truth",
+          "____ hello",
+          "____ a story",
+          "____ thank you"
+        ],
+        "classification_categories": [
+          "tell",
+          "say"
+        ],
+        "prompt": "Classifique cada expressão pelo verbo que ela exige.",
+        "hint": null,
+        "explanation": "Cumprimentar e agradecer vão com *say*; contar verdade e história vão com *tell*.",
+        "hints": [
+          "Cumprimento sempre com *say*.",
+          "Narrar algo vai com *tell*."
+        ],
+        "answers": [
+          "{\"____ the truth\": \"tell\", \"____ hello\": \"say\", \"____ a story\": \"tell\", \"____ thank you\": \"say\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Sue pede a Anna sobre a rede?",
+        "hint": null,
+        "explanation": "*Tell me about that* — pedido de informação.",
+        "hints": [
+          "Ela usa *Tell me*.",
+          "É um pedido, não uma crítica."
+        ],
+        "answers": [
+          "que ela conte sobre o objeto"
+        ],
+        "options": [
+          "que ela conte sobre o objeto",
+          "que ela jogue fora",
+          "que ela conserte o buraco"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o veredito de Sue sobre os objetos?",
+        "hint": null,
+        "explanation": "*It's what we like to call in the business … garbage.*",
+        "hints": [
+          "Ela usa uma palavra bem direta.",
+          "Contrasta com o título da aula."
+        ],
+        "answers": [
+          "que é lixo, não tesouro"
+        ],
+        "options": [
+          "que é lixo, não tesouro",
+          "que valem muito dinheiro",
+          "que servem para decoupage"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o pedido de Sue sobre a rede.",
+        "hint": null,
+        "explanation": "*tell* com objeto indireto logo depois.",
+        "hints": [
+          "Quatro palavras.",
+          "Começa com *Tell me*."
+        ],
+        "answers": [
+          "Tell me about that"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Sue pede que Anna traga na próxima aula?",
+        "hint": null,
+        "explanation": "*All you need to bring is a clean shoe box.*",
+        "hints": [
+          "É para a aula de decoupage.",
+          "Tem que estar limpa."
+        ],
+        "answers": [
+          "uma caixa de sapato limpa"
+        ],
+        "options": [
+          "uma caixa de sapato limpa",
+          "mais lixo",
+          "tinta e pincel"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Conte e diga",
+        "instructions": "Write 7 to 10 sentences in English about advice someone gave you. Use tell with an indirect object at least twice, say at least twice, and one fixed expression such as tell the truth or say thank you.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "tell com objeto indireto",
+            "terms": [
+              "told me",
+              "told us",
+              "told her",
+              "told him",
+              "tell me"
+            ]
+          },
+          {
+            "label": "say",
+            "terms": [
+              "said",
+              "say",
+              "saying"
+            ]
+          },
+          {
+            "label": "expressão fixa",
+            "terms": [
+              "tell the truth",
+              "say thank you",
+              "say hello",
+              "tell a story",
+              "say sorry"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "procurar quem recebe a informação"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 29: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o review oficial 21-25 da VOA.",
+    "number": 23,
+    "slug": "lesson-23",
+    "position": 3,
+    "title": "Rock Star",
+    "title_pt": "Estrela do rock",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-23/4287922.html",
+    "grammar_tag": "Futuro contínuo",
+    "focus_points": [
+      "will be + -ing",
+      "going to be + -ing",
+      "entrevista"
+    ],
+    "story_note": null,
+    "lead": "Anna vai entrevistar a musicista Emma G. A aula apresenta o **futuro contínuo**: ações que estarão **em andamento** num momento do futuro, com duas formas equivalentes.",
+    "warmup_prompt": "What will you be doing this time tomorrow?",
+    "listening_focus": "Anote cada verbo no futuro contínuo e o momento futuro a que ele se refere.",
+    "goals": [
+      "Formar o futuro contínuo com **will be + -ing**.",
+      "Formar a alternativa com **be going to be + -ing**.",
+      "Distinguir *I will do* (ação pontual) de *I will be doing* (em andamento).",
+      "Apresentar e conduzir uma entrevista."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "As duas formas",
+        "why": "O Prof. Bot apresenta as duas como equivalentes: *will be* + -ing e *be going to be* + -ing. A primeira é mais curta e muito mais comum.",
+        "warning": "**O -ing é obrigatório** *Tomorrow you'll be interview Emma G* está errado. É *you'll be **interviewing***.",
+        "table_head": [
+          "Forma",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "mais comum",
+              "will be + -ing",
+              "Tomorrow, you'**ll be interviewing** musician Emma G."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "equivalente",
+              "be going to be + -ing",
+              "I'**m going to be interviewing** her tomorrow."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "pergunta",
+              "Will + sujeito + be + -ing",
+              "**Will** I **be talking** to Emma G?!"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "negativa",
+              "won't be + -ing",
+              "I **won't be working** tomorrow morning."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Em andamento, não pontual",
+        "why": "É o que separa o futuro contínuo do futuro simples: o contínuo coloca a ação **acontecendo** num ponto do futuro, não começando ou terminando nele.",
+        "warning": null,
+        "table_head": [
+          "Futuro simples",
+          "Futuro contínuo",
+          "Diferença"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I **will interview** her at 3.",
+              "At 3, I **will be interviewing** her.",
+              "começa às 3 × já em curso às 3"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "She **will join** us.",
+              "She **will be joining** us.",
+              "fato × cena em andamento"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "I **will call** you tonight.",
+              "I **will be driving** tonight.",
+              "ação única × atividade contínua"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Usos típicos no trabalho",
+        "why": "O futuro contínuo soa menos impositivo que o futuro simples — útil em agenda e em reunião.",
+        "warning": null,
+        "table_head": [
+          "Situação",
+          "Exemplo",
+          "Efeito"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "agenda",
+              "I'll be working from home on Friday.",
+              "informa sem pedir permissão"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "previsão de rotina",
+              "We'll be releasing the report next week.",
+              "soa planejado"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "pergunta discreta",
+              "Will you be using the room at 4?",
+              "menos direto que *Do you need the room?*"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Tomorrow, you'**ll be interviewing** musician Emma G.",
+        "text_pt": "Amanhã você vai estar entrevistando a musicista Emma G.",
+        "note": "A frase que o Prof. Bot usa para apresentar a estrutura."
+      },
+      {
+        "position": 1,
+        "text_en": "Emma G?! I **will be talking** to Emma G?!",
+        "text_pt": "Emma G?! Eu vou estar conversando com a Emma G?!",
+        "note": "Note o *talk to* da aula 21 dentro do futuro contínuo."
+      },
+      {
+        "position": 2,
+        "text_en": "Today, musician Emma G **will be joining** us here!",
+        "text_pt": "Hoje, a musicista Emma G estará conosco aqui!",
+        "note": "Uso típico de apresentação: anuncia a cena que vai acontecer."
+      },
+      {
+        "position": 3,
+        "text_en": "She is a wonderful songwriter and an amazing singer.",
+        "text_pt": "Ela é uma compositora maravilhosa e uma cantora incrível.",
+        "note": "Dois adjetivos de elogio úteis para apresentar alguém."
+      },
+      {
+        "position": 4,
+        "text_en": "Let's give a warm welcome to Emma G!",
+        "text_pt": "Vamos dar as boas-vindas calorosas à Emma G!",
+        "note": "*give a warm welcome* — fórmula fixa de apresentação."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "interview",
+        "ipa": "/ˈɪntərvjuː/",
+        "translation_pt": "entrevistar; entrevista",
+        "example_en": "you'll be interviewing musician Emma G"
+      },
+      {
+        "position": 1,
+        "term": "musician",
+        "ipa": "/mjuˈzɪʃən/",
+        "translation_pt": "músico, musicista",
+        "example_en": "musician Emma G"
+      },
+      {
+        "position": 2,
+        "term": "songwriter",
+        "ipa": "/ˈsɔːŋraɪtər/",
+        "translation_pt": "compositor",
+        "example_en": "She is a wonderful songwriter."
+      },
+      {
+        "position": 3,
+        "term": "singer",
+        "ipa": "/ˈsɪŋər/",
+        "translation_pt": "cantor, cantora",
+        "example_en": "an amazing singer"
+      },
+      {
+        "position": 4,
+        "term": "warm welcome",
+        "ipa": "/wɔːrm ˈwelkəm/",
+        "translation_pt": "boas-vindas calorosas",
+        "example_en": "Let's give a warm welcome to Emma G!"
+      },
+      {
+        "position": 5,
+        "term": "join",
+        "ipa": "/dʒɔɪn/",
+        "translation_pt": "juntar-se a",
+        "example_en": "Emma G will be joining us here!"
+      },
+      {
+        "position": 6,
+        "term": "amazing",
+        "ipa": "/əˈmeɪzɪŋ/",
+        "translation_pt": "incrível",
+        "example_en": "an amazing singer"
+      },
+      {
+        "position": 7,
+        "term": "wonderful",
+        "ipa": "/ˈwʌndərfəl/",
+        "translation_pt": "maravilhoso",
+        "example_en": "a wonderful songwriter"
+      },
+      {
+        "position": 8,
+        "term": "rock star",
+        "ipa": "/rɑːk stɑːr/",
+        "translation_pt": "estrela do rock",
+        "example_en": "Lesson 23: Rock Star"
+      },
+      {
+        "position": 9,
+        "term": "Are you there?",
+        "ipa": "/ɑːr ju ðer/",
+        "translation_pt": "Está aí? (ao telefone)",
+        "example_en": "Anna? Anna, are you there?"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "you'll be → /jəl bi/",
+        "explanation": "Em *you'll be interviewing*, as duas primeiras palavras somem numa só sílaba fraca."
+      },
+      {
+        "position": 1,
+        "label": "musician /mjuˈzɪʃən/",
+        "explanation": "Tônica na segunda sílaba; o *-cian* soa /ʃən/, como em *magician* e *physician*."
+      },
+      {
+        "position": 2,
+        "label": "songwriter /ˈsɔːŋraɪtər/",
+        "explanation": "O *w* é **mudo**: \"SONG-rai-ter\". Mesma coisa em *write* e *wrong*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 23 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/03/15/b53a7e2c-2dd1-4623-b4d0-92efba982191_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 169,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 6,
+            "end_seconds": 24,
+            "speaker": "Ms. Weaver",
+            "text_en": "Anna, this is Ms. Weaver. Tomorrow, you'll be interviewing musician Emma G.",
+            "text_pt": "Anna, aqui é a Ms. Weaver. Amanhã você vai estar entrevistando a musicista Emma G."
+          },
+          {
+            "position": 1,
+            "start_seconds": 26,
+            "end_seconds": 42,
+            "speaker": "Anna",
+            "text_en": "Emma G?! I will be talking to Emma G?!",
+            "text_pt": "Emma G?! Eu vou estar conversando com a Emma G?!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 44,
+            "end_seconds": 58,
+            "speaker": "Ms. Weaver",
+            "text_en": "Anna? Anna, are you there?",
+            "text_pt": "Anna? Anna, você está aí?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 78,
+            "end_seconds": 100,
+            "speaker": "Anna",
+            "text_en": "Hello and welcome to The Music! Today, musician Emma G will be joining us here!",
+            "text_pt": "Olá e bem-vindos ao The Music! Hoje a musicista Emma G estará conosco!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 102,
+            "end_seconds": 124,
+            "speaker": "Anna",
+            "text_en": "She is a wonderful songwriter and an amazing singer. Let's give a warm welcome to Emma G!",
+            "text_pt": "Ela é uma compositora maravilhosa e uma cantora incrível. Vamos dar as boas-vindas à Emma G!"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: Tomorrow, you'll ____ musician Emma G.",
+        "hint": null,
+        "explanation": "Futuro contínuo: *will be* + a forma -ing.",
+        "hints": [
+          "O auxiliar *will* já está implícito em *you'll*.",
+          "Falta *be* + -ing."
+        ],
+        "answers": [
+          "be interviewing"
+        ],
+        "options": [
+          "be interviewing",
+          "interviewing",
+          "be interview"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Forma alternativa: I'm `____` be working at nine. (duas palavras)",
+        "hint": "duas palavras",
+        "explanation": "*be going to be* + -ing é a segunda forma do futuro contínuo.",
+        "hints": [
+          "Começa com *going*.",
+          "A outra forma usa *will be*."
+        ],
+        "answers": [
+          "going to"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Passe ao futuro contínuo: At 3 p.m. I interview her.",
+        "hint": null,
+        "explanation": "O contínuo coloca a ação já em andamento no horário citado.",
+        "hints": [
+          "Use *will be*.",
+          "O verbo recebe *-ing*."
+        ],
+        "answers": [
+          "At 3 p.m. I will be interviewing her",
+          "At 3 p.m. I'll be interviewing her"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "I will call you at eight.",
+          "At eight I will be driving home.",
+          "She will join the meeting.",
+          "She will be joining us all morning."
+        ],
+        "classification_categories": [
+          "pontual",
+          "em andamento"
+        ],
+        "prompt": "Classifique: a frase descreve uma ação pontual ou em andamento no futuro?",
+        "hint": null,
+        "explanation": "O futuro contínuo marca a ação acontecendo no momento citado, não começando nele.",
+        "hints": [
+          "Procure *will be* + -ing.",
+          "Pergunte: começa ou já está rolando?"
+        ],
+        "answers": [
+          "{\"I will call you at eight.\": \"pontual\", \"At eight I will be driving home.\": \"em andamento\", \"She will join the meeting.\": \"pontual\", \"She will be joining us all morning.\": \"em andamento\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Quem Anna vai entrevistar?",
+        "hint": null,
+        "explanation": "Ms. Weaver anuncia no futuro contínuo.",
+        "hints": [
+          "Ms. Weaver avisa por telefone.",
+          "É uma musicista."
+        ],
+        "answers": [
+          "a musicista Emma G"
+        ],
+        "options": [
+          "a musicista Emma G",
+          "um ator de cinema",
+          "o prefeito"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Anna reage ao saber da entrevista?",
+        "hint": null,
+        "explanation": "*Emma G?! I will be talking to Emma G?!*",
+        "hints": [
+          "Ela repete o nome duas vezes.",
+          "Ms. Weaver precisa chamá-la de volta."
+        ],
+        "answers": [
+          "fica muito animada e repete o nome"
+        ],
+        "options": [
+          "fica muito animada e repete o nome",
+          "recusa a pauta",
+          "pede mais prazo"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a frase em que Ms. Weaver anuncia a entrevista.",
+        "hint": null,
+        "explanation": "Futuro contínuo com *will be* contraído em *you'll*.",
+        "hints": [
+          "Começa com *Tomorrow*.",
+          "Termina com *musician Emma G*."
+        ],
+        "answers": [
+          "Tomorrow, you'll be interviewing musician Emma G"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Anna apresenta Emma G no programa?",
+        "hint": null,
+        "explanation": "*a wonderful songwriter and an amazing singer*.",
+        "hints": [
+          "São dois elogios seguidos.",
+          "Um é sobre compor, outro sobre cantar."
+        ],
+        "answers": [
+          "como compositora maravilhosa e cantora incrível"
+        ],
+        "options": [
+          "como compositora maravilhosa e cantora incrível",
+          "como uma estreante",
+          "como sua professora"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Sua semana que vem, em andamento",
+        "instructions": "Write 7 to 10 sentences in English about your next week. Use will be + -ing at least three times and going to be + -ing at least once. Contrast one continuous action with one single future action.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "will be + -ing",
+            "terms": [
+              "will be",
+              "'ll be"
+            ]
+          },
+          {
+            "label": "going to be + -ing",
+            "terms": [
+              "going to be"
+            ]
+          },
+          {
+            "label": "contraste com futuro simples",
+            "terms": [
+              "will "
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "perguntar se a ação já está em curso"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 29: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o review oficial 21-25 da VOA.",
+    "number": 24,
+    "slug": "lesson-24",
+    "position": 4,
+    "title": "I Feel Super!",
+    "title_pt": "Eu me sinto super!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-24/4307612.html",
+    "grammar_tag": "had better e would rather",
+    "focus_points": [
+      "had better = conselho forte",
+      "would rather = preferência",
+      "'d para os dois"
+    ],
+    "story_note": null,
+    "lead": "Numa convenção de super-heróis, Anna discute preferências e leva um raio. A aula traz duas estruturas que compartilham a mesma contração **'d**: **had better** para conselho forte e **would rather** para preferência.",
+    "warmup_prompt": "Would you rather work from home or at an office? Why?",
+    "listening_focus": "Separe os *'d* que são *had* (conselho) dos que são *would* (preferência).",
+    "goals": [
+      "Dar conselho forte com **had better** + infinitivo sem *to*.",
+      "Expressar preferência com **would rather** + infinitivo sem *to*.",
+      "Perceber que os dois contraem para **'d** e desfazer a ambiguidade pelo contexto.",
+      "Comparar duas opções numa pergunta de preferência."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "had better: conselho com urgência",
+        "why": "O Prof. Bot é explícito: *It is very informal and **stronger than should and ought to***. Há uma consequência ruim implícita se o conselho for ignorado.",
+        "warning": "**Sem *to*, e sem *to be*** É *you'd better **decide***, não *you'd better to decide*. E a negativa é *had better **not***, nunca *hadn't better*.",
+        "table_head": [
+          "Forma",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "afirmativa",
+              "had better + verbo",
+              "You'**d better decide** soon. Last year, it sold out."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "negativa",
+              "had better **not** + verbo",
+              "You'**d better not be** late."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "força",
+              "mais forte que should",
+              "*should* sugere; *had better* avisa"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "tempo",
+              "sempre sobre o futuro próximo",
+              "She **had better get** help."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "would rather: preferência entre opções",
+        "why": "Também vem com infinitivo sem *to*, e a comparação entre as opções usa **than**.",
+        "warning": null,
+        "table_head": [
+          "Forma",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "preferência",
+              "would rather + verbo",
+              "I'**d rather be** born a superhero."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "comparando",
+              "would rather A **than** B",
+              "I'd rather walk **than** drive."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "pergunta",
+              "Would you rather A or B?",
+              "**Would you rather** become a superhero by accident, or be born one?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "negativa",
+              "would rather **not** + verbo",
+              "I'**d rather not** answer that."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "O 'd que serve aos dois",
+        "why": "Na fala, *had better* e *would rather* soam quase iguais no começo. O que desfaz a dúvida é a palavra seguinte.",
+        "warning": "**Como distinguir** Se vier **better**, o *'d* é *had*. Se vier **rather**, é *would*. Não há exceção.",
+        "table_head": [
+          "Contração",
+          "Expansão",
+          "Sentido"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "You'd **better** go.",
+              "You **had** better go.",
+              "conselho forte"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "I'd **rather** go.",
+              "I **would** rather go.",
+              "preferência"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "He'd **better not** come.",
+              "He **had** better not come.",
+              "aviso"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "She'd **rather not** come.",
+              "She **would** rather not come.",
+              "preferência negativa"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Well, you'**d better decide** soon. Last year, it sold out.",
+        "text_pt": "Bom, é melhor você decidir logo. No ano passado esgotou.",
+        "note": "O conselho vem com a consequência colada — é o que torna *had better* forte."
+      },
+      {
+        "position": 1,
+        "text_en": "**Would you rather** become a superhero by accident, like Spiderman, or be born a superhero, like Wonder Woman?",
+        "text_pt": "Você preferiria virar super-herói por acidente, como o Homem-Aranha, ou nascer super-herói, como a Mulher-Maravilha?",
+        "note": "A pergunta de preferência com duas opções ligadas por *or*."
+      },
+      {
+        "position": 2,
+        "text_en": "Okay. If I had to choose, I'**d rather be** born a superhero.",
+        "text_pt": "Tá. Se eu tivesse que escolher, eu preferiria nascer super-herói.",
+        "note": "*If I had to choose* é a abertura natural para responder."
+      },
+      {
+        "position": 3,
+        "text_en": "I'**d rather become** a superhero by an unexpected accident!",
+        "text_pt": "Eu preferiria virar super-herói por um acidente inesperado!",
+        "note": "Mesma estrutura, outra escolha — bom par para comparar."
+      },
+      {
+        "position": 4,
+        "text_en": "I'm better than okay. I **feel super**!",
+        "text_pt": "Estou melhor que bem. Me sinto super!",
+        "note": "*feel* + adjetivo, e o trocadilho que dá título à aula."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "superhero",
+        "ipa": "/ˈsuːpərhɪroʊ/",
+        "translation_pt": "super-herói",
+        "example_en": "I see you like superhero culture."
+      },
+      {
+        "position": 1,
+        "term": "convention",
+        "ipa": "/kənˈvenʃən/",
+        "translation_pt": "convenção, encontro",
+        "example_en": "the big superhero convention"
+      },
+      {
+        "position": 2,
+        "term": "sell out",
+        "ipa": "/sel aʊt/",
+        "translation_pt": "esgotar",
+        "example_en": "Last year, it sold out."
+      },
+      {
+        "position": 3,
+        "term": "by accident",
+        "ipa": "/baɪ ˈæksɪdənt/",
+        "translation_pt": "por acidente",
+        "example_en": "become a superhero by accident"
+      },
+      {
+        "position": 4,
+        "term": "be born",
+        "ipa": "/bi bɔːrn/",
+        "translation_pt": "nascer",
+        "example_en": "or be born a superhero"
+      },
+      {
+        "position": 5,
+        "term": "unexpected",
+        "ipa": "/ˌʌnɪkˈspektɪd/",
+        "translation_pt": "inesperado",
+        "example_en": "by an unexpected accident"
+      },
+      {
+        "position": 6,
+        "term": "take your time",
+        "ipa": "/teɪk jər taɪm/",
+        "translation_pt": "sem pressa",
+        "example_en": "Take your time. It's a big question."
+      },
+      {
+        "position": 7,
+        "term": "if I had to choose",
+        "ipa": "/ɪf aɪ hæd tə tʃuːz/",
+        "translation_pt": "se eu tivesse que escolher",
+        "example_en": "If I had to choose, I'd rather…"
+      },
+      {
+        "position": 8,
+        "term": "lightning",
+        "ipa": "/ˈlaɪtnɪŋ/",
+        "translation_pt": "raio",
+        "example_en": "Anna was just hit by lightning."
+      },
+      {
+        "position": 9,
+        "term": "get help",
+        "ipa": "/ɡet help/",
+        "translation_pt": "procurar ajuda",
+        "example_en": "She had better get help."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "you'd better → /jəd ˈbetər/",
+        "explanation": "Na fala rápida vira quase \"you better\" — o *'d* some. Reconhecer isso é essencial no listening."
+      },
+      {
+        "position": 1,
+        "label": "rather /ˈræðər/",
+        "explanation": "No inglês americano a vogal é /æ/, como em *cat*, e o *th* é **sonoro**."
+      },
+      {
+        "position": 2,
+        "label": "lightning /ˈlaɪtnɪŋ/",
+        "explanation": "Duas sílabas, sem vogal entre o *t* e o *n*. Não confunda com *lightening* (clareando), que tem três."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 24 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/03/23/f1f4841a-c2cb-4ee3-9cbe-2a132ffb5c8e_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 288,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 12,
+            "end_seconds": 34,
+            "speaker": "Anna",
+            "text_en": "In fact, tonight I'm going to the big superhero convention. Are you going?",
+            "text_pt": "Aliás, hoje à noite eu vou à grande convenção de super-heróis. Você vai?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 38,
+            "end_seconds": 58,
+            "speaker": "Anna",
+            "text_en": "Well, you'd better decide soon. Last year, it sold out.",
+            "text_pt": "Bom, é melhor você decidir logo. No ano passado esgotou."
+          },
+          {
+            "position": 2,
+            "start_seconds": 62,
+            "end_seconds": 92,
+            "speaker": "Anna",
+            "text_en": "Would you rather become a superhero by accident, like Spiderman, or be born a superhero?",
+            "text_pt": "Você preferiria virar super-herói por acidente, como o Homem-Aranha, ou nascer super-herói?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 110,
+            "end_seconds": 132,
+            "speaker": "Young man",
+            "text_en": "Okay. If I had to choose, I'd rather be born a superhero.",
+            "text_pt": "Tá. Se eu tivesse que escolher, eu preferiria nascer super-herói."
+          },
+          {
+            "position": 4,
+            "start_seconds": 136,
+            "end_seconds": 158,
+            "speaker": "Anna",
+            "text_en": "I'd rather become a superhero by an unexpected accident!",
+            "text_pt": "Eu preferiria virar super-herói por um acidente inesperado!"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Conselho forte: You'd ____ decide soon — last year it sold out.",
+        "hint": null,
+        "explanation": "*had better* avisa de uma consequência ruim se o conselho for ignorado.",
+        "hints": [
+          "O *'d* aqui é *had*.",
+          "Vem com uma consequência colada."
+        ],
+        "answers": [
+          "better"
+        ],
+        "options": [
+          "better",
+          "rather",
+          "prefer"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Preferência: If I had to choose, I'd ____ be born a superhero.",
+        "hint": null,
+        "explanation": "*would rather* expressa preferência entre opções.",
+        "hints": [
+          "O *'d* aqui é *would*.",
+          "Há uma escolha entre duas opções."
+        ],
+        "answers": [
+          "rather"
+        ],
+        "options": [
+          "rather",
+          "better",
+          "prefer to"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Negativa de conselho: You'd better `____` be late. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "A negativa é *had better **not***, nunca *hadn't better*.",
+        "hints": [
+          "Entra logo depois de *better*.",
+          "Três letras."
+        ],
+        "answers": [
+          "not"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "You'd better leave now.",
+          "I'd rather stay home.",
+          "He'd better not forget.",
+          "She'd rather not answer."
+        ],
+        "classification_categories": [
+          "had",
+          "would"
+        ],
+        "prompt": "O 'd de cada frase é *had* ou *would*?",
+        "hint": null,
+        "explanation": "Se vier *better*, o 'd é *had*. Se vier *rather*, é *would*. Sem exceção.",
+        "hints": [
+          "Olhe a palavra logo depois do 'd.",
+          "*better* e *rather* decidem."
+        ],
+        "answers": [
+          "{\"You'd better leave now.\": \"had\", \"I'd rather stay home.\": \"would\", \"He'd better not forget.\": \"had\", \"She'd rather not answer.\": \"would\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Aonde Anna vai naquela noite?",
+        "hint": null,
+        "explanation": "*tonight I'm going to the big superhero convention*.",
+        "hints": [
+          "Ela convida o rapaz.",
+          "Esgotou no ano anterior."
+        ],
+        "answers": [
+          "à convenção de super-heróis"
+        ],
+        "options": [
+          "à convenção de super-heróis",
+          "a um show de rock",
+          "ao cinema"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é a preferência do rapaz?",
+        "hint": null,
+        "explanation": "*If I had to choose, I'd rather be born a superhero.*",
+        "hints": [
+          "Ele escolhe a segunda opção.",
+          "O oposto do que Anna prefere."
+        ],
+        "answers": [
+          "nascer super-herói"
+        ],
+        "options": [
+          "nascer super-herói",
+          "virar super-herói por acidente",
+          "não ser super-herói"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o conselho de Anna sobre decidir.",
+        "hint": null,
+        "explanation": "*had better* contraído, seguido de infinitivo sem *to*.",
+        "hints": [
+          "Contém *you'd better*.",
+          "Termina com *soon*."
+        ],
+        "answers": [
+          "Well, you'd better decide soon",
+          "You'd better decide soon"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que acontece com Anna no fim da cena?",
+        "hint": null,
+        "explanation": "*Anna was just hit by lightning* — e diz que se sente super.",
+        "hints": [
+          "É o que dá título à aula.",
+          "Envolve uma tempestade."
+        ],
+        "answers": [
+          "ela é atingida por um raio"
+        ],
+        "options": [
+          "ela é atingida por um raio",
+          "ela ganha um ingresso",
+          "ela perde a convenção"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Conselho e preferência",
+        "instructions": "Write 7 to 10 sentences in English giving someone strong advice about a decision and explaining what you would prefer. Use had better at least twice (one of them negative) and would rather at least twice, including one comparison with than.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "had better, inclusive negativo",
+            "terms": [
+              "had better",
+              "'d better",
+              "better not"
+            ]
+          },
+          {
+            "label": "would rather",
+            "terms": [
+              "would rather",
+              "'d rather"
+            ]
+          },
+          {
+            "label": "comparação",
+            "terms": [
+              "than"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "expandir a contração antes de traduzir"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 29: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o review oficial 21-25 da VOA.",
+    "number": 25,
+    "slug": "lesson-25",
+    "position": 5,
+    "title": "Only Human",
+    "title_pt": "Apenas humana",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-25/4322773.html",
+    "grammar_tag": "Past perfect continuous",
+    "focus_points": [
+      "had been + -ing",
+      "duração até um ponto do passado",
+      "for e when"
+    ],
+    "story_note": "Fecha a unidade 21–25",
+    "lead": "Lightning Bolt Lady tenta descobrir seus superpoderes. A aula traz o **past perfect continuous**: uma ação que começou no passado e **continuou** até outro momento ou outra ação também no passado.",
+    "warmup_prompt": "What had you been doing before you started your current job?",
+    "listening_focus": "Marque cada *had been + -ing* e identifique o segundo evento que interrompe a ação.",
+    "goals": [
+      "Formar o past perfect continuous com **had been + -ing**.",
+      "Marcar a duração com **for** e o ponto de corte com **when**.",
+      "Distinguir do past continuous simples: duas camadas de passado, não uma.",
+      "Narrar uma sequência de tentativas e descobertas."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "A estrutura e para que serve",
+        "why": "O locutor define: mostra que *an action started in the past and continued to another time or action in the past*. São **duas** marcas de passado.",
+        "warning": "**Invariável** É sempre *had been*, para qualquer sujeito. Não existe *has been* aqui — isso seria present perfect continuous.",
+        "table_head": [
+          "Peça",
+          "Exemplo",
+          "Função"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "had been",
+              "She **had been** walking",
+              "marca o passado anterior"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "verbo + -ing",
+              "had been **walking**",
+              "marca a duração"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "for + tempo",
+              "**for about 15 minutes**",
+              "quanto tempo durou"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "when + evento",
+              "**when** she had a great idea",
+              "o que interrompeu"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Comparando com os vizinhos",
+        "why": "Três tempos parecidos, três recortes diferentes. A tabela separa os três.",
+        "warning": null,
+        "table_head": [
+          "Tempo",
+          "Exemplo",
+          "Recorte"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "past continuous",
+              "She **was walking** when I called.",
+              "ação em curso num ponto do passado"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "past perfect",
+              "She **had walked** home before I called.",
+              "ação concluída antes de outra"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "past perfect continuous",
+              "She **had been walking** for 15 minutes when I called.",
+              "duração até outra ação"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "present perfect continuous",
+              "She **has been walking** for 15 minutes.",
+              "duração até **agora** (aula 11)"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "for, since e when",
+        "why": "As três palavras que costumam acompanhar — cada uma responde a uma pergunta diferente.",
+        "warning": "**for × since** *for* mede a **duração** (*for 15 minutes*); *since* marca o **começo** (*since morning*).",
+        "table_head": [
+          "Palavra",
+          "Responde",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "for",
+              "quanto tempo?",
+              "She had been reading **for** two hours."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "since",
+              "desde quando?",
+              "She had been reading **since** breakfast."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "when",
+              "o que interrompeu?",
+              "…**when** the lights went out."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "before",
+              "antes de quê?",
+              "She had been reading **before** we arrived."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "She **had been walking** into that wall for about 15 minutes when she had a great idea.",
+        "text_pt": "Ela estava batendo naquela parede havia uns 15 minutos quando teve uma grande ideia.",
+        "note": "A frase que o locutor usa para apresentar o tempo verbal — com *for* e *when*."
+      },
+      {
+        "position": 1,
+        "text_en": "If I want to know my superpowers, I'll need to learn about lightning!",
+        "text_pt": "Se eu quiser conhecer meus superpoderes, vou precisar aprender sobre raios!",
+        "note": "Condicional real do Level 2 (aula 12) reaparecendo."
+      },
+      {
+        "position": 2,
+        "text_en": "Wow. A lightning strike usually lasts less than a second.",
+        "text_pt": "Uau. Um raio normalmente dura menos de um segundo.",
+        "note": "*last* como verbo: durar."
+      },
+      {
+        "position": 3,
+        "text_en": "Lightning is really fast and I like speed walking.",
+        "text_pt": "Raio é muito rápido e eu gosto de marcha atlética.",
+        "note": "A lógica torta que move a personagem — e um bom gancho para o humor da aula."
+      },
+      {
+        "position": 4,
+        "text_en": "So, maybe one of my superpowers is super-speed walking!",
+        "text_pt": "Então talvez um dos meus superpoderes seja andar em supervelocidade!",
+        "note": "*maybe* + afirmação: forma mais leve que *might*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "superpower",
+        "ipa": "/ˈsuːpərpaʊər/",
+        "translation_pt": "superpoder",
+        "example_en": "If I want to know my superpowers…"
+      },
+      {
+        "position": 1,
+        "term": "lightning bolt",
+        "ipa": "/ˈlaɪtnɪŋ boʊlt/",
+        "translation_pt": "raio, relâmpago",
+        "example_en": "Lightning Bolt Lady"
+      },
+      {
+        "position": 2,
+        "term": "lightning strike",
+        "ipa": "/ˈlaɪtnɪŋ straɪk/",
+        "translation_pt": "descarga de raio",
+        "example_en": "A lightning strike usually lasts less than a second."
+      },
+      {
+        "position": 3,
+        "term": "last",
+        "ipa": "/læst/",
+        "translation_pt": "durar",
+        "example_en": "usually lasts less than a second"
+      },
+      {
+        "position": 4,
+        "term": "wall",
+        "ipa": "/wɔːl/",
+        "translation_pt": "parede",
+        "example_en": "walking into that wall"
+      },
+      {
+        "position": 5,
+        "term": "speed walking",
+        "ipa": "/spiːd ˈwɔːkɪŋ/",
+        "translation_pt": "marcha atlética",
+        "example_en": "I like speed walking."
+      },
+      {
+        "position": 6,
+        "term": "stranger",
+        "ipa": "/ˈstreɪndʒər/",
+        "translation_pt": "estranho, desconhecido",
+        "example_en": "She tells this to a person…"
+      },
+      {
+        "position": 7,
+        "term": "announcer",
+        "ipa": "/əˈnaʊnsər/",
+        "translation_pt": "locutor",
+        "example_en": "I'm the announcer."
+      },
+      {
+        "position": 8,
+        "term": "on vacation",
+        "ipa": "/ɑːn veɪˈkeɪʃən/",
+        "translation_pt": "de férias",
+        "example_en": "Professor Bot is on vacation this week."
+      },
+      {
+        "position": 9,
+        "term": "great idea",
+        "ipa": "/ɡreɪt aɪˈdiːə/",
+        "translation_pt": "grande ideia",
+        "example_en": "when she had a great idea"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "had been → /ədbɪn/",
+        "explanation": "Na fala corrida as duas palavras colam e o *h* some: \"she-ədbin-WÓ-king\"."
+      },
+      {
+        "position": 1,
+        "label": "walked /wɔːkt/",
+        "explanation": "O *-ed* depois de som surdo vira /t/, uma consoante só. Não é \"wók-id\"."
+      },
+      {
+        "position": 2,
+        "label": "last /læst/ × lasts /læsts/",
+        "explanation": "O plural de 3ª pessoa empilha três consoantes no fim: /sts/. Treine devagar."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 25 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/03/30/a591e14e-e65c-4370-91fb-06e8f9cad590_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 285,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 18,
+            "end_seconds": 44,
+            "speaker": "Announcer",
+            "text_en": "She had been walking into that wall for about 15 minutes when she had a great idea.",
+            "text_pt": "Ela estava batendo naquela parede havia uns 15 minutos quando teve uma grande ideia."
+          },
+          {
+            "position": 1,
+            "start_seconds": 46,
+            "end_seconds": 60,
+            "speaker": "Lightning Bolt Lady",
+            "text_en": "I just had a great idea!",
+            "text_pt": "Acabei de ter uma grande ideia!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 95,
+            "end_seconds": 118,
+            "speaker": "Lightning Bolt Lady",
+            "text_en": "If I want to know my superpowers, I'll need to learn about lightning!",
+            "text_pt": "Se eu quiser conhecer meus superpoderes, vou precisar aprender sobre raios!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 130,
+            "end_seconds": 152,
+            "speaker": "Lightning Bolt Lady",
+            "text_en": "Wow. A lightning strike usually lasts less than a second.",
+            "text_pt": "Uau. Um raio normalmente dura menos de um segundo."
+          },
+          {
+            "position": 4,
+            "start_seconds": 160,
+            "end_seconds": 186,
+            "speaker": "Lightning Bolt Lady",
+            "text_en": "Lightning is really fast and I like speed walking. So, maybe one of my superpowers is super-speed walking!",
+            "text_pt": "Raio é muito rápido e eu gosto de marcha atlética. Então talvez um dos meus superpoderes seja andar em supervelocidade!"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: She ____ into that wall for 15 minutes when she had an idea.",
+        "hint": null,
+        "explanation": "Past perfect continuous: duração até outro evento no passado.",
+        "hints": [
+          "Há *for* e *when* na frase.",
+          "São duas camadas de passado."
+        ],
+        "answers": [
+          "had been walking"
+        ],
+        "options": [
+          "had been walking",
+          "has been walking",
+          "was walked"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Duração: She had been reading `____` two hours. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "*for* mede quanto tempo a ação durou.",
+        "hints": [
+          "Responde \"quanto tempo?\".",
+          "Três letras."
+        ],
+        "answers": [
+          "for"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Junte com when: She had been waiting for an hour. The bus arrived.",
+        "hint": null,
+        "explanation": "*when* introduz o evento que corta a ação em andamento.",
+        "hints": [
+          "A ação longa vem primeiro.",
+          "*when* liga as duas."
+        ],
+        "answers": [
+          "She had been waiting for an hour when the bus arrived"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "She was walking when I called.",
+          "She had been walking for an hour when I called.",
+          "She has been walking for an hour.",
+          "She had walked home before I called."
+        ],
+        "classification_categories": [
+          "past continuous",
+          "past perfect continuous",
+          "present perfect continuous",
+          "past perfect"
+        ],
+        "prompt": "Classifique cada frase pelo tempo verbal.",
+        "hint": null,
+        "explanation": "O auxiliar e a forma do verbo identificam cada tempo: *was* + -ing, *had been* + -ing, *has been* + -ing, *had* + particípio.",
+        "hints": [
+          "Olhe o auxiliar.",
+          "*had been* é passado duplo; *has been* chega até agora."
+        ],
+        "answers": [
+          "{\"She was walking when I called.\": \"past continuous\", \"She had been walking for an hour when I called.\": \"past perfect continuous\", \"She has been walking for an hour.\": \"present perfect continuous\", \"She had walked home before I called.\": \"past perfect\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Por quanto tempo ela estava batendo na parede?",
+        "hint": null,
+        "explanation": "*for about 15 minutes* marca a duração.",
+        "hints": [
+          "O locutor diz o tempo exato.",
+          "Vem depois de *for about*."
+        ],
+        "answers": [
+          "cerca de 15 minutos"
+        ],
+        "options": [
+          "cerca de 15 minutos",
+          "cerca de uma hora",
+          "o dia inteiro"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Por que o Professor Bot não aparece nesta aula?",
+        "hint": null,
+        "explanation": "*Professor Bot is on vacation this week* — quem explica é o locutor.",
+        "hints": [
+          "O locutor avisa logo no começo.",
+          "Ele volta na próxima."
+        ],
+        "answers": [
+          "está de férias"
+        ],
+        "options": [
+          "está de férias",
+          "está doente",
+          "foi substituído de vez"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a frase que o locutor usa para apresentar o tempo verbal.",
+        "hint": null,
+        "explanation": "Past perfect continuous com *for* e *when* na mesma frase.",
+        "hints": [
+          "Começa com *She had been walking*.",
+          "Termina com *a great idea*."
+        ],
+        "answers": [
+          "She had been walking into that wall for about 15 minutes when she had a great idea"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual superpoder ela conclui que pode ter?",
+        "hint": null,
+        "explanation": "Ela parte da rapidez do raio e do gosto por marcha atlética.",
+        "hints": [
+          "A conclusão é cômica.",
+          "Combina raio com caminhada."
+        ],
+        "answers": [
+          "andar em supervelocidade"
+        ],
+        "options": [
+          "andar em supervelocidade",
+          "voar",
+          "ficar invisível"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O que você vinha fazendo",
+        "instructions": "Write 7 to 10 sentences in English about a period before an important change in your life. Use had been + -ing at least three times, one for to show duration, and one when to mark what interrupted it.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "past perfect continuous",
+            "terms": [
+              "had been"
+            ]
+          },
+          {
+            "label": "duração",
+            "terms": [
+              "for "
+            ]
+          },
+          {
+            "label": "o que interrompeu",
+            "terms": [
+              "when"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "desenhar a linha do tempo antes de escrever"
   }
 ]

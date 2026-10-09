@@ -273,14 +273,10 @@ async def test_due_e_items_filtram_curso_unidade_e_expoem_identidade(
     await client.post("/api/review/lessons/41", headers=headers)
 
     first = (
-        await client.get(
-            "/api/review/due?course=voa-level-1&unit=31-40", headers=headers
-        )
+        await client.get("/api/review/due?course=voa-level-1&unit=31-40", headers=headers)
     ).json()
     second = (
-        await client.get(
-            "/api/review/due?course=voa-level-1&unit=40-44", headers=headers
-        )
+        await client.get("/api/review/due?course=voa-level-1&unit=40-44", headers=headers)
     ).json()
     assert first and second
     for unit_slug, lesson_number, items in (
@@ -289,16 +285,12 @@ async def test_due_e_items_filtram_curso_unidade_e_expoem_identidade(
     ):
         assert {item["lesson_number"] for item in items} == {lesson_number}
         assert all(item["course_slug"] == "voa-level-1" for item in items)
-        assert all(
-            item["course_title"] == "Let's Learn English — Level 1" for item in items
-        )
+        assert all(item["course_title"] == "Let's Learn English — Level 1" for item in items)
         assert all(item["unit_slug"] == unit_slug for item in items)
         assert all(item["lesson_title"] for item in items)
 
     assert (
-        await client.get(
-            "/api/review/due?course=voa-level-2&unit=31-40", headers=headers
-        )
+        await client.get("/api/review/due?course=voa-level-2&unit=31-40", headers=headers)
     ).json() == []
 
     for item in (first[0], second[0]):

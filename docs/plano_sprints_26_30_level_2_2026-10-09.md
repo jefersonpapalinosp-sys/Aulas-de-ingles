@@ -381,22 +381,45 @@ afirmar o comportamento novo, que é o correto.
 
 ## 7. Sprint 29 — Level 2, Aulas 21–25
 
-**Estado:** planejada.
+**Estado:** publicada em 9 de outubro de 2026. Resta a conferência auditiva dos 25
+timestamps, que depende de escuta humana.
 
 **Objetivo:** publicar o quinto bloco do Level 2 e o último checkpoint explicitamente listado
 pela VOA para o curso.
 
-### Catálogo oficial confirmado
+### Auditoria oficial confirmada
 
-| Aula | Título confirmado no índice | Foco linguístico |
-|---:|---|---|
-| 21 | *Trash to Treasure, Part 1* | a confirmar na auditoria da aula e do lesson plan |
-| 22 | *Trash to Treasure, Part 2* | a confirmar na auditoria da aula e do lesson plan |
-| 23 | *Rock Star* | a confirmar na auditoria da aula e do lesson plan |
-| 24 | *I Feel Super!* | a confirmar na auditoria da aula e do lesson plan |
-| 25 | *Only Human* | a confirmar na auditoria da aula e do lesson plan |
+Cada foco foi confirmado por **duas fontes independentes**: o segmento do *Professor Bot*
+dentro da própria aula e o [review oficial 21–25](https://learningenglish.voanews.com/a/lets-learn-english-level-2-review-of-lessons-21-to-25/4340525.html).
 
-O índice confirma **Review of Level 2 Lessons 21–25**.
+| Aula | Página canônica | Foco gramatical | MP3 |
+|---:|---|---|---|
+| 21 | [*Trash to Treasure, Part 1*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-21/4273059.html) | `talk` × `speak` | 4:06 |
+| 22 | [*Trash to Treasure, Part 2*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-22/4283017.html) | `tell` × `say` | 4:47 |
+| 23 | [*Rock Star*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-23/4287922.html) | futuro contínuo | 2:49 |
+| 24 | [*I Feel Super!*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-24/4307612.html) | `had better` e `would rather` | 4:48 |
+| 25 | [*Only Human*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-25/4322773.html) | past perfect continuous | 4:45 |
+
+Duas observações da auditoria:
+
+- na **Aula 25 o Professor Bot não aparece** — ele está "de férias" e quem explica a
+  gramática é o locutor. A fonte do foco é a mesma, mas quem procurar pelo marcador
+  habitual não encontra;
+- a **Aula 23 é bem mais curta** que as outras (2:49 contra ~4:45). Não é erro de
+  extração: a conversa é mesmo mais breve, e os cues foram distribuídos nesse intervalo.
+
+O review 21–25 **não tem MP3 contínuo**, só clipes por aula. O checkpoint usa a mídia da
+Aula 24, por `listening_lesson_number`.
+
+### Implementação registrada
+
+- [x] auditar as cinco páginas canônicas, o review 21–25, os MP3s, durações e licença;
+- [x] manter as mídias como `network_only`, com crédito e fallback textual;
+- [x] publicar as cinco aulas, com conteúdo e exercícios autorais;
+- [x] publicar o checkpoint autoral 21–25 com listening da Aula 24;
+- [x] manter independentes as Aulas 21 e 22, ainda que formem narrativa em partes;
+- [x] preparar a transição para 26–30 sem apresentar review inexistente;
+- [ ] **pendente:** conferir por escuta humana os 25 timestamps conservadores.
 
 ### Escopo
 

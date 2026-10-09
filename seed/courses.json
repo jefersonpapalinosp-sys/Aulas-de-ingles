@@ -1000,10 +1000,136 @@
         "slug": "21-25",
         "title": "Aulas 21–25",
         "position": 5,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 21,
         "lesson_end": 25,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-21-25",
+          "title": "Checkpoint 21–25",
+          "position": 6,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Level 2 Lessons 21–25",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-review-of-lessons-21-to-25/4340525.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O banco de questões da VOA, imagens, marcas e outras mídias de terceiros não foram incorporados.",
+          "intro": "Consolide as Aulas 21–25 com o par talk e speak, o par tell e say, o futuro contínuo, had better e would rather, e o past perfect continuous. A escuta da Aula 24 verifica conselho e preferência numa conversa sobre super-heróis.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 25,
+          "listening_lesson_number": 24,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Conversa informal entre duas pessoas. Complete: I was ____ to Pete about the party.",
+              "options": [
+                "talking",
+                "speaking",
+                "telling"
+              ],
+              "accepted_answers": [
+                "talking"
+              ],
+              "explanation": "talk é o verbo da conversa entre pessoas em situação informal; speak soa mais formal.",
+              "lesson_numbers": [
+                21
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Com objeto indireto logo depois. Qual frase está correta?",
+              "options": [
+                "She told me the truth.",
+                "She said me the truth.",
+                "She spoke me the truth."
+              ],
+              "accepted_answers": [
+                "She told me the truth."
+              ],
+              "explanation": "tell é quase sempre seguido de objeto indireto; say exige a preposição to antes da pessoa.",
+              "lesson_numbers": [
+                22
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Futuro contínuo. Complete: Tomorrow, you'll ____ musician Emma G.",
+              "options": [
+                "be interviewing",
+                "interviewing",
+                "be interview"
+              ],
+              "accepted_answers": [
+                "be interviewing"
+              ],
+              "explanation": "O futuro contínuo é will be mais a forma -ing do verbo.",
+              "lesson_numbers": [
+                23
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Conselho forte com consequência. Complete: You'd ____ decide soon, last year it sold out.",
+              "options": [
+                "better",
+                "rather",
+                "prefer"
+              ],
+              "accepted_answers": [
+                "better"
+              ],
+              "explanation": "had better dá conselho mais forte que should, com uma consequência ruim implícita.",
+              "lesson_numbers": [
+                24
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Duração até outro evento no passado. Complete: She ____ for 15 minutes when she had the idea.",
+              "options": [
+                "had been walking",
+                "has been walking",
+                "was walked"
+              ],
+              "accepted_answers": [
+                "had been walking"
+              ],
+              "explanation": "O past perfect continuous usa had been mais -ing e marca a duração até outro momento passado.",
+              "lesson_numbers": [
+                25
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 24, o que o rapaz responde à pergunta de preferência?",
+              "options": [
+                "If I had to choose, I'd rather be born a superhero.",
+                "I'd better become a superhero by accident.",
+                "I would prefer not to answer."
+              ],
+              "accepted_answers": [
+                "If I had to choose, I'd rather be born a superhero."
+              ],
+              "explanation": "Ele usa would rather para a preferência, aberto por If I had to choose.",
+              "lesson_numbers": [
+                24
+              ]
+            }
+          ]
+        }
       },
       {
         "slug": "26-30",

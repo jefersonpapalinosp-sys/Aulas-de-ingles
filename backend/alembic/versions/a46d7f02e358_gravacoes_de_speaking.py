@@ -24,21 +24,35 @@ def upgrade() -> None:
         sa.Column("transcript_cue_id", sa.Integer(), nullable=False),
         sa.Column("duration_ms", sa.Integer(), nullable=False),
         sa.Column("self_rating", sa.String(length=20), nullable=True),
-        sa.Column("consented_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "consented_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.Column("status", sa.String(length=20), nullable=False),
         sa.Column("mime_type", sa.String(length=100), nullable=True),
         sa.Column("file_size", sa.Integer(), nullable=True),
         sa.Column("storage_key", sa.String(length=80), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.CheckConstraint("duration_ms > 0", name="ck_speaking_duration_positive"),
         sa.CheckConstraint("duration_ms <= 30000", name="ck_speaking_duration_limit"),
-        sa.CheckConstraint("file_size IS NULL OR file_size > 0", name="ck_speaking_file_size_positive"),
+        sa.CheckConstraint(
+            "file_size IS NULL OR file_size > 0", name="ck_speaking_file_size_positive"
+        ),
         sa.ForeignKeyConstraint(["transcript_cue_id"], ["transcript_cue.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["app_user.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("storage_key"),
     )
-    op.create_index(op.f("ix_speaking_attempt_transcript_cue_id"), "speaking_attempt", ["transcript_cue_id"])
+    op.create_index(
+        op.f("ix_speaking_attempt_transcript_cue_id"), "speaking_attempt", ["transcript_cue_id"]
+    )
     op.create_index(op.f("ix_speaking_attempt_user_id"), "speaking_attempt", ["user_id"])
 
 
