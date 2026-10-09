@@ -1471,8 +1471,11 @@ test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
 
   await page.goto(unitPath('6-10', LEVEL_2_SLUG))
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 6–10' })).toBeVisible()
-  await expect(page.locator('.course-unit-lessons a[href*="/aulas/"]')).toHaveCount(5)
-  await expect(page.getByRole('link', { name: /The Best Barbecue/ })).toHaveAttribute(
+  const lessons610 = page.locator('.course-unit-lessons')
+  await expect(lessons610.locator('a[href*="/aulas/"]')).toHaveCount(5)
+  // Escopado à lista da unidade: a trilha lateral também linka a mesma aula,
+  // e sem escopo o locator casa com dois elementos.
+  await expect(lessons610.getByRole('link', { name: /The Best Barbecue/ })).toHaveAttribute(
     'href',
     lessonPath(8, LEVEL_2_SLUG),
   )
