@@ -285,6 +285,117 @@ describe('ExerciseCard', () => {
     })
   })
 
+  it('classifica todos os itens com selects nativos e envia JSON determinístico', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() } as never)
+    montar({
+      exercicio: {
+        ...exercicio,
+        activity_type: 'classification',
+        options: null,
+        classification_items: ['carefully', 'careful'],
+        classification_categories: ['adjective', 'adverb'],
+      },
+    })
+
+    const verify = screen.getByRole('button', { name: 'Verificar' })
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(verify).toBeDisabled()
+
+    await user.selectOptions(screen.getByLabelText('carefully'), 'adverb')
+    expect(verify).toBeDisabled()
+    await user.selectOptions(screen.getByLabelText('careful'), 'adjective')
+    expect(verify).toBeEnabled()
+    await user.click(verify)
+
+    await waitFor(() => expect(api.POST).toHaveBeenCalled())
+    expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
+      params: { path: { exercise_id: 1 } },
+      body: {
+        answer: '{"careful":"adjective","carefully":"adverb"}',
+        idempotency_key: expect.any(String),
+      },
+    })
+  })
+
+  it('devolve o foco ao primeiro seletor ao tentar a classificação novamente', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() } as never)
+    montar({
+      exercicio: {
+        ...exercicio,
+        activity_type: 'classification',
+        options: null,
+        classification_items: ['careful', 'carefully'],
+        classification_categories: ['adjective', 'adverb'],
+      },
+    })
+
+    await user.selectOptions(screen.getByLabelText('careful'), 'adverb')
+    await user.selectOptions(screen.getByLabelText('carefully'), 'adjective')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+    await user.click(await screen.findByRole('button', { name: 'Tentar novamente' }))
+
+    expect(screen.getByLabelText('careful')).toHaveFocus()
+  })
+
+  it('apresenta o gabarito de classificação como pares legíveis', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.GET).mockResolvedValue({
+      data: {
+        answers: ['{"careful":"adjective","carefully":"adverb"}'],
+        explanation: 'Adjetivos descrevem nomes; advérbios modificam ações.',
+      },
+      response: new Response(),
+    } as never)
+    montar({
+      exercicio: {
+        ...exercicio,
+        activity_type: 'classification',
+        options: null,
+        classification_items: ['careful', 'carefully'],
+        classification_categories: ['adjective', 'adverb'],
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Resposta' }))
+
+    const answer = await screen.findByLabelText('Gabarito 1')
+    expect(answer).toHaveTextContent('carefuladjective')
+    expect(answer).toHaveTextContent('carefullyadverb')
+    expect(screen.queryByText(/\{"careful"/)).not.toBeInTheDocument()
+  })
+
+  it('preserva a classificação estruturada na fila offline', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    montar({
+      practiceSessionId: 44,
+      courseSlug: 'voa-level-2',
+      lessonNumber: 6,
+      exercicio: {
+        ...exercicio,
+        activity_type: 'classification',
+        options: null,
+        classification_items: ['carefully', 'careful'],
+        classification_categories: ['adjective', 'adverb'],
+      },
+    })
+
+    await user.selectOptions(screen.getByLabelText('carefully'), 'adverb')
+    await user.selectOptions(screen.getByLabelText('careful'), 'adjective')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+
+    expect(await screen.findByText('Na fila')).toBeInTheDocument()
+    expect(listQueuedAttempts(7)).toEqual([
+      expect.objectContaining({
+        answer: '{"careful":"adjective","carefully":"adverb"}',
+        courseSlug: 'voa-level-2',
+        lessonNumber: 6,
+      }),
+    ])
+  })
+
   it('usa endpoints da sessão e informa quando a resposta foi revelada', async () => {
     const user = userEvent.setup()
     vi.mocked(api.POST).mockResolvedValue({

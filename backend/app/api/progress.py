@@ -28,7 +28,11 @@ from app.db.models import (
     VocabItem,
 )
 from app.db.session import get_session
-from app.domain.answers import analisar_resposta, normalizar
+from app.domain.answers import (
+    analisar_resposta,
+    normalizar,
+    validar_e_canonicalizar_classificacao,
+)
 from app.schemas.progress import (
     STUDY_STEPS,
     AttemptFeedbackOut,
@@ -377,6 +381,19 @@ async def tentar(
     """
     response.headers["Cache-Control"] = "private, no-store"
     exercicio = await _exercicio_por_id(session, exercise_id)
+    answer = corpo.answer
+    if exercicio.activity_type == "classification":
+        try:
+            answer = validar_e_canonicalizar_classificacao(
+                answer,
+                exercicio.classification_items or [],
+                exercicio.classification_categories or [],
+            )
+        except ValueError as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=str(error),
+            ) from error
     key = str(corpo.idempotency_key)
     practice: PracticeSession | None = None
     practice_item: PracticeSessionItem | None = None
@@ -404,7 +421,7 @@ async def tentar(
         requested_item_id = practice_item.id if practice_item is not None else None
         if (
             existente.exercise_id != exercicio.id
-            or existente.answer != corpo.answer[:200]
+            or existente.answer != answer
             or existente.practice_session_item_id != requested_item_id
         ):
             raise HTTPException(
@@ -422,7 +439,7 @@ async def tentar(
     if practice is not None:
         ensure_session_mutable(practice)
 
-    feedback = analisar_resposta(corpo.answer, [a.value for a in exercicio.answers])
+    feedback = analisar_resposta(answer, [a.value for a in exercicio.answers])
     certo = feedback.category == "correct"
 
     attempt_id = (
@@ -433,7 +450,7 @@ async def tentar(
                 exercise_id=exercicio.id,
                 practice_session_item_id=(practice_item.id if practice_item is not None else None),
                 idempotency_key=key,
-                answer=corpo.answer[:200],
+                answer=answer,
                 correct=certo,
             )
             .on_conflict_do_nothing(index_elements=["user_id", "idempotency_key"])
@@ -462,7 +479,7 @@ async def tentar(
         requested_item_id = practice_item.id if practice_item is not None else None
         if (
             existente.exercise_id != exercicio.id
-            or existente.answer != corpo.answer[:200]
+            or existente.answer != answer
             or existente.practice_session_item_id != requested_item_id
         ):
             raise HTTPException(
@@ -508,7 +525,7 @@ async def tentar(
                 source_key=f"exercise:{exercicio.id}",
                 skill=exercicio.skill,
                 prompt=exercicio.prompt,
-                prompt_note=f"Sua última resposta: {corpo.answer[:120]}",
+                prompt_note=f"Sua última resposta: {answer[:120]}",
                 answer=" / ".join(answer.value for answer in exercicio.answers),
                 context=exercicio.explanation,
                 origin_reason="Este exercício voltou porque houve uma resposta incorreta.",

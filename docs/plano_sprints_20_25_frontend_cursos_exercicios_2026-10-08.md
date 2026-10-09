@@ -3,7 +3,7 @@
 - Data da análise: 8 de outubro de 2026
 - Atualizado em: 9 de outubro de 2026
 - Estado: Sprints 20–25 implementadas no piloto automatizado; validação manual ampla permanece pendente
-- Próxima prioridade: auditar o próximo bloco do Level 2 antes de publicar as Aulas 6–10
+- Continuidade: Sprints 26–27 implementadas; Sprints 28–30 registradas no roadmap seguinte
 
 ## 1. Objetivo
 
@@ -959,11 +959,16 @@ O ciclo 20–25 foi concluído com:
 - testes automatizados e validações manuais de acessibilidade documentados;
 - orçamento de performance, licença de mídia e privacidade preservados.
 
-## 19. Próxima ação recomendada
+## 19. Continuidade após o ciclo
 
-Auditar as fontes, lesson plans, mídias, licenças e objetivos das Aulas 6–10 do Level 2 antes de
-ampliar o seed. As unidades 6–30 continuam em preparação, sem páginas vazias nem conteúdo
-fictício. Cada novo bloco deve preservar o isolamento por curso e só pode ser publicado depois de
-conteúdo autoral, atribuição e sincronização de áudio serem validados. Quando o projeto chegar à
+A Sprint 26 auditou e publicou as Aulas 6–10 do Level 2 e o exercício reutilizável de
+classificação. A Sprint 27 avançou até as Aulas 11–15 e publicou o terceiro checkpoint do curso.
+A conferência humana dos novos timestamps de áudio e a execução visual dos cenários browser
+continuam registradas como QA pendente.
+
+A próxima implementação recomendada é a Sprint 28, condicionada à auditoria das fontes, lesson
+plans, mídias, licenças e objetivos das Aulas 16–20. As unidades 16–30 continuam em preparação,
+sem páginas vazias nem conteúdo fictício. O escopo e a ordem das próximas entregas estão no
+[Plano das Sprints 26–30](plano_sprints_26_30_level_2_2026-10-09.md). Quando o projeto chegar à
 unidade 26–30, qualquer fechamento criado localmente precisa ser identificado como autoral, pois
 não existe review oficial desse bloco na listagem principal da VOA.

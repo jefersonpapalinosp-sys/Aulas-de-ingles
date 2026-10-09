@@ -11,7 +11,7 @@ def test_seed_pelo_cli(capsys: pytest.CaptureFixture[str]) -> None:
     """Síncrono de propósito: o cli chama asyncio.run(), que não pode rodar
     dentro de um loop já em andamento."""
     cli.main_com_argumentos(["seed"])
-    assert "27 aulas" in capsys.readouterr().out
+    assert "37 aulas" in capsys.readouterr().out
 
 
 def test_comando_desconhecido_sai_com_erro(capsys: pytest.CaptureFixture[str]) -> None:
@@ -21,9 +21,7 @@ def test_comando_desconhecido_sai_com_erro(capsys: pytest.CaptureFixture[str]) -
     assert "uso:" in capsys.readouterr().err
 
 
-def test_gate_assistido_falha_fechado(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_gate_assistido_falha_fechado(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     review = tmp_path / "review.json"
     review.write_text("{}", encoding="utf-8")
 

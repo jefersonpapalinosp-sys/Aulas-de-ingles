@@ -87,8 +87,8 @@
             "AttemptIn": {
                 "properties": {
                     "answer": {
-                        "description": "O que o usuário digitou.",
-                        "maxLength": 200,
+                        "description": "Resposta textual ou JSON de classificação.",
+                        "maxLength": 2000,
                         "title": "Answer",
                         "type": "string"
                     },
@@ -1287,6 +1287,34 @@
                         "title": "Activity Type",
                         "type": "string"
                     },
+                    "classification_categories": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Classification Categories"
+                    },
+                    "classification_items": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Classification Items"
+                    },
                     "explanation": {
                         "anyOf": [
                             {
@@ -1375,6 +1403,34 @@
                     "activity_type": {
                         "title": "Activity Type",
                         "type": "string"
+                    },
+                    "classification_categories": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Classification Categories"
+                    },
+                    "classification_items": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Classification Items"
                     },
                     "course_slug": {
                         "title": "Course Slug",
@@ -2791,7 +2847,8 @@
                                     "multiple_choice",
                                     "transformation",
                                     "reorder",
-                                    "dictation"
+                                    "dictation",
+                                    "classification"
                                 ],
                                 "type": "string"
                             },
@@ -5087,7 +5144,8 @@
                                         "multiple_choice",
                                         "transformation",
                                         "reorder",
-                                        "dictation"
+                                        "dictation",
+                                        "classification"
                                     ],
                                     "type": "string"
                                 },

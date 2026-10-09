@@ -43,6 +43,8 @@ def exercise_fingerprint(exercises: list[Exercise]) -> str:
             "skill": exercise.skill,
             "objective": exercise.objective,
             "options": exercise.options,
+            "classification_items": exercise.classification_items,
+            "classification_categories": exercise.classification_categories,
             "prompt": exercise.prompt,
             "hint": exercise.hint,
             "explanation": exercise.explanation,

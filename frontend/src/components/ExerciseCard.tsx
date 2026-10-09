@@ -16,6 +16,26 @@ type Veredito =
   | { tipo: 'fila' }
   | { tipo: 'falhou'; mensagem: string }
 
+function classificationAnswer(items: string[], assignments: Record<string, string>): string {
+  if (items.some((item) => !assignments[item])) return ''
+  return JSON.stringify(
+    Object.fromEntries([...items].sort().map((item) => [item, assignments[item]])),
+  )
+}
+
+function classificationEntries(answer: string): Array<[string, string]> | null {
+  try {
+    const value: unknown = JSON.parse(answer)
+    if (!value || Array.isArray(value) || typeof value !== 'object') return null
+    const entries = Object.entries(value)
+    return entries.every((entry) => typeof entry[1] === 'string')
+      ? (entries as Array<[string, string]>)
+      : null
+  } catch {
+    return null
+  }
+}
+
 function initialVerdict(item: PracticeSessionItem | undefined, queued: boolean): Veredito {
   if (queued) return { tipo: 'fila' }
   if (!item) return { tipo: 'nada' }
@@ -37,7 +57,7 @@ function initialVerdict(item: PracticeSessionItem | undefined, queued: boolean):
 
 /**
  * Motor único das atividades objetivas: lacuna, escolha, transformação,
- * ordenação por botões e ditado textual.
+ * ordenação por botões, classificação por selects e ditado textual.
  *
  * A correção é do servidor: a resposta certa não faz parte do contrato de
  * leitura, então mandá-la ao navegador para o JavaScript comparar seria
@@ -80,9 +100,11 @@ export function ExerciseCard({
     (initialSessionItem?.attempt_count ?? 0) > 0 && !initialSessionItem?.first_try_correct,
   )
   const [ordem, setOrdem] = useState<string[]>([])
+  const [classificacoes, setClassificacoes] = useState<Record<string, string>>({})
   const inputRef = useRef<HTMLInputElement>(null)
   const firstChoiceRef = useRef<HTMLInputElement>(null)
   const firstReorderRef = useRef<HTMLButtonElement>(null)
+  const firstClassificationRef = useRef<HTMLSelectElement>(null)
   const qc = useQueryClient()
 
   function saveForLater(answer: string, key: string) {
@@ -257,18 +279,32 @@ export function ExerciseCard({
     'transformation',
     'reorder',
     'dictation',
+    'classification',
   ])
+  const classificationItems = exercicio.classification_items ?? []
+  const classificationCategories = exercicio.classification_categories ?? []
+  const classificationReady =
+    exercicio.activity_type !== 'classification' ||
+    (classificationItems.length > 0 && classificationCategories.length >= 2)
+  const supported = supportedTypes.has(exercicio.activity_type) && classificationReady
 
   function tentarNovamente() {
     setVeredito({ tipo: 'nada' })
     if (exercicio.activity_type === 'multiple_choice') firstChoiceRef.current?.focus()
     else if (exercicio.activity_type === 'reorder') firstReorderRef.current?.focus()
+    else if (exercicio.activity_type === 'classification') firstClassificationRef.current?.focus()
     else inputRef.current?.focus()
   }
 
   function atualizarOrdem(next: string[]) {
     setOrdem(next)
     setTexto(next.join(' '))
+  }
+
+  function atualizarClassificacao(item: string, category: string) {
+    const next = { ...classificacoes, [item]: category }
+    setClassificacoes(next)
+    setTexto(classificationAnswer(classificationItems, next))
   }
 
   return (
@@ -281,7 +317,7 @@ export function ExerciseCard({
         </span>
       </h3>
 
-      {!supportedTypes.has(exercicio.activity_type) ? (
+      {!supported ? (
         <p className="exercise-unsupported" role="status">
           Esta atividade ainda não é compatível com esta versão do aplicativo.
         </p>
@@ -295,7 +331,35 @@ export function ExerciseCard({
             }
           }}
         >
-        {exercicio.activity_type === 'reorder' && exercicio.options ? (
+        {exercicio.activity_type === 'classification' ? (
+          <fieldset className="classification-activity">
+            <legend>Classifique cada item</legend>
+            <div className="classification-grid">
+              {classificationItems.map((item, index) => {
+                const selectId = `classification-${exercicio.id}-${index}`
+                return (
+                  <label htmlFor={selectId} key={item}>
+                    <span>{item}</span>
+                    <select
+                      id={selectId}
+                      ref={index === 0 ? firstClassificationRef : undefined}
+                      value={classificacoes[item] ?? ''}
+                      disabled={finalizado}
+                      onChange={(event) => atualizarClassificacao(item, event.target.value)}
+                    >
+                      <option value="">Selecione uma categoria</option>
+                      {classificationCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
+        ) : exercicio.activity_type === 'reorder' && exercicio.options ? (
           <fieldset className="reorder-activity">
             <legend>Monte a frase</legend>
             <div className="reorder-answer" aria-label="Frase montada">
@@ -427,7 +491,27 @@ export function ExerciseCard({
           {veredito.tipo === 'revelado' && (
             <>
               <span className="tag">Resposta</span>
-              <strong className="gabarito">{veredito.respostas.join('  ·  ')}</strong>
+              {exercicio.activity_type === 'classification' ? (
+                <div className="classification-solutions">
+                  {veredito.respostas.map((answer, answerIndex) => {
+                    const entries = classificationEntries(answer)
+                    return entries ? (
+                      <dl key={answer} aria-label={`Gabarito ${answerIndex + 1}`}>
+                        {entries.map(([item, category]) => (
+                          <div key={item}>
+                            <dt>{item}</dt>
+                            <dd>{category}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : (
+                      <strong className="gabarito" key={answer}>{answer}</strong>
+                    )
+                  })}
+                </div>
+              ) : (
+                <strong className="gabarito">{veredito.respostas.join('  ·  ')}</strong>
+              )}
               <span className="why">
                 <Markdown>{veredito.explicacao}</Markdown>
               </span>

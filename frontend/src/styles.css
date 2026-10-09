@@ -195,6 +195,18 @@ input[type='text']::placeholder { color: var(--ink-3); }
 .reorder-options { border-style: solid; background: var(--paper); }
 .reorder-answer button, .reorder-options button { padding: 5px 9px; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); color: var(--ink); font-family: var(--mono); font-size: 12px; }
 .reorder-answer button { border-color: var(--accent); color: var(--accent); }
+.classification-activity { flex: 1 1 100%; margin: 0; padding: 0; border: 0; }
+.classification-activity legend { color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; }
+.classification-grid { display: grid; gap: 8px; margin-top: 7px; }
+.classification-grid label { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(170px, 1fr); gap: 10px; align-items: center; }
+.classification-grid label > span { color: var(--ink-2); font-size: 14px; }
+.classification-grid select { min-width: 0; padding: 7px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: inherit; }
+.classification-grid select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.classification-solutions { display: grid; gap: 5px; margin: 7px 0; }
+.classification-solutions dl { margin: 0; }
+.classification-solutions dl > div { display: grid; grid-template-columns: minmax(100px, auto) 1fr; gap: 8px; }
+.classification-solutions dt { font-weight: 600; }
+.classification-solutions dd { margin: 0; color: var(--ink-2); }
 .exercise-hints { margin: 12px 0 0 32px; padding: 12px 14px 12px 34px; border-left: 2px solid var(--warn); background: var(--warn-wash); color: var(--ink-2); font-size: 13.5px; }
 .exercise-hints li + li { margin-top: 6px; }
 .exercise-hints strong { color: var(--warn); font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; }
@@ -288,7 +300,7 @@ input[type='text']::placeholder { color: var(--ink-3); }
 @media (forced-colors: active) {
   :focus-visible { outline-color: Highlight; }
   a { color: LinkText; }
-  button, .btn, .watch {
+  button, select, .btn, .watch {
     border-color: ButtonText !important;
     background: ButtonFace !important;
     color: ButtonText !important;
@@ -297,6 +309,10 @@ input[type='text']::placeholder { color: var(--ink-3); }
   .nav-item.active, .flat.active { border-left-color: Highlight; }
   .choice-options input:checked + span, .today-days input:checked + span,
   .shadowing-result fieldset button.selected { border-color: Highlight; }
+}
+
+@media (max-width: 520px) {
+  .classification-grid label { grid-template-columns: 1fr; gap: 4px; }
 }
 
 /* ---------- sessão ---------- */

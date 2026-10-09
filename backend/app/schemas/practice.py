@@ -12,7 +12,12 @@ from app.schemas.progress import AttemptFeedbackOut, ExerciseHintOut
 PracticeMode = Literal["guided", "quick", "mistakes"]
 PracticeStatus = Literal["active", "completed", "abandoned"]
 ExerciseActivityType = Literal[
-    "gap_fill", "multiple_choice", "transformation", "reorder", "dictation"
+    "gap_fill",
+    "multiple_choice",
+    "transformation",
+    "reorder",
+    "dictation",
+    "classification",
 ]
 ExerciseSkill = Literal["grammar", "listening"]
 ExerciseObjective = Literal["recognize", "apply", "correct", "produce", "listen"]

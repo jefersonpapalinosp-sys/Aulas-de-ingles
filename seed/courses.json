@@ -537,19 +537,191 @@
         "slug": "6-10",
         "title": "Aulas 6–10",
         "position": 2,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 6,
         "lesson_end": 10,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-6-10",
+          "title": "Checkpoint 6–10",
+          "position": 6,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Level 2 Lessons 6–10",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-review-lesson-6-10/4079032.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O banco de questões da VOA, imagens, marcas e outras mídias de terceiros não foram incorporados.",
+          "intro": "Consolide as Aulas 6–10 com preposições de lugar e movimento, voz passiva, modais sobre o passado, tag questions e hope/wish. A escuta da Aula 9 verifica inferência e responsabilidade ao cuidar de animais.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 10,
+          "listening_lesson_number": 9,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Complete a posição do passeio: The tour bus is now ____ the river, not beside it.",
+              "options": ["in", "through", "at"],
+              "accepted_answers": ["in"],
+              "explanation": "In localiza o veículo dentro da água; through indicaria movimento atravessando um espaço.",
+              "lesson_numbers": [6]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual recomendação usa corretamente preposição e linguagem de conselho?",
+              "options": [
+                "You should walk across the bridge and stop at the memorial.",
+                "You should walk in the bridge and stop on the memorial.",
+                "You should walking across the bridge and stop at memorial."
+              ],
+              "accepted_answers": ["You should walk across the bridge and stop at the memorial."],
+              "explanation": "Across expressa travessia, at marca o ponto de parada e should recebe o verbo na forma base.",
+              "lesson_numbers": [7]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Passe para a voz passiva: The judges keep the sauce recipe secret.",
+              "options": [
+                "The sauce recipe is kept secret by the judges.",
+                "The sauce recipe keeps secret by the judges.",
+                "The judges are kept the sauce recipe secret."
+              ],
+              "accepted_answers": ["The sauce recipe is kept secret by the judges."],
+              "explanation": "Na passiva, o objeto vira sujeito e usamos be + particípio: is kept.",
+              "lesson_numbers": [8]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "A evidência é forte. Complete: Anna won the contest, so the judges ____ liked her unusual pet.",
+              "options": ["must have", "may have", "could not have"],
+              "accepted_answers": ["must have"],
+              "explanation": "Must have expressa uma dedução forte sobre algo que aconteceu no passado.",
+              "lesson_numbers": [9]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase expressa uma esperança possível para o futuro?",
+              "options": [
+                "I hope to visit Peru next year.",
+                "I wish I visited Peru next year.",
+                "I hope I could have visited Peru yesterday."
+              ],
+              "accepted_answers": ["I hope to visit Peru next year."],
+              "explanation": "Hope apresenta uma expectativa considerada possível; wish costuma marcar desejo irreal ou contrário à situação atual.",
+              "lesson_numbers": [10]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 9, por que Ashley sugere que Anna passe algum tempo com um cachorro antes de adotar um?",
+              "options": [
+                "Porque cuidar de um animal é uma grande responsabilidade.",
+                "Porque Anna já tem muitos cachorros em casa.",
+                "Porque o concurso proíbe animais de verdade."
+              ],
+              "accepted_answers": ["Porque cuidar de um animal é uma grande responsabilidade."],
+              "explanation": "Ashley destaca a responsabilidade e oferece uma experiência prática antes de uma decisão permanente.",
+              "lesson_numbers": [6, 7, 8, 9, 10]
+            }
+          ]
+        }
       },
       {
         "slug": "11-15",
         "title": "Aulas 11–15",
         "position": 3,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 11,
         "lesson_end": 15,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-11-15",
+          "title": "Checkpoint 11–15",
+          "position": 6,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Level 2 Lessons 11–15",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-review-of-lessons-11-15/4181693.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O banco de questões da VOA, imagens, marcas e outras mídias de terceiros não foram incorporados.",
+          "intro": "Consolide as Aulas 11–15 com tempos perfeitos, condicionais, concordância com so/either e orações adverbiais de tempo, razão, contraste e condição. A escuta da Aula 14 verifica sentimentos e concordância em uma conversa sobre relacionamentos.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 15,
+          "listening_lesson_number": 14,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "A neve começou antes e continua agora. Complete: It ____ all morning.",
+              "options": ["has been snowing", "had snowed tomorrow", "snows yesterday"],
+              "accepted_answers": ["has been snowing"],
+              "explanation": "Has been snowing destaca uma atividade iniciada no passado que continua no presente.",
+              "lesson_numbers": [11]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Complete uma condição real: If the bees return, the garden ____ healthier.",
+              "options": ["will become", "would become", "became yesterday"],
+              "accepted_answers": ["will become"],
+              "explanation": "Uma possibilidade real usa if + presente e will + verbo na consequência.",
+              "lesson_numbers": [12]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase apresenta uma consequência provável para uma ação futura?",
+              "options": ["If we protect their habitat, more bees will survive.", "If we protected it, more bees survived yesterday.", "If we will protect it, bees survive before."],
+              "accepted_answers": ["If we protect their habitat, more bees will survive."],
+              "explanation": "A primeira condicional relaciona uma ação possível a uma previsão futura.",
+              "lesson_numbers": [13]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Ashley gosta da ideia, e Anna também. Qual resposta concorda corretamente?",
+              "options": ["So does Anna.", "Anna doesn't either.", "So Anna doesn't."],
+              "accepted_answers": ["So does Anna."],
+              "explanation": "So + auxiliar + sujeito concorda com uma afirmação positiva no simple present.",
+              "lesson_numbers": [14]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Complete o contraste: ____ it was cold, they exercised outside.",
+              "options": ["Even though", "Because", "Before"],
+              "accepted_answers": ["Even though"],
+              "explanation": "Even though introduz um fato que contrasta com o resultado apresentado.",
+              "lesson_numbers": [15]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 14, o que a concordância com so e either ajuda os personagens a comunicar?",
+              "options": ["Sentimentos e experiências que compartilham ou não compartilham.", "Somente horários de compromissos futuros.", "Uma explicação científica sobre o clima."],
+              "accepted_answers": ["Sentimentos e experiências que compartilham ou não compartilham."],
+              "explanation": "As estruturas de concordância conectam as reações dos falantes a experiências e sentimentos sobre relacionamentos.",
+              "lesson_numbers": [11, 12, 13, 14, 15]
+            }
+          ]
+        }
       },
       {
         "slug": "16-20",

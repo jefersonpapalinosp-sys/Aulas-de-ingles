@@ -35,9 +35,7 @@ async def conta(client: AsyncClient, suffix: str) -> dict[str, str]:
 
 async def usuario(session: AsyncSession, suffix: str) -> User:
     return (
-        await session.execute(
-            select(User).where(User.email == f"{suffix}@example.com")
-        )
+        await session.execute(select(User).where(User.email == f"{suffix}@example.com"))
     ).scalar_one()
 
 
@@ -87,22 +85,23 @@ def review_attempt(user_id: int, review: CourseReview) -> CourseReviewAttempt:
 
 
 @pytest.mark.asyncio
-async def test_completion_exige_login_e_reconhece_piloto_publicado(client: AsyncClient) -> None:
-    assert (
-        await client.get("/api/courses/voa-level-1/completion")
-    ).status_code == 401
+async def test_completion_exige_login_e_reconhece_recorte_publicado(client: AsyncClient) -> None:
+    assert (await client.get("/api/courses/voa-level-1/completion")).status_code == 401
 
     headers = await conta(client, "completion-404")
-    missing = await client.get(
-        "/api/courses/inexistente/completion", headers=headers
-    )
-    pilot = await client.get(
-        "/api/courses/voa-level-2/completion", headers=headers
-    )
+    missing = await client.get("/api/courses/inexistente/completion", headers=headers)
+    pilot = await client.get("/api/courses/voa-level-2/completion", headers=headers)
 
     assert missing.status_code == 404
     assert pilot.status_code == 200
-    assert pilot.json()["progress"]["published_lessons"] == 5
+    assert pilot.json()["progress"]["published_lessons"] == 15
+    assert pilot.json()["checkpoints"]["published"] == 3
+    assert pilot.json()["checkpoints"]["current_completed"] == 0
+    assert [checkpoint["unit_slug"] for checkpoint in pilot.json()["checkpoints"]["pending"]] == [
+        "1-5",
+        "6-10",
+        "11-15",
+    ]
     assert pilot.json()["certificate"] == {
         **pilot.json()["certificate"],
         "eligible": False,
@@ -136,9 +135,7 @@ async def test_completion_nao_materializa_conteudo_pesado(
 
     event.listen(sync_engine, "before_cursor_execute", capture_sql)
     try:
-        response = await client.get(
-            "/api/courses/voa-level-1/completion", headers=headers
-        )
+        response = await client.get("/api/courses/voa-level-1/completion", headers=headers)
     finally:
         event.remove(sync_engine, "before_cursor_execute", capture_sql)
 
@@ -155,9 +152,7 @@ async def test_completion_nao_materializa_conteudo_pesado(
         "content_source",
     )
     assert not any(
-        relation in statement
-        for relation in heavy_relations
-        for statement in statements
+        relation in statement for relation in heavy_relations for statement in statements
     )
 
 
@@ -174,9 +169,9 @@ async def test_completion_vazio_explica_regra_e_nao_muta_estado(
             int(
                 (
                     await session.execute(
-                        select(func.count()).select_from(LessonProgress).where(
-                            LessonProgress.user_id == user_id
-                        )
+                        select(func.count())
+                        .select_from(LessonProgress)
+                        .where(LessonProgress.user_id == user_id)
                     )
                 ).scalar_one()
             ),
@@ -201,9 +196,7 @@ async def test_completion_vazio_explica_regra_e_nao_muta_estado(
         )
 
     before = await counts()
-    response = await client.get(
-        "/api/courses/voa-level-1/completion", headers=headers
-    )
+    response = await client.get("/api/courses/voa-level-1/completion", headers=headers)
     after = await counts()
 
     assert response.status_code == 200
@@ -276,17 +269,13 @@ async def test_viewed_e_uniao_de_sessao_e_conclusao_sem_promover_aula_52(
     session.add(LessonProgress(user_id=user.id, lesson_id=lessons[52].id))
     await session.commit()
 
-    body = (
-        await client.get("/api/courses/voa-level-1/completion", headers=headers)
-    ).json()
+    body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
     assert body["progress"]["viewed_lessons"] == 2
     assert body["progress"]["completed_lessons"] == 1
     assert body["progress"]["status"] == "in_progress"
     assert body["certificate"]["eligible"] is False
-    final_unit = next(
-        item for item in body["incomplete_units"] if item["slug"] == "50-52"
-    )
+    final_unit = next(item for item in body["incomplete_units"] if item["slug"] == "50-52")
     assert final_unit["viewed_lessons"] == 1
     assert final_unit["completed_lessons"] == 1
 
@@ -308,9 +297,7 @@ async def test_completion_expoe_amostras_score_e_status_do_curso(
         )
         assert attempt.status_code == 200
 
-    body = (
-        await client.get("/api/courses/voa-level-1/completion", headers=headers)
-    ).json()
+    body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
     grammar = next(item for item in body["skills"] if item["skill"] == "grammar")
 
     assert body["progress"]["status"] == "in_progress"
@@ -329,15 +316,11 @@ async def test_certificate_elegivel_exige_aulas_e_checkpoints_na_versao_atual(
     reviews = await published_reviews(session)
     assert len(lessons) == 22
     assert len(reviews) == 3
-    session.add_all(
-        [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons]
-    )
+    session.add_all([LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons])
     session.add_all([review_attempt(user.id, review) for review in reviews])
     await session.commit()
 
-    body = (
-        await client.get("/api/courses/voa-level-1/completion", headers=headers)
-    ).json()
+    body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
     assert body["progress"] == {
         "published_lessons": 22,
@@ -382,9 +365,7 @@ async def test_certificate_rejeita_quantidades_compensadas_entre_unidades(
         ).scalars()
     )
     original_totals = [unit.total_lessons for unit in units]
-    session.add_all(
-        [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons]
-    )
+    session.add_all([LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons])
     session.add_all([review_attempt(user.id, review) for review in reviews])
 
     try:
@@ -392,11 +373,7 @@ async def test_certificate_rejeita_quantidades_compensadas_entre_unidades(
         units[1].total_lessons += 1
         await session.commit()
 
-        body = (
-            await client.get(
-                "/api/courses/voa-level-1/completion", headers=headers
-            )
-        ).json()
+        body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
         assert body["progress"]["completed_lessons"] == 22
         assert body["certificate"]["required_lessons"] == 22
@@ -416,9 +393,7 @@ async def test_tentativa_de_checkpoint_desatualizada_nao_libera_certificado(
     user = await usuario(session, "completion-stale")
     lessons = await level_one_lessons(session)
     reviews = await published_reviews(session)
-    session.add_all(
-        [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons]
-    )
+    session.add_all([LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons])
     session.add_all([review_attempt(user.id, review) for review in reviews])
     await session.commit()
 
@@ -428,11 +403,7 @@ async def test_tentativa_de_checkpoint_desatualizada_nao_libera_certificado(
         stale_review.content_version = original_version + 1
         await session.commit()
 
-        body = (
-            await client.get(
-                "/api/courses/voa-level-1/completion", headers=headers
-            )
-        ).json()
+        body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
         assert body["checkpoints"]["current_completed"] == 2
         assert body["checkpoints"]["pending"] == [
@@ -444,18 +415,14 @@ async def test_tentativa_de_checkpoint_desatualizada_nao_libera_certificado(
             }
         ]
         assert body["certificate"]["eligible"] is False
-        assert body["certificate"]["cta_href"].endswith(
-            "/unidades/50-52/checkpoint"
-        )
+        assert body["certificate"]["cta_href"].endswith("/unidades/50-52/checkpoint")
     finally:
         stale_review.content_version = original_version
         await session.commit()
 
 
 @pytest.mark.asyncio
-async def test_completion_isola_contas_e_cursos(
-    client: AsyncClient, session: AsyncSession
-) -> None:
+async def test_completion_isola_contas_e_cursos(client: AsyncClient, session: AsyncSession) -> None:
     first_headers = await conta(client, "completion-owner")
     second_headers = await conta(client, "completion-other")
     first_user = await usuario(session, "completion-owner")
@@ -476,21 +443,15 @@ async def test_completion_isola_contas_e_cursos(
             )
         )
     ).scalar_one()
-    session.add(
-        LessonProgress(user_id=second_user.id, lesson_id=foreign_lesson.id)
-    )
+    session.add(LessonProgress(user_id=second_user.id, lesson_id=foreign_lesson.id))
     await session.commit()
 
     try:
         owner = (
-            await client.get(
-                "/api/courses/voa-level-1/completion", headers=first_headers
-            )
+            await client.get("/api/courses/voa-level-1/completion", headers=first_headers)
         ).json()
         other = (
-            await client.get(
-                "/api/courses/voa-level-1/completion", headers=second_headers
-            )
+            await client.get("/api/courses/voa-level-1/completion", headers=second_headers)
         ).json()
 
         assert owner["progress"]["completed_lessons"] == 22
@@ -498,9 +459,7 @@ async def test_completion_isola_contas_e_cursos(
         assert other["progress"]["viewed_lessons"] == 0
 
         level_two_completion = (
-            await client.get(
-                "/api/courses/voa-level-2/completion", headers=second_headers
-            )
+            await client.get("/api/courses/voa-level-2/completion", headers=second_headers)
         ).json()
         assert level_two_completion["course"]["slug"] == "voa-level-2"
         assert level_two_completion["certificate"]["scope_label"] == "Aulas 1–30"

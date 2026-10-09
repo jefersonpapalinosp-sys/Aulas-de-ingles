@@ -53,6 +53,7 @@ export const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   transformation: 'Transformação e correção',
   reorder: 'Ordenar palavras',
   dictation: 'Ditado',
+  classification: 'Classificação',
 }
 
 export const SKILL_LABELS: Record<string, string> = {
