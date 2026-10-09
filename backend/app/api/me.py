@@ -60,6 +60,15 @@ def _entry_out(entry: NotebookEntry) -> NotebookEntryOut:
     )
 
 
+def _lesson_reference(lesson: Lesson) -> dict[str, str | int]:
+    """Identifica uma aula sem ambiguidade entre cursos e unidades."""
+    return {
+        "course_slug": lesson.course.slug,
+        "unit_slug": lesson.unit.slug,
+        "lesson_number": lesson.number,
+    }
+
+
 async def _owned_entry(session: AsyncSession, entry_id: int, user_id: int) -> NotebookEntry:
     entry = (
         await session.execute(
@@ -307,7 +316,7 @@ async def exportar_dados(
 
     response.headers["Content-Disposition"] = 'attachment; filename="aulas-ingles-dados.json"'
     return PersonalDataExportOut(
-        schema_version="1.4",
+        schema_version="1.5",
         exported_at=datetime.now(UTC),
         profile={
             "id": usuario.id,
@@ -316,12 +325,12 @@ async def exportar_dados(
             "created_at": usuario.created_at,
         },
         lesson_progress=[
-            {"lesson_number": item.lesson.number, "studied_at": item.studied_at}
+            {**_lesson_reference(item.lesson), "studied_at": item.studied_at}
             for item in progress
         ],
         study_sessions=[
             {
-                "lesson_number": lesson.number,
+                **_lesson_reference(lesson),
                 "current_step": item.current_step,
                 "completed_steps": item.completed_steps,
                 "started_at": item.started_at,
@@ -344,7 +353,7 @@ async def exportar_dados(
         ),
         step_progress=[
             {
-                "lesson_number": lesson.number,
+                **_lesson_reference(lesson),
                 "step": step.step,
                 "seconds_spent": step.seconds_spent,
                 "completed_at": step.completed_at,
@@ -354,7 +363,7 @@ async def exportar_dados(
         ],
         media_progress=[
             {
-                "lesson_number": lesson.number,
+                **_lesson_reference(lesson),
                 "media_label": media.label,
                 "position_seconds": progress.position_seconds,
                 "updated_at": progress.updated_at,
@@ -373,7 +382,7 @@ async def exportar_dados(
         ],
         exercise_attempts=[
             {
-                "lesson_number": lesson.number,
+                **_lesson_reference(lesson),
                 "exercise_position": exercise.position,
                 "answer": attempt.answer,
                 "correct": attempt.correct,
@@ -383,7 +392,7 @@ async def exportar_dados(
         ],
         review_items=[
             {
-                "lesson_number": lesson.number,
+                **_lesson_reference(lesson),
                 "item_type": item.item_type,
                 "skill": item.skill,
                 "prompt": item.prompt,
@@ -401,7 +410,7 @@ async def exportar_dados(
         ],
         writing=[
             {
-                "lesson_number": lesson.number,
+                **_lesson_reference(lesson),
                 "prompt_title": prompt.title,
                 "draft": draft.text,
                 "updated_at": draft.updated_at,
@@ -437,7 +446,7 @@ async def exportar_dados(
         ],
         speaking=[
             {
-                "lesson_number": attempt.cue.media.lesson.number,
+                **_lesson_reference(attempt.cue.media.lesson),
                 "cue_text": attempt.cue.text_en,
                 "duration_ms": attempt.duration_ms,
                 "self_rating": attempt.self_rating,
@@ -469,7 +478,7 @@ async def exportar_dados(
         ],
         notebook=[
             {
-                "lesson_number": entry.lesson.number,
+                **_lesson_reference(entry.lesson),
                 "kind": entry.kind,
                 "content": entry.content,
                 "created_at": entry.created_at,

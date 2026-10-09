@@ -62,7 +62,7 @@ class _CompletionReview(NamedTuple):
 
 def _review_out(unit: CourseUnit) -> CourseReviewSummaryOut | None:
     review = unit.review
-    if review is None or review.status != "published":
+    if unit.status != "published" or review is None or review.status != "published":
         return None
     return CourseReviewSummaryOut.model_validate(
         {
@@ -102,7 +102,11 @@ async def _course_with_count(
 ) -> tuple[Course, int] | None:
     published = (
         select(func.count(Lesson.id))
-        .where(Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            Lesson.course_id == Course.id,
+            CourseUnit.status == "published",
+        )
         .correlate(Course)
         .scalar_subquery()
     )
@@ -449,7 +453,11 @@ async def list_courses(
     """Lista cursos publicados e planejados sem materializar aulas completas."""
     published = (
         select(func.count(Lesson.id))
-        .where(Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            Lesson.course_id == Course.id,
+            CourseUnit.status == "published",
+        )
         .correlate(Course)
         .scalar_subquery()
     )
@@ -472,7 +480,10 @@ async def get_curriculum(
     course, published_lessons = course_row
     published = (
         select(func.count(Lesson.id))
-        .where(Lesson.unit_id == CourseUnit.id)
+        .where(
+            Lesson.unit_id == CourseUnit.id,
+            CourseUnit.status == "published",
+        )
         .correlate(CourseUnit)
         .scalar_subquery()
     )

@@ -17,6 +17,24 @@ async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
+def assert_lesson_reference(
+    item: dict[str, object],
+    *,
+    course_slug: str,
+    unit_slug: str,
+    lesson_number: int,
+) -> None:
+    assert {
+        "course_slug": item["course_slug"],
+        "unit_slug": item["unit_slug"],
+        "lesson_number": item["lesson_number"],
+    } == {
+        "course_slug": course_slug,
+        "unit_slug": unit_slug,
+        "lesson_number": lesson_number,
+    }
+
+
 @pytest.mark.asyncio
 async def test_caderno_exige_login_e_valida_conteudo(client: AsyncClient) -> None:
     body = {"lesson_number": 31, "kind": "note", "content": "Remember faster than."}
@@ -136,9 +154,21 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
         'attachment; filename="aulas-ingles-dados.json"'
     )
     data = exported.json()
-    assert data["schema_version"] == "1.4"
+    assert data["schema_version"] == "1.5"
     assert data["profile"]["email"] == "caderno-exportacao@exemplo.com"
-    assert data["lesson_progress"][0]["lesson_number"] == 31
+    for section in (
+        "lesson_progress",
+        "media_progress",
+        "review_items",
+        "writing",
+        "notebook",
+    ):
+        assert_lesson_reference(
+            data[section][0],
+            course_slug="voa-level-1",
+            unit_slug="31-40",
+            lesson_number=31,
+        )
     assert data["media_progress"][0]["position_seconds"] == 42.5
     assert data["writing"][0]["draft"] == text
     assert data["writing"][0]["revisions"][0]["version"] == 1
@@ -149,6 +179,93 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
     serialized = exported.text.lower()
     for secret in ("password", "password_hash", "access_token", "refresh_token", "storage_key"):
         assert secret not in serialized
+
+
+@pytest.mark.asyncio
+async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "exportacao-multicurso")
+    lesson_response = await client.get("/api/courses/voa-level-2/lessons/1")
+    assert lesson_response.status_code == 200
+    lesson = lesson_response.json()
+
+    studied = await client.put(
+        "/api/courses/voa-level-2/lessons/1/studied", headers=headers
+    )
+    study_session = await client.put(
+        "/api/courses/voa-level-2/lessons/1/study-session",
+        headers=headers,
+        json={"current_step": "assistir", "completed_steps": ["preparar"]},
+    )
+    media = await client.put(
+        f"/api/media/{lesson['media'][0]['id']}/position",
+        headers=headers,
+        json={"position_seconds": 18.0},
+    )
+    exercise = await client.post(
+        f"/api/exercises/{lesson['exercises'][0]['id']}/attempt",
+        headers=headers,
+        json={
+            "answer": "export test answer",
+            "idempotency_key": "00000000-0000-4000-8000-000000001500",
+        },
+    )
+    writing = await client.put(
+        f"/api/writing/prompts/{lesson['writing_prompts'][0]['id']}/draft",
+        headers=headers,
+        json={"text": "This Level 2 draft belongs to its course and unit."},
+    )
+    speaking = await client.post(
+        "/api/speaking/attempts",
+        headers=headers,
+        json={
+            "cue_id": lesson["media"][0]["cues"][0]["id"],
+            "duration_ms": 1200,
+            "self_rating": "almost",
+            "consent": True,
+        },
+    )
+    notebook = await client.post(
+        "/api/me/notebook",
+        headers=headers,
+        json={
+            "course_slug": "voa-level-2",
+            "lesson_number": 1,
+            "kind": "note",
+            "content": "Level 2 export reference.",
+        },
+    )
+    assert studied.status_code == 204
+    assert study_session.status_code == 200
+    assert media.status_code == 200
+    assert exercise.status_code == 200
+    assert writing.status_code == 200
+    assert speaking.status_code == 201
+    assert notebook.status_code == 201
+
+    exported = await client.get("/api/me/export", headers=headers)
+    assert exported.status_code == 200
+    data = exported.json()
+    assert data["schema_version"] == "1.5"
+    for section in (
+        "lesson_progress",
+        "study_sessions",
+        "step_progress",
+        "media_progress",
+        "exercise_attempts",
+        "review_items",
+        "writing",
+        "speaking",
+        "notebook",
+    ):
+        assert data[section], f"A seção {section} deveria ter ao menos um registro."
+        assert_lesson_reference(
+            data[section][0],
+            course_slug="voa-level-2",
+            unit_slug="1-5",
+            lesson_number=1,
+        )
 
 
 @pytest.mark.asyncio

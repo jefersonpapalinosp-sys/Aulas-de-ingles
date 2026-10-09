@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import type { StudyPlan, StudyPlanInput } from '../api/client'
 import { useSaveStudyPlan, useSkills, useToday } from '../api/dashboard'
 import { useProgress } from '../api/progress'
@@ -9,6 +9,7 @@ import { lessonProgressKey } from '../features/curriculum/curriculum'
 import {
   canonicalizeLegacyHref,
   courseCompletionPath,
+  courseLevelLabel,
   coursePath,
   courseReviewPath,
   DEFAULT_COURSE_SLUG,
@@ -109,9 +110,16 @@ function PlanEditor({ plan }: { plan: StudyPlan }) {
   )
 }
 
-function TodayPanel({ courseSlug, unitSlug }: { courseSlug: string; unitSlug?: string }) {
-  const today = useToday()
+function TodayPanel({
+  courseSlug,
+  unitSlug,
+}: {
+  courseSlug: string
+  unitSlug?: string
+}) {
+  const today = useToday(courseSlug)
   const skills = useSkills(courseSlug, unitSlug)
+  const courseLevel = courseLevelLabel(courseSlug)
 
   if (today.isPending || skills.isPending) return <Carregando oque="seu painel de hoje" />
   if (today.error) {
@@ -150,7 +158,11 @@ function TodayPanel({ courseSlug, unitSlug }: { courseSlug: string; unitSlug?: s
           <p className="eyebrow">
             Próxima atividade · cerca de {recommendation.estimated_minutes} min
           </p>
-          <h2>{recommendation.title}</h2>
+          <h2>
+            {recommendation.lesson_number
+              ? `${courseLevel} · ${recommendation.title}`
+              : recommendation.title}
+          </h2>
           <p>{recommendation.reason}</p>
         </div>
         <Link className="btn" to={canonicalizeLegacyHref(recommendation.href)}>
@@ -160,7 +172,11 @@ function TodayPanel({ courseSlug, unitSlug }: { courseSlug: string; unitSlug?: s
 
       {today.data.recent_session && (
         <p className="today-resume">
-          Última sessão: <strong>Aula {today.data.recent_session.lesson_number}</strong> ·{' '}
+          Última sessão:{' '}
+          <strong>
+            {courseLevel} · Aula {today.data.recent_session.lesson_number}
+          </strong>{' '}
+          ·{' '}
           {today.data.recent_session.completed_steps}/5 etapas ·{' '}
           {today.data.recent_session.total_minutes} min registrados
         </p>
@@ -207,7 +223,9 @@ function TodayPanel({ courseSlug, unitSlug }: { courseSlug: string; unitSlug?: s
 
 export function MapPage({ showToday = false }: { showToday?: boolean }) {
   const params = useParams()
-  const courseSlug = params.courseSlug ?? DEFAULT_COURSE_SLUG
+  const [searchParams] = useSearchParams()
+  const courseSlug =
+    params.courseSlug ?? searchParams.get('course') ?? DEFAULT_COURSE_SLUG
   const unitSlug = params.unitSlug
   const curriculum = useCourseCurriculum(courseSlug)
   const progress = useProgress(courseSlug)
@@ -245,7 +263,12 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
 
   return (
     <>
-      {showToday && <TodayPanel courseSlug={courseSlug} unitSlug={unitSlug} />}
+      {showToday && (
+        <TodayPanel
+          courseSlug={courseSlug}
+          unitSlug={unitSlug}
+        />
+      )}
       <section
         className={showToday ? 'map-section course-map' : 'course-map'}
         aria-labelledby="map-title"
@@ -289,13 +312,8 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                     ? 'Aulas concluídas · checkpoint disponível'
                     : 'Concluída'
                   : 'Em andamento'
-            return (
-              <Link
-                className={`unit-card${unit.slug === unitSlug ? ' active' : ''}`}
-                key={unit.id}
-                to={unitPath(courseSlug, unit.slug)}
-                aria-current={unit.slug === unitSlug ? 'page' : undefined}
-              >
+            const content = (
+              <>
                 <span>
                   <strong>{unit.title}</strong>
                   <small>
@@ -306,10 +324,30 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                 <span>
                   <small>{state}</small>
                   <strong>
-                    {completed}/{unit.lessons.length}{' '}
-                    {unit.lessons.length === 1 ? 'aula' : 'aulas'}
+                    {unit.published_lessons === 0
+                      ? `${unit.total_lessons} ${unit.total_lessons === 1 ? 'aula planejada' : 'aulas planejadas'}`
+                      : `${completed}/${unit.lessons.length} ${unit.lessons.length === 1 ? 'aula' : 'aulas'}`}
                   </strong>
                 </span>
+              </>
+            )
+            return unit.published_lessons === 0 ? (
+              <article
+                className="unit-card"
+                key={unit.id}
+                aria-disabled="true"
+                aria-label={`${unit.title}: ${state}`}
+              >
+                {content}
+              </article>
+            ) : (
+              <Link
+                className={`unit-card${unit.slug === unitSlug ? ' active' : ''}`}
+                key={unit.id}
+                to={unitPath(courseSlug, unit.slug)}
+                aria-current={unit.slug === unitSlug ? 'page' : undefined}
+              >
+                {content}
               </Link>
             )
           })}
@@ -333,7 +371,20 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
             </section>
           )}
 
-        {selectedUnit && (
+        {selectedUnit && selectedUnit.published_lessons === 0 && (
+          <div className="media-fallback" role="note">
+            <h2>Unidade em preparação</h2>
+            <p>
+              As Aulas {selectedUnit.lesson_start}–{selectedUnit.lesson_end} ainda não estão
+              publicadas. Elas aparecerão aqui quando o conteúdo estiver pronto para estudo.
+            </p>
+            <Link className="btn ghost" to={coursePath(courseSlug)}>
+              Ver unidades disponíveis
+            </Link>
+          </div>
+        )}
+
+        {selectedUnit && selectedUnit.published_lessons > 0 && (
           <div className="arc course-unit-lessons">
             <div className="ahead">
               <span>Aula</span>

@@ -53,8 +53,9 @@ function assessmentPath(unitSlug: string, courseSlug = LEVEL_1_SLUG): string {
 function studyPath(
   lessonNumber: number,
   step?: 'preparar' | 'assistir' | 'estudar' | 'praticar' | 'revisar',
+  courseSlug = LEVEL_1_SLUG,
 ): string {
-  const base = `${lessonPath(lessonNumber)}/estudar`
+  const base = `${lessonPath(lessonNumber, courseSlug)}/estudar`
   return step ? `${base}/${step}` : base
 }
 
@@ -206,6 +207,8 @@ test('do cadastro à primeira revisão', async ({ page }) => {
     // A tradução não aparece antes de virar.
     await expect(page.locator('.carta-traducao')).toHaveCount(0)
 
+    const showAnswer = page.getByRole('button', { name: 'Mostrar resposta' })
+    await showAnswer.focus()
     await page.keyboard.press(' ')
     await expect(page.locator('.carta-traducao')).toHaveText('desonesto')
 
@@ -219,7 +222,9 @@ test('do cadastro à primeira revisão', async ({ page }) => {
   await test.step('marcar a aula semeia o vocabulário inteiro', async () => {
     const dialog = await ensureTrailVisible(page)
     const scope = dialog ?? page
-    await scope.getByRole('button', { name: 'Marcar aula 39 como estudada' }).click()
+    await scope
+      .getByRole('button', { name: 'Marcar Level 1 · Aula 39 como estudada' })
+      .click()
     await expectCourseProgress(page, 1)
     // 13 itens na aula 39, menos o `dishonest` que já foi revisado hoje.
     await expect(await globalLink(page, /^Revisar/)).toContainText('12')
@@ -634,7 +639,7 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     next_course: {
       slug: LEVEL_2_SLUG,
       level: '2',
-      status: 'planned',
+      status: 'published',
       recommended: true,
       required: false,
       href: coursePath(LEVEL_2_SLUG),
@@ -854,7 +859,7 @@ test('checkpoint 50–52 encerra a revisão oficial e conduz à conclusão', asy
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
   await expect(page.locator('.checkpoint-form')).toHaveCount(0)
-  const completion = page.getByRole('link', { name: 'Ver conclusão do curso' })
+  const completion = page.getByRole('link', { name: 'Ver progresso do curso' })
   await expect(completion).toHaveAttribute('href', courseCompletionPath())
   await completion.click()
   await expect(page).toHaveURL(new RegExp(`${courseCompletionPath()}$`))
@@ -895,7 +900,7 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
   await expect(page.locator('[download], iframe')).toHaveCount(0)
 
   await expect(page.getByText('Recomendado e opcional.')).toBeVisible()
-  await expect(page.getByText(/Level 2 · Intermediário · Em preparação/)).toBeVisible()
+  await expect(page.getByText(/Level 2 · Intermediário · Disponível/)).toBeVisible()
   await expect(page.getByRole('link', { name: 'Conhecer Level 2' })).toHaveAttribute(
     'href',
     coursePath(LEVEL_2_SLUG),
@@ -1381,7 +1386,39 @@ test('rotas legadas redirecionam ao Level 1 e preservam etapa, busca e fragmento
   }
 })
 
-test('catálogo apresenta Level 1 canônico e Level 2 vazio em preparação', async ({ page }) => {
+test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', async ({
+  page,
+  request,
+}) => {
+  const curriculumResponse = await request.get(`/api/courses/${LEVEL_2_SLUG}/curriculum`)
+  expect(curriculumResponse.ok()).toBeTruthy()
+  const curriculum = (await curriculumResponse.json()) as {
+    course: { status: string; published_lessons: number; total_lessons: number }
+    units: Array<{
+      slug: string
+      status: string
+      published_lessons: number
+      lessons: Array<{ number: number; title: string }>
+      review?: { slug: string; question_count: number } | null
+    }>
+  }
+  expect(curriculum.course).toMatchObject({
+    status: 'published',
+    published_lessons: 5,
+    total_lessons: 30,
+  })
+  expect(curriculum.units[0]).toMatchObject({
+    slug: '1-5',
+    status: 'published',
+    published_lessons: 5,
+    review: { slug: 'checkpoint-1-5', question_count: 6 },
+  })
+  expect(curriculum.units[0]?.lessons.map((lesson) => lesson.number)).toEqual([1, 2, 3, 4, 5])
+  expect(curriculum.units.slice(1).every((unit) => (
+    unit.status === 'planned' && unit.published_lessons === 0 && unit.lessons.length === 0
+  ))).toBeTruthy()
+  expect(curriculum.units.at(-1)?.review).toBeNull()
+
   await criarConta(page, 'Catálogo E2E')
   await page.goto('/cursos')
 
@@ -1399,14 +1436,152 @@ test('catálogo apresenta Level 1 canônico e Level 2 vazio em preparação', as
     coursePath(LEVEL_1_SLUG),
   )
   await expect(level2Card.getByText('2 · Intermediário')).toBeVisible()
-  await expect(level2Card.getByText('0/30', { exact: true })).toBeVisible()
-  await expect(level2Card.getByText('Em preparação', { exact: true })).toBeVisible()
+  await expect(level2Card.getByText('5/30', { exact: true })).toBeVisible()
+  await expect(level2Card.getByText('Publicado', { exact: true })).toBeVisible()
 
   await level2Card.getByRole('link', { name: 'Ver unidades' }).click()
   await expect(page).toHaveURL(new RegExp(`${coursePath(LEVEL_2_SLUG)}$`))
   await expect(page.getByRole('heading', { name: 'Mapa do curso' })).toBeVisible()
   await expect(page.getByText(/Level 2 · Intermediário · VOA Learning English/)).toBeVisible()
-  await expect(page.locator('#main-content a[href*="/aulas/"]')).toHaveCount(0)
+  const unitCards = page.locator('.unit-card-grid')
+  await expect(unitCards.locator('a')).toHaveCount(1)
+  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(5)
+  await expect(unitCards.locator('a', { hasText: 'Aulas 26–30' })).toHaveCount(0)
+
+  await unitCards.locator('a', { hasText: 'Aulas 1–5' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 1–5' })).toBeVisible()
+  await expect(page.locator('.course-unit-lessons a[href*="/aulas/"]')).toHaveCount(5)
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Checkpoint 1–5/ }),
+  ).toHaveAttribute('href', courseReviewPath('1-5', LEVEL_2_SLUG))
+})
+
+test('checkpoint 1–5 do Level 2 usa listening da Aula 3 e restaura o resultado', async ({
+  page,
+}) => {
+  await criarConta(page, 'Checkpoint Level 2 Sprint 25')
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+
+  const checkpointPath = courseReviewPath('1-5', LEVEL_2_SLUG)
+  await page.goto(checkpointPath)
+  await expect(page).toHaveURL(new RegExp(`${checkpointPath}$`))
+  await expect(page.getByRole('heading', { level: 1, name: 'Checkpoint 1–5' })).toBeVisible()
+  await expect(page.getByText(/Level 2 · Checkpoint curricular/)).toBeVisible()
+
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(
+    provenance.getByRole('link', { name: /VOA Learning English — Review of Level 2 Lessons 1–5/ }),
+  ).toBeVisible()
+  await expect(provenance.getByText('Conteúdo autoral do projeto')).toBeVisible()
+
+  const checkpointAudio = page.locator(
+    'audio[aria-label="Conversa da Aula 3 — Level 2"]',
+  )
+  await expect(checkpointAudio).toBeVisible()
+  await expect(checkpointAudio.locator('source')).toHaveAttribute('src', /voa-audio\.voanews\.eu/)
+  await expect(page.getByRole('link', { name: 'Rever Level 2 · Aula 3' })).toHaveAttribute(
+    'href',
+    lessonPath(3, LEVEL_2_SLUG),
+  )
+
+  const form = page.locator('.checkpoint-form')
+  await expect(form.getByRole('group')).toHaveCount(6)
+  for (const answer of [
+    'has been worrying',
+    'Please throw the old advertisement away.',
+    'By the time the meeting began, Mia had left a message.',
+    'I see your point, but could you explain what makes it art?',
+    'the most convenient',
+    'Os dois descrevem eventos anteriores ao encontro, mas atribuem o atraso a causas diferentes.',
+  ]) {
+    await form.getByRole('radio', { name: answer, exact: true }).check()
+  }
+
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        '/api/courses/voa-level-2/units/1-5/review/attempts' &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  )
+  await form.getByRole('button', { name: 'Concluir checkpoint' }).click()
+  expect((await saved).status()).toBe(201)
+
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await expect(page.locator('.checkpoint-form')).toHaveCount(0)
+})
+
+test('Sprint 25 isola a retomada de Hoje entre Level 1 e Level 2', async ({ page }) => {
+  await criarConta(page, 'Retomada multi-curso Sprint 25')
+
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        '/api/courses/voa-level-2/lessons/1/study-session' &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  )
+  await page.goto(studyPath(1, 'assistir', LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'Budget Cuts' })).toBeVisible()
+  await expect(page.getByText(/Level 2 · Aula 1 · estudo guiado/)).toBeVisible()
+  await saved
+
+  const today = await globalLink(page, /^Hoje$/)
+  await today.click()
+  await expect(page).toHaveURL(/\/inicio\?course=voa-level-2$/)
+  await expect(page.getByRole('heading', { name: /Continuar a Aula 1/ })).toBeVisible()
+  await expect(page.getByText(/Level 2 · Aula 1/)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Estudar agora' })).toHaveAttribute(
+    'href',
+    studyPath(1, 'assistir', LEVEL_2_SLUG),
+  )
+
+  const trailDialog = await ensureTrailVisible(page)
+  const courseSelect = (trailDialog ?? page).getByRole('combobox', { name: 'Curso' })
+  await courseSelect.selectOption(LEVEL_1_SLUG)
+  await expect(page).toHaveURL(/\/inicio\?course=voa-level-1$/)
+  if (trailDialog) {
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: 'Trilha de estudo' })).toHaveCount(0)
+  }
+  await expect(
+    page.getByRole('heading', { name: 'Level 1 · Começar a Aula 31' }),
+  ).toBeVisible()
+  await expect(page.getByText(/Level 2 · Aula 1/)).toHaveCount(0)
+})
+
+test('Sprint 25 mantém o piloto Level 2 utilizável em mobile e zoom equivalente a 200%', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 640, height: 360 })
+  await criarConta(page, 'Reflow Level 2 Sprint 25')
+  await page.goto(lessonPath(1, LEVEL_2_SLUG))
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Budget Cuts' })).toBeVisible()
+  await expectNoHorizontalScroll(page)
+  const openTrail = page.getByRole('button', { name: /Abrir trilha de aulas/ })
+  await expect(openTrail).toContainText('Level 2 · Aula 1 · Budget Cuts')
+  await tabAte(page, openTrail)
+  await page.keyboard.press('Enter')
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('combobox', { name: 'Curso' })).toHaveValue(LEVEL_2_SLUG)
+  await expect(
+    dialog.getByRole('heading', { name: "Let's Learn English — Level 2" }),
+  ).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(openTrail).toBeFocused()
+
+  const accessibility = await new AxeBuilder({ page })
+    .include('#main-content')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(accessibility.violations).toEqual([])
 })
 
 test('rota canônica mantém aula ativa e navegação completa por teclado', async ({ page }) => {

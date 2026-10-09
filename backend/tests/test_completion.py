@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import delete, event, func, select
+from sqlalchemy import event, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -87,7 +87,7 @@ def review_attempt(user_id: int, review: CourseReview) -> CourseReviewAttempt:
 
 
 @pytest.mark.asyncio
-async def test_completion_exige_login_e_curso_publicado(client: AsyncClient) -> None:
+async def test_completion_exige_login_e_reconhece_piloto_publicado(client: AsyncClient) -> None:
     assert (
         await client.get("/api/courses/voa-level-1/completion")
     ).status_code == 401
@@ -96,12 +96,22 @@ async def test_completion_exige_login_e_curso_publicado(client: AsyncClient) -> 
     missing = await client.get(
         "/api/courses/inexistente/completion", headers=headers
     )
-    planned = await client.get(
+    pilot = await client.get(
         "/api/courses/voa-level-2/completion", headers=headers
     )
 
-    assert missing.status_code == planned.status_code == 404
+    assert missing.status_code == 404
+    assert pilot.status_code == 200
+    assert pilot.json()["progress"]["published_lessons"] == 5
+    assert pilot.json()["certificate"] == {
+        **pilot.json()["certificate"],
+        "eligible": False,
+        "required_lessons": 30,
+        "scope_label": "Aulas 1–30",
+        "automatic_download": False,
+    }
     assert missing.headers["cache-control"] == "private, no-store"
+    assert pilot.headers["cache-control"] == "private, no-store"
 
 
 @pytest.mark.asyncio
@@ -237,7 +247,7 @@ async def test_completion_vazio_explica_regra_e_nao_muta_estado(
         "automatic_download": False,
     }
     assert body["next_course"]["slug"] == "voa-level-2"
-    assert body["next_course"]["status"] == "planned"
+    assert body["next_course"]["status"] == "published"
     assert body["next_course"]["recommended"] is True
     assert body["next_course"]["required"] is False
     assert body["next_course"]["href"] == "/cursos/voa-level-2"
@@ -458,31 +468,14 @@ async def test_completion_isola_contas_e_cursos(
     level_two = (
         await session.execute(select(Course).where(Course.slug == "voa-level-2"))
     ).scalar_one()
-    level_two_unit = (
+    foreign_lesson = (
         await session.execute(
-            select(CourseUnit)
-            .where(CourseUnit.course_id == level_two.id)
-            .order_by(CourseUnit.position)
-            .limit(1)
+            select(Lesson).where(
+                Lesson.course_id == level_two.id,
+                Lesson.number == 1,
+            )
         )
     ).scalar_one()
-    foreign_lesson = Lesson(
-        course_id=level_two.id,
-        unit_id=level_two_unit.id,
-        number=1,
-        slug="completion-level-2-lesson-1",
-        position=1,
-        title="Level 2 fixture",
-        title_pt="Fixture do Level 2",
-        voa_url="https://example.com/level-2",
-        grammar_tag="Isolamento",
-        focus_points=[],
-        lead="Fixture temporária.",
-        warmup_prompt="Teste.",
-        listening_focus="Teste.",
-    )
-    session.add(foreign_lesson)
-    await session.flush()
     session.add(
         LessonProgress(user_id=second_user.id, lesson_id=foreign_lesson.id)
     )
@@ -504,9 +497,6 @@ async def test_completion_isola_contas_e_cursos(
         assert other["progress"]["completed_lessons"] == 0
         assert other["progress"]["viewed_lessons"] == 0
 
-        level_two.status = "published"
-        level_two_unit.status = "published"
-        await session.commit()
         level_two_completion = (
             await client.get(
                 "/api/courses/voa-level-2/completion", headers=second_headers
@@ -516,7 +506,4 @@ async def test_completion_isola_contas_e_cursos(
         assert level_two_completion["certificate"]["scope_label"] == "Aulas 1–30"
         assert "31–52" not in str(level_two_completion)
     finally:
-        level_two.status = "planned"
-        level_two_unit.status = "planned"
-        await session.execute(delete(Lesson).where(Lesson.id == foreign_lesson.id))
-        await session.commit()
+        await session.rollback()

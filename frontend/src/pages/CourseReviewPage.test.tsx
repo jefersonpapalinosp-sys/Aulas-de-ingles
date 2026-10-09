@@ -425,7 +425,7 @@ describe('CourseReviewPage', () => {
     renderFinalPage()
 
     expect(
-      screen.getByRole('link', { name: 'Ver conclusão do curso' }),
+      screen.getByRole('link', { name: 'Ver progresso do curso' }),
     ).toHaveAttribute('href', '/cursos/voa-level-1/conclusao')
     expect(
       screen.queryByRole('link', { name: /Continuar na Aula/ }),

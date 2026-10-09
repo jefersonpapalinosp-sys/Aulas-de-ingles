@@ -2,7 +2,10 @@
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.models import Course, CourseUnit, Lesson
 from app.main import create_app
 
 
@@ -52,7 +55,9 @@ async def test_tentativa_exige_login(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_jornada_guiada_salva_e_normaliza_as_etapas(client: AsyncClient) -> None:
     h = await conta(client, "jornada")
-    inicial = (await client.get("/api/lessons/31/study-session", headers=h)).json()
+    initial_response = await client.get("/api/lessons/31/study-session", headers=h)
+    inicial = initial_response.json()
+    assert initial_response.headers["cache-control"] == "private, no-store"
     assert inicial == {
         "lesson_number": 31,
         "current_step": "preparar",
@@ -96,14 +101,94 @@ async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncCli
     level_2 = await client.get("/api/me/progress?course=voa-level-2", headers=headers)
 
     assert saved.status_code == resumed.status_code == 200
+    assert resumed.headers["cache-control"] == "private, no-store"
+    assert level_1.headers["cache-control"] == "private, no-store"
+    assert level_2.headers["cache-control"] == "private, no-store"
     assert resumed.json()["current_step"] == "assistir"
     assert level_1.json()["total_lessons"] == 22
     assert level_1.json()["studied_count"] == 1
     row = next(item for item in level_1.json()["lessons"] if item["lesson_number"] == 32)
     assert row["course_slug"] == "voa-level-1"
     assert row["unit_slug"] == "31-40"
-    assert level_2.json()["total_lessons"] == 0
-    assert level_2.json()["lessons"] == []
+    assert level_2.json()["total_lessons"] == 5
+    assert level_2.json()["studied_count"] == 0
+    assert {item["lesson_number"] for item in level_2.json()["lessons"]} == set(
+        range(1, 6)
+    )
+    assert all(
+        item["course_slug"] == "voa-level-2"
+        for item in level_2.json()["lessons"]
+    )
+
+
+@pytest.mark.asyncio
+async def test_aula_um_em_dois_cursos_mantem_sessoes_e_historico_distintos(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "mesmo-numero-historico")
+    level_1 = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
+    ).scalar_one()
+    unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == level_1.id,
+                CourseUnit.slug == "31-40",
+            )
+        )
+    ).scalar_one()
+    level_1_lesson = Lesson(
+        course_id=level_1.id,
+        unit_id=unit.id,
+        number=1,
+        slug="history-level-1-lesson-1",
+        position=100,
+        title="Level 1 lesson one",
+        title_pt="Aula um do Level 1",
+        voa_url="https://example.com/level-1/1",
+        grammar_tag="Fixture",
+        focus_points=[],
+        lead="Fixture.",
+        warmup_prompt="Teste.",
+        listening_focus="Teste.",
+    )
+    session.add(level_1_lesson)
+    await session.commit()
+
+    try:
+        level_1_path = "/api/courses/voa-level-1/lessons/1/study-session"
+        level_2_path = "/api/courses/voa-level-2/lessons/1/study-session"
+        assert (
+            await client.put(
+                level_1_path,
+                headers=headers,
+                json={"current_step": "assistir", "completed_steps": ["preparar"]},
+            )
+        ).status_code == 200
+        assert (
+            await client.put(
+                level_2_path,
+                headers=headers,
+                json={
+                    "current_step": "praticar",
+                    "completed_steps": ["preparar", "assistir", "estudar"],
+                },
+            )
+        ).status_code == 200
+
+        level_1_state = (await client.get(level_1_path, headers=headers)).json()
+        level_2_state = (await client.get(level_2_path, headers=headers)).json()
+        assert level_1_state["current_step"] == "assistir"
+        assert level_2_state["current_step"] == "praticar"
+        assert level_1_state["completed_steps"] == ["preparar"]
+        assert level_2_state["completed_steps"] == [
+            "preparar",
+            "assistir",
+            "estudar",
+        ]
+    finally:
+        await session.execute(delete(Lesson).where(Lesson.id == level_1_lesson.id))
+        await session.commit()
 
 
 @pytest.mark.asyncio
@@ -177,6 +262,75 @@ async def test_progresso_filtra_curso_unidade_tentativas_e_revisao(
     assert other_course["studied_count"] == other_course["attempts"] == 0
     assert other_course["review_cards"] == other_course["review_due"] == 0
     assert other_course["lessons"] == []
+
+    ambiguous = await client.get("/api/me/progress?unit=31-40", headers=headers)
+    assert ambiguous.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_progresso_ignora_curso_e_unidade_nao_publicados(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "progresso-publicado")
+    assert (
+        await client.put(
+            "/api/courses/voa-level-2/lessons/1/studied", headers=headers
+        )
+    ).status_code == 204
+
+    course = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-2"))
+    ).scalar_one()
+    unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == course.id,
+                CourseUnit.slug == "1-5",
+            )
+        )
+    ).scalar_one()
+    original_course_status = course.status
+    original_unit_status = unit.status
+
+    try:
+        baseline = await client.get(
+            "/api/me/progress?course=voa-level-2", headers=headers
+        )
+        assert baseline.headers["cache-control"] == "private, no-store"
+        assert baseline.json()["total_lessons"] == 5
+        assert baseline.json()["studied_count"] == 1
+        assert baseline.json()["review_cards"] > 0
+
+        unit.status = "planned"
+        await session.commit()
+        hidden_unit = (
+            await client.get(
+                "/api/me/progress?course=voa-level-2", headers=headers
+            )
+        ).json()
+        assert hidden_unit == {
+            "review_due": 0,
+            "review_cards": 0,
+            "studied_count": 0,
+            "total_lessons": 0,
+            "attempts": 0,
+            "correct": 0,
+            "lessons": [],
+        }
+
+        unit.status = "published"
+        course.status = "planned"
+        await session.commit()
+        hidden_course = (
+            await client.get(
+                "/api/me/progress?course=voa-level-2", headers=headers
+            )
+        ).json()
+        assert hidden_course == hidden_unit
+    finally:
+        course.status = original_course_status
+        unit.status = original_unit_status
+        await session.commit()
 
 
 @pytest.mark.asyncio
@@ -266,7 +420,7 @@ async def test_marcar_aula_e_idempotente(client: AsyncClient) -> None:
 
     p = (await client.get("/api/me/progress", headers=h)).json()
     assert p["studied_count"] == 1
-    assert p["total_lessons"] == 22
+    assert p["total_lessons"] == 27
     assert [linha["studied"] for linha in p["lessons"]].count(True) == 1
 
 
@@ -281,12 +435,12 @@ async def test_desmarcar_aula(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_progresso_traz_as_vinte_e_duas_aulas_mesmo_sem_atividade(
+async def test_progresso_global_traz_as_vinte_e_sete_aulas_sem_atividade(
     client: AsyncClient,
 ) -> None:
     h = await conta(client, "zerado")
     p = (await client.get("/api/me/progress", headers=h)).json()
-    assert len(p["lessons"]) == 22
+    assert len(p["lessons"]) == 27
     assert p == {
         **p,
         "studied_count": 0,

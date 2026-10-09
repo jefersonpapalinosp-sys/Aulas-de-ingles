@@ -16,6 +16,50 @@ async def test_lista_as_vinte_e_duas_aulas_em_ordem(client: AsyncClient) -> None
 
 
 @pytest.mark.asyncio
+async def test_level_2_lista_e_entrega_somente_o_piloto_1_a_5(
+    client: AsyncClient,
+) -> None:
+    response = await client.get("/api/lessons?course=voa-level-2")
+    assert response.status_code == 200
+    summaries = response.json()
+    assert [item["number"] for item in summaries] == [1, 2, 3, 4, 5]
+    assert [item["title"] for item in summaries] == [
+        "Budget Cuts",
+        "The Interview",
+        "He Said - She Said",
+        "Run Away With the Circus!",
+        "Greatest Vacation of All Time",
+    ]
+    assert all(item["course_slug"] == "voa-level-2" for item in summaries)
+    assert all(item["unit_slug"] == "1-5" for item in summaries)
+
+    durations = [247, 245, 295, 301, 290]
+    for number, duration in enumerate(durations, start=1):
+        detail = (
+            await client.get(f"/api/courses/voa-level-2/lessons/{number}")
+        ).json()
+        assert detail["course_slug"] == "voa-level-2"
+        assert detail["number"] == number
+        assert len(detail["goals"]) == 4
+        assert len(detail["grammar_blocks"]) == 3
+        assert len(detail["phrases"]) == 5
+        assert len(detail["vocab"]) == 10
+        assert len(detail["pronunciation"]) == 3
+        assert len(detail["exercises"]) == 8
+        assert len(detail["writing_prompts"]) == 1
+        assert len(detail["media"]) == 1
+        assert detail["media"][0]["duration_seconds"] == duration
+        assert detail["media"][0]["transcript"] == []
+        assert len(detail["media"][0]["cues"]) == 5
+        assert sum(
+            exercise["skill"] == "listening"
+            for exercise in detail["exercises"]
+        ) == 4
+
+    assert (await client.get("/api/lessons/1")).status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     r = await client.get("/api/lessons/31")
     assert r.status_code == 200

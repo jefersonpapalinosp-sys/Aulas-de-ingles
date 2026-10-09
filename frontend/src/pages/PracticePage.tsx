@@ -4,6 +4,7 @@ import { useLesson } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
 import { PracticeRunner } from '../features/practice/PracticeRunner'
 import {
+  courseLevelLabel,
   DEFAULT_COURSE_SLUG,
   lessonPath,
   studyPath,
@@ -26,7 +27,9 @@ export function PracticePage() {
     <article className="practice-page">
       <header className="practice-page-header">
         <div>
-          <p className="eyebrow">Aula {lesson.data.number} · laboratório</p>
+          <p className="eyebrow">
+            {courseLevelLabel(courseSlug)} · Aula {lesson.data.number} · laboratório
+          </p>
           <h1>{lesson.data.title}</h1>
           <p className="lead">
             Exercícios · {lesson.data.grammar_tag}

@@ -5,6 +5,7 @@ import { LegacyLessonRedirect } from '../App'
 import {
   assessmentPath,
   canonicalizeLegacyHref,
+  courseLevelLabel,
   courseCompletionPath,
   courseReviewPath,
   lessonPath,
@@ -12,6 +13,7 @@ import {
   practicePath,
   reviewPath,
   studyPath,
+  todayPath,
 } from './courseRoutes'
 
 function LocationProbe() {
@@ -20,6 +22,11 @@ function LocationProbe() {
 }
 
 describe('rotas de curso', () => {
+  it('deriva um rótulo de nível para referências de aula ambíguas', () => {
+    expect(courseLevelLabel('voa-level-2')).toBe('Level 2')
+    expect(courseLevelLabel('curso-personalizado')).toBe('curso-personalizado')
+  })
+
   it('distingue aulas com o mesmo número em cursos diferentes', () => {
     expect(lessonPath('voa-level-1', 1)).toBe('/cursos/voa-level-1/aulas/1')
     expect(lessonPath('voa-level-2', 1)).toBe('/cursos/voa-level-2/aulas/1')
@@ -50,6 +57,7 @@ describe('rotas de curso', () => {
   })
 
   it('mantém curso e unidade nas rotas de avaliação, revisão e caderno', () => {
+    expect(todayPath('voa-level-2')).toBe('/inicio?course=voa-level-2')
     expect(assessmentPath('voa-level-1', '45-49')).toBe(
       '/cursos/voa-level-1/unidades/45-49/avaliacao',
     )

@@ -6,10 +6,18 @@ from pathlib import Path
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.db.models import TranscriptionJob
+from app.db.models import (
+    Course,
+    CourseUnit,
+    Lesson,
+    LessonMedia,
+    TranscriptCue,
+    TranscriptionJob,
+)
 from app.services import assistance, transcription_queue
 
 
@@ -29,6 +37,12 @@ async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
 async def cue_id(client: AsyncClient) -> int:
     lesson = (await client.get("/api/lessons/31")).json()
     return lesson["media"][0]["cues"][0]["id"]
+
+
+async def course_cue_id(client: AsyncClient, course: str, lesson: int) -> int:
+    response = await client.get(f"/api/courses/{course}/lessons/{lesson}")
+    assert response.status_code == 200, response.text
+    return response.json()["media"][0]["cues"][0]["id"]
 
 
 @pytest.mark.asyncio
@@ -109,6 +123,123 @@ async def test_fluxo_de_upload_listagem_audio_e_exclusao(
     assert (
         await client.get(f"/api/speaking/attempts/{attempt['id']}/audio", headers=headers)
     ).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_listagem_isola_gravacoes_quando_numero_da_aula_se_repete(
+    client: AsyncClient,
+    session: AsyncSession,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(get_settings(), "speaking_storage_dir", str(tmp_path))
+    level_1 = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
+    ).scalar_one()
+    unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == level_1.id,
+                CourseUnit.slug == "31-40",
+            )
+        )
+    ).scalar_one()
+    lesson = Lesson(
+        course_id=level_1.id,
+        unit_id=unit.id,
+        number=1,
+        slug="speaking-level-1-lesson-1",
+        position=100,
+        title="Level 1 lesson one",
+        title_pt="Aula um do Level 1",
+        voa_url="https://example.com/level-1/1",
+        grammar_tag="Teste de isolamento",
+        focus_points=[],
+        lead="Fixture temporária para validar identidade composta.",
+        warmup_prompt="Repita a frase.",
+        listening_focus="Identidade do curso.",
+    )
+    session.add(lesson)
+    await session.flush()
+    media = LessonMedia(
+        lesson_id=lesson.id,
+        position=0,
+        kind="conversation_audio",
+        label="Áudio temporário Level 1 Aula 1",
+        source_url="https://example.com/level-1/1.mp3",
+        license_status="review_required",
+        license_note="Fixture de teste; não publicada.",
+        attribution="Fixture de teste",
+        offline_policy="network_only",
+        duration_seconds=10,
+        transcript=[],
+    )
+    session.add(media)
+    await session.flush()
+    level_1_cue = TranscriptCue(
+        media_id=media.id,
+        position=0,
+        start_seconds=0,
+        end_seconds=5,
+        speaker="Tester",
+        text_en="Level one course cue.",
+        text_pt="Trecho do curso Level 1.",
+    )
+    session.add(level_1_cue)
+    await session.commit()
+
+    headers = await conta(client, "cursos-mesmo-numero")
+    attempt_ids: list[int] = []
+    try:
+        level_2_cue = await course_cue_id(client, "voa-level-2", 1)
+        for cue, audio in (
+            (level_1_cue.id, b"level-one-audio"),
+            (level_2_cue, b"level-two-audio"),
+        ):
+            created = await client.post(
+                "/api/speaking/attempts",
+                headers=headers,
+                json={
+                    "cue_id": cue,
+                    "duration_ms": 1000,
+                    "self_rating": "almost",
+                    "consent": True,
+                },
+            )
+            assert created.status_code == 201, created.text
+            attempt_id = created.json()["id"]
+            attempt_ids.append(attempt_id)
+            uploaded = await client.put(
+                f"/api/speaking/attempts/{attempt_id}/audio",
+                headers={**headers, "Content-Type": "audio/webm"},
+                content=audio,
+            )
+            assert uploaded.status_code == 200, uploaded.text
+
+        level_1_items = (
+            await client.get(
+                "/api/speaking/attempts?lesson=1&course=voa-level-1",
+                headers=headers,
+            )
+        ).json()
+        level_2_items = (
+            await client.get(
+                "/api/speaking/attempts?lesson=1&course=voa-level-2",
+                headers=headers,
+            )
+        ).json()
+        legacy_items = (
+            await client.get("/api/speaking/attempts?lesson=1", headers=headers)
+        ).json()
+
+        assert [item["course_slug"] for item in level_1_items] == ["voa-level-1"]
+        assert [item["course_slug"] for item in level_2_items] == ["voa-level-2"]
+        assert [item["course_slug"] for item in legacy_items] == ["voa-level-1"]
+    finally:
+        for attempt_id in attempt_ids:
+            await client.delete(f"/api/speaking/attempts/{attempt_id}", headers=headers)
+        await session.delete(lesson)
+        await session.commit()
 
 
 @pytest.mark.asyncio

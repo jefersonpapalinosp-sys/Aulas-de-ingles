@@ -230,7 +230,9 @@ async def obter_sessao_de_estudo(
     number: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
 ) -> StudySessionOut:
+    response.headers["Cache-Control"] = "private, no-store"
     return await _obter_sessao_de_estudo(number, DEFAULT_COURSE_SLUG, usuario, session)
 
 
@@ -243,7 +245,9 @@ async def obter_sessao_de_estudo_no_curso(
     number: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
 ) -> StudySessionOut:
+    response.headers["Cache-Control"] = "private, no-store"
     return await _obter_sessao_de_estudo(number, course_slug, usuario, session)
 
 
@@ -601,6 +605,7 @@ async def revelar_resposta(
 async def meu_progresso(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
     course: Annotated[
         str | None,
         Query(description="Limita aulas e denominadores ao slug de um curso."),
@@ -611,6 +616,13 @@ async def meu_progresso(
     ] = None,
 ) -> ProgressOut:
     """Uma linha por aula publicada, opcionalmente limitada a curso e unidade."""
+    response.headers["Cache-Control"] = "private, no-store"
+    if unit is not None and course is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="O parâmetro course é obrigatório quando unit é informado.",
+        )
+
     estudadas = {
         p.lesson_id: p.studied_at
         for p in (
@@ -638,6 +650,10 @@ async def meu_progresso(
         select(Lesson)
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
         .order_by(Course.position, CourseUnit.position, Lesson.position)
     )
     if course is not None:
@@ -663,7 +679,11 @@ async def meu_progresso(
         .join(Lesson, ReviewItem.lesson_id == Lesson.id)
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(ReviewItem.user_id == usuario.id)
+        .where(
+            ReviewItem.user_id == usuario.id,
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
     )
     if course is not None:
         cards_stmt = cards_stmt.where(Course.slug == course)

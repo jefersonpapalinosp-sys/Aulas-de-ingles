@@ -28,9 +28,9 @@ vi.mock('../api/queries', () => ({
         provider: 'VOA Learning English',
         source_url: 'https://example.com/level-2',
         position: 2,
-        status: 'planned',
+        status: 'published',
         total_lessons: 30,
-        published_lessons: 0,
+        published_lessons: 5,
       },
     ],
     isPending: false,
@@ -40,13 +40,14 @@ vi.mock('../api/queries', () => ({
 }))
 
 describe('CourseCatalogPage', () => {
-  it('apresenta cursos publicados e planejados com rótulos compreensíveis', () => {
+  it('apresenta os dois cursos publicados e o recorte disponível de cada um', () => {
     render(<CourseCatalogPage />, { wrapper: MemoryRouter })
 
     expect(screen.getByRole('heading', { name: 'Cursos de inglês' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Level 1/ })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Level 2/ })).toBeInTheDocument()
-    expect(screen.getByText('Em preparação')).toBeInTheDocument()
+    expect(screen.getAllByText('Publicado')).toHaveLength(2)
+    expect(screen.getByText('5/30')).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: 'Ver unidades' }).at(0)).toHaveAttribute(
       'href',
       '/cursos/voa-level-1',

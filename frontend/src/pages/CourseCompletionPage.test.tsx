@@ -84,7 +84,7 @@ const completionData: CourseCompletion = {
     title: "Let's Learn English — Level 2",
     level: '2',
     proficiency_label: 'Intermediário',
-    status: 'planned',
+    status: 'published',
     recommended: true,
     required: false,
     href: '/cursos/voa-level-2',
@@ -199,7 +199,7 @@ describe('CourseCompletionPage', () => {
     renderPage()
 
     expect(screen.getByText('Recomendado e opcional.')).toBeInTheDocument()
-    expect(screen.getByText(/Level 2 · Intermediário · Em preparação/)).toBeInTheDocument()
+    expect(screen.getByText(/Level 2 · Intermediário · Disponível/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Conhecer Level 2' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-2',

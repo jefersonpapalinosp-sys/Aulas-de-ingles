@@ -17,7 +17,13 @@ async def lesson_by_course_number(
         await session.execute(
             select(Lesson)
             .join(Course, Lesson.course_id == Course.id)
-            .where(Course.slug == course_slug, Lesson.number == number)
+            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+            .where(
+                Course.slug == course_slug,
+                Course.status == "published",
+                CourseUnit.status == "published",
+                Lesson.number == number,
+            )
         )
     ).scalar_one_or_none()
 
@@ -42,7 +48,11 @@ async def lesson_summaries(
         )
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(Course.slug == course_slug)
+        .where(
+            Course.slug == course_slug,
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
         .order_by(CourseUnit.position, Lesson.position)
     )
     if unit_id is not None:

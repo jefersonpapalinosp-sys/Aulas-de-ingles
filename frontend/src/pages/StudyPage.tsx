@@ -22,6 +22,7 @@ import {
   type StudyStepSlug,
 } from '../features/study-session/studyProgress'
 import {
+  courseLevelLabel,
   DEFAULT_COURSE_SLUG,
   lessonPath,
   studyPath,
@@ -233,6 +234,7 @@ function StepContent({
       {writingPrompt && <WritingWorkspace prompt={writingPrompt} userId={userId} />}
       {shadowingMedia && (
         <ShadowingPractice
+          courseSlug={lesson.course_slug}
           media={shadowingMedia}
           userId={userId}
           lessonNumber={lesson.number}
@@ -395,7 +397,9 @@ export function StudyPage() {
     <article className="study-workspace">
       <header className="study-header">
         <div>
-          <p className="eyebrow">Aula {lesson.number} · estudo guiado</p>
+          <p className="eyebrow">
+            {courseLevelLabel(lesson.course_slug)} · Aula {lesson.number} · estudo guiado
+          </p>
           <h1>{lesson.title}</h1>
           <p className="lead">
             <em>{lesson.title_pt}</em> · {lesson.grammar_tag}
@@ -436,7 +440,10 @@ export function StudyPage() {
         {isComplete && currentStep === 'revisar' && (
           <div className="study-finished" role="status">
             <p className="study-kicker">Jornada concluída</p>
-            <h2>Boa! Você percorreu as cinco etapas da Aula {lesson.number}.</h2>
+            <h2>
+              Boa! Você percorreu as cinco etapas de {courseLevelLabel(lesson.course_slug)} · Aula{' '}
+              {lesson.number}.
+            </h2>
             <p>
               {marcarEstudada.isPending
                 ? 'Salvando a conclusão…'

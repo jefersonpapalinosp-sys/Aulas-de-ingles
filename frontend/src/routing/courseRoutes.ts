@@ -2,6 +2,15 @@ import type { StudyStepSlug } from '../features/study-session/studyProgress'
 
 export const DEFAULT_COURSE_SLUG = 'voa-level-1'
 
+export function courseLevelLabel(courseSlug: string): string {
+  const match = courseSlug.match(/(?:^|-)level-(\d+)(?:-|$)/i)
+  return match?.[1] ? `Level ${match[1]}` : courseSlug
+}
+
+export function todayPath(courseSlug: string): string {
+  return `/inicio?${new URLSearchParams({ course: courseSlug }).toString()}`
+}
+
 export function coursePath(courseSlug: string): string {
   return `/cursos/${encodeURIComponent(courseSlug)}`
 }

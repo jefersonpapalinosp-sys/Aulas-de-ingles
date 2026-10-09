@@ -1,8 +1,9 @@
 # Plano das Sprints 20–25 — frontend escalável, cursos e exercícios
 
-Data da análise: 8 de outubro de 2026  
-Estado: Sprints 20–24 implementadas; Sprint 25 permanece planejada
-Próxima prioridade: Sprint 25 — piloto Level 2, unidade 1–5
+- Data da análise: 8 de outubro de 2026
+- Atualizado em: 9 de outubro de 2026
+- Estado: Sprints 20–25 implementadas no piloto automatizado; validação manual ampla permanece pendente
+- Próxima prioridade: auditar o próximo bloco do Level 2 antes de publicar as Aulas 6–10
 
 ## 1. Objetivo
 
@@ -85,7 +86,7 @@ transformaria a barra em um catálogo com dezenas de itens e mais de cem paradas
 | `TestPage.tsx` | prova fixa do bloco 31–40 | revisões e avaliações não possuem escopo próprio |
 | testes | várias expectativas literais de dez aulas e 31–40 | a expansão quebra testes por desenho, não por regressão |
 
-O seed atual possui dez aulas e 110 exercícios: 61 lacunas, 19 múltiplas escolhas, dez ditados,
+Na análise inicial, o seed possuía dez aulas e 110 exercícios: 61 lacunas, 19 múltiplas escolhas, dez ditados,
 dez ordenações e dez transformações. Isso significa que o motor de atividades já é uma base útil;
 o frontend precisa de uma sessão melhor, não de um segundo motor paralelo.
 
@@ -488,7 +489,7 @@ payload inicial.
 | 22 | unidade Level 1 40–44 e revisão | Sprints 20 e 21 | concluída |
 | 23 | unidade Level 1 45–49 e revisão | Sprint 22 | concluída |
 | 24 | unidade Level 1 50–52, conclusão do recorte e transição | Sprint 23 | concluída |
-| 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | próxima |
+| 25 | piloto Level 2 1–5 e prova de isolamento entre cursos | Sprint 24 | concluída |
 
 ## 9. Sprint 20 — navegação escalável e catálogo de cursos
 
@@ -811,18 +812,52 @@ responsável.
 
 ## 14. Sprint 25 — piloto Level 2, unidade 1–5
 
+**Estado:** implementação concluída no piloto em 9 de outubro de 2026. A suíte automatizada foi
+validada no ambiente de desenvolvimento; a reconstrução e prova final no compose de produção local
+permanecem pendentes de autorização. A publicação ampla também depende das validações manuais com
+VoiceOver, TalkBack e Windows real já registradas no roteiro de acessibilidade.
+
 **Objetivo:** comprovar em produção local que a arquitetura suporta um segundo curso com numeração
 reiniciada e padrão de conteúdo diferente.
 
-### Entregas
+### Implementação entregue
 
-- cadastrar metadados do catálogo completo de 30 aulas, sem publicar conteúdo incompleto;
-- publicar conteúdo auditado apenas para as Aulas 1–5 e sua revisão;
-- adaptar o template às capacidades reais do Level 2;
-- mostrar “Level 2 · Aula 1” em toda referência ambígua;
-- isolar progresso, caderno, revisão, gravações e recomendações por curso;
-- ajustar recomendação “Hoje” para respeitar curso ativo e sessões incompletas;
-- validar present perfect continuous, phrasal verbs, past perfect e revisão de comparativos no piloto.
+- Level 2 publicado no catálogo com seis unidades cobrindo 30 aulas planejadas, mantendo somente
+  a unidade `1-5` publicada; as unidades 6–30 continuam `planned`, sem metadados individuais nem
+  links para conteúdo inexistente;
+- Aulas 1–5 publicadas com quatro objetivos, três blocos teóricos, cinco frases, dez itens de
+  vocabulário, três notas de pronúncia, um áudio oficial, cinco cues, oito exercícios — quatro
+  de listening — e uma proposta de escrita por aula;
+- `Checkpoint 1–5` publicado como quarto checkpoint curricular, com seis questões autorais,
+  listening da Aula 3, correção persistida e procedência separando fonte oficial de atividade
+  autoral;
+- rotas, catálogo, mapas, rail, painel Hoje, caderno, revisão, avaliação, prática e progresso
+  usam `course_slug`, permitindo que números repetidos coexistam sem misturar identidade ou
+  histórico;
+- referências ambíguas exibem curso e aula, e a troca de curso preserva o contexto canônico;
+- present perfect continuous, phrasal verbs, past perfect, linguagem de opinião e
+  comparativos/superlativos foram cobertos por teoria e atividades autorais;
+- o seed consolidado passou a conter **27 aulas** — 22 do Level 1 e cinco do Level 2 —,
+  **quatro checkpoints/24 questões**, 27 áudios, 133 cues, 289 falas integrais, 27 propostas de
+  escrita, **247 exercícios/278 respostas/407 dicas**, 108 objetivos, 82 blocos e 285 itens de
+  vocabulário;
+- os cinco áudios do Level 2 permanecem `network_only`; seus 25 cues possuem timestamps
+  conservadores e ainda não foram validados por escuta humana, fato registrado no metadado
+  editorial;
+- a VOA lista reviews até o bloco 21–25 do Level 2, mas não oferece review oficial 26–30. Nenhum
+  fechamento desse último bloco é apresentado como oficial;
+- a regra de certificado do recorte Level 1 não mudou: exige as **22 aulas 31–52** e os **três
+  checkpoints** atuais; publicar o piloto do Level 2 não interfere nessa elegibilidade.
+
+### Evidência automatizada de fechamento
+
+- backend: **210 testes pytest** aprovados;
+- frontend: **152 testes Vitest**, ESLint, TypeScript e build aprovados;
+- bundle: **151,9 KiB gzip** somando JavaScript e CSS, dentro do limite de 170 KiB;
+- navegador em desenvolvimento: **35/35 cenários desktop** e **35/35 mobile** aprovados,
+  incluindo checkpoint, troca de curso, reflow equivalente a 200%, teclado e axe;
+- compose de produção local: rebuild e execução integral dos 74 casos ainda pendentes, porque a
+  operação reinicia serviços persistentes e requer autorização explícita.
 
 ### Critérios de aceite
 
@@ -913,21 +948,22 @@ já estabelecidas.
 
 ## 18. Definição de pronto do roadmap
 
-O ciclo 20–25 estará concluído quando:
+O ciclo 20–25 foi concluído com:
 
-- a navegação não depender de lista plana nem de números globais;
-- recorte curricular 31–52 do Level 1 completo e Level 2/1–5 coexistirem;
-- revisões forem itens curriculares próprios;
-- a página de exercícios funcionar nas Aulas 31, 38, 40 e nas novas unidades;
-- nenhuma rota, progresso, prova ou caderno misturar cursos;
-- todos os fluxos relevantes tiverem estados de erro, vazio, offline e retomada;
-- testes automatizados e validações manuais de acessibilidade estiverem documentados;
-- orçamento de performance, licença de mídia e privacidade continuarem aprovados.
+- navegação independente de lista plana e de números globais;
+- recorte curricular 31–52 do Level 1 completo e Level 2/1–5 coexistindo;
+- revisões como itens curriculares próprios;
+- página de exercícios funcionando nas Aulas 31, 38, 40 e nas novas unidades;
+- rotas, progresso, prova e caderno isolados por curso;
+- estados de erro, vazio, offline e retomada nos fluxos relevantes;
+- testes automatizados e validações manuais de acessibilidade documentados;
+- orçamento de performance, licença de mídia e privacidade preservados.
 
 ## 19. Próxima ação recomendada
 
-Iniciar a Sprint 25 sobre o contrato multi-curso e o fechamento validados na Sprint 24, publicando
-somente as Aulas 1–5 auditadas do Level 2 e seu checkpoint. A numeração reiniciada deve provar o
-isolamento de progresso, caderno, revisão, gravações e recomendações entre os níveis. As demais
-aulas do catálogo continuam em preparação, sem páginas vazias nem conteúdo fictício, e cada novo
-item permanece condicionado à auditoria de fonte, mídia, licença e autoria antes do seed principal.
+Auditar as fontes, lesson plans, mídias, licenças e objetivos das Aulas 6–10 do Level 2 antes de
+ampliar o seed. As unidades 6–30 continuam em preparação, sem páginas vazias nem conteúdo
+fictício. Cada novo bloco deve preservar o isolamento por curso e só pode ser publicado depois de
+conteúdo autoral, atribuição e sincronização de áudio serem validados. Quando o projeto chegar à
+unidade 26–30, qualquer fechamento criado localmente precisa ser identificado como autoral, pois
+não existe review oficial desse bloco na listagem principal da VOA.

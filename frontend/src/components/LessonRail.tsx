@@ -11,6 +11,7 @@ import {
 } from '../features/curriculum/curriculum'
 import {
   assessmentPath,
+  courseLevelLabel,
   coursePath,
   courseReviewPath,
   courseSlugFromPath,
@@ -18,6 +19,7 @@ import {
   lessonPath,
   notebookPath,
   reviewPath,
+  todayPath,
   unitPath,
 } from '../routing/courseRoutes'
 
@@ -96,7 +98,13 @@ export function NavigationPanel({
     ).length ?? 0
   const courseTitle =
     curriculum?.course.title ?? courses.find((course) => course.slug === courseSlug)?.title
-  const scopeUnitSlug = activeUnitSlug ?? expandedUnit ?? undefined
+  const courseLevel = courseLevelLabel(courseSlug)
+  const requestedScopeUnit = activeUnitSlug ?? expandedUnit ?? undefined
+  const scopedUnit = curriculum?.units.find((unit) => unit.slug === requestedScopeUnit)
+  const scopeUnitSlug =
+    scopedUnit?.status === 'published' && scopedUnit.published_lessons > 0
+      ? scopedUnit.slug
+      : undefined
 
   return (
     <div className="trail-panel">
@@ -168,7 +176,7 @@ export function NavigationPanel({
       </header>
 
       <nav className="trail-utilities" aria-label="Atalhos">
-        <NavLink to="/inicio" onClick={onNavigate}>
+        <NavLink to={todayPath(courseSlug)} onClick={onNavigate}>
           Hoje
         </NavLink>
         <NavLink to="/cursos" onClick={onNavigate}>
@@ -188,8 +196,8 @@ export function NavigationPanel({
             Avaliação
           </NavLink>
         )}
-        {expandedUnit && (
-          <NavLink to={unitPath(courseSlug, expandedUnit)} onClick={onNavigate}>
+        {scopeUnitSlug && (
+          <NavLink to={unitPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
             Mapa da unidade
           </NavLink>
         )}
@@ -217,17 +225,34 @@ export function NavigationPanel({
                     query.trim().toLocaleLowerCase('pt-BR'),
                   )),
             )
-            const isExpanded = expandedUnit === unit.slug
+            const unavailable = unit.status !== 'published' || unit.published_lessons === 0
+            const isExpanded = !unavailable && expandedUnit === unit.slug
             const visible = visibleWindow(matches, activeLessonNumber)
             return (
               <section className="trail-unit" key={unit.id}>
-                <button
-                  type="button"
-                  className="trail-unit-toggle"
-                  aria-expanded={isExpanded}
-                  aria-controls={`${idPrefix}-trail-unit-${unit.id}`}
-                  onClick={() => onUnitToggle(unit.slug)}
-                >
+                {unavailable ? (
+                  <div
+                    className="trail-unit-toggle"
+                    aria-disabled="true"
+                    aria-label={`${unit.title}: Em preparação`}
+                  >
+                    <span aria-hidden="true">·</span>
+                    <span>
+                      <strong>{unit.title}</strong>
+                      <small>
+                        Em preparação · {unit.total_lessons}{' '}
+                        {unit.total_lessons === 1 ? 'aula' : 'aulas'}
+                      </small>
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="trail-unit-toggle"
+                    aria-expanded={isExpanded}
+                    aria-controls={`${idPrefix}-trail-unit-${unit.id}`}
+                    onClick={() => onUnitToggle(unit.slug)}
+                  >
                   <span aria-hidden="true">{isExpanded ? '−' : '+'}</span>
                   <span>
                     <strong>{unit.title}</strong>
@@ -237,7 +262,8 @@ export function NavigationPanel({
                     </small>
                   </span>
                   {unit.slug === activeUnitSlug && <em>Atual</em>}
-                </button>
+                  </button>
+                )}
                 {isExpanded && (
                   <ul
                     id={`${idPrefix}-trail-unit-${unit.id}`}
@@ -267,7 +293,7 @@ export function NavigationPanel({
                             type="button"
                             className="trail-done"
                             aria-pressed={isStudied}
-                            aria-label={`${isStudied ? 'Desmarcar' : 'Marcar'} aula ${lesson.number} como estudada`}
+                            aria-label={`${isStudied ? 'Desmarcar' : 'Marcar'} ${courseLevel} · Aula ${lesson.number} como estudada`}
                             title={isStudied ? 'Estudada' : 'Marcar como estudada'}
                             disabled={completionPending}
                             onClick={() => onLessonDone(lesson, !isStudied)}
@@ -341,6 +367,13 @@ function activeContext(pathname: string): { unitSlug?: string; lessonNumber?: nu
     unitSlug: unit ? decodeURIComponent(unit) : undefined,
     lessonNumber: lesson ? Number(lesson) : undefined,
   }
+}
+
+function courseSwitchPath(pathname: string, courseSlug: string): string {
+  if (pathname === '/' || pathname === '/inicio') return todayPath(courseSlug)
+  if (pathname === '/revisar') return reviewPath(courseSlug)
+  if (pathname === '/caderno') return notebookPath(courseSlug)
+  return coursePath(courseSlug)
 }
 
 export function LessonRail() {
@@ -445,7 +478,7 @@ export function LessonRail() {
     onQueryChange: setQuery,
     onCourseChange: (slug) => {
       setQuery('')
-      void navigate(coursePath(slug))
+      void navigate(courseSwitchPath(location.pathname, slug))
     },
     onUnitToggle: (slug) =>
       setExpandedUnit((current) => (current === slug ? null : slug)),
@@ -460,12 +493,14 @@ export function LessonRail() {
   const activeCheckpoint = /\/checkpoint\/?$/.test(location.pathname)
     ? contextualUnitData?.review
     : undefined
+  const levelLabel = courseLevelLabel(courseSlug)
   const mobileLabel = activeLesson
-    ? `Aula ${activeLesson.number} · ${activeLesson.title}`
-    : activeCheckpoint?.title ??
-      contextualUnitData?.title ??
-      curriculum.data?.course.title ??
-      'Escolher aula'
+    ? `${levelLabel} · Aula ${activeLesson.number} · ${activeLesson.title}`
+    : activeCheckpoint
+      ? `${levelLabel} · ${activeCheckpoint.title}`
+      : contextualUnitData
+        ? `${levelLabel} · ${contextualUnitData.title}${contextualUnitData.published_lessons === 0 ? ' · Em preparação' : ''}`
+        : curriculum.data?.course.title ?? 'Escolher aula'
 
   return (
     <aside className="navigation-shell" aria-label="Navegação do curso">

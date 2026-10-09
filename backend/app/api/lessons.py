@@ -65,7 +65,11 @@ async def listar_vocabulario(
         .join(Lesson, VocabItem.lesson_id == Lesson.id)
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(Course.slug == course)
+        .where(
+            Course.slug == course,
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
         .order_by(CourseUnit.position, Lesson.position, VocabItem.position)
     )
     if lesson is not None:
@@ -99,7 +103,11 @@ async def listar_exercicios(
         .join(Lesson, Exercise.lesson_id == Lesson.id)
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(Course.slug == course)
+        .where(
+            Course.slug == course,
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
         .order_by(CourseUnit.position, Lesson.position, Exercise.position)
     )
     if lesson is not None:

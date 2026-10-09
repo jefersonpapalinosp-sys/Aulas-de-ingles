@@ -13733,5 +13733,710 @@
         ]
       }
     ]
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "1-5",
+    "slug": "lesson-1",
+    "position": 1,
+    "number": 1,
+    "title": "Budget Cuts",
+    "title_pt": "Cortes no orçamento",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson1/3960391.html",
+    "grammar_tag": "Present perfect e present perfect continuous",
+    "focus_points": [
+      "present perfect para resultados ligados ao presente",
+      "present perfect continuous para atividades em andamento",
+      "substantivos de profissão e inferências"
+    ],
+    "lead": "Rumores sobre cortes no orçamento fazem uma equipe tirar conclusões antes de conhecer os fatos.",
+    "story_note": "A situação profissional permite comparar resultados, processos em andamento e inferências apoiadas em pistas.",
+    "warmup_prompt": "What clues help you decide whether workplace information is a fact or only a rumor?",
+    "listening_focus": "Identifique formas com have/has, atividades em andamento e pistas usadas pelos personagens para inferir o tema da reunião.",
+    "goals": [
+      "Distinguir **present perfect** de **present perfect continuous**.",
+      "Relacionar **for** e **since** à duração de uma atividade.",
+      "Reconhecer nomes de profissão formados a partir de verbos.",
+      "Separar fatos de inferências durante a escuta."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Resultados com present perfect",
+        "why": "Use **have/has + past participle** para experiências ou resultados passados que continuam relevantes agora.",
+        "warning": "Não combine o present perfect com um momento passado encerrado, como *yesterday*.",
+        "table_head": ["Função", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["resultado atual", "has + particípio", "Mia has updated her résumé."]},
+          {"position": 1, "cells": ["experiência", "have + particípio", "They have heard similar rumors."]},
+          {"position": 2, "cells": ["resultado recente", "have already + particípio", "We have already checked the facts."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Processos com present perfect continuous",
+        "why": "Use **have/has been + verbo-ing** para enfatizar uma atividade que começou antes e chega ao presente.",
+        "warning": "Depois de *been*, mantenha o verbo principal em **-ing**.",
+        "table_head": ["Pista", "Uso", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["for two hours", "duração", "They have been meeting for two hours."]},
+          {"position": 1, "cells": ["since nine", "ponto inicial", "She has been working since nine."]},
+          {"position": 2, "cells": ["all morning", "processo recente", "People have been talking all morning."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Profissões e inferências",
+        "why": "Sufixos como **-er**, **-or** e **-ive** ajudam a formar nomes de profissões; verbos modais mostram o grau de certeza de uma inferência.",
+        "warning": "Uma conclusão com *must* ainda é uma inferência, não uma confirmação.",
+        "table_head": ["Base ou pista", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["report", "reporter", "A reporter checks sources."]},
+          {"position": 1, "cells": ["detect", "detective", "A detective investigates facts."]},
+          {"position": 2, "cells": ["strong evidence", "must", "The meeting must be important."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "People have been talking about the changes all morning.", "text_pt": "As pessoas têm falado sobre as mudanças a manhã toda.", "note": "O present perfect continuous destaca a atividade em andamento."},
+      {"position": 1, "text_en": "I have already updated my résumé.", "text_pt": "Eu já atualizei meu currículo.", "note": "*Already* enfatiza um resultado concluído antes de agora."},
+      {"position": 2, "text_en": "That must be what the meeting is about.", "text_pt": "Deve ser esse o assunto da reunião.", "note": "*Must* comunica uma inferência forte."},
+      {"position": 3, "text_en": "She has worked here for five years.", "text_pt": "Ela trabalha aqui há cinco anos.", "note": "*For* introduz uma duração."},
+      {"position": 4, "text_en": "Let's check the facts before we react.", "text_pt": "Vamos verificar os fatos antes de reagir.", "note": "A frase propõe confirmar informações antes de concluir."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "budget", "ipa": "/ˈbʌdʒɪt/", "translation_pt": "orçamento", "example_en": "The team discussed next year's budget."},
+      {"position": 1, "term": "budget cut", "ipa": "/ˈbʌdʒɪt kʌt/", "translation_pt": "corte no orçamento", "example_en": "A budget cut can change a project."},
+      {"position": 2, "term": "rumor", "ipa": "/ˈruːmər/", "translation_pt": "rumor", "example_en": "A rumor is not a confirmed fact."},
+      {"position": 3, "term": "raise", "ipa": "/reɪz/", "translation_pt": "aumento salarial", "example_en": "The workers hope to receive a raise."},
+      {"position": 4, "term": "assignment", "ipa": "/əˈsaɪnmənt/", "translation_pt": "tarefa; atribuição", "example_en": "Her manager gave her a new assignment."},
+      {"position": 5, "term": "accounting", "ipa": "/əˈkaʊntɪŋ/", "translation_pt": "contabilidade", "example_en": "Accounting keeps the financial records."},
+      {"position": 6, "term": "reporter", "ipa": "/rɪˈpɔːrtər/", "translation_pt": "repórter", "example_en": "A reporter asks questions and checks facts."},
+      {"position": 7, "term": "detective", "ipa": "/dɪˈtektɪv/", "translation_pt": "detetive", "example_en": "The detective investigated the case."},
+      {"position": 8, "term": "résumé", "ipa": "/ˈrezəmeɪ/", "translation_pt": "currículo profissional", "example_en": "Update your résumé before applying."},
+      {"position": 9, "term": "gossip", "ipa": "/ˈɡɑːsɪp/", "translation_pt": "fofoca; fofocar", "example_en": "Gossip can turn a guess into a rumor."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "I've /aɪv/ e we've /wiːv/", "explanation": "A contração de *have* se liga ao particípio seguinte; mantenha o som final /v/."},
+      {"position": 1, "label": "been /bɪn/ na fala conectada", "explanation": "Em fala natural, *been* costuma ser curto e sem destaque em *has been working*."},
+      {"position": 2, "label": "report → reporter", "explanation": "Observe a mudança de acento: *rePORT* no verbo e *rePORTer* com a sílaba forte antes do sufixo."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 1 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/08/31/3bf697ff-3ef5-4d59-8dcd-52613e2e7e9d_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 247,
+        "listening_exercise_position": 4,
+        "cues": [
+          {"position": 0, "start_seconds": 8, "end_seconds": 20, "speaker": "Anna", "text_en": "My boss has called a meeting.", "text_pt": "Minha chefe convocou uma reunião."},
+          {"position": 1, "start_seconds": 44, "end_seconds": 61, "speaker": "Jonathan", "text_en": "I have heard people in the building talking about budget cuts.", "text_pt": "Ouvi pessoas no prédio falando sobre cortes no orçamento."},
+          {"position": 2, "start_seconds": 88, "end_seconds": 105, "speaker": "Kaveh", "text_en": "When there are budget cuts, people lose their jobs.", "text_pt": "Quando há cortes no orçamento, pessoas perdem seus empregos."},
+          {"position": 3, "start_seconds": 139, "end_seconds": 155, "speaker": "Kaveh", "text_en": "I've already updated mine.", "text_pt": "Eu já atualizei o meu."},
+          {"position": 4, "start_seconds": 198, "end_seconds": 222, "speaker": "Anna", "text_en": "We've been worrying that you are going to fire us!", "text_pt": "Temos ficado preocupados achando que você vai nos demitir!"}
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["has finished", "finished yesterday", "will finish"], "prompt": "The report is ready now. Mia ____ it.", "hint": null, "explanation": "O resultado presente pede **has finished**.", "hints": ["O relatório está pronto agora.", "Use has + particípio."], "answers": ["has finished"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "They `____` about the meeting since nine o'clock.", "hint": null, "explanation": "Uma atividade iniciada às nove e ainda em andamento usa **have been talking**.", "hints": ["*Since* marca o ponto inicial.", "Use have been + verbo-ing."], "answers": ["have been talking"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["must", "did", "has been"], "prompt": "There are lights and many cars outside. The office ____ be open.", "hint": null, "explanation": "**Must** apresenta uma conclusão forte baseada nas pistas observadas.", "hints": ["A frase apresenta evidências.", "Escolha um modal de inferência forte."], "answers": ["must"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Reescreva com present perfect continuous: People started worrying two hours ago and they are still worried.", "hint": null, "explanation": "A forma conecta o início passado ao processo atual.", "hints": ["Comece com *People have been*.", "Use *for two hours*."], "answers": ["People have been worrying for two hours"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Uma reunião foi convocada.", "Anna recebeu um aumento confirmado.", "O escritório fechará imediatamente."], "prompt": "Listening: qual fato Anna conhece no início?", "hint": null, "explanation": "Anna sabe que a chefe convocou uma reunião; o assunto ainda é desconhecido.", "hints": ["Diferencie fato de suposição.", "Escute a fala sobre a chefe."], "answers": ["Uma reunião foi convocada."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Jonathan ouviu pessoas falarem em cortes.", "A chefe anunciou demissões por escrito.", "Anna conferiu o orçamento."], "prompt": "Listening: que informação inicia o rumor?", "hint": null, "explanation": "Jonathan relata algo que ouviu, sem apresentar confirmação oficial.", "hints": ["Procure a forma *I have heard*.", "A informação circula entre pessoas."], "answers": ["Jonathan ouviu pessoas falarem em cortes."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a frase curta em que Kaveh informa que seu currículo já está atualizado.", "hint": null, "explanation": "A frase usa present perfect com **already**.", "hints": ["Comece com *I've already*.", "O pronome final substitui *résumé*."], "answers": ["I've already updated mine"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["A equipe transformou um rumor em preocupação contínua.", "Todos receberam uma confirmação individual.", "Ninguém pensou em demissão."], "prompt": "Listening: o que a forma 'we've been worrying' revela?", "hint": null, "explanation": "A forma destaca que a preocupação começou antes e continuou até a reunião.", "hints": ["Observe *have been + -ing*.", "Pense em uma atividade com duração."], "answers": ["A equipe transformou um rumor em preocupação contínua."]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Fato, processo e inferência",
+        "instructions": "Write 6 to 9 sentences in English about a change at work, school, or in your routine. State one confirmed fact, describe an activity that has been happening, and make one careful inference from evidence.",
+        "min_words": 70,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "um resultado no present perfect", "terms": ["has ", "have ", "i've ", "we've "]},
+          {"label": "um processo no present perfect continuous", "terms": ["has been ", "have been "]},
+          {"label": "uma inferência cuidadosa", "terms": ["must be", "might be", "could be"]}
+        ]
+      }
+    ],
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "inferir",
+    "review_note": "Sprint 25: conteúdo autoral conferido documentalmente com a aula, o plano e a revisão oficial da VOA; banco de questões, imagens, marcas e outras mídias de terceiros não foram incorporados. Os timestamps dos cues são conservadores e não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "1-5",
+    "slug": "lesson-2",
+    "position": 2,
+    "number": 2,
+    "title": "The Interview",
+    "title_pt": "A entrevista",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-2/3960471.html",
+    "grammar_tag": "Phrasal verbs separáveis e inseparáveis",
+    "focus_points": [
+      "sentido dos phrasal verbs em contexto",
+      "posição de substantivos e pronomes como objeto",
+      "habilidades e realizações em entrevistas"
+    ],
+    "lead": "Uma nova vaga aproxima pessoas com perfis diferentes e transforma uma conversa informal em entrevista de emprego.",
+    "story_note": "O contexto profissional apresenta phrasal verbs frequentes e linguagem para descrever habilidades, metas e realizações.",
+    "warmup_prompt": "Which skills and accomplishments would you mention in a short job interview?",
+    "listening_focus": "Escute verbo e partícula como uma unidade de sentido e observe onde o objeto aparece.",
+    "goals": [
+      "Interpretar **phrasal verbs** sem traduzir cada palavra isoladamente.",
+      "Distinguir phrasal verbs separáveis de inseparáveis.",
+      "Posicionar pronomes corretamente em estruturas separáveis.",
+      "Descrever habilidades, realizações e objetivos profissionais."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Phrasal verbs como unidade",
+        "why": "Verbo e partícula formam um sentido que pode ser diferente do verbo isolado.",
+        "warning": "Evite deduzir o sentido traduzindo apenas o verbo principal.",
+        "table_head": ["Phrasal verb", "Sentido", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["take on", "aceitar responsabilidade", "I can take on a new project."]},
+          {"position": 1, "cells": ["team up", "formar parceria", "They teamed up for the interview."]},
+          {"position": 2, "cells": ["find out", "descobrir", "The manager wants to find out more."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Separável ou inseparável",
+        "why": "Alguns phrasal verbs aceitam o objeto entre verbo e partícula; outros mantêm os dois elementos juntos.",
+        "warning": "Com um pronome em estrutura separável, use obrigatoriamente verbo + pronome + partícula: *throw it away*.",
+        "table_head": ["Tipo", "Padrão", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["separável + nome", "tear the paper up", "She tore the advertisement up."]},
+          {"position": 1, "cells": ["separável + pronome", "tear it up", "She tore it up."]},
+          {"position": 2, "cells": ["inseparável", "go back to", "He went back to work."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Evidências em uma entrevista",
+        "why": "Uma resposta forte nomeia uma habilidade e acrescenta uma realização concreta como evidência.",
+        "warning": "Não confunda uma qualidade genérica com uma realização verificável.",
+        "table_head": ["Função", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["habilidade", "I am good at + -ing", "I am good at organizing interviews."]},
+          {"position": 1, "cells": ["realização", "I + passado + resultado", "I completed a difficult project."]},
+          {"position": 2, "cells": ["meta", "I want to + verbo", "I want to improve my reporting."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "I am ready to take on a new assignment.", "text_pt": "Estou pronto para assumir uma nova tarefa.", "note": "*Take on* significa aceitar uma responsabilidade."},
+      {"position": 1, "text_en": "Would you like to team up with me?", "text_pt": "Você gostaria de formar uma equipe comigo?", "note": "*Team up* apresenta uma parceria."},
+      {"position": 2, "text_en": "Please fill the application out carefully.", "text_pt": "Por favor, preencha a candidatura com cuidado.", "note": "O substantivo separa *fill* de *out*."},
+      {"position": 3, "text_en": "Could you tell me about an accomplishment?", "text_pt": "Você poderia me contar sobre uma realização?", "note": "Pergunta aberta comum em entrevistas."},
+      {"position": 4, "text_en": "I found out more about the position.", "text_pt": "Descobri mais sobre a vaga.", "note": "*Find out* permanece junto antes do complemento."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "interview", "ipa": "/ˈɪntərvjuː/", "translation_pt": "entrevista", "example_en": "The interview starts at ten."},
+      {"position": 1, "term": "job opening", "ipa": "/dʒɑːb ˈoʊpənɪŋ/", "translation_pt": "vaga de emprego", "example_en": "The studio has a job opening."},
+      {"position": 2, "term": "applicant", "ipa": "/ˈæplɪkənt/", "translation_pt": "candidato", "example_en": "Each applicant answers the same questions."},
+      {"position": 3, "term": "skill", "ipa": "/skɪl/", "translation_pt": "habilidade", "example_en": "Clear communication is a useful skill."},
+      {"position": 4, "term": "accomplishment", "ipa": "/əˈkɑːmplɪʃmənt/", "translation_pt": "realização; conquista", "example_en": "Finishing the project was an accomplishment."},
+      {"position": 5, "term": "opportunity", "ipa": "/ˌɑːpərˈtuːnəti/", "translation_pt": "oportunidade", "example_en": "Thank you for the opportunity."},
+      {"position": 6, "term": "take on", "ipa": "/teɪk ɑːn/", "translation_pt": "assumir; aceitar", "example_en": "She can take on more responsibility."},
+      {"position": 7, "term": "team up", "ipa": "/tiːm ʌp/", "translation_pt": "formar equipe", "example_en": "Two reporters will team up."},
+      {"position": 8, "term": "find out", "ipa": "/faɪnd aʊt/", "translation_pt": "descobrir", "example_en": "The interviewer will find out what you know."},
+      {"position": 9, "term": "tear up", "ipa": "/ter ʌp/", "translation_pt": "rasgar", "example_en": "Do not tear the form up."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "TAKE on e team UP", "explanation": "A partícula pode receber destaque quando o phrasal verb encerra a unidade de sentido."},
+      {"position": 1, "label": "find out → /faɪndaʊt/", "explanation": "Na fala conectada, a consoante final de *find* se liga à vogal de *out*."},
+      {"position": 2, "label": "I'd /aɪd/ e I've /aɪv/", "explanation": "Compare a consoante final: *I'd like* introduz preferência; *I've completed* apresenta uma realização."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 2 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/09/05/676d9800-cee0-4a59-9e79-b9378e0061ad_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 245,
+        "listening_exercise_position": 4,
+        "cues": [
+          {"position": 0, "start_seconds": 8, "end_seconds": 23, "speaker": "Anna", "text_en": "I am ready to take on anything she gives me.", "text_pt": "Estou pronta para assumir qualquer coisa que ela me der."},
+          {"position": 1, "start_seconds": 43, "end_seconds": 60, "speaker": "Ms. Weaver", "text_en": "I want you to team up with someone.", "text_pt": "Quero que você forme uma equipe com alguém."},
+          {"position": 2, "start_seconds": 91, "end_seconds": 111, "speaker": "Anna", "text_en": "You can tear these want ads up and throw them away!", "text_pt": "Você pode rasgar estes anúncios de emprego e jogá-los fora!"},
+          {"position": 3, "start_seconds": 166, "end_seconds": 187, "speaker": "Ms. Weaver", "text_en": "I need to find out if you have the skills for this job.", "text_pt": "Preciso descobrir se você tem as habilidades para este trabalho."},
+          {"position": 4, "start_seconds": 220, "end_seconds": 238, "speaker": "Pete", "text_en": "And, I got the job!", "text_pt": "E eu consegui o emprego!"}
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["accept responsibility for", "remove clothing from", "write information about"], "prompt": "In 'take on a new assignment', what does 'take on' mean?", "hint": null, "explanation": "Nesse contexto, **take on** significa aceitar uma responsabilidade.", "hints": ["A expressão acompanha uma nova tarefa.", "Pense em aceitar trabalho."], "answers": ["accept responsibility for"]},
+      {"position": 1, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "options": ["Throw it away.", "Throw away it.", "Away throw it."], "prompt": "Choose the correct position for the pronoun with 'throw away'.", "hint": null, "explanation": "Em um phrasal verb separável, o pronome fica entre verbo e partícula.", "hints": ["O objeto é o pronome *it*.", "Coloque-o depois de *throw*."], "answers": ["Throw it away."]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "The two hosts decided to `____` for the new program.", "hint": null, "explanation": "**Team up** significa trabalhar em parceria.", "hints": ["A resposta tem duas palavras.", "O resultado é uma equipe."], "answers": ["team up"]},
+      {"position": 3, "activity_type": "reorder", "skill": "grammar", "objective": "produce", "options": ["I", "completed", "a difficult project", "last year"], "prompt": "Ordene uma realização adequada para uma entrevista.", "hint": null, "explanation": "A frase combina sujeito, verbo no passado, realização e tempo definido.", "hints": ["Comece com *I completed*.", "A expressão temporal vem no final."], "answers": ["I completed a difficult project last year"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Aceitar qualquer nova tarefa, exceto uma que envolve helicóptero.", "Recusar todo trabalho no estúdio.", "Voltar imediatamente para a escola."], "prompt": "Listening: para o que Anna diz estar preparada?", "hint": null, "explanation": "Anna usa *take on* para demonstrar disposição para novas responsabilidades e menciona uma exceção.", "hints": ["Escute *ready to take on*.", "A fala termina com uma exceção."], "answers": ["Aceitar qualquer nova tarefa, exceto uma que envolve helicóptero."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Trabalhar com outra pessoa.", "Apresentar o programa sozinho.", "Procurar um curso de contabilidade."], "prompt": "Listening: o que Ms. Weaver quer que Anna faça?", "hint": null, "explanation": "A chefe usa *team up* para pedir que Anna trabalhe com um parceiro.", "hints": ["Identifique o phrasal verb principal.", "*Someone* indica outra pessoa."], "answers": ["Trabalhar com outra pessoa."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a pergunta indireta sobre as habilidades para o trabalho.", "hint": null, "explanation": "A fala combina **find out** com uma oração iniciada por *if*.", "hints": ["Comece com *I need to find out*.", "Termine com *for this job*."], "answers": ["I need to find out if you have the skills for this job"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Ele foi contratado apesar de ter um perfil muito diferente de Anna.", "Ele recusou a entrevista antes de responder.", "Ele recebeu o cargo porque gosta de conversar com todos."], "prompt": "Listening: qual é o resultado irônico da entrevista de Pete?", "hint": null, "explanation": "As diferenças de Pete, que pareciam fraquezas, eram justamente o contraste procurado para o programa.", "hints": ["Compare Pete com Anna.", "Escute a notícia no final."], "answers": ["Ele foi contratado apesar de ter um perfil muito diferente de Anna."]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Minha apresentação profissional",
+        "instructions": "Write 6 to 9 sentences in English for a short interview. Name a role you want, describe two skills, give one concrete accomplishment, and state a learning goal. Use at least two phrasal verbs.",
+        "min_words": 75,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "duas habilidades", "terms": ["i can ", "i am good at ", "my skills"]},
+          {"label": "uma realização", "terms": ["i completed", "i created", "i helped", "i achieved"]},
+          {"label": "dois phrasal verbs da aula", "terms": ["take on", "team up", "find out", "go back"]}
+        ]
+      }
+    ],
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "definir metas",
+    "review_note": "Sprint 25: conteúdo autoral conferido documentalmente com a aula, o plano e a revisão oficial da VOA; banco de questões, imagens, marcas e outras mídias de terceiros não foram incorporados. Os timestamps dos cues são conservadores e não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "1-5",
+    "slug": "lesson-3",
+    "position": 3,
+    "number": 3,
+    "title": "He Said - She Said",
+    "title_pt": "Ele disse, ela disse",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-3/4027340.html",
+    "grammar_tag": "Past perfect e sequência de eventos",
+    "focus_points": [
+      "past perfect para o primeiro de dois eventos passados",
+      "pistas temporais com before, after e by the time",
+      "monitoramento de relatos e pontos de vista"
+    ],
+    "lead": "Anna e Pete chegam atrasados e apresentam versões diferentes dos acontecimentos que vieram antes da reunião.",
+    "story_note": "Os relatos contrastantes ajudam a organizar uma linha do tempo, monitorar a compreensão e separar past perfect de outras estruturas com had.",
+    "warmup_prompt": "How can two people remember the same delayed trip in different ways?",
+    "listening_focus": "Localize had + particípio, conectores temporais e detalhes que distinguem os dois pontos de vista.",
+    "goals": [
+      "Formar o **past perfect** com had + past participle.",
+      "Ordenar dois acontecimentos passados com pistas temporais.",
+      "Distinguir **had + particípio** de **had to + verbo**.",
+      "Monitorar divergências entre dois relatos orais."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "O passado anterior",
+        "why": "Quando dois eventos aconteceram no passado, o **past perfect** pode marcar claramente o evento anterior.",
+        "warning": "Depois de *had*, use o particípio: *had left*, não *had leave*.",
+        "table_head": ["Ordem", "Tempo verbal", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["1º mensagem", "past perfect", "Mia had left a message."]},
+          {"position": 1, "cells": ["2º reunião", "simple past", "The meeting began."]},
+          {"position": 2, "cells": ["relação", "had + particípio", "Mia had left a message before the meeting began."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Pistas para montar a linha do tempo",
+        "why": "**Before**, **after** e **by the time** conectam eventos e ajudam o ouvinte a reconstruir a ordem.",
+        "warning": "A ordem das orações na frase pode mudar, mas a forma verbal preserva a ordem dos eventos.",
+        "table_head": ["Conector", "Relação", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["before", "evento anterior", "They had called before they left."]},
+          {"position": 1, "cells": ["after", "primeiro evento na oração", "After they had called, they left."]},
+          {"position": 2, "cells": ["by the time", "limite temporal", "By the time we arrived, she had gone."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Had done × had to do",
+        "why": "**Had + particípio** forma o past perfect; **had to + verbo base** expressa obrigação ou necessidade passada.",
+        "warning": "Em *had to wait*, *wait* não é particípio e a expressão não é past perfect.",
+        "table_head": ["Estrutura", "Função", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["had arrived", "evento anterior", "Pete had arrived on time."]},
+          {"position": 1, "cells": ["had to call", "necessidade", "Anna had to call the office."]},
+          {"position": 2, "cells": ["had waited", "evento anterior", "She had waited fifteen minutes."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "By the time the meeting began, we had arrived.", "text_pt": "Quando a reunião começou, nós já havíamos chegado.", "note": "*By the time* estabelece um limite passado."},
+      {"position": 1, "text_en": "She had left a message before she entered.", "text_pt": "Ela havia deixado uma mensagem antes de entrar.", "note": "O past perfect marca o primeiro evento."},
+      {"position": 2, "text_en": "After he had bought coffee, they continued the trip.", "text_pt": "Depois que ele comprou café, eles continuaram a viagem.", "note": "*After* torna a sequência explícita."},
+      {"position": 3, "text_en": "Could you take a message for me?", "text_pt": "Você poderia anotar um recado para mim?", "note": "Pedido educado para registrar uma mensagem."},
+      {"position": 4, "text_en": "We saw the same event differently.", "text_pt": "Nós vimos o mesmo acontecimento de maneiras diferentes.", "note": "A frase contrasta pontos de vista."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "promptness", "ipa": "/ˈprɑːmptnəs/", "translation_pt": "pontualidade", "example_en": "Promptness matters in a business meeting."},
+      {"position": 1, "term": "schedule", "ipa": "/ˈskedʒuːl/", "translation_pt": "agenda; horário", "example_en": "Check the schedule before leaving."},
+      {"position": 2, "term": "commute", "ipa": "/kəˈmjuːt/", "translation_pt": "trajeto cotidiano", "example_en": "Her commute took longer today."},
+      {"position": 3, "term": "consultant", "ipa": "/kənˈsʌltənt/", "translation_pt": "consultor", "example_en": "The consultant joined the meeting."},
+      {"position": 4, "term": "delay", "ipa": "/dɪˈleɪ/", "translation_pt": "atraso; atrasar", "example_en": "Traffic caused a short delay."},
+      {"position": 5, "term": "message", "ipa": "/ˈmesɪdʒ/", "translation_pt": "mensagem; recado", "example_en": "I left a message for the director."},
+      {"position": 6, "term": "point of view", "ipa": "/pɔɪnt əv vjuː/", "translation_pt": "ponto de vista", "example_en": "Each person shared a different point of view."},
+      {"position": 7, "term": "waste time", "ipa": "/weɪst taɪm/", "translation_pt": "perder tempo", "example_en": "Do not waste time before an appointment."},
+      {"position": 8, "term": "on time", "ipa": "/ɑːn taɪm/", "translation_pt": "na hora; pontualmente", "example_en": "Pete says he arrived on time."},
+      {"position": 9, "term": "take turns", "ipa": "/teɪk tɜːrnz/", "translation_pt": "alternar a vez", "example_en": "Take turns when telling the story."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "had arrived → /hədəˈraɪvd/", "explanation": "Sem destaque, *had* costuma reduzir e se ligar à vogal do particípio seguinte."},
+      {"position": 1, "label": "I'd /aɪd/", "explanation": "No contexto passado, *I'd left* pode representar *I had left*; o particípio ajuda a reconhecer a contração."},
+      {"position": 2, "label": "arrived /d/ e waited /ɪd/", "explanation": "O final **-ed** muda de som: /d/ depois de som sonoro em *arrived* e /ɪd/ depois de /t/ em *waited*."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 3 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/09/15/078ffce1-f691-4e1e-811e-058154119d2d_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 295,
+        "listening_exercise_position": 4,
+        "cues": [
+          {"position": 0, "start_seconds": 7, "end_seconds": 25, "speaker": "Anna", "text_en": "Yesterday, Pete had promised to meet me here at 8:00 a.m.", "text_pt": "Ontem, Pete havia prometido me encontrar aqui às oito da manhã."},
+          {"position": 1, "start_seconds": 69, "end_seconds": 86, "speaker": "Anna", "text_en": "I had waited 15 minutes when Pete arrived!", "text_pt": "Eu havia esperado quinze minutos quando Pete chegou!"},
+          {"position": 2, "start_seconds": 105, "end_seconds": 124, "speaker": "Anna", "text_en": "After Pete had wasted time waiting for coffee, we were late.", "text_pt": "Depois que Pete perdeu tempo esperando café, nós nos atrasamos."},
+          {"position": 3, "start_seconds": 190, "end_seconds": 210, "speaker": "Pete", "text_en": "By the time she had fed all the birds, we were late.", "text_pt": "Quando ela terminou de alimentar todos os pássaros, nós estávamos atrasados."},
+          {"position": 4, "start_seconds": 232, "end_seconds": 252, "speaker": "Kelly", "text_en": "You two see the same event very differently.", "text_pt": "Vocês dois veem o mesmo acontecimento de maneiras muito diferentes."}
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["The train had left before we arrived.", "The train has leave before we arrived.", "The train will left before we arrived."], "prompt": "Choose the sentence that marks the earlier past event.", "hint": null, "explanation": "**Had left** marca a partida como anterior à chegada.", "hints": ["Há dois eventos passados.", "O primeiro usa had + particípio."], "answers": ["The train had left before we arrived."]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "By the time the director called, we `____` a message.", "hint": null, "explanation": "A mensagem veio antes da ligação, por isso usamos **had left**.", "hints": ["*By the time* estabelece a ordem.", "Use o particípio de *leave*."], "answers": ["had left"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["had to buy = necessidade passada", "had to buy = past perfect", "had bought = obrigação futura"], "prompt": "What does 'had to buy coffee' express?", "hint": null, "explanation": "**Had to + verbo base** expressa necessidade passada, não past perfect.", "hints": ["Observe o *to* depois de *had*.", "A estrutura responde ao que foi necessário fazer."], "answers": ["had to buy = necessidade passada"]},
+      {"position": 3, "activity_type": "reorder", "skill": "grammar", "objective": "produce", "options": ["After", "she had called", "the office", "she left"], "prompt": "Ordene os eventos para mostrar que a ligação veio primeiro.", "hint": null, "explanation": "A oração com past perfect vem depois de **After** e antecede o evento no simple past.", "hints": ["Comece com *After*.", "Termine com *she left*."], "answers": ["After she had called the office she left"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Pete havia prometido encontrá-la às oito.", "Pete marcou a reunião para o meio-dia.", "Anna não sabia o horário combinado."], "prompt": "Listening: qual compromisso anterior Anna menciona?", "hint": null, "explanation": "Anna usa *had promised* para apresentar a promessa anterior ao atraso.", "hints": ["Escute um horário exato.", "Procure *had promised*."], "answers": ["Pete havia prometido encontrá-la às oito."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Ela afirma ter esperado quinze minutos.", "Ela diz ter saído quinze minutos antes.", "Ela relata que Pete esperou uma hora."], "prompt": "Listening: como Anna descreve sua espera?", "hint": null, "explanation": "Na versão de Anna, ela havia esperado quinze minutos quando Pete chegou.", "hints": ["Escute o número.", "Identifique quem diz *I had waited*."], "answers": ["Ela afirma ter esperado quinze minutos."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a frase de Pete iniciada por 'By the time'.", "hint": null, "explanation": "A frase combina **by the time**, past perfect e simple past para ordenar os eventos.", "hints": ["O primeiro evento envolve alimentar os pássaros.", "O resultado final é *we were late*."], "answers": ["By the time she had fed all the birds, we were late"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Os dois percebem o mesmo evento de maneiras diferentes.", "Kelly conclui que apenas Anna conhece os fatos.", "Pete e Anna apresentam uma cronologia idêntica."], "prompt": "Listening: qual diagnóstico Kelly faz sobre os relatos?", "hint": null, "explanation": "Kelly reconhece a divergência de pontos de vista e a transforma em ideia para o programa.", "hints": ["Escute *same event*.", "A diferença se torna uma oportunidade."], "answers": ["Os dois percebem o mesmo evento de maneiras diferentes."]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Duas versões de um atraso",
+        "instructions": "Write 7 to 10 sentences in English about two people who remember the same delayed event differently. Establish the timeline, include each point of view, and explain what had happened before the main event.",
+        "min_words": 85,
+        "min_sentences": 7,
+        "requirements": [
+          {"label": "duas formas no past perfect", "terms": ["had arrived", "had left", "had called", "had waited", "had forgotten"]},
+          {"label": "um conector temporal", "terms": ["before", "after", "by the time"]},
+          {"label": "dois pontos de vista", "terms": ["according to", "point of view", "differently", "however"]}
+        ]
+      }
+    ],
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "monitorar",
+    "review_note": "Sprint 25: conteúdo autoral conferido documentalmente com a aula, o plano e a revisão oficial da VOA; banco de questões, imagens, marcas e outras mídias de terceiros não foram incorporados. Os timestamps dos cues são conservadores e não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "1-5",
+    "slug": "lesson-4",
+    "position": 4,
+    "number": 4,
+    "title": "Run Away With the Circus!",
+    "title_pt": "Fugir com o circo!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-4-run-away-with-the-circus/4034187.html",
+    "grammar_tag": "Opiniões, concordância e discordância",
+    "focus_points": [
+      "expressões para apresentar e sustentar opiniões",
+      "concordância e discordância educadas",
+      "perguntas para esclarecer o ponto de vista do outro"
+    ],
+    "lead": "Anna e Pete discordam sobre considerar artistas ou atletas os profissionais de circo e precisam sustentar seus pontos de vista.",
+    "story_note": "O debate mostra que reconhecer parte do argumento, pedir esclarecimento e oferecer razões mantém uma conversa respeitosa.",
+    "warmup_prompt": "Are circus performers artists, athletes, or both? Give one reason for your opinion.",
+    "listening_focus": "Identifique marcadores de opinião, concordância parcial, contraste e mudança de posição.",
+    "goals": [
+      "Apresentar uma opinião com uma razão clara.",
+      "Concordar ou discordar de modo educado.",
+      "Usar perguntas para esclarecer uma ideia.",
+      "Reconhecer concessões e mudanças de posição na escuta."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Opinião acompanhada de razão",
+        "why": "Expressões como **I think** e **in my view** apresentam uma posição; **because** acrescenta evidência ou justificativa.",
+        "warning": "Uma afirmação repetida sem razão não desenvolve o argumento.",
+        "table_head": ["Função", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["opinião", "I think + oração", "I think circus work is creative."]},
+          {"position": 1, "cells": ["ponto de vista", "In my view + oração", "In my view, movement can tell a story."]},
+          {"position": 2, "cells": ["razão", "because + oração", "It is art because it communicates an idea."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Concordar e discordar com respeito",
+        "why": "Uma concessão reconhece parte do argumento antes de apresentar concordância ou contraste.",
+        "warning": "Formas diretas como *You're wrong* podem bloquear a conversa; prefira linguagem sobre a ideia, não sobre a pessoa.",
+        "table_head": ["Movimento", "Expressão", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["concordar", "I agree with you on that point", "I agree that performers are athletic."]},
+          {"position": 1, "cells": ["conceder", "That's a good point, but...", "That's a good point, but skill can be artistic."]},
+          {"position": 2, "cells": ["discordar", "I see it differently", "I see it differently because performance tells a story."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Perguntas para esclarecer",
+        "why": "Uma pergunta de esclarecimento verifica significado e incentiva a outra pessoa a explicar sua razão.",
+        "warning": "Evite perguntas retóricas agressivas; use *could you explain* ou *what do you mean by*.",
+        "table_head": ["Objetivo", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["pedir definição", "What do you mean by...?", "What do you mean by artistic?"]},
+          {"position": 1, "cells": ["pedir razão", "Why do you think...?", "Why do you think it is a sport?"]},
+          {"position": 2, "cells": ["confirmar", "Are you saying that...?", "Are you saying that competition is necessary?"]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "In my view, the performance tells a story.", "text_pt": "Na minha opinião, a apresentação conta uma história.", "note": "A frase apresenta uma opinião e uma razão observável."},
+      {"position": 1, "text_en": "That's a good point, but I see it differently.", "text_pt": "Esse é um bom argumento, mas eu vejo de outra forma.", "note": "A concessão reduz o tom da discordância."},
+      {"position": 2, "text_en": "I agree with you on that point.", "text_pt": "Concordo com você nesse ponto.", "note": "A concordância pode ser parcial e específica."},
+      {"position": 3, "text_en": "Could you explain what makes it an art form?", "text_pt": "Você poderia explicar o que faz disso uma forma de arte?", "note": "Pedido educado de esclarecimento."},
+      {"position": 4, "text_en": "I hadn't considered that perspective.", "text_pt": "Eu não havia considerado essa perspectiva.", "note": "A frase reconhece que uma nova razão mudou a conversa."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "point of view", "ipa": "/pɔɪnt əv vjuː/", "translation_pt": "ponto de vista", "example_en": "Explain your point of view calmly."},
+      {"position": 1, "term": "agree", "ipa": "/əˈɡriː/", "translation_pt": "concordar", "example_en": "I agree with one part of the argument."},
+      {"position": 2, "term": "disagree", "ipa": "/ˌdɪsəˈɡriː/", "translation_pt": "discordar", "example_en": "They disagree without insulting each other."},
+      {"position": 3, "term": "clarify", "ipa": "/ˈklærəfaɪ/", "translation_pt": "esclarecer", "example_en": "Ask a question to clarify the idea."},
+      {"position": 4, "term": "athletic", "ipa": "/æθˈletɪk/", "translation_pt": "atlético", "example_en": "The routine requires athletic strength."},
+      {"position": 5, "term": "artistic", "ipa": "/ɑːrˈtɪstɪk/", "translation_pt": "artístico", "example_en": "The costume adds an artistic element."},
+      {"position": 6, "term": "perform", "ipa": "/pərˈfɔːrm/", "translation_pt": "apresentar-se", "example_en": "The group will perform tonight."},
+      {"position": 7, "term": "compete", "ipa": "/kəmˈpiːt/", "translation_pt": "competir", "example_en": "Athletes often compete for a prize."},
+      {"position": 8, "term": "graceful", "ipa": "/ˈɡreɪsfəl/", "translation_pt": "gracioso; elegante", "example_en": "The performer made a graceful movement."},
+      {"position": 9, "term": "admit", "ipa": "/ədˈmɪt/", "translation_pt": "admitir; reconhecer", "example_en": "Pete can admit that the costumes are creative."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "I AGREE × I DISAGREE", "explanation": "Destaque o verbo principal para tornar a posição clara; use volume e ritmo controlados para manter a cortesia."},
+      {"position": 1, "label": "That's a good point, but...", "explanation": "Uma pequena pausa antes de *but* separa a concessão do contraste."},
+      {"position": 2, "label": "Could you explain...?", "explanation": "A entonação aberta e não agressiva sinaliza um pedido real de esclarecimento."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 4 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/09/19/56dbc988-a70f-4417-8668-c3916f6b73e7_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 301,
+        "listening_exercise_position": 4,
+        "cues": [
+          {"position": 0, "start_seconds": 16, "end_seconds": 32, "speaker": "Professor Bot", "text_en": "Today's lesson is about agreeing and disagreeing.", "text_pt": "A aula de hoje é sobre concordar e discordar."},
+          {"position": 1, "start_seconds": 55, "end_seconds": 70, "speaker": "Anna", "text_en": "That is a very interesting point of view.", "text_pt": "Esse é um ponto de vista muito interessante."},
+          {"position": 2, "start_seconds": 102, "end_seconds": 120, "speaker": "Pete", "text_en": "We can agree that these young people are amazing.", "text_pt": "Podemos concordar que esses jovens são incríveis."},
+          {"position": 3, "start_seconds": 164, "end_seconds": 183, "speaker": "Anna", "text_en": "I see your point, Pete. I really do.", "text_pt": "Entendo seu ponto, Pete. Entendo mesmo."},
+          {"position": 4, "start_seconds": 268, "end_seconds": 288, "speaker": "Pete", "text_en": "You're right, Anna. It's just so beautiful.", "text_pt": "Você tem razão, Anna. É simplesmente tão bonito."}
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["That's a good point, but I see it differently.", "You are completely wrong.", "Stop talking about your idea."], "prompt": "Choose the respectful disagreement.", "hint": null, "explanation": "A primeira opção reconhece o argumento antes de apresentar contraste.", "hints": ["Procure uma concessão.", "A frase deve discutir a ideia, não atacar a pessoa."], "answers": ["That's a good point, but I see it differently."]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "I think the performance is art `____` it tells a story.", "hint": null, "explanation": "**Because** introduz a razão que sustenta a opinião.", "hints": ["A segunda oração explica a primeira.", "Use um conector de causa."], "answers": ["because"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "options": ["Could you explain what you mean by artistic?", "Why are you always wrong?", "Do not explain your opinion."], "prompt": "Which question asks for clarification politely?", "hint": null, "explanation": "**Could you explain...?** abre espaço para que a pessoa torne sua ideia mais clara.", "hints": ["Procure um pedido, não uma acusação.", "A pergunta deve buscar significado."], "answers": ["Could you explain what you mean by artistic?"]},
+      {"position": 3, "activity_type": "reorder", "skill": "grammar", "objective": "produce", "options": ["I", "agree with you", "on", "that point"], "prompt": "Ordene uma concordância parcial e específica.", "hint": null, "explanation": "A estrutura natural é **agree with someone on a point**.", "hints": ["Comece com *I agree*.", "Use *with you* antes de *on*."], "answers": ["I agree with you on that point"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Como as pessoas concordam e discordam.", "Como comprar ingressos para o circo.", "Como competir em um campeonato."], "prompt": "Listening: qual objetivo Professor Bot anuncia?", "hint": null, "explanation": "Professor Bot orienta o ouvinte a prestar atenção à linguagem de concordância e discordância.", "hints": ["Escute duas palavras opostas.", "O foco é uma função comunicativa."], "answers": ["Como as pessoas concordam e discordam."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Ela reconhece o ponto de vista antes de discordar.", "Ela encerra a conversa imediatamente.", "Ela concorda com toda a opinião de Pete."], "prompt": "Listening: o que Anna faz ao chamar a ideia de Pete de um ponto de vista interessante?", "hint": null, "explanation": "Anna sinaliza que ouviu a ideia antes de apresentar sua discordância.", "hints": ["Observe o que vem antes da discordância.", "Reconhecer não significa concordar."], "answers": ["Ela reconhece o ponto de vista antes de discordar."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a frase em que Pete encontra um ponto de concordância sobre os jovens.", "hint": null, "explanation": "A frase usa **can agree** para estabelecer terreno comum.", "hints": ["Comece com *We can agree*.", "Termine com *are amazing*."], "answers": ["We can agree that these young people are amazing"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Novas evidências fazem Pete rever sua posição.", "Pete continua negando qualquer qualidade artística.", "Anna abandona sua opinião sem explicação."], "prompt": "Listening: o que a fala final de Pete mostra?", "hint": null, "explanation": "Ao dizer que Anna tem razão, Pete demonstra que as explicações e a apresentação mudaram sua avaliação.", "hints": ["Escute *You're right*.", "Compare a fala final com a discordância inicial."], "answers": ["Novas evidências fazem Pete rever sua posição."]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma discordância produtiva",
+        "instructions": "Write 7 to 10 sentences in English about whether an activity should be considered art, sport, or both. State your opinion, give two reasons, recognize one opposing point, and ask one clarification question.",
+        "min_words": 85,
+        "min_sentences": 7,
+        "requirements": [
+          {"label": "uma opinião", "terms": ["i think", "in my view", "in my opinion"]},
+          {"label": "uma concessão respeitosa", "terms": ["good point", "i see your point", "however", "but i"]},
+          {"label": "uma pergunta de esclarecimento", "terms": ["could you explain", "what do you mean", "why do you think", "are you saying"]}
+        ]
+      }
+    ],
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "pedir esclarecimento",
+    "review_note": "Sprint 25: conteúdo autoral conferido documentalmente com a aula e o plano individual oficial da VOA, que informa a estratégia Ask Questions to Clarify; a revisão oficial resume a estratégia como Apply a Rule. Banco de questões, imagens, marcas e outras mídias de terceiros não foram incorporados. Os timestamps dos cues são conservadores e não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "1-5",
+    "slug": "lesson-5",
+    "position": 5,
+    "number": 5,
+    "title": "Greatest Vacation of All Time",
+    "title_pt": "As melhores férias de todos os tempos",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-5-greatest-vacation/4035571.html",
+    "grammar_tag": "Comparativos e superlativos",
+    "focus_points": [
+      "comparativos para duas opções",
+      "superlativos para um elemento dentro de um grupo",
+      "formas irregulares e estruturas com more, most, less e least"
+    ],
+    "lead": "Uma agente de viagens apresenta opções cada vez mais caras enquanto Anna compara destinos e meios de transporte.",
+    "story_note": "O planejamento de férias cria um contexto prático para avaliar preço, conforto, velocidade, risco e preferências.",
+    "warmup_prompt": "What makes one vacation better than another: price, comfort, adventure, or something else?",
+    "listening_focus": "Reconheça terminações -er/-est, estruturas com more/most e formas irregulares como better/best.",
+    "goals": [
+      "Comparar duas opções com adjetivos comparativos.",
+      "Destacar uma opção em um grupo com superlativos.",
+      "Usar corretamente formas irregulares e **less/least**.",
+      "Avaliar ofertas de viagem a partir de detalhes ouvidos."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Comparar duas opções",
+        "why": "Adjetivos curtos geralmente recebem **-er**; adjetivos mais longos usam **more + adjetivo**, normalmente com **than**.",
+        "warning": "Não duplique a marca de comparação: evite *more cheaper*.",
+        "table_head": ["Tipo", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["curto", "fast → faster", "A plane is faster than a train."]},
+          {"position": 1, "cells": ["terminado em y", "cozy → cozier", "The cabin is cozier than the tent."]},
+          {"position": 2, "cells": ["longo", "more comfortable", "The train is more comfortable than the bus."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Um elemento dentro do grupo",
+        "why": "Use **the + -est** ou **the most + adjetivo** para comparar uma opção com todo o grupo.",
+        "warning": "O superlativo normalmente precisa de **the** quando identifica uma opção específica.",
+        "table_head": ["Tipo", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["curto", "the fastest", "The plane is the fastest option."]},
+          {"position": 1, "cells": ["terminado em y", "the priciest", "That is the priciest package."]},
+          {"position": 2, "cells": ["longo", "the most relaxing", "The beach is the most relaxing destination."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Formas irregulares e escala inversa",
+        "why": "Alguns adjetivos mudam completamente; **less** e **least** expressam um grau menor sem alterar o adjetivo.",
+        "warning": "Use *better/best* para *good* e *worse/worst* para *bad*, nunca *gooder* ou *baddest*.",
+        "table_head": ["Base", "Comparativo", "Superlativo"],
+        "rows": [
+          {"position": 0, "cells": ["good", "better", "the best"]},
+          {"position": 1, "cells": ["bad", "worse", "the worst"]},
+          {"position": 2, "cells": ["romantic", "less romantic", "the least romantic"]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "This package is cheaper than the mountain trip.", "text_pt": "Este pacote é mais barato que a viagem para a montanha.", "note": "O comparativo avalia duas opções."},
+      {"position": 1, "text_en": "The train is the most comfortable choice.", "text_pt": "O trem é a escolha mais confortável.", "note": "O superlativo seleciona uma opção dentro do grupo."},
+      {"position": 2, "text_en": "Flying is better, but the train is the best for me.", "text_pt": "Voar é melhor, mas o trem é o melhor para mim.", "note": "*Good* muda para *better* e *best*."},
+      {"position": 3, "text_en": "Which vacation is less expensive?", "text_pt": "Quais férias são menos caras?", "note": "*Less* compara em uma escala inversa."},
+      {"position": 4, "text_en": "Could you tell me more about the destination?", "text_pt": "Você poderia me contar mais sobre o destino?", "note": "Pergunta educada para obter informações."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "vacation", "ipa": "/veɪˈkeɪʃən/", "translation_pt": "férias", "example_en": "They are planning a summer vacation."},
+      {"position": 1, "term": "getaway", "ipa": "/ˈɡetəweɪ/", "translation_pt": "viagem curta; escapada", "example_en": "A mountain getaway can be quiet."},
+      {"position": 2, "term": "pricey", "ipa": "/ˈpraɪsi/", "translation_pt": "caro", "example_en": "That hotel is a little pricey."},
+      {"position": 3, "term": "cozy", "ipa": "/ˈkoʊzi/", "translation_pt": "aconchegante", "example_en": "The small cabin feels cozy."},
+      {"position": 4, "term": "romantic", "ipa": "/roʊˈmæntɪk/", "translation_pt": "romântico", "example_en": "They want a romantic train journey."},
+      {"position": 5, "term": "exciting", "ipa": "/ɪkˈsaɪtɪŋ/", "translation_pt": "emocionante", "example_en": "The sea adventure sounds exciting."},
+      {"position": 6, "term": "transportation", "ipa": "/ˌtrænspɔːrˈteɪʃən/", "translation_pt": "transporte", "example_en": "Compare the transportation options."},
+      {"position": 7, "term": "destination", "ipa": "/ˌdestəˈneɪʃən/", "translation_pt": "destino", "example_en": "Choose a destination that fits your budget."},
+      {"position": 8, "term": "convenient", "ipa": "/kənˈviːniənt/", "translation_pt": "conveniente", "example_en": "The direct train is more convenient."},
+      {"position": 9, "term": "latest", "ipa": "/ˈleɪtɪst/", "translation_pt": "mais recente", "example_en": "The agency showed its latest technology."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "fast → faster → fastest", "explanation": "Mantenha a raiz clara e acrescente /ər/ no comparativo e /əst/ no superlativo."},
+      {"position": 1, "label": "than /ðən/", "explanation": "Na fala conectada, *than* costuma ser reduzido e recebe menos destaque que os itens comparados."},
+      {"position": 2, "label": "BETter × BEST", "explanation": "As formas irregulares precisam ser memorizadas; destaque a primeira sílaba de *better* e a palavra curta *best*."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 5 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2017/09/27/11289bfa-a821-47fb-905b-7b4174ae0c5e_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-08",
+        "duration_seconds": 290,
+        "listening_exercise_position": 4,
+        "cues": [
+          {"position": 0, "start_seconds": 5, "end_seconds": 20, "speaker": "Anna", "text_en": "That was the best vacation I have ever had.", "text_pt": "Essas foram as melhores férias que eu já tive."},
+          {"position": 1, "start_seconds": 66, "end_seconds": 82, "speaker": "Dan", "text_en": "The Mountain Getaway is good for you.", "text_pt": "A viagem para a montanha é boa para você."},
+          {"position": 2, "start_seconds": 91, "end_seconds": 111, "speaker": "Dan", "text_en": "The Deep Sea Adventure is better for you!", "text_pt": "A aventura no fundo do mar é melhor para você!"},
+          {"position": 3, "start_seconds": 119, "end_seconds": 139, "speaker": "Dan", "text_en": "It is our priciest vacation.", "text_pt": "São as nossas férias mais caras."},
+          {"position": 4, "start_seconds": 196, "end_seconds": 221, "speaker": "Anna", "text_en": "Planes are a little scary but helicopters are scarier!", "text_pt": "Aviões são um pouco assustadores, mas helicópteros são mais assustadores!"}
+        ],
+        "transcript": []
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "options": ["cheaper than", "more cheaper than", "the cheapest than"], "prompt": "The bus costs less than the train. The bus is ____ the train.", "hint": null, "explanation": "Para comparar duas opções com *cheap*, use **cheaper than**.", "hints": ["Há somente duas opções.", "Adjetivos curtos recebem -er."], "answers": ["cheaper than"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Of all three hotels, this one is `____` comfortable.", "hint": null, "explanation": "A comparação com todo o grupo pede **the most**.", "hints": ["A expressão *of all three* indica superlativo.", "*Comfortable* usa *most*."], "answers": ["the most"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "options": ["good → better → best", "good → gooder → goodest", "good → more good → most good"], "prompt": "Choose the correct irregular comparison.", "hint": null, "explanation": "As formas irregulares de **good** são **better** e **best**.", "hints": ["A raiz muda completamente.", "Não acrescente -er/-est a *good*."], "answers": ["good → better → best"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Combine the ideas with a superlative: The bicycle is romantic. The bus and car are more romantic.", "hint": null, "explanation": "A bicicleta ocupa o menor grau no grupo e pede **the least romantic**.", "hints": ["A escala é inversa.", "Use *least* com o adjetivo inalterado."], "answers": ["The bicycle is the least romantic option"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Ela imagina uma experiência que considera a melhor.", "Ela descreve as piores férias reais de sua vida.", "Ela já comprou uma viagem para a montanha."], "prompt": "Listening: o que Anna avalia no primeiro cue?", "hint": null, "explanation": "Anna usa *best* para avaliar uma viagem imaginada como superior às demais.", "hints": ["Escute o superlativo.", "Considere se a experiência é real ou imaginada."], "answers": ["Ela imagina uma experiência que considera a melhor."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["Ele troca uma opção boa por outra que chama de melhor.", "Ele afirma que todas as opções são idênticas.", "Ele oferece primeiro a opção menos cara."], "prompt": "Listening: como Dan conduz a comparação entre montanha e mar?", "hint": null, "explanation": "Dan começa com *good* e apresenta a aventura no mar como *better*.", "hints": ["Compare *good* e *better*.", "Observe a ordem das duas ofertas."], "answers": ["Ele troca uma opção boa por outra que chama de melhor."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a comparação de Anna entre aviões e helicópteros.", "hint": null, "explanation": "O comparativo de **scary** troca *y* por **-ier**.", "hints": ["A primeira parte usa *a little scary*.", "A segunda termina em *scarier*."], "answers": ["Planes are a little scary but helicopters are scarier"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "options": ["O preço aumenta de uma oferta para a seguinte.", "A opção chamada priciest é a mais barata.", "Dan evita qualquer comparação de preço."], "prompt": "Listening: o que 'priciest' indica sobre a última oferta?", "hint": null, "explanation": "**Priciest** é o superlativo de *pricey* e identifica a oferta de maior preço no grupo.", "hints": ["O final -est indica superlativo.", "Compare todas as ofertas apresentadas."], "answers": ["O preço aumenta de uma oferta para a seguinte."]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Escolhendo as melhores férias",
+        "instructions": "Write 7 to 10 sentences in English comparing three vacation or transportation options. Compare price, comfort and excitement, then choose the best option for you and explain why.",
+        "min_words": 85,
+        "min_sentences": 7,
+        "requirements": [
+          {"label": "dois comparativos", "terms": ["cheaper than", "more comfortable than", "faster than", "better than", "less expensive than"]},
+          {"label": "dois superlativos", "terms": ["the best", "the most", "the least", "the cheapest", "the fastest"]},
+          {"label": "uma justificativa", "terms": ["because", "so i would choose", "for me"]}
+        ]
+      }
+    ],
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "learning_strategy": "fazer associações",
+    "review_note": "Sprint 25: conteúdo autoral conferido documentalmente com a aula, o plano e a revisão oficial da VOA; banco de questões, imagens, marcas e outras mídias de terceiros não foram incorporados. Os timestamps dos cues são conservadores e não tiveram validação humana por escuta.",
+    "source_accessed_at": "2026-10-08"
   }
 ]

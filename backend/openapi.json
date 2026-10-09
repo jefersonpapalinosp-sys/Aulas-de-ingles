@@ -6614,6 +6614,19 @@
         "/api/me/today": {
             "get": {
                 "operationId": "painel_hoje_api_me_today_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "default": "voa-level-1",
+                            "maxLength": 100,
+                            "title": "Course",
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "content": {
@@ -6624,6 +6637,16 @@
                             }
                         },
                         "description": "Successful Response"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
                     }
                 },
                 "summary": "Painel Hoje",

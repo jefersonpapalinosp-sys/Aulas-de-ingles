@@ -73,11 +73,16 @@ afterEach(() => {
   window.localStorage.clear()
 })
 
-function renderPractice() {
+function renderPractice(courseSlug = 'voa-level-1', lessonNumber = 31) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <ShadowingPractice media={media} userId={7} lessonNumber={31} />
+      <ShadowingPractice
+        courseSlug={courseSlug}
+        media={media}
+        userId={7}
+        lessonNumber={lessonNumber}
+      />
     </QueryClientProvider>,
   )
   return { ...view, queryClient }
@@ -91,6 +96,23 @@ describe('ShadowingPractice', () => {
     expect(screen.getByRole('heading', { name: 'Escute, repita e compare sua voz' })).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('não oferece gravação de áudio')
     expect(screen.getByRole('button', { name: '2. Gravar minha voz' })).toBeDisabled()
+  })
+
+  it('isola histórico e cache pela identidade composta de curso e aula', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    const { queryClient } = renderPractice('voa-level-2', 1)
+
+    await waitFor(() =>
+      expect(clientMocks.GET).toHaveBeenCalledWith('/api/speaking/attempts', {
+        params: { query: { lesson: 1, course: 'voa-level-2' } },
+      }),
+    )
+    expect(
+      queryClient.getQueryState(['speaking-attempts', 7, 'voa-level-2', 1]),
+    ).toBeDefined()
+    expect(
+      queryClient.getQueryState(['speaking-attempts', 7, 'voa-level-1', 1]),
+    ).toBeUndefined()
   })
 
   it('reproduz o modelo, grava localmente e salva a autoavaliação', async () => {
@@ -145,7 +167,11 @@ describe('ShadowingPractice', () => {
       'aria-pressed',
       'true',
     )
-    expect(window.localStorage.getItem('aulas-ingles:shadowing-rating:v1:7:31:21')).toBe(
+    expect(
+      window.localStorage.getItem(
+        'aulas-ingles:shadowing-rating:v2:7:voa-level-1:31:21',
+      ),
+    ).toBe(
       'confident',
     )
 
@@ -167,7 +193,9 @@ describe('ShadowingPractice', () => {
       expect.objectContaining({ method: 'PUT', body: expect.any(Blob) }),
     )
     expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] })
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: ['course-completion', 'voa-level-1'],
+    })
   })
 
   it('reproduz e exclui somente uma gravação escolhida do histórico', async () => {
@@ -214,7 +242,9 @@ describe('ShadowingPractice', () => {
       { params: { path: { attempt_id: 15 } } },
     )
     await waitFor(() =>
-      expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] }),
+      expect(invalidate).toHaveBeenCalledWith({
+        queryKey: ['course-completion', 'voa-level-1'],
+      }),
     )
   })
 

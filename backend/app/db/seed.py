@@ -125,15 +125,30 @@ def validate_course_reviews(
                     "não contíguas."
                 )
             expected_lessons = int(unit["total_lessons"])
+            if unit["status"] == "published" and course["status"] != "published":
+                raise ValueError(
+                    f"Unidade publicada {course_slug}/{unit['slug']} pertence a curso "
+                    "não publicado."
+                )
             if unit["status"] == "published" and len(unit_lessons) != expected_lessons:
                 raise ValueError(
                     f"Unidade publicada {course_slug}/{unit['slug']} declara "
                     f"{expected_lessons} aulas, mas possui {len(unit_lessons)}."
                 )
+            if unit["status"] != "published" and unit_lessons:
+                raise ValueError(
+                    f"Unidade em preparação {course_slug}/{unit['slug']} não pode "
+                    "conter aulas públicas."
+                )
 
             review = unit.get("review")
             if review is None:
                 continue
+            if unit["status"] != "published":
+                raise ValueError(
+                    f"Unidade em preparação {course_slug}/{unit['slug']} não pode "
+                    "conter checkpoint."
+                )
 
             listening_number = review.get("listening_lesson_number")
             listening_position = review.get("listening_media_position")

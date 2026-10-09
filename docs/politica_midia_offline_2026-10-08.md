@@ -1,24 +1,38 @@
 # Política de licença e mídia offline
 
-Data da revisão: 8 de outubro de 2026  
-Backlog: item 5 da fila de fechamento
+- Data da revisão inicial: 8 de outubro de 2026
+- Atualizada após a Sprint 25: 9 de outubro de 2026
+- Backlog: item 5 da fila de fechamento e extensão ao Level 2
 
 ## Decisão
 
-As 22 mídias das Aulas 31–52 pertencem ao recorte publicado do curso *Let's Learn English —
-Level 1* e são identificadas nas páginas oficiais como produção da VOA Learning English. Os termos
-oficiais informam que material
-produzido exclusivamente pela VOA é domínio público e deve receber crédito; conteúdo de terceiros
-permanece protegido e não pode ser redistribuído sem autorização.
+As 27 mídias publicadas correspondem às Aulas 31–52 do *Let's Learn English — Level 1* e às
+Aulas 1–5 do *Let's Learn English — Level 2*. Elas são identificadas nas páginas oficiais como
+produção da VOA Learning English. Os termos oficiais informam que material produzido
+exclusivamente pela VOA é domínio público e deve receber crédito; conteúdo de terceiros permanece
+protegido e não pode ser redistribuído sem autorização.
 
-O projeto registra essas 22 mídias como `public_domain`, atribui “Voice of America (VOA Learning
+O projeto registra essas 27 mídias como `public_domain`, atribui “Voice of America (VOA Learning
 English)” e mantém `offline_policy=network_only`. A licença compatível é condição necessária, mas
 não suficiente, para armazenamento offline.
 
 Fontes revisadas:
 
 - curso oficial: https://learningenglish.voanews.com/p/5644.html
+- curso oficial Level 2: https://learningenglish.voanews.com/p/6765.html
 - termos da VOA Learning English: https://learningenglish.voanews.com/p/6021.html
+- orientação de reutilização da VOA Learning English: https://learningenglish.voanews.com/p/6861.html
+
+## Escopo editorial publicado
+
+O seed contém 27 áudios, 133 cues de estudo e 289 falas de transcrição integral. As falas
+integrais pertencem às Aulas 32–40 do Level 1. As Aulas 41–52 do Level 1 e 1–5 do Level 2
+mantêm `transcript=[]` e usam somente cinco trechos curtos com texto e tradução por aula.
+
+Os 25 cues do Level 2 foram posicionados de forma conservadora a partir das fontes documentais,
+mas ainda não passaram por validação humana por escuta. Eles não devem ser descritos como
+sincronização auditada até essa conferência acontecer. As unidades 6–30 permanecem `planned` e
+não possuem mídia publicada no aplicativo.
 
 ## Modelo fail-closed
 
@@ -76,7 +90,7 @@ Reavaliar a decisão quando ocorrer pelo menos uma destas condições:
 ## Evidência de fechamento
 
 - migration com constraints de licença e política offline;
-- seed das 22 mídias com fonte, crédito e data de revisão;
+- seed das 27 mídias com fonte, crédito e data de revisão;
 - contrato OpenAPI e tipos frontend atualizados;
 - player torna origem e política visíveis;
 - teste impede remoção acidental da exclusão de áudio/vídeo do service worker;

@@ -12,15 +12,22 @@ import { formatAudioTime } from '../media/LessonAudioPlayer'
 type RecordingStatus = 'idle' | 'requesting' | 'recording' | 'ready' | 'error'
 type SelfRating = 'repeat' | 'almost' | 'confident'
 
-function ratingKey(userId: number, lessonNumber: number, cueId: number): string {
-  return `aulas-ingles:shadowing-rating:v1:${userId}:${lessonNumber}:${cueId}`
+function ratingKey(
+  userId: number,
+  courseSlug: string,
+  lessonNumber: number,
+  cueId: number,
+): string {
+  return `aulas-ingles:shadowing-rating:v2:${userId}:${courseSlug}:${lessonNumber}:${cueId}`
 }
 
 export function ShadowingPractice({
+  courseSlug,
   media,
   userId,
   lessonNumber,
 }: {
+  courseSlug: string
   media: LessonMedia
   userId: number
   lessonNumber: number
@@ -47,14 +54,14 @@ export function ShadowingPractice({
   const recordingStartedAtRef = useRef(0)
   const cue = media.cues.find((item) => item.id === cueId) ?? firstCue
   const historyKey = useMemo(
-    () => ['speaking-attempts', userId, lessonNumber] as const,
-    [lessonNumber, userId],
+    () => ['speaking-attempts', userId, courseSlug, lessonNumber] as const,
+    [courseSlug, lessonNumber, userId],
   )
   const historyQuery = useQuery({
     queryKey: historyKey,
     queryFn: async () => {
       const { data } = await api.GET('/api/speaking/attempts', {
-        params: { query: { lesson: lessonNumber } },
+        params: { query: { lesson: lessonNumber, course: courseSlug } },
       })
       if (!data) throw new Error('Não foi possível carregar as gravações.')
       return data
@@ -76,7 +83,14 @@ export function ShadowingPractice({
   useEffect(() => {
     if (!cue) return
     if (modelRef.current && !modelRef.current.paused) modelRef.current.pause()
-    const saved = window.localStorage.getItem(ratingKey(userId, lessonNumber, cue.id))
+    const key = ratingKey(userId, courseSlug, lessonNumber, cue.id)
+    let saved = window.localStorage.getItem(key)
+    if (!saved && courseSlug === 'voa-level-1') {
+      saved = window.localStorage.getItem(
+        `aulas-ingles:shadowing-rating:v1:${userId}:${lessonNumber}:${cue.id}`,
+      )
+      if (saved) window.localStorage.setItem(key, saved)
+    }
     setRating(
       saved === 'repeat' || saved === 'almost' || saved === 'confident' ? saved : null,
     )
@@ -87,7 +101,7 @@ export function ShadowingPractice({
     setSavedCurrent(false)
     setStatus('idle')
     setMessage('')
-  }, [cue, lessonNumber, userId])
+  }, [courseSlug, cue, lessonNumber, userId])
 
   useEffect(
     () => () => {
@@ -194,7 +208,7 @@ export function ShadowingPractice({
   function saveRating(value: SelfRating) {
     if (!cue) return
     setRating(value)
-    window.localStorage.setItem(ratingKey(userId, lessonNumber, cue.id), value)
+    window.localStorage.setItem(ratingKey(userId, courseSlug, lessonNumber, cue.id), value)
     setMessage('Autoavaliação salva neste navegador.')
   }
 
@@ -235,7 +249,7 @@ export function ShadowingPractice({
       setMessage('Gravação salva na sua conta. Você pode ouvi-la ou excluí-la abaixo.')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: historyKey }),
-        queryClient.invalidateQueries({ queryKey: ['course-completion'] }),
+        queryClient.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
       ])
     } catch {
       if (attemptId !== null) {
@@ -278,7 +292,7 @@ export function ShadowingPractice({
     setMessage('Gravação excluída da sua conta.')
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: historyKey }),
-      queryClient.invalidateQueries({ queryKey: ['course-completion'] }),
+      queryClient.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
     ])
   }
 

@@ -391,17 +391,147 @@
     "provider": "VOA Learning English",
     "source_url": "https://learningenglish.voanews.com/p/6765.html",
     "position": 2,
-    "status": "planned",
+    "status": "published",
     "total_lessons": 30,
     "units": [
       {
         "slug": "1-5",
         "title": "Aulas 1–5",
         "position": 1,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 1,
         "lesson_end": 5,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-1-5",
+          "title": "Checkpoint 1–5",
+          "position": 6,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Level 2 Lessons 1–5",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-leve-2-review-of-lessons-1-5/4058114.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O banco de questões da VOA, imagens, marcas e outras mídias de terceiros não foram incorporados.",
+          "intro": "Consolide o primeiro bloco do Level 2 com inferências, phrasal verbs, sequência de eventos passados, opiniões e comparações. A escuta da Aula 3 verifica como pistas temporais organizam relatos diferentes.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 5,
+          "listening_lesson_number": 3,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "A preocupação começou antes da reunião e continua agora. Complete: The team ____ about the budget cuts all morning.",
+              "options": [
+                "has been worrying",
+                "worried yesterday",
+                "will worry"
+              ],
+              "accepted_answers": [
+                "has been worrying"
+              ],
+              "explanation": "A duração que chega ao presente pede present perfect continuous: has been + verbo-ing.",
+              "lesson_numbers": [
+                1
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase coloca corretamente o objeto em um phrasal verb separável?",
+              "options": [
+                "Please throw the old advertisement away.",
+                "Please throw away it.",
+                "Please away throw the old advertisement."
+              ],
+              "accepted_answers": [
+                "Please throw the old advertisement away."
+              ],
+              "explanation": "Em throw away, um substantivo pode ficar entre o verbo e a partícula; um pronome obrigatoriamente ficaria no meio: throw it away.",
+              "lesson_numbers": [
+                2
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase mostra claramente a ação que aconteceu primeiro?",
+              "options": [
+                "By the time the meeting began, Mia had left a message.",
+                "By the time the meeting began, Mia leaves a message.",
+                "By the time the meeting began, Mia will leave a message."
+              ],
+              "accepted_answers": [
+                "By the time the meeting began, Mia had left a message."
+              ],
+              "explanation": "Had left marca a mensagem como anterior ao início da reunião, que aparece no simple past.",
+              "lesson_numbers": [
+                3
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual resposta discorda com respeito e pede esclarecimento?",
+              "options": [
+                "I see your point, but could you explain what makes it art?",
+                "You are wrong, and there is nothing to discuss.",
+                "I disagree because yes."
+              ],
+              "accepted_answers": [
+                "I see your point, but could you explain what makes it art?"
+              ],
+              "explanation": "A frase reconhece o ponto de vista do outro, apresenta contraste e abre espaço para uma explicação.",
+              "lesson_numbers": [
+                4
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Complete a comparação: The train is comfortable, the plane is faster, but this is ____ option of all.",
+              "options": [
+                "the most convenient",
+                "more convenient",
+                "the convenientest"
+              ],
+              "accepted_answers": [
+                "the most convenient"
+              ],
+              "explanation": "A comparação com todo o grupo pede o superlativo the most convenient.",
+              "lesson_numbers": [
+                5
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 3, qual interpretação organiza corretamente os relatos de Anna e Pete?",
+              "options": [
+                "Os dois descrevem eventos anteriores ao encontro, mas atribuem o atraso a causas diferentes.",
+                "Os dois contam exatamente a mesma versão e chegam antes do horário.",
+                "Pete descreve apenas planos futuros e Anna não relata nenhum evento."
+              ],
+              "accepted_answers": [
+                "Os dois descrevem eventos anteriores ao encontro, mas atribuem o atraso a causas diferentes."
+              ],
+              "explanation": "As pistas de tempo e o past perfect situam ações anteriores; a diferença entre os relatos sustenta a ideia de pontos de vista distintos.",
+              "lesson_numbers": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
+        }
       },
       {
         "slug": "6-10",

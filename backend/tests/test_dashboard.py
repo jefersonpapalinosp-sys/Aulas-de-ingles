@@ -5,14 +5,17 @@ from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
+    Course,
     CourseReview,
+    CourseReviewAttempt,
     CourseUnit,
     Lesson,
     LessonProgress,
+    ReviewItem,
     StepProgress,
     StudySessionProgress,
     User,
@@ -51,8 +54,10 @@ async def test_today_explains_first_recommendation_and_has_safe_defaults(
     client: AsyncClient,
 ) -> None:
     headers = await conta(client, "today-default")
-    today = (await client.get("/api/me/today", headers=headers)).json()
+    response = await client.get("/api/me/today", headers=headers)
+    today = response.json()
 
+    assert response.headers["cache-control"] == "private, no-store"
     assert today["recommendation"]["kind"] == "start_lesson"
     assert today["recommendation"]["course_slug"] == "voa-level-1"
     assert today["recommendation"]["lesson_number"] == 31
@@ -134,7 +139,7 @@ async def test_recommendation_offers_unit_checkpoint_after_required_lessons(
         "recommendation"
     ]
     assert recommendation["kind"] == "course_review"
-    assert recommendation["title"] == "Checkpoint 40–44"
+    assert recommendation["title"] == "Checkpoint 40–44 · Level 1"
     assert recommendation["href"] == (
         "/cursos/voa-level-1/unidades/40-44/checkpoint"
     )
@@ -186,11 +191,365 @@ async def test_recommendation_offers_unit_checkpoint_after_required_lessons(
 
 
 @pytest.mark.asyncio
+async def test_today_isolates_reviews_sessions_and_time_by_course(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "today-multi-course")
+    level_1 = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
+    ).scalar_one()
+    level_2 = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-2"))
+    ).scalar_one()
+    level_2_unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == level_2.id,
+                CourseUnit.slug == "1-5",
+            )
+        )
+    ).scalar_one()
+    original_course_status = level_2.status
+    original_unit_status = level_2_unit.status
+    created_lesson_id: int | None = None
+
+    try:
+        level_2.status = "planned"
+        await session.commit()
+        unavailable = await client.get(
+            "/api/me/today?course=voa-level-2", headers=headers
+        )
+        assert unavailable.status_code == 404
+
+        level_2.status = "published"
+        level_2_unit.status = "published"
+        level_2_lesson = (
+            await session.execute(
+                select(Lesson).where(
+                    Lesson.course_id == level_2.id,
+                    Lesson.number == 1,
+                )
+            )
+        ).scalar_one_or_none()
+        if level_2_lesson is None:
+            level_2_lesson = Lesson(
+                course_id=level_2.id,
+                unit_id=level_2_unit.id,
+                number=1,
+                slug="dashboard-level-2-lesson-1",
+                position=1,
+                title="Budget Cuts",
+                title_pt="Cortes no orçamento",
+                voa_url="https://example.com/level-2/lesson-1",
+                grammar_tag="Present perfect",
+                focus_points=[],
+                lead="Fixture de isolamento do painel Hoje.",
+                warmup_prompt="What changed?",
+                listening_focus="Identifique a mudança principal.",
+            )
+            session.add(level_2_lesson)
+            await session.flush()
+            created_lesson_id = level_2_lesson.id
+
+        await session.commit()
+        empty_level_1 = (await client.get("/api/me/today", headers=headers)).json()
+        empty_level_2 = (
+            await client.get(
+                "/api/me/today?course=voa-level-2", headers=headers
+            )
+        ).json()
+        assert empty_level_1["recommendation"]["lesson_number"] == 31
+        assert empty_level_1["recommendation"]["course_slug"] == "voa-level-1"
+        assert empty_level_2["recommendation"]["lesson_number"] == 1
+        assert empty_level_2["recommendation"]["course_slug"] == "voa-level-2"
+        assert empty_level_2["recommendation"]["href"].startswith(
+            "/cursos/voa-level-2/aulas/1/"
+        )
+
+        user = (
+            await session.execute(
+                select(User).where(User.email == "today-multi-course@example.com")
+            )
+        ).scalar_one()
+        level_1_lesson = (
+            await session.execute(
+                select(Lesson).where(
+                    Lesson.course_id == level_1.id,
+                    Lesson.number == 31,
+                )
+            )
+        ).scalar_one()
+        now = datetime.now(UTC)
+        level_1_session = StudySessionProgress(
+            user_id=user.id,
+            lesson_id=level_1_lesson.id,
+            current_step="assistir",
+            completed_steps=["preparar"],
+            total_seconds=120,
+            updated_at=now - timedelta(minutes=2),
+        )
+        level_2_session = StudySessionProgress(
+            user_id=user.id,
+            lesson_id=level_2_lesson.id,
+            current_step="estudar",
+            completed_steps=["preparar", "assistir"],
+            total_seconds=300,
+            updated_at=now - timedelta(minutes=1),
+        )
+        cards = [
+            ReviewItem(
+                user_id=user.id,
+                lesson_id=lesson.id,
+                item_type="listening",
+                source_type="dashboard_test",
+                source_id=key,
+                source_key=f"dashboard-test:{key}",
+                skill="listening",
+                prompt=f"Prompt {key}",
+                answer=f"Answer {key}",
+                origin_reason="Fixture de isolamento entre cursos.",
+                estimated_seconds=60,
+                status="active",
+                due_at=now - timedelta(minutes=1),
+            )
+            for key, lesson in (
+                (101, level_1_lesson),
+                (201, level_2_lesson),
+                (202, level_2_lesson),
+            )
+        ]
+        session.add_all([level_1_session, level_2_session, *cards])
+        await session.commit()
+
+        default_today = (await client.get("/api/me/today", headers=headers)).json()
+        level_2_today = (
+            await client.get(
+                "/api/me/today?course=voa-level-2", headers=headers
+            )
+        ).json()
+
+        assert default_today["recommendation"] == {
+            "kind": "review",
+            "title": "Revisar 1 item",
+            "reason": "Esses itens já venceram no seu ciclo de revisão espaçada.",
+            "href": "/revisar?course=voa-level-1",
+            "estimated_minutes": 5,
+            "course_slug": "voa-level-1",
+            "lesson_number": None,
+        }
+        assert default_today["recorded_minutes_this_week"] == 2
+        assert default_today["recent_session"]["course_slug"] == "voa-level-1"
+        assert default_today["recent_session"]["lesson_number"] == 31
+
+        assert level_2_today["recommendation"]["title"] == "Revisar 2 itens"
+        assert level_2_today["recommendation"]["href"] == (
+            "/revisar?course=voa-level-2"
+        )
+        assert level_2_today["recommendation"]["course_slug"] == "voa-level-2"
+        assert level_2_today["recorded_minutes_this_week"] == 5
+        assert level_2_today["recent_session"]["course_slug"] == "voa-level-2"
+        assert level_2_today["recent_session"]["lesson_number"] == 1
+
+        for card in cards:
+            card.status = "suspended"
+        await session.commit()
+
+        level_1_resume = (await client.get("/api/me/today", headers=headers)).json()[
+            "recommendation"
+        ]
+        level_2_resume = (
+            await client.get(
+                "/api/me/today?course=voa-level-2", headers=headers
+            )
+        ).json()["recommendation"]
+        assert level_1_resume["title"] == "Continuar a Aula 31"
+        assert level_1_resume["course_slug"] == "voa-level-1"
+        assert level_1_resume["href"].endswith("/31/estudar/assistir")
+        assert level_2_resume["title"] == "Continuar a Aula 1"
+        assert level_2_resume["course_slug"] == "voa-level-2"
+        assert level_2_resume["href"].endswith("/1/estudar/estudar")
+
+        level_2_session.current_step = "revisar"
+        level_2_session.completed_steps = [
+            "preparar",
+            "assistir",
+            "estudar",
+            "praticar",
+            "revisar",
+        ]
+        published_lessons = list(
+            (
+                await session.execute(
+                    select(Lesson)
+                    .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+                    .where(
+                        Lesson.course_id == level_2.id,
+                        CourseUnit.status == "published",
+                    )
+                )
+            ).scalars()
+        )
+        session.add_all(
+            [
+                LessonProgress(user_id=user.id, lesson_id=lesson.id)
+                for lesson in published_lessons
+            ]
+        )
+        published_reviews = list(
+            (
+                await session.execute(
+                    select(CourseReview)
+                    .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
+                    .where(
+                        CourseUnit.course_id == level_2.id,
+                        CourseUnit.status == "published",
+                        CourseReview.status == "published",
+                    )
+                )
+            ).scalars()
+        )
+        await session.commit()
+
+        if published_reviews:
+            checkpoint = (
+                await client.get(
+                    "/api/me/today?course=voa-level-2", headers=headers
+                )
+            ).json()["recommendation"]
+            assert checkpoint["kind"] == "course_review"
+            assert checkpoint["title"].endswith("· Level 2")
+            assert checkpoint["course_slug"] == "voa-level-2"
+            session.add_all(
+                [
+                    CourseReviewAttempt(
+                        user_id=user.id,
+                        review_id=review.id,
+                        idempotency_key=str(uuid4()),
+                        request_hash="0" * 64,
+                        content_version=review.content_version,
+                        answers=[],
+                        result=[],
+                        score=1,
+                        total=1,
+                    )
+                    for review in published_reviews
+                ]
+            )
+            await session.commit()
+
+        notebook = (
+            await client.get(
+                "/api/me/today?course=voa-level-2", headers=headers
+            )
+        ).json()["recommendation"]
+        assert notebook["kind"] == "practice"
+        assert notebook["href"] == "/caderno?course=voa-level-2"
+        assert notebook["course_slug"] == "voa-level-2"
+    finally:
+        await session.rollback()
+        if created_lesson_id is not None:
+            await session.execute(
+                delete(Lesson).where(Lesson.id == created_lesson_id)
+            )
+        level_2.status = original_course_status
+        level_2_unit.status = original_unit_status
+        await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_today_ignora_retomada_de_unidade_nao_publicada(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "today-planned-resume")
+    user = (
+        await session.execute(
+            select(User).where(User.email == "today-planned-resume@example.com")
+        )
+    ).scalar_one()
+    course = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-2"))
+    ).scalar_one()
+    planned_unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == course.id,
+                CourseUnit.slug == "6-10",
+            )
+        )
+    ).scalar_one()
+    assert course.status == "published"
+    assert planned_unit.status == "planned"
+
+    hidden_lesson = Lesson(
+        course_id=course.id,
+        unit_id=planned_unit.id,
+        number=6,
+        slug="dashboard-hidden-level-2-lesson-6",
+        position=6,
+        title="News From Home",
+        title_pt="Notícias de casa",
+        voa_url="https://example.com/level-2/lesson-6",
+        grammar_tag="Fixture planned",
+        focus_points=[],
+        lead="Fixture de retomada não publicada.",
+        warmup_prompt="What happened?",
+        listening_focus="Identifique a notícia principal.",
+    )
+    session.add(hidden_lesson)
+    await session.flush()
+    now = datetime.now(UTC)
+    session.add_all(
+        [
+            StudySessionProgress(
+                user_id=user.id,
+                lesson_id=hidden_lesson.id,
+                current_step="assistir",
+                completed_steps=["preparar"],
+                total_seconds=600,
+                updated_at=now,
+            ),
+            ReviewItem(
+                user_id=user.id,
+                lesson_id=hidden_lesson.id,
+                item_type="listening",
+                source_type="dashboard_test",
+                source_id=606,
+                source_key="dashboard-test:hidden-planned-606",
+                skill="listening",
+                prompt="Hidden planned prompt",
+                answer="Hidden planned answer",
+                origin_reason="Fixture em unidade não publicada.",
+                estimated_seconds=60,
+                status="active",
+                due_at=now - timedelta(minutes=1),
+            ),
+        ]
+    )
+    await session.commit()
+
+    try:
+        response = await client.get(
+            "/api/me/today?course=voa-level-2", headers=headers
+        )
+        today = response.json()
+        assert response.headers["cache-control"] == "private, no-store"
+        assert today["recommendation"]["kind"] == "start_lesson"
+        assert today["recommendation"]["lesson_number"] == 1
+        assert today["recent_session"] is None
+        assert today["recorded_minutes_this_week"] == 0
+    finally:
+        await session.execute(delete(Lesson).where(Lesson.id == hidden_lesson.id))
+        await session.commit()
+
+
+@pytest.mark.asyncio
 async def test_skill_percentage_requires_three_evidences(client: AsyncClient) -> None:
     headers = await conta(client, "today-skill")
     exercise = (await client.get("/api/exercises?lesson=31")).json()[0]
 
-    empty = (await client.get("/api/me/skills", headers=headers)).json()
+    empty_response = await client.get("/api/me/skills", headers=headers)
+    empty = empty_response.json()
+    assert empty_response.headers["cache-control"] == "private, no-store"
     grammar = next(item for item in empty if item["skill"] == "grammar")
     assert grammar["samples"] == 0
     assert grammar["score_percent"] is None
@@ -224,7 +583,9 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
 
 
 @pytest.mark.asyncio
-async def test_skills_sao_isoladas_por_curso_e_unidade(client: AsyncClient) -> None:
+async def test_skills_sao_isoladas_por_curso_e_unidade(
+    client: AsyncClient, session: AsyncSession
+) -> None:
     headers = await conta(client, "skills-por-unidade")
     lesson_31 = (await client.get("/api/exercises?lesson=31")).json()
     lesson_41 = (await client.get("/api/exercises?lesson=41")).json()
@@ -285,6 +646,60 @@ async def test_skills_sao_isoladas_por_curso_e_unidade(client: AsyncClient) -> N
     assert global_grammar["samples"] == 3
     assert global_grammar["score_percent"] == 0
     assert global_grammar["status"] == "developing"
+
+    ambiguous = await client.get("/api/me/skills?unit=31-40", headers=headers)
+    assert ambiguous.status_code == 422
+
+    course = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
+    ).scalar_one()
+    unit = (
+        await session.execute(
+            select(CourseUnit).where(
+                CourseUnit.course_id == course.id,
+                CourseUnit.slug == "31-40",
+            )
+        )
+    ).scalar_one()
+    original_course_status = course.status
+    original_unit_status = unit.status
+    try:
+        unit.status = "planned"
+        await session.commit()
+        published_only = (
+            await client.get(
+                "/api/me/skills?course=voa-level-1", headers=headers
+            )
+        ).json()
+        hidden_unit = (
+            await client.get(
+                "/api/me/skills?course=voa-level-1&unit=31-40",
+                headers=headers,
+            )
+        ).json()
+        assert next(item for item in published_only if item["skill"] == "grammar")[
+            "samples"
+        ] == 1
+        hidden_grammar = next(
+            item for item in hidden_unit if item["skill"] == "grammar"
+        )
+        assert hidden_grammar["samples"] == 0
+        assert hidden_grammar["score_percent"] is None
+        assert hidden_grammar["fragile_topics"] == []
+
+        unit.status = "published"
+        course.status = "planned"
+        await session.commit()
+        hidden_course = (
+            await client.get(
+                "/api/me/skills?course=voa-level-1", headers=headers
+            )
+        ).json()
+        assert all(item["samples"] == 0 for item in hidden_course)
+    finally:
+        course.status = original_course_status
+        unit.status = original_unit_status
+        await session.commit()
 
 
 @pytest.mark.asyncio

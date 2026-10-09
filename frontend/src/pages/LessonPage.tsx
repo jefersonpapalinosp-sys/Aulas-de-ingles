@@ -6,6 +6,7 @@ import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
 import { adjacentLessons } from '../features/curriculum/curriculum'
 import {
+  courseLevelLabel,
   coursePath,
   courseReviewPath,
   DEFAULT_COURSE_SLUG,
@@ -51,7 +52,7 @@ export function LessonPage() {
   return (
     <>
       <p className="eyebrow">
-        Aula {data.number} · {courseTitle}
+        {courseLevelLabel(courseSlug)} · Aula {data.number} · {courseTitle}
         {data.story_note && <> · {data.story_note}</>}
       </p>
       <h1>{data.title}</h1>

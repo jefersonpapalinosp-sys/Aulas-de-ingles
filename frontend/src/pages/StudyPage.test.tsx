@@ -243,7 +243,7 @@ describe('StudyPage', () => {
 
     expect(marcarEstudada).toHaveBeenCalledWith({ numero: 31, estudada: true })
     expect(screen.getByRole('status')).toHaveTextContent(
-      'Você percorreu as cinco etapas da Aula 31',
+      'Você percorreu as cinco etapas de Level 1 · Aula 31',
     )
   })
 

@@ -34,6 +34,7 @@ const unitLessons = Array.from({ length: 4 }, (_, index) => ({
 let studiedLessonNumbers: number[] = []
 let courseStatus: 'planned' | 'published' = 'published'
 let publishedLessonCount = 10
+let requestedTodayCourse = ''
 
 vi.mock('../api/queries', () => ({
   useCourseCurriculum: () => ({
@@ -88,6 +89,19 @@ vi.mock('../api/queries', () => ({
             source_kind: 'mixed',
           },
         },
+        {
+          id: 3,
+          slug: '45-49',
+          title: 'Unidade 45–49',
+          position: 3,
+          status: 'planned',
+          lesson_start: 45,
+          lesson_end: 49,
+          total_lessons: 5,
+          published_lessons: 0,
+          lessons: [],
+          review: null,
+        },
       ],
     },
     isPending: false,
@@ -121,8 +135,10 @@ vi.mock('../api/progress', () => ({
 }))
 
 vi.mock('../api/dashboard', () => ({
-  useToday: () => ({
-    data: {
+  useToday: (courseSlug: string) => {
+    requestedTodayCourse = courseSlug
+    return {
+      data: {
       recommendation: {
         kind: 'continue_lesson',
         title: 'Continuar a Aula 31',
@@ -139,6 +155,7 @@ vi.mock('../api/dashboard', () => ({
       },
       recorded_minutes_this_week: 18,
       recent_session: {
+        course_slug: 'voa-level-1',
         lesson_number: 31,
         lesson_title: 'Take Me Out to the Ball Game',
         current_step: 'assistir',
@@ -146,11 +163,12 @@ vi.mock('../api/dashboard', () => ({
         total_minutes: 18,
         updated_at: '2026-10-08T00:00:00Z',
       },
-    },
-    isPending: false,
-    error: null,
-    refetch: vi.fn(),
-  }),
+      },
+      isPending: false,
+      error: null,
+      refetch: vi.fn(),
+    }
+  },
   useSkills: () => ({
     data: [
       {
@@ -188,13 +206,16 @@ describe('MapPage / painel Hoje', () => {
     studiedLessonNumbers = []
     courseStatus = 'published'
     publishedLessonCount = 10
+    requestedTodayCourse = ''
   })
 
   it('explica a recomendação e converte o link antigo para a rota canônica', () => {
     render(<MapPage showToday />, { wrapper: MemoryRouter })
 
     expect(screen.getByRole('heading', { name: 'Hoje' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Continuar a Aula 31' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Level 1 · Continuar a Aula 31' }),
+    ).toBeInTheDocument()
     expect(screen.getByText(/retomar preserva o contexto/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Estudar agora' })).toHaveAttribute(
       'href',
@@ -210,6 +231,22 @@ describe('MapPage / painel Hoje', () => {
       'href',
       '/cursos/voa-level-1/conclusao',
     )
+  })
+
+  it('lê o curso ativo da URL do Hoje e explicita o nível nas referências de aula', () => {
+    render(
+      <MemoryRouter initialEntries={['/inicio?course=voa-level-2']}>
+        <Routes>
+          <Route path="/inicio" element={<MapPage showToday />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(requestedTodayCourse).toBe('voa-level-2')
+    expect(
+      screen.getByRole('heading', { name: 'Level 2 · Continuar a Aula 31' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Level 2 · Aula 31/)).toBeInTheDocument()
   })
 
   it('permite editar a meta sem bloquear o catálogo de unidades', async () => {
@@ -238,6 +275,29 @@ describe('MapPage / painel Hoje', () => {
     render(<MapPage />, { wrapper: MemoryRouter })
 
     expect(screen.queryByRole('link', { name: 'Ver meu fechamento' })).not.toBeInTheDocument()
+  })
+
+  it('mantém unidade planejada visível, mas fora da navegação', () => {
+    render(<MapPage />, { wrapper: MemoryRouter })
+
+    const planned = screen.getByRole('article', { name: 'Unidade 45–49: Em preparação' })
+    expect(planned).toHaveAttribute('aria-disabled', 'true')
+    expect(within(planned).getByText('5 aulas planejadas')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Unidade 45–49/ })).not.toBeInTheDocument()
+  })
+
+  it('explica uma URL direta de unidade planejada sem renderizar uma lista vazia', () => {
+    const { container } = render(
+      <MemoryRouter initialEntries={['/cursos/voa-level-1/unidades/45-49']}>
+        <Routes>
+          <Route path="/cursos/:courseSlug/unidades/:unitSlug" element={<MapPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Unidade em preparação' })).toBeInTheDocument()
+    expect(screen.getByText(/Aulas 45–49 ainda não estão publicadas/)).toBeInTheDocument()
+    expect(container.querySelector('.course-unit-lessons')).not.toBeInTheDocument()
   })
 
   it('apresenta o checkpoint como item próprio no mapa da unidade', () => {

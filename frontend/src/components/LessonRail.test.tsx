@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CourseCurriculum, LessonSummary } from '../api/client'
 import { LessonRail } from './LessonRail'
@@ -32,7 +32,7 @@ const curriculum: CourseCurriculum = {
     id: 1,
     slug: 'voa-level-1',
     title: "Let's Learn English — Level 1",
-    level: 'Level 1',
+    level: '1',
     proficiency_label: 'Iniciante',
     provider: 'VOA Learning English',
     source_url: 'https://example.com',
@@ -91,6 +91,70 @@ const curriculum: CourseCurriculum = {
         source_kind: 'mixed',
       },
     },
+    {
+      id: 4,
+      slug: '21-25',
+      title: 'Unidade 21–25',
+      position: 4,
+      status: 'planned',
+      lesson_start: 21,
+      lesson_end: 25,
+      total_lessons: 5,
+      published_lessons: 0,
+      lessons: [],
+      review: null,
+    },
+  ],
+}
+
+const level2Lesson: LessonSummary = {
+  ...lesson(1, '1-5'),
+  id: 201,
+  course_slug: 'voa-level-2',
+  title: 'Budget Cuts',
+  title_pt: 'Cortes no orçamento',
+  grammar_tag: 'Present perfect continuous',
+}
+
+const level2Curriculum: CourseCurriculum = {
+  course: {
+    ...curriculum.course,
+    id: 2,
+    slug: 'voa-level-2',
+    title: "Let's Learn English — Level 2",
+    level: '2',
+    proficiency_label: 'Intermediário',
+    position: 2,
+    total_lessons: 30,
+    published_lessons: 1,
+  },
+  units: [
+    {
+      id: 21,
+      slug: '1-5',
+      title: 'Aulas 1–5',
+      position: 1,
+      status: 'published',
+      lesson_start: 1,
+      lesson_end: 5,
+      total_lessons: 5,
+      published_lessons: 1,
+      lessons: [level2Lesson],
+      review: null,
+    },
+    {
+      id: 22,
+      slug: '6-10',
+      title: 'Aulas 6–10',
+      position: 2,
+      status: 'planned',
+      lesson_start: 6,
+      lesson_end: 10,
+      total_lessons: 5,
+      published_lessons: 0,
+      lessons: [],
+      review: null,
+    },
   ],
 }
 
@@ -103,27 +167,30 @@ vi.mock('../api/auth', () => ({
 
 vi.mock('../api/queries', () => ({
   useCourses: () => ({
-    data: [curriculum.course],
+    data: [curriculum.course, level2Curriculum.course],
     isPending: false,
     error: null,
   }),
-  useCourseCurriculum: () => ({
-    data: curriculum,
+  useCourseCurriculum: (courseSlug: string) => ({
+    data: courseSlug === 'voa-level-2' ? level2Curriculum : curriculum,
     isPending: false,
     error: null,
   }),
 }))
 
 vi.mock('../api/progress', () => ({
-  useProgress: () => ({
+  useProgress: (courseSlug: string) => ({
     data: {
       studied_count: 1,
-      total_lessons: 16,
+      total_lessons: courseSlug === 'voa-level-2' ? 1 : 16,
       attempts: 0,
       correct: 0,
       review_due: 2,
       review_cards: 2,
-      lessons: [...firstUnitLessons, lesson(15, '15-20'), lesson(41, '40-44')].map((item) => ({
+      lessons: (courseSlug === 'voa-level-2'
+        ? [level2Lesson]
+        : [...firstUnitLessons, lesson(15, '15-20'), lesson(41, '40-44')]
+      ).map((item) => ({
         course_slug: item.course_slug,
         unit_slug: item.unit_slug,
         lesson_number: item.number,
@@ -140,10 +207,16 @@ vi.mock('../api/progress', () => ({
   }),
 }))
 
+function LocationProbe() {
+  const location = useLocation()
+  return <output aria-label="Rota atual">{`${location.pathname}${location.search}`}</output>
+}
+
 function renderRailAt(route = '/cursos/voa-level-1/aulas/14') {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <LessonRail />
+      <LocationProbe />
     </MemoryRouter>,
   )
 }
@@ -179,6 +252,10 @@ describe('LessonRail', () => {
     expect(within(desktop!).getByRole('link', { name: 'Avaliação' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-1/unidades/1-14/avaliacao',
+    )
+    expect(within(desktop!).getByRole('link', { name: 'Hoje' })).toHaveAttribute(
+      'href',
+      '/inicio?course=voa-level-1',
     )
 
     const lessonLinks = within(desktop!).getAllByRole('link', { name: /Lesson \d+/ })
@@ -250,6 +327,40 @@ describe('LessonRail', () => {
     expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
       'Checkpoint 40–44',
     )
+  })
+
+  it('inclui o nível no rótulo móvel de aulas com numeração reiniciada', () => {
+    renderRailAt('/cursos/voa-level-2/aulas/1')
+
+    expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
+      'Level 2 · Aula 1 · Budget Cuts',
+    )
+  })
+
+  it('mostra unidades planejadas sem transformá-las em controles ou atalhos', () => {
+    const { container } = renderRail()
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    const planned = within(desktop!).getByLabelText('Unidade 21–25: Em preparação')
+    expect(planned).toHaveAttribute('aria-disabled', 'true')
+    expect(planned).toHaveTextContent('Em preparação · 5 aulas')
+    expect(within(desktop!).queryByRole('button', { name: /Unidade 21–25/ })).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['/inicio?course=voa-level-1', '/inicio?course=voa-level-2'],
+    ['/revisar?course=voa-level-1&unit=40-44', '/revisar?course=voa-level-2'],
+    ['/caderno?course=voa-level-1&unit=40-44', '/caderno?course=voa-level-2'],
+  ])('preserva a área atual ao trocar de curso em %s', async (from, expected) => {
+    const user = userEvent.setup()
+    const { container } = renderRailAt(from)
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    await user.selectOptions(within(desktop!).getByRole('combobox', { name: 'Curso' }), 'voa-level-2')
+
+    expect(screen.getByRole('status', { name: 'Rota atual' })).toHaveTextContent(expected)
   })
 
   it('preserva curso e unidade do escopo nas páginas utilitárias', async () => {

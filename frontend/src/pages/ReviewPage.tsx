@@ -11,7 +11,7 @@ import {
 import { useCourseCurriculum, useCourses } from '../api/queries'
 import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
-import { DEFAULT_COURSE_SLUG } from '../routing/courseRoutes'
+import { DEFAULT_COURSE_SLUG, todayPath } from '../routing/courseRoutes'
 
 const NOTES = [
   { key: '1', label: 'Errei', quality: 1, className: 'errei' },
@@ -105,10 +105,10 @@ export function ReviewPage() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLSelectElement ||
-        event.target instanceof HTMLTextAreaElement ||
-        event.target instanceof HTMLButtonElement
+        event.target instanceof Element &&
+        event.target.closest(
+          'a[href], button, input, select, textarea, summary, audio[controls], video[controls], [contenteditable="true"], [role="button"]',
+        )
       ) {
         return
       }
@@ -358,7 +358,7 @@ export function ReviewPage() {
 
       {!item && (
         <p className="navbtns">
-          <Link className="btn ghost" to="/">← Hoje e mapa</Link>
+          <Link className="btn ghost" to={todayPath(courseSlug)}>← Hoje e mapa</Link>
         </p>
       )}
     </div>

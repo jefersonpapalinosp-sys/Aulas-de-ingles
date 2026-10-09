@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -208,6 +208,23 @@ describe('ReviewPage', () => {
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       ),
     )
+  })
+
+  it('não captura espaço ou enter usados no player de áudio', () => {
+    useDueCards.mockReturnValue({
+      data: [{ ...carta, media_url: 'https://example.com/review.mp3' }],
+      isPending: false,
+      error: null,
+    })
+    const { container } = montar()
+    const audio = container.querySelector('audio[controls]')
+    expect(audio).not.toBeNull()
+
+    fireEvent.keyDown(audio!, { key: ' ' })
+    fireEvent.keyDown(audio!, { key: 'Enter' })
+
+    expect(screen.queryByText('esgotado')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Mostrar resposta' })).toBeInTheDocument()
   })
 
   it('"Errei" manda qualidade abaixo do corte de acerto', async () => {

@@ -40,9 +40,14 @@ async def skill_summaries(
     unit_slug: str | None = None,
 ) -> list[SkillSummaryOut]:
     """Devolve as quatro competências, inclusive quando ainda não há amostra."""
+    if unit_slug is not None and course_slug is None:
+        raise ValueError("course_slug is required when unit_slug is provided")
 
     def scoped_ids(stmt: Select[int]) -> Select[int]:
-        scoped = stmt
+        scoped = stmt.where(
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
         if course_slug is not None:
             scoped = scoped.where(Course.slug == course_slug)
         if unit_slug is not None:
@@ -109,7 +114,11 @@ async def skill_summaries(
         .join(Lesson, Exercise.lesson_id == Lesson.id)
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(ExerciseAttempt.user_id == user_id)
+        .where(
+            ExerciseAttempt.user_id == user_id,
+            Course.status == "published",
+            CourseUnit.status == "published",
+        )
     )
     if course_slug is not None:
         topic_stmt = topic_stmt.where(Course.slug == course_slug)

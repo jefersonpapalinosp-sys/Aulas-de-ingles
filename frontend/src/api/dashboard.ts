@@ -1,14 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type StudyPlanInput } from './client'
 
-export function useToday() {
+export function useToday(courseSlug: string) {
   return useQuery({
-    queryKey: ['today'],
+    queryKey: ['today', courseSlug],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/me/today')
+      const { data, response } = await api.GET('/api/me/today', {
+        params: { query: { course: courseSlug } },
+      })
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao abrir Hoje.`)
       return data
     },
+    enabled: Boolean(courseSlug),
   })
 }
 

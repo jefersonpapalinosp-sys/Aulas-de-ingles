@@ -4,13 +4,14 @@ App de estudo construído sobre a série *Let's Learn English* da VOA. O catálo
 níveis 1 e 2, com unidades navegáveis, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: Sprints 6–14 e 20–24 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
+**Estado: Sprints 6–14 e 20–25 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
 da jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável,
 rotas canônicas por curso, laboratório retomável por aula e checkpoints curriculares persistidos.
 As **22 Aulas 31–52** e os checkpoints 40–44, 45–49 e 50–52 estão publicados no Level 1. O
 fechamento do recorte separa conteúdo visto, aulas concluídas e desempenho apoiado por evidências;
-o Level 2 permanece planejado e opcional, sem conteúdo fictício. Os recursos assistidos ficam
-desligados por padrão até passarem pela avaliação humana.
+as **Aulas 1–5** e o checkpoint 1–5 estão publicados no Level 2. As Aulas 6–30 desse nível
+permanecem planejadas e indisponíveis, sem páginas vazias nem conteúdo fictício. Os recursos
+assistidos ficam desligados por padrão até passarem pela avaliação humana.
 
 O aplicativo trata como certificado interno apenas a conclusão do recorte 31–52. Depois das 22
 aulas e dos três checkpoints atuais, libera por ação explícita uma consulta à página de revisão e
@@ -57,6 +58,8 @@ Rotas úteis da unidade mais recente e do fechamento:
 - checkpoint: <http://localhost:5180/cursos/voa-level-1/unidades/50-52/checkpoint>;
 - avaliação escopada: <http://localhost:5180/cursos/voa-level-1/unidades/50-52/avaliacao>;
 - conclusão: <http://localhost:5180/cursos/voa-level-1/conclusao>;
+- mapa Level 2: <http://localhost:5180/cursos/voa-level-2/unidades/1-5>;
+- checkpoint Level 2: <http://localhost:5180/cursos/voa-level-2/unidades/1-5/checkpoint>;
 - revisão e caderno no mesmo contexto: `/revisar?course=voa-level-1&unit=50-52` e
   `/caderno?course=voa-level-1&unit=50-52`.
 
@@ -169,14 +172,19 @@ app_user ─┬─ study_session_progress ─┬─ lesson
 `exercise_answer` é tabela à parte porque um exercício aceita mais de uma
 resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
-O que está carregado hoje: **22 aulas**, 88 objetivos, 67 blocos de gramática
-com 261 linhas, 136 frases, **235 itens de vocabulário**, 81 notas de pronúncia,
-**22 áudios oficiais**, 108 trechos selecionados, 289 falas de transcrição integral nas Aulas 32–40,
-**22 propostas de escrita** e **207 exercícios** com 238 respostas aceitas e 327 dicas graduais nas
-Aulas 31–52. As Aulas 41–52 usam cinco trechos selecionados com texto e tradução por aula, mas
-ainda não possuem transcrição integral. As Aulas 32–52 possuem ao menos três práticas de listening
-e atividades de ditado, ordenação e transformação. As 22 aulas também possuem fonte
-oficial/autoral, estratégia, versão e status editorial explícitos.
+O que está carregado hoje: **27 aulas** — 22 do Level 1 e cinco do Level 2 —, **quatro
+checkpoints com 24 questões**, 108 objetivos, 82 blocos de gramática com 306 linhas, 161 frases,
+**285 itens de vocabulário**, 96 notas de pronúncia, **27 áudios oficiais**, 133 trechos
+selecionados, 289 falas de transcrição integral nas Aulas 32–40 do Level 1, **27 propostas de
+escrita** e **247 exercícios** com 278 respostas aceitas e 407 dicas graduais. As Aulas 41–52 do
+Level 1 e 1–5 do Level 2 usam cinco trechos selecionados com texto e tradução por aula, mas não
+possuem transcrição integral. Os timestamps dos 25 trechos do Level 2 são conservadores e ainda
+não foram validados por escuta humana. As 27 aulas possuem fonte oficial/autoral, estratégia,
+versão e status editorial explícitos.
+
+O Level 2 permanece deliberadamente parcial: as unidades 6–30 continuam `planned`, e a listagem
+oficial da VOA não oferece um review 26–30. O projeto não apresenta um fechamento autoral desse
+bloco como se fosse uma revisão oficial.
 
 Os packs autorais das Aulas 31, 38 e 40 estão na versão 2 e possuem objetivo pedagógico
 explícito (`recognize`, `apply`, `correct`, `produce` ou `listen`) e duas dicas progressivas por
@@ -456,15 +464,15 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 201 testes contra o Postgres do compose | `make test-api` |
-| vitest | 141 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 34 cenários em desktop e mobile (68 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 210 testes contra o Postgres do compose | `make test-api` |
+| vitest | 152 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 37 cenários em desktop e mobile (74 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
-O frontend possui uma **jornada guiada** em todas as Aulas 31–52. Ela divide o estudo em
-preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
+O frontend possui uma **jornada guiada** nas 27 aulas publicadas dos dois níveis. Ela divide o
+estudo em preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
 permitindo continuar em outro navegador. Em “Assistir”, o player usa o áudio oficial da VOA,
 sincroniza a posição na conta e oferece velocidade, saltos de cinco segundos, repetição A–B e
-108 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
+133 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
 API sem enviar o gabarito antes da
 resposta. Na revisão, o aluno pode praticar *shadowing*, gravar a voz localmente, comparar com
 o modelo e salvar uma autoavaliação. O áudio permanece local por padrão; somente após
@@ -518,7 +526,7 @@ infra/     compose.yml                 — dev: db + api + worker + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
 seed/      courses.json                — catálogo de cursos e unidades
-           lessons.json                — conteúdo das 22 aulas publicadas
+           lessons.json                — conteúdo das 27 aulas publicadas
 ```
 
 ## Convenções

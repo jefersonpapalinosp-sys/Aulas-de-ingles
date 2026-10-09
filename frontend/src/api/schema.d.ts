@@ -4022,7 +4022,9 @@ export interface operations {
     };
     painel_hoje_api_me_today_get: {
         parameters: {
-            query?: never;
+            query?: {
+                course?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4036,6 +4038,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TodayOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
