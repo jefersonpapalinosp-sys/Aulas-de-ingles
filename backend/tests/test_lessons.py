@@ -16,13 +16,13 @@ async def test_lista_as_vinte_e_duas_aulas_em_ordem(client: AsyncClient) -> None
 
 
 @pytest.mark.asyncio
-async def test_level_2_lista_e_entrega_as_aulas_1_a_15(
+async def test_level_2_lista_e_entrega_as_aulas_1_a_20(
     client: AsyncClient,
 ) -> None:
     response = await client.get("/api/lessons?course=voa-level-2")
     assert response.status_code == 200
     summaries = response.json()
-    assert [item["number"] for item in summaries] == list(range(1, 16))
+    assert [item["number"] for item in summaries] == list(range(1, 21))
     assert [item["title"] for item in summaries] == [
         "Budget Cuts",
         "The Interview",
@@ -39,11 +39,17 @@ async def test_level_2_lista_e_entrega_as_aulas_1_a_15(
         "Save the Bees!",
         "Made for Each Other",
         "Before and After",
+        "Find Your Joy!",
+        "Flour Baby, Part 1",
+        "Flour Baby, Part 2",
+        "Movie Night",
+        "The Test Drive",
     ]
     assert all(item["course_slug"] == "voa-level-2" for item in summaries)
     assert all(item["unit_slug"] == "1-5" for item in summaries[:5])
     assert all(item["unit_slug"] == "6-10" for item in summaries[5:10])
-    assert all(item["unit_slug"] == "11-15" for item in summaries[10:])
+    assert all(item["unit_slug"] == "11-15" for item in summaries[10:15])
+    assert all(item["unit_slug"] == "16-20" for item in summaries[15:])
 
     durations = [
         247,
@@ -125,7 +131,7 @@ async def test_level_2_lista_e_entrega_as_aulas_1_a_15(
     assert len(sprint_27_classifications) == 3
 
     assert (await client.get("/api/lessons/1")).status_code == 404
-    assert (await client.get("/api/courses/voa-level-2/lessons/16")).status_code == 404
+    assert (await client.get("/api/courses/voa-level-2/lessons/21")).status_code == 404
 
 
 @pytest.mark.asyncio
@@ -382,7 +388,7 @@ async def test_exercicios_filtram_por_curso_e_unidade(client: AsyncClient) -> No
         assert all("answers" not in item for item in items)
 
     assert (await client.get("/api/exercises?course=voa-level-2&unit=45-49")).json() == []
-    assert (await client.get("/api/exercises?course=voa-level-2&unit=16-20")).json() == []
+    assert (await client.get("/api/exercises?course=voa-level-2&unit=21-25")).json() == []
     assert (await client.get("/api/exercises?course=voa-level-1&unit=45-49&lesson=31")).json() == []
     assert (
         await client.get("/api/exercises?course=voa-level-2&unit=11-15&lesson=10")

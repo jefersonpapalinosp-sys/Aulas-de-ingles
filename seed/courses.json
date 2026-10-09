@@ -48,60 +48,110 @@
               "activity_type": "multiple_choice",
               "skill": "listening",
               "prompt": "Na conversa da Aula 40, qual papel o diretor dá a Anna?",
-              "options": ["uma árvore", "a diretora", "uma viajante perdida"],
-              "accepted_answers": ["uma árvore"],
+              "options": [
+                "uma árvore",
+                "a diretora",
+                "uma viajante perdida"
+              ],
+              "accepted_answers": [
+                "uma árvore"
+              ],
               "explanation": "No fim da audição, Anna veste o figurino e diz que é uma árvore.",
-              "lesson_numbers": [40]
+              "lesson_numbers": [
+                40
+              ]
             },
             {
               "position": 2,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Complete a condição real: If you look at the chart, you ____ the audience growing.",
-              "options": ["will see", "would see", "saw"],
-              "accepted_answers": ["will see"],
+              "options": [
+                "will see",
+                "would see",
+                "saw"
+              ],
+              "accepted_answers": [
+                "will see"
+              ],
               "explanation": "Na first conditional, usamos if + presente e will + verbo para uma consequência provável.",
-              "lesson_numbers": [41]
+              "lesson_numbers": [
+                41
+              ]
             },
             {
               "position": 3,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Escolha a frase correta sobre a história da Aula 42.",
-              "options": ["Anna hurt herself.", "Anna hurt her self.", "Anna hurt himself."],
-              "accepted_answers": ["Anna hurt herself."],
+              "options": [
+                "Anna hurt herself.",
+                "Anna hurt her self.",
+                "Anna hurt himself."
+              ],
+              "accepted_answers": [
+                "Anna hurt herself."
+              ],
               "explanation": "O pronome reflexivo que retoma Anna/she é herself, escrito em uma palavra.",
-              "lesson_numbers": [42]
+              "lesson_numbers": [
+                42
+              ]
             },
             {
               "position": 4,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Qual pedido é mais adequado e cortês para pedir ajuda?",
-              "options": ["Would you be able to help me?", "You help me now.", "Could to you help me?"],
-              "accepted_answers": ["Would you be able to help me?"],
+              "options": [
+                "Would you be able to help me?",
+                "You help me now.",
+                "Could to you help me?"
+              ],
+              "accepted_answers": [
+                "Would you be able to help me?"
+              ],
               "explanation": "Would you be able to…? formula um pedido indireto e cortês; could nunca recebe to nessa estrutura.",
-              "lesson_numbers": [43]
+              "lesson_numbers": [
+                43
+              ]
             },
             {
               "position": 5,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Qual frase expressa ausência de obrigação, e não proibição?",
-              "options": ["You don't have to buy bread.", "You mustn't buy bread.", "You must buy bread."],
-              "accepted_answers": ["You don't have to buy bread."],
+              "options": [
+                "You don't have to buy bread.",
+                "You mustn't buy bread.",
+                "You must buy bread."
+              ],
+              "accepted_answers": [
+                "You don't have to buy bread."
+              ],
               "explanation": "Don't have to significa que algo não é necessário; mustn't proíbe a ação.",
-              "lesson_numbers": [44]
+              "lesson_numbers": [
+                44
+              ]
             },
             {
               "position": 6,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Qual opção reúne uma consequência provável, um reflexivo e uma obrigação forte?",
-              "options": ["will succeed · yourself · must", "would succeed · your self · could", "succeeded · himself · don't have to"],
-              "accepted_answers": ["will succeed · yourself · must"],
+              "options": [
+                "will succeed · yourself · must",
+                "would succeed · your self · could",
+                "succeeded · himself · don't have to"
+              ],
+              "accepted_answers": [
+                "will succeed · yourself · must"
+              ],
               "explanation": "A sequência retoma, respectivamente, a condição real da 41, o reflexivo da 42 e a obrigação forte da 44.",
-              "lesson_numbers": [41, 42, 44]
+              "lesson_numbers": [
+                41,
+                42,
+                44
+              ]
             }
           ]
         }
@@ -244,143 +294,143 @@
           ]
         }
       },
-    {
-      "slug": "50-52",
-      "title": "Aulas 50–52",
-      "position": 4,
-      "status": "published",
-      "lesson_start": 50,
-      "lesson_end": 52,
-      "total_lessons": 3,
-      "review": {
-        "slug": "checkpoint-50-52",
-        "title": "Checkpoint 50–52",
+      {
+        "slug": "50-52",
+        "title": "Aulas 50–52",
         "position": 4,
         "status": "published",
-        "source_kind": "mixed",
-        "source_title": "VOA Learning English — Review of Lessons 50–52",
-        "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-review-lessons-50-51-52/3805506.html",
-        "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O certificado e mídias de terceiros não foram incorporados.",
-        "intro": "Conclua o Level 1 retomando atividades em duração, hábitos, metas, phrasal verbs e o contraste entre experiências, eventos passados e próximos passos. A escuta da Aula 52 verifica como Anna avalia o próprio percurso.",
-        "estimated_minutes": 12,
-        "content_version": 1,
-        "review_lesson_number": 52,
-        "listening_lesson_number": 52,
-        "listening_media_position": 0,
-        "questions": [
-          {
-            "position": 1,
-            "activity_type": "multiple_choice",
-            "skill": "grammar",
-            "prompt": "A atividade começou ontem à noite e continua agora. Complete: Taylor ____ her report since last night.",
-            "options": [
-              "has been writing",
-              "wrote",
-              "will be writing"
-            ],
-            "accepted_answers": [
-              "has been writing"
-            ],
-            "explanation": "A pista ‘since last night’ marca o início de uma atividade que continua no presente; por isso usamos has been + verbo-ing.",
-            "lesson_numbers": [
-              50
-            ]
-          },
-          {
-            "position": 2,
-            "activity_type": "multiple_choice",
-            "skill": "grammar",
-            "prompt": "Qual frase combina corretamente uma duração e um ponto inicial?",
-            "options": [
-              "We have been waiting for ten minutes, and he has been studying since 2015.",
-              "We have been waiting since ten minutes, and he has been studying for 2015.",
-              "We waited for now, and he studies since three years."
-            ],
-            "accepted_answers": [
-              "We have been waiting for ten minutes, and he has been studying since 2015."
-            ],
-            "explanation": "‘Ten minutes’ é uma duração e pede for; ‘2015’ é o ponto inicial e pede since. As duas atividades chegam até o presente.",
-            "lesson_numbers": [
-              50
-            ]
-          },
-          {
-            "position": 3,
-            "activity_type": "multiple_choice",
-            "skill": "grammar",
-            "prompt": "Escolha a opção correta para preferência e meta: Ashley ____ running, and Anna wants ____ herself.",
-            "options": [
-              "loves · to challenge",
-              "loves to · challenging",
-              "love · challenge to"
-            ],
-            "accepted_answers": [
-              "loves · to challenge"
-            ],
-            "explanation": "‘Love’ pode receber o gerúndio para uma atividade preferida, enquanto ‘want’ pede o infinitivo to + verbo para uma meta.",
-            "lesson_numbers": [
-              51
-            ]
-          },
-          {
-            "position": 4,
-            "activity_type": "multiple_choice",
-            "skill": "grammar",
-            "prompt": "Qual opção contrasta um processo de uma hora com um resultado muito recente?",
-            "options": [
-              "I've been training for an hour; I've just found a new goal.",
-              "I trained since an hour; I just finding a new goal.",
-              "I've trained yesterday; I've been just find a new goal."
-            ],
-            "accepted_answers": [
-              "I've been training for an hour; I've just found a new goal."
-            ],
-            "explanation": "‘For an hour’ destaca a duração do processo com have been training; ‘just’ destaca o resultado recém-concluído com have found.",
-            "lesson_numbers": [
-              51
-            ]
-          },
-          {
-            "position": 5,
-            "activity_type": "multiple_choice",
-            "skill": "listening",
-            "prompt": "Na escuta da Aula 52, como Anna avalia tentativas com resultados diferentes?",
-            "options": [
-              "Sometimes she succeeded, sometimes she failed, but she will never stop trying.",
-              "She always succeeded, so she will stop taking chances.",
-              "She failed once and decided to leave Washington immediately."
-            ],
-            "accepted_answers": [
-              "Sometimes she succeeded, sometimes she failed, but she will never stop trying."
-            ],
-            "explanation": "As formas passadas ‘succeeded’ e ‘failed’ avaliam experiências concluídas; ‘will never stop’ declara a decisão futura de continuar.",
-            "lesson_numbers": [
-              52
-            ]
-          },
-          {
-            "position": 6,
-            "activity_type": "multiple_choice",
-            "skill": "grammar",
-            "prompt": "Qual sequência usa as pistas temporais e o contexto corretamente?",
-            "options": [
-              "She has been training for a month; her career has taken off; next year she will be acting in movies.",
-              "She trained since a month; her career takes off yesterday; next year she acting in movies.",
-              "She has training for a month; her career has take off; next year she was acting in movies."
-            ],
-            "accepted_answers": [
-              "She has been training for a month; her career has taken off; next year she will be acting in movies."
-            ],
-            "explanation": "‘For a month’ pede o processo have been training; o resultado atual da carreira usa has taken off; ‘next year’ aponta para will be acting.",
-            "lesson_numbers": [
-              50,
-              51,
-              52
-            ]
-          }
-        ]
+        "lesson_start": 50,
+        "lesson_end": 52,
+        "total_lessons": 3,
+        "review": {
+          "slug": "checkpoint-50-52",
+          "title": "Checkpoint 50–52",
+          "position": 4,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Lessons 50–52",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-review-lessons-50-51-52/3805506.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O certificado e mídias de terceiros não foram incorporados.",
+          "intro": "Conclua o Level 1 retomando atividades em duração, hábitos, metas, phrasal verbs e o contraste entre experiências, eventos passados e próximos passos. A escuta da Aula 52 verifica como Anna avalia o próprio percurso.",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 52,
+          "listening_lesson_number": 52,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "A atividade começou ontem à noite e continua agora. Complete: Taylor ____ her report since last night.",
+              "options": [
+                "has been writing",
+                "wrote",
+                "will be writing"
+              ],
+              "accepted_answers": [
+                "has been writing"
+              ],
+              "explanation": "A pista ‘since last night’ marca o início de uma atividade que continua no presente; por isso usamos has been + verbo-ing.",
+              "lesson_numbers": [
+                50
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual frase combina corretamente uma duração e um ponto inicial?",
+              "options": [
+                "We have been waiting for ten minutes, and he has been studying since 2015.",
+                "We have been waiting since ten minutes, and he has been studying for 2015.",
+                "We waited for now, and he studies since three years."
+              ],
+              "accepted_answers": [
+                "We have been waiting for ten minutes, and he has been studying since 2015."
+              ],
+              "explanation": "‘Ten minutes’ é uma duração e pede for; ‘2015’ é o ponto inicial e pede since. As duas atividades chegam até o presente.",
+              "lesson_numbers": [
+                50
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Escolha a opção correta para preferência e meta: Ashley ____ running, and Anna wants ____ herself.",
+              "options": [
+                "loves · to challenge",
+                "loves to · challenging",
+                "love · challenge to"
+              ],
+              "accepted_answers": [
+                "loves · to challenge"
+              ],
+              "explanation": "‘Love’ pode receber o gerúndio para uma atividade preferida, enquanto ‘want’ pede o infinitivo to + verbo para uma meta.",
+              "lesson_numbers": [
+                51
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual opção contrasta um processo de uma hora com um resultado muito recente?",
+              "options": [
+                "I've been training for an hour; I've just found a new goal.",
+                "I trained since an hour; I just finding a new goal.",
+                "I've trained yesterday; I've been just find a new goal."
+              ],
+              "accepted_answers": [
+                "I've been training for an hour; I've just found a new goal."
+              ],
+              "explanation": "‘For an hour’ destaca a duração do processo com have been training; ‘just’ destaca o resultado recém-concluído com have found.",
+              "lesson_numbers": [
+                51
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 52, como Anna avalia tentativas com resultados diferentes?",
+              "options": [
+                "Sometimes she succeeded, sometimes she failed, but she will never stop trying.",
+                "She always succeeded, so she will stop taking chances.",
+                "She failed once and decided to leave Washington immediately."
+              ],
+              "accepted_answers": [
+                "Sometimes she succeeded, sometimes she failed, but she will never stop trying."
+              ],
+              "explanation": "As formas passadas ‘succeeded’ e ‘failed’ avaliam experiências concluídas; ‘will never stop’ declara a decisão futura de continuar.",
+              "lesson_numbers": [
+                52
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Qual sequência usa as pistas temporais e o contexto corretamente?",
+              "options": [
+                "She has been training for a month; her career has taken off; next year she will be acting in movies.",
+                "She trained since a month; her career takes off yesterday; next year she acting in movies.",
+                "She has training for a month; her career has take off; next year she was acting in movies."
+              ],
+              "accepted_answers": [
+                "She has been training for a month; her career has taken off; next year she will be acting in movies."
+              ],
+              "explanation": "‘For a month’ pede o processo have been training; o resultado atual da carreira usa has taken off; ‘next year’ aponta para will be acting.",
+              "lesson_numbers": [
+                50,
+                51,
+                52
+              ]
+            }
+          ]
+        }
       }
-    }
     ]
   },
   {
@@ -562,10 +612,18 @@
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Complete a posição do passeio: The tour bus is now ____ the river, not beside it.",
-              "options": ["in", "through", "at"],
-              "accepted_answers": ["in"],
+              "options": [
+                "in",
+                "through",
+                "at"
+              ],
+              "accepted_answers": [
+                "in"
+              ],
               "explanation": "In localiza o veículo dentro da água; through indicaria movimento atravessando um espaço.",
-              "lesson_numbers": [6]
+              "lesson_numbers": [
+                6
+              ]
             },
             {
               "position": 2,
@@ -577,9 +635,13 @@
                 "You should walk in the bridge and stop on the memorial.",
                 "You should walking across the bridge and stop at memorial."
               ],
-              "accepted_answers": ["You should walk across the bridge and stop at the memorial."],
+              "accepted_answers": [
+                "You should walk across the bridge and stop at the memorial."
+              ],
               "explanation": "Across expressa travessia, at marca o ponto de parada e should recebe o verbo na forma base.",
-              "lesson_numbers": [7]
+              "lesson_numbers": [
+                7
+              ]
             },
             {
               "position": 3,
@@ -591,19 +653,31 @@
                 "The sauce recipe keeps secret by the judges.",
                 "The judges are kept the sauce recipe secret."
               ],
-              "accepted_answers": ["The sauce recipe is kept secret by the judges."],
+              "accepted_answers": [
+                "The sauce recipe is kept secret by the judges."
+              ],
               "explanation": "Na passiva, o objeto vira sujeito e usamos be + particípio: is kept.",
-              "lesson_numbers": [8]
+              "lesson_numbers": [
+                8
+              ]
             },
             {
               "position": 4,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "A evidência é forte. Complete: Anna won the contest, so the judges ____ liked her unusual pet.",
-              "options": ["must have", "may have", "could not have"],
-              "accepted_answers": ["must have"],
+              "options": [
+                "must have",
+                "may have",
+                "could not have"
+              ],
+              "accepted_answers": [
+                "must have"
+              ],
               "explanation": "Must have expressa uma dedução forte sobre algo que aconteceu no passado.",
-              "lesson_numbers": [9]
+              "lesson_numbers": [
+                9
+              ]
             },
             {
               "position": 5,
@@ -615,9 +689,13 @@
                 "I wish I visited Peru next year.",
                 "I hope I could have visited Peru yesterday."
               ],
-              "accepted_answers": ["I hope to visit Peru next year."],
+              "accepted_answers": [
+                "I hope to visit Peru next year."
+              ],
               "explanation": "Hope apresenta uma expectativa considerada possível; wish costuma marcar desejo irreal ou contrário à situação atual.",
-              "lesson_numbers": [10]
+              "lesson_numbers": [
+                10
+              ]
             },
             {
               "position": 6,
@@ -629,9 +707,17 @@
                 "Porque Anna já tem muitos cachorros em casa.",
                 "Porque o concurso proíbe animais de verdade."
               ],
-              "accepted_answers": ["Porque cuidar de um animal é uma grande responsabilidade."],
+              "accepted_answers": [
+                "Porque cuidar de um animal é uma grande responsabilidade."
+              ],
               "explanation": "Ashley destaca a responsabilidade e oferece uma experiência prática antes de uma decisão permanente.",
-              "lesson_numbers": [6, 7, 8, 9, 10]
+              "lesson_numbers": [
+                6,
+                7,
+                8,
+                9,
+                10
+              ]
             }
           ]
         }
@@ -665,60 +751,112 @@
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "A neve começou antes e continua agora. Complete: It ____ all morning.",
-              "options": ["has been snowing", "had snowed tomorrow", "snows yesterday"],
-              "accepted_answers": ["has been snowing"],
+              "options": [
+                "has been snowing",
+                "had snowed tomorrow",
+                "snows yesterday"
+              ],
+              "accepted_answers": [
+                "has been snowing"
+              ],
               "explanation": "Has been snowing destaca uma atividade iniciada no passado que continua no presente.",
-              "lesson_numbers": [11]
+              "lesson_numbers": [
+                11
+              ]
             },
             {
               "position": 2,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Complete uma condição real: If the bees return, the garden ____ healthier.",
-              "options": ["will become", "would become", "became yesterday"],
-              "accepted_answers": ["will become"],
+              "options": [
+                "will become",
+                "would become",
+                "became yesterday"
+              ],
+              "accepted_answers": [
+                "will become"
+              ],
               "explanation": "Uma possibilidade real usa if + presente e will + verbo na consequência.",
-              "lesson_numbers": [12]
+              "lesson_numbers": [
+                12
+              ]
             },
             {
               "position": 3,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Qual frase apresenta uma consequência provável para uma ação futura?",
-              "options": ["If we protect their habitat, more bees will survive.", "If we protected it, more bees survived yesterday.", "If we will protect it, bees survive before."],
-              "accepted_answers": ["If we protect their habitat, more bees will survive."],
+              "options": [
+                "If we protect their habitat, more bees will survive.",
+                "If we protected it, more bees survived yesterday.",
+                "If we will protect it, bees survive before."
+              ],
+              "accepted_answers": [
+                "If we protect their habitat, more bees will survive."
+              ],
               "explanation": "A primeira condicional relaciona uma ação possível a uma previsão futura.",
-              "lesson_numbers": [13]
+              "lesson_numbers": [
+                13
+              ]
             },
             {
               "position": 4,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Ashley gosta da ideia, e Anna também. Qual resposta concorda corretamente?",
-              "options": ["So does Anna.", "Anna doesn't either.", "So Anna doesn't."],
-              "accepted_answers": ["So does Anna."],
+              "options": [
+                "So does Anna.",
+                "Anna doesn't either.",
+                "So Anna doesn't."
+              ],
+              "accepted_answers": [
+                "So does Anna."
+              ],
               "explanation": "So + auxiliar + sujeito concorda com uma afirmação positiva no simple present.",
-              "lesson_numbers": [14]
+              "lesson_numbers": [
+                14
+              ]
             },
             {
               "position": 5,
               "activity_type": "multiple_choice",
               "skill": "grammar",
               "prompt": "Complete o contraste: ____ it was cold, they exercised outside.",
-              "options": ["Even though", "Because", "Before"],
-              "accepted_answers": ["Even though"],
+              "options": [
+                "Even though",
+                "Because",
+                "Before"
+              ],
+              "accepted_answers": [
+                "Even though"
+              ],
               "explanation": "Even though introduz um fato que contrasta com o resultado apresentado.",
-              "lesson_numbers": [15]
+              "lesson_numbers": [
+                15
+              ]
             },
             {
               "position": 6,
               "activity_type": "multiple_choice",
               "skill": "listening",
               "prompt": "Na escuta da Aula 14, o que a concordância com so e either ajuda os personagens a comunicar?",
-              "options": ["Sentimentos e experiências que compartilham ou não compartilham.", "Somente horários de compromissos futuros.", "Uma explicação científica sobre o clima."],
-              "accepted_answers": ["Sentimentos e experiências que compartilham ou não compartilham."],
+              "options": [
+                "Sentimentos e experiências que compartilham ou não compartilham.",
+                "Somente horários de compromissos futuros.",
+                "Uma explicação científica sobre o clima."
+              ],
+              "accepted_answers": [
+                "Sentimentos e experiências que compartilham ou não compartilham."
+              ],
               "explanation": "As estruturas de concordância conectam as reações dos falantes a experiências e sentimentos sobre relacionamentos.",
-              "lesson_numbers": [11, 12, 13, 14, 15]
+              "lesson_numbers": [
+                11,
+                12,
+                13,
+                14,
+                15
+              ]
             }
           ]
         }
@@ -727,10 +865,136 @@
         "slug": "16-20",
         "title": "Aulas 16–20",
         "position": 4,
-        "status": "planned",
+        "status": "published",
         "lesson_start": 16,
         "lesson_end": 20,
-        "total_lessons": 5
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-16-20",
+          "title": "Checkpoint 16–20",
+          "position": 6,
+          "status": "published",
+          "source_kind": "mixed",
+          "source_title": "VOA Learning English — Review of Level 2 Lessons 16–20",
+          "source_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-review-of-lessons-16-to-20/4249943.html",
+          "source_note": "A seleção de competências acompanha a revisão oficial da VOA; perguntas, alternativas, explicações e correção são criações autorais do projeto. O banco de questões da VOA, imagens, marcas e outras mídias de terceiros não foram incorporados.",
+          "intro": "Consolide as Aulas 16–20 com hábitos do passado, pronomes reflexivos, perguntas indiretas e discurso relatado. A escuta da Aula 19 verifica pedidos polidos numa conversa sobre comportamento no cinema.",
+          "estimated_minutes": 14,
+          "content_version": 1,
+          "review_lesson_number": 20,
+          "listening_lesson_number": 19,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Verbo de estado no passado. Complete: The office ____ across from the cafeteria.",
+              "options": [
+                "used to be",
+                "would be",
+                "uses to be"
+              ],
+              "accepted_answers": [
+                "used to be"
+              ],
+              "explanation": "Com verbos de estado como be, só used to é possível; would descreve ação repetida.",
+              "lesson_numbers": [
+                16
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Ms. Weaver fala com Anna e Pete. Complete: You must do everything by ____.",
+              "options": [
+                "yourselves",
+                "yourself",
+                "themselves"
+              ],
+              "accepted_answers": [
+                "yourselves"
+              ],
+              "explanation": "São duas pessoas recebendo a instrução, então o reflexivo vai para o plural.",
+              "lesson_numbers": [
+                17
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Preposição de lugar. Complete: While I was making myself dinner, I put Baby next to ____.",
+              "options": [
+                "me",
+                "myself",
+                "mine"
+              ],
+              "accepted_answers": [
+                "me"
+              ],
+              "explanation": "Depois de preposição de lugar o inglês volta ao pronome comum, mesmo sendo a mesma pessoa.",
+              "lesson_numbers": [
+                18
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Pergunta indireta. Complete: Can you tell me ____?",
+              "options": [
+                "where the theater is",
+                "where is the theater",
+                "where does the theater is"
+              ],
+              "accepted_answers": [
+                "where the theater is"
+              ],
+              "explanation": "Dentro da pergunta indireta a inversão desaparece: sujeito antes do verbo.",
+              "lesson_numbers": [
+                19
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Discurso relatado. Qual frase está correta?",
+              "options": [
+                "She said that we need to show lots of cars.",
+                "She said us that we need to show lots of cars.",
+                "She told that we need to show lots of cars."
+              ],
+              "accepted_answers": [
+                "She said that we need to show lots of cars."
+              ],
+              "explanation": "say não aceita a pessoa logo depois; tell exige a pessoa. Aqui a forma correta é said that.",
+              "lesson_numbers": [
+                20
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 19, como Pete pede que Anna pare de falar durante os trailers?",
+              "options": [
+                "Would you mind not talking?",
+                "Stop talking right now.",
+                "You talk too much."
+              ],
+              "accepted_answers": [
+                "Would you mind not talking?"
+              ],
+              "explanation": "Pete usa a fórmula indireta Would you mind seguida de gerúndio, mais polida que o imperativo.",
+              "lesson_numbers": [
+                19
+              ]
+            }
+          ]
+        }
       },
       {
         "slug": "21-25",

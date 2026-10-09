@@ -363,7 +363,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
                 )
             ).scalars()
         )
-        assert len(published_lessons) == 15
+        assert len(published_lessons) == 20
         session.add_all(
             [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in published_lessons]
         )
@@ -380,7 +380,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
                 )
             ).scalars()
         )
-        assert len(published_reviews) == 3
+        assert len(published_reviews) == 4
         await session.commit()
 
         if published_reviews:
@@ -438,7 +438,7 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
         await session.execute(
             select(CourseUnit).where(
                 CourseUnit.course_id == course.id,
-                CourseUnit.slug == "16-20",
+                CourseUnit.slug == "21-25",
             )
         )
     ).scalar_one()
@@ -448,7 +448,7 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
     hidden_lesson = Lesson(
         course_id=course.id,
         unit_id=planned_unit.id,
-        number=16,
+        number=21,
         slug="dashboard-hidden-level-2-lesson-16",
         position=1,
         title="Find Your Joy!",

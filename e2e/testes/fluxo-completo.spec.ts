@@ -19,6 +19,11 @@ function emailUnico() {
 }
 
 const SENHA = 'senha-bem-grande'
+
+/** Títulos como "Find Your Joy!" e "Flour Baby, Part 1" têm caracteres de regex. */
+function escapeRegex(texto: string): string {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 const LEVEL_1_SLUG = 'voa-level-1'
 const LEVEL_2_SLUG = 'voa-level-2'
 
@@ -1386,7 +1391,7 @@ test('rotas legadas redirecionam ao Level 1 e preservam etapa, busca e fragmento
   }
 })
 
-test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
+test('Sprints anteriores seguem publicadas após a expansão da Sprint 28', async ({
   page,
   request,
 }) => {
@@ -1404,7 +1409,7 @@ test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
   }
   expect(curriculum.course).toMatchObject({
     status: 'published',
-    published_lessons: 15,
+    published_lessons: 20,
     total_lessons: 30,
   })
   expect(curriculum.units[0]).toMatchObject({
@@ -1428,7 +1433,14 @@ test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
     review: { slug: 'checkpoint-11-15', question_count: 6 },
   })
   expect(curriculum.units[2]?.lessons.map((lesson) => lesson.number)).toEqual([11, 12, 13, 14, 15])
-  expect(curriculum.units.slice(3).every((unit) => (
+  expect(curriculum.units[3]).toMatchObject({
+    slug: '16-20',
+    status: 'published',
+    published_lessons: 5,
+    review: { slug: 'checkpoint-16-20', question_count: 6 },
+  })
+  expect(curriculum.units[3]?.lessons.map((lesson) => lesson.number)).toEqual([16, 17, 18, 19, 20])
+  expect(curriculum.units.slice(4).every((unit) => (
     unit.status === 'planned' && unit.published_lessons === 0 && unit.lessons.length === 0
   ))).toBeTruthy()
   expect(curriculum.units.at(-1)?.review).toBeNull()
@@ -1450,7 +1462,7 @@ test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
     coursePath(LEVEL_1_SLUG),
   )
   await expect(level2Card.getByText('2 · Intermediário')).toBeVisible()
-  await expect(level2Card.getByText('15/30', { exact: true })).toBeVisible()
+  await expect(level2Card.getByText('20/30', { exact: true })).toBeVisible()
   await expect(level2Card.getByText('Publicado', { exact: true })).toBeVisible()
 
   await level2Card.getByRole('link', { name: 'Ver unidades' }).click()
@@ -1458,8 +1470,9 @@ test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
   await expect(page.getByRole('heading', { name: 'Mapa do curso' })).toBeVisible()
   await expect(page.getByText(/Level 2 · Intermediário · VOA Learning English/)).toBeVisible()
   const unitCards = page.locator('.unit-card-grid')
-  await expect(unitCards.locator('a')).toHaveCount(3)
-  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(3)
+  // Quatro unidades publicadas e navegáveis; as duas últimas seguem em preparação.
+  await expect(unitCards.locator('a')).toHaveCount(4)
+  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(2)
   await expect(unitCards.locator('a', { hasText: 'Aulas 26–30' })).toHaveCount(0)
 
   await unitCards.locator('a', { hasText: 'Aulas 1–5' }).click()
@@ -1482,6 +1495,38 @@ test('Sprint 26 permanece publicada após a expansão da Sprint 27', async ({
   await expect(
     page.getByRole('main').getByRole('link', { name: /Checkpoint 6–10/ }),
   ).toHaveAttribute('href', courseReviewPath('6-10', LEVEL_2_SLUG))
+})
+
+test('Sprint 28 publica a unidade 16–20 e mantém as fronteiras curriculares', async ({
+  page,
+}) => {
+  await criarConta(page, 'Unidade Level 2 Sprint 28')
+
+  await page.goto(unitPath('16-20', LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 16–20' })).toBeVisible()
+  const lessons = page.locator('.course-unit-lessons')
+  await expect(lessons.locator('a[href*="/aulas/"]')).toHaveCount(5)
+  for (const [number, title] of [
+    [16, 'Find Your Joy!'],
+    [17, 'Flour Baby, Part 1'],
+    [18, 'Flour Baby, Part 2'],
+    [19, 'Movie Night'],
+    [20, 'The Test Drive'],
+  ] as const) {
+    await expect(lessons.getByRole('link', { name: new RegExp(escapeRegex(title)) })).toHaveAttribute(
+      'href',
+      lessonPath(number, LEVEL_2_SLUG),
+    )
+  }
+
+  // As duas partes de Flour Baby são aulas independentes.
+  await page.goto(lessonPath(17, LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'Flour Baby, Part 1' })).toBeVisible()
+  await page.goto(lessonPath(18, LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'Flour Baby, Part 2' })).toBeVisible()
+
+  // O bloco seguinte continua indisponível, sem link morto.
+  await expect(page.getByRole('link', { name: /Aulas 21–25/ })).toHaveCount(0)
 })
 
 test('Sprint 27 publica a unidade 11–15 e preserva as fronteiras curriculares', async ({
@@ -1714,11 +1759,13 @@ test('checkpoint 11–15 usa listening da Aula 14, persiste e isola o histórico
   expect((await saved).status()).toBe(201)
   await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
   await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Ver progresso do curso' })).toHaveAttribute(
+  // Desde a Sprint 28 a Aula 16 existe, então o fecho do bloco 11-15 deixa de
+  // mandar ao progresso do curso e passa a oferecer a continuação natural.
+  await expect(page.getByRole('link', { name: /Continuar em Level 2 · Aula 16/ })).toHaveAttribute(
     'href',
-    courseCompletionPath(LEVEL_2_SLUG),
+    lessonPath(16, LEVEL_2_SLUG),
   )
-  await expect(page.getByRole('link', { name: /Continuar em Level 2 · Aula 16/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Ver progresso do curso' })).toHaveCount(0)
 
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
