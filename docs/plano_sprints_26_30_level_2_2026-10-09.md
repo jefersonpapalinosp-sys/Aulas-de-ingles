@@ -315,22 +315,52 @@ as mesmas da Sprint 26; não há novo contrato de API ou migration nesta sprint.
 
 ## 6. Sprint 28 — Level 2, Aulas 16–20
 
-**Estado:** planejada.
+**Estado:** publicada em 9 de outubro de 2026. Resta a conferência auditiva dos 25
+timestamps, que depende de escuta humana.
 
 **Objetivo:** publicar o quarto bloco do Level 2 e seu checkpoint, comprovando que narrativas
 relacionadas ou aulas em partes continuam independentes no progresso.
 
-### Catálogo oficial confirmado
+### Auditoria oficial confirmada
 
-| Aula | Título confirmado no índice | Foco linguístico |
-|---:|---|---|
-| 16 | *Find Your Joy!* | a confirmar na auditoria da aula e do lesson plan |
-| 17 | *Flour Baby, Part 1* | a confirmar na auditoria da aula e do lesson plan |
-| 18 | *Flour Baby, Part 2* | a confirmar na auditoria da aula e do lesson plan |
-| 19 | *Movie Night* | a confirmar na auditoria da aula e do lesson plan |
-| 20 | *The Test Drive* | a confirmar na auditoria da aula e do lesson plan |
+Cada foco foi confirmado **por duas fontes independentes**: o segmento do *Professor Bot*
+dentro da própria aula, e o [review oficial 16–20](https://learningenglish.voanews.com/a/lets-learn-english-level-2-review-of-lessons-16-to-20/4249943.html).
 
-O índice confirma **Review of Level 2 Lessons 16–20**.
+| Aula | Página canônica | Foco gramatical | Foco funcional | MP3 |
+|---:|---|---|---|---|
+| 16 | [*Find Your Joy!*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-16/4198066.html) | `used to` e `would` para hábitos do passado | preferências de lazer | 4:41 |
+| 17 | [*Flour Baby, Part 1*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-17/4220576.html) | pronomes reflexivos | interpretar informação e dar instruções | 3:58 |
+| 18 | [*Flour Baby, Part 2*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-18/4231290.html) | reflexivos: quando **não** usar | seguir instruções e descrever um acidente | 4:18 |
+| 19 | [*Movie Night*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-19/4242927.html) | perguntas indiretas | corrigir e pedir com polidez | 4:47 |
+| 20 | [*The Test Drive*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-20/4254704.html) | discurso direto e relatado | opiniões, semelhanças e diferenças | 4:41 |
+
+Duas observações da auditoria, registradas aqui porque afetam o conteúdo publicado:
+
+- a Aula 16 ensina **duas** restrições do `would` que o review não detalha: ele exige a
+  marca temporal dita antes, e não aceita verbos de estado (*be*, *think*, *feel*, *see*,
+  *understand*). As duas vieram do *Professor Bot* e estão nos blocos de gramática;
+- a Aula 18 é a que de fato carrega o foco negativo — *não* usar reflexivo depois de
+  preposição de lugar. O review rotula 17 e 18 igualmente como "reflexive pronouns", o que
+  esconde essa diferença; o projeto separa os dois focos.
+
+O review 16–20 **não tem MP3 contínuo**, só clipes por aula — mesma situação do bloco
+11–15. Por isso o checkpoint local usa a mídia da Aula 19, por `listening_lesson_number`.
+
+### Implementação registrada
+
+- [x] auditar as cinco páginas canônicas, o review 16–20, os MP3s, durações e licença;
+- [x] manter as mídias como `network_only`, com crédito e fallback textual;
+- [x] publicar as cinco aulas, com conteúdo e exercícios autorais;
+- [x] publicar o checkpoint autoral 16–20 com listening da Aula 19;
+- [x] tratar *Part 1* e *Part 2* como aulas distintas, sem conclusão em cadeia;
+- [x] validar catálogo, currículo, fronteiras e isolamento dos checkpoints;
+- [ ] **pendente:** conferir por escuta humana os 25 timestamps conservadores.
+
+### Comportamento que mudou por efeito desta sprint
+
+Com a Aula 16 publicada, o fecho do checkpoint 11–15 **deixa de mandar ao progresso do
+curso** e passa a oferecer a continuação natural para a Aula 16. O E2E foi atualizado para
+afirmar o comportamento novo, que é o correto.
 
 ### Escopo
 
