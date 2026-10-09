@@ -100,11 +100,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
       - name: prepara o .env.prod
         run: |
           sed -e "s/TROQUE_ISTO_POR_32_BYTES_OU_MAIS_DE_VERDADE/$(openssl rand -hex 32)/" \
               -e "s/TROQUE_ISTO/ci_$(openssl rand -hex 6)/g" \
               .env.prod.example > .env.prod
+      # Registries públicos limitam pull anônimo por janela de tempo, e este job
+      # puxa quatro imagens. Esperar e tentar de novo resolve; insistir na hora
+      # não, porque a cota só se renova com o tempo.
+      - name: baixa as imagens, com espera entre tentativas
+        run: |
+          for tentativa in 1 2 3 4; do
+            if docker compose --env-file .env.prod -f infra/compose.prod.yml pull --quiet db; then
+              echo "imagens baixadas na tentativa $tentativa"
+              exit 0
+            fi
+            espera=$((tentativa * 45))
+            echo "::warning::pull falhou na tentativa $tentativa; nova tentativa em ${espera}s"
+            sleep $espera
+          done
+          echo "::error::não foi possível baixar as imagens após 4 tentativas"
+          exit 1
       - name: sobe a stack de produção
         run: |
           docker compose --env-file .env.prod -f infra/compose.prod.yml up -d --build
