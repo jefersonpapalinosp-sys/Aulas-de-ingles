@@ -24,7 +24,9 @@ vi.mock('./pages/CourseCompletionPage', () => ({
 }))
 
 describe('App', () => {
-  it('expõe a conclusão pela rota canônica autenticada', () => {
+  // Desde a Sprint 30 as rotas pesadas são carregadas sob demanda, então a
+  // página só aparece depois que o chunk resolve.
+  it('expõe a conclusão pela rota canônica autenticada', async () => {
     render(
       <MemoryRouter initialEntries={['/cursos/voa-level-1/conclusao']}>
         <App />
@@ -32,7 +34,7 @@ describe('App', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: 'Fechamento do curso carregado' }),
+      await screen.findByRole('heading', { name: 'Fechamento do curso carregado' }),
     ).toBeInTheDocument()
     expect(screen.queryByText('Página não encontrada')).not.toBeInTheDocument()
   })

@@ -1,18 +1,25 @@
+import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { useSessao } from './api/auth'
 import { LessonRail } from './components/LessonRail'
-import { CourseCatalogPage } from './pages/CourseCatalogPage'
-import { CourseCompletionPage } from './pages/CourseCompletionPage'
-import { CourseReviewPage } from './pages/CourseReviewPage'
-import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
-import { NotebookPage } from './pages/NotebookPage'
-import { PracticePage } from './pages/PracticePage'
-import { ReviewPage } from './pages/ReviewPage'
-import { StudyPage } from './pages/StudyPage'
-import { TestPage } from './pages/TestPage'
 import { ConnectivityStatus } from './features/offline/ConnectivityStatus'
+
+/**
+ * Cada rota pesada vira um chunk próprio. Mapa e login ficam no bundle
+ * inicial porque são as duas primeiras telas; o resto só é baixado quando
+ * o estudante navega até lá.
+ */
+const CourseCatalogPage = lazy(() => import('./pages/CourseCatalogPage').then((m) => ({ default: m.CourseCatalogPage })))
+const CourseCompletionPage = lazy(() => import('./pages/CourseCompletionPage').then((m) => ({ default: m.CourseCompletionPage })))
+const CourseReviewPage = lazy(() => import('./pages/CourseReviewPage').then((m) => ({ default: m.CourseReviewPage })))
+const LessonPage = lazy(() => import('./pages/LessonPage').then((m) => ({ default: m.LessonPage })))
+const NotebookPage = lazy(() => import('./pages/NotebookPage').then((m) => ({ default: m.NotebookPage })))
+const PracticePage = lazy(() => import('./pages/PracticePage').then((m) => ({ default: m.PracticePage })))
+const ReviewPage = lazy(() => import('./pages/ReviewPage').then((m) => ({ default: m.ReviewPage })))
+const StudyPage = lazy(() => import('./pages/StudyPage').then((m) => ({ default: m.StudyPage })))
+const TestPage = lazy(() => import('./pages/TestPage').then((m) => ({ default: m.TestPage })))
 import {
   assessmentPath,
   DEFAULT_COURSE_SLUG,
@@ -47,7 +54,8 @@ export default function App() {
       <div className="shell">
         <LessonRail />
         <main id="main-content" tabIndex={-1}>
-          <Routes>
+          <Suspense fallback={<p className="muted" role="status">Carregando…</p>}>
+            <Routes>
             <Route path="/" element={<Navigate to="/inicio" replace />} />
             <Route path="/inicio" element={<MapPage showToday />} />
             <Route path="/cursos" element={<CourseCatalogPage />} />
@@ -110,7 +118,8 @@ export default function App() {
                 </>
               }
             />
-          </Routes>
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </>
