@@ -14,7 +14,7 @@ from sqlalchemy import delete  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
-from app.db.models import User  # noqa: E402
+from app.db.models import CourseUnit, User  # noqa: E402
 from app.db.session import dispose_engine, get_sessionmaker  # noqa: E402
 from app.main import create_app  # noqa: E402
 
@@ -42,6 +42,9 @@ async def banco_por_teste() -> AsyncIterator[None]:
 
     async with get_sessionmaker()() as s:
         await s.execute(delete(User))
+        # Unidades sintéticas criadas por testes de "unidade planejada". Se um
+        # teste falhar antes do finally, elas vazariam para os seguintes.
+        await s.execute(delete(CourseUnit).where(CourseUnit.slug == "31-35"))
         await s.commit()
     await dispose_engine()
 

@@ -1391,7 +1391,7 @@ test('rotas legadas redirecionam ao Level 1 e preservam etapa, busca e fragmento
   }
 })
 
-test('Sprints anteriores seguem publicadas após a expansão da Sprint 29', async ({
+test('Sprints anteriores seguem publicadas após o fechamento do Level 2', async ({
   page,
   request,
 }) => {
@@ -1409,7 +1409,7 @@ test('Sprints anteriores seguem publicadas após a expansão da Sprint 29', asyn
   }
   expect(curriculum.course).toMatchObject({
     status: 'published',
-    published_lessons: 25,
+    published_lessons: 30,
     total_lessons: 30,
   })
   expect(curriculum.units[0]).toMatchObject({
@@ -1447,10 +1447,20 @@ test('Sprints anteriores seguem publicadas após a expansão da Sprint 29', asyn
     review: { slug: 'checkpoint-21-25', question_count: 6 },
   })
   expect(curriculum.units[4]?.lessons.map((lesson) => lesson.number)).toEqual([21, 22, 23, 24, 25])
-  expect(curriculum.units.slice(5).every((unit) => (
-    unit.status === 'planned' && unit.published_lessons === 0 && unit.lessons.length === 0
-  ))).toBeTruthy()
-  expect(curriculum.units.at(-1)?.review).toBeNull()
+  // Sprint 30: o Level 2 fecha. Nenhuma unidade planejada resta, e o último
+  // bloco traz um fechamento AUTORAL — a VOA não publica review das 26–30.
+  expect(curriculum.units[5]).toMatchObject({
+    slug: '26-30',
+    status: 'published',
+    published_lessons: 5,
+    review: { slug: 'checkpoint-26-30', question_count: 6, source_kind: 'authorial' },
+  })
+  expect(curriculum.units[5]?.lessons.map((lesson) => lesson.number)).toEqual([26, 27, 28, 29, 30])
+  expect(curriculum.units).toHaveLength(6)
+  expect(curriculum.units.at(-1)?.review).toMatchObject({
+    slug: 'checkpoint-26-30',
+    source_kind: 'authorial',
+  })
 
   await criarConta(page, 'Catálogo E2E')
   await page.goto('/cursos')
@@ -1469,7 +1479,7 @@ test('Sprints anteriores seguem publicadas após a expansão da Sprint 29', asyn
     coursePath(LEVEL_1_SLUG),
   )
   await expect(level2Card.getByText('2 · Intermediário')).toBeVisible()
-  await expect(level2Card.getByText('25/30', { exact: true })).toBeVisible()
+  await expect(level2Card.getByText('30/30', { exact: true })).toBeVisible()
   await expect(level2Card.getByText('Publicado', { exact: true })).toBeVisible()
 
   await level2Card.getByRole('link', { name: 'Ver unidades' }).click()
@@ -1478,9 +1488,9 @@ test('Sprints anteriores seguem publicadas após a expansão da Sprint 29', asyn
   await expect(page.getByText(/Level 2 · Intermediário · VOA Learning English/)).toBeVisible()
   const unitCards = page.locator('.unit-card-grid')
   // Quatro unidades publicadas e navegáveis; as duas últimas seguem em preparação.
-  await expect(unitCards.locator('a')).toHaveCount(5)
-  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(1)
-  await expect(unitCards.locator('a', { hasText: 'Aulas 26–30' })).toHaveCount(0)
+  await expect(unitCards.locator('a')).toHaveCount(6)
+  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(0)
+  await expect(unitCards.locator('a', { hasText: 'Aulas 26–30' })).toHaveCount(1)
 
   await unitCards.locator('a', { hasText: 'Aulas 1–5' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 1–5' })).toBeVisible()
@@ -1564,8 +1574,41 @@ test('Sprint 29 publica a unidade 21–25 e mantém as fronteiras curriculares',
   await page.goto(lessonPath(22, LEVEL_2_SLUG))
   await expect(page.getByRole('heading', { level: 1, name: 'Trash to Treasure, Part 2' })).toBeVisible()
 
-  // O último bloco segue indisponível.
+  // A página de uma unidade não linka a unidade seguinte — isso não mudou
+  // com a Sprint 30, que apenas publicou o bloco 26–30.
   await expect(page.getByRole('link', { name: /Aulas 26–30/ })).toHaveCount(0)
+})
+
+test('Sprint 30 fecha o Level 2 e rotula o fechamento como autoral', async ({ page }) => {
+  await criarConta(page, 'Fechamento Level 2')
+
+  await page.goto(unitPath('26-30', LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 26–30' })).toBeVisible()
+  const lessons = page.locator('.course-unit-lessons')
+  await expect(lessons.locator('a[href*="/aulas/"]')).toHaveCount(5)
+  for (const [number, title] of [
+    [26, 'Look-alikes'],
+    [27, 'Fish out of Water'],
+    [28, 'For the Birds'],
+    [29, "Where There's Smoke..."],
+    [30, 'Dream a Little Dream'],
+  ] as const) {
+    await expect(lessons.getByRole('link', { name: new RegExp(escapeRegex(title)) })).toHaveAttribute(
+      'href',
+      lessonPath(number, LEVEL_2_SLUG),
+    )
+  }
+
+  // O fechamento é autoral: a interface não pode chamá-lo de base curricular
+  // nem oferecer link para um review oficial que não existe.
+  await page.goto(courseReviewPath('26-30', LEVEL_2_SLUG))
+  const origem = page.locator('.checkpoint-provenance')
+  await expect(origem.getByText('Origem', { exact: true })).toBeVisible()
+  await expect(origem.getByText('Base curricular', { exact: true })).toHaveCount(0)
+  await expect(origem.getByText('Fechamento autoral do Aulas de Inglês')).toBeVisible()
+  await expect(origem.locator('a')).toHaveCount(0)
+  await expect(origem.getByText(/não publica review das Aulas 26–30/)).toBeVisible()
+  await expect(origem.getByText(/não confere certificação/)).toBeVisible()
 })
 
 test('Sprint 27 publica a unidade 11–15 e preserva as fronteiras curriculares', async ({
@@ -1858,6 +1901,10 @@ test('Sprint 25 isola a retomada de Hoje entre Level 1 e Level 2', async ({ page
   await courseSelect.selectOption(LEVEL_1_SLUG)
   await expect(page).toHaveURL(/\/inicio\?course=voa-level-1$/)
   if (trailDialog) {
+    // A troca de curso navega e o drawer remonta. Esperar que ele reassente
+    // antes do Escape: sem isso a tecla cai durante a transição e o teste
+    // fica dependente da ordem de execução.
+    await expect(page.getByRole('dialog', { name: 'Trilha de estudo' })).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog', { name: 'Trilha de estudo' })).toHaveCount(0)
   }

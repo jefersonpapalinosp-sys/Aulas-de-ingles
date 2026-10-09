@@ -204,7 +204,9 @@ function CourseReviewContent({
 
       <section className="checkpoint-provenance" aria-label="Origem do checkpoint">
         <div>
-          <span>Base curricular</span>
+          {/* Sem review oficial da VOA, chamar a origem de "base curricular"
+              sugeriria um respaldo que não existe. */}
+          <span>{data.source_kind === 'authorial' ? 'Origem' : 'Base curricular'}</span>
           {data.source_url ? (
             <a href={data.source_url} target="_blank" rel="noopener noreferrer">
               {data.source_title} ↗

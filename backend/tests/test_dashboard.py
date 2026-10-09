@@ -363,7 +363,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
                 )
             ).scalars()
         )
-        assert len(published_lessons) == 25
+        assert len(published_lessons) == 30
         session.add_all(
             [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in published_lessons]
         )
@@ -380,7 +380,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
                 )
             ).scalars()
         )
-        assert len(published_reviews) == 5
+        assert len(published_reviews) == 6
         await session.commit()
 
         if published_reviews:
@@ -443,12 +443,26 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
         )
     ).scalar_one()
     assert course.status == "published"
+    # Sprint 30: o Level 2 fechou e não há mais unidade planejada no seed.
+    # A regra continua valendo, então o teste cria a sua.
+    planned_unit = CourseUnit(
+        course_id=course.id,
+        slug="31-35",
+        title="Aulas 31–35",
+        position=7,
+        status="planned",
+        lesson_start=31,
+        lesson_end=35,
+        total_lessons=5,
+    )
+    session.add(planned_unit)
+    await session.flush()
     assert planned_unit.status == "planned"
 
     hidden_lesson = Lesson(
         course_id=course.id,
         unit_id=planned_unit.id,
-        number=26,
+        number=31,
         slug="dashboard-hidden-level-2-lesson-16",
         position=1,
         title="Find Your Joy!",
@@ -502,6 +516,7 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
         assert today["recorded_minutes_this_week"] == 0
     finally:
         await session.execute(delete(Lesson).where(Lesson.id == hidden_lesson.id))
+        await session.execute(delete(CourseUnit).where(CourseUnit.id == planned_unit.id))
         await session.commit()
 
 

@@ -26957,5 +26957,2744 @@
       }
     ],
     "learning_strategy": "desenhar a linha do tempo antes de escrever"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 30: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o lesson plan oficial da aula, quando existe, e o segmento do Professor Bot.",
+    "number": 26,
+    "slug": "lesson-26",
+    "position": 1,
+    "title": "Look-alikes",
+    "title_pt": "Sósias",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-26/4350607.html",
+    "grammar_tag": "Descrever pessoas + comparativos",
+    "focus_points": [
+      "look like / look alike",
+      "much + comparativo",
+      "descrever aparência"
+    ],
+    "story_note": null,
+    "lead": "Pete conta que conheceu alguém idêntica a Anna. O lesson plan oficial define os objetivos: **aprender a descrever pessoas** e **revisar comparativos**. A aula junta os dois ao comparar duas pessoas parecidas por fora e opostas por dentro.",
+    "warmup_prompt": "Describe someone who looks like you. How are you different?",
+    "listening_focus": "Separe o que descreve aparência do que compara duas pessoas.",
+    "goals": [
+      "Descrever aparência com **look like**, **look alike** e adjetivos.",
+      "Revisar o comparativo com **-er than** e **more … than**.",
+      "Intensificar a comparação com **much**, **a lot** e **far**.",
+      "Falar de semelhanças e diferenças entre pessoas."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "look like, look alike e look + adjetivo",
+        "why": "Três construções muito próximas que o português resolve com \"parecer\". A diferença está no que vem depois de *look*.",
+        "warning": "**Erro clássico** *She looks like tall* está errado. Antes de **adjetivo** não entra *like*: *she looks tall*. O *like* só aparece antes de **substantivo** ou pronome.",
+        "table_head": [
+          "Construção",
+          "O que vem depois",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "look **like** + substantivo",
+              "pessoa ou coisa",
+              "I met a woman who **looks just like** you."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "look **alike**",
+              "nada — o sujeito é plural",
+              "We **look alike**, don't we?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "look + adjetivo",
+              "adjetivo",
+              "You **look stupid** with that thing on your head."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "act alike",
+              "nada",
+              "But you don't **act alike**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Comparativo, revisto do Level 1",
+        "why": "O lesson plan pede revisão explícita. A regra é a mesma do Level 1: o tamanho do adjetivo decide entre a terminação e o *more*.",
+        "warning": null,
+        "table_head": [
+          "Adjetivo",
+          "Comparativo",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "nice (1 sílaba)",
+              "nic**er** than",
+              "You're much **nicer than** she is."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "tall (1 sílaba)",
+              "tall**er** than",
+              "She's **taller than** Pete."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "curly (2 sílabas, -y)",
+              "curl**ier** than",
+              "Her hair is **curlier than** mine."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "difficult (3 sílabas)",
+              "**more** difficult than",
+              "She is **more difficult than** I expected."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "good / bad",
+              "better / worse than",
+              "First impressions are **worse than** the truth."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Intensificar a comparação",
+        "why": "Para dizer \"muito mais\" antes de um comparativo, o inglês **não** usa *very*. A aula traz o caso com *much*.",
+        "warning": "**Não existe** *very nicer*. Use **much**, **a lot** ou **far** — e, para pouca diferença, **a little** ou **slightly**.",
+        "table_head": [
+          "Intensificador",
+          "Exemplo",
+          "Grau"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "much",
+              "You're **much nicer** than she is.",
+              "grande diferença"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "a lot / far",
+              "She's **far more** experienced.",
+              "grande diferença"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "a little / slightly",
+              "He's **a little taller** than me.",
+              "pouca diferença"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "just as … as",
+              "She's **just as** tall **as** Anna.",
+              "igualdade"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Somewhere in the world there is someone who **looks just like you**.",
+        "text_pt": "Em algum lugar do mundo existe alguém que é a sua cara.",
+        "note": "*look just like* + pessoa: o *just* reforça a semelhança."
+      },
+      {
+        "position": 1,
+        "text_en": "She's tall and has curly hair. But even her face **looks like** yours.",
+        "text_pt": "Ela é alta e tem cabelo cacheado. Mas até o rosto dela parece o seu.",
+        "note": "Descrição física seguida de comparação."
+      },
+      {
+        "position": 2,
+        "text_en": "We **look alike**, don't we?",
+        "text_pt": "A gente é parecida, né?",
+        "note": "*look alike* sem complemento, com sujeito no plural — e uma tag question da aula 34 do Level 1."
+      },
+      {
+        "position": 3,
+        "text_en": "Yeah, but you don't **act alike**. You're **much nicer than** she is.",
+        "text_pt": "É, mas vocês não agem igual. Você é muito mais simpática que ela.",
+        "note": "A frase que junta os dois focos: semelhança física × diferença de comportamento."
+      },
+      {
+        "position": 4,
+        "text_en": "You **look serious** with that look on your face.",
+        "text_pt": "Você está com cara de séria com essa expressão.",
+        "note": "*look* + adjetivo, sem *like*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "look-alike",
+        "ipa": "/ˈlʊkəlaɪk/",
+        "translation_pt": "sósia",
+        "example_en": "We are look-alikes!"
+      },
+      {
+        "position": 1,
+        "term": "curly hair",
+        "ipa": "/ˈkɜːrli her/",
+        "translation_pt": "cabelo cacheado",
+        "example_en": "She's tall and has curly hair."
+      },
+      {
+        "position": 2,
+        "term": "career consultant",
+        "ipa": "/kəˈrɪr kənˈsʌltənt/",
+        "translation_pt": "consultor de carreira",
+        "example_en": "I think she's a career consultant."
+      },
+      {
+        "position": 3,
+        "term": "make fun of",
+        "ipa": "/meɪk fʌn əv/",
+        "translation_pt": "zoar, tirar sarro de",
+        "example_en": "Are you making fun of me?"
+      },
+      {
+        "position": 4,
+        "term": "give someone a chance",
+        "ipa": "/ɡɪv ... ə tʃæns/",
+        "translation_pt": "dar uma chance a alguém",
+        "example_en": "We have to give her a chance."
+      },
+      {
+        "position": 5,
+        "term": "judge",
+        "ipa": "/dʒʌdʒ/",
+        "translation_pt": "julgar",
+        "example_en": "Let's not judge, Penelope."
+      },
+      {
+        "position": 6,
+        "term": "mean",
+        "ipa": "/miːn/",
+        "translation_pt": "mal-intencionado, cruel",
+        "example_en": "She's mean."
+      },
+      {
+        "position": 7,
+        "term": "shy",
+        "ipa": "/ʃaɪ/",
+        "translation_pt": "tímido",
+        "example_en": "Or maybe she's shy."
+      },
+      {
+        "position": 8,
+        "term": "childish",
+        "ipa": "/ˈtʃaɪldɪʃ/",
+        "translation_pt": "infantil",
+        "example_en": "you may be childish but I'm not"
+      },
+      {
+        "position": 9,
+        "term": "get to know",
+        "ipa": "/ɡet tə noʊ/",
+        "translation_pt": "conhecer melhor",
+        "example_en": "we should get to know her better"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "look like → /lʊk laɪk/",
+        "explanation": "Os dois /k/ se fundem num só na fala: \"lu-klaik\". Não tente pronunciar os dois."
+      },
+      {
+        "position": 1,
+        "label": "alike /əˈlaɪk/",
+        "explanation": "Tônica na **segunda** sílaba, e o *a* inicial é fraco /ə/. Não é \"Á-laik\"."
+      },
+      {
+        "position": 2,
+        "label": "curly /ˈkɜːrli/",
+        "explanation": "O som /ɜːr/ é o mesmo de *her* e *bird*, com a língua curvada."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 26 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/04/25/3b556bb7-8c37-4c22-a390-d79b9f34fd24_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 300,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 18,
+            "end_seconds": 40,
+            "speaker": "Anna",
+            "text_en": "Somewhere in the world there is someone who looks just like you.",
+            "text_pt": "Em algum lugar do mundo existe alguém que é a sua cara."
+          },
+          {
+            "position": 1,
+            "start_seconds": 72,
+            "end_seconds": 96,
+            "speaker": "Pete",
+            "text_en": "Yesterday at work, I met a woman who looks just like you.",
+            "text_pt": "Ontem no trabalho conheci uma mulher que é a sua cara."
+          },
+          {
+            "position": 2,
+            "start_seconds": 104,
+            "end_seconds": 128,
+            "speaker": "Pete",
+            "text_en": "She's tall and has curly hair. But even her face looks like yours.",
+            "text_pt": "Ela é alta e tem cabelo cacheado. Mas até o rosto dela parece o seu."
+          },
+          {
+            "position": 3,
+            "start_seconds": 160,
+            "end_seconds": 180,
+            "speaker": "Anna",
+            "text_en": "We look alike, don't we?",
+            "text_pt": "A gente é parecida, né?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 182,
+            "end_seconds": 206,
+            "speaker": "Penelope",
+            "text_en": "Yeah, but you don't act alike. You're much nicer than she is.",
+            "text_pt": "É, mas vocês não agem igual. Você é muito mais simpática que ela."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Antes de substantivo: She ____ her sister.",
+        "hint": null,
+        "explanation": "*look like* + substantivo ou pronome.",
+        "hints": [
+          "O que vem depois é uma pessoa.",
+          "Precisa de *like*."
+        ],
+        "answers": [
+          "looks like"
+        ],
+        "options": [
+          "looks like",
+          "looks",
+          "looks alike"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Antes de adjetivo: You ____ serious with that face.",
+        "hint": null,
+        "explanation": "Antes de adjetivo não entra *like*.",
+        "hints": [
+          "*serious* é adjetivo.",
+          "O *like* sobraria aqui."
+        ],
+        "answers": [
+          "look"
+        ],
+        "options": [
+          "look",
+          "look like",
+          "look alike"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Intensificando: You're `____` nicer than she is. (uma palavra, não use *very*)",
+        "hint": "uma palavra",
+        "explanation": "Comparativo aceita *much*, *a lot* ou *far* — nunca *very*.",
+        "hints": [
+          "*very* não cabe antes de comparativo.",
+          "Quatro letras."
+        ],
+        "answers": [
+          "much",
+          "far"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "She looks like her mother.",
+          "They look alike.",
+          "You look tired today.",
+          "We don't act alike."
+        ],
+        "classification_categories": [
+          "look like + substantivo",
+          "alike sem complemento",
+          "look + adjetivo"
+        ],
+        "prompt": "Classifique cada frase pela construção usada.",
+        "hint": null,
+        "explanation": "O que vem depois do verbo decide: substantivo pede *like*, adjetivo não, e *alike* fecha a frase.",
+        "hints": [
+          "Veja o que vem depois.",
+          "*alike* nunca leva complemento."
+        ],
+        "answers": [
+          "{\"She looks like her mother.\": \"look like + substantivo\", \"They look alike.\": \"alike sem complemento\", \"You look tired today.\": \"look + adjetivo\", \"We don't act alike.\": \"alike sem complemento\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Pete descreve a mulher que conheceu?",
+        "hint": null,
+        "explanation": "*She's tall and has curly hair. But even her face looks like yours.*",
+        "hints": [
+          "São três detalhes.",
+          "Um deles é o cabelo."
+        ],
+        "answers": [
+          "alta, de cabelo cacheado e rosto parecido com o de Anna"
+        ],
+        "options": [
+          "alta, de cabelo cacheado e rosto parecido com o de Anna",
+          "baixa e ruiva",
+          "idêntica ao Pete"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é a diferença que Penelope aponta entre as duas?",
+        "hint": null,
+        "explanation": "*you don't act alike. You're much nicer than she is.*",
+        "hints": [
+          "A diferença não é física.",
+          "Envolve comportamento."
+        ],
+        "answers": [
+          "parecem iguais, mas não agem igual"
+        ],
+        "options": [
+          "parecem iguais, mas não agem igual",
+          "têm a mesma profissão",
+          "moram na mesma rua"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a comparação que Penelope faz entre as duas.",
+        "hint": null,
+        "explanation": "*much* + comparativo + *than*.",
+        "hints": [
+          "Começa com *You're much*.",
+          "Termina com *than she is*."
+        ],
+        "answers": [
+          "You're much nicer than she is"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é a proposta de Anna diante das críticas?",
+        "hint": null,
+        "explanation": "*we should get to know her better* — ela resiste ao julgamento.",
+        "hints": [
+          "Ela discorda de Penelope.",
+          "Envolve um convite."
+        ],
+        "answers": [
+          "conhecer a colega melhor"
+        ],
+        "options": [
+          "conhecer a colega melhor",
+          "evitá-la",
+          "reclamar com Ms. Weaver"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Duas pessoas parecidas",
+        "instructions": "Write 7 to 10 sentences in English comparing two people who look similar. Use look like at least once, look alike at least once, two comparatives with than, and one intensifier such as much or a little.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "look like e look alike",
+            "terms": [
+              "look like",
+              "looks like",
+              "look alike",
+              "looks alike"
+            ]
+          },
+          {
+            "label": "dois comparativos",
+            "terms": [
+              "than"
+            ]
+          },
+          {
+            "label": "intensificador",
+            "terms": [
+              "much ",
+              "a lot ",
+              "far ",
+              "a little "
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "encontrar e aplicar padrões"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 30: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o lesson plan oficial da aula, quando existe, e o segmento do Professor Bot.",
+    "number": 27,
+    "slug": "lesson-27",
+    "position": 2,
+    "title": "Fish out of Water",
+    "title_pt": "Peixe fora d'água",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-27/4374632.html",
+    "grammar_tag": "Convites informais",
+    "focus_points": [
+      "Why don't you…?",
+      "How about…?",
+      "aceitar e recusar"
+    ],
+    "story_note": null,
+    "lead": "Ms. Weaver convida Anna para jantar num barco-casa. O Professor Bot define o foco: **convites informais**, com *Why don't…?* — a estrutura é *Why don't* + sujeito + verbo na forma simples.",
+    "warmup_prompt": "How do you invite a friend to do something, in English?",
+    "listening_focus": "Anote cada convite e como a pessoa convidada respondeu.",
+    "goals": [
+      "Convidar com **Why don't you…?** e **How about…?**",
+      "Montar a estrutura: *Why don't* + sujeito + verbo **simples**.",
+      "Aceitar e recusar convites sem soar rude.",
+      "Falar de moradia e de situações em que você se sente deslocado."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Why don't…? não é uma pergunta de verdade",
+        "why": "A forma é interrogativa e negativa, mas a função é **convidar ou sugerir**. Responder explicando o motivo seria literal demais.",
+        "warning": "**A forma do verbo** Depois do sujeito vem o verbo **simples**, sem *to* e sem *-s*: *Why don't **she** join us* está errado; é *Why **doesn't** she join us*.",
+        "table_head": [
+          "Estrutura",
+          "Exemplo",
+          "Função"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "Why don't + **you** + verbo",
+              "**Why don't you join** us? My treat!",
+              "convite direto"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Why don't + **we** + verbo",
+              "**Why don't we go** out tonight?",
+              "sugestão conjunta"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "Why **doesn't** + he/she",
+              "**Why doesn't she come** too?",
+              "3ª pessoa muda o auxiliar"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "Why not + verbo",
+              "**Why not try** the houseboat?",
+              "forma ainda mais curta"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Outras aberturas de convite informal",
+        "why": "Todas equivalem a *Why don't…?*, mas mudam a forma do verbo que vem depois.",
+        "warning": null,
+        "table_head": [
+          "Abertura",
+          "Forma seguinte",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "How about…?",
+              "**-ing** ou substantivo",
+              "**How about** giving Anna a tour?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "What about…?",
+              "**-ing** ou substantivo",
+              "**What about** lunch at noon?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "Would you like…?",
+              "**to** + verbo",
+              "**Would you like to** join us?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "Do you want…?",
+              "**to** + verbo",
+              "**Do you want to** come along?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Aceitar e recusar",
+        "why": "Recusar em inglês quase sempre vem em três partes: agradecer, dizer não e dar um motivo curto. A fala de Anna segue exatamente esse molde.",
+        "warning": null,
+        "table_head": [
+          "Função",
+          "Fórmula",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "aceitar",
+              "I'd love to / Sure!",
+              "I'm so glad you could come!"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "recusar",
+              "Thanks, but + motivo",
+              "**Thanks, but I already have plans.**"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "oferecer-se para pagar",
+              "My treat!",
+              "Why don't you join us? **My treat!**"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "adiar",
+              "Maybe another time.",
+              "—"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "**Why don't you join us?** My treat!",
+        "text_pt": "Por que você não vem com a gente? É por minha conta!",
+        "note": "A frase que o Professor Bot usa para apresentar a estrutura."
+      },
+      {
+        "position": 1,
+        "text_en": "**Thanks, but I already have plans.**",
+        "text_pt": "Obrigada, mas eu já tenho planos.",
+        "note": "Recusa em duas partes: agradecer e dar o motivo."
+      },
+      {
+        "position": 2,
+        "text_en": "Anna, I'm so glad you could come!",
+        "text_pt": "Anna, estou tão feliz que você pôde vir!",
+        "note": "Receber alguém: *I'm so glad you could come*."
+      },
+      {
+        "position": 3,
+        "text_en": "**How about** you give Anna a tour and I will make some lunch?",
+        "text_pt": "Que tal você mostrar o barco para a Anna enquanto eu faço o almoço?",
+        "note": "*How about* + oração: outra forma de propor."
+      },
+      {
+        "position": 4,
+        "text_en": "Aren't you too tall and klutzy to live on a houseboat?",
+        "text_pt": "Você não é alta e desastrada demais para morar num barco-casa?",
+        "note": "*too* + adjetivo + *to* + verbo — estrutura do Level 1, aula 40."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "houseboat",
+        "ipa": "/ˈhaʊsboʊt/",
+        "translation_pt": "barco-casa",
+        "example_en": "Aren't you too tall to live on a houseboat?"
+      },
+      {
+        "position": 1,
+        "term": "fish out of water",
+        "ipa": "/fɪʃ aʊt əv ˈwɔːtər/",
+        "translation_pt": "peixe fora d'água",
+        "example_en": "Lesson 27: Fish out of Water"
+      },
+      {
+        "position": 2,
+        "term": "My treat!",
+        "ipa": "/maɪ triːt/",
+        "translation_pt": "É por minha conta!",
+        "example_en": "Why don't you join us? My treat!"
+      },
+      {
+        "position": 3,
+        "term": "klutzy",
+        "ipa": "/ˈklʌtsi/",
+        "translation_pt": "desastrado",
+        "example_en": "too tall and klutzy"
+      },
+      {
+        "position": 4,
+        "term": "knock over",
+        "ipa": "/nɑːk ˈoʊvər/",
+        "translation_pt": "derrubar",
+        "example_en": "She knocks over a display board."
+      },
+      {
+        "position": 5,
+        "term": "tour",
+        "ipa": "/tʊr/",
+        "translation_pt": "visita guiada",
+        "example_en": "give Anna a tour"
+      },
+      {
+        "position": 6,
+        "term": "captain",
+        "ipa": "/ˈkæptən/",
+        "translation_pt": "capitã, capitão",
+        "example_en": "Do you really call her captain?"
+      },
+      {
+        "position": 7,
+        "term": "have plans",
+        "ipa": "/hæv plænz/",
+        "translation_pt": "ter compromisso",
+        "example_en": "Thanks, but I already have plans."
+      },
+      {
+        "position": 8,
+        "term": "display board",
+        "ipa": "/dɪˈspleɪ bɔːrd/",
+        "translation_pt": "painel de exposição",
+        "example_en": "She knocks over a display board."
+      },
+      {
+        "position": 9,
+        "term": "glad",
+        "ipa": "/ɡlæd/",
+        "translation_pt": "contente",
+        "example_en": "I'm so glad you could come!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Why don't you → /waɪ ˈdoʊntʃə/",
+        "explanation": "O /t/ + /j/ se fundem num som de *tch*: \"uai-DÔUN-tcha\". Igual a *don't you know*."
+      },
+      {
+        "position": 1,
+        "label": "How about → /haʊ əˈbaʊt/",
+        "explanation": "Na fala rápida vira \"hau-BAUT\", com o *about* colado."
+      },
+      {
+        "position": 2,
+        "label": "houseboat /ˈhaʊsboʊt/",
+        "explanation": "Tônica na primeira sílaba e dois ditongos seguidos: /aʊ/ e /oʊ/."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 27 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/05/03/198277fc-1de6-487a-8196-dc808623e1b6_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 265,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 30,
+            "end_seconds": 54,
+            "speaker": "Ms. Weaver",
+            "text_en": "Why don't you join us? My treat!",
+            "text_pt": "Por que você não vem com a gente? É por minha conta!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 56,
+            "end_seconds": 76,
+            "speaker": "Anna",
+            "text_en": "Thanks, but I already have plans.",
+            "text_pt": "Obrigada, mas eu já tenho planos."
+          },
+          {
+            "position": 2,
+            "start_seconds": 92,
+            "end_seconds": 114,
+            "speaker": "Ms. Weaver",
+            "text_en": "Aren't you too tall and klutzy to live on a houseboat?",
+            "text_pt": "Você não é alta e desastrada demais para morar num barco-casa?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 150,
+            "end_seconds": 172,
+            "speaker": "Fanny",
+            "text_en": "Anna, I'm so glad you could come!",
+            "text_pt": "Anna, estou tão feliz que você pôde vir!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 178,
+            "end_seconds": 202,
+            "speaker": "Fanny",
+            "text_en": "How about you give Anna a tour and I will make some lunch?",
+            "text_pt": "Que tal você mostrar o barco para a Anna enquanto eu faço o almoço?"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Convite informal: Why don't you ____ us for dinner?",
+        "hint": null,
+        "explanation": "Depois do sujeito vem o verbo na forma simples, sem *to*.",
+        "hints": [
+          "Sem *to*.",
+          "Sem *-s*."
+        ],
+        "answers": [
+          "join"
+        ],
+        "options": [
+          "join",
+          "to join",
+          "joining"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Terceira pessoa: Why `____` she come with us? (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Com *he/she/it* o auxiliar vira *doesn't*.",
+        "hints": [
+          "O sujeito é *she*.",
+          "O auxiliar muda."
+        ],
+        "answers": [
+          "doesn't",
+          "does not"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Reescreva com How about: Why don't we go to the beach?",
+        "hint": null,
+        "explanation": "*How about* é seguido de -ing ou de uma oração.",
+        "hints": [
+          "Comece com *How about*.",
+          "O verbo pode ir para -ing."
+        ],
+        "answers": [
+          "How about going to the beach",
+          "How about we go to the beach"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "I'd love to!",
+          "Thanks, but I already have plans.",
+          "Sure, what time?",
+          "Maybe another time."
+        ],
+        "classification_categories": [
+          "aceitar",
+          "recusar"
+        ],
+        "prompt": "Classifique cada resposta como aceitar ou recusar.",
+        "hint": null,
+        "explanation": "Recusar em inglês costuma começar agradecendo e terminar com um motivo curto.",
+        "hints": [
+          "Procure o agradecimento seguido de *but*.",
+          "*Maybe another time* adia."
+        ],
+        "answers": [
+          "{\"I'd love to!\": \"aceitar\", \"Thanks, but I already have plans.\": \"recusar\", \"Sure, what time?\": \"aceitar\", \"Maybe another time.\": \"recusar\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Ms. Weaver convida Anna?",
+        "hint": null,
+        "explanation": "Convite informal com oferta de pagar.",
+        "hints": [
+          "Começa com *Why don't*.",
+          "Inclui uma oferta."
+        ],
+        "answers": [
+          "Why don't you join us? My treat!"
+        ],
+        "options": [
+          "Why don't you join us? My treat!",
+          "You must come with us.",
+          "Would you like to pay?"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Anna responde ao convite?",
+        "hint": null,
+        "explanation": "*Thanks, but I already have plans.*",
+        "hints": [
+          "Ela recusa com educação.",
+          "Dá um motivo curto."
+        ],
+        "answers": [
+          "agradece e diz que já tem planos"
+        ],
+        "options": [
+          "agradece e diz que já tem planos",
+          "aceita na hora",
+          "não responde"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o convite de Ms. Weaver, com a oferta.",
+        "hint": null,
+        "explanation": "A estrutura do convite informal seguida da oferta de pagar.",
+        "hints": [
+          "Começa com *Why don't you*.",
+          "Termina com *My treat*."
+        ],
+        "answers": [
+          "Why don't you join us? My treat!",
+          "Why don't you join us My treat"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Fanny propõe quando Anna chega?",
+        "hint": null,
+        "explanation": "*How about you give Anna a tour and I will make some lunch?*",
+        "hints": [
+          "Ela usa *How about*.",
+          "Divide as tarefas entre os dois."
+        ],
+        "answers": [
+          "que Phoenix mostre o barco enquanto ela faz o almoço"
+        ],
+        "options": [
+          "que Phoenix mostre o barco enquanto ela faz o almoço",
+          "que todos saiam para comer",
+          "que Anna cozinhe"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Convide e responda",
+        "instructions": "Write 7 to 10 sentences in English inviting a friend to do something and imagining their reply. Use Why don't at least twice, How about once, and include one polite refusal with a short reason.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "Why don't",
+            "terms": [
+              "why don't",
+              "why doesn't"
+            ]
+          },
+          {
+            "label": "How about",
+            "terms": [
+              "how about",
+              "what about"
+            ]
+          },
+          {
+            "label": "recusa educada",
+            "terms": [
+              "thanks, but",
+              "thank you, but",
+              "maybe another time"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "reconhecer a função por trás da forma"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 30: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o lesson plan oficial da aula, quando existe, e o segmento do Professor Bot.",
+    "number": 28,
+    "slug": "lesson-28",
+    "position": 3,
+    "title": "For the Birds",
+    "title_pt": "Coisa de passarinho",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-28/4396849.html",
+    "grammar_tag": "have to, ought to e supposed to",
+    "focus_points": [
+      "be supposed to",
+      "have to × ought to",
+      "expressar decepção"
+    ],
+    "story_note": null,
+    "lead": "Anna e Kelly saem para contar pássaros, e Anna só encontra carrinhos de sorvete. O lesson plan define os objetivos: usar **have to, ought to e supposed to**, e **expressar decepção** com termos informais.",
+    "warmup_prompt": "What are you supposed to do at work that you don't always do?",
+    "listening_focus": "Separe o que é obrigação, o que é expectativa e o que é só recomendação.",
+    "goals": [
+      "Usar **be supposed to** para o que se espera de alguém.",
+      "Diferenciar de **have to** (obrigação) e **ought to** (recomendação).",
+      "Expressar decepção com termos informais: *a bust*, *a flop*, *a bummer*.",
+      "Falar de observação de aves e de trabalho científico amador."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Os três graus, segundo o Professor Bot",
+        "why": "Ele define os três numa sequência: *have to* é obrigação, *ought to* é recomendação sem obrigação, e *be supposed to* é expectativa.",
+        "warning": "**O que distingue *supposed to*** Ele carrega a ideia de que a expectativa **pode não** ter sido cumprida. *Anna was supposed to find birds, but she didn't* — a frase quase pede o *but*.",
+        "table_head": [
+          "Estrutura",
+          "Força",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "have to + verbo",
+              "obrigação: você **deve**",
+              "I **have to** help everyone out of the building. (aula 29)"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "ought to + verbo",
+              "recomendação: deveria, mas não é obrigado",
+              "You **ought to** check the form."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "be supposed to + verbo",
+              "expectativa: esperam que você",
+              "We're **supposed to be** counting birds, not ice cream trucks."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "was/were supposed to",
+              "expectativa **não** cumprida",
+              "Anna **was supposed to** find birds, but she didn't."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "A forma do be supposed to",
+        "why": "É o *be* que conjuga, não o *suppose*. E o **-d** de *supposed* é obrigatório, ainda que quase não se ouça na fala.",
+        "warning": "**Erro de escrita frequente** *I'm suppose to* está errado — falta o **-d**. O ouvido engana porque o /d/ se funde com o /t/ de *to*.",
+        "table_head": [
+          "Pessoa / tempo",
+          "Forma",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "presente",
+              "am / is / are supposed to",
+              "We **are supposed to** count birds."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "passado",
+              "was / were supposed to",
+              "She **was supposed to** bring the form."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "contínuo",
+              "supposed to **be** + -ing",
+              "We're supposed to **be counting** birds."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "negativa",
+              "**not** supposed to",
+              "You're **not supposed to** feed the birds."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Decepção em registro informal",
+        "why": "O lesson plan pede explicitamente \"express disappointment with informal terms\". Anna enfileira três sinônimos na mesma fala.",
+        "warning": null,
+        "table_head": [
+          "Termo",
+          "Registro",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "a bust",
+              "informal",
+              "Today has been **a bust**…"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "a flop",
+              "informal",
+              "…**a flop**…"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "a bummer",
+              "muito informal",
+              "…**a bummer**!"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "What a letdown.",
+              "neutro",
+              "—"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Today has been **a bust** … **a flop** … **a bummer**!",
+        "text_pt": "Hoje foi um fracasso… um desastre… uma decepção!",
+        "note": "Três sinônimos informais de decepção, em escala crescente."
+      },
+      {
+        "position": 1,
+        "text_en": "I'm sensing a little disappointment.",
+        "text_pt": "Estou sentindo uma certa decepção.",
+        "note": "*sense* + substantivo: perceber algo não dito."
+      },
+      {
+        "position": 2,
+        "text_en": "We're **supposed to be** counting birds, not ice cream trucks.",
+        "text_pt": "A gente deveria estar contando pássaros, não carrinhos de sorvete.",
+        "note": "A frase que o Professor Bot usa — *supposed to* + **be** + -ing."
+      },
+      {
+        "position": 3,
+        "text_en": "I've **only seen** pigeons ... lots and lots of pigeons!",
+        "text_pt": "Eu só vi pombos… muitos e muitos pombos!",
+        "note": "Present perfect com *only* — o resultado até agora."
+      },
+      {
+        "position": 4,
+        "text_en": "But, make sure that you put it on the official form.",
+        "text_pt": "Mas certifique-se de colocar no formulário oficial.",
+        "note": "*make sure that* + oração: instrução com ênfase."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "bird count",
+        "ipa": "/bɜːrd kaʊnt/",
+        "translation_pt": "contagem de aves",
+        "example_en": "the Great City Bird Count"
+      },
+      {
+        "position": 1,
+        "term": "bird-watching",
+        "ipa": "/ˈbɜːrdwɑːtʃɪŋ/",
+        "translation_pt": "observação de aves",
+        "example_en": "My official bird-watching form is almost full!"
+      },
+      {
+        "position": 2,
+        "term": "a bust",
+        "ipa": "/ə bʌst/",
+        "translation_pt": "um fracasso",
+        "example_en": "Today has been a bust"
+      },
+      {
+        "position": 3,
+        "term": "a flop",
+        "ipa": "/ə flɑːp/",
+        "translation_pt": "um desastre",
+        "example_en": "… a flop …"
+      },
+      {
+        "position": 4,
+        "term": "a bummer",
+        "ipa": "/ə ˈbʌmər/",
+        "translation_pt": "uma decepção",
+        "example_en": "… a bummer!"
+      },
+      {
+        "position": 5,
+        "term": "disappointment",
+        "ipa": "/ˌdɪsəˈpɔɪntmənt/",
+        "translation_pt": "decepção",
+        "example_en": "I'm sensing a little disappointment."
+      },
+      {
+        "position": 6,
+        "term": "pigeon",
+        "ipa": "/ˈpɪdʒən/",
+        "translation_pt": "pombo",
+        "example_en": "I've only seen pigeons"
+      },
+      {
+        "position": 7,
+        "term": "nest",
+        "ipa": "/nest/",
+        "translation_pt": "ninho",
+        "example_en": "Did you find a bird's nest?!"
+      },
+      {
+        "position": 8,
+        "term": "form",
+        "ipa": "/fɔːrm/",
+        "translation_pt": "formulário",
+        "example_en": "put it on the official form"
+      },
+      {
+        "position": 9,
+        "term": "binoculars",
+        "ipa": "/bɪˈnɑːkjələrz/",
+        "translation_pt": "binóculo",
+        "example_en": "Anna looks through binoculars."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "supposed to → /səˈpoʊstə/",
+        "explanation": "O /d/ e o /t/ se fundem num /t/ só: \"sə-PÔUS-tə\". Por isso tanta gente escreve *suppose to*, sem o -d."
+      },
+      {
+        "position": 1,
+        "label": "pigeon /ˈpɪdʒən/",
+        "explanation": "Duas sílabas, com /dʒ/ no meio. Não é \"pi-GEON\"."
+      },
+      {
+        "position": 2,
+        "label": "bummer /ˈbʌmər/",
+        "explanation": "Vogal /ʌ/ como em *cup*, e o *-er* final bem fraco."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 28 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/05/17/48003699-cb0b-4cb7-8002-27bb38944ebf_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 294,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 10,
+            "end_seconds": 32,
+            "speaker": "Kelly",
+            "text_en": "Oh, Anna, there you are! I am so glad we joined the Great City Bird Count!",
+            "text_pt": "Ah, Anna, aí está você! Que bom que entramos na Grande Contagem de Aves da Cidade!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 34,
+            "end_seconds": 54,
+            "speaker": "Anna",
+            "text_en": "No. Today has been a bust, a flop, a bummer!",
+            "text_pt": "Não. Hoje foi um fracasso, um desastre, uma decepção!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 56,
+            "end_seconds": 72,
+            "speaker": "Kelly",
+            "text_en": "I'm sensing a little disappointment.",
+            "text_pt": "Estou sentindo uma certa decepção."
+          },
+          {
+            "position": 3,
+            "start_seconds": 80,
+            "end_seconds": 104,
+            "speaker": "Anna",
+            "text_en": "I've only seen pigeons, lots and lots of pigeons!",
+            "text_pt": "Eu só vi pombos, muitos e muitos pombos!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 130,
+            "end_seconds": 156,
+            "speaker": "Kelly",
+            "text_en": "We're supposed to be counting birds, not ice cream trucks.",
+            "text_pt": "A gente deveria estar contando pássaros, não carrinhos de sorvete."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Expectativa, não obrigação: We're ____ counting birds.",
+        "hint": null,
+        "explanation": "*be supposed to* + *be* + -ing marca o que se espera.",
+        "hints": [
+          "A ação está em andamento.",
+          "Três palavras."
+        ],
+        "answers": [
+          "supposed to be"
+        ],
+        "options": [
+          "supposed to be",
+          "have to be",
+          "ought to be"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Cuidado com a grafia: I'm `____` to call her today. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "O **-d** é obrigatório, mesmo que quase não se ouça.",
+        "hints": [
+          "Termina em *-d*.",
+          "O som se funde com o *to*."
+        ],
+        "answers": [
+          "supposed"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Obrigação sem escolha: If there is a fire, I ____ help everyone out.",
+        "hint": null,
+        "explanation": "*have to* é a obrigação; *ought to* seria só recomendação.",
+        "hints": [
+          "Não há escolha aqui.",
+          "É emergência."
+        ],
+        "answers": [
+          "have to"
+        ],
+        "options": [
+          "have to",
+          "ought to",
+          "am supposed to"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "You have to wear a seatbelt.",
+          "You ought to call your mother.",
+          "We're supposed to arrive at nine.",
+          "You have to pay taxes."
+        ],
+        "classification_categories": [
+          "obrigação",
+          "recomendação",
+          "expectativa"
+        ],
+        "prompt": "Classifique cada frase pela força da expressão.",
+        "hint": null,
+        "explanation": "*have to* não dá escolha; *ought to* aconselha; *be supposed to* descreve o que esperam.",
+        "hints": [
+          "Pergunte: posso não fazer?",
+          "Expectativa admite descumprimento."
+        ],
+        "answers": [
+          "{\"You have to wear a seatbelt.\": \"obrigação\", \"You ought to call your mother.\": \"recomendação\", \"We're supposed to arrive at nine.\": \"expectativa\", \"You have to pay taxes.\": \"obrigação\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Anna resume o dia?",
+        "hint": null,
+        "explanation": "*a bust … a flop … a bummer!*",
+        "hints": [
+          "Ela enfileira sinônimos.",
+          "Todos negativos e informais."
+        ],
+        "answers": [
+          "como um fracasso, usando três palavras informais"
+        ],
+        "options": [
+          "como um fracasso, usando três palavras informais",
+          "como o melhor dia do ano",
+          "como um dia comum"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Anna viu em vez de aves variadas?",
+        "hint": null,
+        "explanation": "*I've only seen pigeons* e o mapa de 10 carrinhos.",
+        "hints": [
+          "Uma espécie só de ave.",
+          "E um mapa de outra coisa."
+        ],
+        "answers": [
+          "pombos, e muitos carrinhos de sorvete"
+        ],
+        "options": [
+          "pombos, e muitos carrinhos de sorvete",
+          "águias e falcões",
+          "nenhum animal"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a correção de Kelly sobre o que deveriam contar.",
+        "hint": null,
+        "explanation": "*supposed to be* + -ing, com o contraste marcado por *not*.",
+        "hints": [
+          "Começa com *We're supposed to be*.",
+          "Termina com *ice cream trucks*."
+        ],
+        "answers": [
+          "We're supposed to be counting birds, not ice cream trucks"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Kelly pede que Anna faça com o que encontrar?",
+        "hint": null,
+        "explanation": "*make sure that you put it on the official form*.",
+        "hints": [
+          "Ela insiste no registro.",
+          "Envolve um documento."
+        ],
+        "answers": [
+          "que registre no formulário oficial"
+        ],
+        "options": [
+          "que registre no formulário oficial",
+          "que tire fotos",
+          "que vá para casa"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O que esperam de você",
+        "instructions": "Write 7 to 10 sentences in English about rules and expectations at work or school. Use have to, ought to and be supposed to at least once each, and describe one expectation that was not met.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "os três graus",
+            "terms": [
+              "have to",
+              "ought to",
+              "supposed to"
+            ]
+          },
+          {
+            "label": "expectativa não cumprida",
+            "terms": [
+              "was supposed to",
+              "were supposed to",
+              "but"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "fazer inferências"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 30: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o lesson plan oficial da aula, quando existe, e o segmento do Professor Bot.",
+    "number": 29,
+    "slug": "lesson-29",
+    "position": 4,
+    "title": "Where There's Smoke...",
+    "title_pt": "Onde há fumaça…",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-29/4423736.html",
+    "grammar_tag": "Revisão de condicionais",
+    "focus_points": [
+      "if real",
+      "if I were you",
+      "linguagem de emergência"
+    ],
+    "story_note": null,
+    "lead": "Anna vira monitora de segurança contra incêndio e visita um quartel. O lesson plan define o objetivo em uma linha: **revisar condicionais**. A aula junta isso a vocabulário de emergência.",
+    "warmup_prompt": "If there were a fire in your building, what would you do first?",
+    "listening_focus": "Marque cada *if* e classifique: situação real ou hipotética?",
+    "goals": [
+      "Revisar o **condicional real**: *if* + presente, *will* + verbo.",
+      "Usar o **condicional hipotético**: *if* + passado, *would* + verbo.",
+      "Reconhecer **if I were you** como fórmula fixa de conselho.",
+      "Usar linguagem de emergência e evacuação."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Os dois condicionais que a aula revisa",
+        "why": "O Professor Bot resume: o condicional *uses \"if\" to show that something is true only when something else is true*. O que muda entre os dois é a probabilidade.",
+        "warning": "**Nunca *will* depois de *if*** É *If it **rains**, we'll stay*, não *if it will rain*. O futuro mora só na outra metade da frase.",
+        "table_head": [
+          "Tipo",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "real / provável",
+              "if + **presente**, will + verbo",
+              "**If** Anna **studies** hard, she'**ll be** a great fire safety monitor!"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "real",
+              "if + presente, **have to** + verbo",
+              "**If there is** a fire emergency, I **have to** help everyone out."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "hipotético",
+              "if + **passado**, would + verbo",
+              "**If I were** you, I'**d learn** as much as possible."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "ordem invertida",
+              "oração principal primeiro",
+              "I'd learn as much as possible **if I were you**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "if I were you — a fórmula do conselho",
+        "why": "É a maneira mais natural de aconselhar em inglês. Repare no **were**, não *was*: é o subjuntivo, que sobrevive justamente nessa expressão.",
+        "warning": "**Sempre *were*** Mesmo com *I* e *he/she*. *If I **was** you* aparece na fala informal, mas *were* é a forma correta e a esperada em prova.",
+        "table_head": [
+          "Fórmula",
+          "Exemplo",
+          "Função"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "If I were you, I'd…",
+              "**If I were you, I'd** learn as much as possible.",
+              "conselho"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "If I were in your place…",
+              "**If I were in your place**, I'd call them.",
+              "conselho, mais formal"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "What would you do if…?",
+              "**What would you do if** there were a fire?",
+              "pergunta hipotética"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Linguagem de emergência",
+        "why": "O segundo objetivo do lesson plan. São blocos prontos, úteis fora da aula.",
+        "warning": null,
+        "table_head": [
+          "Expressão",
+          "Tradução",
+          "Contexto"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "fire safety monitor",
+              "monitor de segurança contra incêndio",
+              "Ms. Weaver named me **fire safety monitor**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "fire emergency",
+              "emergência de incêndio",
+              "If there is a **fire emergency**…"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "evacuate the building",
+              "evacuar o prédio",
+              "help everyone **out of the building**"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "firehouse / firefighter",
+              "quartel / bombeiro",
+              "Welcome to our **firehouse**."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "**If there is** a fire emergency, I **have to** help everyone out of the building.",
+        "text_pt": "Se houver uma emergência de incêndio, eu tenho que ajudar todo mundo a sair do prédio.",
+        "note": "Condicional real: presente no *if*, obrigação na outra metade."
+      },
+      {
+        "position": 1,
+        "text_en": "Well then, **if I were you, I'd** learn as much as possible.",
+        "text_pt": "Então, se eu fosse você, eu aprenderia o máximo possível.",
+        "note": "A fórmula do conselho, com *were* e *would* contraído."
+      },
+      {
+        "position": 2,
+        "text_en": "**If** Anna **studies** hard, she'**ll be** a great fire safety monitor!",
+        "text_pt": "Se a Anna estudar bastante, ela vai ser uma ótima monitora de segurança!",
+        "note": "A frase que o Professor Bot usa para definir o condicional."
+      },
+      {
+        "position": 3,
+        "text_en": "But the only time we have a fire emergency is when someone burns a piece of toast.",
+        "text_pt": "Mas a única vez que temos emergência de incêndio é quando alguém queima uma torrada.",
+        "note": "*the only time … is when*: estrutura útil para relativizar."
+      },
+      {
+        "position": 4,
+        "text_en": "This is where the firefighters eat. This is where we rest.",
+        "text_pt": "Aqui é onde os bombeiros comem. Aqui é onde descansamos.",
+        "note": "*This is where* + oração: apresentar um espaço."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "fire safety",
+        "ipa": "/ˈfaɪər ˈseɪfti/",
+        "translation_pt": "segurança contra incêndio",
+        "example_en": "I'm reading about fire safety."
+      },
+      {
+        "position": 1,
+        "term": "monitor",
+        "ipa": "/ˈmɑːnətər/",
+        "translation_pt": "monitor, responsável",
+        "example_en": "Ms. Weaver named me fire safety monitor."
+      },
+      {
+        "position": 2,
+        "term": "emergency",
+        "ipa": "/ɪˈmɜːrdʒənsi/",
+        "translation_pt": "emergência",
+        "example_en": "If there is a fire emergency…"
+      },
+      {
+        "position": 3,
+        "term": "firehouse",
+        "ipa": "/ˈfaɪərhaʊs/",
+        "translation_pt": "quartel de bombeiros",
+        "example_en": "Welcome to our firehouse."
+      },
+      {
+        "position": 4,
+        "term": "firefighter",
+        "ipa": "/ˈfaɪərfaɪtər/",
+        "translation_pt": "bombeiro",
+        "example_en": "Hi, Firefighter Jones."
+      },
+      {
+        "position": 5,
+        "term": "firetruck",
+        "ipa": "/ˈfaɪərtrʌk/",
+        "translation_pt": "caminhão de bombeiros",
+        "example_en": "where the firetrucks are parked"
+      },
+      {
+        "position": 6,
+        "term": "evacuate",
+        "ipa": "/ɪˈvækjueɪt/",
+        "translation_pt": "evacuar",
+        "example_en": "how to safely evacuate the building"
+      },
+      {
+        "position": 7,
+        "term": "burn",
+        "ipa": "/bɜːrn/",
+        "translation_pt": "queimar",
+        "example_en": "when someone burns a piece of toast"
+      },
+      {
+        "position": 8,
+        "term": "toast",
+        "ipa": "/toʊst/",
+        "translation_pt": "torrada",
+        "example_en": "burns a piece of toast"
+      },
+      {
+        "position": 9,
+        "term": "maintain",
+        "ipa": "/meɪnˈteɪn/",
+        "translation_pt": "fazer a manutenção de",
+        "example_en": "parked and maintained"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "if I were → /ɪf aɪ wər/",
+        "explanation": "O *were* é átono e reduz a /wər/. A fórmula inteira sai numa tacada: \"ifai-wər-yu\"."
+      },
+      {
+        "position": 1,
+        "label": "emergency /ɪˈmɜːrdʒənsi/",
+        "explanation": "Quatro sílabas, tônica na segunda, com /dʒ/ no meio."
+      },
+      {
+        "position": 2,
+        "label": "fire /ˈfaɪər/",
+        "explanation": "Duas sílabas no inglês americano cuidadoso: \"FAI-ər\". Em compostos como *firehouse*, costuma reduzir a uma."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 29 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/06/08/c954b93d-aacb-40b2-8c20-423d8c100045_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 274,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 8,
+            "end_seconds": 30,
+            "speaker": "Anna",
+            "text_en": "I'm reading about fire safety. Ms. Weaver named me fire safety monitor.",
+            "text_pt": "Estou lendo sobre segurança contra incêndio. A Ms. Weaver me nomeou monitora."
+          },
+          {
+            "position": 1,
+            "start_seconds": 32,
+            "end_seconds": 56,
+            "speaker": "Penelope",
+            "text_en": "But the only time we have a fire emergency is when someone burns a piece of toast.",
+            "text_pt": "Mas a única vez que temos emergência é quando alguém queima uma torrada."
+          },
+          {
+            "position": 2,
+            "start_seconds": 58,
+            "end_seconds": 86,
+            "speaker": "Anna",
+            "text_en": "If there is a fire emergency, I have to help everyone out of the building.",
+            "text_pt": "Se houver uma emergência, eu tenho que ajudar todo mundo a sair do prédio."
+          },
+          {
+            "position": 3,
+            "start_seconds": 88,
+            "end_seconds": 110,
+            "speaker": "Penelope",
+            "text_en": "Well then, if I were you, I'd learn as much as possible.",
+            "text_pt": "Então, se eu fosse você, eu aprenderia o máximo possível."
+          },
+          {
+            "position": 4,
+            "start_seconds": 150,
+            "end_seconds": 176,
+            "speaker": "Firefighter Hatcher",
+            "text_en": "This is where the firefighters eat. This is where we rest.",
+            "text_pt": "Aqui é onde os bombeiros comem. Aqui é onde descansamos."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Condicional real: If there ____ a fire, I'll help everyone out.",
+        "hint": null,
+        "explanation": "Depois de *if*, presente — o futuro fica na outra metade.",
+        "hints": [
+          "Nunca *will* depois de *if*.",
+          "A situação é possível."
+        ],
+        "answers": [
+          "is"
+        ],
+        "options": [
+          "is",
+          "will be",
+          "would be"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Fórmula do conselho: If I `____` you, I'd learn as much as possible. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "O subjuntivo *were* é a forma correta, mesmo com *I*.",
+        "hints": [
+          "Não é *was*.",
+          "Quatro letras."
+        ],
+        "answers": [
+          "were"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Passe ao hipotético: If I have time, I will help.",
+        "hint": null,
+        "explanation": "Hipotético: passado no *if*, *would* na outra metade.",
+        "hints": [
+          "O verbo do *if* vai ao passado.",
+          "*will* vira *would*."
+        ],
+        "answers": [
+          "If I had time, I would help",
+          "If I had time, I'd help"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "If it rains, we will stay home.",
+          "If I were rich, I would travel.",
+          "If she studies, she'll pass.",
+          "If I were you, I'd call them."
+        ],
+        "classification_categories": [
+          "real",
+          "hipotético"
+        ],
+        "prompt": "Classifique cada condicional.",
+        "hint": null,
+        "explanation": "Presente + *will* indica situação possível; passado + *would* indica hipótese.",
+        "hints": [
+          "Olhe o tempo do verbo depois de *if*.",
+          "*were* sinaliza hipótese."
+        ],
+        "answers": [
+          "{\"If it rains, we will stay home.\": \"real\", \"If I were rich, I would travel.\": \"hipotético\", \"If she studies, she'll pass.\": \"real\", \"If I were you, I'd call them.\": \"hipotético\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que função Ms. Weaver deu a Anna?",
+        "hint": null,
+        "explanation": "*Ms. Weaver named me fire safety monitor.*",
+        "hints": [
+          "Tem a ver com incêndio.",
+          "É um cargo."
+        ],
+        "answers": [
+          "monitora de segurança contra incêndio"
+        ],
+        "options": [
+          "monitora de segurança contra incêndio",
+          "repórter de polícia",
+          "chefe de redação"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o conselho de Penelope?",
+        "hint": null,
+        "explanation": "*if I were you, I'd learn as much as possible.*",
+        "hints": [
+          "Ela usa a fórmula do conselho.",
+          "Começa com *if I were you*."
+        ],
+        "answers": [
+          "que Anna aprenda o máximo possível"
+        ],
+        "options": [
+          "que Anna aprenda o máximo possível",
+          "que Anna recuse o cargo",
+          "que Anna chame os bombeiros"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o conselho de Penelope, com a fórmula completa.",
+        "hint": null,
+        "explanation": "*if I were you* + *would* contraído.",
+        "hints": [
+          "Contém *if I were you*.",
+          "Termina com *as much as possible*."
+        ],
+        "answers": [
+          "Well then, if I were you, I'd learn as much as possible",
+          "If I were you, I'd learn as much as possible"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que o bombeiro mostra a Anna no quartel?",
+        "hint": null,
+        "explanation": "Ele usa *This is where…* quatro vezes, apresentando cada espaço.",
+        "hints": [
+          "São vários ambientes.",
+          "Ele repete a mesma estrutura."
+        ],
+        "answers": [
+          "onde comem, descansam, treinam e guardam os caminhões"
+        ],
+        "options": [
+          "onde comem, descansam, treinam e guardam os caminhões",
+          "só a cozinha",
+          "o escritório da chefia"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Um plano de emergência",
+        "instructions": "Write 7 to 10 sentences in English describing what you would do in an emergency at home or at work. Use at least two real conditionals (if + present, will) and one hypothetical with if I were you.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "condicional real",
+            "terms": [
+              "if "
+            ]
+          },
+          {
+            "label": "conselho hipotético",
+            "terms": [
+              "if i were",
+              "i would",
+              "i'd "
+            ]
+          },
+          {
+            "label": "vocabulário de emergência",
+            "terms": [
+              "emergency",
+              "evacuate",
+              "fire",
+              "exit",
+              "safety"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "avaliar a probabilidade antes de escolher o tempo"
+  },
+  {
+    "course_slug": "voa-level-2",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-09",
+    "review_note": "Sprint 30: conteúdo autoral conferido com a aula, o segmento do Professor Bot e o lesson plan oficial da aula, quando existe, e o segmento do Professor Bot.",
+    "number": 30,
+    "slug": "lesson-30",
+    "position": 5,
+    "title": "Dream a Little Dream",
+    "title_pt": "Sonhe um sonho",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-30/4465315.html",
+    "grammar_tag": "dream, hope, plan e would love",
+    "focus_points": [
+      "dream of + -ing",
+      "would love to",
+      "planos e esperanças"
+    ],
+    "story_note": "Última aula do Level 2",
+    "lead": "Anna conversa com colegas sobre sonhos e planos de carreira. O lesson plan define o objetivo: usar **dream, hope, plan, would love** e afins. Cada um pede uma forma diferente do verbo seguinte — é aí que mora a dificuldade.",
+    "warmup_prompt": "What have you always dreamed of doing?",
+    "listening_focus": "Anote cada verbo de sonho ou plano e a forma que vem depois dele.",
+    "goals": [
+      "Usar **dream of** + *-ing* e **dream about** + substantivo.",
+      "Usar **hope to**, **plan to** e **would love to** + infinitivo.",
+      "Distinguir o que vem depois de cada verbo: *-ing* ou *to*.",
+      "Falar de carreira, aspirações e planos de futuro."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Cada verbo pede uma forma",
+        "why": "Em português todos levam infinitivo. Em inglês, *dream of* pede **-ing**, enquanto *hope*, *plan* e *would love* pedem **to**.",
+        "warning": "**O erro mais comum** *I dream to be a nurse* está errado. É *I dream **of being*** — ou, mais simples, *I want to be*.",
+        "table_head": [
+          "Verbo",
+          "Forma seguinte",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "dream **of**",
+              "**-ing**",
+              "I used to **dream of being** a nurse."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "dream **about**",
+              "substantivo ou -ing",
+              "Is there something you've **dreamed of doing**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "hope **to**",
+              "infinitivo",
+              "I **hope to** finish the course this year."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "plan **to**",
+              "infinitivo",
+              "She **plans to** study abroad."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "would love **to**",
+              "infinitivo",
+              "I **would love to** be a dog trainer."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Graus de vontade",
+        "why": "As quatro expressões marcam intensidades diferentes — vale escolher conscientemente.",
+        "warning": null,
+        "table_head": [
+          "Expressão",
+          "Grau",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I'd love to…",
+              "vontade forte, mas sem plano",
+              "I'**d love to** be a dog trainer."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "I hope to…",
+              "expectativa realista",
+              "I **hope to** travel next year."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "I plan to…",
+              "decisão já tomada",
+              "I **plan to** apply in March."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "I dream of…",
+              "aspiração distante",
+              "I **dream of** working abroad."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Falar de carreira",
+        "why": "O vocabulário que acompanha o tema, com as colocações que a aula usa.",
+        "warning": null,
+        "table_head": [
+          "Expressão",
+          "Tradução",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "an honorable career",
+              "uma carreira digna",
+              "It is such **an honorable career**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "dream career",
+              "carreira dos sonhos",
+              "Anna talks about their **dream careers**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "life is short",
+              "a vida é curta",
+              "Well, **life is short**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "I couldn't agree more",
+              "não poderia concordar mais",
+              "**I couldn't agree more.**"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "You know, I used to **dream of being** a nurse. It is such an honorable career.",
+        "text_pt": "Sabe, eu sonhava em ser enfermeira. É uma carreira tão digna.",
+        "note": "*dream of* + **-ing**, e o *used to* da aula 16 reaparecendo."
+      },
+      {
+        "position": 1,
+        "text_en": "Is there something you'**ve dreamed of doing**?",
+        "text_pt": "Tem alguma coisa que você sonhou em fazer?",
+        "note": "Present perfect + *dream of* + -ing."
+      },
+      {
+        "position": 2,
+        "text_en": "Sure! I **would love to** be a dog trainer.",
+        "text_pt": "Claro! Eu adoraria ser adestradora de cães.",
+        "note": "*would love to* + infinitivo — vontade forte, sem plano concreto."
+      },
+      {
+        "position": 3,
+        "text_en": "There are so many things I **haven't done** yet.",
+        "text_pt": "Há tantas coisas que eu ainda não fiz.",
+        "note": "Present perfect negativo com *yet*: o balanço até agora."
+      },
+      {
+        "position": 4,
+        "text_en": "Well, life is short. It's important to do something you love every day.",
+        "text_pt": "Bom, a vida é curta. É importante fazer algo que você ama todo dia.",
+        "note": "*It's important to* + verbo: estrutura para dar conselho impessoal."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "dream of",
+        "ipa": "/driːm əv/",
+        "translation_pt": "sonhar em",
+        "example_en": "I used to dream of being a nurse."
+      },
+      {
+        "position": 1,
+        "term": "would love to",
+        "ipa": "/wʊd lʌv tə/",
+        "translation_pt": "adoraria",
+        "example_en": "I would love to be a dog trainer."
+      },
+      {
+        "position": 2,
+        "term": "honorable",
+        "ipa": "/ˈɑːnərəbəl/",
+        "translation_pt": "digno, honroso",
+        "example_en": "It is such an honorable career."
+      },
+      {
+        "position": 3,
+        "term": "career",
+        "ipa": "/kəˈrɪr/",
+        "translation_pt": "carreira",
+        "example_en": "such an honorable career"
+      },
+      {
+        "position": 4,
+        "term": "dog trainer",
+        "ipa": "/dɔːɡ ˈtreɪnər/",
+        "translation_pt": "adestrador de cães",
+        "example_en": "I would love to be a dog trainer."
+      },
+      {
+        "position": 5,
+        "term": "trick",
+        "ipa": "/trɪk/",
+        "translation_pt": "truque",
+        "example_en": "I've taught my dog lots of tricks!"
+      },
+      {
+        "position": 6,
+        "term": "blood test",
+        "ipa": "/blʌd test/",
+        "translation_pt": "exame de sangue",
+        "example_en": "Today I get the results from my blood test."
+      },
+      {
+        "position": 7,
+        "term": "make it",
+        "ipa": "/meɪk ɪt/",
+        "translation_pt": "conseguir; sobreviver",
+        "example_en": "she's not going to make it"
+      },
+      {
+        "position": 8,
+        "term": "graduation",
+        "ipa": "/ˌɡrædʒuˈeɪʃən/",
+        "translation_pt": "formatura",
+        "example_en": "she won't be able to make it to graduation"
+      },
+      {
+        "position": 9,
+        "term": "Life is short.",
+        "ipa": "/laɪf ɪz ʃɔːrt/",
+        "translation_pt": "A vida é curta.",
+        "example_en": "Well, life is short."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "would love to → /wʊd lʌv tə/",
+        "explanation": "Os três colam: \"wud-LAV-tə\". O *to* reduz a /tə/ e nunca é /tuː/ aqui."
+      },
+      {
+        "position": 1,
+        "label": "honorable /ˈɑːnərəbəl/",
+        "explanation": "O *h* é **mudo**, como em *honest* e *hour*. Começa com som de vogal — por isso *an* honorable career."
+      },
+      {
+        "position": 2,
+        "label": "career /kəˈrɪr/",
+        "explanation": "Tônica na **segunda** sílaba. Não confunda com *carrier* /ˈkæriər/, que tem tônica na primeira."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 30 — Level 2",
+        "source_url": "https://voa-audio.voanews.eu/vle/2018/07/06/931150ac-ddf3-42db-9247-b3ac4aec6180_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6861.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-09",
+        "duration_seconds": 292,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 10,
+            "end_seconds": 30,
+            "speaker": "Ashley",
+            "text_en": "Anna, where are you going in such a hurry?",
+            "text_pt": "Anna, aonde você vai com tanta pressa?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 44,
+            "end_seconds": 70,
+            "speaker": "Anna",
+            "text_en": "You know, I used to dream of being a nurse. It is such an honorable career.",
+            "text_pt": "Sabe, eu sonhava em ser enfermeira. É uma carreira tão digna."
+          },
+          {
+            "position": 2,
+            "start_seconds": 72,
+            "end_seconds": 92,
+            "speaker": "Anna",
+            "text_en": "Is there something you've dreamed of doing?",
+            "text_pt": "Tem alguma coisa que você sonhou em fazer?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 94,
+            "end_seconds": 120,
+            "speaker": "Ashley",
+            "text_en": "Sure! I would love to be a dog trainer. Actually, I've taught my dog lots of tricks!",
+            "text_pt": "Claro! Eu adoraria ser adestradora de cães. Aliás, já ensinei vários truques ao meu cachorro!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 230,
+            "end_seconds": 256,
+            "speaker": "Nurse",
+            "text_en": "Well, life is short. It's important to do something you love every day.",
+            "text_pt": "Bom, a vida é curta. É importante fazer algo que você ama todo dia."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: I used to dream ____ a nurse.",
+        "hint": null,
+        "explanation": "*dream of* pede a forma -ing, não o infinitivo.",
+        "hints": [
+          "Não é *to be*.",
+          "Duas palavras."
+        ],
+        "answers": [
+          "of being"
+        ],
+        "options": [
+          "of being",
+          "to be",
+          "being"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: I would love ____ a dog trainer.",
+        "hint": null,
+        "explanation": "*would love* pede infinitivo com *to*.",
+        "hints": [
+          "Diferente de *dream of*.",
+          "Leva *to*."
+        ],
+        "answers": [
+          "to be"
+        ],
+        "options": [
+          "to be",
+          "being",
+          "of being"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Decisão tomada: She `____` to apply for the job in March. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "*plan to* indica decisão já tomada, mais firme que *hope*.",
+        "hints": [
+          "Mais firme que *hope*.",
+          "Termina com *-s*."
+        ],
+        "answers": [
+          "plans"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "dream of ____",
+          "hope ____",
+          "plan ____",
+          "would love ____"
+        ],
+        "classification_categories": [
+          "-ing",
+          "to + infinitivo"
+        ],
+        "prompt": "Classifique cada verbo pela forma que exige depois.",
+        "hint": null,
+        "explanation": "Só *dream of* pede -ing; os outros três pedem infinitivo com *to*.",
+        "hints": [
+          "Três se comportam igual.",
+          "O que tem preposição é o diferente."
+        ],
+        "answers": [
+          "{\"dream of ____\": \"-ing\", \"hope ____\": \"to + infinitivo\", \"plan ____\": \"to + infinitivo\", \"would love ____\": \"to + infinitivo\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Com o que Anna sonhava antes?",
+        "hint": null,
+        "explanation": "*I used to dream of being a nurse.*",
+        "hints": [
+          "Tem a ver com saúde.",
+          "Ela usa *used to*."
+        ],
+        "answers": [
+          "ser enfermeira"
+        ],
+        "options": [
+          "ser enfermeira",
+          "ser cantora",
+          "ser bombeira"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o sonho de Ashley?",
+        "hint": null,
+        "explanation": "*I would love to be a dog trainer.*",
+        "hints": [
+          "Envolve animais.",
+          "Ela já treinou o próprio cachorro."
+        ],
+        "answers": [
+          "ser adestradora de cães"
+        ],
+        "options": [
+          "ser adestradora de cães",
+          "ser veterinária",
+          "ser professora"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a frase em que Anna conta o sonho antigo.",
+        "hint": null,
+        "explanation": "*used to* + *dream of* + -ing numa frase só.",
+        "hints": [
+          "Contém *used to dream of*.",
+          "Termina com *a nurse*."
+        ],
+        "answers": [
+          "You know, I used to dream of being a nurse",
+          "I used to dream of being a nurse"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o conselho da enfermeira no fim?",
+        "hint": null,
+        "explanation": "*life is short. It's important to do something you love every day.*",
+        "hints": [
+          "Começa lembrando que a vida é curta.",
+          "É sobre rotina, não carreira."
+        ],
+        "answers": [
+          "fazer todo dia algo que você ama"
+        ],
+        "options": [
+          "fazer todo dia algo que você ama",
+          "trocar de emprego",
+          "fazer mais exames"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Sonho, esperança e plano",
+        "instructions": "Write 7 to 10 sentences in English about one dream, one hope and one concrete plan you have. Use dream of with -ing, and hope to, plan to or would love to with the infinitive. Explain what separates the plan from the dream.",
+        "min_words": 90,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "dream of + -ing",
+            "terms": [
+              "dream of",
+              "dreamed of",
+              "dreaming of"
+            ]
+          },
+          {
+            "label": "infinitivo com to",
+            "terms": [
+              "hope to",
+              "plan to",
+              "would love to",
+              "'d love to"
+            ]
+          },
+          {
+            "label": "o que separa plano de sonho",
+            "terms": [
+              "because",
+              "but",
+              "while",
+              "whereas"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "prever a forma que vem depois do verbo"
   }
 ]
