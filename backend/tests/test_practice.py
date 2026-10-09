@@ -60,6 +60,47 @@ async def test_lista_canonica_filtra_sem_vazar_feedback(client: AsyncClient) -> 
 
 
 @pytest.mark.asyncio
+async def test_sessao_filtra_classificacao_e_preserva_resposta_estruturada(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "classification")
+    lesson_url = "/api/courses/voa-level-2/lessons/8"
+    filtered = await client.get(f"{lesson_url}/exercises?activity_type=classification")
+
+    assert filtered.status_code == 200
+    assert len(filtered.json()) == 1
+    assert filtered.json()[0]["classification_categories"] == ["adjective", "adverb"]
+    assert "answers" not in filtered.text
+
+    created = await client.post(
+        f"{lesson_url}/practice-sessions",
+        headers=headers,
+        json=create_body(activity_type="classification"),
+    )
+    assert created.status_code == 201, created.text
+    practice = created.json()
+    assert practice["activity_type"] == "classification"
+    assert practice["summary"]["total"] == 1
+    exercise = practice["items"][0]["exercise"]
+
+    answered = await client.post(
+        f"/api/exercises/{exercise['id']}/attempt",
+        headers=headers,
+        json=attempt(
+            '{"strongly":"adverb","secret":"adjective","loyal":"adjective","seriously":"adverb"}',
+            practice["id"],
+        ),
+    )
+    assert answered.status_code == 200, answered.text
+    assert answered.json()["correct"] is True
+
+    resumed = await client.get(f"/api/practice-sessions/{practice['id']}", headers=headers)
+    assert resumed.status_code == 200
+    assert resumed.json()["items"][0]["outcome"] == "first_try_correct"
+    assert resumed.json()["summary"]["completed"] == 1
+
+
+@pytest.mark.asyncio
 async def test_openapi_documenta_retomada_com_status_200(client: AsyncClient) -> None:
     contract = (await client.get("/openapi.json")).json()
     operation = contract["paths"]["/api/courses/{course_slug}/lessons/{number}/practice-sessions"][

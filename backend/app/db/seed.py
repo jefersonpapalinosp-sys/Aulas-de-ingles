@@ -41,6 +41,7 @@ from app.db.models import (
     VocabItem,
     WritingPrompt,
 )
+from app.domain.answers import parse_classification
 
 log = logging.getLogger(__name__)
 
@@ -76,18 +77,75 @@ def load_course_seed(path: Path | None = None) -> list[dict[str, Any]]:
     return data
 
 
-def validate_course_reviews(
-    courses: list[dict[str, Any]], lessons: list[dict[str, Any]]
-) -> None:
+def validate_exercises(lessons: list[dict[str, Any]]) -> None:
+    """Valida os campos estruturados que não cabem em constraints simples."""
+    for lesson in lessons:
+        lesson_ref = f"{lesson['course_slug']}/Aula {lesson['number']}"
+        for exercise in lesson.get("exercises", []):
+            activity_type = exercise.get("activity_type", "gap_fill")
+            items = exercise.get("classification_items")
+            categories = exercise.get("classification_categories")
+            if activity_type != "classification":
+                if items is not None or categories is not None:
+                    raise ValueError(
+                        f"Exercício {exercise['position']} de {lesson_ref} só pode informar "
+                        "itens/categorias quando for classification."
+                    )
+                continue
+
+            if (
+                not isinstance(items, list)
+                or not items
+                or not all(isinstance(item, str) and item.strip() for item in items)
+            ):
+                raise ValueError(
+                    f"Classificação {exercise['position']} de {lesson_ref} precisa de itens."
+                )
+            if (
+                not isinstance(categories, list)
+                or len(categories) < 2
+                or not all(
+                    isinstance(category, str) and category.strip() for category in categories
+                )
+            ):
+                raise ValueError(
+                    f"Classificação {exercise['position']} de {lesson_ref} precisa de ao "
+                    "menos duas categorias."
+                )
+            if len({item.strip().casefold() for item in items}) != len(items):
+                raise ValueError(
+                    f"Classificação {exercise['position']} de {lesson_ref} repete itens."
+                )
+            if len({category.strip().casefold() for category in categories}) != len(categories):
+                raise ValueError(
+                    f"Classificação {exercise['position']} de {lesson_ref} repete categorias."
+                )
+
+            answers = exercise.get("answers", [])
+            if not answers:
+                raise ValueError(
+                    f"Classificação {exercise['position']} de {lesson_ref} precisa de gabarito."
+                )
+            for answer in answers:
+                assignment = parse_classification(answer) if isinstance(answer, str) else None
+                if (
+                    assignment is None
+                    or set(assignment) != set(items)
+                    or any(category not in categories for category in assignment.values())
+                ):
+                    raise ValueError(
+                        f"Classificação {exercise['position']} de {lesson_ref} tem gabarito "
+                        "incompatível com os itens e categorias."
+                    )
+
+
+def validate_course_reviews(courses: list[dict[str, Any]], lessons: list[dict[str, Any]]) -> None:
     """Falha cedo quando catálogo ou checkpoint contradizem o conteúdo semeado."""
     lessons_by_course_number = {
-        (str(lesson["course_slug"]), int(lesson["number"])): lesson
-        for lesson in lessons
+        (str(lesson["course_slug"]), int(lesson["number"])): lesson for lesson in lessons
     }
     catalog_units = {
-        (str(course["slug"]), str(unit["slug"]))
-        for course in courses
-        for unit in course["units"]
+        (str(course["slug"]), str(unit["slug"])) for course in courses for unit in course["units"]
     }
     for lesson in lessons:
         unit_key = (str(lesson["course_slug"]), str(lesson["unit_slug"]))
@@ -103,8 +161,7 @@ def validate_course_reviews(
             unit_lessons = [
                 lesson
                 for lesson in lessons
-                if lesson["course_slug"] == course_slug
-                and lesson["unit_slug"] == unit["slug"]
+                if lesson["course_slug"] == course_slug and lesson["unit_slug"] == unit["slug"]
             ]
             start = int(unit["lesson_start"])
             end = int(unit["lesson_end"])
@@ -121,8 +178,7 @@ def validate_course_reviews(
             positions = sorted(int(lesson["position"]) for lesson in unit_lessons)
             if positions != list(range(1, len(unit_lessons) + 1)):
                 raise ValueError(
-                    f"Unidade {course_slug}/{unit['slug']} tem posições de aula "
-                    "não contíguas."
+                    f"Unidade {course_slug}/{unit['slug']} tem posições de aula não contíguas."
                 )
             expected_lessons = int(unit["total_lessons"])
             if unit["status"] == "published" and course["status"] != "published":
@@ -163,9 +219,7 @@ def validate_course_reviews(
                 referenced_numbers.add(int(listening_number))
             questions = review.get("questions", [])
             if not questions:
-                raise ValueError(
-                    f"Checkpoint {course_slug}/{unit['slug']} precisa ter questões."
-                )
+                raise ValueError(f"Checkpoint {course_slug}/{unit['slug']} precisa ter questões.")
             positions = [int(question["position"]) for question in questions]
             if positions != list(range(1, len(questions) + 1)):
                 raise ValueError(
@@ -250,9 +304,7 @@ async def _upsert_catalog(session: AsyncSession, courses: list[dict[str, Any]]) 
         existing_units = {
             unit.slug: unit
             for unit in (
-                await session.execute(
-                    select(CourseUnit).where(CourseUnit.course_id == course.id)
-                )
+                await session.execute(select(CourseUnit).where(CourseUnit.course_id == course.id))
             ).scalars()
         }
         for raw_unit in raw["units"]:
@@ -379,10 +431,7 @@ async def _upsert_course_review(
     review.listening_media_position = raw.get("listening_media_position")
     await session.flush()
 
-    existing = {
-        question.position: question
-        for question in existing_questions
-    }
+    existing = {question.position: question for question in existing_questions}
     seen: set[int] = set()
     for raw_question in raw["questions"]:
         position = int(raw_question["position"])
@@ -668,10 +717,12 @@ async def _upsert_exercises(session: AsyncSession, lesson: Lesson, raw: dict[str
             else "correct"
             if ex.activity_type == "transformation"
             else "recognize"
-            if ex.activity_type == "multiple_choice"
+            if ex.activity_type in {"multiple_choice", "classification"}
             else "apply",
         )
         ex.options = e.get("options")
+        ex.classification_items = e.get("classification_items")
+        ex.classification_categories = e.get("classification_categories")
         await session.flush()
         await session.execute(delete(ExerciseAnswer).where(ExerciseAnswer.exercise_id == ex.id))
         await session.execute(delete(ExerciseHint).where(ExerciseHint.exercise_id == ex.id))
@@ -719,6 +770,7 @@ async def seed_lessons(session: AsyncSession, path: Path | None = None) -> int:
     catalog_path = path.with_name("courses.json") if path is not None else None
     courses = load_course_seed(catalog_path)
     dados = load_seed(path)
+    validate_exercises(dados)
     validate_course_reviews(courses, dados)
     await _upsert_catalog(session, courses)
     for raw in dados:

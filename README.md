@@ -4,12 +4,14 @@ App de estudo construído sobre a série *Let's Learn English* da VOA. O catálo
 níveis 1 e 2, com unidades navegáveis, vocabulário com IPA, exercícios corrigidos no servidor,
 progresso por usuário e revisão espaçada do que você errou.
 
-**Estado: Sprints 6–14 e 20–25 concluídas no piloto.** Além do caderno, da conta, do painel Hoje e
-da jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail escalável,
-rotas canônicas por curso, laboratório retomável por aula e checkpoints curriculares persistidos.
+**Estado: Sprints 6–14 e 20–25 concluídas; Sprint 26 implementada em piloto, com QA auditiva
+manual e execução visual dos cenários browser pendentes.** Além do caderno, da conta, do painel
+Hoje e da jornada multimodal, a aplicação possui catálogo multi-curso, mapas por unidade, rail
+escalável, rotas canônicas por curso, laboratório retomável por aula e checkpoints curriculares
+persistidos.
 As **22 Aulas 31–52** e os checkpoints 40–44, 45–49 e 50–52 estão publicados no Level 1. O
 fechamento do recorte separa conteúdo visto, aulas concluídas e desempenho apoiado por evidências;
-as **Aulas 1–5** e o checkpoint 1–5 estão publicados no Level 2. As Aulas 6–30 desse nível
+as **Aulas 1–10** e os checkpoints 1–5 e 6–10 estão publicados no Level 2. As Aulas 11–30 desse nível
 permanecem planejadas e indisponíveis, sem páginas vazias nem conteúdo fictício. Os recursos
 assistidos ficam desligados por padrão até passarem pela avaliação humana.
 
@@ -58,8 +60,9 @@ Rotas úteis da unidade mais recente e do fechamento:
 - checkpoint: <http://localhost:5180/cursos/voa-level-1/unidades/50-52/checkpoint>;
 - avaliação escopada: <http://localhost:5180/cursos/voa-level-1/unidades/50-52/avaliacao>;
 - conclusão: <http://localhost:5180/cursos/voa-level-1/conclusao>;
-- mapa Level 2: <http://localhost:5180/cursos/voa-level-2/unidades/1-5>;
-- checkpoint Level 2: <http://localhost:5180/cursos/voa-level-2/unidades/1-5/checkpoint>;
+- mapa Level 2: <http://localhost:5180/cursos/voa-level-2/unidades/6-10>;
+- checkpoint Level 2: <http://localhost:5180/cursos/voa-level-2/unidades/6-10/checkpoint>;
+- classificação adjective/adverb: <http://localhost:5180/cursos/voa-level-2/aulas/8/exercicios>;
 - revisão e caderno no mesmo contexto: `/revisar?course=voa-level-1&unit=50-52` e
   `/caderno?course=voa-level-1&unit=50-52`.
 
@@ -172,19 +175,24 @@ app_user ─┬─ study_session_progress ─┬─ lesson
 `exercise_answer` é tabela à parte porque um exercício aceita mais de uma
 resposta certa (`should` e `ought to`, por exemplo) e todas valem igual.
 
-O que está carregado hoje: **27 aulas** — 22 do Level 1 e cinco do Level 2 —, **quatro
-checkpoints com 24 questões**, 108 objetivos, 82 blocos de gramática com 306 linhas, 161 frases,
-**285 itens de vocabulário**, 96 notas de pronúncia, **27 áudios oficiais**, 133 trechos
-selecionados, 289 falas de transcrição integral nas Aulas 32–40 do Level 1, **27 propostas de
-escrita** e **247 exercícios** com 278 respostas aceitas e 407 dicas graduais. As Aulas 41–52 do
-Level 1 e 1–5 do Level 2 usam cinco trechos selecionados com texto e tradução por aula, mas não
-possuem transcrição integral. Os timestamps dos 25 trechos do Level 2 são conservadores e ainda
-não foram validados por escuta humana. As 27 aulas possuem fonte oficial/autoral, estratégia,
+O que está carregado hoje: **32 aulas** — 22 do Level 1 e dez do Level 2 —, **cinco
+checkpoints com 30 questões**, 128 objetivos, 97 blocos de gramática com 351 linhas, 186 frases,
+**335 itens de vocabulário**, 111 notas de pronúncia, **32 mídias oficiais**, 158 trechos
+selecionados, 289 falas de transcrição integral nas Aulas 32–40 do Level 1, **32 propostas de
+escrita** e **287 exercícios** com 318 respostas aceitas e 487 dicas graduais. As Aulas 41–52 do
+Level 1 e 1–10 do Level 2 usam cinco trechos selecionados com texto e tradução por aula, mas não
+possuem transcrição integral. Os timestamps dos 50 trechos do Level 2 são conservadores e ainda
+não foram validados por escuta humana. As 32 aulas possuem fonte oficial/autoral, estratégia,
 versão e status editorial explícitos.
 
-O Level 2 permanece deliberadamente parcial: as unidades 6–30 continuam `planned`, e a listagem
+O Level 2 permanece deliberadamente parcial: as unidades 11–30 continuam `planned`, e a listagem
 oficial da VOA não oferece um review 26–30. O projeto não apresenta um fechamento autoral desse
 bloco como se fosse uma revisão oficial.
+
+O laboratório agora também aceita `classification`: cada item recebe uma categoria em um
+`select` nativo, a API rejeita respostas parciais ou adulteradas e o gabarito permanece somente no
+servidor. A Aula 8 usa o tipo para “adjective ou adverb” como complemento autoral claramente
+identificado; as Aulas 6 e 10 o reutilizam para relações espaciais e `hope/wish`.
 
 Os packs autorais das Aulas 31, 38 e 40 estão na versão 2 e possuem objetivo pedagógico
 explícito (`recognize`, `apply`, `correct`, `produce` ou `listen`) e duas dicas progressivas por
@@ -464,15 +472,19 @@ restaurando: usuários, cartas de revisão e tentativas voltam intactos.
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 210 testes contra o Postgres do compose | `make test-api` |
-| vitest | 152 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 37 cenários em desktop e mobile (74 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | 221 testes contra o Postgres do compose | `make test-api` |
+| vitest | 157 testes de componente, fluxo e parser | `make test-web` |
+| Playwright | 39 cenários em desktop e mobile (78 execuções), contra **produção** | `make prod-up && make test-e2e` |
 
-O frontend possui uma **jornada guiada** nas 27 aulas publicadas dos dois níveis. Ela divide o
+Na Sprint 26, pytest, Vitest, lint, tipagem, build e orçamento de bundle foram executados com
+sucesso. Os 78 casos Playwright foram listados e compilados, mas a execução visual permanece
+pendente porque o ambiente controlado da entrega não disponibilizou um navegador.
+
+O frontend possui uma **jornada guiada** nas 32 aulas publicadas dos dois níveis. Ela divide o
 estudo em preparar, assistir, estudar, praticar e revisar. A etapa atual é salva localmente e na conta,
 permitindo continuar em outro navegador. Em “Assistir”, o player usa o áudio oficial da VOA,
 sincroniza a posição na conta e oferece velocidade, saltos de cinco segundos, repetição A–B e
-133 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
+158 trechos selecionados com tradução opcional. As atividades de compreensão são corrigidas pela
 API sem enviar o gabarito antes da
 resposta. Na revisão, o aluno pode praticar *shadowing*, gravar a voz localmente, comparar com
 o modelo e salvar uma autoavaliação. O áudio permanece local por padrão; somente após
@@ -526,7 +538,7 @@ infra/     compose.yml                 — dev: db + api + worker + web
            compose.prod.yml            — prod local: nginx + uvicorn + db
 e2e/       testes/                     — Playwright, fluxo completo
 seed/      courses.json                — catálogo de cursos e unidades
-           lessons.json                — conteúdo das 27 aulas publicadas
+           lessons.json                — conteúdo das 32 aulas publicadas
 ```
 
 ## Convenções
@@ -540,3 +552,5 @@ seed/      courses.json                — catálogo de cursos e unidades
 
 O plano das Sprints 20–25 está em
 [docs/plano_sprints_20_25_frontend_cursos_exercicios_2026-10-08.md](docs/plano_sprints_20_25_frontend_cursos_exercicios_2026-10-08.md).
+O plano de expansão das Sprints 26–30 está em
+[docs/plano_sprints_26_30_level_2_2026-10-09.md](docs/plano_sprints_26_30_level_2_2026-10-09.md).

@@ -70,9 +70,7 @@ class LessonMediaOut(ORMModel):
     kind: str
     label: str
     source_url: str
-    license_status: Literal[
-        "public_domain", "permission_granted", "restricted", "review_required"
-    ]
+    license_status: Literal["public_domain", "permission_granted", "restricted", "review_required"]
     license_url: str | None
     license_note: str
     attribution: str
@@ -131,6 +129,8 @@ class ExerciseOut(ORMModel):
     skill: str
     objective: Literal["recognize", "apply", "correct", "produce", "listen"]
     options: list[str] | None
+    classification_items: list[str] | None = None
+    classification_categories: list[str] | None = None
     prompt: str
     hint: str | None
     hint_count: int
@@ -249,6 +249,8 @@ def exercise_public_payload(exercise: Any) -> dict[str, Any]:
         "skill": exercise.skill,
         "objective": exercise.objective,
         "options": exercise.options,
+        "classification_items": exercise.classification_items,
+        "classification_categories": exercise.classification_categories,
         "prompt": exercise.prompt,
         "hint": None,
         "hint_count": exercise.hint_count,

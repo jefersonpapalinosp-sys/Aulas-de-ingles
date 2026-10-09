@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import CourseReview, CourseReviewAttempt, CourseUnit
 
 REVIEW_URL = "/api/courses/voa-level-1/units/40-44/review"
+LEVEL_2_REVIEW_URL = "/api/courses/voa-level-2/units/6-10/review"
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -78,9 +79,7 @@ async def test_checkpoint_exige_login_e_rotas_inexistentes_retornam_404(
 
     headers = await conta(client, "not-found")
     assert (
-        await client.get(
-            "/api/courses/curso-inexistente/units/40-44/review", headers=headers
-        )
+        await client.get("/api/courses/curso-inexistente/units/40-44/review", headers=headers)
     ).status_code == 404
     assert (
         await client.get(
@@ -107,11 +106,44 @@ async def test_detalhe_do_checkpoint_e_seguro_e_retoma_listening_da_aula_40(
     assert len(detail["questions"]) == 6
     assert [question["position"] for question in detail["questions"]] == list(range(1, 7))
     assert all("accepted_answers" not in question for question in detail["questions"])
-    lesson_40 = (
-        await client.get("/api/courses/voa-level-1/lessons/40")
-    ).json()
+    lesson_40 = (await client.get("/api/courses/voa-level-1/lessons/40")).json()
     assert detail["listening_media"] == lesson_40["media"][0]
     assert detail["listening_source_page_url"] == lesson_40["voa_url"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_6_10_do_level_2_usa_aula_9_e_isola_historico(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-2-6-10")
+    response = await client.get(LEVEL_2_REVIEW_URL, headers=headers)
+
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "private, no-store"
+    assert "accepted_answers" not in response.text
+    detail = response.json()
+    assert detail["slug"] == "checkpoint-6-10"
+    assert len(detail["questions"]) == 6
+    assert [question["position"] for question in detail["questions"]] == list(range(1, 7))
+    lesson_9 = (await client.get("/api/courses/voa-level-2/lessons/9")).json()
+    assert detail["listening_media"] == lesson_9["media"][0]
+    assert detail["listening_source_page_url"] == lesson_9["voa_url"]
+
+    failed = await client.post(
+        f"{LEVEL_2_REVIEW_URL}/attempts",
+        headers=headers,
+        json=attempt_body(detail, correct=False),
+    )
+    assert failed.status_code == 201, failed.text
+    assert failed.json()["reinforced_lesson_numbers"] == [6, 7, 8, 9, 10]
+    assert (await client.get(LEVEL_2_REVIEW_URL, headers=headers)).json()["latest_attempt"][
+        "id"
+    ] == failed.json()["id"]
+    first_checkpoint = await client.get(
+        "/api/courses/voa-level-2/units/1-5/review", headers=headers
+    )
+    assert first_checkpoint.status_code == 200
+    assert first_checkpoint.json()["latest_attempt"] is None
 
 
 @pytest.mark.asyncio
@@ -284,9 +316,7 @@ async def test_checkpoint_nao_publicado_nao_e_exposto(
         assert (
             await client.post(f"{REVIEW_URL}/attempts", headers=headers, json=body)
         ).status_code == 404
-        curriculum = (
-            await client.get("/api/courses/voa-level-1/curriculum")
-        ).json()
+        curriculum = (await client.get("/api/courses/voa-level-1/curriculum")).json()
         unit = next(item for item in curriculum["units"] if item["slug"] == "40-44")
         assert unit["review"] is None
     finally:

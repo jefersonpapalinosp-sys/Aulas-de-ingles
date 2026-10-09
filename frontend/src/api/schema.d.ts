@@ -1116,7 +1116,7 @@ export interface components {
         AttemptIn: {
             /**
              * Answer
-             * @description O que o usuário digitou.
+             * @description Resposta textual ou JSON de classificação.
              */
             answer: string;
             /**
@@ -1569,6 +1569,10 @@ export interface components {
         ExerciseOut: {
             /** Activity Type */
             activity_type: string;
+            /** Classification Categories */
+            classification_categories?: string[] | null;
+            /** Classification Items */
+            classification_items?: string[] | null;
             /** Explanation */
             explanation: string | null;
             /** Hint */
@@ -1595,6 +1599,10 @@ export interface components {
         ExerciseWithLessonOut: {
             /** Activity Type */
             activity_type: string;
+            /** Classification Categories */
+            classification_categories?: string[] | null;
+            /** Classification Items */
+            classification_items?: string[] | null;
             /** Course Slug */
             course_slug: string;
             /** Explanation */
@@ -2123,7 +2131,7 @@ export interface components {
         /** PracticeSessionCreateIn */
         PracticeSessionCreateIn: {
             /** Activity Type */
-            activity_type?: ("gap_fill" | "multiple_choice" | "transformation" | "reorder" | "dictation") | null;
+            activity_type?: ("gap_fill" | "multiple_choice" | "transformation" | "reorder" | "dictation" | "classification") | null;
             /**
              * Idempotency Key
              * Format: uuid
@@ -3065,7 +3073,7 @@ export interface operations {
     list_lesson_exercises_api_courses__course_slug__lessons__number__exercises_get: {
         parameters: {
             query?: {
-                activity_type?: ("gap_fill" | "multiple_choice" | "transformation" | "reorder" | "dictation") | null;
+                activity_type?: ("gap_fill" | "multiple_choice" | "transformation" | "reorder" | "dictation" | "classification") | null;
                 skill?: ("grammar" | "listening") | null;
                 objective?: ("recognize" | "apply" | "correct" | "produce" | "listen") | null;
             };

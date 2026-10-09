@@ -116,6 +116,18 @@ const level2Lesson: LessonSummary = {
   grammar_tag: 'Present perfect continuous',
 }
 
+const level2Lesson6: LessonSummary = {
+  ...level2Lesson,
+  id: 206,
+  unit_slug: '6-10',
+  slug: 'lesson-6',
+  position: 1,
+  number: 6,
+  title: 'Will It Float?',
+  title_pt: 'Será que flutua?',
+  grammar_tag: 'Preposições de lugar',
+}
+
 const level2Curriculum: CourseCurriculum = {
   course: {
     ...curriculum.course,
@@ -126,7 +138,7 @@ const level2Curriculum: CourseCurriculum = {
     proficiency_label: 'Intermediário',
     position: 2,
     total_lessons: 30,
-    published_lessons: 1,
+    published_lessons: 2,
   },
   units: [
     {
@@ -147,9 +159,32 @@ const level2Curriculum: CourseCurriculum = {
       slug: '6-10',
       title: 'Aulas 6–10',
       position: 2,
-      status: 'planned',
+      status: 'published',
       lesson_start: 6,
       lesson_end: 10,
+      total_lessons: 5,
+      published_lessons: 1,
+      lessons: [level2Lesson6],
+      review: {
+        id: 26,
+        slug: 'checkpoint-6-10',
+        position: 6,
+        title: 'Checkpoint 6–10',
+        status: 'published',
+        estimated_minutes: 14,
+        question_count: 6,
+        review_lesson_number: 10,
+        source_kind: 'mixed',
+      },
+    },
+    {
+      id: 23,
+      slug: '11-15',
+      title: 'Aulas 11–15',
+      position: 3,
+      status: 'planned',
+      lesson_start: 11,
+      lesson_end: 15,
       total_lessons: 5,
       published_lessons: 0,
       lessons: [],
@@ -182,13 +217,13 @@ vi.mock('../api/progress', () => ({
   useProgress: (courseSlug: string) => ({
     data: {
       studied_count: 1,
-      total_lessons: courseSlug === 'voa-level-2' ? 1 : 16,
+      total_lessons: courseSlug === 'voa-level-2' ? 2 : 16,
       attempts: 0,
       correct: 0,
       review_due: 2,
       review_cards: 2,
       lessons: (courseSlug === 'voa-level-2'
-        ? [level2Lesson]
+        ? [level2Lesson, level2Lesson6]
         : [...firstUnitLessons, lesson(15, '15-20'), lesson(41, '40-44')]
       ).map((item) => ({
         course_slug: item.course_slug,
@@ -334,6 +369,24 @@ describe('LessonRail', () => {
 
     expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
       'Level 2 · Aula 1 · Budget Cuts',
+    )
+  })
+
+  it('expõe a Aula 6 e o checkpoint 6–10 no trilho do Level 2', () => {
+    const { container } = renderRailAt('/cursos/voa-level-2/aulas/6')
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
+      'Level 2 · Aula 6 · Will It Float?',
+    )
+    expect(within(desktop!).getByRole('link', { name: /Will It Float/ })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-2/aulas/6',
+    )
+    expect(within(desktop!).getByRole('link', { name: /Checkpoint 6–10/ })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-2/unidades/6-10/checkpoint',
     )
   })
 

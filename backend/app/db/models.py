@@ -116,9 +116,7 @@ class CourseReview(Base):
         CheckConstraint("position > 0", name="ck_course_review_position_positive"),
         CheckConstraint("estimated_minutes > 0", name="ck_course_review_minutes_positive"),
         CheckConstraint("content_version > 0", name="ck_course_review_version_positive"),
-        CheckConstraint(
-            "review_lesson_number > 0", name="ck_course_review_lesson_positive"
-        ),
+        CheckConstraint("review_lesson_number > 0", name="ck_course_review_lesson_positive"),
         CheckConstraint(
             "listening_lesson_number IS NULL OR listening_lesson_number > 0",
             name="ck_course_review_listening_lesson_positive",
@@ -224,9 +222,7 @@ class CourseReviewAttempt(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("app_user.id", ondelete="CASCADE"), index=True
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     review_id: Mapped[int] = mapped_column(
         ForeignKey("course_review.id", ondelete="CASCADE"), index=True
     )
@@ -712,6 +708,16 @@ class Exercise(Base):
             "objective IN ('recognize', 'apply', 'correct', 'produce', 'listen')",
             name="ck_exercise_objective",
         ),
+        CheckConstraint(
+            "activity_type != 'classification' OR "
+            "(classification_items IS NOT NULL AND "
+            "jsonb_typeof(classification_items) = 'array' AND "
+            "jsonb_array_length(classification_items) > 0 AND "
+            "classification_categories IS NOT NULL AND "
+            "jsonb_typeof(classification_categories) = 'array' AND "
+            "jsonb_array_length(classification_categories) >= 2)",
+            name="ck_exercise_classification_contract",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -721,6 +727,8 @@ class Exercise(Base):
     skill: Mapped[str] = mapped_column(String(40), default="grammar")
     objective: Mapped[str] = mapped_column(String(20), default="apply")
     options: Mapped[list[str] | None] = mapped_column(JSONB, default=None)
+    classification_items: Mapped[list[str] | None] = mapped_column(JSONB, default=None)
+    classification_categories: Mapped[list[str] | None] = mapped_column(JSONB, default=None)
     prompt: Mapped[str] = mapped_column(Text)
     hint: Mapped[str | None] = mapped_column(String(200), default=None)
     explanation: Mapped[str] = mapped_column(Text)
@@ -762,7 +770,7 @@ class ExerciseAnswer(Base):
         ForeignKey("exercise.id", ondelete="CASCADE"), index=True
     )
     position: Mapped[int] = mapped_column(Integer)
-    value: Mapped[str] = mapped_column(String(200))
+    value: Mapped[str] = mapped_column(Text)
 
     exercise: Mapped[Exercise] = relationship(back_populates="answers")
 
@@ -1191,7 +1199,7 @@ class ExerciseAttempt(Base):
         default=None,
     )
     idempotency_key: Mapped[str | None] = mapped_column(String(36), default=None)
-    answer: Mapped[str] = mapped_column(String(200))
+    answer: Mapped[str] = mapped_column(Text)
     correct: Mapped[bool] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

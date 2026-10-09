@@ -1386,7 +1386,7 @@ test('rotas legadas redirecionam ao Level 1 e preservam etapa, busca e fragmento
   }
 })
 
-test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', async ({
+test('Sprint 26 publica as Aulas 6–10 do Level 2 e preserva unidades futuras', async ({
   page,
   request,
 }) => {
@@ -1404,7 +1404,7 @@ test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', 
   }
   expect(curriculum.course).toMatchObject({
     status: 'published',
-    published_lessons: 5,
+    published_lessons: 10,
     total_lessons: 30,
   })
   expect(curriculum.units[0]).toMatchObject({
@@ -1414,7 +1414,14 @@ test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', 
     review: { slug: 'checkpoint-1-5', question_count: 6 },
   })
   expect(curriculum.units[0]?.lessons.map((lesson) => lesson.number)).toEqual([1, 2, 3, 4, 5])
-  expect(curriculum.units.slice(1).every((unit) => (
+  expect(curriculum.units[1]).toMatchObject({
+    slug: '6-10',
+    status: 'published',
+    published_lessons: 5,
+    review: { slug: 'checkpoint-6-10', question_count: 6 },
+  })
+  expect(curriculum.units[1]?.lessons.map((lesson) => lesson.number)).toEqual([6, 7, 8, 9, 10])
+  expect(curriculum.units.slice(2).every((unit) => (
     unit.status === 'planned' && unit.published_lessons === 0 && unit.lessons.length === 0
   ))).toBeTruthy()
   expect(curriculum.units.at(-1)?.review).toBeNull()
@@ -1436,7 +1443,7 @@ test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', 
     coursePath(LEVEL_1_SLUG),
   )
   await expect(level2Card.getByText('2 · Intermediário')).toBeVisible()
-  await expect(level2Card.getByText('5/30', { exact: true })).toBeVisible()
+  await expect(level2Card.getByText('10/30', { exact: true })).toBeVisible()
   await expect(level2Card.getByText('Publicado', { exact: true })).toBeVisible()
 
   await level2Card.getByRole('link', { name: 'Ver unidades' }).click()
@@ -1444,8 +1451,8 @@ test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', 
   await expect(page.getByRole('heading', { name: 'Mapa do curso' })).toBeVisible()
   await expect(page.getByText(/Level 2 · Intermediário · VOA Learning English/)).toBeVisible()
   const unitCards = page.locator('.unit-card-grid')
-  await expect(unitCards.locator('a')).toHaveCount(1)
-  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(5)
+  await expect(unitCards.locator('a')).toHaveCount(2)
+  await expect(unitCards.getByText('Em preparação', { exact: true })).toHaveCount(4)
   await expect(unitCards.locator('a', { hasText: 'Aulas 26–30' })).toHaveCount(0)
 
   await unitCards.locator('a', { hasText: 'Aulas 1–5' }).click()
@@ -1454,6 +1461,17 @@ test('Sprint 25 publica o piloto 1–5 do Level 2 e preserva unidades futuras', 
   await expect(
     page.getByRole('main').getByRole('link', { name: /Checkpoint 1–5/ }),
   ).toHaveAttribute('href', courseReviewPath('1-5', LEVEL_2_SLUG))
+
+  await page.goto(unitPath('6-10', LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 6–10' })).toBeVisible()
+  await expect(page.locator('.course-unit-lessons a[href*="/aulas/"]')).toHaveCount(5)
+  await expect(page.getByRole('link', { name: /The Best Barbecue/ })).toHaveAttribute(
+    'href',
+    lessonPath(8, LEVEL_2_SLUG),
+  )
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Checkpoint 6–10/ }),
+  ).toHaveAttribute('href', courseReviewPath('6-10', LEVEL_2_SLUG))
 })
 
 test('checkpoint 1–5 do Level 2 usa listening da Aula 3 e restaura o resultado', async ({
@@ -1511,6 +1529,76 @@ test('checkpoint 1–5 do Level 2 usa listening da Aula 3 e restaura o resultado
   await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await expect(page.locator('.checkpoint-form')).toHaveCount(0)
+})
+
+test('Sprint 26 oferece classificação adjective/adverb com correção no servidor', async ({
+  page,
+}) => {
+  await criarConta(page, 'Classificação Level 2 Sprint 26')
+  await page.goto(practicePath(8, LEVEL_2_SLUG))
+  await expect(page.getByRole('heading', { level: 1, name: 'The Best Barbecue' })).toBeVisible()
+
+  const session = await iniciarPraticaGuiada(page, 8, LEVEL_2_SLUG)
+  const exercise = await avancarAteEnunciado(
+    page,
+    session,
+    /Classifique as palavras da narrativa como adjective ou adverb/,
+  )
+  await expect(exercise.getByRole('group', { name: 'Classifique cada item' })).toBeVisible()
+  await exercise.getByRole('combobox', { name: 'secret' }).selectOption('adjective')
+  await exercise.getByRole('combobox', { name: 'seriously' }).selectOption('adverb')
+  await exercise.getByRole('combobox', { name: 'loyal' }).selectOption('adjective')
+  await exercise.getByRole('combobox', { name: 'strongly' }).selectOption('adverb')
+  await exercise.getByRole('button', { name: 'Verificar' }).click()
+  await expect(exercise.getByText('Correto')).toBeVisible()
+  await expect(exercise.getByText(/complemento autoral/)).toBeVisible()
+})
+
+test('checkpoint 6–10 usa listening da Aula 9 e restaura o resultado', async ({ page }) => {
+  await criarConta(page, 'Checkpoint Level 2 Sprint 26')
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+
+  const checkpointPath = courseReviewPath('6-10', LEVEL_2_SLUG)
+  await page.goto(checkpointPath)
+  await expect(page).toHaveURL(new RegExp(`${checkpointPath}$`))
+  await expect(page.getByRole('heading', { level: 1, name: 'Checkpoint 6–10' })).toBeVisible()
+
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(
+    provenance.getByRole('link', { name: /VOA Learning English — Review of Level 2 Lessons 6–10/ }),
+  ).toBeVisible()
+  await expect(page.locator('audio[aria-label="Conversa da Aula 9 — Level 2"]')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Rever Level 2 · Aula 9' })).toHaveAttribute(
+    'href',
+    lessonPath(9, LEVEL_2_SLUG),
+  )
+
+  const form = page.locator('.checkpoint-form')
+  await expect(form.getByRole('group')).toHaveCount(6)
+  for (const answer of [
+    'in',
+    'You should walk across the bridge and stop at the memorial.',
+    'The sauce recipe is kept secret by the judges.',
+    'must have',
+    'I hope to visit Peru next year.',
+    'Porque cuidar de um animal é uma grande responsabilidade.',
+  ]) {
+    await form.getByRole('radio', { name: answer, exact: true }).check()
+  }
+
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        '/api/courses/voa-level-2/units/6-10/review/attempts' &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  )
+  await form.getByRole('button', { name: 'Concluir checkpoint' }).click()
+  expect((await saved).status()).toBe(201)
+  await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
+  await page.reload()
   await expect(page.getByText('Você acertou 6 de 6 questões (100%).')).toBeVisible()
   await expect(page.locator('.checkpoint-form')).toHaveCount(0)
 })

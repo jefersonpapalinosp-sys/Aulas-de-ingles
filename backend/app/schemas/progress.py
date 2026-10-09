@@ -17,7 +17,7 @@ STUDY_STEPS: tuple[StudyStep, ...] = (
 
 
 class AttemptIn(BaseModel):
-    answer: str = Field(max_length=200, description="O que o usuário digitou.")
+    answer: str = Field(max_length=2000, description="Resposta textual ou JSON de classificação.")
     idempotency_key: UUID
     practice_session_id: int | None = Field(default=None, gt=0)
 
