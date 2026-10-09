@@ -363,6 +363,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
                 )
             ).scalars()
         )
+        assert len(published_lessons) == 15
         session.add_all(
             [LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in published_lessons]
         )
@@ -379,6 +380,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
                 )
             ).scalars()
         )
+        assert len(published_reviews) == 3
         await session.commit()
 
         if published_reviews:
@@ -436,7 +438,7 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
         await session.execute(
             select(CourseUnit).where(
                 CourseUnit.course_id == course.id,
-                CourseUnit.slug == "11-15",
+                CourseUnit.slug == "16-20",
             )
         )
     ).scalar_one()
@@ -446,12 +448,12 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
     hidden_lesson = Lesson(
         course_id=course.id,
         unit_id=planned_unit.id,
-        number=11,
-        slug="dashboard-hidden-level-2-lesson-11",
+        number=16,
+        slug="dashboard-hidden-level-2-lesson-16",
         position=1,
-        title="News From Home",
-        title_pt="Notícias de casa",
-        voa_url="https://example.com/level-2/lesson-11",
+        title="Find Your Joy!",
+        title_pt="Encontre sua alegria!",
+        voa_url="https://example.com/level-2/lesson-16",
         grammar_tag="Fixture planned",
         focus_points=[],
         lead="Fixture de retomada não publicada.",
@@ -476,8 +478,8 @@ async def test_today_ignora_retomada_de_unidade_nao_publicada(
                 lesson_id=hidden_lesson.id,
                 item_type="listening",
                 source_type="dashboard_test",
-                source_id=611,
-                source_key="dashboard-test:hidden-planned-611",
+                source_id=616,
+                source_key="dashboard-test:hidden-planned-616",
                 skill="listening",
                 prompt="Hidden planned prompt",
                 answer="Hidden planned answer",

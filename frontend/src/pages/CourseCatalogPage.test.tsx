@@ -30,7 +30,7 @@ vi.mock('../api/queries', () => ({
         position: 2,
         status: 'published',
         total_lessons: 30,
-        published_lessons: 10,
+        published_lessons: 15,
       },
     ],
     isPending: false,
@@ -47,7 +47,7 @@ describe('CourseCatalogPage', () => {
     expect(screen.getByRole('heading', { name: /Level 1/ })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Level 2/ })).toBeInTheDocument()
     expect(screen.getAllByText('Publicado')).toHaveLength(2)
-    expect(screen.getByText('10/30')).toBeInTheDocument()
+    expect(screen.getByText('15/30')).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: 'Ver unidades' }).at(0)).toHaveAttribute(
       'href',
       '/cursos/voa-level-1',

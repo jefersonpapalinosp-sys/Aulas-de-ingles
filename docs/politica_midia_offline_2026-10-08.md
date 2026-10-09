@@ -1,18 +1,18 @@
 # Política de licença e mídia offline
 
 - Data da revisão inicial: 8 de outubro de 2026
-- Atualizada após a Sprint 26: 9 de outubro de 2026
+- Atualizada durante a Sprint 27: 9 de outubro de 2026
 - Backlog: item 5 da fila de fechamento e extensão ao Level 2
 
 ## Decisão
 
-As 32 mídias publicadas correspondem às Aulas 31–52 do *Let's Learn English — Level 1* e às
-Aulas 1–10 do *Let's Learn English — Level 2*. Elas são identificadas nas páginas oficiais como
+As 37 mídias publicadas correspondem às Aulas 31–52 do *Let's Learn English — Level 1* e às
+Aulas 1–15 do *Let's Learn English — Level 2*. Elas são identificadas nas páginas oficiais como
 produção da VOA Learning English. Os termos oficiais informam que material produzido
 exclusivamente pela VOA é domínio público e deve receber crédito; conteúdo de terceiros permanece
 protegido e não pode ser redistribuído sem autorização.
 
-O projeto registra essas 32 mídias como `public_domain`, atribui “Voice of America (VOA Learning
+O projeto registra essas 37 mídias como `public_domain`, atribui “Voice of America (VOA Learning
 English)” e mantém `offline_policy=network_only`. A licença compatível é condição necessária, mas
 não suficiente, para armazenamento offline.
 
@@ -25,17 +25,17 @@ Fontes revisadas:
 
 ## Escopo editorial publicado
 
-O seed contém 32 mídias, 158 cues de estudo e 289 falas de transcrição integral. As falas
-integrais pertencem às Aulas 32–40 do Level 1. As Aulas 41–52 do Level 1 e 1–10 do Level 2
+O seed contém 37 mídias, 183 cues de estudo e 289 falas de transcrição integral. As falas
+integrais pertencem às Aulas 32–40 do Level 1. As Aulas 41–52 do Level 1 e 1–15 do Level 2
 mantêm `transcript=[]` e usam somente cinco trechos curtos com texto e tradução por aula.
 
-Os 50 cues do Level 2 foram posicionados de forma conservadora a partir das fontes documentais,
+Os 75 cues do Level 2 foram posicionados de forma conservadora a partir das fontes documentais,
 mas ainda não passaram por validação humana por escuta. Eles não devem ser descritos como
-sincronização auditada até essa conferência acontecer. As unidades 11–30 permanecem `planned` e
+sincronização auditada até essa conferência acontecer. As unidades 16–30 permanecem `planned` e
 não possuem mídia publicada no aplicativo.
 
 A página oficial da Aula 8 do Level 2 não oferece um MP3 separado. Nesse caso, o player de áudio
-usa a faixa sonora do MP4 oficial de baixa resolução, mantido como `network_only`; as outras 31
+usa a faixa sonora do MP4 oficial de baixa resolução, mantido como `network_only`; as outras 36
 mídias usam os MP3 oficiais. A interface deve continuar funcional quando qualquer origem externa
 estiver indisponível.
 
@@ -95,7 +95,7 @@ Reavaliar a decisão quando ocorrer pelo menos uma destas condições:
 ## Evidência de fechamento
 
 - migration com constraints de licença e política offline;
-- seed das 32 mídias com fonte, crédito e data de revisão;
+- seed das 37 mídias com fonte, crédito e data de revisão;
 - contrato OpenAPI e tipos frontend atualizados;
 - player torna origem e política visíveis;
 - teste impede remoção acidental da exclusão de áudio/vídeo do service worker;

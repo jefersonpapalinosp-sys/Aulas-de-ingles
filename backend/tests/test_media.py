@@ -71,3 +71,29 @@ async def test_posicao_valida_midia_e_duracao(client: AsyncClient) -> None:
     assert negativo.status_code == 422
     assert alem.status_code == 422
     assert ausente.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_midia_da_aula_14_level_2_respeita_duracao_oficial(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-2-14")
+    lesson = (await client.get("/api/courses/voa-level-2/lessons/14")).json()
+    media = lesson["media"][0]
+
+    assert media["duration_seconds"] == 276
+    assert media["source_url"].endswith("e2fe076d-3fa7-495a-83ea-9d4d4cba9fad_hq.mp3")
+    saved = await client.put(
+        f"/api/media/{media['id']}/position",
+        headers=headers,
+        json={"position_seconds": 275.5},
+    )
+    outside = await client.put(
+        f"/api/media/{media['id']}/position",
+        headers=headers,
+        json={"position_seconds": 276.1},
+    )
+
+    assert saved.status_code == 200
+    assert saved.json()["position_seconds"] == 275.5
+    assert outside.status_code == 422

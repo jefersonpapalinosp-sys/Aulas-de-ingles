@@ -3,7 +3,7 @@
 - Data da análise: 8 de outubro de 2026
 - Atualizado em: 9 de outubro de 2026
 - Estado: Sprints 20–25 implementadas no piloto automatizado; validação manual ampla permanece pendente
-- Continuidade: Sprint 26 implementada; Sprints 27–30 registradas no roadmap seguinte
+- Continuidade: Sprints 26–27 implementadas; Sprints 28–30 registradas no roadmap seguinte
 
 ## 1. Objetivo
 
@@ -961,12 +961,13 @@ O ciclo 20–25 foi concluído com:
 
 ## 19. Continuidade após o ciclo
 
-A Sprint 26 auditou e publicou as Aulas 6–10 do Level 2, o checkpoint autoral 6–10 e o exercício
-reutilizável de classificação. A conferência humana dos novos timestamps de áudio e a execução
-visual dos cenários browser continuam registradas como QA pendente.
+A Sprint 26 auditou e publicou as Aulas 6–10 do Level 2 e o exercício reutilizável de
+classificação. A Sprint 27 avançou até as Aulas 11–15 e publicou o terceiro checkpoint do curso.
+A conferência humana dos novos timestamps de áudio e a execução visual dos cenários browser
+continuam registradas como QA pendente.
 
-A próxima implementação recomendada é a Sprint 27, condicionada à auditoria das fontes, lesson
-plans, mídias, licenças e objetivos das Aulas 11–15. As unidades 11–30 continuam em preparação,
+A próxima implementação recomendada é a Sprint 28, condicionada à auditoria das fontes, lesson
+plans, mídias, licenças e objetivos das Aulas 16–20. As unidades 16–30 continuam em preparação,
 sem páginas vazias nem conteúdo fictício. O escopo e a ordem das próximas entregas estão no
 [Plano das Sprints 26–30](plano_sprints_26_30_level_2_2026-10-09.md). Quando o projeto chegar à
 unidade 26–30, qualquer fechamento criado localmente precisa ser identificado como autoral, pois

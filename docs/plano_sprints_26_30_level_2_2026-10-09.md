@@ -221,22 +221,47 @@ na Aula 6 e hope/wish na Aula 10.
 
 ## 5. Sprint 27 — Level 2, Aulas 11–15
 
-**Estado:** planejada.
+**Estado:** conteúdo publicado e mergeado em 9 de outubro de 2026. Catálogo, currículo,
+aulas e checkpoint foram verificados pela API; a suíte comum está verde. Três gates
+continuam abertos e estão listados em "Implementação registrada": o listening do
+checkpoint, a conferência auditiva dos 25 timestamps e a jornada visual.
 
 **Objetivo:** publicar o terceiro bloco do Level 2 e consolidá-lo em um checkpoint próprio,
 reutilizando o motor de exercícios ampliado na Sprint 26.
 
-### Catálogo oficial confirmado
+### Auditoria oficial confirmada
 
-| Aula | Título confirmado no índice | Foco linguístico |
-|---:|---|---|
-| 11 | *The Big Snow* | a confirmar na auditoria da aula e do lesson plan |
-| 12 | *Run! Bees!* | a confirmar na auditoria da aula e do lesson plan |
-| 13 | *Save the Bees!* | a confirmar na auditoria da aula e do lesson plan |
-| 14 | *Made for Each Other* | a confirmar na auditoria da aula e do lesson plan |
-| 15 | *Before and After* | a confirmar na auditoria da aula e do lesson plan |
+| Aula | Página canônica | Foco confirmado no lesson plan/review | Mídia de conversa |
+|---:|---|---|---|
+| 11 | [*The Big Snow*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-11-the-big-snow/4102755.html) | present perfect simple/continuous e past perfect; ações concluídas, duração e clima | MP3 oficial, 4:27 |
+| 12 | [*Run! Bees!*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-12-run-bees/4139015.html) | conditionals real e unreal; informação, incerteza, razões e deduções | MP3 oficial, 4:18 |
+| 13 | [*Save the Bees!*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-13-save-the-bees/4145716.html) | conditionals, hope clauses, consequências e previsões | MP3 oficial, 3:51 |
+| 14 | [*Made for Each Other*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-14-made-for-each-other/4159000.html) | `and ... either`, `and so ...` e inversão; sentimentos e relacionamentos | MP3 oficial, 4:36 |
+| 15 | [*Before and After*](https://learningenglish.voanews.com/a/lets-learn-english-level-2-lesson-15-before-after/4159057.html) | adverb clauses de tempo, razão, contraste e condição; descrever exercício | MP3 oficial, 4:09 |
 
-O índice confirma **Review of Level 2 Lessons 11–15**.
+O [review oficial 11–15](https://learningenglish.voanews.com/a/lets-learn-english-level-2-review-of-lessons-11-15/4181693.html)
+confirma a sequência, os focos e as estratégias. O pacote oficial de lesson plans 11–20 e os
+cinco PDFs individuais também foram conferidos. A revisão oferece um quiz com clipes, mas não um
+MP3 contínuo; por isso, o checkpoint local usa a mídia da Aula 14 e perguntas autorais.
+
+A auditoria registrou duas ressalvas:
+
+- o PDF da Aula 11 rotula incorretamente *has been falling* como past perfect continuous; o
+  projeto segue a forma gramatical correta, present perfect continuous, e o resumo do review;
+- o PDF da Aula 15 omite `as` na lista principal, mas o transcript usa `as long as` e
+  `as soon as`, e o review inclui `as`; essas locuções podem aparecer como extensão documentada.
+
+### Implementação registrada
+
+- [x] auditar páginas canônicas, lesson plans, review, MP3s, durações e licença;
+- [x] manter as mídias como `network_only`, com crédito e fallback textual;
+- [x] publicar as cinco aulas, com conteúdo e exercícios autorais;
+- [x] publicar o checkpoint autoral 11–15;
+- [ ] **pendente:** anexar o listening da Aula 14 ao checkpoint 11–15 — nenhum dos
+      três checkpoints do Level 2 tem mídia hoje, então isto é um item aberto do
+      bloco inteiro, não uma regressão desta sprint;
+- [ ] **pendente:** conferir por escuta humana os 25 timestamps conservadores;
+- [ ] **pendente:** executar a jornada visual em desktop e mobile.
 
 ### Escopo
 
@@ -247,6 +272,10 @@ O índice confirma **Review of Level 2 Lessons 11–15**.
 - validar navegação 10 → checkpoint 6–10 → 11 e 15 → checkpoint 11–15;
 - reutilizar `classification` apenas quando houver objetivo pedagógico compatível;
 - manter o bloco 16–30 indisponível e sem links vazios.
+
+O tipo `classification` é adequado neste bloco para distinguir tempos perfeitos, conditionals
+reais/irreais e funções de adverb clauses. A seleção nativa e a correção no servidor permanecem
+as mesmas da Sprint 26; não há novo contrato de API ou migration nesta sprint.
 
 ### Critérios de aceite
 

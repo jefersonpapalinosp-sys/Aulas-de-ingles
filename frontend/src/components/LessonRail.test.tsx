@@ -107,26 +107,46 @@ const curriculum: CourseCurriculum = {
   ],
 }
 
-const level2Lesson: LessonSummary = {
-  ...lesson(1, '1-5'),
-  id: 201,
-  course_slug: 'voa-level-2',
-  title: 'Budget Cuts',
-  title_pt: 'Cortes no orçamento',
-  grammar_tag: 'Present perfect continuous',
+function level2Lesson(
+  number: number,
+  unitSlug: string,
+  title: string,
+  grammarTag = 'Grammar',
+): LessonSummary {
+  return {
+    ...lesson(number, unitSlug),
+    id: 200 + number,
+    course_slug: 'voa-level-2',
+    position: ((number - 1) % 5) + 1,
+    title,
+    title_pt: `Aula ${number} do Level 2`,
+    grammar_tag: grammarTag,
+  }
 }
 
-const level2Lesson6: LessonSummary = {
-  ...level2Lesson,
-  id: 206,
-  unit_slug: '6-10',
-  slug: 'lesson-6',
-  position: 1,
-  number: 6,
-  title: 'Will It Float?',
-  title_pt: 'Será que flutua?',
-  grammar_tag: 'Preposições de lugar',
-}
+const level2FirstUnit = [
+  level2Lesson(1, '1-5', 'Budget Cuts', 'Present perfect continuous'),
+  level2Lesson(2, '1-5', 'The Interview'),
+  level2Lesson(3, '1-5', 'He Said - She Said'),
+  level2Lesson(4, '1-5', 'Run Away With the Circus!'),
+  level2Lesson(5, '1-5', 'Greatest Vacation of All Time'),
+]
+
+const level2SecondUnit = [
+  level2Lesson(6, '6-10', 'Will It Float?', 'Preposições de lugar'),
+  level2Lesson(7, '6-10', 'Tip Your Tour Guide'),
+  level2Lesson(8, '6-10', 'The Best Barbecue'),
+  level2Lesson(9, '6-10', 'Pets Are Family, Too!'),
+  level2Lesson(10, '6-10', 'Visit to Peru'),
+]
+
+const level2ThirdUnit = [
+  level2Lesson(11, '11-15', 'The Big Snow', 'Present perfect continuous'),
+  level2Lesson(12, '11-15', 'Run! Bees!', 'Conditionals'),
+  level2Lesson(13, '11-15', 'Save the Bees!', 'First conditional'),
+  level2Lesson(14, '11-15', 'Made for Each Other', 'So / either'),
+  level2Lesson(15, '11-15', 'Before and After', 'Adverb clauses'),
+]
 
 const level2Curriculum: CourseCurriculum = {
   course: {
@@ -138,7 +158,7 @@ const level2Curriculum: CourseCurriculum = {
     proficiency_label: 'Intermediário',
     position: 2,
     total_lessons: 30,
-    published_lessons: 2,
+    published_lessons: 15,
   },
   units: [
     {
@@ -150,9 +170,19 @@ const level2Curriculum: CourseCurriculum = {
       lesson_start: 1,
       lesson_end: 5,
       total_lessons: 5,
-      published_lessons: 1,
-      lessons: [level2Lesson],
-      review: null,
+      published_lessons: 5,
+      lessons: level2FirstUnit,
+      review: {
+        id: 25,
+        slug: 'checkpoint-1-5',
+        position: 6,
+        title: 'Checkpoint 1–5',
+        status: 'published',
+        estimated_minutes: 14,
+        question_count: 6,
+        review_lesson_number: 5,
+        source_kind: 'mixed',
+      },
     },
     {
       id: 22,
@@ -163,8 +193,8 @@ const level2Curriculum: CourseCurriculum = {
       lesson_start: 6,
       lesson_end: 10,
       total_lessons: 5,
-      published_lessons: 1,
-      lessons: [level2Lesson6],
+      published_lessons: 5,
+      lessons: level2SecondUnit,
       review: {
         id: 26,
         slug: 'checkpoint-6-10',
@@ -182,9 +212,58 @@ const level2Curriculum: CourseCurriculum = {
       slug: '11-15',
       title: 'Aulas 11–15',
       position: 3,
-      status: 'planned',
+      status: 'published',
       lesson_start: 11,
       lesson_end: 15,
+      total_lessons: 5,
+      published_lessons: 5,
+      lessons: level2ThirdUnit,
+      review: {
+        id: 27,
+        slug: 'checkpoint-11-15',
+        position: 6,
+        title: 'Checkpoint 11–15',
+        status: 'published',
+        estimated_minutes: 14,
+        question_count: 6,
+        review_lesson_number: 15,
+        source_kind: 'mixed',
+      },
+    },
+    {
+      id: 24,
+      slug: '16-20',
+      title: 'Aulas 16–20',
+      position: 4,
+      status: 'planned',
+      lesson_start: 16,
+      lesson_end: 20,
+      total_lessons: 5,
+      published_lessons: 0,
+      lessons: [],
+      review: null,
+    },
+    {
+      id: 25,
+      slug: '21-25',
+      title: 'Aulas 21–25',
+      position: 5,
+      status: 'planned',
+      lesson_start: 21,
+      lesson_end: 25,
+      total_lessons: 5,
+      published_lessons: 0,
+      lessons: [],
+      review: null,
+    },
+    {
+      id: 26,
+      slug: '26-30',
+      title: 'Aulas 26–30',
+      position: 6,
+      status: 'planned',
+      lesson_start: 26,
+      lesson_end: 30,
       total_lessons: 5,
       published_lessons: 0,
       lessons: [],
@@ -217,13 +296,13 @@ vi.mock('../api/progress', () => ({
   useProgress: (courseSlug: string) => ({
     data: {
       studied_count: 1,
-      total_lessons: courseSlug === 'voa-level-2' ? 2 : 16,
+      total_lessons: courseSlug === 'voa-level-2' ? 15 : 16,
       attempts: 0,
       correct: 0,
       review_due: 2,
       review_cards: 2,
       lessons: (courseSlug === 'voa-level-2'
-        ? [level2Lesson, level2Lesson6]
+        ? [...level2FirstUnit, ...level2SecondUnit, ...level2ThirdUnit]
         : [...firstUnitLessons, lesson(15, '15-20'), lesson(41, '40-44')]
       ).map((item) => ({
         course_slug: item.course_slug,
@@ -388,6 +467,51 @@ describe('LessonRail', () => {
       'href',
       '/cursos/voa-level-2/unidades/6-10/checkpoint',
     )
+  })
+
+  it('expõe as Aulas 11–15 e o checkpoint da Sprint 27 no trilho do Level 2', () => {
+    const { container } = renderRailAt('/cursos/voa-level-2/aulas/11')
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
+      'Level 2 · Aula 11 · The Big Snow',
+    )
+    expect(within(desktop!).getByRole('button', { name: /Aulas 11–15/ })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+    for (const [number, title] of [
+      [11, 'The Big Snow'],
+      [12, 'Run! Bees!'],
+      [13, 'Save the Bees!'],
+      [14, 'Made for Each Other'],
+      [15, 'Before and After'],
+    ] as const) {
+      expect(within(desktop!).getByRole('link', { name: new RegExp(title) })).toHaveAttribute(
+        'href',
+        `/cursos/voa-level-2/aulas/${number}`,
+      )
+    }
+    expect(within(desktop!).getByRole('link', { name: /Checkpoint 11–15/ })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-2/unidades/11-15/checkpoint',
+    )
+  })
+
+  it('mantém as Aulas 16–30 indisponíveis no trilho do Level 2', () => {
+    const { container } = renderRailAt('/cursos/voa-level-2/aulas/15')
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    for (const title of ['Aulas 16–20', 'Aulas 21–25', 'Aulas 26–30']) {
+      const planned = within(desktop!).getByLabelText(`${title}: Em preparação`)
+      expect(planned).toHaveAttribute('aria-disabled', 'true')
+      expect(planned).toHaveTextContent('Em preparação · 5 aulas')
+      expect(
+        within(desktop!).queryByRole('button', { name: new RegExp(title) }),
+      ).not.toBeInTheDocument()
+    }
   })
 
   it('mostra unidades planejadas sem transformá-las em controles ou atalhos', () => {

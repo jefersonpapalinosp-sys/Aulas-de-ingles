@@ -251,6 +251,15 @@ def validate_course_reviews(courses: list[dict[str, Any]], lessons: list[dict[st
                     )
                 referenced_numbers.update(int(number) for number in lesson_numbers)
 
+            outside_review_range = sorted(
+                number for number in referenced_numbers if not start <= number <= end
+            )
+            if outside_review_range:
+                raise ValueError(
+                    f"Checkpoint {course_slug}/{unit['slug']} referencia a Aula "
+                    f"{outside_review_range[0]} fora da faixa {start}–{end} da unidade."
+                )
+
             for number in referenced_numbers:
                 if (course_slug, number) not in lessons_by_course_number:
                     raise ValueError(

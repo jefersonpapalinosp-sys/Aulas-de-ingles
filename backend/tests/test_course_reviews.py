@@ -11,6 +11,7 @@ from app.db.models import CourseReview, CourseReviewAttempt, CourseUnit
 
 REVIEW_URL = "/api/courses/voa-level-1/units/40-44/review"
 LEVEL_2_REVIEW_URL = "/api/courses/voa-level-2/units/6-10/review"
+LEVEL_2_REVIEW_11_15_URL = "/api/courses/voa-level-2/units/11-15/review"
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -143,6 +144,51 @@ async def test_checkpoint_6_10_do_level_2_usa_aula_9_e_isola_historico(
         "/api/courses/voa-level-2/units/1-5/review", headers=headers
     )
     assert first_checkpoint.status_code == 200
+    assert first_checkpoint.json()["latest_attempt"] is None
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_11_15_usa_aula_14_e_isola_checkpoints_anteriores(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-2-11-15")
+
+    previous_detail = (await client.get(LEVEL_2_REVIEW_URL, headers=headers)).json()
+    previous_attempt = await client.post(
+        f"{LEVEL_2_REVIEW_URL}/attempts",
+        headers=headers,
+        json=attempt_body(previous_detail, correct=False),
+    )
+    assert previous_attempt.status_code == 201, previous_attempt.text
+
+    response = await client.get(LEVEL_2_REVIEW_11_15_URL, headers=headers)
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "private, no-store"
+    assert "accepted_answers" not in response.text
+    detail = response.json()
+    assert detail["slug"] == "checkpoint-11-15"
+    assert detail["latest_attempt"] is None
+    assert len(detail["questions"]) == 6
+    assert [question["position"] for question in detail["questions"]] == list(range(1, 7))
+    lesson_14 = (await client.get("/api/courses/voa-level-2/lessons/14")).json()
+    assert detail["listening_media"] == lesson_14["media"][0]
+    assert detail["listening_source_page_url"] == lesson_14["voa_url"]
+
+    current_attempt = await client.post(
+        f"{LEVEL_2_REVIEW_11_15_URL}/attempts",
+        headers=headers,
+        json=attempt_body(detail, correct=False),
+    )
+    assert current_attempt.status_code == 201, current_attempt.text
+    assert current_attempt.json()["reinforced_lesson_numbers"] == [11, 12, 13, 14, 15]
+
+    current_refreshed = await client.get(LEVEL_2_REVIEW_11_15_URL, headers=headers)
+    previous_refreshed = await client.get(LEVEL_2_REVIEW_URL, headers=headers)
+    first_checkpoint = await client.get(
+        "/api/courses/voa-level-2/units/1-5/review", headers=headers
+    )
+    assert current_refreshed.json()["latest_attempt"]["id"] == current_attempt.json()["id"]
+    assert previous_refreshed.json()["latest_attempt"]["id"] == previous_attempt.json()["id"]
     assert first_checkpoint.json()["latest_attempt"] is None
 
 

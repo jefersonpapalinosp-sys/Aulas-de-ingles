@@ -94,12 +94,13 @@ async def test_completion_exige_login_e_reconhece_recorte_publicado(client: Asyn
 
     assert missing.status_code == 404
     assert pilot.status_code == 200
-    assert pilot.json()["progress"]["published_lessons"] == 10
-    assert pilot.json()["checkpoints"]["published"] == 2
+    assert pilot.json()["progress"]["published_lessons"] == 15
+    assert pilot.json()["checkpoints"]["published"] == 3
     assert pilot.json()["checkpoints"]["current_completed"] == 0
     assert [checkpoint["unit_slug"] for checkpoint in pilot.json()["checkpoints"]["pending"]] == [
         "1-5",
         "6-10",
+        "11-15",
     ]
     assert pilot.json()["certificate"] == {
         **pilot.json()["certificate"],
