@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { api, setAccessToken } from './client'
+import { api, onSessaoPerdida, setAccessToken } from './client'
 
 type Usuario = { id: number; email: string; display_name: string }
 
@@ -105,6 +105,16 @@ export function SessaoProvider({ children }: { children: React.ReactNode }) {
     },
     [qc],
   )
+
+  // Quando o middleware não consegue renovar, a sessão acabou de verdade:
+  // a interface precisa voltar ao login em vez de fingir que está logada.
+  useEffect(() => {
+    onSessaoPerdida(() => {
+      setUsuario(null)
+      qc.clear()
+    })
+    return () => onSessaoPerdida(null)
+  }, [qc])
 
   useEffect(() => {
     let vivo = true
@@ -212,14 +222,9 @@ export function useSessao(): Sessao {
   return ctx
 }
 
-export function useRenovacaoAutomatica() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async () => {
-      const { data } = await api.POST('/api/auth/refresh')
-      if (!data) throw new Error('sessão expirada')
-      setAccessToken(data.access_token)
-      await qc.invalidateQueries()
-    },
-  })
-}
+/*
+ * A renovação automática virou um middleware em api/client.ts: ele intercepta
+ * o 401, renova e repete a requisição. O hook que existia aqui nunca chegou a
+ * ser usado por tela nenhuma, e por isso a sessão morria em silêncio depois
+ * dos 15 minutos do access token.
+ */
