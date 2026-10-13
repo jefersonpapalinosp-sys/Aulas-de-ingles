@@ -9,7 +9,7 @@ from app.db.models import Course, CourseUnit, Lesson
 
 
 @pytest.mark.asyncio
-async def test_catalogo_publica_as_seis_unidades_do_level_2(
+async def test_catalogo_publica_as_unidades_dos_dois_cursos(
     client: AsyncClient,
 ) -> None:
     response = await client.get("/api/courses")
@@ -28,7 +28,7 @@ async def test_catalogo_publica_as_seis_unidades_do_level_2(
         "position": 1,
         "status": "published",
         "total_lessons": 52,
-        "published_lessons": 22,
+        "published_lessons": 27,
     }
     assert courses[1]["total_lessons"] == 30
     assert courses[1]["published_lessons"] == 30
@@ -41,14 +41,20 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
 
     assert response.status_code == 200
     curriculum = response.json()
-    assert curriculum["course"]["published_lessons"] == 22
+    assert curriculum["course"]["published_lessons"] == 27
     assert [unit["slug"] for unit in curriculum["units"]] == [
+        "1-5",
         "31-40",
         "40-44",
         "45-49",
         "50-52",
     ]
-    first = curriculum["units"][0]
+    # O bloco 1–5 abre o curso; o 31–40 segue sendo a referência deste teste.
+    opening = curriculum["units"][0]
+    assert opening["total_lessons"] == opening["published_lessons"] == 5
+    assert [lesson["number"] for lesson in opening["lessons"]] == list(range(1, 6))
+    assert opening["review"]["slug"] == "checkpoint-1-5-level-1"
+    first = curriculum["units"][1]
     assert first["total_lessons"] == first["published_lessons"] == 10
     assert [lesson["number"] for lesson in first["lessons"]] == list(range(31, 41))
     assert first["lessons"][0] == {
@@ -65,7 +71,7 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
         "story_note": None,
     }
     assert "grammar_blocks" not in first["lessons"][0]
-    second = curriculum["units"][1]
+    second = curriculum["units"][2]
     assert second["total_lessons"] == second["published_lessons"] == 4
     assert [lesson["number"] for lesson in second["lessons"]] == list(range(41, 45))
     assert all(lesson["unit_slug"] == "40-44" for lesson in second["lessons"])
@@ -81,13 +87,13 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
         "question_count": 6,
     }
     assert first["review"] is None
-    third = curriculum["units"][2]
+    third = curriculum["units"][3]
     assert third["total_lessons"] == third["published_lessons"] == 5
     assert [lesson["number"] for lesson in third["lessons"]] == list(range(45, 50))
     assert all(lesson["unit_slug"] == "45-49" for lesson in third["lessons"])
     assert third["review"]["slug"] == "checkpoint-45-49"
     assert third["review"]["question_count"] == 6
-    fourth = curriculum["units"][3]
+    fourth = curriculum["units"][4]
     assert fourth["total_lessons"] == fourth["published_lessons"] == 3
     assert [lesson["number"] for lesson in fourth["lessons"]] == [50, 51, 52]
     assert all(lesson["unit_slug"] == "50-52" for lesson in fourth["lessons"])
@@ -175,45 +181,20 @@ async def test_detalhe_canonico_e_legado_apontam_para_mesma_aula(client: AsyncCl
 
 
 @pytest.mark.asyncio
-async def test_mesmo_numero_pode_existir_em_dois_cursos(
-    client: AsyncClient, session: AsyncSession
-) -> None:
-    courses = {course.slug: course for course in (await session.execute(select(Course))).scalars()}
-    units = {
-        (unit.course_id, unit.slug): unit
-        for unit in (await session.execute(select(CourseUnit))).scalars()
-    }
-    level_1 = courses["voa-level-1"]
-    level_1_fixture = Lesson(
-        course_id=level_1.id,
-        unit_id=units[(level_1.id, "31-40")].id,
-        number=1,
-        slug="legacy-level-1-lesson-1",
-        position=100,
-        title="Level 1 lesson one",
-        title_pt="Aula um do Level 1",
-        voa_url="https://example.com/level-1/1",
-        grammar_tag="Teste Level 1",
-        focus_points=[],
-        lead="Fixture temporária.",
-        warmup_prompt="Warmup Level 1",
-        listening_focus="Listening Level 1",
-    )
-    session.add(level_1_fixture)
-    await session.commit()
+async def test_mesmo_numero_pode_existir_em_dois_cursos(client: AsyncClient) -> None:
+    """Desde a Sprint 31 a Aula 1 é real nos dois cursos; a rota legada cai no Level 1."""
+    legacy = await client.get("/api/lessons/1")
+    level_1_response = await client.get("/api/courses/voa-level-1/lessons/1")
+    level_2_response = await client.get("/api/courses/voa-level-2/lessons/1")
 
-    try:
-        legacy = await client.get("/api/lessons/1")
-        level_2_response = await client.get("/api/courses/voa-level-2/lessons/1")
-
-        assert legacy.status_code == level_2_response.status_code == 200
-        assert legacy.json()["title"] == "Level 1 lesson one"
-        assert level_2_response.json()["title"] == "Budget Cuts"
-        assert level_2_response.json()["course_slug"] == "voa-level-2"
-        assert legacy.json()["id"] != level_2_response.json()["id"]
-    finally:
-        await session.execute(delete(Lesson).where(Lesson.id == level_1_fixture.id))
-        await session.commit()
+    assert legacy.status_code == level_1_response.status_code == 200
+    assert level_2_response.status_code == 200
+    assert legacy.json() == level_1_response.json()
+    assert level_1_response.json()["title"] == "Welcome!"
+    assert level_1_response.json()["unit_slug"] == "1-5"
+    assert level_2_response.json()["title"] == "Budget Cuts"
+    assert level_2_response.json()["course_slug"] == "voa-level-2"
+    assert level_1_response.json()["id"] != level_2_response.json()["id"]
 
 
 @pytest.mark.asyncio

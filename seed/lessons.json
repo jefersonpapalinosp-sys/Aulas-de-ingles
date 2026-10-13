@@ -1,6 +1,2763 @@
 [
   {
     "course_slug": "voa-level-1",
+    "unit_slug": "1-5",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 31: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 1,
+    "slug": "lesson-1",
+    "position": 1,
+    "title": "Welcome!",
+    "title_pt": "Bem-vinda!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-one/3111026.html",
+    "grammar_tag": "Verbo BE em apresentações",
+    "focus_points": [
+      "I am / I'm",
+      "Are you…?",
+      "soletrar o nome"
+    ],
+    "story_note": "Primeira aula do curso",
+    "lead": "Anna chega a Washington e encontra Pete na porta do prédio. A primeira aula do curso ensina o verbo mais usado do inglês: **BE**. Com ele você se apresenta, confirma quem é a outra pessoa e diz onde está.",
+    "warmup_prompt": "Introduce yourself in English: your name and where you are from.",
+    "listening_focus": "Conte quantas vezes aparece alguma forma do verbo BE: *am*, *is*, *are*.",
+    "goals": [
+      "Apresentar-se com **I am** e a contração **I'm**.",
+      "Perguntar e responder **Are you…?** com resposta curta.",
+      "Usar **BE + lugar** para dizer onde algo fica.",
+      "Soletrar o próprio nome e reconhecer o alfabeto."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "As três formas do verbo BE no presente",
+        "why": "O português tem *ser* e *estar*; o inglês resolve os dois com **BE**. O que muda é a forma, conforme o sujeito.",
+        "warning": "**O erro mais comum de iniciante** não é escolher a forma errada — é **esquecer o verbo**. *I Anna* não existe. Em inglês a frase precisa de um verbo: *I **am** Anna*.",
+        "table_head": [
+          "Sujeito",
+          "Forma",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I",
+              "**am**",
+              "I **am** Pete."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you",
+              "**are**",
+              "**Are** you Anna?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "he / she / it",
+              "**is**",
+              "She **is** new to D.C."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "we / you / they",
+              "**are**",
+              "We **are** roommates."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "A contração, que é como se fala de verdade",
+        "why": "Na conversa ninguém diz *I am* por extenso. A forma contraída é a normal; a completa soa enfática ou formal.",
+        "warning": null,
+        "table_head": [
+          "Completa",
+          "Contraída",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I am",
+              "**I'm**",
+              "**I'm** Anna. Nice to meet you."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you are",
+              "**you're**",
+              "Tell her **you're** here. (aula 2)"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "she is",
+              "**she's**",
+              "**She's** new to D.C."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "it is",
+              "**it's**",
+              "**It's** a big book. (aula 4)"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Perguntar com BE: o verbo vem na frente",
+        "why": "Para perguntar, o inglês **inverte**: o verbo passa na frente do sujeito. Não existe um equivalente ao nosso \"será que\".",
+        "warning": "**Na resposta curta não repita tudo** A *Are you Anna?* responde-se *Yes, I am* — e **nunca** *Yes, I'm*. A contração não pode terminar a frase.",
+        "table_head": [
+          "Afirmação",
+          "Pergunta",
+          "Resposta curta"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "You **are** Anna.",
+              "**Are** you Anna?",
+              "Yes, I **am**. / No, I'm not."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "He **is** Pete.",
+              "**Is** he Pete?",
+              "Yes, he **is**. / No, he isn't."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "They **are** here.",
+              "**Are** they here?",
+              "Yes, they **are**."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Hi! **Are you** Anna?",
+        "text_pt": "Oi! Você é a Anna?",
+        "note": "A pergunta com BE invertido, a primeira fala do curso."
+      },
+      {
+        "position": 1,
+        "text_en": "Yes! Hi there! **Are you** Pete?",
+        "text_pt": "Sim! Oi! Você é o Pete?",
+        "note": "*Hi there* é um cumprimento informal."
+      },
+      {
+        "position": 2,
+        "text_en": "**I am** Pete.",
+        "text_pt": "Eu sou o Pete.",
+        "note": "Forma completa, usada aqui para se apresentar com clareza."
+      },
+      {
+        "position": 3,
+        "text_en": "**I'm** Anna. **Nice to meet you.**",
+        "text_pt": "Eu sou a Anna. Prazer em conhecê-lo.",
+        "note": "*Nice to meet you* é fórmula fixa — só no primeiro encontro."
+      },
+      {
+        "position": 4,
+        "text_en": "Welcome to 1400 Irving Street!",
+        "text_pt": "Bem-vinda à Rua Irving, 1400!",
+        "note": "*Welcome to* + lugar. O número da casa vem **antes** do nome da rua em inglês."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "Hi",
+        "ipa": "/haɪ/",
+        "translation_pt": "oi",
+        "example_en": "Hi! Are you Anna?"
+      },
+      {
+        "position": 1,
+        "term": "Hi there",
+        "ipa": "/haɪ ðer/",
+        "translation_pt": "oi (informal)",
+        "example_en": "Yes! Hi there!"
+      },
+      {
+        "position": 2,
+        "term": "Nice to meet you",
+        "ipa": "/naɪs tə miːt juː/",
+        "translation_pt": "prazer em conhecê-lo",
+        "example_en": "Nice to meet you."
+      },
+      {
+        "position": 3,
+        "term": "Welcome to",
+        "ipa": "/ˈwelkəm tə/",
+        "translation_pt": "bem-vindo a",
+        "example_en": "Welcome to 1400 Irving Street!"
+      },
+      {
+        "position": 4,
+        "term": "apartment",
+        "ipa": "/əˈpɑːrtmənt/",
+        "translation_pt": "apartamento",
+        "example_en": "My new apartment! Yes!"
+      },
+      {
+        "position": 5,
+        "term": "new",
+        "ipa": "/nuː/",
+        "translation_pt": "novo",
+        "example_en": "My new apartment!"
+      },
+      {
+        "position": 6,
+        "term": "street",
+        "ipa": "/striːt/",
+        "translation_pt": "rua",
+        "example_en": "1400 Irving Street"
+      },
+      {
+        "position": 7,
+        "term": "yes / no",
+        "ipa": "/jes/ /noʊ/",
+        "translation_pt": "sim / não",
+        "example_en": "Yes! / No. A-N-N-A"
+      },
+      {
+        "position": 8,
+        "term": "Let's try that again",
+        "ipa": "/lets traɪ ðæt əˈɡen/",
+        "translation_pt": "vamos tentar de novo",
+        "example_en": "Let's try that again."
+      },
+      {
+        "position": 9,
+        "term": "two",
+        "ipa": "/tuː/",
+        "translation_pt": "dois",
+        "example_en": "Anna with two n's"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Sons que se ligam: Are you → /ɑːrjə/",
+        "explanation": "O guia chama isso de *linked sounds*: o fim de uma palavra cola no começo da seguinte. *Are you Anna?* sai \"ar-ya-ANA\", sem pausa entre as três."
+      },
+      {
+        "position": 1,
+        "label": "I'm /aɪm/",
+        "explanation": "Uma sílaba só. Brasileiro tende a dizer \"ai-ãm\" — junte tudo num som só."
+      },
+      {
+        "position": 2,
+        "label": "Nice to meet you → /naɪs tə ˈmiːtʃu/",
+        "explanation": "O /t/ de *meet* funde com o /j/ de *you* e vira um som de *tch*: \"mí-tchu\"."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 1 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/02/08/49485bf8-4277-47f6-9abe-617ee2473f8c.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 30,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 2,
+            "end_seconds": 8,
+            "speaker": "Pete",
+            "text_en": "Hi! Are you Anna?",
+            "text_pt": "Oi! Você é a Anna?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 8,
+            "end_seconds": 13,
+            "speaker": "Anna",
+            "text_en": "Yes! Hi there! Are you Pete?",
+            "text_pt": "Sim! Oi! Você é o Pete?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 13,
+            "end_seconds": 17,
+            "speaker": "Pete",
+            "text_en": "I am Pete.",
+            "text_pt": "Eu sou o Pete."
+          },
+          {
+            "position": 3,
+            "start_seconds": 17,
+            "end_seconds": 22,
+            "speaker": "Anna",
+            "text_en": "I'm Anna. Nice to meet you.",
+            "text_pt": "Eu sou a Anna. Prazer em conhecê-lo."
+          },
+          {
+            "position": 4,
+            "start_seconds": 23,
+            "end_seconds": 29,
+            "speaker": "Pete",
+            "text_en": "Welcome to 1400 Irving Street!",
+            "text_pt": "Bem-vinda à Rua Irving, 1400!"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: I ____ Anna.",
+        "hint": null,
+        "explanation": "Com o sujeito *I*, a forma do BE é sempre *am*.",
+        "hints": [
+          "O sujeito é *I*.",
+          "Nunca *is* nem *are* com *I*."
+        ],
+        "answers": [
+          "am"
+        ],
+        "options": [
+          "am",
+          "is",
+          "are"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Pergunta: ____ you Pete?",
+        "hint": null,
+        "explanation": "Para perguntar, o verbo vem na frente do sujeito.",
+        "hints": [
+          "O verbo abre a pergunta.",
+          "O sujeito é *you*."
+        ],
+        "answers": [
+          "Are"
+        ],
+        "options": [
+          "Are",
+          "Is",
+          "Am"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Resposta curta: — Are you Anna? — Yes, I `____`. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Na resposta curta não se contrai: *Yes, I am*, nunca *Yes, I'm*.",
+        "hints": [
+          "Duas letras.",
+          "Não pode ser contraído no fim da frase."
+        ],
+        "answers": [
+          "am"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "I am Pete.",
+          "Are you Anna?",
+          "She is new to D.C.",
+          "Is he your friend?"
+        ],
+        "classification_categories": [
+          "afirmação",
+          "pergunta"
+        ],
+        "prompt": "Classifique cada frase: afirmação ou pergunta?",
+        "hint": null,
+        "explanation": "Se o verbo vem antes do sujeito, é pergunta.",
+        "hints": [
+          "Veja o que vem primeiro.",
+          "Verbo na frente = pergunta."
+        ],
+        "answers": [
+          "{\"I am Pete.\": \"afirmação\", \"Are you Anna?\": \"pergunta\", \"She is new to D.C.\": \"afirmação\", \"Is he your friend?\": \"pergunta\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Quem pergunta primeiro na conversa?",
+        "hint": null,
+        "explanation": "*Hi! Are you Anna?* abre o curso inteiro.",
+        "hints": [
+          "É a primeira fala.",
+          "Ele quer confirmar o nome."
+        ],
+        "answers": [
+          "Pete, perguntando se ela é a Anna"
+        ],
+        "options": [
+          "Pete, perguntando se ela é a Anna",
+          "Anna, perguntando o endereço",
+          "Marsha, ao telefone"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como se escreve o nome dela?",
+        "hint": null,
+        "explanation": "Pete erra e ela corrige: *No. A-N-N-A*.",
+        "hints": [
+          "Pete erra na primeira tentativa.",
+          "A diferença está na letra n."
+        ],
+        "answers": [
+          "A-N-N-A, com dois n"
+        ],
+        "options": [
+          "A-N-N-A, com dois n",
+          "A-N-A, com um n",
+          "H-A-N-N-A"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a apresentação completa da Anna.",
+        "hint": null,
+        "explanation": "Contração + fórmula fixa de primeiro encontro.",
+        "hints": [
+          "Começa com *I'm Anna*.",
+          "Termina com *meet you*."
+        ],
+        "answers": [
+          "I'm Anna. Nice to meet you",
+          "I'm Anna Nice to meet you"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o endereço do novo apartamento?",
+        "hint": null,
+        "explanation": "*Welcome to 1400 Irving Street!*",
+        "hints": [
+          "Pete diz ao dar as boas-vindas.",
+          "O número vem antes do nome da rua."
+        ],
+        "answers": [
+          "1400 Irving Street"
+        ],
+        "options": [
+          "1400 Irving Street",
+          "1500 Irving Street",
+          "555 Irving Street"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Apresente-se",
+        "instructions": "Write 5 to 8 sentences in English introducing yourself: your name, where you are from, and where you live now. Use I am or I'm at least three times, and one question with Are you.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "apresentação com BE",
+            "terms": [
+              "i am",
+              "i'm"
+            ]
+          },
+          {
+            "label": "uma pergunta",
+            "terms": [
+              "are you"
+            ]
+          },
+          {
+            "label": "de onde você é",
+            "terms": [
+              "from"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "definir uma meta"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "1-5",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 31: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 2,
+    "slug": "lesson-2",
+    "position": 2,
+    "title": "Hello, I'm Anna!",
+    "title_pt": "Olá, eu sou a Anna!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-2-hello/3113733.html",
+    "grammar_tag": "Pronomes pessoais + BE",
+    "focus_points": [
+      "I, you, he, she, we, they",
+      "BE + substantivo",
+      "despedidas"
+    ],
+    "story_note": null,
+    "lead": "Pete apresenta Anna a Jonathan na entrada do prédio. A aula completa o quadro dos **pronomes pessoais** e mostra o BE em duas funções: dizer **quem** alguém é e dizer **onde** está.",
+    "warmup_prompt": "Who are your neighbors? Describe two of them in English.",
+    "listening_focus": "Marque cada pronome pessoal e a forma do BE que vem junto.",
+    "goals": [
+      "Usar os seis pronomes pessoais: **I, you, he, she, we, they**.",
+      "Combinar cada um com a forma certa do BE.",
+      "Dizer quem é alguém (**BE + substantivo**) e onde está (**BE + lugar**).",
+      "Cumprimentar e se despedir."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "O quadro completo dos pronomes",
+        "why": "Em português o verbo já diz quem é o sujeito, e por isso a gente omite o pronome. **Em inglês isso não existe**: o pronome é obrigatório.",
+        "warning": "**Erro de quem fala português** *Is nice* não existe. É ***She** is nice*. Toda frase em inglês precisa de sujeito explícito.",
+        "table_head": [
+          "Pronome",
+          "Forma do BE",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**I**",
+              "am",
+              "**I am** Jonathan."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**you**",
+              "are",
+              "Where **are you** from?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**he**",
+              "is",
+              "**He is** in apartment D7."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**she**",
+              "is",
+              "**She is** new to D.C."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "**we**",
+              "are",
+              "**We are** roommates. (aula 3)"
+            ]
+          },
+          {
+            "position": 5,
+            "cells": [
+              "**they**",
+              "are",
+              "**They are** my friends."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "BE para dizer quem é, e BE para dizer onde está",
+        "why": "A mesma palavra cobre o que o português divide entre *ser* e *estar*.",
+        "warning": null,
+        "table_head": [
+          "Função",
+          "Estrutura",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "quem é (**ser**)",
+              "BE + substantivo",
+              "**She is** Anna."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "como é (**ser**)",
+              "BE + adjetivo",
+              "She **is nice**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "onde está (**estar**)",
+              "BE + lugar",
+              "**I am in** apartment C2."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "de onde é",
+              "BE + from",
+              "**I am from** a small town."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Cumprimentar e se despedir",
+        "why": "Fórmulas fixas que abrem e fecham qualquer conversa. Decore como bloco.",
+        "warning": "**Nice to meet you** só no **primeiro** encontro. Depois disso, use *Nice to see you*.",
+        "table_head": [
+          "Momento",
+          "Expressão",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "chegar",
+              "Hey / Hi / Hello",
+              "**Hey**, Pete! Who's your friend?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "primeiro encontro",
+              "Nice to meet you",
+              "**Nice to meet you!**"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "responder ao prazer",
+              "You too",
+              "**You too.** Bye."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "sair",
+              "I have to go now",
+              "**I have to go now.**"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "despedida",
+              "Bye / Goodbye",
+              "You too, **Bye**."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Hey, Pete! **Who's** your friend?",
+        "text_pt": "Ei, Pete! Quem é sua amiga?",
+        "note": "*Who's* = *who is*. A contração também vale para perguntas."
+      },
+      {
+        "position": 1,
+        "text_en": "**She is** Anna. **She is** new to D.C.",
+        "text_pt": "Ela é a Anna. Ela é nova em Washington.",
+        "note": "BE + substantivo e depois BE + adjetivo, na mesma respiração."
+      },
+      {
+        "position": 2,
+        "text_en": "**Where are you** from? — **I am from** a small town.",
+        "text_pt": "De onde você é? — Eu sou de uma cidade pequena.",
+        "note": "*Where are you from?* é a pergunta mais útil desta aula."
+      },
+      {
+        "position": 3,
+        "text_en": "**I am in** apartment C2. Marsha **is** my roommate.",
+        "text_pt": "Eu estou no apartamento C2. A Marsha é minha colega de apartamento.",
+        "note": "O mesmo verbo para *estar* no lugar e *ser* alguém."
+      },
+      {
+        "position": 4,
+        "text_en": "Nice to meet you! — **You too.** Bye.",
+        "text_pt": "Prazer em conhecê-lo! — Igualmente. Tchau.",
+        "note": "*You too* é a resposta padrão, e vale decorar inteira."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "Hey",
+        "ipa": "/heɪ/",
+        "translation_pt": "ei (bem informal)",
+        "example_en": "Hey, Pete! Who's your friend?"
+      },
+      {
+        "position": 1,
+        "term": "friend",
+        "ipa": "/frend/",
+        "translation_pt": "amigo, amiga",
+        "example_en": "Who's your friend?"
+      },
+      {
+        "position": 2,
+        "term": "new to",
+        "ipa": "/nuː tə/",
+        "translation_pt": "novo em (lugar)",
+        "example_en": "She is new to D.C."
+      },
+      {
+        "position": 3,
+        "term": "small town",
+        "ipa": "/smɔːl taʊn/",
+        "translation_pt": "cidade pequena",
+        "example_en": "I am from a small town."
+      },
+      {
+        "position": 4,
+        "term": "roommate",
+        "ipa": "/ˈruːmmeɪt/",
+        "translation_pt": "colega de apartamento",
+        "example_en": "Marsha is my roommate."
+      },
+      {
+        "position": 5,
+        "term": "nice",
+        "ipa": "/naɪs/",
+        "translation_pt": "legal, simpático",
+        "example_en": "She is nice."
+      },
+      {
+        "position": 6,
+        "term": "I have to go",
+        "ipa": "/aɪ hæv tə ɡoʊ/",
+        "translation_pt": "preciso ir",
+        "example_en": "I have to go now."
+      },
+      {
+        "position": 7,
+        "term": "Remember to",
+        "ipa": "/rɪˈmembər tə/",
+        "translation_pt": "lembre-se de",
+        "example_en": "Remember to call Marsha at work."
+      },
+      {
+        "position": 8,
+        "term": "at work",
+        "ipa": "/ət wɜːrk/",
+        "translation_pt": "no trabalho",
+        "example_en": "call Marsha at work"
+      },
+      {
+        "position": 9,
+        "term": "You too",
+        "ipa": "/juː tuː/",
+        "translation_pt": "igualmente",
+        "example_en": "You too, Bye."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Who's /huːz/",
+        "explanation": "Contração de *who is*. O *wh* soa apenas /h/ — \"ruz\" não, \"huz\"."
+      },
+      {
+        "position": 1,
+        "label": "Where are you → /werər juː/",
+        "explanation": "Os três colam: \"UÉ-rar-iu\". Reconhecer essa fusão é o que destrava o listening."
+      },
+      {
+        "position": 2,
+        "label": "She's /ʃiːz/ × She is /ʃiː ɪz/",
+        "explanation": "A contraída tem uma sílaba, a completa tem duas. Use a contraída na fala."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 2 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/02/10/56246d7b-5fa4-42d2-90b0-d403e6b46227_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 48,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 2,
+            "end_seconds": 9,
+            "speaker": "Jonathan",
+            "text_en": "Hey, Pete! Who's your friend?",
+            "text_pt": "Ei, Pete! Quem é sua amiga?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 9,
+            "end_seconds": 14,
+            "speaker": "Pete",
+            "text_en": "She is Anna. She is new to D.C.",
+            "text_pt": "Ela é a Anna. Ela é nova em Washington."
+          },
+          {
+            "position": 2,
+            "start_seconds": 14,
+            "end_seconds": 20,
+            "speaker": "Jonathan",
+            "text_en": "Where are you from?",
+            "text_pt": "De onde você é?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 20,
+            "end_seconds": 26,
+            "speaker": "Anna",
+            "text_en": "I am from a small town.",
+            "text_pt": "Eu sou de uma cidade pequena."
+          },
+          {
+            "position": 4,
+            "start_seconds": 28,
+            "end_seconds": 36,
+            "speaker": "Anna",
+            "text_en": "I am in apartment C2. Marsha is my roommate.",
+            "text_pt": "Eu estou no apartamento C2. A Marsha é minha colega de apartamento."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: ____ is new to D.C. (falando da Anna)",
+        "hint": null,
+        "explanation": "*She* é o pronome para uma mulher.",
+        "hints": [
+          "É uma pessoa, mulher.",
+          "Vem antes do verbo."
+        ],
+        "answers": [
+          "She"
+        ],
+        "options": [
+          "She",
+          "He",
+          "It"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Pronome obrigatório: `____` is nice. (falando da Marsha, uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Em inglês o sujeito nunca some, diferente do português.",
+        "hints": [
+          "Não dá para começar com o verbo.",
+          "Marsha é mulher."
+        ],
+        "answers": [
+          "She"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: We ____ roommates.",
+        "hint": null,
+        "explanation": "Com *we*, *you* e *they*, a forma do BE é *are*.",
+        "hints": [
+          "O sujeito é plural.",
+          "Não é *am* nem *is*."
+        ],
+        "answers": [
+          "are"
+        ],
+        "options": [
+          "are",
+          "is",
+          "am"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "She is Anna.",
+          "I am in apartment C2.",
+          "She is nice.",
+          "I am from a small town."
+        ],
+        "classification_categories": [
+          "quem é",
+          "onde está",
+          "como é",
+          "de onde é"
+        ],
+        "prompt": "Classifique o uso do BE em cada frase.",
+        "hint": null,
+        "explanation": "O mesmo verbo cobre o que o português divide entre ser e estar.",
+        "hints": [
+          "Procure substantivo, lugar, adjetivo ou *from*.",
+          "O complemento decide."
+        ],
+        "answers": [
+          "{\"She is Anna.\": \"quem é\", \"I am in apartment C2.\": \"onde está\", \"She is nice.\": \"como é\", \"I am from a small town.\": \"de onde é\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Jonathan pergunta à Anna?",
+        "hint": null,
+        "explanation": "*Where are you from?*",
+        "hints": [
+          "É a pergunta de apresentação.",
+          "Ela responde falando da cidade."
+        ],
+        "answers": [
+          "de onde ela é"
+        ],
+        "options": [
+          "de onde ela é",
+          "qual o telefone dela",
+          "onde ela trabalha"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Em que apartamento mora a Anna?",
+        "hint": null,
+        "explanation": "*I am in apartment C2.* Jonathan está no B4 e Pete no D7.",
+        "hints": [
+          "Três apartamentos são citados.",
+          "O dela vem depois do de Jonathan."
+        ],
+        "answers": [
+          "C2"
+        ],
+        "options": [
+          "C2",
+          "B4",
+          "D7"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta de Jonathan sobre a origem dela.",
+        "hint": null,
+        "explanation": "Pergunta com *where* + BE invertido.",
+        "hints": [
+          "Quatro palavras.",
+          "Começa com *Where*."
+        ],
+        "answers": [
+          "Where are you from"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Pete pede antes de sair?",
+        "hint": null,
+        "explanation": "*Remember to call Marsha at work. Tell her you're here.*",
+        "hints": [
+          "Envolve um telefonema.",
+          "É um lembrete."
+        ],
+        "answers": [
+          "que Anna ligue para a Marsha no trabalho"
+        ],
+        "options": [
+          "que Anna ligue para a Marsha no trabalho",
+          "que Anna compre comida",
+          "que Anna espere no hall"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Apresente duas pessoas",
+        "instructions": "Write 5 to 8 sentences in English introducing two people you know. Use he, she and they at least once each, say where each one is from, and end with a greeting or a goodbye.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "três pronomes",
+            "terms": [
+              "he ",
+              "she ",
+              "they "
+            ]
+          },
+          {
+            "label": "origem",
+            "terms": [
+              "from"
+            ]
+          },
+          {
+            "label": "cumprimento ou despedida",
+            "terms": [
+              "nice to meet",
+              "hello",
+              "hi",
+              "bye",
+              "goodbye"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "antecipar o conteúdo"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "1-5",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 31: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 3,
+    "slug": "lesson-3",
+    "position": 3,
+    "title": "I'm Here!",
+    "title_pt": "Estou aqui!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-3-i-am-here/3126527.html",
+    "grammar_tag": "here e there + telefone",
+    "focus_points": [
+      "here × there",
+      "ligar por telefone",
+      "pedir desculpa"
+    ],
+    "story_note": null,
+    "lead": "Anna liga para a Marsha, erra o número e pede desculpa. A aula ensina o par **here** e **there** — que marca se o lugar é o seu ou o do outro — e as fórmulas de uma ligação telefônica.",
+    "warmup_prompt": "Make a short phone call in English: say who you are and what you want.",
+    "listening_focus": "Marque cada *here* e cada *there* e veja quem está falando.",
+    "goals": [
+      "Distinguir **here** (onde eu estou) de **there** (onde o outro está).",
+      "Atender e conduzir uma ligação: *Hello. This is…*",
+      "Pedir desculpa com **I'm sorry** e **Excuse me**.",
+      "Dizer endereços e números de telefone."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "here e there: o ponto de vista de quem fala",
+        "why": "A escolha não depende da distância, e sim de **quem** fala. O mesmo lugar é *here* para quem está nele e *there* para quem não está — e a aula mostra isso numa troca perfeita.",
+        "warning": "**Não confunda com *their* e *they're*** As três soam igual, /ðer/, e significam coisas diferentes: *there* é lugar, *their* é posse, *they're* é *they are*.",
+        "table_head": [
+          "Palavra",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**here**",
+              "onde quem fala está",
+              "Anna: I am **here**!"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**there**",
+              "onde o outro está",
+              "Marsha: Good. You are **there**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "near here",
+              "perto daqui",
+              "Is there a supermarket **near here**?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "There is / There are",
+              "existe, há",
+              "**Is there** a supermarket near here?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "A ligação telefônica, do começo ao fim",
+        "why": "Falar ao telefone é a situação mais difícil para iniciante: não há rosto nem gesto. Por isso as fórmulas são fixas — decore inteiras.",
+        "warning": "**Ao telefone não se usa *I am*** Para se identificar, diga ***This is** Marsha*, não *I am Marsha*. E para perguntar por alguém, ***Is this** Marsha?*",
+        "table_head": [
+          "Momento",
+          "Fórmula",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "atender",
+              "Hello.",
+              "**Hello.**"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "identificar-se",
+              "This is + nome",
+              "Hello. **This is Marsha.**"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "perguntar quem é",
+              "Is this + nome?",
+              "**Is this Marsha?** It is Anna."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "número errado",
+              "You have the wrong number",
+              "I am sorry. **You have the wrong number.**"
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "despedir-se",
+              "Goodbye",
+              "**Goodbye**, Anna."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "I'm sorry e Excuse me não são a mesma coisa",
+        "why": "Os dois viram \"desculpa\" em português, mas o inglês separa: um lamenta algo que já aconteceu, o outro **pede licença** antes.",
+        "warning": null,
+        "table_head": [
+          "Expressão",
+          "Quando usar",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**I'm sorry**",
+              "lamentar, se desculpar por algo feito",
+              "**I am sorry.** You have the wrong number."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Excuse me**",
+              "pedir licença, chamar atenção",
+              "Oh. **Excuse me!**"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Excuse me?**",
+              "não entendi, repita",
+              "**Excuse me?** Anna? Is that you?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "One more time",
+              "mais uma vez",
+              "**One more time.** 555-8986."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Is there a supermarket **near here**?",
+        "text_pt": "Tem um supermercado perto daqui?",
+        "note": "*Is there…?* para perguntar se algo existe, e *near here* para a proximidade."
+      },
+      {
+        "position": 1,
+        "text_en": "Hello. **This is Marsha.**",
+        "text_pt": "Alô. É a Marsha.",
+        "note": "Ao telefone a identificação é *This is*, nunca *I am*."
+      },
+      {
+        "position": 2,
+        "text_en": "I am sorry. You have **the wrong number**.",
+        "text_pt": "Desculpe. Você ligou para o número errado.",
+        "note": "Fórmula fixa: *the wrong number*, com artigo."
+      },
+      {
+        "position": 3,
+        "text_en": "Oh, yes. I am **here**! — Good. You are **there**.",
+        "text_pt": "Ah, sim. Estou aqui! — Que bom. Você está aí.",
+        "note": "A troca que define a aula: o mesmo lugar, dois pontos de vista."
+      },
+      {
+        "position": 4,
+        "text_en": "The supermarket **is at** 1500 Irving Street. **It is near** the apartment.",
+        "text_pt": "O supermercado fica na Rua Irving, 1500. É perto do apartamento.",
+        "note": "*be at* + endereço exato; *be near* + referência."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "here",
+        "ipa": "/hɪr/",
+        "translation_pt": "aqui",
+        "example_en": "I am here!"
+      },
+      {
+        "position": 1,
+        "term": "there",
+        "ipa": "/ðer/",
+        "translation_pt": "aí, lá",
+        "example_en": "You are there."
+      },
+      {
+        "position": 2,
+        "term": "near",
+        "ipa": "/nɪr/",
+        "translation_pt": "perto de",
+        "example_en": "It is near the apartment."
+      },
+      {
+        "position": 3,
+        "term": "supermarket",
+        "ipa": "/ˈsuːpərmɑːrkɪt/",
+        "translation_pt": "supermercado",
+        "example_en": "Is there a supermarket near here?"
+      },
+      {
+        "position": 4,
+        "term": "wrong number",
+        "ipa": "/rɔːŋ ˈnʌmbər/",
+        "translation_pt": "número errado",
+        "example_en": "You have the wrong number."
+      },
+      {
+        "position": 5,
+        "term": "Excuse me",
+        "ipa": "/ɪkˈskjuːz miː/",
+        "translation_pt": "com licença; desculpe",
+        "example_en": "Oh. Excuse me!"
+      },
+      {
+        "position": 6,
+        "term": "I am sorry",
+        "ipa": "/aɪ əm ˈsɑːri/",
+        "translation_pt": "sinto muito, desculpe",
+        "example_en": "I am sorry."
+      },
+      {
+        "position": 7,
+        "term": "cook dinner",
+        "ipa": "/kʊk ˈdɪnər/",
+        "translation_pt": "fazer o jantar",
+        "example_en": "I want to cook dinner."
+      },
+      {
+        "position": 8,
+        "term": "One more time",
+        "ipa": "/wʌn mɔːr taɪm/",
+        "translation_pt": "mais uma vez",
+        "example_en": "One more time. 555-8986."
+      },
+      {
+        "position": 9,
+        "term": "This is",
+        "ipa": "/ðɪs ɪz/",
+        "translation_pt": "é o/a (ao telefone)",
+        "example_en": "Hello. This is Marsha."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "here /hɪr/ × there /ðer/",
+        "explanation": "*here* começa com /h/ soprado e tem a vogal de *see*; *there* começa com *th* sonoro e tem a vogal de *air*. Treine o par seguido."
+      },
+      {
+        "position": 1,
+        "label": "Números de telefone, um dígito por vez",
+        "explanation": "555-8986 se lê \"five five five, eight nine eight six\" — nunca \"five hundred\". E o zero costuma virar \"oh\"."
+      },
+      {
+        "position": 2,
+        "label": "This is → /ˈðɪsɪz/",
+        "explanation": "As duas palavras colam numa só: \"DIS-iz\", com *th* sonoro no começo."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 3 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/02/18/a82baaf4-0a91-4d43-8ab6-78f72cef8fce.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 120,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 6,
+            "end_seconds": 18,
+            "speaker": "Anna",
+            "text_en": "Is there a supermarket near here?",
+            "text_pt": "Tem um supermercado perto daqui?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 28,
+            "end_seconds": 40,
+            "speaker": "Man",
+            "text_en": "I am sorry. You have the wrong number.",
+            "text_pt": "Desculpe. Você ligou para o número errado."
+          },
+          {
+            "position": 2,
+            "start_seconds": 56,
+            "end_seconds": 68,
+            "speaker": "Marsha",
+            "text_en": "Hello. This is Marsha.",
+            "text_pt": "Alô. É a Marsha."
+          },
+          {
+            "position": 3,
+            "start_seconds": 74,
+            "end_seconds": 86,
+            "speaker": "Anna",
+            "text_en": "Oh, yes. I am here!",
+            "text_pt": "Ah, sim. Estou aqui!"
+          },
+          {
+            "position": 4,
+            "start_seconds": 86,
+            "end_seconds": 98,
+            "speaker": "Marsha",
+            "text_en": "Good. You are there.",
+            "text_pt": "Que bom. Você está aí."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Anna está no apartamento e diz: I am ____!",
+        "hint": null,
+        "explanation": "Quem fala usa *here* para o lugar onde está.",
+        "hints": [
+          "Ela está no lugar.",
+          "O ponto de vista é dela."
+        ],
+        "answers": [
+          "here"
+        ],
+        "options": [
+          "here",
+          "there",
+          "where"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Marsha, do trabalho, responde: You are ____.",
+        "hint": null,
+        "explanation": "Para quem não está no lugar, ele é *there*.",
+        "hints": [
+          "Marsha está em outro lugar.",
+          "É o oposto de *here*."
+        ],
+        "answers": [
+          "there"
+        ],
+        "options": [
+          "there",
+          "here",
+          "their"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Ao telefone: Hello. `____` is Marsha. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Ao telefone a identificação usa *This is*, não *I am*.",
+        "hints": [
+          "Quatro letras.",
+          "Não é *I*."
+        ],
+        "answers": [
+          "This"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "Você pisou no pé de alguém.",
+          "Você quer passar numa fila.",
+          "Você ligou para o número errado.",
+          "Você não entendeu e quer que repitam."
+        ],
+        "classification_categories": [
+          "I'm sorry",
+          "Excuse me"
+        ],
+        "prompt": "I'm sorry ou Excuse me?",
+        "hint": null,
+        "explanation": "*I'm sorry* lamenta o que já aconteceu; *Excuse me* pede licença ou atenção.",
+        "hints": [
+          "Já aconteceu ou está por acontecer?",
+          "Pedir licença é sempre *Excuse me*."
+        ],
+        "answers": [
+          "{\"Você pisou no pé de alguém.\": \"I'm sorry\", \"Você quer passar numa fila.\": \"Excuse me\", \"Você ligou para o número errado.\": \"I'm sorry\", \"Você não entendeu e quer que repitam.\": \"Excuse me\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Anna quer fazer no começo da aula?",
+        "hint": null,
+        "explanation": "*I want to cook dinner.* — e por isso procura um supermercado.",
+        "hints": [
+          "Envolve comida.",
+          "Leva ela a procurar o supermercado."
+        ],
+        "answers": [
+          "fazer o jantar"
+        ],
+        "options": [
+          "fazer o jantar",
+          "sair para comer",
+          "mudar de apartamento"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que o homem responde quando Anna liga?",
+        "hint": null,
+        "explanation": "*I am sorry. You have the wrong number.*",
+        "hints": [
+          "Ele se desculpa primeiro.",
+          "O número dele é outro."
+        ],
+        "answers": [
+          "que ela ligou para o número errado"
+        ],
+        "options": [
+          "que ela ligou para o número errado",
+          "que a Marsha saiu",
+          "que não conhece a Anna"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva como a Marsha atende o telefone.",
+        "hint": null,
+        "explanation": "Fórmula fixa de identificação ao telefone.",
+        "hints": [
+          "Começa com *Hello*.",
+          "Usa *This is*, não *I am*."
+        ],
+        "answers": [
+          "Hello. This is Marsha",
+          "Hello This is Marsha"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Onde fica o supermercado?",
+        "hint": null,
+        "explanation": "*The supermarket is at 1500 Irving Street. It is near the apartment.*",
+        "hints": [
+          "O apartamento é no 1400.",
+          "Marsha dá o endereço no fim."
+        ],
+        "answers": [
+          "na Rua Irving, 1500, perto do apartamento"
+        ],
+        "options": [
+          "na Rua Irving, 1500, perto do apartamento",
+          "na Rua Irving, 1400",
+          "no centro da cidade"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Um telefonema curto",
+        "instructions": "Write a short phone conversation in English, 6 to 10 lines. Identify yourself with This is, ask if something is near, and include one apology with I'm sorry or Excuse me.",
+        "min_words": 50,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "identificação ao telefone",
+            "terms": [
+              "this is"
+            ]
+          },
+          {
+            "label": "here ou there",
+            "terms": [
+              "here",
+              "there"
+            ]
+          },
+          {
+            "label": "desculpa",
+            "terms": [
+              "sorry",
+              "excuse me"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "procurar oportunidades de praticar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "1-5",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 31: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 4,
+    "slug": "lesson-4",
+    "position": 4,
+    "title": "What Is It?",
+    "title_pt": "O que é isso?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-4/3168920.html",
+    "grammar_tag": "Negativa com BE + objetos",
+    "focus_points": [
+      "It is not…",
+      "a / an",
+      "have + objeto"
+    ],
+    "story_note": null,
+    "lead": "Anna procura uma caneta na bolsa e tira tudo menos uma caneta. A aula ensina a **negar** com BE, nomear objetos do dia a dia e usar **have** para dizer o que você tem.",
+    "warmup_prompt": "What do you have in your bag right now? List five things in English.",
+    "listening_focus": "Conte quantas vezes alguém diz *It is not a…* e o que aparece em seguida.",
+    "goals": [
+      "Negar com **BE + not** e com a contração **isn't**.",
+      "Usar **a** e **an** antes de substantivo contável no singular.",
+      "Dizer o que você tem com **have** e **I have a…**",
+      "Descrever um objeto com **BE + adjetivo + substantivo**."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "A negativa: o not vem depois do BE",
+        "why": "Não existe \"não\" antes do verbo em inglês. O **not** vem **depois** da forma do BE, e quase sempre colado nela, na contração.",
+        "warning": "**Não use *don't* com o BE** *It don't a pen* está errado. Com o verbo BE a negativa é *is **not*** ou *isn't* — o *do* só aparece com outros verbos.",
+        "table_head": [
+          "Afirmativa",
+          "Negativa completa",
+          "Contraída"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "It **is** a pen.",
+              "It **is not** a pen.",
+              "It **isn't** a pen."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "I **am** new.",
+              "I **am not** new.",
+              "I**'m not** new."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "They **are** here.",
+              "They **are not** here.",
+              "They **aren't** here."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "She **is** Anna.",
+              "She **is not** Anna.",
+              "She **isn't** Anna."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "a ou an: decide o som, não a letra",
+        "why": "A regra que todo mundo aprende errado. O que manda é o **som** da palavra seguinte, não a vogal escrita.",
+        "warning": "**Por isso** é *an **h**our* (o *h* é mudo, começa com som de vogal) e *a **u**niversity* (o *u* soa /juː/, que é som de consoante).",
+        "table_head": [
+          "Artigo",
+          "Quando",
+          "Exemplo"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**a**",
+              "antes de som de consoante",
+              "**a** pen, **a** book, **a** map"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**an**",
+              "antes de som de vogal",
+              "**an** apartment, **an** orange"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**a**",
+              "som de /j/ apesar da vogal",
+              "**a** university"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**an**",
+              "h mudo",
+              "**an** hour"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "BE e HAVE fazem trabalhos diferentes",
+        "why": "A confusão clássica: em português \"ter\" e \"estar com\" se misturam. Em inglês, **BE** diz o que a coisa **é**, **HAVE** diz o que você **possui**.",
+        "warning": null,
+        "table_head": [
+          "Verbo",
+          "Função",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "BE",
+              "identificar",
+              "**It is** a book."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "BE + adjetivo",
+              "descrever",
+              "**It is a big** book."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "HAVE",
+              "possuir",
+              "**I have** a pen in my bag."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "HAVE (pergunta)",
+              "do + sujeito + have",
+              "**Do you have** a pen?"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Anna, **do you have** a pen?",
+        "text_pt": "Anna, você tem uma caneta?",
+        "note": "Pergunta com *have* precisa do auxiliar *do*."
+      },
+      {
+        "position": 1,
+        "text_en": "Yes. **I have a** pen in my bag.",
+        "text_pt": "Tenho. Tenho uma caneta na bolsa.",
+        "note": "*in my bag* — preposição de lugar com possessivo."
+      },
+      {
+        "position": 2,
+        "text_en": "**It is not a** pen. **It is a** book. **It is a big** book.",
+        "text_pt": "Não é uma caneta. É um livro. É um livro grande.",
+        "note": "Negativa, afirmativa e descrição em três frases seguidas."
+      },
+      {
+        "position": 3,
+        "text_en": "Why do you have **a map of the world**?",
+        "text_pt": "Por que você tem um mapa-múndi?",
+        "note": "*a map of the world* — o *of* liga as duas partes."
+      },
+      {
+        "position": 4,
+        "text_en": "**I have a** pen! Let's get coffee!",
+        "text_pt": "Eu tenho uma caneta! Vamos tomar um café!",
+        "note": "*Let's* + verbo: a forma mais simples de propor algo."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "pen",
+        "ipa": "/pen/",
+        "translation_pt": "caneta",
+        "example_en": "Do you have a pen?"
+      },
+      {
+        "position": 1,
+        "term": "bag",
+        "ipa": "/bæɡ/",
+        "translation_pt": "bolsa, sacola",
+        "example_en": "I have a pen in my bag."
+      },
+      {
+        "position": 2,
+        "term": "book",
+        "ipa": "/bʊk/",
+        "translation_pt": "livro",
+        "example_en": "It is a book."
+      },
+      {
+        "position": 3,
+        "term": "toy",
+        "ipa": "/tɔɪ/",
+        "translation_pt": "brinquedo",
+        "example_en": "It is not a pen, Anna ... a toy?"
+      },
+      {
+        "position": 4,
+        "term": "pillow",
+        "ipa": "/ˈpɪloʊ/",
+        "translation_pt": "travesseiro",
+        "example_en": "And it is a pillow!"
+      },
+      {
+        "position": 5,
+        "term": "map",
+        "ipa": "/mæp/",
+        "translation_pt": "mapa",
+        "example_en": "Anna, it is a map."
+      },
+      {
+        "position": 6,
+        "term": "lamp",
+        "ipa": "/læmp/",
+        "translation_pt": "luminária, abajur",
+        "example_en": "And now you have a lamp."
+      },
+      {
+        "position": 7,
+        "term": "big",
+        "ipa": "/bɪɡ/",
+        "translation_pt": "grande",
+        "example_en": "It is a big book."
+      },
+      {
+        "position": 8,
+        "term": "every day",
+        "ipa": "/ˈevri deɪ/",
+        "translation_pt": "todo dia",
+        "example_en": "you learn a little more every day"
+      },
+      {
+        "position": 9,
+        "term": "Let's get coffee",
+        "ipa": "/lets ɡet ˈkɔːfi/",
+        "translation_pt": "vamos tomar um café",
+        "example_en": "Let's get coffee!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "and reduzido → /ən/",
+        "explanation": "O guia chama de *reduced and*. Em *Pete and Marsha*, o *and* some quase todo: \"Pit-ən-MAR-sha\". Pronunciar /ænd/ inteiro soa artificial."
+      },
+      {
+        "position": 1,
+        "label": "It is → It's /ɪts/",
+        "explanation": "Na fala vira uma sílaba. *It is* por extenso só para enfatizar."
+      },
+      {
+        "position": 2,
+        "label": "Palavras de uma sílaba com vogal curta",
+        "explanation": "*pen* /pen/, *bag* /bæɡ/, *big* /bɪɡ/: a vogal é curta e seca. Alongá-la muda a palavra — *bag* vira *beg*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 4 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/02/26/af0324f6-67c5-4c0c-ab42-abb0cd33817c_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 89,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 4,
+            "end_seconds": 12,
+            "speaker": "Pete",
+            "text_en": "How are you two?",
+            "text_pt": "Como vocês duas estão?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 20,
+            "end_seconds": 32,
+            "speaker": "Anna",
+            "text_en": "You know, Pete, I am new to D.C. The city is big.",
+            "text_pt": "Sabe, Pete, eu sou nova em Washington. A cidade é grande."
+          },
+          {
+            "position": 2,
+            "start_seconds": 40,
+            "end_seconds": 50,
+            "speaker": "Marsha",
+            "text_en": "Anna, do you have a pen?",
+            "text_pt": "Anna, você tem uma caneta?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 50,
+            "end_seconds": 60,
+            "speaker": "Anna",
+            "text_en": "Yes. I have a pen in my bag.",
+            "text_pt": "Tenho. Tenho uma caneta na bolsa."
+          },
+          {
+            "position": 4,
+            "start_seconds": 62,
+            "end_seconds": 74,
+            "speaker": "Pete",
+            "text_en": "It is not a pen. It is a book. It is a big book.",
+            "text_pt": "Não é uma caneta. É um livro. É um livro grande."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Negativa com BE: It ____ a pen, it's a book.",
+        "hint": null,
+        "explanation": "Com o verbo BE, a negativa é *is not* ou *isn't* — nunca com *do*.",
+        "hints": [
+          "Não entra *don't*.",
+          "O *not* vem depois do verbo."
+        ],
+        "answers": [
+          "is not"
+        ],
+        "options": [
+          "is not",
+          "do not",
+          "not is"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Artigo certo: I have `____` apartment in D.C. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "*apartment* começa com som de vogal, então o artigo é *an*.",
+        "hints": [
+          "O som inicial é de vogal.",
+          "Duas letras."
+        ],
+        "answers": [
+          "an"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Passe para a negativa contraída: It is a map.",
+        "hint": null,
+        "explanation": "*is not* contrai em *isn't*; as duas formas valem.",
+        "hints": [
+          "O *not* vem depois do verbo.",
+          "A contração junta *is* e *not*."
+        ],
+        "answers": [
+          "It isn't a map",
+          "It is not a map"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "It ____ a big book.",
+          "I ____ a pen in my bag.",
+          "She ____ my roommate.",
+          "Do you ____ a map?"
+        ],
+        "classification_categories": [
+          "BE",
+          "HAVE"
+        ],
+        "prompt": "A frase usa BE ou HAVE?",
+        "hint": null,
+        "explanation": "BE identifica ou descreve; HAVE diz o que alguém possui.",
+        "hints": [
+          "Pergunte: é ou tem?",
+          "Depois de *Do you* vem *have*."
+        ],
+        "answers": [
+          "{\"It ____ a big book.\": \"BE\", \"I ____ a pen in my bag.\": \"HAVE\", \"She ____ my roommate.\": \"BE\", \"Do you ____ a map?\": \"HAVE\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que a Marsha pede para a Anna?",
+        "hint": null,
+        "explanation": "*Anna, do you have a pen?* — e começa a saga da bolsa.",
+        "hints": [
+          "É um objeto de escrever.",
+          "Anna jura que tem."
+        ],
+        "answers": [
+          "uma caneta"
+        ],
+        "options": [
+          "uma caneta",
+          "um livro",
+          "um mapa"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Anna tira da bolsa antes de achar o que procurava?",
+        "hint": null,
+        "explanation": "A piada da aula: tudo menos a caneta.",
+        "hints": [
+          "São cinco objetos.",
+          "Um deles é um travesseiro."
+        ],
+        "answers": [
+          "livro, brinquedo, travesseiro, mapa e luminária"
+        ],
+        "options": [
+          "livro, brinquedo, travesseiro, mapa e luminária",
+          "só um livro",
+          "nada, a bolsa está vazia"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva as três frases do Pete sobre o livro.",
+        "hint": null,
+        "explanation": "Negativa, afirmativa e descrição em sequência.",
+        "hints": [
+          "Começa com *It is not a pen*.",
+          "Termina com *a big book*."
+        ],
+        "answers": [
+          "It is not a pen. It is a book. It is a big book",
+          "It is not a pen It is a book It is a big book"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Pete descreve a adaptação da Anna à cidade?",
+        "hint": null,
+        "explanation": "*But you learn a little more every day.*",
+        "hints": [
+          "É uma frase de encorajamento.",
+          "Fala do tempo que passa."
+        ],
+        "answers": [
+          "que ela aprende um pouco mais a cada dia"
+        ],
+        "options": [
+          "que ela aprende um pouco mais a cada dia",
+          "que ela deveria voltar",
+          "que a cidade é pequena"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O que tem na sua bolsa",
+        "instructions": "Write 6 to 9 sentences in English about what you have with you right now. Use I have at least three times, one negative with isn't, and describe two objects with an adjective before the noun.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "o que você tem",
+            "terms": [
+              "i have"
+            ]
+          },
+          {
+            "label": "uma negativa",
+            "terms": [
+              "isn't",
+              "is not"
+            ]
+          },
+          {
+            "label": "adjetivo antes do substantivo",
+            "terms": [
+              "big",
+              "small",
+              "new",
+              "old",
+              "red",
+              "blue",
+              "black"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "concentrar a atenção"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "1-5",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 31: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 5,
+    "slug": "lesson-5",
+    "position": 5,
+    "title": "Where Are You?",
+    "title_pt": "Onde você está?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-5-where-are-you/3168971.html",
+    "grammar_tag": "BE + lugar e cômodos da casa",
+    "focus_points": [
+      "in the kitchen",
+      "Where are you?",
+      "entonação da pergunta"
+    ],
+    "story_note": "Fecha a unidade 1–5",
+    "lead": "Marsha mostra a casa de uma amiga e Anna some de cômodo em cômodo. A aula fixa **BE + lugar** e associa cada cômodo à atividade que acontece nele.",
+    "warmup_prompt": "Describe your home in English: name three rooms and what you do in each.",
+    "listening_focus": "Marque cada *in the* + cômodo e o verbo que aparece junto.",
+    "goals": [
+      "Dizer onde alguém está com **BE + in the + lugar**.",
+      "Perguntar **Where are you?** e responder.",
+      "Nomear os cômodos da casa.",
+      "Reconhecer a **entonação descendente** das perguntas com *where*."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "BE + in the + cômodo",
+        "why": "A estrutura é sempre a mesma, e o artigo **the** é obrigatório antes do cômodo. O português às vezes dispensa; o inglês não.",
+        "warning": "**O artigo não some** *I am in kitchen* está errado. É *in **the** kitchen*. A exceção é *at home*, que não leva artigo nenhum.",
+        "table_head": [
+          "Estrutura",
+          "Frase da aula",
+          "Tradução"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I am **in the** + cômodo",
+              "I am **in the kitchen**!",
+              "Estou na cozinha!"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "We + verbo + **in the**",
+              "We cook **in the kitchen**.",
+              "A gente cozinha na cozinha."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "pergunta",
+              "**Where are you?**",
+              "Onde você está?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "sem artigo",
+              "I am **at home**.",
+              "Estou em casa."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Cada cômodo com sua atividade",
+        "why": "A aula pareia cômodo e verbo, que é a melhor forma de memorizar os dois de uma vez. Repare que o nome do cômodo quase sempre entrega a função.",
+        "warning": null,
+        "table_head": [
+          "Cômodo",
+          "Verbo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "the **kitchen**",
+              "cook / eat",
+              "We **cook** in the kitchen."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "the **living room**",
+              "relax",
+              "We **relax** in the living room."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "the **bathroom**",
+              "wash",
+              "I **wash** in the bathroom."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "the **bedroom**",
+              "sleep",
+              "We **sleep** in the bedroom."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "I e we não dizem a mesma coisa",
+        "why": "Na conversa, Marsha usa **we** para falar do costume geral e Anna responde com **I** para falar de si. É uma diferença sutil que muda o sentido.",
+        "warning": null,
+        "table_head": [
+          "Pronome",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**we**",
+              "o que as pessoas costumam fazer",
+              "**We** cook in the kitchen."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**I**",
+              "o que **eu** faço",
+              "**I** eat in the kitchen."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**we**",
+              "costume",
+              "**We** sleep in the bedroom."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**I**",
+              "eu mesmo",
+              "**I** sleep in the bedroom!"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Marsha, I am **in the kitchen**! It is a beautiful kitchen!",
+        "text_pt": "Marsha, estou na cozinha! É uma cozinha linda!",
+        "note": "BE + lugar, seguido de BE + adjetivo."
+      },
+      {
+        "position": 1,
+        "text_en": "**We cook in the** kitchen. — **I eat in the** kitchen.",
+        "text_pt": "A gente cozinha na cozinha. — Eu como na cozinha.",
+        "note": "A troca entre *we* (costume) e *I* (eu mesma)."
+      },
+      {
+        "position": 2,
+        "text_en": "Anna? **Where are you?**",
+        "text_pt": "Anna? Onde você está?",
+        "note": "A pergunta que dá título à aula. Entonação **descendente** no fim."
+      },
+      {
+        "position": 3,
+        "text_en": "I am **in the bathroom**! I **wash** in the bathroom.",
+        "text_pt": "Estou no banheiro! Eu me lavo no banheiro.",
+        "note": "*wash* sem objeto já significa lavar-se."
+      },
+      {
+        "position": 4,
+        "text_en": "Marsha, **let's go upstairs**!",
+        "text_pt": "Marsha, vamos lá para cima!",
+        "note": "*upstairs* e *downstairs* não levam preposição: nunca *to upstairs*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "kitchen",
+        "ipa": "/ˈkɪtʃən/",
+        "translation_pt": "cozinha",
+        "example_en": "I am in the kitchen!"
+      },
+      {
+        "position": 1,
+        "term": "living room",
+        "ipa": "/ˈlɪvɪŋ ruːm/",
+        "translation_pt": "sala de estar",
+        "example_en": "We relax in the living room."
+      },
+      {
+        "position": 2,
+        "term": "bathroom",
+        "ipa": "/ˈbæθruːm/",
+        "translation_pt": "banheiro",
+        "example_en": "I am in the bathroom!"
+      },
+      {
+        "position": 3,
+        "term": "bedroom",
+        "ipa": "/ˈbedruːm/",
+        "translation_pt": "quarto",
+        "example_en": "We sleep in the bedroom."
+      },
+      {
+        "position": 4,
+        "term": "house",
+        "ipa": "/haʊs/",
+        "translation_pt": "casa",
+        "example_en": "Marsha is at her friend's house."
+      },
+      {
+        "position": 5,
+        "term": "beautiful",
+        "ipa": "/ˈbjuːtɪfəl/",
+        "translation_pt": "lindo, bonito",
+        "example_en": "She says it is beautiful."
+      },
+      {
+        "position": 6,
+        "term": "cook",
+        "ipa": "/kʊk/",
+        "translation_pt": "cozinhar",
+        "example_en": "We cook in the kitchen."
+      },
+      {
+        "position": 7,
+        "term": "relax",
+        "ipa": "/rɪˈlæks/",
+        "translation_pt": "relaxar, descansar",
+        "example_en": "We relax in the living room."
+      },
+      {
+        "position": 8,
+        "term": "wash",
+        "ipa": "/wɑːʃ/",
+        "translation_pt": "lavar(-se)",
+        "example_en": "I wash in the bathroom."
+      },
+      {
+        "position": 9,
+        "term": "upstairs",
+        "ipa": "/ˌʌpˈsterz/",
+        "translation_pt": "lá em cima",
+        "example_en": "Let's go upstairs!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Entonação: Where are you? ↘",
+        "explanation": "Pergunta com palavra interrogativa (*where*, *what*, *who*) termina com a voz **descendo**. Só as de sim ou não sobem: *Are you Anna?* ↗"
+      },
+      {
+        "position": 1,
+        "label": "kitchen /ˈkɪtʃən/",
+        "explanation": "Duas sílabas, com /tʃ/ no meio. A segunda é bem fraca: \"KI-tchən\"."
+      },
+      {
+        "position": 2,
+        "label": "bathroom /ˈbæθruːm/",
+        "explanation": "Começa com o *th* **surdo** de *think*, língua entre os dentes. Não é /f/ nem /t/."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 5 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/03/01/ab9c2944-eddc-4806-9296-290bfa8c6ff2_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 61,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 3,
+            "end_seconds": 14,
+            "speaker": "Anna",
+            "text_en": "Today my friend Marsha is at her friend's house.",
+            "text_pt": "Hoje minha amiga Marsha está na casa de uma amiga dela."
+          },
+          {
+            "position": 1,
+            "start_seconds": 18,
+            "end_seconds": 28,
+            "speaker": "Anna",
+            "text_en": "Marsha, I am in the kitchen! It is a beautiful kitchen!",
+            "text_pt": "Marsha, estou na cozinha! É uma cozinha linda!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 30,
+            "end_seconds": 38,
+            "speaker": "Marsha",
+            "text_en": "We cook in the kitchen.",
+            "text_pt": "A gente cozinha na cozinha."
+          },
+          {
+            "position": 3,
+            "start_seconds": 40,
+            "end_seconds": 48,
+            "speaker": "Marsha",
+            "text_en": "Anna? Where are you?",
+            "text_pt": "Anna? Onde você está?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 48,
+            "end_seconds": 58,
+            "speaker": "Anna",
+            "text_en": "Marsha, I am in the bathroom! I wash in the bathroom.",
+            "text_pt": "Marsha, estou no banheiro! Eu me lavo no banheiro."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: I am in `____` kitchen. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "O artigo é obrigatório antes do nome do cômodo.",
+        "hints": [
+          "Três letras.",
+          "O português às vezes dispensa; o inglês não."
+        ],
+        "answers": [
+          "the"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Qual cômodo combina com *sleep*?",
+        "hint": null,
+        "explanation": "O nome entrega: *bed* + *room*.",
+        "hints": [
+          "A palavra contém *bed*.",
+          "É onde fica a cama."
+        ],
+        "answers": [
+          "the bedroom"
+        ],
+        "options": [
+          "the bedroom",
+          "the kitchen",
+          "the bathroom"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Pergunta de lugar: ____ are you?",
+        "hint": null,
+        "explanation": "*Where* pergunta pelo lugar; *who* pergunta pela pessoa.",
+        "hints": [
+          "A resposta é um lugar.",
+          "Começa com *wh*."
+        ],
+        "answers": [
+          "Where"
+        ],
+        "options": [
+          "Where",
+          "Who",
+          "What"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "cook",
+          "relax",
+          "wash",
+          "sleep"
+        ],
+        "classification_categories": [
+          "the kitchen",
+          "the living room",
+          "the bathroom",
+          "the bedroom"
+        ],
+        "prompt": "Associe cada atividade ao cômodo.",
+        "hint": null,
+        "explanation": "A aula pareia cada verbo com seu cômodo, na ordem da visita.",
+        "hints": [
+          "O nome do cômodo costuma entregar.",
+          "*wash* vai com *bath*."
+        ],
+        "answers": [
+          "{\"cook\": \"the kitchen\", \"relax\": \"the living room\", \"wash\": \"the bathroom\", \"sleep\": \"the bedroom\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Onde Marsha está no começo da aula?",
+        "hint": null,
+        "explanation": "*Marsha is at her friend's house.*",
+        "hints": [
+          "Não é a casa dela.",
+          "Anna quer conhecer o lugar."
+        ],
+        "answers": [
+          "na casa de uma amiga"
+        ],
+        "options": [
+          "na casa de uma amiga",
+          "no trabalho",
+          "no supermercado"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o primeiro cômodo que Anna comenta?",
+        "hint": null,
+        "explanation": "*I am in the kitchen! It is a beautiful kitchen!*",
+        "hints": [
+          "É onde se cozinha.",
+          "Ela acha lindo."
+        ],
+        "answers": [
+          "a cozinha"
+        ],
+        "options": [
+          "a cozinha",
+          "o banheiro",
+          "o quarto"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta que dá título à aula.",
+        "hint": null,
+        "explanation": "Pergunta de lugar, com entonação descendente.",
+        "hints": [
+          "Quatro palavras.",
+          "Começa com *Where*."
+        ],
+        "answers": [
+          "Anna? Where are you?",
+          "Where are you"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que acontece quando elas sobem?",
+        "hint": null,
+        "explanation": "*Let's go upstairs!* e logo depois Marsha pergunta onde ela está.",
+        "hints": [
+          "Marsha precisa procurá-la.",
+          "Ela reaparece num cômodo específico."
+        ],
+        "answers": [
+          "Anna some e aparece no banheiro"
+        ],
+        "options": [
+          "Anna some e aparece no banheiro",
+          "elas vão embora",
+          "a dona da casa chega"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "A sua casa, cômodo a cômodo",
+        "instructions": "Write 6 to 9 sentences in English about your home. Name at least four rooms with in the, say what you do in each one, and include one question with Where.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "quatro cômodos",
+            "terms": [
+              "kitchen",
+              "living room",
+              "bathroom",
+              "bedroom"
+            ]
+          },
+          {
+            "label": "BE + lugar",
+            "terms": [
+              "in the"
+            ]
+          },
+          {
+            "label": "uma pergunta",
+            "terms": [
+              "where"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "planejar o próprio estudo"
+  },
+  {
+    "course_slug": "voa-level-1",
     "unit_slug": "31-40",
     "slug": "lesson-31",
     "position": 1,

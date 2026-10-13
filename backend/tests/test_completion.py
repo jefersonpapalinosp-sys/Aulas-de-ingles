@@ -213,33 +213,34 @@ async def test_completion_vazio_explica_regra_e_nao_muta_estado(
         "proficiency_label": "Iniciante",
     }
     assert body["progress"] == {
-        "published_lessons": 22,
+        "published_lessons": 27,
         "viewed_lessons": 0,
         "completed_lessons": 0,
         "completion_percent": 0,
         "status": "not_started",
     }
     assert [unit["slug"] for unit in body["incomplete_units"]] == [
+        "1-5",
         "31-40",
         "40-44",
         "45-49",
         "50-52",
     ]
-    assert body["checkpoints"]["published"] == 3
+    assert body["checkpoints"]["published"] == 4
     assert body["checkpoints"]["current_completed"] == 0
-    assert len(body["checkpoints"]["pending"]) == 3
+    assert len(body["checkpoints"]["pending"]) == 4
     assert all(skill["samples"] == 0 for skill in body["skills"])
     assert all(skill["score_percent"] is None for skill in body["skills"])
     assert {skill["status"] for skill in body["skills"]} == {"insufficient"}
     assert body["certificate"] == {
         "eligible": False,
         "status": "ineligible",
-        "reason": "Conclua 22 aulas do recorte para liberar o certificado.",
-        "required_lessons": 22,
-        "required_checkpoints": 3,
-        "scope_label": "Aulas 31–52",
+        "reason": "Conclua 27 aulas do recorte para liberar o certificado.",
+        "required_lessons": 27,
+        "required_checkpoints": 4,
+        "scope_label": "Aulas 1–52",
         "cta_label": "Continuar estudando",
-        "cta_href": "/cursos/voa-level-1/unidades/31-40",
+        "cta_href": "/cursos/voa-level-1/unidades/1-5",
         "automatic_download": False,
     }
     assert body["next_course"]["slug"] == "voa-level-2"
@@ -317,8 +318,8 @@ async def test_certificate_elegivel_exige_aulas_e_checkpoints_na_versao_atual(
     user = await usuario(session, "completion-eligible")
     lessons = await level_one_lessons(session)
     reviews = await published_reviews(session)
-    assert len(lessons) == 22
-    assert len(reviews) == 3
+    assert len(lessons) == 27
+    assert len(reviews) == 4
     session.add_all([LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons])
     session.add_all([review_attempt(user.id, review) for review in reviews])
     await session.commit()
@@ -326,21 +327,21 @@ async def test_certificate_elegivel_exige_aulas_e_checkpoints_na_versao_atual(
     body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
     assert body["progress"] == {
-        "published_lessons": 22,
-        "viewed_lessons": 22,
-        "completed_lessons": 22,
+        "published_lessons": 27,
+        "viewed_lessons": 27,
+        "completed_lessons": 27,
         "completion_percent": 100,
         "status": "completed",
     }
     assert body["incomplete_units"] == []
     assert body["checkpoints"] == {
-        "published": 3,
-        "current_completed": 3,
+        "published": 4,
+        "current_completed": 4,
         "pending": [],
     }
     assert body["certificate"]["eligible"] is True
     assert body["certificate"]["status"] == "eligible"
-    assert body["certificate"]["scope_label"] == "Aulas 31–52"
+    assert body["certificate"]["scope_label"] == "Aulas 1–52"
     assert body["certificate"]["cta_label"] == "Consultar revisão e certificado na VOA"
     assert body["certificate"]["cta_href"] == (
         "https://learningenglish.voanews.com/a/"
@@ -378,8 +379,8 @@ async def test_certificate_rejeita_quantidades_compensadas_entre_unidades(
 
         body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
-        assert body["progress"]["completed_lessons"] == 22
-        assert body["certificate"]["required_lessons"] == 22
+        assert body["progress"]["completed_lessons"] == 27
+        assert body["certificate"]["required_lessons"] == 27
         assert body["certificate"]["eligible"] is False
         assert "quantidade de aulas diferente" in body["certificate"]["reason"]
     finally:
@@ -408,7 +409,7 @@ async def test_tentativa_de_checkpoint_desatualizada_nao_libera_certificado(
 
         body = (await client.get("/api/courses/voa-level-1/completion", headers=headers)).json()
 
-        assert body["checkpoints"]["current_completed"] == 2
+        assert body["checkpoints"]["current_completed"] == 3
         assert body["checkpoints"]["pending"] == [
             {
                 "unit_slug": "50-52",
@@ -457,7 +458,7 @@ async def test_completion_isola_contas_e_cursos(client: AsyncClient, session: As
             await client.get("/api/courses/voa-level-1/completion", headers=second_headers)
         ).json()
 
-        assert owner["progress"]["completed_lessons"] == 22
+        assert owner["progress"]["completed_lessons"] == 27
         assert other["progress"]["completed_lessons"] == 0
         assert other["progress"]["viewed_lessons"] == 0
 

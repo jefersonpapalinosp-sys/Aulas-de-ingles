@@ -5,12 +5,12 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_lista_as_vinte_e_duas_aulas_em_ordem(client: AsyncClient) -> None:
+async def test_lista_as_vinte_e_sete_aulas_em_ordem(client: AsyncClient) -> None:
     r = await client.get("/api/lessons")
     assert r.status_code == 200
     aulas = r.json()
-    assert [a["number"] for a in aulas] == list(range(31, 53))
-    assert aulas[0]["title"] == "Take Me Out to the Ball Game"
+    assert [a["number"] for a in aulas] == list(range(1, 6)) + list(range(31, 53))
+    assert aulas[0]["title"] == "Welcome!"
     # O resumo não carrega a aula inteira.
     assert "grammar_blocks" not in aulas[0]
 
@@ -137,7 +137,9 @@ async def test_level_2_lista_e_entrega_as_aulas_1_a_30(
         sprint_27_classifications.extend(matching)
     assert len(sprint_27_classifications) == 3
 
-    assert (await client.get("/api/lessons/1")).status_code == 404
+    # A Aula 1 existe nos dois cursos; a rota legada resolve no Level 1.
+    assert (await client.get("/api/lessons/1")).json()["title"] == "Welcome!"
+    assert (await client.get("/api/courses/voa-level-1/lessons/1")).status_code == 200
     assert (await client.get("/api/courses/voa-level-2/lessons/31")).status_code == 404
 
 
@@ -326,7 +328,7 @@ async def test_texto_vem_em_markdown_sem_html(client: AsyncClient) -> None:
 async def test_vocabulario_filtra_por_aula(client: AsyncClient) -> None:
     todos = (await client.get("/api/vocab")).json()
     expected = 0
-    for number in range(31, 53):
+    for number in [*range(1, 6), *range(31, 53)]:
         expected += len((await client.get(f"/api/lessons/{number}")).json()["vocab"])
     assert len(todos) == expected
     da_40 = (await client.get("/api/vocab?lesson=40")).json()
@@ -345,10 +347,10 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
     expected = 0
-    for number in range(31, 53):
+    for number in [*range(1, 6), *range(31, 53)]:
         expected += len((await client.get(f"/api/lessons/{number}")).json()["exercises"])
     assert len(todos) == expected
-    assert {e["lesson_number"] for e in todos} == set(range(31, 53))
+    assert {e["lesson_number"] for e in todos} == {*range(1, 6), *range(31, 53)}
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
     assert chaves == sorted(chaves)

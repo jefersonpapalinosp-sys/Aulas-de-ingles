@@ -11,9 +11,144 @@
     "total_lessons": 52,
     "units": [
       {
+        "slug": "1-5",
+        "title": "Aulas 1–5",
+        "position": 1,
+        "status": "published",
+        "lesson_start": 1,
+        "lesson_end": 5,
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-1-5-level-1",
+          "title": "Fechamento 1–5",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA para as Aulas 1–5 do Level 1. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção. A seleção acompanha os Goals declarados no guia oficial de lesson plans, mas o fechamento não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o primeiro bloco revendo o verbo BE em apresentações, os pronomes pessoais, o par here e there, a negativa com not e BE + lugar. A escuta da Aula 5 verifica cômodos da casa e a pergunta Where are you?",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 5,
+          "listening_lesson_number": 5,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Apresentação. Complete: I ____ Anna.",
+              "options": [
+                "am",
+                "is",
+                "are"
+              ],
+              "accepted_answers": [
+                "am"
+              ],
+              "explanation": "Com o sujeito I a forma do verbo BE é sempre am.",
+              "lesson_numbers": [
+                1
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Pronome e verbo. Complete, falando da Marsha: ____ is my roommate.",
+              "options": [
+                "She",
+                "He",
+                "They"
+              ],
+              "accepted_answers": [
+                "She"
+              ],
+              "explanation": "She é o pronome para uma mulher, e em inglês o sujeito nunca é omitido.",
+              "lesson_numbers": [
+                2
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Ao telefone, para se identificar, diga:",
+              "options": [
+                "Hello. This is Marsha.",
+                "Hello. I am Marsha here.",
+                "Hello. Here Marsha."
+              ],
+              "accepted_answers": [
+                "Hello. This is Marsha."
+              ],
+              "explanation": "Ao telefone a identificação usa This is, não I am.",
+              "lesson_numbers": [
+                3
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Negativa com BE. Complete: It ____ a pen, it's a book.",
+              "options": [
+                "is not",
+                "do not",
+                "not is"
+              ],
+              "accepted_answers": [
+                "is not"
+              ],
+              "explanation": "Com o verbo BE o not vem depois do verbo; do só aparece com outros verbos.",
+              "lesson_numbers": [
+                4
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Lugar. Complete: I am in ____ kitchen.",
+              "options": [
+                "the",
+                "a",
+                "—"
+              ],
+              "accepted_answers": [
+                "the"
+              ],
+              "explanation": "O artigo the é obrigatório antes do nome do cômodo.",
+              "lesson_numbers": [
+                5
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 5, o que Marsha pergunta quando perde a Anna de vista?",
+              "options": [
+                "Anna? Where are you?",
+                "Anna, are you here?",
+                "Anna, who is there?"
+              ],
+              "accepted_answers": [
+                "Anna? Where are you?"
+              ],
+              "explanation": "Where are you? é a pergunta que dá título à aula, com entonação descendente.",
+              "lesson_numbers": [
+                5
+              ]
+            }
+          ]
+        }
+      },
+      {
         "slug": "31-40",
         "title": "Aulas 31–40",
-        "position": 1,
+        "position": 2,
         "status": "published",
         "lesson_start": 31,
         "lesson_end": 40,
@@ -22,7 +157,7 @@
       {
         "slug": "40-44",
         "title": "Aulas 40–44",
-        "position": 2,
+        "position": 3,
         "status": "published",
         "lesson_start": 40,
         "lesson_end": 44,
@@ -159,7 +294,7 @@
       {
         "slug": "45-49",
         "title": "Aulas 45–49",
-        "position": 3,
+        "position": 4,
         "status": "published",
         "lesson_start": 45,
         "lesson_end": 49,
@@ -297,7 +432,7 @@
       {
         "slug": "50-52",
         "title": "Aulas 50–52",
-        "position": 4,
+        "position": 5,
         "status": "published",
         "lesson_start": 50,
         "lesson_end": 52,
