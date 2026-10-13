@@ -146,9 +146,144 @@
         }
       },
       {
+        "slug": "6-10",
+        "title": "Aulas 6–10",
+        "position": 2,
+        "status": "published",
+        "lesson_start": 6,
+        "lesson_end": 10,
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-6-10-level-1",
+          "title": "Fechamento 6–10",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA para as Aulas 6–10 do Level 1. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção. A seleção acompanha os Goals declarados no guia oficial de lesson plans, mas o fechamento não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o segundo bloco revendo as preposições de lugar, o presente contínuo, a resposta curta com BE, o sujeito obrigatório it e o par there is / there are. A escuta da Aula 10 verifica a sequência de direções no imperativo.",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 10,
+          "listening_lesson_number": 10,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Lugar. A academia e o salão ficam um de cada lado do corredor: The gym is ____ the lounge.",
+              "options": [
+                "across from",
+                "next to",
+                "behind"
+              ],
+              "accepted_answers": [
+                "across from"
+              ],
+              "explanation": "Across from é do outro lado, com um vão entre os dois; next to é encostado.",
+              "lesson_numbers": [
+                6
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Ação em curso. Complete: What ____ you doing?",
+              "options": [
+                "are",
+                "is",
+                "do"
+              ],
+              "accepted_answers": [
+                "are"
+              ],
+              "explanation": "O presente contínuo precisa do BE, e com you a forma é are.",
+              "lesson_numbers": [
+                7
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Resposta curta. Complete: — Are you busy? — ____",
+              "options": [
+                "Yes, I am.",
+                "Yes, I'm.",
+                "Yes, I busy."
+              ],
+              "accepted_answers": [
+                "Yes, I am."
+              ],
+              "explanation": "Na resposta curta afirmativa não se contrai: a contração não pode terminar a frase.",
+              "lesson_numbers": [
+                8
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Tempo. Pergunte se está frio: ____ cold?",
+              "options": [
+                "Is it",
+                "Is",
+                "It is"
+              ],
+              "accepted_answers": [
+                "Is it"
+              ],
+              "explanation": "O sujeito it é obrigatório em inglês, mesmo quando o português o dispensa.",
+              "lesson_numbers": [
+                9
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Existência. Complete: ____ three coffee shops on my street.",
+              "options": [
+                "There are",
+                "There is",
+                "It is"
+              ],
+              "accepted_answers": [
+                "There are"
+              ],
+              "explanation": "O verbo concorda com o que vem depois de there; shops é plural.",
+              "lesson_numbers": [
+                10
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 10, qual é a sequência de direções que Anna dá?",
+              "options": [
+                "direita, esquerda, em frente",
+                "esquerda, direita, em frente",
+                "em frente, direita, esquerda"
+              ],
+              "accepted_answers": [
+                "direita, esquerda, em frente"
+              ],
+              "explanation": "Turn right, then turn left, then walk straight ahead — três imperativos encadeados por then.",
+              "lesson_numbers": [
+                10
+              ]
+            }
+          ]
+        }
+      },
+      {
         "slug": "31-40",
         "title": "Aulas 31–40",
-        "position": 2,
+        "position": 3,
         "status": "published",
         "lesson_start": 31,
         "lesson_end": 40,
@@ -157,7 +292,7 @@
       {
         "slug": "40-44",
         "title": "Aulas 40–44",
-        "position": 3,
+        "position": 4,
         "status": "published",
         "lesson_start": 40,
         "lesson_end": 44,
@@ -294,7 +429,7 @@
       {
         "slug": "45-49",
         "title": "Aulas 45–49",
-        "position": 4,
+        "position": 5,
         "status": "published",
         "lesson_start": 45,
         "lesson_end": 49,
@@ -432,7 +567,7 @@
       {
         "slug": "50-52",
         "title": "Aulas 50–52",
-        "position": 5,
+        "position": 6,
         "status": "published",
         "lesson_start": 50,
         "lesson_end": 52,

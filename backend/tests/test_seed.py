@@ -54,11 +54,11 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
 
 
 @pytest.mark.asyncio
-async def test_arquivo_de_seed_tem_cinquenta_e_sete_aulas_em_dois_cursos() -> None:
+async def test_arquivo_de_seed_tem_sessenta_e_duas_aulas_em_dois_cursos() -> None:
     dados = load_seed()
     level_1 = [lesson for lesson in dados if lesson["course_slug"] == "voa-level-1"]
     level_2 = [lesson for lesson in dados if lesson["course_slug"] == "voa-level-2"]
-    assert [d["number"] for d in level_1] == list(range(1, 6)) + list(range(31, 53))
+    assert [d["number"] for d in level_1] == list(range(1, 11)) + list(range(31, 53))
     assert [d["number"] for d in level_2] == list(range(1, 31))
 
     # O conteúdo publicado nas Sprints anteriores não pode ser reduzido durante
@@ -83,6 +83,32 @@ async def test_arquivo_de_seed_tem_cinquenta_e_sete_aulas_em_dois_cursos() -> No
     assert all(len(d.get("media", [])) == 1 for d in novas)
     assert all(len(d["media"][0].get("cues", [])) == 5 for d in novas)
     assert all(len(d.get("writing_prompts", [])) == 1 for d in novas)
+
+    # Sprint 32: o bloco 6–10 segue a mesma convenção do 1–5.
+    segundo = [d for d in level_1 if 6 <= d["number"] <= 10]
+    assert [d["number"] for d in segundo] == list(range(6, 11))
+    assert all(d["unit_slug"] == "6-10" for d in segundo)
+    assert all(len(d["vocab"]) == 10 for d in segundo)
+    assert all(len(d["exercises"]) == 8 for d in segundo)
+    assert all(len(d.get("media", [])) == 1 for d in segundo)
+    assert all(len(d["media"][0].get("cues", [])) == 5 for d in segundo)
+    assert all(len(d.get("writing_prompts", [])) == 1 for d in segundo)
+    assert all(d["learning_strategy"] for d in segundo)
+    assert [d["title"] for d in segundo] == [
+        "Where Is the Gym?",
+        "What Are You Doing?",
+        "Are You Busy?",
+        "Is It Cold?",
+        "Come Over to My Place",
+    ]
+    # Os focos saem do guia oficial de lesson plans, não da transcrição.
+    assert [d["grammar_tag"] for d in segundo] == [
+        "Preposições de lugar",
+        "Presente contínuo",
+        "Respostas curtas e rotina",
+        "Respostas curtas e tempo",
+        "Imperativo e there is / there are",
+    ]
 
     # Sprint 31: o bloco 1–5 abre o Level 1 e segue a convenção editorial do
     # curso (10 termos, 4 exercícios de gramática + 4 de listening, 5 cues).
@@ -155,12 +181,13 @@ async def test_arquivo_de_seed_tem_cinquenta_e_sete_aulas_em_dois_cursos() -> No
     assert all(item["attribution"] and item["license_url"] for item in media)
     assert sum(item["license_reviewed_at"] == "2026-10-08" for item in media) == 27
     assert sum(item["license_reviewed_at"] == "2026-10-09" for item in media) == 25
-    assert sum(item["license_reviewed_at"] == "2026-10-13" for item in media) == 5
+    assert sum(item["license_reviewed_at"] == "2026-10-13" for item in media) == 10
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
     # As fatias do Level 1 são por número de aula: o bloco 1–5 entrou na frente.
     blocos_level_1 = {
         "1-5": range(1, 6),
+        "6-10": range(6, 11),
         "31-40": range(31, 41),
         "40-44": range(41, 45),
         "45-49": range(45, 50),
@@ -491,7 +518,7 @@ async def test_seed_de_cursos_publica_as_seis_unidades_do_level_2() -> None:
 
     assert [course["slug"] for course in courses] == ["voa-level-1", "voa-level-2"]
     assert [course["total_lessons"] for course in courses] == [52, 30]
-    assert [len(course["units"]) for course in courses] == [5, 6]
+    assert [len(course["units"]) for course in courses] == [6, 6]
     assert [course["status"] for course in courses] == ["published", "published"]
     assert [unit["status"] for unit in courses[1]["units"]] == [
         "published",
@@ -516,6 +543,7 @@ def test_checkpoint_do_seed_valida_referencias_e_gabarito() -> None:
     ]
     assert [review["slug"] for review in reviews] == [
         "checkpoint-1-5-level-1",
+        "checkpoint-6-10-level-1",
         "checkpoint-40-44",
         "checkpoint-45-49",
         "checkpoint-50-52",
@@ -613,10 +641,10 @@ def test_catalogo_do_seed_valida_faixa_quantidade_e_posicao_das_aulas() -> None:
 async def test_seed_rodado_de_novo_nao_duplica(session: AsyncSession) -> None:
     antes = await _contagens(session)
     assert antes["course"] == 2
-    assert antes["course_unit"] == 11
-    assert antes["course_review"] == 10
-    assert antes["course_review_question"] == 60
-    assert antes["lesson"] == 57
+    assert antes["course_unit"] == 12
+    assert antes["course_review"] == 11
+    assert antes["course_review_question"] == 66
+    assert antes["lesson"] == 62
 
     await seed_lessons(session)
 
@@ -649,8 +677,8 @@ async def test_ids_do_checkpoint_sobrevivem_ao_reseed(session: AsyncSession) -> 
         (item.review_id, item.position): item.id
         for item in (await session.execute(select(CourseReviewQuestion))).scalars()
     }
-    assert len(reviews_before) == 10
-    assert len(questions_before) == 60
+    assert len(reviews_before) == 11
+    assert len(questions_before) == 66
 
     await seed_lessons(session)
 
@@ -708,7 +736,7 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
 async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
     media = list((await session.execute(select(LessonMedia))).scalars())
 
-    assert len(media) == 57
+    assert len(media) == 62
     assert all(item.license_status == "public_domain" for item in media)
     assert all(item.offline_policy == "network_only" for item in media)
     assert all(item.attribution == "Voice of America (VOA Learning English)" for item in media)
