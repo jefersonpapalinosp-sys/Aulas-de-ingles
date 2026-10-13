@@ -107,7 +107,7 @@ Seis sprints de cinco aulas, na mesma cadência do Level 2.
 |---:|---|---|---|
 | 31 | 1–5 | verbo `BE`, pronomes pessoais e de lugar | **publicada em 13/10/2026** |
 | 32 | 6–10 | preposições de lugar, presente contínuo, respostas curtas | **publicada em 13/10/2026** |
-| 33 | 11–15 | adjetivos, advérbios de frequência, tag questions | pendente |
+| 33 | 11–15 | adjetivos, advérbios de frequência, tag questions | **publicada em 13/10/2026** |
 | 34 | 16–20 | futuro com `will` e `going to`, `can` para habilidade | pendente |
 | 35 | 21–25 | `have to`, `want to`, passado regular, `should` | pendente |
 | 36 | 26–30 | passado irregular, imperativo, comparativo e superlativo | pendente |
@@ -174,6 +174,23 @@ claramente os da Aula 8. O título publicado é o da página da VOA, *Are You Bu
 
 Level 1 vai de 27 para **32 de 52** aulas publicadas; o recorte do certificado, de
 27 aulas e 4 checkpoints para 32 e 5.
+
+### Sprint 33, fechada
+
+O conteúdo entrou sem atrito: as duas convenções que a Sprint 32 documentou
+(`learning_strategy` como rótulo, `writing_prompts` com `requirements`) foram aplicadas
+de partida, e o deslocamento de unidades já estava resolvido no semeador.
+
+O que apareceu foi um **teste E2E instável que a sprint tornou determinístico no erro**.
+O teste `Sprint 25 isola a retomada de Hoje entre Level 1 e Level 2` fechava o drawer
+da trilha com `Escape`. A tecla vai para o documento e se perde se o drawer remontar no
+meio da transição — e, com a trilha crescendo de 32 para 37 aulas, o remount passou a
+demorar o suficiente para a corrida perder quase sempre em `mobile-chrome` (e a passar
+quando o teste rodava isolado). Passou a fechar pelo botão `Fechar trilha`, que é
+determinístico; o caminho do `Escape` segue coberto pelo teste dedicado do drawer.
+
+Level 1 vai de 32 para **37 de 52** aulas publicadas; o recorte do certificado, de 32
+aulas e 5 checkpoints para 37 e 6.
 
 ## 6. Ordem de execução
 

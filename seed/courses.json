@@ -281,9 +281,144 @@
         }
       },
       {
+        "slug": "11-15",
+        "title": "Aulas 11–15",
+        "position": 3,
+        "status": "published",
+        "lesson_start": 11,
+        "lesson_end": 15,
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-11-15-level-1",
+          "title": "Fechamento 11–15",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA para as Aulas 11–15 do Level 1. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção. A seleção acompanha os Goals declarados no guia oficial de lesson plans, mas o fechamento não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o terceiro bloco revendo o plural dos substantivos, o auxiliar do e does, a posição dos advérbios de frequência, o adjetivo antes do substantivo e a tag question. A escuta da Aula 15 verifica a entonação da tag.",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 15,
+          "listening_lesson_number": 15,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Plural. Complete: I need to return three ____.",
+              "options": [
+                "books",
+                "book",
+                "bookes"
+              ],
+              "accepted_answers": [
+                "books"
+              ],
+              "explanation": "O número não dispensa o -s: o substantivo contável marca o plural sempre.",
+              "lesson_numbers": [
+                11
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Auxiliar. Complete: What ____ Uncle John do?",
+              "options": [
+                "does",
+                "do",
+                "is"
+              ],
+              "accepted_answers": [
+                "does"
+              ],
+              "explanation": "Terceira pessoa do singular usa does, e o verbo principal fica na forma base — o -s é marcado uma vez só.",
+              "lesson_numbers": [
+                12
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Frequência. Onde entra o advérbio? Complete: ____ watch puppet shows.",
+              "options": [
+                "I never",
+                "Never I",
+                "I watch never"
+              ],
+              "accepted_answers": [
+                "I never"
+              ],
+              "explanation": "O advérbio de frequência vem antes do verbo principal — e depois do verbo BE.",
+              "lesson_numbers": [
+                13
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Adjetivo. Ordene corretamente: Take off the ____.",
+              "options": [
+                "green dress",
+                "dress green",
+                "greens dress"
+              ],
+              "accepted_answers": [
+                "green dress"
+              ],
+              "explanation": "Em inglês o adjetivo vem antes do substantivo e nunca vai ao plural.",
+              "lesson_numbers": [
+                14
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Tag question. Complete: She wears glasses, ____?",
+              "options": [
+                "doesn't she",
+                "isn't she",
+                "doesn't it"
+              ],
+              "accepted_answers": [
+                "doesn't she"
+              ],
+              "explanation": "O verbo principal não é o BE, então a tag usa o auxiliar does, com o sinal invertido.",
+              "lesson_numbers": [
+                15
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 15, como Anna abre a conversa sobre o tempo?",
+              "options": [
+                "com uma tag question",
+                "com uma pergunta de sim ou não",
+                "com uma resposta curta"
+              ],
+              "accepted_answers": [
+                "com uma tag question"
+              ],
+              "explanation": "…the weather is beautiful, isn't it? — a tag convida à concordância, com entonação descendente.",
+              "lesson_numbers": [
+                15
+              ]
+            }
+          ]
+        }
+      },
+      {
         "slug": "31-40",
         "title": "Aulas 31–40",
-        "position": 3,
+        "position": 4,
         "status": "published",
         "lesson_start": 31,
         "lesson_end": 40,
@@ -292,7 +427,7 @@
       {
         "slug": "40-44",
         "title": "Aulas 40–44",
-        "position": 4,
+        "position": 5,
         "status": "published",
         "lesson_start": 40,
         "lesson_end": 44,
@@ -429,7 +564,7 @@
       {
         "slug": "45-49",
         "title": "Aulas 45–49",
-        "position": 5,
+        "position": 6,
         "status": "published",
         "lesson_start": 45,
         "lesson_end": 49,
@@ -567,7 +702,7 @@
       {
         "slug": "50-52",
         "title": "Aulas 50–52",
-        "position": 6,
+        "position": 7,
         "status": "published",
         "lesson_start": 50,
         "lesson_end": 52,

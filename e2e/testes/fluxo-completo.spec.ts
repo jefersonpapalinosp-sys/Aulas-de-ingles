@@ -541,7 +541,7 @@ test('Sprint 23 publica a unidade 45–49 no catálogo sem alongar a trilha', as
   const level1Card = page
     .getByRole('article')
     .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 1" }) })
-  await expect(level1Card.getByText('32/52', { exact: true })).toBeVisible()
+  await expect(level1Card.getByText('37/52', { exact: true })).toBeVisible()
 
   await page.goto(unitPath('45-49'))
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 45–49' })).toBeVisible()
@@ -570,7 +570,7 @@ test('Sprint 24 publica as Aulas 50–52 e o checkpoint final sem inventar trans
       review?: { title: string; question_count: number } | null
     }>
   }
-  expect(curriculum.course.published_lessons).toBe(32)
+  expect(curriculum.course.published_lessons).toBe(37)
   const unit = curriculum.units.find((candidate) => candidate.slug === '50-52')
   expect(unit).toMatchObject({
     published_lessons: 3,
@@ -630,17 +630,17 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
   const initial = await initialResponse.json()
   expect(initial).toMatchObject({
     progress: {
-      published_lessons: 32,
+      published_lessons: 37,
       viewed_lessons: 0,
       completed_lessons: 0,
       completion_percent: 0,
       status: 'not_started',
     },
-    checkpoints: { published: 5, current_completed: 0 },
+    checkpoints: { published: 6, current_completed: 0 },
     certificate: {
       eligible: false,
-      required_lessons: 32,
-      required_checkpoints: 5,
+      required_lessons: 37,
+      required_checkpoints: 6,
       automatic_download: false,
     },
     next_course: {
@@ -655,6 +655,7 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
   expect(initial.incomplete_units.map((unit: { slug: string }) => unit.slug)).toEqual([
     '1-5',
     '6-10',
+    '11-15',
     '31-40',
     '40-44',
     '45-49',
@@ -674,13 +675,13 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     await request.get(`/api/courses/${LEVEL_1_SLUG}/completion`, { headers })
   ).json()
   expect(after.progress).toMatchObject({
-    published_lessons: 32,
+    published_lessons: 37,
     viewed_lessons: 1,
     completed_lessons: 1,
     status: 'in_progress',
   })
   expect(after.certificate).toMatchObject({ eligible: false, automatic_download: false })
-  expect(after.incomplete_units).toHaveLength(6)
+  expect(after.incomplete_units).toHaveLength(7)
   expect(
     after.incomplete_units.find((unit: { slug: string }) => unit.slug === '50-52'),
   ).toMatchObject({ published_lessons: 3, viewed_lessons: 1, completed_lessons: 1 })
@@ -893,15 +894,16 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
       .locator('..')
       .locator('dd')
       .first()
-  await expect(metricValue('Conteúdo publicado')).toHaveText('32')
-  await expect(metricValue('Aulas vistas')).toHaveText('0 / 32')
-  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 32')
+  await expect(metricValue('Conteúdo publicado')).toHaveText('37')
+  await expect(metricValue('Aulas vistas')).toHaveText('0 / 37')
+  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 37')
   await expect(page.getByRole('progressbar', { name: 'Aulas concluídas no recorte publicado' }))
     .toHaveAttribute('aria-valuenow', '0')
 
     for (const unit of [
     'Aulas 1–5',
     'Aulas 6–10',
+    'Aulas 11–15',
     'Aulas 31–40',
     'Aulas 40–44',
     'Aulas 45–49',
@@ -912,7 +914,7 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
   await expect(
     page.getByRole('heading', { name: 'Certificado do recorte: ainda não elegível' }),
   ).toBeVisible()
-  await expect(page.getByText(/Regra deste recorte: 32 aulas e 5 checkpoints/)).toBeVisible()
+  await expect(page.getByText(/Regra deste recorte: 37 aulas e 6 checkpoints/)).toBeVisible()
   await expect(page.locator('[download], iframe')).toHaveCount(0)
 
   await expect(page.getByText('Recomendado e opcional.')).toBeVisible()
@@ -1913,11 +1915,15 @@ test('Sprint 25 isola a retomada de Hoje entre Level 1 e Level 2', async ({ page
   await expect(page).toHaveURL(/\/inicio\?course=voa-level-1$/)
   if (trailDialog) {
     // A troca de curso navega e o drawer remonta. Esperar que ele reassente
-    // antes do Escape: sem isso a tecla cai durante a transição e o teste
-    // fica dependente da ordem de execução.
-    await expect(page.getByRole('dialog', { name: 'Trilha de estudo' })).toBeVisible()
-    await page.keyboard.press('Escape')
-    await expect(page.getByRole('dialog', { name: 'Trilha de estudo' })).toHaveCount(0)
+    // antes de fechar: sem isso a ação cai durante a transição e o teste fica
+    // dependente da ordem de execução. Fechar pelo botão, e não pelo Escape:
+    // a tecla vai para o documento e se perde se o drawer remontar no meio,
+    // o que fica mais provável à medida que a trilha cresce. O caminho do
+    // Escape segue coberto pelo teste dedicado do drawer.
+    const reaberto = page.getByRole('dialog', { name: 'Trilha de estudo' })
+    await expect(reaberto).toBeVisible()
+    await reaberto.getByRole('button', { name: 'Fechar trilha' }).click()
+    await expect(reaberto).toHaveCount(0)
   }
   await expect(
     page.getByRole('heading', { name: 'Level 1 · Começar a Aula 1' }),

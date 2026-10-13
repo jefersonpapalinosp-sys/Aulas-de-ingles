@@ -5426,6 +5426,2710 @@
   },
   {
     "course_slug": "voa-level-1",
+    "unit_slug": "11-15",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 33: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 11,
+    "slug": "lesson-11",
+    "position": 1,
+    "title": "This Is My Neighborhood",
+    "title_pt": "Este é o meu bairro",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-11-this-is-my-neighborhood/3293986.html",
+    "grammar_tag": "Plural e there is / there are",
+    "focus_points": [
+      "singular × plural",
+      "números para quantidade",
+      "Is there…? / There is…"
+    ],
+    "story_note": "Anna resolve tudo a pé no bairro",
+    "lead": "Anna precisa devolver **três livros**, postar **quatro cartas** e comprar selos — tudo no mesmo bairro. A aula apresenta o **plural** dos substantivos, os números para dizer quantidade, e a pergunta **Is there…?** para saber se existe algo por perto. A estratégia do guia é **fazer perguntas**: cada etapa do passeio começa com uma.",
+    "warmup_prompt": "Name four places in your neighborhood and say how far each one is.",
+    "listening_focus": "Anote cada pergunta de Anna e a preposição que aparece na resposta.",
+    "goals": [
+      "Formar o plural dos substantivos com **-s** e reconhecer a forma do singular.",
+      "Usar números cardinais para dizer quantidade: **three books**, **four letters**.",
+      "Perguntar se algo existe perto com **Is there… near here?**",
+      "Agradecer e reagir com ênfase: **Thanks!**, **Awesome!**"
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Singular e plural: o -s que o português dispensa",
+        "why": "O guia introduz aqui o plural. Em inglês o substantivo contável **sempre** marca o plural, mesmo quando o número já está na frente — e é justamente aí que o brasileiro esquece.",
+        "warning": "**O número não substitui o -s.** *Three book* está errado; é *three book**s***. E o adjetivo **nunca** vai para o plural: *four beautiful letters*, nunca *four beautifuls letters*.",
+        "table_head": [
+          "Singular",
+          "Plural",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "book",
+              "book**s**",
+              "I need to return three book**s**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "letter",
+              "letter**s**",
+              "These are letter**s** to my family."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "stamp",
+              "stamp**s**",
+              "Now I need to buy stamp**s**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "box → **boxes**",
+              "+es depois de s, x, ch, sh",
+              "two box**es**, three bus**es**"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Is there…? — perguntar se algo existe perto",
+        "why": "Para saber se existe algo nas redondezas, o inglês inverte o **there is** em **Is there**. É a pergunta que organiza toda a conversa desta aula.",
+        "warning": "**Não confunda com *Where is*.** *Is there a bank near here?* pergunta se **existe**; *Where is the bank?* pergunta **onde fica** — e supõe que já existe. Anna usa as duas, em momentos diferentes.",
+        "table_head": [
+          "Pergunta",
+          "O que se quer saber",
+          "Resposta da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Is there** a post office near here?",
+              "se existe",
+              "Um, no. The post office is far from here."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Is there** a bank near here?",
+              "se existe",
+              "**There is** a bank behind you."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Where is** the library?",
+              "onde fica",
+              "It is on this street on the corner."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "This / that, these / those: perto e longe, um e vários",
+        "why": "Estes quatro demonstrativos combinam **distância** com **número**. A aula usa os quatro, e a escolha errada muda o sentido da frase.",
+        "warning": "**O plural de *this* é *these*, não *thises*.** E a diferença entre *these* e *those* é a distância: *these letters* estão na mão de Anna; *those* estariam longe. Marsha pergunta *what are **those***? porque não as alcança.",
+        "table_head": [
+          "",
+          "Perto",
+          "Longe"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "Singular",
+              "**this** book",
+              "**that** store sells stamps"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "Plural",
+              "**these** are letters",
+              "what are **those**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "Frase da aula",
+              "**These** are letters to my family.",
+              "**That** store sells stamps."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "I need to return **three books** to the library.",
+        "text_pt": "Preciso devolver três livros à biblioteca.",
+        "note": "Número + substantivo no plural; o -s é obrigatório."
+      },
+      {
+        "position": 1,
+        "text_en": "**Is there** a post office near here?",
+        "text_pt": "Tem uma agência de correio por aqui?",
+        "note": "Pergunta de existência. *Near here* é a fórmula fixa para \"por aqui\"."
+      },
+      {
+        "position": 2,
+        "text_en": "**There is** a mailbox **across from** the store.",
+        "text_pt": "Tem uma caixa de correio do outro lado da loja.",
+        "note": "Resposta com *there is* + a preposição da Aula 6."
+      },
+      {
+        "position": 3,
+        "text_en": "**There is** a bank **behind** you.",
+        "text_pt": "Tem um banco atrás de você.",
+        "note": "A preposição aqui localiza em relação à pessoa, não a um prédio."
+      },
+      {
+        "position": 4,
+        "text_en": "You know our neighborhood **so well**.",
+        "text_pt": "Você conhece o nosso bairro muito bem.",
+        "note": "*So* + advérbio é o elogio enfático que o guia pede como foco de pronúncia."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "neighborhood",
+        "ipa": "/ˈneɪbərhʊd/",
+        "translation_pt": "bairro",
+        "example_en": "I love my new neighborhood!"
+      },
+      {
+        "position": 1,
+        "term": "errand",
+        "ipa": "/ˈerənd/",
+        "translation_pt": "tarefa, recado na rua",
+        "example_en": "I can do all my errands."
+      },
+      {
+        "position": 2,
+        "term": "library",
+        "ipa": "/ˈlaɪbreri/",
+        "translation_pt": "biblioteca",
+        "example_en": "Where is the library?"
+      },
+      {
+        "position": 3,
+        "term": "post office",
+        "ipa": "/ˈpoʊst ˌɔːfɪs/",
+        "translation_pt": "agência de correio",
+        "example_en": "Is there a post office near here?"
+      },
+      {
+        "position": 4,
+        "term": "mailbox",
+        "ipa": "/ˈmeɪlbɑːks/",
+        "translation_pt": "caixa de correio",
+        "example_en": "There is a mailbox across from the store."
+      },
+      {
+        "position": 5,
+        "term": "stamp",
+        "ipa": "/stæmp/",
+        "translation_pt": "selo",
+        "example_en": "Now I need to buy stamps."
+      },
+      {
+        "position": 6,
+        "term": "cash",
+        "ipa": "/kæʃ/",
+        "translation_pt": "dinheiro em espécie",
+        "example_en": "Do you have cash?"
+      },
+      {
+        "position": 7,
+        "term": "corner",
+        "ipa": "/ˈkɔːrnər/",
+        "translation_pt": "esquina",
+        "example_en": "It is on this street on the corner."
+      },
+      {
+        "position": 8,
+        "term": "far from",
+        "ipa": "/fɑːr frəm/",
+        "translation_pt": "longe de",
+        "example_en": "The post office is far from here."
+      },
+      {
+        "position": 9,
+        "term": "near here",
+        "ipa": "/nɪr hɪr/",
+        "translation_pt": "por aqui, perto daqui",
+        "example_en": "Is there a bank near here?"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "O -s do plural tem três sons: /s/, /z/ e /ɪz/",
+        "explanation": "Depois de som surdo é /s/ (*stamps* = \"stamps\"); depois de som sonoro é /z/ (*letters* = \"léterz\"); depois de s, x, ch, sh é /ɪz/ (*boxes* = \"bóksiz\"). A regra é do som, não da letra."
+      },
+      {
+        "position": 1,
+        "label": "Ênfase nas palavras de sentimento",
+        "explanation": "O guia pede este foco. *Awesome!* e *Thank you* ganham força pelo **alongamento da sílaba tônica**, não pelo volume: \"Ó-ssam\", com o Ó bem longo."
+      },
+      {
+        "position": 2,
+        "label": "library /ˈlaɪbreri/ — três sílabas, não quatro",
+        "explanation": "A tentação é dizer \"lai-bra-RÍ-a\". Em inglês americano são três: \"LÁI-bre-ri\", com a tônica na primeira."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 11 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/04/20/de238e35-97b9-4c21-81e3-e3c26fbeccaa_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 110,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 12,
+            "end_seconds": 24,
+            "speaker": "Anna",
+            "text_en": "I need to return three books to the library. Where is the library?",
+            "text_pt": "Preciso devolver três livros à biblioteca. Onde é a biblioteca?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 24,
+            "end_seconds": 32,
+            "speaker": "Marsha",
+            "text_en": "It is on this street on the corner.",
+            "text_pt": "É nesta rua, na esquina."
+          },
+          {
+            "position": 2,
+            "start_seconds": 40,
+            "end_seconds": 52,
+            "speaker": "Anna",
+            "text_en": "These are letters to my family and friends back home … four letters!",
+            "text_pt": "Estas são cartas para a minha família e amigos em casa… quatro cartas!"
+          },
+          {
+            "position": 3,
+            "start_seconds": 52,
+            "end_seconds": 60,
+            "speaker": "Anna",
+            "text_en": "Is there a post office near here?",
+            "text_pt": "Tem uma agência de correio por aqui?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 60,
+            "end_seconds": 72,
+            "speaker": "Marsha",
+            "text_en": "Um, no. But there is a mailbox across from the store.",
+            "text_pt": "Hum, não. Mas tem uma caixa de correio do outro lado da loja."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete com o plural: I need to return three ____.",
+        "hint": null,
+        "explanation": "O número não dispensa o -s: o substantivo contável marca o plural sempre.",
+        "hints": [
+          "O número já diz que é mais de um.",
+          "Em inglês o -s ainda é obrigatório."
+        ],
+        "answers": [
+          "books"
+        ],
+        "options": [
+          "books",
+          "book",
+          "bookes"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Pergunte se existe um banco perto: `____` `____` a bank near here? (duas palavras)",
+        "hint": "duas palavras",
+        "explanation": "Para perguntar se algo existe, inverte-se o *there is* em *Is there*.",
+        "hints": [
+          "Começa pelo verbo.",
+          "O *there* vem depois dele."
+        ],
+        "answers": [
+          "Is there"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Anna está com as cartas na mão. Complete: ____ are letters to my family.",
+        "hint": null,
+        "explanation": "Plural e perto: *these*. *This* é singular; *those* seria longe.",
+        "hints": [
+          "São várias cartas.",
+          "Estão perto de quem fala."
+        ],
+        "answers": [
+          "These"
+        ],
+        "options": [
+          "These",
+          "This",
+          "Those"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "Is there a bank near here?",
+          "Where is the library?",
+          "Is there a post office near here?"
+        ],
+        "classification_categories": [
+          "se existe",
+          "onde fica"
+        ],
+        "prompt": "Classifique cada pergunta: quer saber se existe, ou onde fica?",
+        "hint": null,
+        "explanation": "*Is there* pergunta pela existência; *Where is* supõe que existe e pede o lugar.",
+        "hints": [
+          "Veja as duas primeiras palavras.",
+          "*Where* já pressupõe que o lugar existe."
+        ],
+        "answers": [
+          "{\"Is there a bank near here?\": \"se existe\", \"Where is the library?\": \"onde fica\", \"Is there a post office near here?\": \"se existe\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, onde fica a biblioteca?",
+        "hint": null,
+        "explanation": "*It is on this street on the corner* — duas referências juntas.",
+        "hints": [
+          "Marsha dá duas informações.",
+          "Uma delas é a esquina."
+        ],
+        "answers": [
+          "nesta rua, na esquina"
+        ],
+        "options": [
+          "nesta rua, na esquina",
+          "do outro lado da loja",
+          "atrás do banco"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Quantas cartas Anna tem para postar?",
+        "hint": null,
+        "explanation": "Ela conta em voz alta: *four letters*.",
+        "hints": [
+          "Ela diz o número.",
+          "É mais que os três livros."
+        ],
+        "answers": [
+          "quatro"
+        ],
+        "options": [
+          "quatro",
+          "três",
+          "cinco"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta de existência que Anna faz sobre o correio.",
+        "hint": null,
+        "explanation": "Pergunta de existência + *near here*, a fórmula para \"por aqui\".",
+        "hints": [
+          "Sete palavras.",
+          "Começa com *Is there*."
+        ],
+        "answers": [
+          "Is there a post office near here?",
+          "Is there a post office near here"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Onde fica a caixa de correio, segundo Marsha?",
+        "hint": null,
+        "explanation": "*Across from the store* — a preposição da Aula 6 reaparece aqui.",
+        "hints": [
+          "Ela usa uma das três preposições de lugar.",
+          "Há um vão entre os dois."
+        ],
+        "answers": [
+          "do outro lado da loja"
+        ],
+        "options": [
+          "do outro lado da loja",
+          "atrás da loja",
+          "ao lado do banco"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O seu bairro, em tarefas",
+        "instructions": "Write 6 to 9 sentences in English about errands in your neighborhood. Use three plural nouns with a number in front, ask two questions with Is there, and locate one place with across from or behind.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "plural com número",
+            "terms": [
+              "two",
+              "three",
+              "four",
+              "five"
+            ]
+          },
+          {
+            "label": "pergunta de existência",
+            "terms": [
+              "is there"
+            ]
+          },
+          {
+            "label": "lugar do bairro",
+            "terms": [
+              "library",
+              "post office",
+              "bank",
+              "store",
+              "mailbox",
+              "park"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "fazer perguntas"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "11-15",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 33: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 12,
+    "slug": "lesson-12",
+    "position": 2,
+    "title": "Meet My Family",
+    "title_pt": "Conheça a minha família",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-12-meet-my-family/3301733.html",
+    "grammar_tag": "Auxiliar do e o verbo make",
+    "focus_points": [
+      "What do…? / What does…?",
+      "make",
+      "parentesco"
+    ],
+    "story_note": "Anna mostra as fotos da família",
+    "lead": "Anna está com saudade de casa e mostra as fotos da família. Marsha pergunta o que cada um faz — e é por aí que entra o **auxiliar do**, que o inglês exige para perguntar sobre qualquer verbo que não seja o BE. A estratégia do guia é **achar e aplicar padrões**: *do* para eu/você/eles, *does* para ele/ela.",
+    "warmup_prompt": "Describe three people in your family: the relationship and what they do.",
+    "listening_focus": "Anote cada pergunta de Marsha e se ela usa *do* ou *does*.",
+    "goals": [
+      "Perguntar com o auxiliar **do** e **does** no presente simples.",
+      "Usar o verbo **make** para o que se produz: **make jokes**, **make spoons**.",
+      "Nomear o parentesco: **aunt**, **uncle**, **niece**, **cousin**.",
+      "Falar de um problema: **What's wrong?** / **Do you want to talk about it?**"
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "O auxiliar do: a peça que o português não tem",
+        "why": "Com o verbo BE, a pergunta inverte (*Are you busy?*). Com **qualquer outro verbo**, o inglês precisa do auxiliar **do** ou **does** na frente. É a gramática que o guia declara para esta aula.",
+        "warning": "**Quando o *does* aparece, o verbo principal perde o -s.** *What does Uncle John **do**?* — nunca *does… does*. O -s migra para o auxiliar: a terceira pessoa é marcada **uma vez só**.",
+        "table_head": [
+          "Sujeito",
+          "Auxiliar",
+          "Pergunta da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I / you / we / they",
+              "**do**",
+              "What **do** rodeo clowns **do**?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "he / she / it",
+              "**does**",
+              "What **does** Uncle John **do**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "they",
+              "**do**",
+              "What **do** they **do**?"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "(com o verbo BE)",
+              "— sem auxiliar",
+              "**Who is** that woman in the picture?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "A resposta curta com do",
+        "why": "Como a pergunta usa o auxiliar, a resposta curta também — e não o verbo principal. Anna responde *I **do**!*, não *I have!*.",
+        "warning": "**Não repita o verbo principal.** A *Do you have more cash?* responde-se *I do* ou *Yes, I do* — nunca *Yes, I have*. O auxiliar é que carrega a resposta.",
+        "table_head": [
+          "Pergunta",
+          "Resposta curta",
+          "O que carrega a resposta"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Do** you have cash?",
+              "Yes, I **do**. / No, I **don't**.",
+              "o auxiliar"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Does** she make spoons?",
+              "Yes, she **does**.",
+              "o auxiliar na 3ª pessoa"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Are** you busy? (BE)",
+              "Yes, I **am**.",
+              "o próprio BE"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "make: o verbo de quem produz alguma coisa",
+        "why": "*Make* é fazer no sentido de **produzir, fabricar, criar**. O guia o põe no mesmo foco do auxiliar justamente porque *do* e *make* são o nosso único \"fazer\".",
+        "warning": "**do ≠ make.** *Do* é executar uma tarefa (*do my errands*, *do my show*); *make* é produzir algo que antes não existia (*make jokes*, *make guitars*, *make sweaters*). A família da Anna só aparece com *make*.",
+        "table_head": [
+          "Expressão",
+          "O que se produz",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**make** jokes",
+              "piadas",
+              "They **make** jokes at a rodeo."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**make** people laugh",
+              "o riso de alguém",
+              "They **make** people laugh."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**make** spoons / guitars",
+              "objetos",
+              "She **makes** spoons."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**do** my errands (contraste)",
+              "tarefas, não objetos",
+              "I can **do** all my errands."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "**What's wrong?**",
+        "text_pt": "O que houve?",
+        "note": "A pergunta que o guia marca como foco de fala: perguntar sobre um problema."
+      },
+      {
+        "position": 1,
+        "text_en": "I'm **feeling homesick**.",
+        "text_pt": "Estou com saudade de casa.",
+        "note": "*Homesick* é adjetivo; usa-se com *feel* ou *be*, nunca com *have*."
+      },
+      {
+        "position": 2,
+        "text_en": "**What do** rodeo clowns **do**?",
+        "text_pt": "O que fazem os palhaços de rodeio?",
+        "note": "O *do* aparece duas vezes: primeiro como auxiliar, depois como verbo principal."
+      },
+      {
+        "position": 3,
+        "text_en": "**What does** Uncle John **do**?",
+        "text_pt": "O que o tio John faz?",
+        "note": "Terceira pessoa: o -s vai para o auxiliar e o verbo principal fica na forma base."
+      },
+      {
+        "position": 4,
+        "text_en": "She is my mom's **sister**.",
+        "text_pt": "Ela é irmã da minha mãe.",
+        "note": "O parentesco se explica com o genitivo: *mom's sister*, não *sister of mom*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "family",
+        "ipa": "/ˈfæməli/",
+        "translation_pt": "família",
+        "example_en": "I'm thinking about my family."
+      },
+      {
+        "position": 1,
+        "term": "homesick",
+        "ipa": "/ˈhoʊmsɪk/",
+        "translation_pt": "com saudade de casa",
+        "example_en": "I'm feeling homesick."
+      },
+      {
+        "position": 2,
+        "term": "aunt",
+        "ipa": "/ænt/ ou /ɑːnt/",
+        "translation_pt": "tia",
+        "example_en": "That is my Aunt Lavender."
+      },
+      {
+        "position": 3,
+        "term": "uncle",
+        "ipa": "/ˈʌŋkl/",
+        "translation_pt": "tio",
+        "example_en": "This is my Uncle John."
+      },
+      {
+        "position": 4,
+        "term": "cousin",
+        "ipa": "/ˈkʌzn/",
+        "translation_pt": "primo, prima",
+        "example_en": "They are my cousins."
+      },
+      {
+        "position": 5,
+        "term": "niece",
+        "ipa": "/niːs/",
+        "translation_pt": "sobrinha",
+        "example_en": "I'm his favorite niece."
+      },
+      {
+        "position": 6,
+        "term": "nephew",
+        "ipa": "/ˈnefjuː/",
+        "translation_pt": "sobrinho",
+        "example_en": "They are Anna's niece and nephew."
+      },
+      {
+        "position": 7,
+        "term": "to make",
+        "ipa": "/meɪk/",
+        "translation_pt": "fazer (produzir)",
+        "example_en": "She makes spoons."
+      },
+      {
+        "position": 8,
+        "term": "joke",
+        "ipa": "/dʒoʊk/",
+        "translation_pt": "piada",
+        "example_en": "They make jokes at a rodeo."
+      },
+      {
+        "position": 9,
+        "term": "to raise",
+        "ipa": "/reɪz/",
+        "translation_pt": "criar (animais)",
+        "example_en": "They raise sheep and make sweaters."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "aunt: /ænt/ ou /ɑːnt/, as duas valem",
+        "explanation": "O guia dedica o foco de pronúncia a esta palavra. Na maior parte dos Estados Unidos é /ænt/, igual a *ant* (formiga); na Nova Inglaterra e no inglês britânico é /ɑːnt/, com a vogal longa. Nenhuma das duas é erro."
+      },
+      {
+        "position": 1,
+        "label": "What does → /ˈwʌdəz/",
+        "explanation": "Na fala rápida *what does* vira um bloco só, \"UÁ-daz\". O /t/ desaparece e o *does* reduz a /dəz/ — é por isso que a pergunta soa mais curta do que parece escrita."
+      },
+      {
+        "position": 2,
+        "label": "cousin /ˈkʌzn/ — duas sílabas, com z",
+        "explanation": "Não é \"cou-SIN\" nem \"CÁU-zin\": é \"CÂ-zn\", com a vogal de *cup* e o *s* sonoro. A segunda sílaba quase não tem vogal."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 12 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/04/28/d1527ef7-587d-45b5-b3cc-fecbe37167ab_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 189,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 26,
+            "end_seconds": 36,
+            "speaker": "Marsha",
+            "text_en": "What's wrong?",
+            "text_pt": "O que houve?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 36,
+            "end_seconds": 48,
+            "speaker": "Anna",
+            "text_en": "I'm thinking about my family. I'm feeling homesick.",
+            "text_pt": "Estou pensando na minha família. Estou com saudade de casa."
+          },
+          {
+            "position": 2,
+            "start_seconds": 70,
+            "end_seconds": 80,
+            "speaker": "Marsha",
+            "text_en": "What do rodeo clowns do?",
+            "text_pt": "O que fazem os palhaços de rodeio?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 80,
+            "end_seconds": 92,
+            "speaker": "Anna",
+            "text_en": "They make jokes at a rodeo. They make people laugh.",
+            "text_pt": "Eles fazem piadas no rodeio. Eles fazem as pessoas rirem."
+          },
+          {
+            "position": 4,
+            "start_seconds": 120,
+            "end_seconds": 130,
+            "speaker": "Marsha",
+            "text_en": "What does Uncle John do?",
+            "text_pt": "O que o tio John faz?"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: What ____ Uncle John do?",
+        "hint": null,
+        "explanation": "Terceira pessoa do singular: o auxiliar é *does*, e o verbo principal fica na forma base.",
+        "hints": [
+          "O sujeito é *Uncle John*.",
+          "Equivale a *he*."
+        ],
+        "answers": [
+          "does"
+        ],
+        "options": [
+          "does",
+          "do",
+          "is"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: What ____ they do?",
+        "hint": null,
+        "explanation": "Com *they* o auxiliar é *do*.",
+        "hints": [
+          "O sujeito é plural.",
+          "Não leva -s."
+        ],
+        "answers": [
+          "do"
+        ],
+        "options": [
+          "do",
+          "does",
+          "are"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Resposta curta: — Do you have more cash? — Yes, I `____`. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "A resposta curta repete o **auxiliar**, não o verbo principal.",
+        "hints": [
+          "Duas letras.",
+          "Não é *have*."
+        ],
+        "answers": [
+          "do"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "my errands",
+          "jokes",
+          "guitars",
+          "my show"
+        ],
+        "classification_categories": [
+          "do",
+          "make"
+        ],
+        "prompt": "Classifique cada expressão: é do (executar) ou make (produzir)?",
+        "hint": null,
+        "explanation": "*Do* executa tarefas; *make* produz coisas que antes não existiam.",
+        "hints": [
+          "Pergunte se algo passa a existir.",
+          "Tarefa é *do*; objeto é *make*."
+        ],
+        "answers": [
+          "{\"my errands\": \"do\", \"jokes\": \"make\", \"guitars\": \"make\", \"my show\": \"do\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, como Marsha pergunta sobre o problema?",
+        "hint": null,
+        "explanation": "*What's wrong?* é a pergunta direta sobre o que houve.",
+        "hints": [
+          "São duas palavras contraídas.",
+          "Não é *How are you?*"
+        ],
+        "answers": [
+          "What's wrong?"
+        ],
+        "options": [
+          "What's wrong?",
+          "How are you?",
+          "Are you busy?"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que os pais de Anna fazem no rodeio?",
+        "hint": null,
+        "explanation": "*They make jokes at a rodeo. They make people laugh.* — as duas com *make*.",
+        "hints": [
+          "Duas frases, o mesmo verbo.",
+          "Nenhuma delas usa *do*."
+        ],
+        "answers": [
+          "fazem piadas e fazem as pessoas rirem"
+        ],
+        "options": [
+          "fazem piadas e fazem as pessoas rirem",
+          "criam cavalos e fazem colheres",
+          "tocam música e vendem ingressos"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta de Marsha sobre os palhaços de rodeio.",
+        "hint": null,
+        "explanation": "O *do* aparece duas vezes: auxiliar e verbo principal.",
+        "hints": [
+          "Cinco palavras.",
+          "A primeira e a última são quase iguais."
+        ],
+        "answers": [
+          "What do rodeo clowns do?",
+          "What do rodeo clowns do"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que forma do auxiliar Marsha usa para perguntar sobre o tio John?",
+        "hint": null,
+        "explanation": "*What does Uncle John do?* — terceira pessoa do singular.",
+        "hints": [
+          "O tio é uma pessoa só.",
+          "Equivale a *he*."
+        ],
+        "answers": [
+          "does"
+        ],
+        "options": [
+          "does",
+          "do",
+          "did"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "A sua família, em perguntas e respostas",
+        "instructions": "Write 6 to 9 sentences in English about three people in your family. Say the relationship, ask one question with What do and one with What does, and use make at least once for something someone produces.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "auxiliar nas duas formas",
+            "terms": [
+              "what do",
+              "what does"
+            ]
+          },
+          {
+            "label": "produzir algo",
+            "terms": [
+              "make",
+              "makes"
+            ]
+          },
+          {
+            "label": "parentesco",
+            "terms": [
+              "aunt",
+              "uncle",
+              "cousin",
+              "niece",
+              "nephew",
+              "mother",
+              "father",
+              "brother",
+              "sister"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "achar e aplicar padrões"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "11-15",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 33: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 13,
+    "slug": "lesson-13",
+    "position": 3,
+    "title": "Happy Birthday, William Shakespeare!",
+    "title_pt": "Feliz aniversário, William Shakespeare!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-13-happy-birthday-william-shakespeare/3312239.html",
+    "grammar_tag": "Advérbios de frequência e causa",
+    "focus_points": [
+      "always / never / usually",
+      "because",
+      "usual × unusual"
+    ],
+    "story_note": "Anna acha uma festa para Shakespeare",
+    "lead": "Anna está entediada, ouve música e vai ver o que é: uma festa de aniversário para Shakespeare. A aula ensina os **advérbios de frequência** e a ligação de **causa** com *because* — e a frase da aula repete o mesmo molde cinco vezes: *I never…, but today I am… because…*. A estratégia do guia é **fazer inferências**: adivinhar pelo contexto antes de perguntar.",
+    "warmup_prompt": "Say three things you always do and three things you never do.",
+    "listening_focus": "Anote cada advérbio de frequência e o que vem depois do *because*.",
+    "goals": [
+      "Usar **always**, **never** e **usually** na posição certa da frase.",
+      "Ligar causa e efeito com **because**.",
+      "Contrastar **usual** e **unusual**.",
+      "Reconhecer sons que se fundem na fala rápida."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Onde entra o advérbio de frequência",
+        "why": "A posição não é livre: o advérbio de frequência fica **antes do verbo principal**, mas **depois do verbo BE**. É a regra que o guia declara para esta aula.",
+        "warning": "**never já é negativo.** *I don't never watch* está errado — em inglês padrão não se acumulam duas negativas. É *I **never** watch puppet shows*.",
+        "table_head": [
+          "Advérbio",
+          "Posição",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**always**",
+              "antes do verbo principal",
+              "When I feel bored I **always** look for something."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**never**",
+              "antes do verbo principal",
+              "I **never** watch puppet shows."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**usually**",
+              "antes do verbo principal",
+              "I **usually** exercise on Sunday."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "com o BE",
+              "**depois** do verbo",
+              "My clothes **are usually** usual."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "because: a causa vem depois",
+        "why": "*Because* abre a explicação. Na frase-molde da aula, ele liga a exceção de hoje ao motivo: a festa de Shakespeare.",
+        "warning": "**because ≠ because of.** *Because* vem antes de uma **frase** com sujeito e verbo (*because it's his birthday*); *because of* vem antes de um **substantivo** (*because of the party*). Trocar os dois é erro frequente.",
+        "table_head": [
+          "Hábito",
+          "Exceção de hoje",
+          "Causa"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I **never** listen to a drum band.",
+              "But today I **am listening**…",
+              "**because** it's Shakespeare's birthday."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "I **never** watch puppet shows.",
+              "But today I **am watching**…",
+              "**because** it's Shakespeare's birthday."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "I **never** sword fight.",
+              "But today I **am** sword fighting…",
+              "**because** it's Shakespeare's birthday."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "usual e unusual: o prefixo que inverte",
+        "why": "O prefixo **un-** nega o adjetivo. O contraste entre o comum e o incomum é o eixo da conversa: em Washington, ver o presidente é comum; a rainha, não.",
+        "warning": "**A tônica muda de lugar.** *Usual* é /ˈjuːʒuəl/, com a força na primeira sílaba; *unusual* é /ʌnˈjuːʒuəl/, com a força na segunda. Quem mantém a tônica no mesmo lugar não é entendido.",
+        "table_head": [
+          "Adjetivo",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**usual**",
+              "comum, de sempre",
+              "My clothes are **usual**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**unusual**",
+              "incomum",
+              "His clothes are **unusual**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "very **unusual**",
+              "muito incomum",
+              "Seeing the Queen of England is very **unusual**!"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "When I feel bored I **always** look for something unusual to do.",
+        "text_pt": "Quando fico entediada eu sempre procuro algo incomum para fazer.",
+        "note": "Advérbio antes do verbo principal, e o contraste *usual/unusual* já na primeira frase."
+      },
+      {
+        "position": 1,
+        "text_en": "I **never** listen to a drum band.",
+        "text_pt": "Eu nunca escuto banda de percussão.",
+        "note": "*Never* no presente simples: o hábito."
+      },
+      {
+        "position": 2,
+        "text_en": "But today I **am listening** to a drum band **because** it's Shakespeare's birthday!",
+        "text_pt": "Mas hoje eu estou escutando uma banda de percussão porque é o aniversário do Shakespeare!",
+        "note": "A exceção vai para o presente contínuo, e o *because* dá a causa."
+      },
+      {
+        "position": 3,
+        "text_en": "My clothes are **usual**. His clothes are **unusual**.",
+        "text_pt": "Minhas roupas são comuns. As roupas dele são incomuns.",
+        "note": "O prefixo *un-* inverte o adjetivo, e a tônica muda de sílaba."
+      },
+      {
+        "position": 4,
+        "text_en": "Today, I am **not bored** because it is William Shakespeare's birthday!",
+        "text_pt": "Hoje eu não estou entediada porque é o aniversário do William Shakespeare!",
+        "note": "Fecha o arco: o tédio do começo resolvido pela causa."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "bored",
+        "ipa": "/bɔːrd/",
+        "translation_pt": "entediado",
+        "example_en": "But today I feel bored."
+      },
+      {
+        "position": 1,
+        "term": "usual",
+        "ipa": "/ˈjuːʒuəl/",
+        "translation_pt": "comum, de sempre",
+        "example_en": "My clothes are usual."
+      },
+      {
+        "position": 2,
+        "term": "unusual",
+        "ipa": "/ʌnˈjuːʒuəl/",
+        "translation_pt": "incomum",
+        "example_en": "His clothes are unusual."
+      },
+      {
+        "position": 3,
+        "term": "always",
+        "ipa": "/ˈɔːlweɪz/",
+        "translation_pt": "sempre",
+        "example_en": "I always look for something unusual."
+      },
+      {
+        "position": 4,
+        "term": "never",
+        "ipa": "/ˈnevər/",
+        "translation_pt": "nunca",
+        "example_en": "I never watch puppet shows."
+      },
+      {
+        "position": 5,
+        "term": "because",
+        "ipa": "/bɪˈkɔːz/",
+        "translation_pt": "porque",
+        "example_en": "because it's Shakespeare's birthday"
+      },
+      {
+        "position": 6,
+        "term": "drum band",
+        "ipa": "/drʌm bænd/",
+        "translation_pt": "banda de percussão",
+        "example_en": "This is a drum band."
+      },
+      {
+        "position": 7,
+        "term": "puppet show",
+        "ipa": "/ˈpʌpɪt ʃoʊ/",
+        "translation_pt": "teatro de fantoches",
+        "example_en": "I never watch puppet shows."
+      },
+      {
+        "position": 8,
+        "term": "to exercise",
+        "ipa": "/ˈeksərsaɪz/",
+        "translation_pt": "fazer exercício",
+        "example_en": "I like to exercise."
+      },
+      {
+        "position": 9,
+        "term": "to garden",
+        "ipa": "/ˈɡɑːrdn/",
+        "translation_pt": "cuidar do jardim",
+        "example_en": "I like to garden."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Sons que se fundem: because it's → /bɪˈkɔːzɪts/",
+        "explanation": "O guia chama isso de *blended sounds*. O /z/ final de *because* cola no *it's* e as duas palavras viram um bloco: \"bi-CÓ-zits\". É o que faz a frase-molde soar mais curta do que é."
+      },
+      {
+        "position": 1,
+        "label": "usual /ˈjuːʒuəl/ × unusual /ʌnˈjuːʒuəl/",
+        "explanation": "O som do meio é /ʒ/, o mesmo de *measure* — não é /z/ nem /ʃ/. E a tônica salta da primeira para a segunda sílaba quando entra o *un-*."
+      },
+      {
+        "position": 2,
+        "label": "always /ˈɔːlweɪz/ — o l não soa",
+        "explanation": "A grafia tem *l*, a pronúncia não: \"ÓL-weiz\" com o *l* apenas insinuado, quase engolido pela vogal longa."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 13 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/05/05/a7673055-e023-4593-9372-06d61ee8afd9_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 130,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 16,
+            "end_seconds": 30,
+            "speaker": "Anna",
+            "text_en": "But today I feel bored. When I feel bored I always look for something unusual to do!",
+            "text_pt": "Mas hoje eu estou entediada. Quando fico entediada eu sempre procuro algo incomum para fazer!"
+          },
+          {
+            "position": 1,
+            "start_seconds": 38,
+            "end_seconds": 48,
+            "speaker": "Rebecca",
+            "text_en": "It's a big birthday party for the writer William Shakespeare.",
+            "text_pt": "É uma grande festa de aniversário para o escritor William Shakespeare."
+          },
+          {
+            "position": 2,
+            "start_seconds": 56,
+            "end_seconds": 72,
+            "speaker": "Anna",
+            "text_en": "I never listen to a drum band. But today I am listening to a drum band.",
+            "text_pt": "Eu nunca escuto banda de percussão. Mas hoje eu estou escutando uma banda de percussão."
+          },
+          {
+            "position": 3,
+            "start_seconds": 78,
+            "end_seconds": 88,
+            "speaker": "Anna",
+            "text_en": "My clothes are usual. His clothes are unusual.",
+            "text_pt": "Minhas roupas são comuns. As roupas dele são incomuns."
+          },
+          {
+            "position": 4,
+            "start_seconds": 100,
+            "end_seconds": 112,
+            "speaker": "Anna",
+            "text_en": "Seeing the Queen of England is very unusual!",
+            "text_pt": "Ver a rainha da Inglaterra é muito incomum!"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Coloque o advérbio no lugar certo: ____ watch puppet shows.",
+        "hint": null,
+        "explanation": "O advérbio de frequência vem antes do verbo principal.",
+        "hints": [
+          "Depois do sujeito.",
+          "Antes do verbo *watch*."
+        ],
+        "answers": [
+          "I never"
+        ],
+        "options": [
+          "I never",
+          "Never I",
+          "I watch never"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Com o verbo BE, onde vai o advérbio? Complete: My clothes ____ usual.",
+        "hint": null,
+        "explanation": "Com o BE o advérbio vem **depois** do verbo, não antes.",
+        "hints": [
+          "O verbo aqui é o BE.",
+          "A ordem se inverte."
+        ],
+        "answers": [
+          "are usually"
+        ],
+        "options": [
+          "are usually",
+          "usually are",
+          "are usual"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Ligue a causa: But today I am listening `____` it's his birthday. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "*Because* abre a explicação, antes de uma frase com sujeito e verbo.",
+        "hints": [
+          "Uma palavra.",
+          "Não é *because of* — o que vem depois é uma frase inteira."
+        ],
+        "answers": [
+          "because"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "seeing a politician",
+          "seeing the Queen of England",
+          "sword fighting"
+        ],
+        "classification_categories": [
+          "usual",
+          "unusual"
+        ],
+        "prompt": "Classifique cada atividade, segundo a aula: usual ou unusual em Washington?",
+        "hint": null,
+        "explanation": "A conversa contrasta o que é comum na cidade com o que só acontece na festa.",
+        "hints": [
+          "Políticos são rotina na capital.",
+          "Realeza e espada, não."
+        ],
+        "answers": [
+          "{\"seeing a politician\": \"usual\", \"seeing the Queen of England\": \"unusual\", \"sword fighting\": \"unusual\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, o que Anna faz quando se sente entediada?",
+        "hint": null,
+        "explanation": "*I always look for something unusual to do* — com o advérbio antes do verbo.",
+        "hints": [
+          "Ela tem um hábito para isso.",
+          "A palavra-chave é *unusual*."
+        ],
+        "answers": [
+          "procura algo incomum para fazer"
+        ],
+        "options": [
+          "procura algo incomum para fazer",
+          "fica em casa lendo",
+          "liga para a Marsha"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "De quem é a festa?",
+        "hint": null,
+        "explanation": "Rebecca explica: *a big birthday party for the writer William Shakespeare*.",
+        "hints": [
+          "Rebecca responde.",
+          "É um escritor."
+        ],
+        "answers": [
+          "do escritor William Shakespeare"
+        ],
+        "options": [
+          "do escritor William Shakespeare",
+          "da rainha da Inglaterra",
+          "do presidente"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o contraste que Anna faz sobre as roupas.",
+        "hint": null,
+        "explanation": "Duas frases paralelas; a segunda só muda o prefixo e o possessivo.",
+        "hints": [
+          "Duas frases curtas.",
+          "A diferença entre elas é o prefixo *un-*."
+        ],
+        "answers": [
+          "My clothes are usual. His clothes are unusual.",
+          "My clothes are usual His clothes are unusual"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Anna classifica como *very unusual* em Washington?",
+        "hint": null,
+        "explanation": "Ver político é comum na capital; a rainha é *very unusual*.",
+        "hints": [
+          "É alguém de fora dos Estados Unidos.",
+          "Ela chama de *your majesty*."
+        ],
+        "answers": [
+          "ver a rainha da Inglaterra"
+        ],
+        "options": [
+          "ver a rainha da Inglaterra",
+          "ver o presidente",
+          "ver uma banda de percussão"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O seu domingo comum e o incomum",
+        "instructions": "Write 6 to 9 sentences in English about your Sundays. Use always, never and usually in the right position, and build one sentence with the pattern I never… but today I am… because…",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "três advérbios de frequência",
+            "terms": [
+              "always",
+              "never",
+              "usually"
+            ]
+          },
+          {
+            "label": "a causa",
+            "terms": [
+              "because"
+            ]
+          },
+          {
+            "label": "comum ou incomum",
+            "terms": [
+              "usual",
+              "unusual"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "fazer inferências"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "11-15",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 33: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 14,
+    "slug": "lesson-14",
+    "position": 4,
+    "title": "How About This?",
+    "title_pt": "Que tal este?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-14-how-about-this/3323771.html",
+    "grammar_tag": "Adjetivo antes do substantivo",
+    "focus_points": [
+      "green dress, not dress green",
+      "put on / take off",
+      "How about…?"
+    ],
+    "story_note": "O gênio ajuda Anna a se vestir",
+    "lead": "Anna vai ao teatro e não sabe o que vestir. Um gênio sai da revista para ajudar — e a cada peça aparece a mesma estrutura: **adjetivo antes do substantivo** e os verbos **put on** e **take off**. A estratégia do guia é **personalizar**: aplicar cada palavra nova à sua própria roupa, não à da Anna.",
+    "warmup_prompt": "Describe three pieces of clothing you own: colour, size and when you wear them.",
+    "listening_focus": "Anote cada adjetivo e o substantivo que vem depois dele.",
+    "goals": [
+      "Pôr o adjetivo **antes** do substantivo: **a green dress**.",
+      "Usar os phrasal verbs **put on** e **take off**.",
+      "Sugerir com **How about…?** e elogiar com **looks great on you**.",
+      "Falar de tamanho: **small**, **medium**, **large**, **too small**."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "O adjetivo vem antes, e no singular",
+        "why": "Em português o adjetivo costuma vir depois (*vestido verde*); em inglês vem **sempre antes** do substantivo. É a gramática que o guia declara para esta aula.",
+        "warning": "**O adjetivo nunca vai ao plural.** *Green dresses*, nunca *greens dresses*. E a ordem é fixa: *a beautiful green dress* — opinião antes de cor, nunca o contrário.",
+        "table_head": [
+          "Português",
+          "Inglês",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "vestido **verde**",
+              "**green** dress",
+              "Take off the **green dress**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "camisa **verde**",
+              "**green** shirt",
+              "Let's try a **green shirt**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "saia **laranja**",
+              "**orange** skirt",
+              "this **orange skirt** is too orange"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "cinto **dourado**",
+              "**gold** belt",
+              "can you put on a **gold belt**?"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "put on e take off: vestir e tirar",
+        "why": "São **phrasal verbs**: o verbo muda de sentido por causa da partícula. *Put* é colocar; *put on* é vestir. *Take* é pegar; *take off* é tirar.",
+        "warning": "**O objeto pode entrar no meio.** *Take off the hat* e *take the hat off* são os dois corretos. Mas com pronome **só o meio funciona**: *take it off*, nunca *take off it*.",
+        "table_head": [
+          "Phrasal verb",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**put on**",
+              "vestir, pôr",
+              "Can you **put on** a gold belt?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**take off**",
+              "tirar",
+              "**Take off** the green dress."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "com pronome",
+              "só no meio",
+              "**Take it off.** (nunca *take off it*)"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**try**",
+              "experimentar",
+              "Let's **try** a green shirt and a skirt."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Sugerir, elogiar e falar de tamanho",
+        "why": "O guia dá *making a suggestion* como foco de fala. *How about…?* é a forma mais comum, e o que vem depois dela não é um verbo conjugado.",
+        "warning": "**Depois de *How about* vem substantivo ou verbo-ing**, nunca infinitivo: *How about jeans?*, *How about trying this?* — nunca *How about to try*.",
+        "table_head": [
+          "Função",
+          "Fórmula",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "sugerir",
+              "**How about** + substantivo",
+              "**How about** jeans and a t-shirt?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "elogiar",
+              "**looks great on you**",
+              "Now these clothes **look great on you**!"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "tamanho errado",
+              "**too** + adjetivo",
+              "It's **too small**. / **too large**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "tamanho certo",
+              "the right size is…",
+              "The **right size** for you is medium."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "**How about** jeans and a t-shirt?",
+        "text_pt": "Que tal jeans e camiseta?",
+        "note": "Sugestão com substantivo depois, nunca infinitivo."
+      },
+      {
+        "position": 1,
+        "text_en": "Jeans and a t-shirt are **too casual**.",
+        "text_pt": "Jeans e camiseta são informais demais.",
+        "note": "*Too* + adjetivo é \"demais\", sempre negativo — diferente de *very*."
+      },
+      {
+        "position": 2,
+        "text_en": "**Take off** the **green dress**.",
+        "text_pt": "Tire o vestido verde.",
+        "note": "Phrasal verb no imperativo, com o adjetivo antes do substantivo."
+      },
+      {
+        "position": 3,
+        "text_en": "But **green looks great on you**.",
+        "text_pt": "Mas verde cai muito bem em você.",
+        "note": "A fórmula de elogio: *look great on* + pessoa."
+      },
+      {
+        "position": 4,
+        "text_en": "The **right size** for you is **medium**.",
+        "text_pt": "O tamanho certo para você é médio.",
+        "note": "Os três tamanhos da aula: *small*, *medium*, *large*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "clothes",
+        "ipa": "/kloʊz/",
+        "translation_pt": "roupas",
+        "example_en": "I don't know what clothes to wear."
+      },
+      {
+        "position": 1,
+        "term": "dress",
+        "ipa": "/dres/",
+        "translation_pt": "vestido",
+        "example_en": "This dress is beautiful."
+      },
+      {
+        "position": 2,
+        "term": "shirt",
+        "ipa": "/ʃɜːrt/",
+        "translation_pt": "camisa",
+        "example_en": "Let's try a green shirt."
+      },
+      {
+        "position": 3,
+        "term": "skirt",
+        "ipa": "/skɜːrt/",
+        "translation_pt": "saia",
+        "example_en": "this orange skirt is too orange"
+      },
+      {
+        "position": 4,
+        "term": "belt",
+        "ipa": "/belt/",
+        "translation_pt": "cinto",
+        "example_en": "Can you put on a gold belt?"
+      },
+      {
+        "position": 5,
+        "term": "to put on",
+        "ipa": "/pʊt ɑːn/",
+        "translation_pt": "vestir, pôr",
+        "example_en": "Can you put on a jacket?"
+      },
+      {
+        "position": 6,
+        "term": "to take off",
+        "ipa": "/teɪk ɔːf/",
+        "translation_pt": "tirar",
+        "example_en": "Take off the green dress."
+      },
+      {
+        "position": 7,
+        "term": "size",
+        "ipa": "/saɪz/",
+        "translation_pt": "tamanho",
+        "example_en": "It's not the right size."
+      },
+      {
+        "position": 8,
+        "term": "casual × formal",
+        "ipa": "/ˈkæʒuəl/ /ˈfɔːrml/",
+        "translation_pt": "informal × formal",
+        "example_en": "Jeans are too casual."
+      },
+      {
+        "position": 9,
+        "term": "to match",
+        "ipa": "/mætʃ/",
+        "translation_pt": "combinar",
+        "example_en": "That does not match."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Cor + substantivo: a força vai no substantivo",
+        "explanation": "O guia pede este foco. Em *green DRESS* e *gold BELT* a sílaba forte é a do substantivo, não a da cor — a cor é informação secundária. Quem acentua a cor soa como se estivesse corrigindo alguém."
+      },
+      {
+        "position": 1,
+        "label": "clothes /kloʊz/ — uma sílaba só",
+        "explanation": "A grafia tem *th*, a pronúncia americana comum não: soa quase igual a *close*. Não diga \"CLÓ-dis\" nem \"clo-THES\"."
+      },
+      {
+        "position": 2,
+        "label": "take off → /ˈteɪkɔːf/ e put on → /ˈpʊtɑːn/",
+        "explanation": "Nos phrasal verbs as duas palavras colam e a partícula leva a força: \"teik-ÓF\", \"put-ÁN\". É a partícula que carrega o sentido, e a fala reflete isso."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 14 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/05/11/f3b56fb5-23f9-4668-bae1-d98ab8967e50_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 207,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 40,
+            "end_seconds": 50,
+            "speaker": "Anna",
+            "text_en": "How about jeans and a t-shirt?",
+            "text_pt": "Que tal jeans e camiseta?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 50,
+            "end_seconds": 64,
+            "speaker": "Genie",
+            "text_en": "No! Jeans and a t-shirt are too casual. How about something more formal?",
+            "text_pt": "Não! Jeans e camiseta são informais demais. Que tal algo mais formal?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 70,
+            "end_seconds": 84,
+            "speaker": "Anna",
+            "text_en": "Genie, this dress is beautiful. But it's not the right size. It's too small.",
+            "text_pt": "Gênio, este vestido é lindo. Mas não é o tamanho certo. É pequeno demais."
+          },
+          {
+            "position": 3,
+            "start_seconds": 84,
+            "end_seconds": 94,
+            "speaker": "Genie",
+            "text_en": "Yes, it is too small. But green looks great on you.",
+            "text_pt": "Sim, é pequeno demais. Mas verde cai muito bem em você."
+          },
+          {
+            "position": 4,
+            "start_seconds": 94,
+            "end_seconds": 106,
+            "speaker": "Genie",
+            "text_en": "Take off the green dress. Let's try a green shirt and a skirt.",
+            "text_pt": "Tire o vestido verde. Vamos experimentar uma camisa verde e uma saia."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Ordene corretamente: Take off the ____.",
+        "hint": null,
+        "explanation": "Em inglês o adjetivo vem antes do substantivo, e não vai ao plural.",
+        "hints": [
+          "A cor vem primeiro.",
+          "Ao contrário do português."
+        ],
+        "answers": [
+          "green dress"
+        ],
+        "options": [
+          "green dress",
+          "dress green",
+          "greens dress"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Com pronome, qual é a ordem certa do phrasal verb?",
+        "hint": null,
+        "explanation": "Com pronome o objeto fica obrigatoriamente **no meio**.",
+        "hints": [
+          "O objeto é um pronome.",
+          "Não pode ficar depois da partícula."
+        ],
+        "answers": [
+          "Take it off."
+        ],
+        "options": [
+          "Take it off.",
+          "Take off it.",
+          "It take off."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Sugira uma peça: `____` `____` a green shirt? (duas palavras)",
+        "hint": "duas palavras",
+        "explanation": "*How about* + substantivo é a fórmula de sugestão da aula.",
+        "hints": [
+          "Duas palavras.",
+          "Depois dela não vem infinitivo."
+        ],
+        "answers": [
+          "How about"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "jeans and a t-shirt",
+          "a suit jacket",
+          "a dress shirt and a tie"
+        ],
+        "classification_categories": [
+          "casual",
+          "formal"
+        ],
+        "prompt": "Classifique cada peça de roupa, segundo o gênio: casual ou formal?",
+        "hint": null,
+        "explanation": "O gênio rejeita o informal e propõe o formal para o teatro.",
+        "hints": [
+          "Jeans ele chama de *too casual*.",
+          "Paletó e gravata são do grupo oposto."
+        ],
+        "answers": [
+          "{\"jeans and a t-shirt\": \"casual\", \"a suit jacket\": \"formal\", \"a dress shirt and a tie\": \"formal\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, por que o gênio recusa a primeira sugestão?",
+        "hint": null,
+        "explanation": "*Jeans and a t-shirt are too casual* — *too* + adjetivo, com sentido negativo.",
+        "hints": [
+          "Ele usa *too* + adjetivo.",
+          "O problema é o registro, não o tamanho."
+        ],
+        "answers": [
+          "jeans e camiseta são informais demais"
+        ],
+        "options": [
+          "jeans e camiseta são informais demais",
+          "o vestido é pequeno demais",
+          "as cores não combinam"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o problema do vestido verde?",
+        "hint": null,
+        "explanation": "*It's not the right size. It's too small.* — o problema é tamanho, não cor.",
+        "hints": [
+          "Anna acha o vestido lindo.",
+          "A objeção é de tamanho."
+        ],
+        "answers": [
+          "não é o tamanho certo, é pequeno demais"
+        ],
+        "options": [
+          "não é o tamanho certo, é pequeno demais",
+          "a cor não cai bem nela",
+          "é formal demais para o teatro"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o elogio que o gênio faz à cor.",
+        "hint": null,
+        "explanation": "A fórmula de elogio é *look great on* + pessoa.",
+        "hints": [
+          "Começa com *But*.",
+          "A fórmula termina em *on you*."
+        ],
+        "answers": [
+          "But green looks great on you.",
+          "But green looks great on you",
+          "green looks great on you"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que peças o gênio propõe depois do vestido?",
+        "hint": null,
+        "explanation": "*Let's try a green shirt and a skirt* — a cor antes do substantivo.",
+        "hints": [
+          "São duas peças.",
+          "Uma delas mantém a cor verde."
+        ],
+        "answers": [
+          "uma camisa verde e uma saia"
+        ],
+        "options": [
+          "uma camisa verde e uma saia",
+          "um paletó e uma gravata",
+          "um cinto dourado e um chapéu"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "A roupa da sua próxima saída",
+        "instructions": "Write 6 to 9 sentences in English about what you will wear to an event. Put the adjective before every noun, use put on and take off at least once each, and make one suggestion with How about.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "os dois phrasal verbs",
+            "terms": [
+              "put on",
+              "take off"
+            ]
+          },
+          {
+            "label": "uma sugestão",
+            "terms": [
+              "how about"
+            ]
+          },
+          {
+            "label": "cor antes do substantivo",
+            "terms": [
+              "green",
+              "orange",
+              "blue",
+              "black",
+              "gold",
+              "red",
+              "white"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "personalizar o conteúdo"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "11-15",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 33: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 15,
+    "slug": "lesson-15",
+    "position": 5,
+    "title": "I Love People-Watching!",
+    "title_pt": "Eu adoro observar as pessoas!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-15-i-love-people-watching/3343720.html",
+    "grammar_tag": "Adjetivos descritivos e tag questions",
+    "focus_points": [
+      "tall / short / curly",
+      "…, isn't it?",
+      "What does she look like?"
+    ],
+    "story_note": "Anna observa as pessoas no almoço",
+    "lead": "Anna almoça na rua e observa quem passa. Com Ashley e Keyana, descreve as três: altura, olhos, pele, cabelo. A aula ensina os **adjetivos descritivos** e as **tag questions** — aquele rabinho de pergunta no fim da frase. A estratégia do guia é **descobrir por conta própria**: Ashley deduz quem é a chefe só pela descrição.",
+    "warmup_prompt": "Describe two people you know: height, hair and eyes.",
+    "listening_focus": "Anote cada tag question e se a entonação sobe ou desce.",
+    "goals": [
+      "Descrever pessoas com adjetivos: **tall**, **short**, **curly**, **straight**.",
+      "Formar a **tag question**: **…, isn't it?** / **…, doesn't she?**",
+      "Perguntar a aparência com **What does she look like?**",
+      "Reconhecer a diferença entre entonação ascendente e descendente na tag."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "A tag question: o espelho invertido da frase",
+        "why": "A tag repete o **verbo auxiliar** da frase principal e **inverte** o sinal: frase afirmativa pede tag negativa, e vice-versa. É a gramática que o guia declara aqui.",
+        "warning": "**A tag copia o auxiliar, não o verbo principal.** Se a frase tem BE, a tag tem BE (*is beautiful, isn't it?*). Se tem outro verbo, a tag usa *do/does* (*she wears glasses, doesn't she?*).",
+        "table_head": [
+          "Frase",
+          "Tag",
+          "O que a tag repete"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "The weather **is** beautiful,",
+              "**isn't it**?",
+              "o BE, invertido"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "It **is** a beautiful day,",
+              "**isn't it**?",
+              "o BE, invertido"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "She **wears** glasses,",
+              "**doesn't she**?",
+              "o auxiliar *does*"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "You **are** tall,",
+              "**aren't you**?",
+              "o BE, invertido"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Os adjetivos para descrever uma pessoa",
+        "why": "O guia pede *descriptive adjectives*. A conversa cobre quatro eixos — altura, olhos, pele e cabelo — e todos seguem a mesma estrutura: **have** para partes do corpo, **be** para o corpo inteiro.",
+        "warning": "**Altura usa BE; cabelo e olhos usam HAVE.** *I **am** tall* e *I **have** curly hair* — nunca *I have tall* nem *My hair is curly* como primeira escolha. A aula usa os dois verbos lado a lado.",
+        "table_head": [
+          "Eixo",
+          "Verbo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "altura",
+              "**be**",
+              "You **are** tall. But Ashley and I **are** short."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "olhos",
+              "**have**",
+              "You and Ashley **have** brown eyes; I **have** blue eyes."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "pele",
+              "**have**",
+              "You two **have** light skin and I **have** dark skin."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "cabelo",
+              "**have**",
+              "You **have** straight hair. Keyana and I **have** curly hair."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "What does she look like? — pedir a aparência",
+        "why": "Esta pergunta pede a **descrição física**. Ashley a usa para descobrir quem é a chefe sem perguntar o nome — é a estratégia da aula em ação.",
+        "warning": "**Três perguntas parecidas, três sentidos.** *What does she **look like**?* é aparência; *What does she **like**?* é gosto; *What is she **like**?* é personalidade. Só o *look* pede a descrição física.",
+        "table_head": [
+          "Pergunta",
+          "O que se quer",
+          "Resposta da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "What does she **look like**?",
+              "aparência física",
+              "She is short. She has straight, light hair."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Does** she wear glasses?",
+              "confirmação",
+              "Yes. Yes, she **does**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Is** she wearing a blue sweater?",
+              "confirmação, agora",
+              "How do you know that?"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Today the weather is beautiful, **isn't it**?",
+        "text_pt": "Hoje o tempo está bonito, não está?",
+        "note": "Tag question com o BE invertido; aqui a entonação **desce**, porque Anna não tem dúvida."
+      },
+      {
+        "position": 1,
+        "text_en": "**Yes, it is.**",
+        "text_pt": "Sim, está.",
+        "note": "A resposta à tag é a resposta curta da Aula 8 — o mesmo mecanismo."
+      },
+      {
+        "position": 2,
+        "text_en": "You **are** tall. But Ashley and I **are** short.",
+        "text_pt": "Você é alta. Mas a Ashley e eu somos baixas.",
+        "note": "Altura com o verbo BE, nunca com *have*."
+      },
+      {
+        "position": 3,
+        "text_en": "You **have** straight hair. Keyana and I **have** curly hair.",
+        "text_pt": "Você tem cabelo liso. A Keyana e eu temos cabelo cacheado.",
+        "note": "Cabelo com *have*, e o adjetivo antes do substantivo."
+      },
+      {
+        "position": 4,
+        "text_en": "What **does** she **look like**?",
+        "text_pt": "Como ela é?",
+        "note": "A pergunta de aparência — diferente de *What is she like?*, que pede a personalidade."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "people-watching",
+        "ipa": "/ˈpiːpl ˌwɑːtʃɪŋ/",
+        "translation_pt": "observar as pessoas",
+        "example_en": "I love people-watching!"
+      },
+      {
+        "position": 1,
+        "term": "tall × short",
+        "ipa": "/tɔːl/ /ʃɔːrt/",
+        "translation_pt": "alto × baixo",
+        "example_en": "You are tall. But I am short."
+      },
+      {
+        "position": 2,
+        "term": "curly × straight",
+        "ipa": "/ˈkɜːrli/ /streɪt/",
+        "translation_pt": "cacheado × liso",
+        "example_en": "You have straight hair."
+      },
+      {
+        "position": 3,
+        "term": "light × dark",
+        "ipa": "/laɪt/ /dɑːrk/",
+        "translation_pt": "claro × escuro",
+        "example_en": "You have light skin."
+      },
+      {
+        "position": 4,
+        "term": "eyes",
+        "ipa": "/aɪz/",
+        "translation_pt": "olhos",
+        "example_en": "I have blue eyes."
+      },
+      {
+        "position": 5,
+        "term": "hair",
+        "ipa": "/her/",
+        "translation_pt": "cabelo",
+        "example_en": "Anna has very curly hair."
+      },
+      {
+        "position": 6,
+        "term": "skin",
+        "ipa": "/skɪn/",
+        "translation_pt": "pele",
+        "example_en": "I have dark skin."
+      },
+      {
+        "position": 7,
+        "term": "glasses",
+        "ipa": "/ˈɡlæsɪz/",
+        "translation_pt": "óculos",
+        "example_en": "Does she wear glasses?"
+      },
+      {
+        "position": 8,
+        "term": "sweater",
+        "ipa": "/ˈswetər/",
+        "translation_pt": "suéter",
+        "example_en": "Is she wearing a blue sweater today?"
+      },
+      {
+        "position": 9,
+        "term": "to join",
+        "ipa": "/dʒɔɪn/",
+        "translation_pt": "juntar-se a",
+        "example_en": "Keyana, hi! Come and join us!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Tag question: subindo pergunta, descendo confirma",
+        "explanation": "O guia dedica o foco a isto. Com a voz **subindo** no fim, a tag é pergunta de verdade — quem fala não sabe. Com a voz **descendo**, é só convite à concordância: *It's a beautiful day, isn't it?* dito descendo não espera discordância."
+      },
+      {
+        "position": 1,
+        "label": "hair /her/ × hear /hɪr/",
+        "explanation": "Duas palavras que o brasileiro funde. *Hair* tem a vogal de *air*; *hear* tem a de *ear*. A diferença é audível e muda a frase inteira."
+      },
+      {
+        "position": 2,
+        "label": "glasses /ˈɡlæsɪz/ — o plural soa /ɪz/",
+        "explanation": "Termina em /s/, então o plural é /ɪz/: \"GLÁ-siz\". Mesma regra de *boxes* na Aula 11."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 15 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/05/31/b08ceeac-8274-4e2d-b678-2cd30ba31f4f_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 171,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 22,
+            "end_seconds": 32,
+            "speaker": "Anna",
+            "text_en": "Ashley, today the weather is beautiful, isn't it?",
+            "text_pt": "Ashley, hoje o tempo está bonito, não está?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 32,
+            "end_seconds": 38,
+            "speaker": "Ashley",
+            "text_en": "Yes, it is.",
+            "text_pt": "Sim, está."
+          },
+          {
+            "position": 2,
+            "start_seconds": 92,
+            "end_seconds": 106,
+            "speaker": "Keyana",
+            "text_en": "For example, Anna, you are tall. But Ashley and I are short.",
+            "text_pt": "Por exemplo, Anna, você é alta. Mas a Ashley e eu somos baixas."
+          },
+          {
+            "position": 3,
+            "start_seconds": 120,
+            "end_seconds": 134,
+            "speaker": "Anna",
+            "text_en": "Ashley, you have straight hair. Keyana and I have curly hair.",
+            "text_pt": "Ashley, você tem cabelo liso. A Keyana e eu temos cabelo cacheado."
+          },
+          {
+            "position": 4,
+            "start_seconds": 150,
+            "end_seconds": 160,
+            "speaker": "Ashley",
+            "text_en": "Anna, what does your boss look like?",
+            "text_pt": "Anna, como é a sua chefe?"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete a tag: The weather is beautiful, ____?",
+        "hint": null,
+        "explanation": "A frase é afirmativa e usa o BE, então a tag é o BE negativo invertido.",
+        "hints": [
+          "A tag inverte o sinal.",
+          "O verbo da frase é o BE."
+        ],
+        "answers": [
+          "isn't it"
+        ],
+        "options": [
+          "isn't it",
+          "doesn't it",
+          "is it"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete a tag: She wears glasses, ____?",
+        "hint": null,
+        "explanation": "O verbo principal não é o BE, então a tag usa o auxiliar *does*.",
+        "hints": [
+          "O verbo é *wears*.",
+          "A tag precisa de um auxiliar."
+        ],
+        "answers": [
+          "doesn't she"
+        ],
+        "options": [
+          "doesn't she",
+          "isn't she",
+          "doesn't it"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Escolha o verbo certo: I `____` curly hair. (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Cabelo, olhos e pele usam *have*; só a altura usa o BE.",
+        "hints": [
+          "Não é o verbo BE.",
+          "É o verbo de posse."
+        ],
+        "answers": [
+          "have"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "tall",
+          "curly hair",
+          "blue eyes",
+          "short"
+        ],
+        "classification_categories": [
+          "be",
+          "have"
+        ],
+        "prompt": "Classifique cada descrição pelo verbo que a aula usa:",
+        "hint": null,
+        "explanation": "Altura é com o BE; partes do corpo são com *have*.",
+        "hints": [
+          "Altura descreve a pessoa inteira.",
+          "Cabelo e olhos se *tem*."
+        ],
+        "answers": [
+          "{\"tall\": \"be\", \"curly hair\": \"have\", \"blue eyes\": \"have\", \"short\": \"be\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, como Anna abre a conversa sobre o tempo?",
+        "hint": null,
+        "explanation": "*…the weather is beautiful, isn't it?* — a tag convida Ashley a concordar.",
+        "hints": [
+          "A frase termina com um rabinho de pergunta.",
+          "Ela não usa *Is the weather…?*"
+        ],
+        "answers": [
+          "com uma tag question"
+        ],
+        "options": [
+          "com uma tag question",
+          "com uma pergunta de sim ou não",
+          "com uma resposta curta"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Segundo Keyana, quem é alta e quem é baixa?",
+        "hint": null,
+        "explanation": "*You are tall. But Ashley and I are short* — altura sempre com o BE.",
+        "hints": [
+          "Keyana fala de si e da Ashley juntas.",
+          "Anna é a exceção do grupo."
+        ],
+        "answers": [
+          "Anna é alta; Ashley e Keyana são baixas"
+        ],
+        "options": [
+          "Anna é alta; Ashley e Keyana são baixas",
+          "Ashley é alta; Anna e Keyana são baixas",
+          "as três têm a mesma altura"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta de aparência que Ashley faz sobre a chefe.",
+        "hint": null,
+        "explanation": "Pergunta de aparência física, com o auxiliar *does*.",
+        "hints": [
+          "Começa com *What does*.",
+          "Termina com *look like*."
+        ],
+        "answers": [
+          "What does your boss look like?",
+          "What does your boss look like",
+          "Anna, what does your boss look like?"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que tipo de cabelo a Ashley tem, segundo Anna?",
+        "hint": null,
+        "explanation": "*You have straight hair* — em contraste com o cacheado de Anna e Keyana.",
+        "hints": [
+          "Anna contrasta com o dela.",
+          "É o oposto de *curly*."
+        ],
+        "answers": [
+          "liso"
+        ],
+        "options": [
+          "liso",
+          "cacheado",
+          "claro"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Duas pessoas, descritas",
+        "instructions": "Write 6 to 9 sentences in English describing two people you know. Use be for height and have for hair, eyes and skin, and finish with one tag question about the weather or the day.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "uma tag question",
+            "terms": [
+              "isn't it",
+              "aren't you",
+              "doesn't she",
+              "doesn't he"
+            ]
+          },
+          {
+            "label": "adjetivos descritivos",
+            "terms": [
+              "tall",
+              "short",
+              "curly",
+              "straight",
+              "light",
+              "dark"
+            ]
+          },
+          {
+            "label": "partes do corpo com have",
+            "terms": [
+              "hair",
+              "eyes",
+              "skin"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "descobrir por conta própria"
+  },
+  {
+    "course_slug": "voa-level-1",
     "unit_slug": "31-40",
     "slug": "lesson-31",
     "position": 1,
