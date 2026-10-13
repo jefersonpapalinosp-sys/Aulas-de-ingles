@@ -6,16 +6,10 @@ from pathlib import Path
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.models import (
-    Course,
-    CourseUnit,
-    Lesson,
-    LessonMedia,
-    TranscriptCue,
     TranscriptionJob,
 )
 from app.services import assistance, transcription_queue
@@ -128,72 +122,19 @@ async def test_fluxo_de_upload_listagem_audio_e_exclusao(
 @pytest.mark.asyncio
 async def test_listagem_isola_gravacoes_quando_numero_da_aula_se_repete(
     client: AsyncClient,
-    session: AsyncSession,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """A Aula 1 existe nos dois cursos, então a listagem precisa do curso para desempatar."""
     monkeypatch.setattr(get_settings(), "speaking_storage_dir", str(tmp_path))
-    level_1 = (
-        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
-    ).scalar_one()
-    unit = (
-        await session.execute(
-            select(CourseUnit).where(
-                CourseUnit.course_id == level_1.id,
-                CourseUnit.slug == "31-40",
-            )
-        )
-    ).scalar_one()
-    lesson = Lesson(
-        course_id=level_1.id,
-        unit_id=unit.id,
-        number=1,
-        slug="speaking-level-1-lesson-1",
-        position=100,
-        title="Level 1 lesson one",
-        title_pt="Aula um do Level 1",
-        voa_url="https://example.com/level-1/1",
-        grammar_tag="Teste de isolamento",
-        focus_points=[],
-        lead="Fixture temporária para validar identidade composta.",
-        warmup_prompt="Repita a frase.",
-        listening_focus="Identidade do curso.",
-    )
-    session.add(lesson)
-    await session.flush()
-    media = LessonMedia(
-        lesson_id=lesson.id,
-        position=0,
-        kind="conversation_audio",
-        label="Áudio temporário Level 1 Aula 1",
-        source_url="https://example.com/level-1/1.mp3",
-        license_status="review_required",
-        license_note="Fixture de teste; não publicada.",
-        attribution="Fixture de teste",
-        offline_policy="network_only",
-        duration_seconds=10,
-        transcript=[],
-    )
-    session.add(media)
-    await session.flush()
-    level_1_cue = TranscriptCue(
-        media_id=media.id,
-        position=0,
-        start_seconds=0,
-        end_seconds=5,
-        speaker="Tester",
-        text_en="Level one course cue.",
-        text_pt="Trecho do curso Level 1.",
-    )
-    session.add(level_1_cue)
-    await session.commit()
-
     headers = await conta(client, "cursos-mesmo-numero")
     attempt_ids: list[int] = []
     try:
+        level_1_cue = await course_cue_id(client, "voa-level-1", 1)
         level_2_cue = await course_cue_id(client, "voa-level-2", 1)
+        assert level_1_cue != level_2_cue
         for cue, audio in (
-            (level_1_cue.id, b"level-one-audio"),
+            (level_1_cue, b"level-one-audio"),
             (level_2_cue, b"level-two-audio"),
         ):
             created = await client.post(
@@ -236,8 +177,6 @@ async def test_listagem_isola_gravacoes_quando_numero_da_aula_se_repete(
     finally:
         for attempt_id in attempt_ids:
             await client.delete(f"/api/speaking/attempts/{attempt_id}", headers=headers)
-        await session.delete(lesson)
-        await session.commit()
 
 
 @pytest.mark.asyncio

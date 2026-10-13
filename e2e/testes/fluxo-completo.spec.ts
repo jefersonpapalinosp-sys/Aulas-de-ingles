@@ -186,7 +186,9 @@ test('do cadastro à primeira revisão', async ({ page }) => {
   await test.step('o currículo do curso e da unidade vem da API', async () => {
     await page.goto(coursePath(LEVEL_1_SLUG))
     const main = page.locator('#main-content')
-    await main.getByRole('link', { name: /Aulas/ }).first().click()
+    // Desde a Sprint 31 o bloco 1–5 abre o curso, então a unidade é escolhida
+    // pelo nome em vez da posição.
+    await main.getByRole('link', { name: /Aulas 31–40/ }).click()
     const lessonLink = main.getByRole('link', { name: /It's Unbelievable/ })
     await expect(lessonLink).toHaveAttribute('href', lessonPath(39))
     await lessonLink.click()
@@ -539,7 +541,7 @@ test('Sprint 23 publica a unidade 45–49 no catálogo sem alongar a trilha', as
   const level1Card = page
     .getByRole('article')
     .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 1" }) })
-  await expect(level1Card.getByText('22/52', { exact: true })).toBeVisible()
+  await expect(level1Card.getByText('27/52', { exact: true })).toBeVisible()
 
   await page.goto(unitPath('45-49'))
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 45–49' })).toBeVisible()
@@ -568,7 +570,7 @@ test('Sprint 24 publica as Aulas 50–52 e o checkpoint final sem inventar trans
       review?: { title: string; question_count: number } | null
     }>
   }
-  expect(curriculum.course.published_lessons).toBe(22)
+  expect(curriculum.course.published_lessons).toBe(27)
   const unit = curriculum.units.find((candidate) => candidate.slug === '50-52')
   expect(unit).toMatchObject({
     published_lessons: 3,
@@ -628,17 +630,17 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
   const initial = await initialResponse.json()
   expect(initial).toMatchObject({
     progress: {
-      published_lessons: 22,
+      published_lessons: 27,
       viewed_lessons: 0,
       completed_lessons: 0,
       completion_percent: 0,
       status: 'not_started',
     },
-    checkpoints: { published: 3, current_completed: 0 },
+    checkpoints: { published: 4, current_completed: 0 },
     certificate: {
       eligible: false,
-      required_lessons: 22,
-      required_checkpoints: 3,
+      required_lessons: 27,
+      required_checkpoints: 4,
       automatic_download: false,
     },
     next_course: {
@@ -651,6 +653,7 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     },
   })
   expect(initial.incomplete_units.map((unit: { slug: string }) => unit.slug)).toEqual([
+    '1-5',
     '31-40',
     '40-44',
     '45-49',
@@ -670,13 +673,13 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     await request.get(`/api/courses/${LEVEL_1_SLUG}/completion`, { headers })
   ).json()
   expect(after.progress).toMatchObject({
-    published_lessons: 22,
+    published_lessons: 27,
     viewed_lessons: 1,
     completed_lessons: 1,
     status: 'in_progress',
   })
   expect(after.certificate).toMatchObject({ eligible: false, automatic_download: false })
-  expect(after.incomplete_units).toHaveLength(4)
+  expect(after.incomplete_units).toHaveLength(5)
   expect(
     after.incomplete_units.find((unit: { slug: string }) => unit.slug === '50-52'),
   ).toMatchObject({ published_lessons: 3, viewed_lessons: 1, completed_lessons: 1 })
@@ -889,19 +892,19 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
       .locator('..')
       .locator('dd')
       .first()
-  await expect(metricValue('Conteúdo publicado')).toHaveText('22')
-  await expect(metricValue('Aulas vistas')).toHaveText('0 / 22')
-  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 22')
+  await expect(metricValue('Conteúdo publicado')).toHaveText('27')
+  await expect(metricValue('Aulas vistas')).toHaveText('0 / 27')
+  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 27')
   await expect(page.getByRole('progressbar', { name: 'Aulas concluídas no recorte publicado' }))
     .toHaveAttribute('aria-valuenow', '0')
 
-  for (const unit of ['Aulas 31–40', 'Aulas 40–44', 'Aulas 45–49', 'Aulas 50–52']) {
+  for (const unit of ['Aulas 1–5', 'Aulas 31–40', 'Aulas 40–44', 'Aulas 45–49', 'Aulas 50–52']) {
     await expect(page.getByRole('link', { name: new RegExp(unit) })).toBeVisible()
   }
   await expect(
     page.getByRole('heading', { name: 'Certificado do recorte: ainda não elegível' }),
   ).toBeVisible()
-  await expect(page.getByText(/Regra deste recorte: 22 aulas e 3 checkpoints/)).toBeVisible()
+  await expect(page.getByText(/Regra deste recorte: 27 aulas e 4 checkpoints/)).toBeVisible()
   await expect(page.locator('[download], iframe')).toHaveCount(0)
 
   await expect(page.getByText('Recomendado e opcional.')).toBeVisible()
@@ -1018,7 +1021,7 @@ test('painel Hoje orienta, salva o plano e só calcula competência com amostra'
   await criarConta(page, 'Painel E2E')
 
   await expect(page.getByRole('heading', { name: 'Hoje' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Começar a Aula 31' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Começar a Aula 1' })).toBeVisible()
   await expect(page.getByText(/próxima aula ainda não concluída/)).toBeVisible()
   const grammarBefore = page.locator('.today-skills li').filter({ hasText: 'Gramática' })
   await expect(grammarBefore.getByText('Dados insuficientes (0/3)')).toBeVisible()
@@ -1909,7 +1912,7 @@ test('Sprint 25 isola a retomada de Hoje entre Level 1 e Level 2', async ({ page
     await expect(page.getByRole('dialog', { name: 'Trilha de estudo' })).toHaveCount(0)
   }
   await expect(
-    page.getByRole('heading', { name: 'Level 1 · Começar a Aula 31' }),
+    page.getByRole('heading', { name: 'Level 1 · Começar a Aula 1' }),
   ).toBeVisible()
   await expect(page.getByText(/Level 2 · Aula 1/)).toHaveCount(0)
 })

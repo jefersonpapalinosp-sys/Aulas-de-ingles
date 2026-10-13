@@ -2,10 +2,10 @@
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Course, CourseUnit, Lesson
+from app.db.models import Course, CourseUnit
 from app.main import create_app
 
 
@@ -105,7 +105,7 @@ async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncCli
     assert level_1.headers["cache-control"] == "private, no-store"
     assert level_2.headers["cache-control"] == "private, no-store"
     assert resumed.json()["current_step"] == "assistir"
-    assert level_1.json()["total_lessons"] == 22
+    assert level_1.json()["total_lessons"] == 27
     assert level_1.json()["studied_count"] == 1
     row = next(item for item in level_1.json()["lessons"] if item["lesson_number"] == 32)
     assert row["course_slug"] == "voa-level-1"
@@ -118,72 +118,47 @@ async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncCli
 
 @pytest.mark.asyncio
 async def test_aula_um_em_dois_cursos_mantem_sessoes_e_historico_distintos(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient,
 ) -> None:
+    """A Aula 1 existe de verdade nos dois cursos; a identidade é (curso, número)."""
     headers = await conta(client, "mesmo-numero-historico")
-    level_1 = (
-        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
-    ).scalar_one()
-    unit = (
-        await session.execute(
-            select(CourseUnit).where(
-                CourseUnit.course_id == level_1.id,
-                CourseUnit.slug == "31-40",
-            )
+
+    level_1_path = "/api/courses/voa-level-1/lessons/1/study-session"
+    level_2_path = "/api/courses/voa-level-2/lessons/1/study-session"
+    assert (
+        await client.put(
+            level_1_path,
+            headers=headers,
+            json={"current_step": "assistir", "completed_steps": ["preparar"]},
         )
-    ).scalar_one()
-    level_1_lesson = Lesson(
-        course_id=level_1.id,
-        unit_id=unit.id,
-        number=1,
-        slug="history-level-1-lesson-1",
-        position=100,
-        title="Level 1 lesson one",
-        title_pt="Aula um do Level 1",
-        voa_url="https://example.com/level-1/1",
-        grammar_tag="Fixture",
-        focus_points=[],
-        lead="Fixture.",
-        warmup_prompt="Teste.",
-        listening_focus="Teste.",
-    )
-    session.add(level_1_lesson)
-    await session.commit()
+    ).status_code == 200
+    assert (
+        await client.put(
+            level_2_path,
+            headers=headers,
+            json={
+                "current_step": "praticar",
+                "completed_steps": ["preparar", "assistir", "estudar"],
+            },
+        )
+    ).status_code == 200
 
-    try:
-        level_1_path = "/api/courses/voa-level-1/lessons/1/study-session"
-        level_2_path = "/api/courses/voa-level-2/lessons/1/study-session"
-        assert (
-            await client.put(
-                level_1_path,
-                headers=headers,
-                json={"current_step": "assistir", "completed_steps": ["preparar"]},
-            )
-        ).status_code == 200
-        assert (
-            await client.put(
-                level_2_path,
-                headers=headers,
-                json={
-                    "current_step": "praticar",
-                    "completed_steps": ["preparar", "assistir", "estudar"],
-                },
-            )
-        ).status_code == 200
+    level_1_state = (await client.get(level_1_path, headers=headers)).json()
+    level_2_state = (await client.get(level_2_path, headers=headers)).json()
+    assert level_1_state["current_step"] == "assistir"
+    assert level_2_state["current_step"] == "praticar"
+    assert level_1_state["completed_steps"] == ["preparar"]
+    assert level_2_state["completed_steps"] == [
+        "preparar",
+        "assistir",
+        "estudar",
+    ]
 
-        level_1_state = (await client.get(level_1_path, headers=headers)).json()
-        level_2_state = (await client.get(level_2_path, headers=headers)).json()
-        assert level_1_state["current_step"] == "assistir"
-        assert level_2_state["current_step"] == "praticar"
-        assert level_1_state["completed_steps"] == ["preparar"]
-        assert level_2_state["completed_steps"] == [
-            "preparar",
-            "assistir",
-            "estudar",
-        ]
-    finally:
-        await session.execute(delete(Lesson).where(Lesson.id == level_1_lesson.id))
-        await session.commit()
+    # Os títulos confirmam que são aulas distintas, não a mesma lida duas vezes.
+    titulo_1 = (await client.get("/api/courses/voa-level-1/lessons/1")).json()["title"]
+    titulo_2 = (await client.get("/api/courses/voa-level-2/lessons/1")).json()["title"]
+    assert titulo_1 == "Welcome!"
+    assert titulo_1 != titulo_2
 
 
 @pytest.mark.asyncio
@@ -409,7 +384,7 @@ async def test_marcar_aula_e_idempotente(client: AsyncClient) -> None:
 
     p = (await client.get("/api/me/progress", headers=h)).json()
     assert p["studied_count"] == 1
-    assert p["total_lessons"] == 52
+    assert p["total_lessons"] == 57
     assert [linha["studied"] for linha in p["lessons"]].count(True) == 1
 
 
@@ -429,7 +404,7 @@ async def test_progresso_global_traz_as_cinquenta_e_duas_aulas_sem_atividade(
 ) -> None:
     h = await conta(client, "zerado")
     p = (await client.get("/api/me/progress", headers=h)).json()
-    assert len(p["lessons"]) == 52
+    assert len(p["lessons"]) == 57
     assert p == {
         **p,
         "studied_count": 0,

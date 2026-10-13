@@ -17,7 +17,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -44,6 +44,10 @@ from app.db.models import (
 from app.domain.answers import parse_classification
 
 log = logging.getLogger(__name__)
+
+# Deslocamento usado para liberar a faixa de posições durante o reordenamento
+# das unidades. Alto o bastante para não colidir com nenhuma posição real.
+POSICAO_PROVISORIA = 1000
 
 
 def find_seed_file() -> Path:
@@ -316,6 +320,18 @@ async def _upsert_catalog(session: AsyncSession, courses: list[dict[str, Any]]) 
                 await session.execute(select(CourseUnit).where(CourseUnit.course_id == course.id))
             ).scalars()
         }
+        # Inserir uma unidade antes das existentes renumera as seguintes, e a
+        # constraint de (curso, posição) é única. Como o upsert atualiza uma por
+        # vez, as posições novas colidem com as antigas no meio do caminho.
+        # Tirar todas da faixa válida primeiro resolve, dentro da transação.
+        if existing_units:
+            await session.execute(
+                update(CourseUnit)
+                .where(CourseUnit.course_id == course.id)
+                .values(position=CourseUnit.position + POSICAO_PROVISORIA)
+            )
+            await session.flush()
+
         for raw_unit in raw["units"]:
             unit = existing_units.get(raw_unit["slug"])
             if unit is None:

@@ -60,8 +60,8 @@ async def test_today_explains_first_recommendation_and_has_safe_defaults(
     assert response.headers["cache-control"] == "private, no-store"
     assert today["recommendation"]["kind"] == "start_lesson"
     assert today["recommendation"]["course_slug"] == "voa-level-1"
-    assert today["recommendation"]["lesson_number"] == 31
-    assert today["recommendation"]["href"] == "/cursos/voa-level-1/aulas/31/estudar"
+    assert today["recommendation"]["lesson_number"] == 1
+    assert today["recommendation"]["href"] == "/cursos/voa-level-1/aulas/1/estudar"
     assert today["recommendation"]["reason"]
     assert today["plan"] == {
         "weekly_minutes": 90,
@@ -240,7 +240,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
         empty_level_2 = (
             await client.get("/api/me/today?course=voa-level-2", headers=headers)
         ).json()
-        assert empty_level_1["recommendation"]["lesson_number"] == 31
+        assert empty_level_1["recommendation"]["lesson_number"] == 1
         assert empty_level_1["recommendation"]["course_slug"] == "voa-level-1"
         assert empty_level_2["recommendation"]["lesson_number"] == 1
         assert empty_level_2["recommendation"]["course_slug"] == "voa-level-2"

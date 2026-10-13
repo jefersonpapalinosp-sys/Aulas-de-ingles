@@ -103,14 +103,14 @@ foco do segmento do Professor Bot. Aqui as 30 estão declaradas pela própria VO
 
 Seis sprints de cinco aulas, na mesma cadência do Level 2.
 
-| Sprint | Aulas | Eixo gramatical do bloco |
-|---:|---|---|
-| 31 | 1–5 | verbo `BE`, pronomes pessoais e de lugar |
-| 32 | 6–10 | preposições de lugar, presente contínuo, respostas curtas |
-| 33 | 11–15 | adjetivos, advérbios de frequência, tag questions |
-| 34 | 16–20 | futuro com `will` e `going to`, `can` para habilidade |
-| 35 | 21–25 | `have to`, `want to`, passado regular, `should` |
-| 36 | 26–30 | passado irregular, imperativo, comparativo e superlativo |
+| Sprint | Aulas | Eixo gramatical do bloco | Situação |
+|---:|---|---|---|
+| 31 | 1–5 | verbo `BE`, pronomes pessoais e de lugar | **publicada em 13/10/2026** |
+| 32 | 6–10 | preposições de lugar, presente contínuo, respostas curtas | pendente |
+| 33 | 11–15 | adjetivos, advérbios de frequência, tag questions | pendente |
+| 34 | 16–20 | futuro com `will` e `going to`, `can` para habilidade | pendente |
+| 35 | 21–25 | `have to`, `want to`, passado regular, `should` | pendente |
+| 36 | 26–30 | passado irregular, imperativo, comparativo e superlativo | pendente |
 
 ### O que cada sprint entrega
 
@@ -135,6 +135,21 @@ regra da Sprint 30: `source_kind: "authorial"`, sem `source_url`, e rotulados co
 **Origem** na interface — nunca como base curricular.
 
 Isso inclui o checkpoint que falta para a unidade `31-40`.
+
+### Sprint 31, fechada
+
+A unidade `1-5` entrou **na frente** das já publicadas, e isso quebrou o semeador: a
+constraint `uq_course_unit_course_position` é única por curso, e o upsert renumera uma
+unidade por vez, então as posições novas colidiam com as antigas no meio do caminho.
+O seeder passou a tirar todas as unidades do curso da faixa válida antes de renumerar,
+na mesma transação (`POSICAO_PROVISORIA` em `backend/app/db/seed.py`).
+
+Dois testes criavam uma Aula 1 sintética no Level 1 para provar que a identidade é
+`(curso, número)`. Com a aula real publicada, a fixture passou a colidir — os dois
+testes agora usam as aulas de verdade, o que é uma prova mais forte do mesmo ponto.
+
+A recomendação inicial do Level 1 mudou de Aula 31 para Aula 1, e o recorte do
+certificado passou de 22 aulas / 3 checkpoints para 27 / 4.
 
 ## 6. Ordem de execução
 
