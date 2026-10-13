@@ -106,7 +106,7 @@ Seis sprints de cinco aulas, na mesma cadência do Level 2.
 | Sprint | Aulas | Eixo gramatical do bloco | Situação |
 |---:|---|---|---|
 | 31 | 1–5 | verbo `BE`, pronomes pessoais e de lugar | **publicada em 13/10/2026** |
-| 32 | 6–10 | preposições de lugar, presente contínuo, respostas curtas | pendente |
+| 32 | 6–10 | preposições de lugar, presente contínuo, respostas curtas | **publicada em 13/10/2026** |
 | 33 | 11–15 | adjetivos, advérbios de frequência, tag questions | pendente |
 | 34 | 16–20 | futuro com `will` e `going to`, `can` para habilidade | pendente |
 | 35 | 21–25 | `have to`, `want to`, passado regular, `should` | pendente |
@@ -150,6 +150,30 @@ testes agora usam as aulas de verdade, o que é uma prova mais forte do mesmo po
 
 A recomendação inicial do Level 1 mudou de Aula 31 para Aula 1, e o recorte do
 certificado passou de 22 aulas / 3 checkpoints para 27 / 4.
+
+### Sprint 32, fechada
+
+A unidade `6-10` entrou na posição 2, e o deslocamento que a Sprint 31 ensinou ao
+semeador cobriu o caso sem ajuste novo.
+
+Dois campos do schema cobraram a convenção já estabelecida, e foi o próprio semeador
+que apontou os dois:
+
+- **`learning_strategy` é `String(100)`** e, nas aulas já publicadas, carrega só o
+  **rótulo** da estratégia traduzido (`definir uma meta`, `antecipar o conteúdo`). O
+  primeiro rascunho da sprint trazia um parágrafo de 300 caracteres em cada aula; o
+  desenvolvimento foi para o `lead`, que é onde o enquadramento da aula já vive.
+- **`writing_prompts` tem forma própria** — `title`, `instructions`, `min_words`,
+  `min_sentences` e `requirements` com `label` e `terms` —, não o par
+  `prompt`/`guidance` do rascunho. Os `terms` de cada requisito são as expressões que
+  o texto do aluno precisa conter, e por isso saem do vocabulário da própria aula.
+
+O guia oficial traz **um erro de título na página da Aula 8**: o cabeçalho repete
+*What Are You DOING?* da Aula 7, embora os *Topics* e os *Goals* da página sejam
+claramente os da Aula 8. O título publicado é o da página da VOA, *Are You Busy?*.
+
+Level 1 vai de 27 para **32 de 52** aulas publicadas; o recorte do certificado, de
+27 aulas e 4 checkpoints para 32 e 5.
 
 ## 6. Ordem de execução
 

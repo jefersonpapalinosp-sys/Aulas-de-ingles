@@ -2758,6 +2758,2674 @@
   },
   {
     "course_slug": "voa-level-1",
+    "unit_slug": "6-10",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 32: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 6,
+    "slug": "lesson-6",
+    "position": 1,
+    "title": "Where Is the Gym?",
+    "title_pt": "Onde fica a academia?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-6-where-is-the-gym/3225958.html",
+    "grammar_tag": "Preposições de lugar",
+    "focus_points": [
+      "next to",
+      "behind",
+      "across from"
+    ],
+    "story_note": "Anna procura a academia do prédio",
+    "lead": "Anna quer treinar e pergunta ao Pete onde fica a academia. Ele responde, ela erra o caminho, e **pergunta de novo** — cinco vezes, até achar. A aula ensina três preposições de lugar e, junto com elas, a estratégia de **pedir esclarecimento** em vez de fingir que entendeu.",
+    "warmup_prompt": "Describe where two rooms in your home are, using next to and across from.",
+    "listening_focus": "Anote as três preposições de lugar e o que cada uma localiza.",
+    "goals": [
+      "Localizar lugares com **next to**, **behind** e **across from**.",
+      "Perguntar **Where is…?** e repetir a pergunta para confirmar.",
+      "Nomear os ambientes de um prédio residencial.",
+      "Cumprimentar informalmente com **How's it going?**"
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "As três preposições de lugar da aula",
+        "why": "O guia oficial declara estas três como a gramática da aula. Cada uma responde a uma pergunta diferente sobre a posição: ao lado, atrás ou do outro lado.",
+        "warning": "**across from não é *in front of*.** *Across from* é **do outro lado** de um corredor, rua ou sala — há um vão entre os dois. *In front of* é encostado, logo à frente. A academia fica *across from the lounge*: uma de cada lado.",
+        "table_head": [
+          "Preposição",
+          "Sentido",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**next to**",
+              "ao lado de, encostado",
+              "The gym is **next to** the mailroom."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**across from**",
+              "do outro lado de",
+              "The gym is **across from** the lounge."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**behind**",
+              "atrás de",
+              "It is **behind** the lobby."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Where is…? e a resposta com BE",
+        "why": "A pergunta de lugar usa **where** + o verbo BE invertido. A resposta repete o verbo e acrescenta a preposição — não se responde só com a preposição.",
+        "warning": "**Não troque *where* por *what*.** *Where* pergunta o lugar; *what* pergunta a coisa. Quando Anna quer confirmar o **ponto de referência**, ela usa *what*: *The gym is across from … what?* — é a preposição que já está dada, falta o alvo.",
+        "table_head": [
+          "Pergunta",
+          "Resposta completa",
+          "O que se confirma"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Where is** the gym?",
+              "The gym **is across from** the lounge.",
+              "o lugar"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "The mailroom is next to **what**?",
+              "Next to **the gym**.",
+              "o ponto de referência"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "The gym is across from **what**?",
+              "Across from **the lounge**.",
+              "o ponto de referência"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Cumprimento informal: How's it going?",
+        "why": "O guia pede este cumprimento como foco de pronúncia. Ele não pergunta sobre uma coisa específica — é o nosso \"e aí, como vai?\".",
+        "warning": "**A resposta não é *I'm fine*.** Como a pergunta é sobre *it* (a vida, o dia), a resposta fala de coisas: *It's going great*, *Things are awesome*.",
+        "table_head": [
+          "Pergunta",
+          "Resposta da aula",
+          "Registro"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**How's it going?**",
+              "**It's going great.**",
+              "informal"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "How's it going **with you**?",
+              "**Things are awesome!**",
+              "informal, entusiasmado"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "How are you?",
+              "I'm fine, thanks.",
+              "neutro, serve sempre"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Oh, hi, Pete. **How's it going?**",
+        "text_pt": "Ah, oi, Pete. Como vai?",
+        "note": "Cumprimento informal; *How's* é a contração de *How is*."
+      },
+      {
+        "position": 1,
+        "text_en": "It's going great. How's it going **with you**?",
+        "text_pt": "Vai ótimo. E com você?",
+        "note": "A devolução da pergunta acrescenta *with you*."
+      },
+      {
+        "position": 2,
+        "text_en": "**Where is** the gym?",
+        "text_pt": "Onde fica a academia?",
+        "note": "Where + BE invertido. A pergunta que dá título à aula."
+      },
+      {
+        "position": 3,
+        "text_en": "The gym is **across from** the lounge. It's **next to** the mailroom.",
+        "text_pt": "A academia fica do outro lado do salão. Fica ao lado da sala de correio.",
+        "note": "Duas referências para o mesmo lugar — é assim que se dá uma localização clara."
+      },
+      {
+        "position": 4,
+        "text_en": "The gym is across from … **what**?",
+        "text_pt": "A academia fica do outro lado de… o quê?",
+        "note": "A estratégia da aula: repetir a frase e perguntar só a parte que faltou."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "gym",
+        "ipa": "/dʒɪm/",
+        "translation_pt": "academia",
+        "example_en": "Where is the gym?"
+      },
+      {
+        "position": 1,
+        "term": "lounge",
+        "ipa": "/laʊndʒ/",
+        "translation_pt": "salão de convivência",
+        "example_en": "The gym is across from the lounge."
+      },
+      {
+        "position": 2,
+        "term": "mailroom",
+        "ipa": "/ˈmeɪlruːm/",
+        "translation_pt": "sala de correio",
+        "example_en": "It's next to the mailroom."
+      },
+      {
+        "position": 3,
+        "term": "lobby",
+        "ipa": "/ˈlɑːbi/",
+        "translation_pt": "saguão de entrada",
+        "example_en": "It is behind the lobby."
+      },
+      {
+        "position": 4,
+        "term": "parking garage",
+        "ipa": "/ˈpɑːrkɪŋ ɡəˈrɑːʒ/",
+        "translation_pt": "estacionamento coberto",
+        "example_en": "This is a parking garage."
+      },
+      {
+        "position": 5,
+        "term": "rooftop",
+        "ipa": "/ˈruːftɑːp/",
+        "translation_pt": "terraço, cobertura",
+        "example_en": "This is a rooftop."
+      },
+      {
+        "position": 6,
+        "term": "next to",
+        "ipa": "/nekst tuː/",
+        "translation_pt": "ao lado de",
+        "example_en": "next to the mailroom"
+      },
+      {
+        "position": 7,
+        "term": "across from",
+        "ipa": "/əˈkrɔːs frəm/",
+        "translation_pt": "do outro lado de",
+        "example_en": "across from the lounge"
+      },
+      {
+        "position": 8,
+        "term": "behind",
+        "ipa": "/bɪˈhaɪnd/",
+        "translation_pt": "atrás de",
+        "example_en": "behind the lobby"
+      },
+      {
+        "position": 9,
+        "term": "to work out",
+        "ipa": "/wɜːrk aʊt/",
+        "translation_pt": "treinar, fazer exercício",
+        "example_en": "Pete, I want to work out."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "How's it going? → /ˈhaʊzɪtˈɡoʊɪn/",
+        "explanation": "As três palavras colam numa só: \"hau-zi-GO-in\". O *g* final de *going* quase desaparece na fala rápida — é o cumprimento informal que o guia pede como foco."
+      },
+      {
+        "position": 1,
+        "label": "across from → /əˈkrɔːsfrəm/",
+        "explanation": "O /s/ de *across* e o /f/ de *from* se encostam sem vogal entre eles. Não diga \"acróssi-from\": o problema brasileiro é inserir um *i* que não existe."
+      },
+      {
+        "position": 2,
+        "label": "lounge /laʊndʒ/ × lunch /lʌntʃ/",
+        "explanation": "*Lounge* tem o ditongo /aʊ/ de *how* e termina com som de *dj*. *Lunch* tem vogal curta e termina com *tch*. São lugares bem diferentes do prédio."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 6 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/03/10/66b63229-1dc5-40ab-886d-1f4b891adf6b_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 108,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 6,
+            "end_seconds": 14,
+            "speaker": "Anna",
+            "text_en": "Oh, hi, Pete. How's it going?",
+            "text_pt": "Ah, oi, Pete. Como vai?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 14,
+            "end_seconds": 22,
+            "speaker": "Pete",
+            "text_en": "It's going great. How's it going with you?",
+            "text_pt": "Vai ótimo. E com você?"
+          },
+          {
+            "position": 2,
+            "start_seconds": 22,
+            "end_seconds": 32,
+            "speaker": "Anna",
+            "text_en": "Things are awesome! Pete, I want to work out. Where is the gym?",
+            "text_pt": "Tudo ótimo! Pete, eu quero treinar. Onde fica a academia?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 32,
+            "end_seconds": 44,
+            "speaker": "Pete",
+            "text_en": "The gym is across from the lounge. It's next to the mailroom.",
+            "text_pt": "A academia fica do outro lado do salão. Fica ao lado da sala de correio."
+          },
+          {
+            "position": 4,
+            "start_seconds": 56,
+            "end_seconds": 66,
+            "speaker": "Anna",
+            "text_en": "The gym is across from … what?",
+            "text_pt": "A academia fica do outro lado de… o quê?"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "A academia e o salão ficam um de cada lado do corredor. Complete: The gym is ____ the lounge.",
+        "hint": null,
+        "explanation": "*Across from* é do outro lado, com um vão entre os dois — é a situação da aula.",
+        "hints": [
+          "Há um corredor entre os dois.",
+          "Não estão encostados."
+        ],
+        "answers": [
+          "across from"
+        ],
+        "options": [
+          "across from",
+          "next to",
+          "behind"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "A sala de correio é colada na academia. Complete: The mailroom is ____ the gym.",
+        "hint": null,
+        "explanation": "*Next to* é ao lado, encostado — sem nada entre os dois.",
+        "hints": [
+          "Estão encostadas.",
+          "Não há vão entre elas."
+        ],
+        "answers": [
+          "next to"
+        ],
+        "options": [
+          "next to",
+          "across from",
+          "behind"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Pergunte o lugar: `____` `____` the gym? (duas palavras)",
+        "hint": "duas palavras",
+        "explanation": "A pergunta de lugar é *where* + BE invertido: *Where is…?*",
+        "hints": [
+          "Começa com a palavra de lugar.",
+          "Depois vem o verbo BE na terceira pessoa."
+        ],
+        "answers": [
+          "Where is"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "next to",
+          "behind",
+          "across from"
+        ],
+        "classification_categories": [
+          "ao lado",
+          "atrás",
+          "do outro lado"
+        ],
+        "prompt": "Classifique cada preposição pelo tipo de posição que descreve:",
+        "hint": null,
+        "explanation": "As três preposições da aula respondem a perguntas diferentes sobre a posição.",
+        "hints": [
+          "*next to* = encostado.",
+          "*across from* = há um vão entre os dois."
+        ],
+        "answers": [
+          "{\"next to\": \"ao lado\", \"behind\": \"atrás\", \"across from\": \"do outro lado\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, como Pete cumprimenta de volta?",
+        "hint": null,
+        "explanation": "*It's going great* responde a *How's it going?* falando de *it*, não de si mesmo.",
+        "hints": [
+          "A resposta fala de *it*, não de *I*.",
+          "Não é *I'm fine* — a pergunta não foi *How are you?*"
+        ],
+        "answers": [
+          "It's going great."
+        ],
+        "options": [
+          "It's going great.",
+          "I'm fine, thank you.",
+          "Things are busy."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que dois pontos de referência Pete dá para a academia?",
+        "hint": null,
+        "explanation": "Ele dá duas referências na mesma resposta: *across from the lounge* e *next to the mailroom*.",
+        "hints": [
+          "Ele cita dois lugares.",
+          "Um com *across from*, outro com *next to*."
+        ],
+        "answers": [
+          "o salão e a sala de correio"
+        ],
+        "options": [
+          "o salão e a sala de correio",
+          "o saguão e o terraço",
+          "o estacionamento e o salão"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a pergunta que dá título à aula.",
+        "hint": null,
+        "explanation": "Pergunta de lugar: *where* + BE invertido.",
+        "hints": [
+          "Quatro palavras.",
+          "Começa com *Where*."
+        ],
+        "answers": [
+          "Where is the gym?",
+          "Where is the gym"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Quando Anna repete a frase e pergunta só o que faltou, ela diz:",
+        "hint": null,
+        "explanation": "Ela mantém a parte que entendeu e substitui a que perdeu por *what* — a estratégia de pedir esclarecimento que a aula ensina.",
+        "hints": [
+          "Ela repete a frase inteira.",
+          "A palavra que falta vira *what*."
+        ],
+        "answers": [
+          "The gym is across from … what?"
+        ],
+        "options": [
+          "The gym is across from … what?",
+          "Where is the gym again?",
+          "What? I don't understand."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O seu prédio, lugar por lugar",
+        "instructions": "Write 6 to 9 sentences in English about your building, your street or your home. Locate at least three places with next to, across from and behind, and include one question with Where is.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "as três preposições",
+            "terms": [
+              "next to",
+              "across from",
+              "behind"
+            ]
+          },
+          {
+            "label": "uma pergunta de lugar",
+            "terms": [
+              "where is"
+            ]
+          },
+          {
+            "label": "nomes de lugares",
+            "terms": [
+              "gym",
+              "lobby",
+              "lounge",
+              "kitchen",
+              "store",
+              "mailroom",
+              "garage"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "fazer perguntas para esclarecer"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "6-10",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 32: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 7,
+    "slug": "lesson-7",
+    "position": 2,
+    "title": "What Are You Doing?",
+    "title_pt": "O que você está fazendo?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-7-what-are-you-doing/3240468.html",
+    "grammar_tag": "Presente contínuo",
+    "focus_points": [
+      "BE + verbo-ing",
+      "What are you doing?",
+      "I'm sorry"
+    ],
+    "story_note": "Primeiro dia de trabalho da Anna",
+    "lead": "É o primeiro dia da Anna na VOA. Ela conhece a chefe e os colegas — e interrompe todos eles no meio do trabalho. A aula ensina o tempo verbal que descreve o que está acontecendo **agora**: o presente contínuo. A estratégia é a mesma da Aula 6 — **perguntar para esclarecer** —, agora aplicada a pessoas, não a lugares.",
+    "warmup_prompt": "Write three sentences about what people around you are doing right now.",
+    "listening_focus": "Conte quantas vezes Anna pergunta *What are you doing?* e quantas pede desculpa.",
+    "goals": [
+      "Formar o presente contínuo com **BE + verbo-ing**.",
+      "Perguntar **What are you doing?** e responder com a ação em curso.",
+      "Pedir desculpa com **I'm sorry** e reconhecer **That's okay**.",
+      "Reconhecer a forma reduzida **What're you doing?** na fala rápida."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Presente contínuo: BE + verbo-ing",
+        "why": "Este tempo descreve o que está acontecendo **neste momento**. Ele tem duas peças, e as duas são obrigatórias: a forma do BE que combina com o sujeito, e o verbo principal com **-ing**.",
+        "warning": "**Não esqueça o BE.** *I writing* não existe — falta o verbo auxiliar. E não use o -ing sozinho para hábitos: *I'm writing* é agora; *I write* é sempre.",
+        "table_head": [
+          "Sujeito",
+          "BE",
+          "Verbo-ing",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "I",
+              "**am**",
+              "writing",
+              "Um, **I'm writing**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "you",
+              "**are**",
+              "doing",
+              "What **are** you **doing**?"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "he / she",
+              "**is**",
+              "recording",
+              "He **is recording** his show."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "they",
+              "**are**",
+              "working",
+              "They **are working**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "A pergunta What are you doing?",
+        "why": "Esta pergunta aparece quatro vezes na conversa. Ela pede a ação em curso, e a resposta vem sempre no mesmo tempo: BE + verbo-ing.",
+        "warning": "**Cuidado com a resposta.** A *What are you doing?* responde-se com a ação (*I'm reading*), não com *Yes* nem *No* — é pergunta aberta, não de sim ou não. Para sim ou não, a pergunta seria *Are you reading?*",
+        "table_head": [
+          "Pergunta",
+          "Tipo",
+          "Resposta"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**What** are you doing?",
+              "aberta",
+              "I'm writing. / I'm reading."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Are** you recording?",
+              "sim ou não",
+              "Yes! / No, I'm not."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Are** you reading the news?",
+              "sim ou não",
+              "No, I'm reading for my show."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Pedir desculpa e aceitar o pedido",
+        "why": "O guia dá a *apologizing* um foco próprio de pronúncia nesta aula. Anna erra com todos os colegas, então o par pedido/aceite aparece o tempo inteiro.",
+        "warning": "**I'm sorry não é um só.** *Sorry* sozinho serve para esbarrões e interrupções pequenas. *I am sorry*, por extenso e com ênfase, é para algo mais sério — e repetir muitas vezes incomoda, como a própria aula mostra.",
+        "table_head": [
+          "Pedido",
+          "Força",
+          "Aceite"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Sorry.**",
+              "leve, de passagem",
+              "That's okay."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**I'm sorry!**",
+              "normal",
+              "That's okay. Really."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**I am sorry!**",
+              "enfático, por extenso",
+              "Please. Please stop."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Nice to meet you. **What are you doing?**",
+        "text_pt": "Prazer em conhecê-la. O que você está fazendo?",
+        "note": "Pergunta aberta sobre a ação em curso."
+      },
+      {
+        "position": 1,
+        "text_en": "Um, **I'm writing**.",
+        "text_pt": "Hum, estou escrevendo.",
+        "note": "*Um* é o ruído de hesitação que o guia marca como foco de pronúncia."
+      },
+      {
+        "position": 2,
+        "text_en": "You **are writing** a lot!",
+        "text_pt": "Você está escrevendo muito!",
+        "note": "*A lot* intensifica o verbo e vem no fim da frase."
+      },
+      {
+        "position": 3,
+        "text_en": "Are you **recording**?",
+        "text_pt": "Você está gravando?",
+        "note": "Pergunta de sim ou não no presente contínuo: BE na frente."
+      },
+      {
+        "position": 4,
+        "text_en": "No, **I'm reading** for my show.",
+        "text_pt": "Não, estou lendo para o meu programa.",
+        "note": "A negativa corrige a suposição e dá a informação certa."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "to write",
+        "ipa": "/raɪt/",
+        "translation_pt": "escrever",
+        "example_en": "Um, I'm writing."
+      },
+      {
+        "position": 1,
+        "term": "to read",
+        "ipa": "/riːd/",
+        "translation_pt": "ler",
+        "example_en": "I'm reading for my show."
+      },
+      {
+        "position": 2,
+        "term": "to record",
+        "ipa": "/rɪˈkɔːrd/",
+        "translation_pt": "gravar",
+        "example_en": "Are you recording?"
+      },
+      {
+        "position": 3,
+        "term": "show",
+        "ipa": "/ʃoʊ/",
+        "translation_pt": "programa",
+        "example_en": "I am doing my show!"
+      },
+      {
+        "position": 4,
+        "term": "boss",
+        "ipa": "/bɔːs/",
+        "translation_pt": "chefe",
+        "example_en": "I am your boss, Caty Weaver."
+      },
+      {
+        "position": 5,
+        "term": "co-worker",
+        "ipa": "/ˈkoʊˌwɜːrkər/",
+        "translation_pt": "colega de trabalho",
+        "example_en": "Please meet your co-workers."
+      },
+      {
+        "position": 6,
+        "term": "busy",
+        "ipa": "/ˈbɪzi/",
+        "translation_pt": "ocupado",
+        "example_en": "So sorry, but I am busy."
+      },
+      {
+        "position": 7,
+        "term": "excited",
+        "ipa": "/ɪkˈsaɪtɪd/",
+        "translation_pt": "animado, empolgado",
+        "example_en": "Yes, I am excited!"
+      },
+      {
+        "position": 8,
+        "term": "a lot",
+        "ipa": "/ə lɑːt/",
+        "translation_pt": "muito",
+        "example_en": "You are writing a lot!"
+      },
+      {
+        "position": 9,
+        "term": "I'm sorry",
+        "ipa": "/aɪm ˈsɑːri/",
+        "translation_pt": "desculpe, sinto muito",
+        "example_en": "I am sorry!"
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "What are you doing? → /ˈwʌtərjəˈduːɪn/",
+        "explanation": "O guia marca a forma reduzida da pergunta: as quatro palavras viram \"WÁ-ta-ya-DU-in\". Caty chega a dizer *What're you doing?* na conversa — essa é a forma normal na fala."
+      },
+      {
+        "position": 1,
+        "label": "O -ing final: /ɪŋ/, não /ĩg/",
+        "explanation": "*Writing* termina com o som de *ng* nasal, com a língua no fundo. Brasileiro tende a fechar com um /g/ audível: evite o \"ráiti-ngui\"."
+      },
+      {
+        "position": 2,
+        "label": "Um /ʌm/ — o ruído de hesitação",
+        "explanation": "O guia pede este som como foco: é o equivalente ao nosso \"hum\" ou \"é…\", usado para ganhar tempo antes de responder. Anne o usa antes de *I'm writing*."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 7 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/03/16/5d724fbc-a907-4a48-9221-c1813d248168_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 149,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 14,
+            "end_seconds": 22,
+            "speaker": "Caty",
+            "text_en": "I am your boss, Caty Weaver. But, please call me Caty.",
+            "text_pt": "Eu sou a sua chefe, Caty Weaver. Mas, por favor, me chame de Caty."
+          },
+          {
+            "position": 1,
+            "start_seconds": 36,
+            "end_seconds": 44,
+            "speaker": "Caty",
+            "text_en": "So sorry, but I am busy. Please meet your co-workers.",
+            "text_pt": "Desculpe, mas estou ocupada. Vá conhecer os seus colegas."
+          },
+          {
+            "position": 2,
+            "start_seconds": 56,
+            "end_seconds": 66,
+            "speaker": "Anna",
+            "text_en": "Nice to meet you. What are you doing?",
+            "text_pt": "Prazer em conhecê-la. O que você está fazendo?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 66,
+            "end_seconds": 72,
+            "speaker": "Anne",
+            "text_en": "Um, I'm writing.",
+            "text_pt": "Hum, estou escrevendo."
+          },
+          {
+            "position": 4,
+            "start_seconds": 72,
+            "end_seconds": 78,
+            "speaker": "Anna",
+            "text_en": "You are writing! You are writing a lot!",
+            "text_pt": "Você está escrevendo! Você está escrevendo muito!"
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete no presente contínuo: I ____ writing.",
+        "hint": null,
+        "explanation": "O presente contínuo tem duas peças; com *I* a forma do BE é *am*.",
+        "hints": [
+          "O verbo-ing já está lá.",
+          "Falta a forma do BE para *I*."
+        ],
+        "answers": [
+          "am"
+        ],
+        "options": [
+          "am",
+          "is",
+          "are"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete a pergunta: What ____ you doing?",
+        "hint": null,
+        "explanation": "Com o sujeito *you* a forma do BE é *are*, e ela vem antes do sujeito na pergunta.",
+        "hints": [
+          "O sujeito é *you*.",
+          "Na pergunta o BE vem na frente do sujeito."
+        ],
+        "answers": [
+          "are"
+        ],
+        "options": [
+          "are",
+          "is",
+          "do"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Passe para o presente contínuo: *He records his show.* → `He ____ ____ his show.` (duas palavras)",
+        "hint": "duas palavras",
+        "explanation": "BE na terceira pessoa (*is*) + verbo com -ing (*recording*).",
+        "hints": [
+          "O sujeito é *he*.",
+          "O verbo principal recebe -ing."
+        ],
+        "answers": [
+          "is recording"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "What are you doing?",
+          "Are you recording?",
+          "Are you reading the news?"
+        ],
+        "classification_categories": [
+          "pede a ação",
+          "sim ou não"
+        ],
+        "prompt": "Classifique cada pergunta: espera a ação, ou espera sim ou não?",
+        "hint": null,
+        "explanation": "Perguntas com *what* são abertas; as que começam pelo BE são de sim ou não.",
+        "hints": [
+          "Veja a primeira palavra.",
+          "*What* abre; *Are* fecha em sim ou não."
+        ],
+        "answers": [
+          "{\"What are you doing?\": \"pede a ação\", \"Are you recording?\": \"sim ou não\", \"Are you reading the news?\": \"sim ou não\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, como Caty se apresenta?",
+        "hint": null,
+        "explanation": "Ela usa BE + substantivo para dar o cargo, e depois pede para ser chamada só de Caty.",
+        "hints": [
+          "Ela diz o cargo.",
+          "Usa *I am* por extenso, de forma clara."
+        ],
+        "answers": [
+          "I am your boss, Caty Weaver."
+        ],
+        "options": [
+          "I am your boss, Caty Weaver.",
+          "I'm Caty, your co-worker.",
+          "My name is Ms. Weaver."
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que som Anne faz antes de responder *I'm writing*?",
+        "hint": null,
+        "explanation": "*Um* é o ruído de hesitação — o guia o marca como foco de pronúncia desta aula.",
+        "hints": [
+          "É um som, não uma palavra.",
+          "Serve para ganhar tempo."
+        ],
+        "answers": [
+          "Um"
+        ],
+        "options": [
+          "Um",
+          "Oh",
+          "Well"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a resposta da Anne, com o ruído de hesitação.",
+        "hint": null,
+        "explanation": "O *um* vem antes da resposta e faz parte dela na fala real.",
+        "hints": [
+          "Começa com o som de hesitação.",
+          "Depois vem BE + verbo-ing."
+        ],
+        "answers": [
+          "Um, I'm writing.",
+          "Um, I'm writing",
+          "Um I'm writing"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "O que Caty diz antes de sair para trabalhar?",
+        "hint": null,
+        "explanation": "Ela pede desculpa e dá o motivo: está ocupada. *Busy* é a palavra-chave da aula seguinte.",
+        "hints": [
+          "Ela pede desculpa.",
+          "Dá o motivo com *busy*."
+        ],
+        "answers": [
+          "So sorry, but I am busy."
+        ],
+        "options": [
+          "So sorry, but I am busy.",
+          "I am sorry, I am working.",
+          "Excuse me, I am recording."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O que todos estão fazendo agora",
+        "instructions": "Write 5 to 8 sentences in English about what people around you are doing right now. Use the present continuous with at least three different subjects, and include one question with What are you doing.",
+        "min_words": 50,
+        "min_sentences": 5,
+        "requirements": [
+          {
+            "label": "BE antes do verbo",
+            "terms": [
+              "am",
+              "is",
+              "are"
+            ]
+          },
+          {
+            "label": "verbo com -ing",
+            "terms": [
+              "writing",
+              "reading",
+              "working",
+              "recording",
+              "eating",
+              "studying",
+              "talking",
+              "doing"
+            ]
+          },
+          {
+            "label": "uma pergunta",
+            "terms": [
+              "what are you doing"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "fazer perguntas para esclarecer"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "6-10",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 32: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 8,
+    "slug": "lesson-8",
+    "position": 3,
+    "title": "Are You Busy?",
+    "title_pt": "Você está ocupado?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-8-are-you-busy/3253185.html",
+    "grammar_tag": "Respostas curtas e rotina",
+    "focus_points": [
+      "Yes, I am / No, I'm not",
+      "presente simples",
+      "morning / afternoon / evening"
+    ],
+    "story_note": "Anna pede desculpa aos colegas",
+    "lead": "Segundo dia de trabalho: Anna volta para pedir desculpa a cada colega. Todos dizem que estão ocupados — e explicam **em que horário** fazem o quê. A aula ensina a resposta curta com BE e o presente simples para rotina. A estratégia do guia é **usar o que você já sabe**: com três palavras, Anna resolve três conversas.",
+    "warmup_prompt": "Say what you do every morning, every afternoon and every evening.",
+    "listening_focus": "Anote o horário que cada colega dá e a atividade que faz nele.",
+    "goals": [
+      "Responder **Are you busy?** com resposta curta.",
+      "Usar o presente simples para rotina: **Every day I do my morning show.**",
+      "Nomear as partes do dia: **morning**, **afternoon**, **evening**.",
+      "Distinguir o que acontece agora do que acontece sempre."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Resposta curta com BE",
+        "why": "Quando a pergunta começa pelo verbo BE, a resposta não repete a frase inteira: repete **só o sujeito e o verbo**. É a gramática que o guia declara para esta aula.",
+        "warning": "**Na afirmativa não se contrai; na negativa, sim.** *Yes, I am* — nunca *Yes, I'm*, porque a contração não pode terminar a frase. Mas *No, I'm not* está correto, porque ainda vem o *not* depois.",
+        "table_head": [
+          "Pergunta",
+          "Sim",
+          "Não"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Are** you busy?",
+              "Yes, I **am**.",
+              "No, I'm **not**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Is** he busy?",
+              "Yes, he **is**.",
+              "No, he **isn't**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Are** they busy?",
+              "Yes, they **are**.",
+              "No, they **aren't**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Presente simples para rotina",
+        "why": "Para dizer o que se faz **sempre**, o inglês não usa o -ing: usa o verbo na forma base. É o contraste direto com a Aula 7.",
+        "warning": "**Na terceira pessoa o verbo ganha -s.** *I do my show* mas *she does her show*. Esquecer esse -s é o erro mais frequente do presente simples.",
+        "table_head": [
+          "Tempo",
+          "Frase da aula",
+          "Quando se usa"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "presente **simples**",
+              "**Every day I do** my morning show.",
+              "rotina, hábito"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "presente **contínuo**",
+              "At 10 a.m. **I am writing**.",
+              "agora, neste momento"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "presente simples, 3ª pessoa",
+              "She **does** her show every day.",
+              "rotina de he/she/it"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "As partes do dia e a preposição certa",
+        "why": "O guia dá *times of day* como tópico da aula. Cada parte do dia pede uma preposição — e o horário exato pede outra.",
+        "warning": "**in the morning**, mas **at 10 a.m.** A parte do dia usa *in the*; a hora exata usa *at*. E *at night*, não *in the night* — essa é a exceção da lista.",
+        "table_head": [
+          "Expressão",
+          "Preposição",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**in the** morning",
+              "in the",
+              "I am writing **in the morning**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**in the** afternoon",
+              "in the",
+              "Come by **this afternoon**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**in the** evening",
+              "in the",
+              "I am recording my **evening** show."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**at** 10 a.m. / **at** 5 p.m.",
+              "at",
+              "**At 10 a.m.** I am writing."
+            ]
+          },
+          {
+            "position": 4,
+            "cells": [
+              "**at** night",
+              "at (exceção)",
+              "I read **at night**."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "Hi, Anne. **Are you busy?**",
+        "text_pt": "Oi, Anne. Você está ocupada?",
+        "note": "Pergunta de sim ou não com o BE na frente."
+      },
+      {
+        "position": 1,
+        "text_en": "Yes. **At 10 a.m.** I am writing.",
+        "text_pt": "Sim. Às 10 da manhã eu estou escrevendo.",
+        "note": "*At* + hora exata. A ação em curso naquele horário."
+      },
+      {
+        "position": 2,
+        "text_en": "**Every day I do** my morning show.",
+        "text_pt": "Todo dia eu faço o meu programa da manhã.",
+        "note": "Presente simples para rotina — verbo na forma base, sem -ing."
+      },
+      {
+        "position": 3,
+        "text_en": "When the studio light is on, **I am recording** my evening show.",
+        "text_pt": "Quando a luz do estúdio está acesa, eu estou gravando o meu programa da noite.",
+        "note": "A condição no presente simples, a ação em curso no contínuo."
+      },
+      {
+        "position": 4,
+        "text_en": "**I'm a little busy.**",
+        "text_pt": "Estou um pouco ocupada.",
+        "note": "*A little* suaviza a recusa — mais gentil que só *I'm busy*."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "busy",
+        "ipa": "/ˈbɪzi/",
+        "translation_pt": "ocupado",
+        "example_en": "Are you busy?"
+      },
+      {
+        "position": 1,
+        "term": "morning",
+        "ipa": "/ˈmɔːrnɪŋ/",
+        "translation_pt": "manhã",
+        "example_en": "I do my morning show."
+      },
+      {
+        "position": 2,
+        "term": "afternoon",
+        "ipa": "/ˌæftərˈnuːn/",
+        "translation_pt": "tarde",
+        "example_en": "Come by this afternoon."
+      },
+      {
+        "position": 3,
+        "term": "evening",
+        "ipa": "/ˈiːvnɪŋ/",
+        "translation_pt": "noite (início)",
+        "example_en": "I am recording my evening show."
+      },
+      {
+        "position": 4,
+        "term": "every day",
+        "ipa": "/ˈevri deɪ/",
+        "translation_pt": "todo dia",
+        "example_en": "Every day I do my morning show."
+      },
+      {
+        "position": 5,
+        "term": "a little",
+        "ipa": "/ə ˈlɪtl/",
+        "translation_pt": "um pouco",
+        "example_en": "I'm a little busy."
+      },
+      {
+        "position": 6,
+        "term": "maybe",
+        "ipa": "/ˈmeɪbi/",
+        "translation_pt": "talvez",
+        "example_en": "Maybe I'll see you later."
+      },
+      {
+        "position": 7,
+        "term": "another time",
+        "ipa": "/əˈnʌðər taɪm/",
+        "translation_pt": "outra hora",
+        "example_en": "Um, maybe another time?"
+      },
+      {
+        "position": 8,
+        "term": "No worries",
+        "ipa": "/noʊ ˈwɜːriz/",
+        "translation_pt": "sem problema",
+        "example_en": "No worries."
+      },
+      {
+        "position": 9,
+        "term": "to come by",
+        "ipa": "/kʌm baɪ/",
+        "translation_pt": "dar uma passada",
+        "example_en": "Come by this afternoon."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Um /ʌm/ — hesitar antes de recusar",
+        "explanation": "O guia marca o ruído de hesitação nesta aula também. Jonathan diz *Um, maybe another time?* — o *um* avisa que vem uma recusa, e por isso soa mais gentil que a recusa seca."
+      },
+      {
+        "position": 1,
+        "label": "I'm sorry: a ênfase muda o sentido",
+        "explanation": "O guia pede atenção à entonação do pedido de desculpa. Com ênfase em **sorry** (*I'm SORry*) é um pedido de verdade; plano e rápido, é só fórmula de passagem."
+      },
+      {
+        "position": 2,
+        "label": "busy /ˈbɪzi/ — o s soa como z",
+        "explanation": "A grafia engana: *busy* se diz \"BI-zi\", com /ɪ/ curto e o *s* sonoro. Não é \"biúzi\" nem \"bâsi\"."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 8 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/03/25/ae6c5055-13ae-485b-995d-b347125ecf10_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 118,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 14,
+            "end_seconds": 20,
+            "speaker": "Anna",
+            "text_en": "Hi, Anne. Are you busy?",
+            "text_pt": "Oi, Anne. Você está ocupada?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 20,
+            "end_seconds": 32,
+            "speaker": "Anne",
+            "text_en": "Yes. At 10 a.m. I am writing. Every day I do my morning show.",
+            "text_pt": "Sim. Às 10 da manhã eu estou escrevendo. Todo dia eu faço o meu programa da manhã."
+          },
+          {
+            "position": 2,
+            "start_seconds": 40,
+            "end_seconds": 46,
+            "speaker": "Anna",
+            "text_en": "Hi, Jonathan. Are you busy?",
+            "text_pt": "Oi, Jonathan. Você está ocupado?"
+          },
+          {
+            "position": 3,
+            "start_seconds": 46,
+            "end_seconds": 60,
+            "speaker": "Jonathan",
+            "text_en": "Yes, I'm busy. When the studio light is on, I am recording my evening show.",
+            "text_pt": "Sim, estou ocupado. Quando a luz do estúdio está acesa, eu estou gravando o programa da noite."
+          },
+          {
+            "position": 4,
+            "start_seconds": 76,
+            "end_seconds": 82,
+            "speaker": "Amelia",
+            "text_en": "I'm a little busy.",
+            "text_pt": "Estou um pouco ocupada."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Responda com resposta curta afirmativa: — Are you busy? — ____",
+        "hint": null,
+        "explanation": "Na resposta curta afirmativa não se contrai: *Yes, I am*.",
+        "hints": [
+          "Repete só sujeito e verbo.",
+          "A contração não pode fechar a frase."
+        ],
+        "answers": [
+          "Yes, I am."
+        ],
+        "options": [
+          "Yes, I am.",
+          "Yes, I'm.",
+          "Yes, I busy."
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Responda com resposta curta negativa: — Is he busy? — ____",
+        "hint": null,
+        "explanation": "Na negativa a contração é permitida, porque o *not* fecha a frase.",
+        "hints": [
+          "O sujeito é *he*.",
+          "Aqui a contração pode."
+        ],
+        "answers": [
+          "No, he isn't."
+        ],
+        "options": [
+          "No, he isn't.",
+          "No, he not.",
+          "No, he doesn't."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "transformation",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Passe para rotina, no presente simples: *I am writing my show.* → `Every day I ____ my show.` (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Rotina usa o verbo na forma base, sem o BE e sem o -ing.",
+        "hints": [
+          "Tire o BE e o -ing.",
+          "O sujeito é *I*, então não leva -s."
+        ],
+        "answers": [
+          "write"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "At 10 a.m. I am writing.",
+          "Every day I do my morning show.",
+          "I'm a little busy."
+        ],
+        "classification_categories": [
+          "agora",
+          "rotina"
+        ],
+        "prompt": "Classifique cada frase: fala do agora, ou de uma rotina?",
+        "hint": null,
+        "explanation": "O presente contínuo (BE + -ing) é agora; o presente simples com *every day* é rotina.",
+        "hints": [
+          "Procure o -ing.",
+          "*Every day* indica rotina."
+        ],
+        "answers": [
+          "{\"At 10 a.m. I am writing.\": \"agora\", \"Every day I do my morning show.\": \"rotina\", \"I'm a little busy.\": \"agora\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, em que horário Anne está escrevendo?",
+        "hint": null,
+        "explanation": "Ela diz *At 10 a.m. I am writing* — *at* + hora exata.",
+        "hints": [
+          "Ela dá a hora exata.",
+          "É de manhã."
+        ],
+        "answers": [
+          "às 10 da manhã"
+        ],
+        "options": [
+          "às 10 da manhã",
+          "às 10 da noite",
+          "à tarde"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é o sinal de que Jonathan está gravando?",
+        "hint": null,
+        "explanation": "*When the studio light is on* — a condição que avisa que ele não pode ser interrompido.",
+        "hints": [
+          "É algo visível do lado de fora.",
+          "Fica aceso durante a gravação."
+        ],
+        "answers": [
+          "a luz do estúdio acesa"
+        ],
+        "options": [
+          "a luz do estúdio acesa",
+          "a porta fechada",
+          "o telefone fora do gancho"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a frase de rotina da Anne.",
+        "hint": null,
+        "explanation": "Rotina no presente simples: *every day* + verbo na forma base.",
+        "hints": [
+          "Começa com duas palavras que indicam rotina.",
+          "O verbo não leva -ing."
+        ],
+        "answers": [
+          "Every day I do my morning show.",
+          "Every day I do my morning show"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Como Amelia recusa, de forma suave?",
+        "hint": null,
+        "explanation": "*A little* suaviza a recusa — não é um não seco.",
+        "hints": [
+          "Ela não diz só *I'm busy*.",
+          "Acrescenta duas palavras que amenizam."
+        ],
+        "answers": [
+          "I'm a little busy."
+        ],
+        "options": [
+          "I'm a little busy.",
+          "Yes, I am busy.",
+          "No, I'm not busy."
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "A sua rotina, parte por parte do dia",
+        "instructions": "Write 6 to 9 sentences in English about your routine. Use in the morning, in the afternoon and in the evening with the simple present, then write one sentence in the present continuous about what you are doing now.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "as três partes do dia",
+            "terms": [
+              "in the morning",
+              "in the afternoon",
+              "in the evening"
+            ]
+          },
+          {
+            "label": "rotina",
+            "terms": [
+              "every day"
+            ]
+          },
+          {
+            "label": "o agora, no contínuo",
+            "terms": [
+              "i am",
+              "i'm"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "usar o que já sabe"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "6-10",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 32: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 9,
+    "slug": "lesson-9",
+    "position": 4,
+    "title": "Is It Cold?",
+    "title_pt": "Está frio?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-9-is-it-cold/3261789.html",
+    "grammar_tag": "Respostas curtas e tempo",
+    "focus_points": [
+      "Is it…? / Yes, it is",
+      "adjetivos de tempo",
+      "Celsius × Fahrenheit"
+    ],
+    "story_note": "Anna consulta a previsão do tempo",
+    "lead": "Anna pergunta ao telefone qual é a temperatura — e ouve *18 degrees*, que soa frio até ela descobrir que é Celsius. A aula treina a pergunta e a resposta curta com **it**, e o vocabulário do tempo. O guia escolhe aqui a estratégia de **procurar oportunidades de praticar** — e o tempo é o assunto mais disponível que existe: dá para falar dele todo dia, com qualquer pessoa, sem preparo.",
+    "warmup_prompt": "Describe today's weather where you are, in two sentences.",
+    "listening_focus": "Anote cada pergunta *Is it…?* e se a resposta foi sim ou não.",
+    "goals": [
+      "Perguntar sobre o tempo com **Is it…?**",
+      "Responder com resposta curta: **Yes, it is / No, it is not**.",
+      "Usar os adjetivos **cold**, **warm**, **windy**, **sunny**, **snowy**.",
+      "Dizer a temperatura em **Celsius** e em **Fahrenheit**."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "A resposta curta com it",
+        "why": "Para falar de tempo, temperatura e hora, o inglês usa o sujeito **it** — que não traduz nada. A pergunta e a resposta giram em torno dele.",
+        "warning": "**O sujeito it é obrigatório.** Em português se diz \"está frio\" sem sujeito; em inglês *Is cold* está errado. Tem de ser *Is **it** cold?* e *Yes, **it** is*.",
+        "table_head": [
+          "Pergunta",
+          "Sim",
+          "Não"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Is it** cold?",
+              "Yes, **it is**.",
+              "No, **it is not**. / No, **it isn't**."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Is it** windy today?",
+              "Yes, it is.",
+              "No, **it is not** windy today."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Is it** snowy today?",
+              "Yes, it is.",
+              "No, it is not snowy."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Os adjetivos do tempo",
+        "why": "Quase todos se formam do substantivo + **-y**: *wind* → *windy*, *sun* → *sunny*, *snow* → *snowy*. Reconhecer o padrão poupa decorar a lista.",
+        "warning": "**cold e warm não levam -y**, porque já são adjetivos. E *hot* é mais forte que *warm*: *warm* é agradável, *hot* é quente de verdade.",
+        "table_head": [
+          "Substantivo",
+          "Adjetivo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "wind (vento)",
+              "**windy**",
+              "Is it **windy** today?"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "sun (sol)",
+              "**sunny**",
+              "Yes, Anna. It is **sunny**."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "snow (neve)",
+              "**snowy**",
+              "No, Anna. It is not **snowy**."
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "— (já é adjetivo)",
+              "**cold** / **warm**",
+              "That is **cold**! / That's **warm**."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Celsius e Fahrenheit: a mesma temperatura, dois números",
+        "why": "A piada da aula vive nessa diferença: *18 degrees* é frio em Fahrenheit e agradável em Celsius. Nos Estados Unidos a escala padrão é Fahrenheit.",
+        "warning": "**Diga sempre a escala quando houver dúvida.** *It is 18 degrees* é ambíguo; *18 degrees Celsius* não é. Foi exatamente o que confundiu a Anna.",
+        "table_head": [
+          "Celsius",
+          "Fahrenheit",
+          "Como se sente"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**18 °C**",
+              "**65 °F**",
+              "warm — agradável"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "0 °C",
+              "32 °F",
+              "cold — congelando"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "30 °C",
+              "86 °F",
+              "hot — quente"
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "What is today's **temperature**?",
+        "text_pt": "Qual é a temperatura de hoje?",
+        "note": "*Today's* com apóstrofo-s: a temperatura **de** hoje."
+      },
+      {
+        "position": 1,
+        "text_en": "Eighteen degrees! **That is cold!**",
+        "text_pt": "Dezoito graus! Isso é frio!",
+        "note": "A reação da Anna, que supôs Fahrenheit."
+      },
+      {
+        "position": 2,
+        "text_en": "**Is it** windy today?",
+        "text_pt": "Está ventando hoje?",
+        "note": "Pergunta de sim ou não com o sujeito *it* obrigatório."
+      },
+      {
+        "position": 3,
+        "text_en": "**No, it is not** windy today.",
+        "text_pt": "Não, não está ventando hoje.",
+        "note": "Resposta curta negativa, repetindo o complemento para dar ênfase."
+      },
+      {
+        "position": 4,
+        "text_en": "Remember to **check the forecast**.",
+        "text_pt": "Lembre-se de consultar a previsão.",
+        "note": "*To check* é consultar, verificar — não \"checar\" no sentido de marcar."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "weather",
+        "ipa": "/ˈweðər/",
+        "translation_pt": "tempo (clima)",
+        "example_en": "The weather changes often."
+      },
+      {
+        "position": 1,
+        "term": "forecast",
+        "ipa": "/ˈfɔːrkæst/",
+        "translation_pt": "previsão do tempo",
+        "example_en": "Every day I check the forecast."
+      },
+      {
+        "position": 2,
+        "term": "temperature",
+        "ipa": "/ˈtemprətʃər/",
+        "translation_pt": "temperatura",
+        "example_en": "What is today's temperature?"
+      },
+      {
+        "position": 3,
+        "term": "degree",
+        "ipa": "/dɪˈɡriː/",
+        "translation_pt": "grau",
+        "example_en": "Today it is 18 degrees."
+      },
+      {
+        "position": 4,
+        "term": "cold",
+        "ipa": "/koʊld/",
+        "translation_pt": "frio",
+        "example_en": "That is cold!"
+      },
+      {
+        "position": 5,
+        "term": "warm",
+        "ipa": "/wɔːrm/",
+        "translation_pt": "agradável, morno",
+        "example_en": "That's warm."
+      },
+      {
+        "position": 6,
+        "term": "windy",
+        "ipa": "/ˈwɪndi/",
+        "translation_pt": "ventando",
+        "example_en": "Is it windy today?"
+      },
+      {
+        "position": 7,
+        "term": "sunny",
+        "ipa": "/ˈsʌni/",
+        "translation_pt": "ensolarado",
+        "example_en": "Yes, Anna. It is sunny."
+      },
+      {
+        "position": 8,
+        "term": "snowy",
+        "ipa": "/ˈsnoʊi/",
+        "translation_pt": "nevando",
+        "example_en": "It is not snowy."
+      },
+      {
+        "position": 9,
+        "term": "often",
+        "ipa": "/ˈɔːfn/",
+        "translation_pt": "com frequência",
+        "example_en": "The weather changes often."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Yes, it is → /ˈjesɪtɪz/ (\"yessitis\")",
+        "explanation": "O guia chama isso de forma reduzida da resposta curta afirmativa: as três palavras colam numa só, \"IÉ-si-tis\". Reconhecer esse bloco é o que permite entender a resposta na velocidade real."
+      },
+      {
+        "position": 1,
+        "label": "Oh — a mesma palavra, três sentidos",
+        "explanation": "O guia pede atenção à entonação de *oh*. Descendente (*Oh.*) é decepção; subindo e descendo (*Oh!*) é surpresa; alongado (*Ohhh, I see*) é \"agora entendi\" — os três aparecem na conversa."
+      },
+      {
+        "position": 2,
+        "label": "often: o t é opcional",
+        "explanation": "*Often* pode ser /ˈɔːfn/ ou /ˈɔːftn/. As duas são corretas; a sem /t/ é mais comum nos Estados Unidos."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 9 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/04/01/fe67e651-87d0-4b62-9c68-749b2d3c2f21_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 121,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 28,
+            "end_seconds": 38,
+            "speaker": "Anna",
+            "text_en": "Hello, Phone? What is today's temperature?",
+            "text_pt": "Alô, Telefone? Qual é a temperatura de hoje?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 38,
+            "end_seconds": 48,
+            "speaker": "Anna",
+            "text_en": "Eighteen degrees! That is cold!",
+            "text_pt": "Dezoito graus! Isso é frio!"
+          },
+          {
+            "position": 2,
+            "start_seconds": 48,
+            "end_seconds": 58,
+            "speaker": "Anna",
+            "text_en": "Oh, Celsius. That is 65 degrees Fahrenheit. That's warm.",
+            "text_pt": "Ah, Celsius. Isso é 65 graus Fahrenheit. Isso é agradável."
+          },
+          {
+            "position": 3,
+            "start_seconds": 60,
+            "end_seconds": 68,
+            "speaker": "Anna",
+            "text_en": "Excuse me, Phone. Is it windy today?",
+            "text_pt": "Com licença, Telefone. Está ventando hoje?"
+          },
+          {
+            "position": 4,
+            "start_seconds": 68,
+            "end_seconds": 76,
+            "speaker": "Phone",
+            "text_en": "No, it is not windy today.",
+            "text_pt": "Não, não está ventando hoje."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Pergunte se está frio: ____ cold?",
+        "hint": null,
+        "explanation": "O sujeito *it* é obrigatório, e na pergunta o BE vem antes dele.",
+        "hints": [
+          "Falta o sujeito.",
+          "Em inglês nenhuma frase fica sem sujeito."
+        ],
+        "answers": [
+          "Is it"
+        ],
+        "options": [
+          "Is it",
+          "Is",
+          "It is"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Responda: — Is it sunny today? — ____",
+        "hint": null,
+        "explanation": "A resposta curta repete o sujeito *it* e o verbo, sem contrair na afirmativa.",
+        "hints": [
+          "Repete o sujeito.",
+          "Não contraia no fim da frase."
+        ],
+        "answers": [
+          "Yes, it is."
+        ],
+        "options": [
+          "Yes, it is.",
+          "Yes, it's.",
+          "Yes, is."
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "gap_fill",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Forme o adjetivo: *wind* → `____` (uma palavra)",
+        "hint": "uma palavra",
+        "explanation": "Substantivo do tempo + **-y** vira adjetivo: *wind* → *windy*.",
+        "hints": [
+          "Acrescente uma letra.",
+          "O mesmo padrão de *sun* → *sunny*."
+        ],
+        "answers": [
+          "windy"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "cold",
+          "sunny",
+          "snowy",
+          "warm"
+        ],
+        "classification_categories": [
+          "já é adjetivo",
+          "substantivo + -y"
+        ],
+        "prompt": "Classifique cada palavra: já é adjetivo, ou vem de substantivo + -y?",
+        "hint": null,
+        "explanation": "O padrão -y transforma o substantivo em adjetivo; *cold* e *warm* já nascem adjetivos.",
+        "hints": [
+          "Procure o -y no fim.",
+          "*cold* e *warm* não derivam de nada."
+        ],
+        "answers": [
+          "{\"cold\": \"já é adjetivo\", \"sunny\": \"substantivo + -y\", \"snowy\": \"substantivo + -y\", \"warm\": \"já é adjetivo\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, por que Anna acha que 18 graus é frio?",
+        "hint": null,
+        "explanation": "18 °F é congelante; 18 °C é agradável. O telefone só diz a escala depois.",
+        "hints": [
+          "A escala muda tudo.",
+          "Nos Estados Unidos o padrão é Fahrenheit."
+        ],
+        "answers": [
+          "ela supôs que era Fahrenheit"
+        ],
+        "options": [
+          "ela supôs que era Fahrenheit",
+          "o telefone errou a previsão",
+          "estava ventando ao mesmo tempo"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Quantos graus Fahrenheit correspondem aos 18 Celsius, segundo a aula?",
+        "hint": null,
+        "explanation": "Anna faz a conversão em voz alta: *That is 65 degrees Fahrenheit.*",
+        "hints": [
+          "Ela diz o número na conversa.",
+          "É mais que o dobro de 18."
+        ],
+        "answers": [
+          "65"
+        ],
+        "options": [
+          "65",
+          "32",
+          "18"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva a resposta negativa do telefone sobre o vento.",
+        "hint": null,
+        "explanation": "Resposta curta negativa que repete o complemento para dar ênfase.",
+        "hints": [
+          "Começa com *No*.",
+          "O sujeito *it* aparece duas vezes na frase."
+        ],
+        "answers": [
+          "No, it is not windy today.",
+          "No, it is not windy today",
+          "No it is not windy today"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Que respostas o telefone dá sobre vento e sol?",
+        "hint": null,
+        "explanation": "*No, it is not windy* e *Yes, Anna. It is sunny* — duas respostas curtas opostas.",
+        "hints": [
+          "São duas perguntas seguidas.",
+          "As respostas não são iguais."
+        ],
+        "answers": [
+          "não para vento, sim para sol"
+        ],
+        "options": [
+          "não para vento, sim para sol",
+          "sim para os dois",
+          "não para os dois"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "O tempo de hoje, em diálogo",
+        "instructions": "Write a short dialogue in English, 6 to 10 lines, about today's weather. Ask two questions with Is it, answer one with Yes, it is and one with No, it is not, and say the temperature with the scale.",
+        "min_words": 50,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "pergunta com it",
+            "terms": [
+              "is it"
+            ]
+          },
+          {
+            "label": "resposta curta",
+            "terms": [
+              "yes, it is",
+              "no, it is not",
+              "no, it isn't"
+            ]
+          },
+          {
+            "label": "adjetivos do tempo",
+            "terms": [
+              "cold",
+              "warm",
+              "hot",
+              "windy",
+              "sunny",
+              "snowy",
+              "rainy"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "procurar oportunidades de praticar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "6-10",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 32: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 10,
+    "slug": "lesson-10",
+    "position": 5,
+    "title": "Come Over to My Place",
+    "title_pt": "Venha até a minha casa",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-10/3285228.html",
+    "grammar_tag": "Imperativo e there is / there are",
+    "focus_points": [
+      "turn right / go straight",
+      "There is / There are",
+      "then"
+    ],
+    "story_note": "Ashley tenta achar o apartamento da Anna",
+    "lead": "Ashley está vindo visitar e se perde. Anna dá as direções por telefone, passo a passo, com **then** entre eles. A aula ensina o imperativo para instruções e o par **there is / there are** para dizer o que existe num lugar. A estratégia do guia é **usar imagens**: direção se entende melhor desenhada que descrita.",
+    "warmup_prompt": "Give directions from the nearest metro or bus stop to your home.",
+    "listening_focus": "Anote a sequência de direções que Anna dá, na ordem.",
+    "goals": [
+      "Dar instruções no **imperativo**: *Exit the Metro and turn right.*",
+      "Encadear passos com **then**.",
+      "Dizer o que existe num lugar com **There is / There are**.",
+      "Confirmar o que entendeu repetindo com entonação ascendente."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "O imperativo: instrução sem sujeito",
+        "why": "Para dar uma instrução, o inglês usa o verbo na forma base e **não diz o sujeito**. É a única situação em que a frase inglesa fica sem sujeito.",
+        "warning": "**Não ponha *you*.** *You turn right* é descrição, não instrução. A instrução é *Turn right*. E o imperativo não é grosseiro: com *please* ou pelo contexto, é a forma normal de orientar alguém.",
+        "table_head": [
+          "Instrução",
+          "Tradução",
+          "Onde aparece"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**Exit** the Metro.",
+              "Saia do metrô.",
+              "primeiro passo"
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**Turn** right. / **Turn** left.",
+              "Vire à direita. / à esquerda.",
+              "segundo e terceiro"
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**Walk** straight ahead.",
+              "Siga em frente.",
+              "último passo"
+            ]
+          },
+          {
+            "position": 3,
+            "cells": [
+              "**Come** on!",
+              "Vamos!",
+              "convite no fim da conversa"
+            ]
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Encadear passos com then",
+        "why": "*Then* liga um passo ao seguinte e deixa claro que há uma ordem. Sem ele, a sequência de instruções fica ambígua.",
+        "warning": "**then não é than.** *Then* é \"depois\", de tempo. *Than* é o \"que\" da comparação (*bigger than*). Escrevem-se parecido e significam coisas distintas.",
+        "table_head": [
+          "Passo",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "1",
+              "**Exit** the Metro and **turn** right."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "2",
+              "**Then** at the bus station **turn** left."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "3",
+              "**Then walk** straight ahead."
+            ]
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "There is / There are: dizer o que existe",
+        "why": "Para informar que algo existe num lugar, o inglês começa pela estrutura **there + BE** — e o verbo concorda com o que vem **depois**, não com *there*.",
+        "warning": "**There is não é a mesma coisa que It is.** *There is a coffee shop* informa que existe uma cafeteria. *It is a coffee shop* identifica o que aquilo é. Trocar os dois é um dos erros mais persistentes de quem fala português.",
+        "table_head": [
+          "Estrutura",
+          "Quantidade",
+          "Frase da aula"
+        ],
+        "rows": [
+          {
+            "position": 0,
+            "cells": [
+              "**There is** + singular",
+              "um",
+              "**There is** a coffee shop."
+            ]
+          },
+          {
+            "position": 1,
+            "cells": [
+              "**There are** + plural",
+              "mais de um",
+              "**There are** three coffee shops."
+            ]
+          },
+          {
+            "position": 2,
+            "cells": [
+              "**It is** + identificação",
+              "—",
+              "**It is** near the Metro."
+            ]
+          }
+        ]
+      }
+    ],
+    "phrases": [
+      {
+        "position": 0,
+        "text_en": "**Where is** your apartment?",
+        "text_pt": "Onde é o seu apartamento?",
+        "note": "A pergunta de lugar da Aula 6, agora por telefone."
+      },
+      {
+        "position": 1,
+        "text_en": "**Exit** the Metro and **turn right**.",
+        "text_pt": "Saia do metrô e vire à direita.",
+        "note": "Dois imperativos ligados por *and*."
+      },
+      {
+        "position": 2,
+        "text_en": "**Then** at the bus station **turn left**.",
+        "text_pt": "Depois, na parada de ônibus, vire à esquerda.",
+        "note": "*Then* marca o passo seguinte; o ponto de referência vem antes do verbo."
+      },
+      {
+        "position": 3,
+        "text_en": "**There are** three coffee shops.",
+        "text_pt": "Tem três cafeterias.",
+        "note": "Plural: *there are*. É a dúvida que faz Ashley ligar de novo."
+      },
+      {
+        "position": 4,
+        "text_en": "My apartment is **across from** a big department store.",
+        "text_pt": "Meu apartamento fica do outro lado de uma loja de departamentos grande.",
+        "note": "A preposição da Aula 6 resolve a confusão."
+      }
+    ],
+    "vocab": [
+      {
+        "position": 0,
+        "term": "to exit",
+        "ipa": "/ˈeɡzɪt/",
+        "translation_pt": "sair de",
+        "example_en": "Exit the Metro and turn right."
+      },
+      {
+        "position": 1,
+        "term": "to turn right",
+        "ipa": "/tɜːrn raɪt/",
+        "translation_pt": "virar à direita",
+        "example_en": "Exit the Metro and turn right."
+      },
+      {
+        "position": 2,
+        "term": "to turn left",
+        "ipa": "/tɜːrn left/",
+        "translation_pt": "virar à esquerda",
+        "example_en": "At the bus station turn left."
+      },
+      {
+        "position": 3,
+        "term": "straight ahead",
+        "ipa": "/streɪt əˈhed/",
+        "translation_pt": "em frente",
+        "example_en": "Then walk straight ahead."
+      },
+      {
+        "position": 4,
+        "term": "then",
+        "ipa": "/ðen/",
+        "translation_pt": "depois, então",
+        "example_en": "Then at the bus station turn left."
+      },
+      {
+        "position": 5,
+        "term": "near",
+        "ipa": "/nɪr/",
+        "translation_pt": "perto de",
+        "example_en": "My apartment is near the Metro."
+      },
+      {
+        "position": 6,
+        "term": "bus station",
+        "ipa": "/bʌs ˈsteɪʃn/",
+        "translation_pt": "parada de ônibus",
+        "example_en": "at the bus station"
+      },
+      {
+        "position": 7,
+        "term": "coffee shop",
+        "ipa": "/ˈkɔːfi ʃɑːp/",
+        "translation_pt": "cafeteria",
+        "example_en": "There are three coffee shops."
+      },
+      {
+        "position": 8,
+        "term": "department store",
+        "ipa": "/dɪˈpɑːrtmənt stɔːr/",
+        "translation_pt": "loja de departamentos",
+        "example_en": "across from a big department store"
+      },
+      {
+        "position": 9,
+        "term": "to come over",
+        "ipa": "/kʌm ˈoʊvər/",
+        "translation_pt": "ir à casa de alguém",
+        "example_en": "Today, my friend Ashley is coming over."
+      }
+    ],
+    "pronunciation": [
+      {
+        "position": 0,
+        "label": "Entonação ascendente para confirmar",
+        "explanation": "O guia marca este foco: Ashley repete a informação com a voz **subindo** no fim — *It is near the Columbia Heights Metro?* A mesma frase com voz descendente seria afirmação; subindo, é pedido de confirmação."
+      },
+      {
+        "position": 1,
+        "label": "straight ahead → /streɪtəˈhed/",
+        "explanation": "O /t/ final de *straight* liga direto na vogal de *ahead* e vira um toque rápido: \"strei-ta-RÉD\". Não separe as duas palavras."
+      },
+      {
+        "position": 2,
+        "label": "There are → /ˈðerər/",
+        "explanation": "Na fala rápida as duas viram um só bloco, \"DÉ-rer\". Com *there is* o resultado é \"DÉ-ris\" — e é pelo som final que se percebe se o que vem é singular ou plural."
+      }
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 10 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/04/14/442a6a50-693e-411f-8cff-99e40d16614c_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 90,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {
+            "position": 0,
+            "start_seconds": 10,
+            "end_seconds": 18,
+            "speaker": "Ashley",
+            "text_en": "Hi Anna! I'm coming to your apartment. Where is your apartment?",
+            "text_pt": "Oi, Anna! Estou indo ao seu apartamento. Onde é o seu apartamento?"
+          },
+          {
+            "position": 1,
+            "start_seconds": 18,
+            "end_seconds": 26,
+            "speaker": "Anna",
+            "text_en": "My apartment is near the Columbia Heights Metro.",
+            "text_pt": "Meu apartamento fica perto do metrô Columbia Heights."
+          },
+          {
+            "position": 2,
+            "start_seconds": 28,
+            "end_seconds": 42,
+            "speaker": "Anna",
+            "text_en": "Exit the Metro and turn right. Then at the bus station turn left. Then walk straight ahead.",
+            "text_pt": "Saia do metrô e vire à direita. Depois, na parada de ônibus, vire à esquerda. Depois siga em frente."
+          },
+          {
+            "position": 3,
+            "start_seconds": 52,
+            "end_seconds": 60,
+            "speaker": "Ashley",
+            "text_en": "Anna, which coffee shop? There are three coffee shops.",
+            "text_pt": "Anna, qual cafeteria? Tem três cafeterias."
+          },
+          {
+            "position": 4,
+            "start_seconds": 60,
+            "end_seconds": 70,
+            "speaker": "Anna",
+            "text_en": "Okay, my apartment is across from a big department store.",
+            "text_pt": "Está bem, meu apartamento fica do outro lado de uma loja de departamentos grande."
+          }
+        ]
+      }
+    ],
+    "exercises": [
+      {
+        "position": 0,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Dê a instrução: ____ right at the corner.",
+        "hint": null,
+        "explanation": "O imperativo usa o verbo na forma base e não leva sujeito.",
+        "hints": [
+          "Instrução não tem sujeito.",
+          "O verbo abre a frase."
+        ],
+        "answers": [
+          "Turn"
+        ],
+        "options": [
+          "Turn",
+          "You turn",
+          "Turning"
+        ]
+      },
+      {
+        "position": 1,
+        "activity_type": "multiple_choice",
+        "skill": "grammar",
+        "objective": "apply",
+        "prompt": "Complete: ____ three coffee shops on my street.",
+        "hint": null,
+        "explanation": "O verbo concorda com o que vem depois: *shops* é plural, então *there are*.",
+        "hints": [
+          "O substantivo está no plural.",
+          "O verbo concorda com ele, não com *there*."
+        ],
+        "answers": [
+          "There are"
+        ],
+        "options": [
+          "There are",
+          "There is",
+          "It is"
+        ]
+      },
+      {
+        "position": 2,
+        "activity_type": "reorder",
+        "skill": "grammar",
+        "objective": "produce",
+        "prompt": "Ordene os passos da instrução: `walk` / `Then` / `ahead` / `straight` (quatro palavras)",
+        "hint": "quatro palavras",
+        "explanation": "*Then* abre o passo seguinte, depois vem o imperativo e o complemento.",
+        "hints": [
+          "Comece pelo marcador de sequência.",
+          "O verbo vem logo depois dele."
+        ],
+        "answers": [
+          "Then walk straight ahead"
+        ]
+      },
+      {
+        "position": 3,
+        "activity_type": "classification",
+        "skill": "grammar",
+        "objective": "recognize",
+        "classification_items": [
+          "There is a coffee shop.",
+          "It is a coffee shop.",
+          "There are three coffee shops."
+        ],
+        "classification_categories": [
+          "informa que existe",
+          "identifica"
+        ],
+        "prompt": "Classifique cada frase: informa que algo existe, ou identifica o que é?",
+        "hint": null,
+        "explanation": "*There is / there are* informam a existência; *it is* identifica o que a coisa é.",
+        "hints": [
+          "Veja a primeira palavra.",
+          "*There* informa; *it* identifica."
+        ],
+        "answers": [
+          "{\"There is a coffee shop.\": \"informa que existe\", \"It is a coffee shop.\": \"identifica\", \"There are three coffee shops.\": \"informa que existe\"}"
+        ]
+      },
+      {
+        "position": 4,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Na escuta, qual é a referência que Anna dá primeiro?",
+        "hint": null,
+        "explanation": "Ela começa pelo ponto de partida: *near the Columbia Heights Metro*.",
+        "hints": [
+          "É o ponto de partida do caminho.",
+          "Ashley vai de metrô."
+        ],
+        "answers": [
+          "o metrô Columbia Heights"
+        ],
+        "options": [
+          "o metrô Columbia Heights",
+          "a parada de ônibus",
+          "a loja de departamentos"
+        ]
+      },
+      {
+        "position": 5,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Qual é a sequência de direções, na ordem da escuta?",
+        "hint": null,
+        "explanation": "*Turn right* → *turn left* → *walk straight ahead*, encadeados por *then*.",
+        "hints": [
+          "Três passos.",
+          "O último é seguir em frente."
+        ],
+        "answers": [
+          "direita, esquerda, em frente"
+        ],
+        "options": [
+          "direita, esquerda, em frente",
+          "esquerda, direita, em frente",
+          "em frente, direita, esquerda"
+        ]
+      },
+      {
+        "position": 6,
+        "activity_type": "dictation",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Ditado: escreva o primeiro passo da instrução da Anna.",
+        "hint": null,
+        "explanation": "Dois imperativos ligados por *and*, nenhum com sujeito.",
+        "hints": [
+          "Seis palavras.",
+          "Começa pelo verbo, sem sujeito."
+        ],
+        "answers": [
+          "Exit the Metro and turn right.",
+          "Exit the Metro and turn right",
+          "Exit the metro and turn right"
+        ]
+      },
+      {
+        "position": 7,
+        "activity_type": "multiple_choice",
+        "skill": "listening",
+        "objective": "listen",
+        "prompt": "Por que a referência da cafeteria não resolve?",
+        "hint": null,
+        "explanation": "*There are three coffee shops* — no plural, então a referência não identifica o lugar.",
+        "hints": [
+          "Ashley pergunta *which*.",
+          "A quantidade é o problema."
+        ],
+        "answers": [
+          "há três cafeterias na rua"
+        ],
+        "options": [
+          "há três cafeterias na rua",
+          "a cafeteria estava fechada",
+          "Ashley não gosta de café"
+        ]
+      }
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Como chegar à sua casa",
+        "instructions": "Write directions in English from the nearest station or bus stop to your home, in 6 to 9 sentences. Use three imperatives linked by then, and finish with There is or There are to say what is nearby.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "instruções no imperativo",
+            "terms": [
+              "turn right",
+              "turn left",
+              "straight ahead",
+              "exit"
+            ]
+          },
+          {
+            "label": "sequência",
+            "terms": [
+              "then"
+            ]
+          },
+          {
+            "label": "o que existe perto",
+            "terms": [
+              "there is",
+              "there are"
+            ]
+          }
+        ]
+      }
+    ],
+    "learning_strategy": "usar imagens"
+  },
+  {
+    "course_slug": "voa-level-1",
     "unit_slug": "31-40",
     "slug": "lesson-31",
     "position": 1,

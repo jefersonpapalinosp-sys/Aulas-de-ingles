@@ -541,7 +541,7 @@ test('Sprint 23 publica a unidade 45–49 no catálogo sem alongar a trilha', as
   const level1Card = page
     .getByRole('article')
     .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 1" }) })
-  await expect(level1Card.getByText('27/52', { exact: true })).toBeVisible()
+  await expect(level1Card.getByText('32/52', { exact: true })).toBeVisible()
 
   await page.goto(unitPath('45-49'))
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 45–49' })).toBeVisible()
@@ -570,7 +570,7 @@ test('Sprint 24 publica as Aulas 50–52 e o checkpoint final sem inventar trans
       review?: { title: string; question_count: number } | null
     }>
   }
-  expect(curriculum.course.published_lessons).toBe(27)
+  expect(curriculum.course.published_lessons).toBe(32)
   const unit = curriculum.units.find((candidate) => candidate.slug === '50-52')
   expect(unit).toMatchObject({
     published_lessons: 3,
@@ -630,17 +630,17 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
   const initial = await initialResponse.json()
   expect(initial).toMatchObject({
     progress: {
-      published_lessons: 27,
+      published_lessons: 32,
       viewed_lessons: 0,
       completed_lessons: 0,
       completion_percent: 0,
       status: 'not_started',
     },
-    checkpoints: { published: 4, current_completed: 0 },
+    checkpoints: { published: 5, current_completed: 0 },
     certificate: {
       eligible: false,
-      required_lessons: 27,
-      required_checkpoints: 4,
+      required_lessons: 32,
+      required_checkpoints: 5,
       automatic_download: false,
     },
     next_course: {
@@ -654,6 +654,7 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
   })
   expect(initial.incomplete_units.map((unit: { slug: string }) => unit.slug)).toEqual([
     '1-5',
+    '6-10',
     '31-40',
     '40-44',
     '45-49',
@@ -673,13 +674,13 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     await request.get(`/api/courses/${LEVEL_1_SLUG}/completion`, { headers })
   ).json()
   expect(after.progress).toMatchObject({
-    published_lessons: 27,
+    published_lessons: 32,
     viewed_lessons: 1,
     completed_lessons: 1,
     status: 'in_progress',
   })
   expect(after.certificate).toMatchObject({ eligible: false, automatic_download: false })
-  expect(after.incomplete_units).toHaveLength(5)
+  expect(after.incomplete_units).toHaveLength(6)
   expect(
     after.incomplete_units.find((unit: { slug: string }) => unit.slug === '50-52'),
   ).toMatchObject({ published_lessons: 3, viewed_lessons: 1, completed_lessons: 1 })
@@ -892,19 +893,26 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
       .locator('..')
       .locator('dd')
       .first()
-  await expect(metricValue('Conteúdo publicado')).toHaveText('27')
-  await expect(metricValue('Aulas vistas')).toHaveText('0 / 27')
-  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 27')
+  await expect(metricValue('Conteúdo publicado')).toHaveText('32')
+  await expect(metricValue('Aulas vistas')).toHaveText('0 / 32')
+  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 32')
   await expect(page.getByRole('progressbar', { name: 'Aulas concluídas no recorte publicado' }))
     .toHaveAttribute('aria-valuenow', '0')
 
-  for (const unit of ['Aulas 1–5', 'Aulas 31–40', 'Aulas 40–44', 'Aulas 45–49', 'Aulas 50–52']) {
+    for (const unit of [
+    'Aulas 1–5',
+    'Aulas 6–10',
+    'Aulas 31–40',
+    'Aulas 40–44',
+    'Aulas 45–49',
+    'Aulas 50–52',
+  ]) {
     await expect(page.getByRole('link', { name: new RegExp(unit) })).toBeVisible()
   }
   await expect(
     page.getByRole('heading', { name: 'Certificado do recorte: ainda não elegível' }),
   ).toBeVisible()
-  await expect(page.getByText(/Regra deste recorte: 27 aulas e 4 checkpoints/)).toBeVisible()
+  await expect(page.getByText(/Regra deste recorte: 32 aulas e 5 checkpoints/)).toBeVisible()
   await expect(page.locator('[download], iframe')).toHaveCount(0)
 
   await expect(page.getByText('Recomendado e opcional.')).toBeVisible()
