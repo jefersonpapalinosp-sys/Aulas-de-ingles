@@ -5,11 +5,11 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_lista_as_trinta_e_duas_aulas_em_ordem(client: AsyncClient) -> None:
+async def test_lista_as_trinta_e_sete_aulas_em_ordem(client: AsyncClient) -> None:
     r = await client.get("/api/lessons")
     assert r.status_code == 200
     aulas = r.json()
-    assert [a["number"] for a in aulas] == list(range(1, 11)) + list(range(31, 53))
+    assert [a["number"] for a in aulas] == list(range(1, 16)) + list(range(31, 53))
     assert aulas[0]["title"] == "Welcome!"
     # O resumo não carrega a aula inteira.
     assert "grammar_blocks" not in aulas[0]
@@ -328,7 +328,7 @@ async def test_texto_vem_em_markdown_sem_html(client: AsyncClient) -> None:
 async def test_vocabulario_filtra_por_aula(client: AsyncClient) -> None:
     todos = (await client.get("/api/vocab")).json()
     expected = 0
-    for number in [*range(1, 11), *range(31, 53)]:
+    for number in [*range(1, 16), *range(31, 53)]:
         expected += len((await client.get(f"/api/lessons/{number}")).json()["vocab"])
     assert len(todos) == expected
     da_40 = (await client.get("/api/vocab?lesson=40")).json()
@@ -347,10 +347,10 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
     expected = 0
-    for number in [*range(1, 11), *range(31, 53)]:
+    for number in [*range(1, 16), *range(31, 53)]:
         expected += len((await client.get(f"/api/lessons/{number}")).json()["exercises"])
     assert len(todos) == expected
-    assert {e["lesson_number"] for e in todos} == {*range(1, 11), *range(31, 53)}
+    assert {e["lesson_number"] for e in todos} == {*range(1, 16), *range(31, 53)}
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
     assert chaves == sorted(chaves)
