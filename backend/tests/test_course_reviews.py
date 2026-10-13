@@ -10,6 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import CourseReview, CourseReviewAttempt, CourseUnit
 
 REVIEW_URL = "/api/courses/voa-level-1/units/40-44/review"
+LEVEL_1_REVIEW_16_20_URL = "/api/courses/voa-level-1/units/16-20/review"
+LEVEL_1_REVIEW_21_25_URL = "/api/courses/voa-level-1/units/21-25/review"
+LEVEL_1_REVIEW_26_30_URL = "/api/courses/voa-level-1/units/26-30/review"
+LEVEL_1_REVIEW_31_40_URL = "/api/courses/voa-level-1/units/31-40/review"
 LEVEL_2_REVIEW_URL = "/api/courses/voa-level-2/units/6-10/review"
 LEVEL_2_REVIEW_11_15_URL = "/api/courses/voa-level-2/units/11-15/review"
 
@@ -110,6 +114,146 @@ async def test_detalhe_do_checkpoint_e_seguro_e_retoma_listening_da_aula_40(
     lesson_40 = (await client.get("/api/courses/voa-level-1/lessons/40")).json()
     assert detail["listening_media"] == lesson_40["media"][0]
     assert detail["listening_source_page_url"] == lesson_40["voa_url"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_16_20_e_autoral_e_retoma_listening_da_aula_20(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-1-16-20")
+    response = await client.get(LEVEL_1_REVIEW_16_20_URL, headers=headers)
+
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "private, no-store"
+    assert "accepted_answers" not in response.text
+    detail = response.json()
+    assert detail["slug"] == "checkpoint-16-20-level-1"
+    assert detail["source_kind"] == "authorial"
+    assert detail["source_url"] is None
+    assert "reviews dos blocos 15–19 e 20–24" in detail["source_note"]
+    assert detail["latest_attempt"] is None
+    assert [question["position"] for question in detail["questions"]] == list(range(1, 7))
+    assert [question["lesson_numbers"] for question in detail["questions"]] == [
+        [16],
+        [17],
+        [18],
+        [19],
+        [20],
+        [20],
+    ]
+    lesson_20 = (await client.get("/api/courses/voa-level-1/lessons/20")).json()
+    assert detail["listening_media"] == lesson_20["media"][0]
+    assert detail["listening_media"]["offline_policy"] == "network_only"
+    assert detail["listening_source_page_url"] == lesson_20["voa_url"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_21_25_e_autoral_e_retoma_listening_da_aula_25(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-1-21-25")
+    response = await client.get(LEVEL_1_REVIEW_21_25_URL, headers=headers)
+
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "private, no-store"
+    assert "accepted_answers" not in response.text
+    detail = response.json()
+    assert detail["slug"] == "checkpoint-21-25-level-1"
+    assert detail["source_kind"] == "authorial"
+    assert detail["source_url"] is None
+    assert "reviews dos blocos 20–24 e 25–29" in detail["source_note"]
+    assert detail["latest_attempt"] is None
+    assert [question["position"] for question in detail["questions"]] == list(range(1, 7))
+    assert [question["lesson_numbers"] for question in detail["questions"]] == [
+        [21],
+        [22],
+        [23],
+        [24],
+        [25],
+        [25],
+    ]
+    lesson_25 = (await client.get("/api/courses/voa-level-1/lessons/25")).json()
+    assert detail["listening_media"] == lesson_25["media"][0]
+    assert detail["listening_media"]["offline_policy"] == "network_only"
+    assert detail["listening_source_page_url"] == lesson_25["voa_url"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_26_30_e_autoral_e_retoma_listening_da_aula_30(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-1-26-30")
+    response = await client.get(LEVEL_1_REVIEW_26_30_URL, headers=headers)
+
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "private, no-store"
+    assert "accepted_answers" not in response.text
+    detail = response.json()
+    assert detail["slug"] == "checkpoint-26-30-level-1"
+    assert detail["content_version"] == 2
+    assert detail["source_kind"] == "authorial"
+    assert detail["source_title"] == "Fechamento autoral do Aulas de Inglês"
+    assert detail["source_url"] is None
+    assert "revisão oficial 25–29" in detail["source_note"]
+    assert "revisão oficial 30–34" in detail["source_note"]
+    assert "apenas como referência curricular" in detail["source_note"]
+    assert detail["latest_attempt"] is None
+    assert [question["position"] for question in detail["questions"]] == list(range(1, 7))
+    assert [question["lesson_numbers"] for question in detail["questions"]] == [
+        [26],
+        [27],
+        [28],
+        [29],
+        [30],
+        [30],
+    ]
+    lesson_30 = (await client.get("/api/courses/voa-level-1/lessons/30")).json()
+    assert detail["listening_media"] == lesson_30["media"][0]
+    assert detail["listening_media"]["offline_policy"] == "network_only"
+    assert detail["listening_source_page_url"] == lesson_30["voa_url"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_31_40_e_autoral_cobre_o_bloco_e_reforca_todas_as_aulas(
+    client: AsyncClient,
+) -> None:
+    headers = await conta(client, "level-1-31-40")
+    response = await client.get(LEVEL_1_REVIEW_31_40_URL, headers=headers)
+
+    assert response.status_code == 200, response.text
+    assert response.headers["cache-control"] == "private, no-store"
+    assert "accepted_answers" not in response.text
+    detail = response.json()
+    assert detail["slug"] == "checkpoint-31-40-level-1"
+    assert detail["content_version"] == 1
+    assert detail["source_kind"] == "authorial"
+    assert detail["source_title"] == "Fechamento autoral do Aulas de Inglês"
+    assert detail["source_url"] is None
+    assert "revisões oficiais 30–34, 35–39 e 40–44" in detail["source_note"]
+    assert "foram usadas apenas como referências curriculares" in detail["source_note"]
+    assert detail["latest_attempt"] is None
+    assert [question["position"] for question in detail["questions"]] == list(range(1, 11))
+    assert [question["lesson_numbers"] for question in detail["questions"]] == [
+        [number] for number in range(31, 41)
+    ]
+    lesson_40 = (await client.get("/api/courses/voa-level-1/lessons/40")).json()
+    assert detail["listening_media"] == lesson_40["media"][0]
+    assert detail["listening_media"]["offline_policy"] == "network_only"
+    assert detail["listening_source_page_url"] == lesson_40["voa_url"]
+
+    failed = await client.post(
+        f"{LEVEL_1_REVIEW_31_40_URL}/attempts",
+        headers=headers,
+        json=attempt_body(detail, correct=False),
+    )
+    assert failed.status_code == 201, failed.text
+    result = failed.json()
+    assert result["score"] == 0
+    assert result["total"] == 10
+    assert result["status"] == "reinforce"
+    assert result["reinforced_lesson_numbers"] == list(range(31, 41))
+    assert len(result["feedback"]) == 10
+    assert all(item["correct"] is False for item in result["feedback"])
 
 
 @pytest.mark.asyncio

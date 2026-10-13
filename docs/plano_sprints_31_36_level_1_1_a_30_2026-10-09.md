@@ -2,16 +2,20 @@
 
 **Criado em 9 de outubro de 2026.**
 
-## 1. Situação
+**Atualizado em 13 de outubro de 2026:** Sprints 31–36 implementadas; Level 1 com
+52 de 52 aulas e dez checkpoints no seed. O fechamento posterior da unidade `31-40`
+encerrou a última pendência curricular.
 
-O Level 2 está completo (30 de 30). O Level 1 tem **22 de 52 aulas** publicadas, todas
-no recorte **31–52**. Faltam as **30 primeiras**, que são justamente as que um iniciante
-precisa — hoje o curso começa pela aula 31.
+## 1. Situação inicial e avanço
 
-### Uma lacuna e uma sobreposição deliberada no catálogo atual
+No início deste plano, o Level 2 já estava completo (30 de 30) e o Level 1 tinha
+**22 de 52 aulas** publicadas, todas no recorte **31–52**. As Sprints 31–36
+acrescentaram as Aulas 1–30 e completaram as 52 aulas do curso.
 
-**A unidade `31-40` é a única sem checkpoint.** As outras três do Level 1 têm. Esta é
-uma lacuna real, e entra no escopo deste plano.
+### Uma lacuna encerrada e uma sobreposição deliberada no catálogo atual
+
+**A unidade `31-40` era a única sem checkpoint.** O fechamento autoral publicado após
+a Sprint 36 completou os checkpoints das dez unidades do Level 1.
 
 **A unidade `40-44` declara `lesson_start: 40` embora a aula 40 pertença à `31-40`.**
 Isso *parece* erro, e cheguei a "corrigir" para 41 antes de olhar o conteúdo — o que
@@ -75,9 +79,13 @@ foco do segmento do Professor Bot. Aqui as 30 estão declaradas pela própria VO
 |---:|---|---|---|
 | 16 | [*Where Are You From?*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-16-where-are-you-from/3355849.html) | Nationality and language names used as nouns and adjectives | Monitor |
 | 17 | [*Are You Free on Friday?*](https://learningenglish.voanews.com/a/are-you-free-on-friday-lets-learn-english/3355785.html) | Simple Future tense with ‘will’ and ‘going to’ | Evaluate |
-| 18 | [*She Always Does That*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-18-she-always-does-that/3357748.html) | Describing frequency of actions; object pronouns; ordinal numbers | Grouping |
-| 19 | [*When Do I Start?*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-19-when-do-you-start/3357760.html) | ‘Which’ as an adjective alone and with pronouns; adjectives ‘next’ and ‘… | Summarize |
+| 18 | [*She Always Does That*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-18-she-always-does-that/3357748.html) | frequência das ações; pronomes objeto; números ordinais | Classify / Grouping¹ |
+| 19 | [*When Do I Start?*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-19-when-do-you-start/3357760.html) | `which` sozinho e com substantivo; `which one`; `next` e `every` em expressões de tempo | Summarize |
 | 20 | [*What Can You Do?*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-20-what-can-you-do/3384429.html) | Expressing ability; ‘can’ & ‘can’t;’ contractions | Identify Problems |
+
+¹ O plano individual e o review chamam a estratégia da Aula 18 de *Classify*; o
+guia consolidado usa *Grouping*. O seed adota **classificar**, que preserva a função
+pedagógica e segue a fonte individual da aula.
 
 ### Unidade 21–25
 
@@ -87,7 +95,11 @@ foco do segmento do Professor Bot. Aqui as 30 estão declaradas pela própria VO
 | 22 | [*Next Summer...*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-22/3397314.html) | Future events and intentions using going to | Plan |
 | 23 | [*What Do You Want?*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-23-what-do-you-want/3413753.html) | Using want to express desires | Respond |
 | 24 | [*Yesterday Was Amazing!*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-24-yesterday-was-amazing/3439164.html) | Regular Past Tense Verbs | Substitute |
-| 25 | [*Watch Out!*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-25-watch-out/3431138.html) | Should; ought to | Make associations |
+| 25 | [*Watch Out!*](https://learningenglish.voanews.com/a/lets-learn-english-lesson-25-watch-out/3431138.html) | Should; ought to | Make associations² |
+
+² O lesson plan individual da Aula 25 declara e desenvolve *Make Associations*.
+O review agregado 25–29 mostra *Cooperate* por inconsistência editorial; o seed segue
+a fonte individual, mais específica, e registra **fazer associações**.
 
 ### Unidade 26–30
 
@@ -108,9 +120,9 @@ Seis sprints de cinco aulas, na mesma cadência do Level 2.
 | 31 | 1–5 | verbo `BE`, pronomes pessoais e de lugar | **publicada em 13/10/2026** |
 | 32 | 6–10 | preposições de lugar, presente contínuo, respostas curtas | **publicada em 13/10/2026** |
 | 33 | 11–15 | adjetivos, advérbios de frequência, tag questions | **publicada em 13/10/2026** |
-| 34 | 16–20 | futuro com `will` e `going to`, `can` para habilidade | pendente |
-| 35 | 21–25 | `have to`, `want to`, passado regular, `should` | pendente |
-| 36 | 26–30 | passado irregular, imperativo, comparativo e superlativo | pendente |
+| 34 | 16–20 | futuro com `will` e `going to`, `can` para habilidade | **implementada e validada em 13/10/2026** |
+| 35 | 21–25 | `have to`, `want to`, passado regular, `should` | **implementada e validada em 13/10/2026** |
+| 36 | 26–30 | passado irregular, imperativo, comparativo e superlativo | **implementada e validada em 13/10/2026** |
 
 ### O que cada sprint entrega
 
@@ -129,12 +141,39 @@ gramática e quatro de listening) e um prompt de escrita. Mais um checkpoint por
 
 ## 5. Checkpoints
 
-Os reviews oficiais do Level 1 **não foram localizados no índice** para os blocos 1–30.
-Até que se confirme a existência de cada um, os checkpoints deste recorte seguem a
-regra da Sprint 30: `source_kind: "authorial"`, sem `source_url`, e rotulados como
-**Origem** na interface — nunca como base curricular.
+Os reviews oficiais do Level 1 não seguem todos os mesmos limites das unidades locais.
+Na auditoria da Sprint 34 foram localizados o [review oficial 15–19](https://learningenglish.voanews.com/a/review-of-lessons-15-19/3384444.html)
+e o [review oficial 20–24](https://learningenglish.voanews.com/a/review-lesson-20-24/3450511.html),
+mas nenhum review com o recorte exato **16–20**. Por isso o checkpoint local continua
+`source_kind: "authorial"`, sem `source_url`: os dois reviews servem como referência
+curricular, não como autoria das perguntas, alternativas, explicações ou correção.
 
-Isso inclui o checkpoint que falta para a unidade `31-40`.
+O checkpoint `21-25` segue a mesma decisão. A VOA publicou os reviews oficiais
+[20–24](https://learningenglish.voanews.com/a/review-lesson-20-24/3450511.html) e
+[25–29](https://learningenglish.voanews.com/a/lets-learn-english-lesson-25-29-review/3518965.html),
+mas nenhum deles coincide com a unidade local. Eles servem apenas como referências
+curriculares; as seis questões e a correção são autorais e `source_url` permanece nulo.
+
+O checkpoint `26-30` também é autoral. Os reviews oficiais
+[25–29](https://learningenglish.voanews.com/a/lets-learn-english-lesson-25-29-review/3518965.html) e
+[30–34](https://learningenglish.voanews.com/a/lets-learn-english-lesson-30-34-review/3569049.html)
+são adjacentes, mas nenhum coincide com a unidade local. Eles orientam a cobertura
+curricular; as seis questões, alternativas, explicações e correção são próprias do
+aplicativo, e `source_url` permanece nulo.
+
+O fechamento `31-40` segue a mesma regra. Não existe review oficial com esse recorte;
+os reviews oficiais
+[30–34](https://learningenglish.voanews.com/a/lets-learn-english-lesson-30-34-review/3569049.html),
+[35–39](https://learningenglish.voanews.com/a/lets-learn-english-review-lessons-35-39/3625403.html)
+e [40–44](https://learningenglish.voanews.com/a/lets-learn-english-review-lessons-40-44/3688551.html)
+são referências curriculares adjacentes. O checkpoint permanece
+`source_kind: "authorial"`, com `source_url` nulo: suas dez questões, alternativas,
+explicações e correção são próprias do aplicativo. Uma questão representa cada aula do
+bloco, e a retomada de listening aponta para a conversa oficial da Aula 40.
+
+Os checkpoints autorais deste recorte só podem mudar de origem depois que um review
+oficial com cobertura compatível for auditado. Na interface, continuam rotulados como
+**Origem** e nunca são apresentados como uma revisão da VOA.
 
 ### Sprint 31, fechada
 
@@ -192,14 +231,109 @@ determinístico; o caminho do `Escape` segue coberto pelo teste dedicado do draw
 Level 1 vai de 32 para **37 de 52** aulas publicadas; o recorte do certificado, de 32
 aulas e 5 checkpoints para 37 e 6.
 
+### Sprint 34, implementada
+
+A unidade `16-20` entrou na posição 4 com cinco aulas e o checkpoint autoral
+`checkpoint-16-20-level-1`. Cada aula preserva o pacote editorial das três sprints
+anteriores: três blocos de gramática, cinco frases, dez itens de vocabulário, três
+notas de pronúncia, cinco cues, oito exercícios e um prompt de escrita.
+
+A auditoria resolveu três ambiguidades das fontes oficiais:
+
+- o título da Aula 19 é *When Do I Start?*, embora o slug da URL diga
+  `when-do-you-start`;
+- a Aula 18 usa **classificar** para conciliar *Classify* do plano individual com
+  *Grouping* do guia consolidado;
+- a folha inicial consolidada da Aula 20 repete por engano os tópicos da Aula 19;
+  plano individual, review e conversa confirmam ocupações e habilidade com `can`.
+
+Os cinco MP3 oficiais responderam com `audio/mp3` e ficaram em `network_only`. Os cues
+passam pelas regras estruturais, mas a sincronia semântica ainda exige conferência por
+escuta humana.
+
+Com a Sprint 34, o Level 1 vai de 37 para **42 de 52** aulas publicadas; o recorte do
+certificado passa de 37 aulas e 6 checkpoints para 42 e 7.
+
+### Sprint 35, implementada
+
+A unidade `21-25` entrou na posição 5, deslocando as unidades posteriores para as
+posições 6–9. As cinco aulas repetem o pacote editorial validado: quatro objetivos,
+três blocos de gramática, cinco frases, dez itens de vocabulário, três notas de
+pronúncia, cinco cues, oito exercícios e um prompt de escrita por aula.
+
+A auditoria usou as páginas individuais, o guia consolidado, os lesson plans e os
+reviews adjacentes. Ela resolveu duas divergências sem esconder a fonte:
+
+- na Aula 21, o título canônico é *Can You Come to the Party?*, embora o player da
+  conversa diga *Can You Come With Me?*;
+- na Aula 25, o lesson plan individual determina **Make Associations**; o review
+  agregado 25–29 informa *Cooperate* por inconsistência editorial, e o seed preserva
+  **fazer associações**.
+
+Os cinco MP3 oficiais responderam com `audio/mp3` e ficaram em `network_only`. O
+checkpoint `checkpoint-21-25-level-1` é autoral, tem seis questões e retoma a escuta
+da Aula 25. Os 25 cues passam pelas regras estruturais, mas seus tempos ainda exigem
+conferência humana por escuta.
+
+Com a Sprint 35, o Level 1 vai de 42 para **47 de 52** aulas publicadas; o recorte do
+certificado passa de 42 aulas e 7 checkpoints para 47 e 8.
+
+### Sprint 36, implementada
+
+A unidade `26-30` entrou na posição 6, deslocando as quatro unidades posteriores para
+as posições 7–10. Suas cinco aulas completam o pacote editorial do Level 1: quatro
+objetivos, três blocos de gramática, cinco frases, dez itens de vocabulário, três notas
+de pronúncia, cinco cues, oito exercícios e um prompt de escrita por aula.
+
+A auditoria cruzou as páginas individuais, o guia consolidado e os reviews oficiais
+adjacentes 25–29 e 30–34. As fontes exibem pequenas variações editoriais que não mudam
+a identidade das aulas:
+
+- a página canônica da Aula 26 usa *This Game Is Fun!*, enquanto o título do player
+  registra *This Game is Fun!* com `is` em minúscula;
+- a Aula 29 aparece como *A Long Time Ago* no cabeçalho canônico, embora uma arte da
+  própria página acrescente reticências ao título.
+
+O seed segue os cabeçalhos canônicos. O checkpoint `checkpoint-26-30-level-1` é
+explicitamente autoral, tem seis questões e usa os dois reviews apenas como referências
+curriculares. Sua versão 2 corrige o rótulo da questão de imperativo sem reutilizar
+tentativas da versão anterior. Os cinco MP3 oficiais permanecem `network_only`; os 25 cues passam pelas
+regras estruturais, mas seus tempos ainda dependem de validação humana por escuta.
+
+### Fechamento 31–40, concluído após a Sprint 36
+
+A lacuna herdada foi encerrada com o checkpoint `checkpoint-31-40-level-1`, na
+posição 11 da unidade. Ele tem dez questões — uma por aula —, estimativa de 18 minutos
+e retomada do áudio oficial da Aula 40. A navegação da Aula 40 conduz ao fechamento;
+depois do resultado, a sequência continua na Aula 41.
+
+Com a Sprint 36 e o fechamento posterior 31–40, o Level 1 vai de 47 para **52 de 52**
+aulas publicadas; o recorte do certificado passa de 47 aulas e 8 checkpoints para 52 e
+10. No catálogo inteiro, o seed passa a reunir **82 aulas, 16 unidades, 16 checkpoints
+com 100 questões, 328 objetivos, 247 blocos de gramática com 879 linhas, 436 frases,
+835 itens de vocabulário, 261 notas de pronúncia, 82 mídias, 408 cues, 289 falas de
+transcrição integral, 82 propostas de escrita, 687 exercícios, 769 respostas aceitas e
+1.287 dicas graduais**.
+
+O novo requisito é aplicado à versão curricular atual, sem backfill: quem já havia
+concluído as 52 aulas e os nove checkpoints anteriores volta a ficar inelegível até
+realizar o fechamento 31–40. Tentativas existentes continuam preservadas, e o
+certificado volta a ser liberado quando os dez checkpoints estiverem concluídos em suas
+versões atuais.
+
+O fechamento 31–40 aplicou o seed de forma idempotente e aprovou 237 testes backend
+no fuso local e em `Pacific/Kiritimati`, 166 testes frontend, lint, tipagem, build,
+94% de cobertura, orçamento total de 163,2 KiB gzip e os 48 cenários Playwright em
+desktop e mobile (96 execuções) contra o compose de produção.
+
 ## 6. Ordem de execução
 
-1. executar as sprints 31 a 36 na ordem, uma unidade por vez;
-2. criar o checkpoint que falta para a unidade `31-40`;
-3. ao fim, o Level 1 fecha em 52 de 52 e o aplicativo passa a ter os dois cursos
-   completos.
+1. Sprints 31 a 36 executadas na ordem, uma unidade por vez;
+2. checkpoint autoral da unidade `31-40` publicado com dez questões e listening da Aula 40;
+3. recorte curricular dos dois cursos encerrado.
 
-## 7. Pendência herdada
+## 7. Pendência manual herdada
 
-A conferência auditiva dos cues das Sprints 27 a 30 continua aberta e depende de escuta
-humana. Os testes estruturais de `test_cues.py` cobrem o que é verificável sem ouvir.
+A conferência auditiva dos cues das Sprints 27 a 30 e 34 a 36 continua aberta e depende de
+escuta humana. Os testes estruturais de `test_cues.py` cobrem o que é verificável sem
+ouvir.

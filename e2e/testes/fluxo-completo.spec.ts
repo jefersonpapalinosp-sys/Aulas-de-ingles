@@ -541,7 +541,7 @@ test('Sprint 23 publica a unidade 45–49 no catálogo sem alongar a trilha', as
   const level1Card = page
     .getByRole('article')
     .filter({ has: page.getByRole('heading', { name: "Let's Learn English — Level 1" }) })
-  await expect(level1Card.getByText('37/52', { exact: true })).toBeVisible()
+  await expect(level1Card.getByText('52/52', { exact: true })).toBeVisible()
 
   await page.goto(unitPath('45-49'))
   await expect(page.getByRole('heading', { level: 1, name: 'Aulas 45–49' })).toBeVisible()
@@ -570,7 +570,7 @@ test('Sprint 24 publica as Aulas 50–52 e o checkpoint final sem inventar trans
       review?: { title: string; question_count: number } | null
     }>
   }
-  expect(curriculum.course.published_lessons).toBe(37)
+  expect(curriculum.course.published_lessons).toBe(52)
   const unit = curriculum.units.find((candidate) => candidate.slug === '50-52')
   expect(unit).toMatchObject({
     published_lessons: 3,
@@ -608,6 +608,375 @@ test('Sprint 24 publica as Aulas 50–52 e o checkpoint final sem inventar trans
   }
 })
 
+test('Sprint 34 publica as Aulas 16–20 do Level 1 com pacote multimodal completo', async ({
+  page,
+  request,
+}) => {
+  const curriculumResponse = await request.get(`/api/courses/${LEVEL_1_SLUG}/curriculum`)
+  expect(curriculumResponse.ok()).toBeTruthy()
+  const curriculum = (await curriculumResponse.json()) as {
+    course: { published_lessons: number }
+    units: Array<{
+      slug: string
+      lessons: Array<{ number: number; title: string }>
+      review?: { slug: string; question_count: number; source_kind: string } | null
+    }>
+  }
+  expect(curriculum.course.published_lessons).toBe(52)
+  expect(curriculum.units).toHaveLength(10)
+  expect(curriculum.units[3]).toMatchObject({
+    slug: '16-20',
+    lessons: [
+      { number: 16, title: 'Where Are You From?' },
+      { number: 17, title: 'Are You Free on Friday?' },
+      { number: 18, title: 'She Always Does That' },
+      { number: 19, title: 'When Do I Start?' },
+      { number: 20, title: 'What Can You Do?' },
+    ],
+    review: {
+      slug: 'checkpoint-16-20-level-1',
+      question_count: 6,
+      source_kind: 'authorial',
+    },
+  })
+
+  const expected = [
+    [16, 'Nacionalidades e idiomas', 'monitorar'],
+    [17, 'Futuro com will e going to', 'avaliar'],
+    [18, 'Frequência, pronomes objeto e ordinais', 'classificar'],
+    [19, 'Which, which one, next e every', 'resumir'],
+    [20, "Habilidade com can, can't e cannot", 'identificar problemas'],
+  ] as const
+  for (const [number, grammarTag, learningStrategy] of expected) {
+    const response = await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/${number}`)
+    expect(response.ok()).toBeTruthy()
+    const lesson = (await response.json()) as {
+      grammar_tag: string
+      versions: Array<{ learning_strategy: string }>
+      vocab: unknown[]
+      exercises: Array<{ skill: string }>
+      media: Array<{ cues: unknown[] }>
+      writing_prompts: unknown[]
+    }
+    expect(lesson.grammar_tag).toBe(grammarTag)
+    expect(lesson.versions[0]?.learning_strategy).toBe(learningStrategy)
+    expect(lesson.vocab).toHaveLength(10)
+    expect(lesson.exercises).toHaveLength(8)
+    expect(lesson.exercises.filter((exercise) => exercise.skill === 'listening')).toHaveLength(4)
+    expect(lesson.media).toHaveLength(1)
+    expect(lesson.media[0]?.cues).toHaveLength(5)
+    expect(lesson.writing_prompts).toHaveLength(1)
+  }
+
+  await criarConta(page, 'Unidade Level 1 Sprint 34')
+  await page.goto(unitPath('16-20'))
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 16–20' })).toBeVisible()
+  const lessons = page.locator('.course-unit-lessons')
+  await expect(lessons.locator('a[href*="/aulas/"]')).toHaveCount(5)
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Fechamento 16–20/ }),
+  ).toHaveAttribute('href', courseReviewPath('16-20'))
+})
+
+test('Sprint 35 publica as Aulas 21–25 e identifica o fechamento autoral', async ({
+  page,
+  request,
+}) => {
+  const curriculumResponse = await request.get(`/api/courses/${LEVEL_1_SLUG}/curriculum`)
+  expect(curriculumResponse.ok()).toBeTruthy()
+  const curriculum = (await curriculumResponse.json()) as {
+    course: { published_lessons: number }
+    units: Array<{
+      slug: string
+      lessons: Array<{ number: number; title: string }>
+      review?: { slug: string; question_count: number; source_kind: string } | null
+    }>
+  }
+  expect(curriculum.course.published_lessons).toBe(52)
+  expect(curriculum.units).toHaveLength(10)
+  expect(curriculum.units[4]).toMatchObject({
+    slug: '21-25',
+    lessons: [
+      { number: 21, title: 'Can You Come to the Party?' },
+      { number: 22, title: 'Next Summer...' },
+      { number: 23, title: 'What Do You Want?' },
+      { number: 24, title: 'Yesterday Was Amazing!' },
+      { number: 25, title: 'Watch Out!' },
+    ],
+    review: {
+      slug: 'checkpoint-21-25-level-1',
+      question_count: 6,
+      source_kind: 'authorial',
+    },
+  })
+
+  const expected = [
+    [21, "Have to, can e can't em convites", 'cooperar'],
+    [22, 'Going to e sequência de planos', 'planejar'],
+    [23, 'Want, horas, preços e troco', 'responder'],
+    [24, 'Passado regular + festivais e cultura', 'substituir'],
+    [25, 'Should, ought to e avisos', 'fazer associações'],
+  ] as const
+  for (const [number, grammarTag, learningStrategy] of expected) {
+    const response = await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/${number}`)
+    expect(response.ok()).toBeTruthy()
+    const lesson = (await response.json()) as {
+      grammar_tag: string
+      versions: Array<{ learning_strategy: string }>
+      vocab: unknown[]
+      exercises: Array<{ skill: string }>
+      media: Array<{ cues: unknown[] }>
+      writing_prompts: unknown[]
+    }
+    expect(lesson.grammar_tag).toBe(grammarTag)
+    expect(lesson.versions[0]?.learning_strategy).toBe(learningStrategy)
+    expect(lesson.vocab).toHaveLength(10)
+    expect(lesson.exercises).toHaveLength(8)
+    expect(lesson.exercises.filter((exercise) => exercise.skill === 'listening')).toHaveLength(4)
+    expect(lesson.media).toHaveLength(1)
+    expect(lesson.media[0]?.cues).toHaveLength(5)
+    expect(lesson.writing_prompts).toHaveLength(1)
+  }
+
+  await criarConta(page, 'Unidade Level 1 Sprint 35')
+  await page.goto(unitPath('21-25'))
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 21–25' })).toBeVisible()
+  const lessons = page.locator('.course-unit-lessons')
+  await expect(lessons.locator('a[href*="/aulas/"]')).toHaveCount(5)
+  for (const [number, title] of [
+    [21, 'Can You Come to the Party?'],
+    [22, 'Next Summer...'],
+    [23, 'What Do You Want?'],
+    [24, 'Yesterday Was Amazing!'],
+    [25, 'Watch Out!'],
+  ] as const) {
+    await expect(lessons.getByRole('link', { name: new RegExp(escapeRegex(title)) })).toHaveAttribute(
+      'href',
+      lessonPath(number),
+    )
+  }
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Fechamento 21–25/ }),
+  ).toHaveAttribute('href', courseReviewPath('21-25'))
+
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+  await page.goto(courseReviewPath('21-25'))
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(provenance.getByText('Origem', { exact: true })).toBeVisible()
+  await expect(provenance.getByText('Base curricular', { exact: true })).toHaveCount(0)
+  await expect(provenance.getByText('Fechamento autoral do Aulas de Inglês')).toBeVisible()
+  await expect(provenance.locator('a')).toHaveCount(0)
+  await expect(provenance).toContainText('reviews dos blocos 20–24 e 25–29')
+  await expect(page.getByRole('heading', { name: /Conversa da Aula 25/ })).toBeVisible()
+})
+
+test('Sprint 36 publica as Aulas 26–30 e fecha o bloco com referências adjacentes', async ({
+  page,
+  request,
+}) => {
+  const curriculumResponse = await request.get(`/api/courses/${LEVEL_1_SLUG}/curriculum`)
+  expect(curriculumResponse.ok()).toBeTruthy()
+  const curriculum = (await curriculumResponse.json()) as {
+    course: { published_lessons: number }
+    units: Array<{
+      slug: string
+      lessons: Array<{ number: number; title: string }>
+      review?: { slug: string; question_count: number; source_kind: string } | null
+    }>
+  }
+  expect(curriculum.course.published_lessons).toBe(52)
+  expect(curriculum.units).toHaveLength(10)
+  expect(curriculum.units[5]).toMatchObject({
+    slug: '26-30',
+    lessons: [
+      { number: 26, title: 'This Game Is Fun!' },
+      { number: 27, title: "I Can't Come In" },
+      { number: 28, title: 'I Passed It!' },
+      { number: 29, title: 'A Long Time Ago' },
+      { number: 30, title: 'Rolling on the River' },
+    ],
+    review: {
+      slug: 'checkpoint-26-30-level-1',
+      question_count: 6,
+      source_kind: 'authorial',
+    },
+  })
+
+  const expected = [
+    [26, 'Ought to + passado irregular', 'fazer associações'],
+    [27, 'Passado irregular + saúde e conselhos', 'analisar informações'],
+    [28, 'Imperativos + was e were', 'falar consigo mesmo'],
+    [29, 'Simple past + adjetivos e infinitivos', 'personalizar'],
+    [30, 'Comparativos, superlativos + much e many', 'fazer inferências'],
+  ] as const
+  for (const [number, grammarTag, learningStrategy] of expected) {
+    const response = await request.get(`/api/courses/${LEVEL_1_SLUG}/lessons/${number}`)
+    expect(response.ok()).toBeTruthy()
+    const lesson = (await response.json()) as {
+      grammar_tag: string
+      goals: unknown[]
+      grammar_blocks: unknown[]
+      phrases: unknown[]
+      vocab: unknown[]
+      pronunciation: unknown[]
+      versions: Array<{ learning_strategy: string }>
+      exercises: Array<{ skill: string }>
+      media: Array<{ cues: unknown[] }>
+      writing_prompts: unknown[]
+    }
+    expect(lesson.grammar_tag).toBe(grammarTag)
+    expect(lesson.versions[0]?.learning_strategy).toBe(learningStrategy)
+    expect(lesson.goals).toHaveLength(4)
+    expect(lesson.grammar_blocks).toHaveLength(3)
+    expect(lesson.phrases).toHaveLength(5)
+    expect(lesson.vocab).toHaveLength(10)
+    expect(lesson.pronunciation).toHaveLength(3)
+    expect(lesson.exercises).toHaveLength(8)
+    expect(lesson.exercises.filter((exercise) => exercise.skill === 'listening')).toHaveLength(4)
+    expect(lesson.media).toHaveLength(1)
+    expect(lesson.media[0]?.cues).toHaveLength(5)
+    expect(lesson.writing_prompts).toHaveLength(1)
+  }
+
+  await criarConta(page, 'Unidade Level 1 Sprint 36')
+  await page.goto(unitPath('26-30'))
+  await expect(page.getByRole('heading', { level: 1, name: 'Aulas 26–30' })).toBeVisible()
+  const lessons = page.locator('.course-unit-lessons')
+  await expect(lessons.locator('a[href*="/aulas/"]')).toHaveCount(5)
+  for (const [number, title] of [
+    [26, 'This Game Is Fun!'],
+    [27, "I Can't Come In"],
+    [28, 'I Passed It!'],
+    [29, 'A Long Time Ago'],
+    [30, 'Rolling on the River'],
+  ] as const) {
+    await expect(lessons.getByRole('link', { name: new RegExp(escapeRegex(title)) })).toHaveAttribute(
+      'href',
+      lessonPath(number),
+    )
+  }
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Fechamento 26–30/ }),
+  ).toHaveAttribute('href', courseReviewPath('26-30'))
+
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+  await page.goto(courseReviewPath('26-30'))
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(provenance.getByText('Origem', { exact: true })).toBeVisible()
+  await expect(provenance.getByText('Base curricular', { exact: true })).toHaveCount(0)
+  await expect(provenance.getByText('Fechamento autoral do Aulas de Inglês')).toBeVisible()
+  await expect(provenance.locator('a')).toHaveCount(0)
+  await expect(provenance).toContainText('revisão oficial 25–29')
+  await expect(provenance).toContainText('revisão oficial 30–34')
+  const checkpointAudio = page.locator('audio[aria-label="Conversa da Aula 30 — Level 1"]')
+  await expect(checkpointAudio).toBeVisible()
+  await expect(checkpointAudio.locator('source')).toHaveAttribute('src', /voa-audio\.voanews\.eu/)
+  await expect(page.getByRole('link', { name: 'Rever Aula 30' })).toHaveAttribute(
+    'href',
+    lessonPath(30),
+  )
+})
+
+test('fechamento autoral 31–40 cobre cada aula e passa a integrar o certificado', async ({
+  page,
+  request,
+}) => {
+  const curriculumResponse = await request.get(`/api/courses/${LEVEL_1_SLUG}/curriculum`)
+  expect(curriculumResponse.ok()).toBeTruthy()
+  const curriculum = (await curriculumResponse.json()) as {
+    units: Array<{
+      slug: string
+      review?: {
+        slug: string
+        title: string
+        question_count: number
+        source_kind: string
+        review_lesson_number: number
+      } | null
+    }>
+  }
+  const unit = curriculum.units.find(({ slug }) => slug === '31-40')
+  expect(unit?.review).toMatchObject({
+    slug: 'checkpoint-31-40-level-1',
+    title: 'Fechamento 31–40',
+    question_count: 10,
+    source_kind: 'authorial',
+    review_lesson_number: 40,
+  })
+
+  await criarConta(page, 'Fechamento 31–40 E2E')
+  await page.goto(unitPath('31-40'))
+  await expect(
+    page.getByRole('main').getByRole('link', { name: /Fechamento 31–40/ }),
+  ).toHaveAttribute('href', courseReviewPath('31-40'))
+
+  await page.goto(lessonPath(40))
+  await expect(page.getByRole('link', { name: 'Fechamento 31–40 →' })).toHaveAttribute(
+    'href',
+    courseReviewPath('31-40'),
+  )
+
+  await page.route('https://voa-audio.voanews.eu/**', (route) => route.abort('blockedbyclient'))
+  const checkpointPath = courseReviewPath('31-40')
+  await page.goto(checkpointPath)
+  await expect(page.getByRole('heading', { level: 1, name: 'Fechamento 31–40' })).toBeVisible()
+
+  const provenance = page.getByRole('region', { name: 'Origem do checkpoint' })
+  await expect(provenance.getByText('Origem', { exact: true })).toBeVisible()
+  await expect(provenance.getByText('Base curricular', { exact: true })).toHaveCount(0)
+  await expect(provenance.getByText('Fechamento autoral do Aulas de Inglês')).toBeVisible()
+  await expect(provenance.locator('a')).toHaveCount(0)
+  await expect(provenance).toContainText('30–34, 35–39 e 40–44')
+  await expect(provenance).toContainText('inteiramente autoral')
+
+  const checkpointAudio = page.locator('audio[aria-label="Conversa da Aula 40"]')
+  await expect(checkpointAudio).toBeVisible()
+  await expect(checkpointAudio.locator('source')).toHaveAttribute('src', /voa-audio\.voanews\.eu/)
+  await expect(page.getByRole('link', { name: 'Rever Aula 40' })).toHaveAttribute(
+    'href',
+    lessonPath(40),
+  )
+
+  const form = page.locator('.checkpoint-form')
+  await expect(form.getByRole('group')).toHaveCount(10)
+  await expect(form.getByText('0/10 respondidas')).toBeVisible()
+  for (const answer of [
+    'faster than',
+    'us',
+    'pitcher',
+    'might',
+    'I bought two loaves of bread.',
+    'are; under',
+    'mine',
+    'the best',
+    'imperfect',
+    'More loudly and more seriously.',
+  ]) {
+    await form.getByRole('radio', { name: answer, exact: true }).check()
+  }
+  await expect(form.getByText('10/10 respondidas')).toBeVisible()
+
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname ===
+        '/api/courses/voa-level-1/units/31-40/review/attempts' &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  )
+  await form.getByRole('button', { name: 'Concluir checkpoint' }).click()
+  expect((await saved).status()).toBe(201)
+
+  await expect(page.getByRole('heading', { name: 'Bloco consolidado' })).toBeVisible()
+  await expect(page.getByText('Você acertou 10 de 10 questões (100%).')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Continuar na Aula 41' })).toHaveAttribute(
+    'href',
+    lessonPath(41),
+  )
+  await page.reload()
+  await expect(page.getByText('Você acertou 10 de 10 questões (100%).')).toBeVisible()
+  await expect(page.locator('.checkpoint-form')).toHaveCount(0)
+})
+
 test('concluir somente a Aula 52 não libera certificado nem completa outras unidades', async ({
   request,
 }) => {
@@ -630,17 +999,17 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
   const initial = await initialResponse.json()
   expect(initial).toMatchObject({
     progress: {
-      published_lessons: 37,
+      published_lessons: 52,
       viewed_lessons: 0,
       completed_lessons: 0,
       completion_percent: 0,
       status: 'not_started',
     },
-    checkpoints: { published: 6, current_completed: 0 },
+    checkpoints: { published: 10, current_completed: 0 },
     certificate: {
       eligible: false,
-      required_lessons: 37,
-      required_checkpoints: 6,
+      required_lessons: 52,
+      required_checkpoints: 10,
       automatic_download: false,
     },
     next_course: {
@@ -656,6 +1025,9 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     '1-5',
     '6-10',
     '11-15',
+    '16-20',
+    '21-25',
+    '26-30',
     '31-40',
     '40-44',
     '45-49',
@@ -675,13 +1047,13 @@ test('concluir somente a Aula 52 não libera certificado nem completa outras uni
     await request.get(`/api/courses/${LEVEL_1_SLUG}/completion`, { headers })
   ).json()
   expect(after.progress).toMatchObject({
-    published_lessons: 37,
+    published_lessons: 52,
     viewed_lessons: 1,
     completed_lessons: 1,
     status: 'in_progress',
   })
   expect(after.certificate).toMatchObject({ eligible: false, automatic_download: false })
-  expect(after.incomplete_units).toHaveLength(7)
+  expect(after.incomplete_units).toHaveLength(10)
   expect(
     after.incomplete_units.find((unit: { slug: string }) => unit.slug === '50-52'),
   ).toMatchObject({ published_lessons: 3, viewed_lessons: 1, completed_lessons: 1 })
@@ -894,9 +1266,9 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
       .locator('..')
       .locator('dd')
       .first()
-  await expect(metricValue('Conteúdo publicado')).toHaveText('37')
-  await expect(metricValue('Aulas vistas')).toHaveText('0 / 37')
-  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 37')
+  await expect(metricValue('Conteúdo publicado')).toHaveText('52')
+  await expect(metricValue('Aulas vistas')).toHaveText('0 / 52')
+  await expect(metricValue('Aulas concluídas')).toHaveText('0 / 52')
   await expect(page.getByRole('progressbar', { name: 'Aulas concluídas no recorte publicado' }))
     .toHaveAttribute('aria-valuenow', '0')
 
@@ -904,6 +1276,9 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
     'Aulas 1–5',
     'Aulas 6–10',
     'Aulas 11–15',
+    'Aulas 16–20',
+    'Aulas 21–25',
+    'Aulas 26–30',
     'Aulas 31–40',
     'Aulas 40–44',
     'Aulas 45–49',
@@ -914,7 +1289,7 @@ test('conclusão separa progresso, evidência, certificado e Level 2 opcional', 
   await expect(
     page.getByRole('heading', { name: 'Certificado do recorte: ainda não elegível' }),
   ).toBeVisible()
-  await expect(page.getByText(/Regra deste recorte: 37 aulas e 6 checkpoints/)).toBeVisible()
+  await expect(page.getByText(/Regra deste recorte: 52 aulas e 10 checkpoints/)).toBeVisible()
   await expect(page.locator('[download], iframe')).toHaveCount(0)
 
   await expect(page.getByText('Recomendado e opcional.')).toBeVisible()

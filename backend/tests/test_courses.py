@@ -28,7 +28,7 @@ async def test_catalogo_publica_as_unidades_dos_dois_cursos(
         "position": 1,
         "status": "published",
         "total_lessons": 52,
-        "published_lessons": 37,
+        "published_lessons": 52,
     }
     assert courses[1]["total_lessons"] == 30
     assert courses[1]["published_lessons"] == 30
@@ -41,11 +41,14 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
 
     assert response.status_code == 200
     curriculum = response.json()
-    assert curriculum["course"]["published_lessons"] == 37
+    assert curriculum["course"]["published_lessons"] == 52
     assert [unit["slug"] for unit in curriculum["units"]] == [
         "1-5",
         "6-10",
         "11-15",
+        "16-20",
+        "21-25",
+        "26-30",
         "31-40",
         "40-44",
         "45-49",
@@ -64,11 +67,35 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
     assert third_block["total_lessons"] == third_block["published_lessons"] == 5
     assert [lesson["number"] for lesson in third_block["lessons"]] == list(range(11, 16))
     assert third_block["review"]["slug"] == "checkpoint-11-15-level-1"
-    first = curriculum["units"][3]
-    assert first["total_lessons"] == first["published_lessons"] == 10
-    assert [lesson["number"] for lesson in first["lessons"]] == list(range(31, 41))
-    assert first["lessons"][0] == {
-        "id": first["lessons"][0]["id"],
+    fourth_block = curriculum["units"][3]
+    assert fourth_block["total_lessons"] == fourth_block["published_lessons"] == 5
+    assert [lesson["number"] for lesson in fourth_block["lessons"]] == list(range(16, 21))
+    assert all(lesson["unit_slug"] == "16-20" for lesson in fourth_block["lessons"])
+    assert fourth_block["review"]["slug"] == "checkpoint-16-20-level-1"
+    assert fourth_block["review"]["source_kind"] == "authorial"
+    assert fourth_block["review"]["review_lesson_number"] == 20
+    assert fourth_block["review"]["question_count"] == 6
+    fifth_block = curriculum["units"][4]
+    assert fifth_block["total_lessons"] == fifth_block["published_lessons"] == 5
+    assert [lesson["number"] for lesson in fifth_block["lessons"]] == list(range(21, 26))
+    assert all(lesson["unit_slug"] == "21-25" for lesson in fifth_block["lessons"])
+    assert fifth_block["review"]["slug"] == "checkpoint-21-25-level-1"
+    assert fifth_block["review"]["source_kind"] == "authorial"
+    assert fifth_block["review"]["review_lesson_number"] == 25
+    assert fifth_block["review"]["question_count"] == 6
+    sixth_block = curriculum["units"][5]
+    assert sixth_block["total_lessons"] == sixth_block["published_lessons"] == 5
+    assert [lesson["number"] for lesson in sixth_block["lessons"]] == list(range(26, 31))
+    assert all(lesson["unit_slug"] == "26-30" for lesson in sixth_block["lessons"])
+    assert sixth_block["review"]["slug"] == "checkpoint-26-30-level-1"
+    assert sixth_block["review"]["source_kind"] == "authorial"
+    assert sixth_block["review"]["review_lesson_number"] == 30
+    assert sixth_block["review"]["question_count"] == 6
+    seventh_block = curriculum["units"][6]
+    assert seventh_block["total_lessons"] == seventh_block["published_lessons"] == 10
+    assert [lesson["number"] for lesson in seventh_block["lessons"]] == list(range(31, 41))
+    assert seventh_block["lessons"][0] == {
+        "id": seventh_block["lessons"][0]["id"],
         "course_slug": "voa-level-1",
         "unit_slug": "31-40",
         "slug": "lesson-31",
@@ -80,8 +107,19 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
         "focus_points": ["should / ought to", "-er than", "a lot + comparativo"],
         "story_note": None,
     }
-    assert "grammar_blocks" not in first["lessons"][0]
-    second = curriculum["units"][4]
+    assert "grammar_blocks" not in seventh_block["lessons"][0]
+    assert seventh_block["review"] == {
+        "id": seventh_block["review"]["id"],
+        "slug": "checkpoint-31-40-level-1",
+        "title": "Fechamento 31–40",
+        "position": 11,
+        "status": "published",
+        "source_kind": "authorial",
+        "estimated_minutes": 18,
+        "review_lesson_number": 40,
+        "question_count": 10,
+    }
+    second = curriculum["units"][7]
     assert second["total_lessons"] == second["published_lessons"] == 4
     assert [lesson["number"] for lesson in second["lessons"]] == list(range(41, 45))
     assert all(lesson["unit_slug"] == "40-44" for lesson in second["lessons"])
@@ -96,14 +134,13 @@ async def test_curriculo_traz_unidades_e_resumos_leves(client: AsyncClient) -> N
         "review_lesson_number": 40,
         "question_count": 6,
     }
-    assert first["review"] is None
-    third = curriculum["units"][5]
+    third = curriculum["units"][8]
     assert third["total_lessons"] == third["published_lessons"] == 5
     assert [lesson["number"] for lesson in third["lessons"]] == list(range(45, 50))
     assert all(lesson["unit_slug"] == "45-49" for lesson in third["lessons"])
     assert third["review"]["slug"] == "checkpoint-45-49"
     assert third["review"]["question_count"] == 6
-    fourth = curriculum["units"][6]
+    fourth = curriculum["units"][9]
     assert fourth["total_lessons"] == fourth["published_lessons"] == 3
     assert [lesson["number"] for lesson in fourth["lessons"]] == [50, 51, 52]
     assert all(lesson["unit_slug"] == "50-52" for lesson in fourth["lessons"])

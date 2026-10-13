@@ -54,11 +54,11 @@ async def _contagens(session: AsyncSession) -> dict[str, int]:
 
 
 @pytest.mark.asyncio
-async def test_arquivo_de_seed_tem_sessenta_e_sete_aulas_em_dois_cursos() -> None:
+async def test_arquivo_de_seed_tem_oitenta_e_duas_aulas_em_dois_cursos() -> None:
     dados = load_seed()
     level_1 = [lesson for lesson in dados if lesson["course_slug"] == "voa-level-1"]
     level_2 = [lesson for lesson in dados if lesson["course_slug"] == "voa-level-2"]
-    assert [d["number"] for d in level_1] == list(range(1, 16)) + list(range(31, 53))
+    assert [d["number"] for d in level_1] == list(range(1, 53))
     assert [d["number"] for d in level_2] == list(range(1, 31))
 
     # O conteúdo publicado nas Sprints anteriores não pode ser reduzido durante
@@ -115,6 +115,154 @@ async def test_arquivo_de_seed_tem_sessenta_e_sete_aulas_em_dois_cursos() -> Non
         "descobrir por conta própria",
     ]
     assert all(len(d["learning_strategy"]) <= 100 for d in dados)
+
+    # Sprint 34: o bloco 16–20 segue o pacote editorial do Level 1 e mantém os
+    # focos declarados no guia oficial, inclusive as cinco estratégias CALLA.
+    quarto = [d for d in level_1 if 16 <= d["number"] <= 20]
+    assert [d["number"] for d in quarto] == list(range(16, 21))
+    assert all(d["unit_slug"] == "16-20" for d in quarto)
+    assert all(len(d["goals"]) == 4 for d in quarto)
+    assert all(len(d["grammar_blocks"]) == 3 for d in quarto)
+    assert all(len(d["phrases"]) == 5 for d in quarto)
+    assert all(len(d["vocab"]) == 10 for d in quarto)
+    assert all(len(d["pronunciation"]) == 3 for d in quarto)
+    assert all(len(d["exercises"]) == 8 for d in quarto)
+    assert all(len(d.get("media", [])) == 1 for d in quarto)
+    assert all(len(d["media"][0].get("cues", [])) == 5 for d in quarto)
+    assert all(len(d.get("writing_prompts", [])) == 1 for d in quarto)
+    assert [d["media"][0]["duration_seconds"] for d in quarto] == [205, 152, 242, 170, 219]
+    assert all(d["media"][0]["offline_policy"] == "network_only" for d in quarto)
+    assert all(
+        d["media"][0]["source_url"].startswith("https://voa-audio.voanews.eu/") for d in quarto
+    )
+    assert all(
+        sum(exercise["skill"] == "listening" for exercise in lesson["exercises"]) == 4
+        for lesson in quarto
+    )
+    assert [d["title"] for d in quarto] == [
+        "Where Are You From?",
+        "Are You Free on Friday?",
+        "She Always Does That",
+        "When Do I Start?",
+        "What Can You Do?",
+    ]
+    assert [d["grammar_tag"] for d in quarto] == [
+        "Nacionalidades e idiomas",
+        "Futuro com will e going to",
+        "Frequência, pronomes objeto e ordinais",
+        "Which, which one, next e every",
+        "Habilidade com can, can't e cannot",
+    ]
+    assert [d["learning_strategy"] for d in quarto] == [
+        "monitorar",
+        "avaliar",
+        "classificar",
+        "resumir",
+        "identificar problemas",
+    ]
+    assert all(d.get("review_note", "").startswith("Sprint 34:") for d in quarto)
+
+    # Sprint 35: o bloco 21–25 fecha a lacuna até a Aula 25 e mantém a
+    # estratégia da Aula 25 conforme o lesson plan individual, mais específico
+    # do que o review agregado que a rotula de forma divergente.
+    quinto = [d for d in level_1 if 21 <= d["number"] <= 25]
+    assert [d["number"] for d in quinto] == list(range(21, 26))
+    assert all(d["unit_slug"] == "21-25" for d in quinto)
+    assert all(len(d["goals"]) == 4 for d in quinto)
+    assert all(len(d["grammar_blocks"]) == 3 for d in quinto)
+    assert all(len(d["phrases"]) == 5 for d in quinto)
+    assert all(len(d["vocab"]) == 10 for d in quinto)
+    assert all(len(d["pronunciation"]) == 3 for d in quinto)
+    assert all(len(d["exercises"]) == 8 for d in quinto)
+    assert all(len(d.get("media", [])) == 1 for d in quinto)
+    assert all(len(d["media"][0].get("cues", [])) == 5 for d in quinto)
+    assert all(len(d.get("writing_prompts", [])) == 1 for d in quinto)
+    assert [d["media"][0]["duration_seconds"] for d in quinto] == [177, 194, 177, 157, 149]
+    assert all(d["media"][0]["offline_policy"] == "network_only" for d in quinto)
+    assert all(
+        d["media"][0]["source_url"].startswith("https://voa-audio.voanews.eu/") for d in quinto
+    )
+    assert all(
+        sum(exercise["skill"] == "listening" for exercise in lesson["exercises"]) == 4
+        for lesson in quinto
+    )
+    assert [d["title"] for d in quinto] == [
+        "Can You Come to the Party?",
+        "Next Summer...",
+        "What Do You Want?",
+        "Yesterday Was Amazing!",
+        "Watch Out!",
+    ]
+    assert [d["grammar_tag"] for d in quinto] == [
+        "Have to, can e can't em convites",
+        "Going to e sequência de planos",
+        "Want, horas, preços e troco",
+        "Passado regular + festivais e cultura",
+        "Should, ought to e avisos",
+    ]
+    assert [d["learning_strategy"] for d in quinto] == [
+        "cooperar",
+        "planejar",
+        "responder",
+        "substituir",
+        "fazer associações",
+    ]
+    assert all(d.get("review_note", "").startswith("Sprint 35:") for d in quinto)
+    assert "review agregado 25–29 informa Cooperate" in quinto[-1]["review_note"]
+
+    # Sprint 36: o bloco 26–30 completa o Level 1 com as fontes individuais,
+    # durações oficiais e estratégias declaradas no lesson plan da VOA.
+    sexto = [d for d in level_1 if 26 <= d["number"] <= 30]
+    assert [d["number"] for d in sexto] == list(range(26, 31))
+    assert all(d["unit_slug"] == "26-30" for d in sexto)
+    assert all(len(d["goals"]) == 4 for d in sexto)
+    assert all(len(d["grammar_blocks"]) == 3 for d in sexto)
+    assert all(len(d["phrases"]) == 5 for d in sexto)
+    assert all(len(d["vocab"]) == 10 for d in sexto)
+    assert all(len(d["pronunciation"]) == 3 for d in sexto)
+    assert all(len(d["exercises"]) == 8 for d in sexto)
+    assert all(len(d.get("media", [])) == 1 for d in sexto)
+    assert all(len(d["media"][0].get("cues", [])) == 5 for d in sexto)
+    assert all(d["media"][0].get("transcript", []) == [] for d in sexto)
+    assert all(len(d.get("writing_prompts", [])) == 1 for d in sexto)
+    assert [d["media"][0]["duration_seconds"] for d in sexto] == [122, 201, 198, 200, 199]
+    assert [d["media"][0]["source_url"] for d in sexto] == [
+        "https://voa-audio.voanews.eu/vle/2016/08/21/5085086e-5053-401a-9f9c-826aabe8abcb_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2016/08/30/4b0918a8-33b1-4b9d-8d88-f54d8a1be9ea_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2016/09/08/a087a1f8-4939-4f40-8612-e99605e88caf_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2016/09/15/e7c6ba11-8320-4bcc-8fc5-27fa4e385e23_hq.mp3",
+        "https://voa-audio.voanews.eu/vle/2016/09/27/a8dbb32b-ada5-4441-a2d1-340924241a4b_hq.mp3",
+    ]
+    assert all(d["media"][0]["offline_policy"] == "network_only" for d in sexto)
+    assert all(
+        d["media"][0]["source_url"].startswith("https://voa-audio.voanews.eu/") for d in sexto
+    )
+    assert all(
+        sum(exercise["skill"] == "listening" for exercise in lesson["exercises"]) == 4
+        for lesson in sexto
+    )
+    assert [d["title"] for d in sexto] == [
+        "This Game Is Fun!",
+        "I Can't Come In",
+        "I Passed It!",
+        "A Long Time Ago",
+        "Rolling on the River",
+    ]
+    assert [d["grammar_tag"] for d in sexto] == [
+        "Ought to + passado irregular",
+        "Passado irregular + saúde e conselhos",
+        "Imperativos + was e were",
+        "Simple past + adjetivos e infinitivos",
+        "Comparativos, superlativos + much e many",
+    ]
+    assert [d["learning_strategy"] for d in sexto] == [
+        "fazer associações",
+        "analisar informações",
+        "falar consigo mesmo",
+        "personalizar",
+        "fazer inferências",
+    ]
+    assert all(d.get("review_note", "").startswith("Sprint 36:") for d in sexto)
 
     # Sprint 32: o bloco 6–10 segue a mesma convenção do 1–5.
     segundo = [d for d in level_1 if 6 <= d["number"] <= 10]
@@ -213,7 +361,7 @@ async def test_arquivo_de_seed_tem_sessenta_e_sete_aulas_em_dois_cursos() -> Non
     assert all(item["attribution"] and item["license_url"] for item in media)
     assert sum(item["license_reviewed_at"] == "2026-10-08" for item in media) == 27
     assert sum(item["license_reviewed_at"] == "2026-10-09" for item in media) == 25
-    assert sum(item["license_reviewed_at"] == "2026-10-13" for item in media) == 15
+    assert sum(item["license_reviewed_at"] == "2026-10-13" for item in media) == 30
     assert all(d["editorial_status"] == "reviewed" for d in dados)
     assert all(d["learning_strategy"] for d in dados)
     # As fatias do Level 1 são por número de aula: o bloco 1–5 entrou na frente.
@@ -221,6 +369,9 @@ async def test_arquivo_de_seed_tem_sessenta_e_sete_aulas_em_dois_cursos() -> Non
         "1-5": range(1, 6),
         "6-10": range(6, 11),
         "11-15": range(11, 16),
+        "16-20": range(16, 21),
+        "21-25": range(21, 26),
+        "26-30": range(26, 31),
         "31-40": range(31, 41),
         "40-44": range(41, 45),
         "45-49": range(45, 50),
@@ -551,7 +702,7 @@ async def test_seed_de_cursos_publica_as_seis_unidades_do_level_2() -> None:
 
     assert [course["slug"] for course in courses] == ["voa-level-1", "voa-level-2"]
     assert [course["total_lessons"] for course in courses] == [52, 30]
-    assert [len(course["units"]) for course in courses] == [7, 6]
+    assert [len(course["units"]) for course in courses] == [10, 6]
     assert [course["status"] for course in courses] == ["published", "published"]
     assert [unit["status"] for unit in courses[1]["units"]] == [
         "published",
@@ -578,6 +729,10 @@ def test_checkpoint_do_seed_valida_referencias_e_gabarito() -> None:
         "checkpoint-1-5-level-1",
         "checkpoint-6-10-level-1",
         "checkpoint-11-15-level-1",
+        "checkpoint-16-20-level-1",
+        "checkpoint-21-25-level-1",
+        "checkpoint-26-30-level-1",
+        "checkpoint-31-40-level-1",
         "checkpoint-40-44",
         "checkpoint-45-49",
         "checkpoint-50-52",
@@ -588,7 +743,11 @@ def test_checkpoint_do_seed_valida_referencias_e_gabarito() -> None:
         "checkpoint-21-25",
         "checkpoint-26-30",
     ]
-    assert all(len(review["questions"]) == 6 for review in reviews)
+    question_counts = {review["slug"]: len(review["questions"]) for review in reviews}
+    assert question_counts["checkpoint-31-40-level-1"] == 10
+    assert all(
+        count == 6 for slug, count in question_counts.items() if slug != "checkpoint-31-40-level-1"
+    )
 
     review_unit_index = next(
         index
@@ -675,10 +834,10 @@ def test_catalogo_do_seed_valida_faixa_quantidade_e_posicao_das_aulas() -> None:
 async def test_seed_rodado_de_novo_nao_duplica(session: AsyncSession) -> None:
     antes = await _contagens(session)
     assert antes["course"] == 2
-    assert antes["course_unit"] == 13
-    assert antes["course_review"] == 12
-    assert antes["course_review_question"] == 72
-    assert antes["lesson"] == 67
+    assert antes["course_unit"] == 16
+    assert antes["course_review"] == 16
+    assert antes["course_review_question"] == 100
+    assert antes["lesson"] == 82
 
     await seed_lessons(session)
 
@@ -711,8 +870,8 @@ async def test_ids_do_checkpoint_sobrevivem_ao_reseed(session: AsyncSession) -> 
         (item.review_id, item.position): item.id
         for item in (await session.execute(select(CourseReviewQuestion))).scalars()
     }
-    assert len(reviews_before) == 12
-    assert len(questions_before) == 72
+    assert len(reviews_before) == 16
+    assert len(questions_before) == 100
 
     await seed_lessons(session)
 
@@ -770,7 +929,7 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
 async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
     media = list((await session.execute(select(LessonMedia))).scalars())
 
-    assert len(media) == 67
+    assert len(media) == 82
     assert all(item.license_status == "public_domain" for item in media)
     assert all(item.offline_policy == "network_only" for item in media)
     assert all(item.attribution == "Voice of America (VOA Learning English)" for item in media)
@@ -780,6 +939,7 @@ async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) 
     }
     assert sum(item.license_reviewed_at == date(2026, 10, 8) for item in media) == 27
     assert sum(item.license_reviewed_at == date(2026, 10, 9) for item in media) == 25
+    assert sum(item.license_reviewed_at == date(2026, 10, 13) for item in media) == 30
 
 
 @pytest.mark.asyncio

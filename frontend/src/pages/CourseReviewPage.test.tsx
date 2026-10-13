@@ -30,6 +30,7 @@ vi.mock('../api/queries', () => ({
     data: {
       course: { title: "Let's Learn English — Level 1" },
       units: [
+        { id: 1, slug: '31-40', lessons: [{ number: 40 }] },
         { id: 2, slug: '40-44', lessons: [{ number: 41 }] },
         { id: 3, slug: '45-49', lessons: [{ number: 45 }] },
         { id: 4, slug: '50-52', lessons: [{ number: 50 }] },
@@ -59,73 +60,120 @@ const questions: CourseReview['questions'] = [
     id: 101,
     position: 1,
     activity_type: 'multiple_choice',
-    skill: 'listening',
-    lesson_numbers: [40],
-    prompt: 'O que Anna ouve na floresta?',
-    options: ['Um pássaro', 'Um carro', 'Uma campainha'],
+    skill: 'grammar',
+    lesson_numbers: [31],
+    prompt: 'Comparação. Complete: A taxi is ____ a bus.',
+    options: ['faster than', 'more faster than', 'faster that'],
   },
   {
     id: 102,
     position: 2,
     activity_type: 'multiple_choice',
     skill: 'grammar',
-    lesson_numbers: [41],
-    prompt: 'Qual frase usa corretamente o pronome reflexivo?',
-    options: ['She did it herself.', 'She did it her.', 'She herself did it is.'],
+    lesson_numbers: [32],
+    prompt: 'Dois objetos. Complete: Kids from all over the world ask ____ questions.',
+    options: ['us', 'we', 'our'],
   },
   {
     id: 103,
     position: 3,
     activity_type: 'multiple_choice',
     skill: 'grammar',
-    lesson_numbers: [42],
-    prompt: 'Escolha a ação que estava em andamento.',
-    options: ['I was reading.', 'I read tomorrow.', 'I am read.'],
+    lesson_numbers: [33],
+    prompt: 'Presente simples e agente. Complete: First, the ____ pitches the ball to the batter.',
+    options: ['pitcher', 'pitch', 'pitching'],
   },
   {
     id: 104,
     position: 4,
     activity_type: 'multiple_choice',
-    skill: 'vocabulary',
-    lesson_numbers: [43],
-    prompt: 'Qual opção significa plano alternativo?',
-    options: ['Plan B', 'Team member', 'Healthy choice'],
+    skill: 'grammar',
+    lesson_numbers: [34],
+    prompt: "Possibilidade. Complete: I ____ go to the party; I'm not sure.",
+    options: ['might', 'will definitely', 'might to'],
   },
   {
     id: 105,
     position: 5,
     activity_type: 'multiple_choice',
     skill: 'grammar',
-    lesson_numbers: [44],
-    prompt: 'Qual conselho é adequado?',
-    options: ['You should rest.', 'You rest yesterday.', 'You should to rest.'],
+    lesson_numbers: [35],
+    prompt: 'Quantidade e embalagem. Qual frase está correta?',
+    options: [
+      'I bought two loaves of bread.',
+      'I bought two loafs of bread.',
+      'I bought too much loaves of bread.',
+    ],
   },
   {
     id: 106,
     position: 6,
-    activity_type: 'short_answer',
-    skill: 'vocabulary',
-    lesson_numbers: [40, 41, 42, 43, 44],
-    prompt: 'Escreva a expressão para uma escolha saudável.',
-    options: null,
+    activity_type: 'multiple_choice',
+    skill: 'grammar',
+    lesson_numbers: [36],
+    prompt:
+      'Lugar e concordância. Complete: Where ____ the eggs? They are inside the cabinet ____ the sink.',
+    options: ['are; under', 'is; under', 'are; in'],
+  },
+  {
+    id: 107,
+    position: 7,
+    activity_type: 'multiple_choice',
+    skill: 'grammar',
+    lesson_numbers: [37],
+    prompt: 'Pronome possessivo. Complete: This is my bag. This bag is ____.',
+    options: ['mine', 'my', 'me'],
+  },
+  {
+    id: 108,
+    position: 8,
+    activity_type: 'multiple_choice',
+    skill: 'grammar',
+    lesson_numbers: [38],
+    prompt: 'Superlativo. Complete: Old friends are ____.',
+    options: ['the best', 'the goodest', 'better than'],
+  },
+  {
+    id: 109,
+    position: 9,
+    activity_type: 'multiple_choice',
+    skill: 'grammar',
+    lesson_numbers: [39],
+    prompt: 'Prefixo negativo. Reescreva not perfect com uma palavra: It is ____.',
+    options: ['imperfect', 'unperfect', 'disperfect'],
+  },
+  {
+    id: 110,
+    position: 10,
+    activity_type: 'multiple_choice',
+    skill: 'listening',
+    lesson_numbers: [40],
+    prompt: 'Na escuta da Aula 40, como o diretor pede que Anna fale?',
+    options: [
+      'More loudly and more seriously.',
+      'More quietly and more slowly.',
+      'Earlier and less carefully.',
+    ],
   },
 ]
 
 const review: CourseReview = {
   id: 12,
-  slug: 'checkpoint-40-44',
-  position: 5,
-  title: 'Checkpoint 40–44',
-  intro: 'Consolide listening, gramática e vocabulário antes de continuar.',
-  estimated_minutes: 12,
-  question_count: 6,
-  content_version: 3,
+  slug: 'checkpoint-31-40-level-1',
+  position: 11,
+  title: 'Fechamento 31–40',
+  intro:
+    'Feche o bloco revendo comparativos, objetos diretos e indiretos, presente simples, agentes em -er, possibilidade com might, certeza com will, quantidades, preposições de lugar, possessivos, superlativos, prefixos negativos e advérbios de modo. A escuta da Aula 40 verifica as orientações dadas a Anna durante o ensaio.',
+  estimated_minutes: 18,
+  question_count: 10,
+  content_version: 1,
   review_lesson_number: 40,
   listening_lesson_number: 40,
-  source_kind: 'mixed',
-  source_title: "VOA Let's Learn English — Level 1",
-  source_url: 'https://learningenglish.voanews.com/p/5644.html',
-  source_note: 'Base oficial da VOA; questões autorais deste projeto.',
+  source_kind: 'authorial',
+  source_title: 'Fechamento autoral do Aulas de Inglês',
+  source_url: null,
+  source_note:
+    'Não há review oficial da VOA com o recorte exato das Aulas 31–40 do Level 1. As revisões oficiais 30–34, 35–39 e 40–44 sustentam, respectivamente, os objetivos das Aulas 31–34, 35–39 e 40; foram usadas apenas como referências curriculares. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção — e não equivale a, nem substitui, uma revisão da VOA.',
   status: 'published',
   latest_attempt: null,
   listening_source_page_url: 'https://example.com/lesson-40',
@@ -140,7 +188,7 @@ const review: CourseReview = {
     attribution: 'Voice of America (VOA Learning English)',
     offline_policy: 'network_only',
     license_reviewed_at: '2026-10-08',
-    duration_seconds: 180,
+    duration_seconds: 251,
     listening_exercise_position: null,
     cues: [],
     transcript: [],
@@ -150,22 +198,22 @@ const review: CourseReview = {
 
 const persistedAttempt: CourseReviewAttempt = {
   id: 501,
-  content_version: 3,
+  content_version: 1,
   completed_at: '2026-10-08T12:00:00Z',
-  score: 4,
-  total: 6,
-  score_percent: 67,
+  score: 7,
+  total: 10,
+  score_percent: 70,
   status: 'reinforce',
-  reinforced_lesson_numbers: [40, 42],
+  reinforced_lesson_numbers: [31, 40],
   feedback: [
     {
       question_id: 101,
       position: 1,
-      answer: 'Um carro',
+      answer: 'more faster than',
       correct: false,
-      accepted_answers: ['Um pássaro'],
-      explanation: 'No trecho selecionado, Anna identifica o som de um pássaro.',
-      lesson_numbers: [40],
+      accepted_answers: ['faster than'],
+      explanation: 'Fast é um adjetivo curto: o comparativo recebe -er e é seguido por than.',
+      lesson_numbers: [31],
     },
   ],
 }
@@ -173,7 +221,7 @@ const persistedAttempt: CourseReviewAttempt = {
 function renderPage() {
   return render(
     <MemoryRouter
-      initialEntries={['/cursos/voa-level-1/unidades/40-44/checkpoint']}
+      initialEntries={['/cursos/voa-level-1/unidades/31-40/checkpoint']}
     >
       <Routes>
         <Route
@@ -188,9 +236,9 @@ function renderPage() {
 function renderSwitchablePage() {
   return render(
     <MemoryRouter
-      initialEntries={['/cursos/voa-level-1/unidades/40-44/checkpoint']}
+      initialEntries={['/cursos/voa-level-1/unidades/31-40/checkpoint']}
     >
-      <Link to="/cursos/voa-level-1/unidades/45-49/checkpoint">
+      <Link to="/cursos/voa-level-1/unidades/40-44/checkpoint">
         Trocar checkpoint
       </Link>
       <Routes>
@@ -271,11 +319,17 @@ describe('CourseReviewPage', () => {
     expect(hooks.refetch).toHaveBeenCalledOnce()
   })
 
-  it('mostra seis questões sem antecipar o gabarito, áudio e retorno à Aula 40', () => {
+  it('mostra dez questões sem antecipar o gabarito, áudio e retorno à Aula 40', () => {
     renderPage()
 
-    expect(screen.getByRole('heading', { name: 'Checkpoint 40–44' })).toBeInTheDocument()
-    expect(screen.getAllByRole('group')).toHaveLength(6)
+    expect(screen.getByRole('heading', { name: 'Fechamento 31–40' })).toBeInTheDocument()
+    expect(screen.getAllByRole('group')).toHaveLength(10)
+    const provenance = screen.getByRole('region', { name: 'Origem do checkpoint' })
+    expect(within(provenance).getByText('Origem')).toBeInTheDocument()
+    expect(
+      within(provenance).getByText('Fechamento autoral do Aulas de Inglês'),
+    ).toBeInTheDocument()
+    expect(within(provenance).queryByRole('link')).not.toBeInTheDocument()
     expect(screen.getByTestId('checkpoint-audio')).toHaveTextContent(
       'Conversa da Aula 40',
     )
@@ -291,14 +345,20 @@ describe('CourseReviewPage', () => {
       'aria-valuenow',
       '0',
     )
+    expect(screen.getByRole('progressbar', { name: 'Questões respondidas' })).toHaveAttribute(
+      'aria-valuemax',
+      '10',
+    )
     expect(screen.getByRole('button', { name: 'Concluir checkpoint' })).toBeDisabled()
     expect(screen.getByRole('link', { name: 'Voltar à unidade' })).toHaveAttribute(
       'href',
-      '/cursos/voa-level-1/unidades/40-44',
+      '/cursos/voa-level-1/unidades/31-40',
     )
-    expect(screen.queryByText('Um pássaro', { selector: 'small' })).not.toBeInTheDocument()
     expect(
-      screen.queryByText(/No trecho selecionado, Anna identifica/),
+      screen.queryByText('faster than', { selector: 'small' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/Fast é um adjetivo curto/),
     ).not.toBeInTheDocument()
   })
 
@@ -306,21 +366,17 @@ describe('CourseReviewPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    for (const question of questions.slice(0, 5)) {
-      const group = screen.getByRole('group', { name: new RegExp(question.prompt) })
+    for (const question of questions) {
+      const group = screen.getByRole('group', {
+        name: (accessibleName) => accessibleName.includes(question.prompt),
+      })
       await user.click(within(group).getAllByRole('radio')[0]!)
     }
-    await user.type(
-      screen.getByRole('textbox', {
-        name: 'Resposta para: Escreva a expressão para uma escolha saudável.',
-      }),
-      'healthy choice',
-    )
 
-    expect(screen.getByText('6/6 respondidas')).toBeInTheDocument()
+    expect(screen.getByText('10/10 respondidas')).toBeInTheDocument()
     expect(screen.getByRole('progressbar', { name: 'Questões respondidas' })).toHaveAttribute(
       'aria-valuenow',
-      '6',
+      '10',
     )
     const submit = screen.getByRole('button', { name: 'Concluir checkpoint' })
     expect(submit).toBeEnabled()
@@ -329,15 +385,11 @@ describe('CourseReviewPage', () => {
 
     const expectedAttempt = {
       idempotency_key: '123e4567-e89b-12d3-a456-426614174000',
-      content_version: 3,
-      answers: [
-        { question_id: 101, answer: 'Um pássaro' },
-        { question_id: 102, answer: 'She did it herself.' },
-        { question_id: 103, answer: 'I was reading.' },
-        { question_id: 104, answer: 'Plan B' },
-        { question_id: 105, answer: 'You should rest.' },
-        { question_id: 106, answer: 'healthy choice' },
-      ],
+      content_version: 1,
+      answers: questions.map((question) => ({
+        question_id: question.id,
+        answer: question.options![0],
+      })),
     }
     expect(hooks.mutate).toHaveBeenNthCalledWith(1, expectedAttempt)
     expect(hooks.mutate).toHaveBeenNthCalledWith(2, expectedAttempt)
@@ -361,45 +413,45 @@ describe('CourseReviewPage', () => {
     expect(resultTitle).toBeInTheDocument()
     expect(screen.getByRole('status', { name: 'Vale reforçar alguns pontos' })).toBeInTheDocument()
     await waitFor(() => expect(resultTitle).toHaveFocus())
-    expect(screen.getByText('Você acertou 4 de 6 questões (67%).')).toBeInTheDocument()
-    expect(screen.getByLabelText('67 por cento')).toBeInTheDocument()
+    expect(screen.getByText('Você acertou 7 de 10 questões (70%).')).toBeInTheDocument()
+    expect(screen.getByLabelText('70 por cento')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Aula 31' })).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/aulas/31',
+    )
     expect(screen.getByRole('link', { name: 'Aula 40' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-1/aulas/40',
     )
-    expect(screen.getByRole('link', { name: 'Aula 42' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Continuar na Aula 41' })).toHaveAttribute(
       'href',
-      '/cursos/voa-level-1/aulas/42',
-    )
-    expect(screen.getByRole('link', { name: 'Continuar na Aula 45' })).toHaveAttribute(
-      'href',
-      '/cursos/voa-level-1/aulas/45',
+      '/cursos/voa-level-1/aulas/41',
     )
     expect(
       screen.getByText(
         (_, element) =>
           element?.tagName === 'SMALL' &&
-          element.textContent?.includes('resposta esperada: Um pássaro') === true,
+          element.textContent?.includes(
+            'resposta esperada: faster than',
+          ) === true,
       ),
     ).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Concluir checkpoint' })).not.toBeInTheDocument()
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Refazer checkpoint' }))
-    const firstAnswer = screen.getByRole('radio', { name: 'Um pássaro' })
+    const firstAnswer = screen.getByRole('radio', {
+      name: 'faster than',
+    })
     await waitFor(() => expect(firstAnswer).toHaveFocus())
 
     const user = userEvent.setup()
     await user.click(firstAnswer)
-    for (const question of questions.slice(1, 5)) {
-      const group = screen.getByRole('group', { name: new RegExp(question.prompt) })
+    for (const question of questions.slice(1)) {
+      const group = screen.getByRole('group', {
+        name: (accessibleName) => accessibleName.includes(question.prompt),
+      })
       await user.click(within(group).getAllByRole('radio')[0]!)
     }
-    await user.type(
-      screen.getByRole('textbox', {
-        name: 'Resposta para: Escreva a expressão para uma escolha saudável.',
-      }),
-      'healthy choice',
-    )
     await user.click(screen.getByRole('button', { name: 'Concluir checkpoint' }))
 
     expect(hooks.mutate).toHaveBeenLastCalledWith(
@@ -446,18 +498,20 @@ describe('CourseReviewPage', () => {
     }))
     renderSwitchablePage()
 
-    await user.click(screen.getByRole('radio', { name: 'Um pássaro' }))
-    expect(screen.getByText('1/6 respondidas')).toBeInTheDocument()
+    await user.click(screen.getByRole('radio', { name: 'faster than' }))
+    expect(screen.getByText('1/10 respondidas')).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Trocar checkpoint' }))
 
-    expect(screen.getByRole('heading', { name: 'Checkpoint 45-49' })).toBeInTheDocument()
-    expect(screen.getByText('0/6 respondidas')).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: 'Um pássaro' })).not.toBeChecked()
+    expect(screen.getByRole('heading', { name: 'Checkpoint 40-44' })).toBeInTheDocument()
+    expect(screen.getByText('0/10 respondidas')).toBeInTheDocument()
+    expect(
+      screen.getByRole('radio', { name: 'faster than' }),
+    ).not.toBeChecked()
     expect(globalThis.crypto.randomUUID).toHaveBeenCalledTimes(2)
     expect(hooks.useSubmitCourseReview).toHaveBeenLastCalledWith(
       'voa-level-1',
-      '45-49',
+      '40-44',
     )
   })
 })

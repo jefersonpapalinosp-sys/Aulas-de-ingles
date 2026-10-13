@@ -5,14 +5,137 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_lista_as_trinta_e_sete_aulas_em_ordem(client: AsyncClient) -> None:
+async def test_lista_as_cinquenta_e_duas_aulas_em_ordem(client: AsyncClient) -> None:
     r = await client.get("/api/lessons")
     assert r.status_code == 200
     aulas = r.json()
-    assert [a["number"] for a in aulas] == list(range(1, 16)) + list(range(31, 53))
+    assert [a["number"] for a in aulas] == list(range(1, 53))
     assert aulas[0]["title"] == "Welcome!"
     # O resumo não carrega a aula inteira.
     assert "grammar_blocks" not in aulas[0]
+
+
+@pytest.mark.asyncio
+async def test_sprint_34_publica_o_pacote_completo_das_aulas_16_a_20(
+    client: AsyncClient,
+) -> None:
+    expected = [
+        (16, "Where Are You From?", "Nacionalidades e idiomas", "monitorar"),
+        (17, "Are You Free on Friday?", "Futuro com will e going to", "avaliar"),
+        (
+            18,
+            "She Always Does That",
+            "Frequência, pronomes objeto e ordinais",
+            "classificar",
+        ),
+        (19, "When Do I Start?", "Which, which one, next e every", "resumir"),
+        (
+            20,
+            "What Can You Do?",
+            "Habilidade com can, can't e cannot",
+            "identificar problemas",
+        ),
+    ]
+
+    for number, title, grammar_tag, learning_strategy in expected:
+        response = await client.get(f"/api/courses/voa-level-1/lessons/{number}")
+        assert response.status_code == 200
+        lesson = response.json()
+        assert lesson["unit_slug"] == "16-20"
+        assert lesson["title"] == title
+        assert lesson["grammar_tag"] == grammar_tag
+        assert lesson["versions"][0]["learning_strategy"] == learning_strategy
+        assert len(lesson["vocab"]) == 10
+        assert len(lesson["exercises"]) == 8
+        assert sum(item["skill"] == "listening" for item in lesson["exercises"]) == 4
+        assert len(lesson["media"]) == 1
+        assert len(lesson["media"][0]["cues"]) == 5
+        assert len(lesson["writing_prompts"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_sprint_35_publica_o_pacote_completo_das_aulas_21_a_25(
+    client: AsyncClient,
+) -> None:
+    expected = [
+        (21, "Can You Come to the Party?", "Have to, can e can't em convites", "cooperar"),
+        (22, "Next Summer...", "Going to e sequência de planos", "planejar"),
+        (23, "What Do You Want?", "Want, horas, preços e troco", "responder"),
+        (
+            24,
+            "Yesterday Was Amazing!",
+            "Passado regular + festivais e cultura",
+            "substituir",
+        ),
+        (25, "Watch Out!", "Should, ought to e avisos", "fazer associações"),
+    ]
+
+    for number, title, grammar_tag, learning_strategy in expected:
+        response = await client.get(f"/api/courses/voa-level-1/lessons/{number}")
+        assert response.status_code == 200
+        lesson = response.json()
+        assert lesson["unit_slug"] == "21-25"
+        assert lesson["title"] == title
+        assert lesson["grammar_tag"] == grammar_tag
+        assert lesson["versions"][0]["learning_strategy"] == learning_strategy
+        assert len(lesson["goals"]) == 4
+        assert len(lesson["grammar_blocks"]) == 3
+        assert len(lesson["phrases"]) == 5
+        assert len(lesson["vocab"]) == 10
+        assert len(lesson["pronunciation"]) == 3
+        assert len(lesson["exercises"]) == 8
+        assert sum(item["skill"] == "listening" for item in lesson["exercises"]) == 4
+        assert len(lesson["media"]) == 1
+        assert len(lesson["media"][0]["cues"]) == 5
+        assert len(lesson["writing_prompts"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_sprint_36_publica_o_pacote_completo_das_aulas_26_a_30(
+    client: AsyncClient,
+) -> None:
+    expected = [
+        (26, "This Game Is Fun!", "Ought to + passado irregular", "fazer associações"),
+        (
+            27,
+            "I Can't Come In",
+            "Passado irregular + saúde e conselhos",
+            "analisar informações",
+        ),
+        (28, "I Passed It!", "Imperativos + was e were", "falar consigo mesmo"),
+        (
+            29,
+            "A Long Time Ago",
+            "Simple past + adjetivos e infinitivos",
+            "personalizar",
+        ),
+        (
+            30,
+            "Rolling on the River",
+            "Comparativos, superlativos + much e many",
+            "fazer inferências",
+        ),
+    ]
+
+    for number, title, grammar_tag, learning_strategy in expected:
+        response = await client.get(f"/api/courses/voa-level-1/lessons/{number}")
+        assert response.status_code == 200
+        lesson = response.json()
+        assert lesson["unit_slug"] == "26-30"
+        assert lesson["title"] == title
+        assert lesson["grammar_tag"] == grammar_tag
+        assert lesson["versions"][0]["learning_strategy"] == learning_strategy
+        assert len(lesson["goals"]) == 4
+        assert len(lesson["grammar_blocks"]) == 3
+        assert len(lesson["phrases"]) == 5
+        assert len(lesson["vocab"]) == 10
+        assert len(lesson["pronunciation"]) == 3
+        assert len(lesson["exercises"]) == 8
+        assert sum(item["skill"] == "listening" for item in lesson["exercises"]) == 4
+        assert len(lesson["media"]) == 1
+        assert len(lesson["media"][0]["cues"]) == 5
+        assert lesson["media"][0]["transcript"] == []
+        assert len(lesson["writing_prompts"]) == 1
 
 
 @pytest.mark.asyncio
@@ -221,7 +344,7 @@ async def test_aula_32_esta_alinhada_ao_plano_oficial(client: AsyncClient) -> No
 
 @pytest.mark.asyncio
 async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient) -> None:
-    for number in range(31, 53):
+    for number in range(1, 53):
         lesson = (await client.get(f"/api/lessons/{number}")).json()
         assert len(lesson["media"]) == 1
         media = lesson["media"][0]
@@ -328,7 +451,7 @@ async def test_texto_vem_em_markdown_sem_html(client: AsyncClient) -> None:
 async def test_vocabulario_filtra_por_aula(client: AsyncClient) -> None:
     todos = (await client.get("/api/vocab")).json()
     expected = 0
-    for number in [*range(1, 16), *range(31, 53)]:
+    for number in range(1, 53):
         expected += len((await client.get(f"/api/lessons/{number}")).json()["vocab"])
     assert len(todos) == expected
     da_40 = (await client.get("/api/vocab?lesson=40")).json()
@@ -347,10 +470,10 @@ async def test_vocabulario_de_aula_inexistente_vem_vazio(client: AsyncClient) ->
 async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
     todos = (await client.get("/api/exercises")).json()
     expected = 0
-    for number in [*range(1, 16), *range(31, 53)]:
+    for number in range(1, 53):
         expected += len((await client.get(f"/api/lessons/{number}")).json()["exercises"])
     assert len(todos) == expected
-    assert {e["lesson_number"] for e in todos} == {*range(1, 16), *range(31, 53)}
+    assert {e["lesson_number"] for e in todos} == set(range(1, 53))
     # Ordenado por aula e depois por posição.
     chaves = [(e["lesson_number"], e["position"]) for e in todos]
     assert chaves == sorted(chaves)
@@ -361,16 +484,28 @@ async def test_exercicios_do_bloco_inteiro(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_exercicios_filtram_por_curso_e_unidade(client: AsyncClient) -> None:
     unit_31_40 = (await client.get("/api/exercises?course=voa-level-1&unit=31-40")).json()
+    unit_16_20 = (await client.get("/api/exercises?course=voa-level-1&unit=16-20")).json()
+    unit_21_25 = (await client.get("/api/exercises?course=voa-level-1&unit=21-25")).json()
+    unit_26_30 = (await client.get("/api/exercises?course=voa-level-1&unit=26-30")).json()
     unit_40_44 = (await client.get("/api/exercises?course=voa-level-1&unit=40-44")).json()
     unit_45_49 = (await client.get("/api/exercises?course=voa-level-1&unit=45-49")).json()
     unit_50_52 = (await client.get("/api/exercises?course=voa-level-1&unit=50-52")).json()
     level_2_unit_6_10 = (await client.get("/api/exercises?course=voa-level-2&unit=6-10")).json()
     level_2_unit_11_15 = (await client.get("/api/exercises?course=voa-level-2&unit=11-15")).json()
 
+    assert {item["lesson_number"] for item in unit_16_20} == set(range(16, 21))
+    assert {item["lesson_number"] for item in unit_21_25} == set(range(21, 26))
+    assert {item["lesson_number"] for item in unit_26_30} == set(range(26, 31))
     assert {item["lesson_number"] for item in unit_31_40} == set(range(31, 41))
     assert {item["lesson_number"] for item in unit_40_44} == set(range(41, 45))
     assert {item["lesson_number"] for item in unit_45_49} == set(range(45, 50))
     assert {item["lesson_number"] for item in unit_50_52} == {50, 51, 52}
+    assert len(unit_16_20) == 5 * 8
+    assert sum(item["skill"] == "listening" for item in unit_16_20) == 5 * 4
+    assert len(unit_21_25) == 5 * 8
+    assert sum(item["skill"] == "listening" for item in unit_21_25) == 5 * 4
+    assert len(unit_26_30) == 5 * 8
+    assert sum(item["skill"] == "listening" for item in unit_26_30) == 5 * 4
     assert len(unit_45_49) == 5 * 8
     assert len(unit_50_52) == 3 * 8
     assert len(level_2_unit_6_10) == 5 * 8
@@ -385,6 +520,9 @@ async def test_exercicios_filtram_por_curso_e_unidade(client: AsyncClient) -> No
     assert all(item["unit_slug"] == "11-15" for item in level_2_unit_11_15)
     assert all("answers" not in item for item in level_2_unit_11_15)
     for unit_slug, items in (
+        ("16-20", unit_16_20),
+        ("21-25", unit_21_25),
+        ("26-30", unit_26_30),
         ("31-40", unit_31_40),
         ("40-44", unit_40_44),
         ("45-49", unit_45_49),

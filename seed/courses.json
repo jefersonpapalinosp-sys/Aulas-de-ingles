@@ -416,18 +416,525 @@
         }
       },
       {
+        "slug": "16-20",
+        "title": "Aulas 16–20",
+        "position": 4,
+        "status": "published",
+        "lesson_start": 16,
+        "lesson_end": 20,
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-16-20-level-1",
+          "title": "Fechamento 16–20",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA com o recorte exato das Aulas 16–20 do Level 1. A VOA publicou reviews dos blocos 15–19 e 20–24, usados apenas como referência curricular. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção — e não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o quarto bloco revendo nacionalidades e idiomas, o futuro com will e going to, advérbios de frequência, pronomes objeto, ordinais, which e a habilidade com can e can't. A escuta da Aula 20 verifica como Pete identifica a habilidade que pode virar trabalho.",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 20,
+          "listening_lesson_number": 20,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "País e nacionalidade. Complete: Sabrina is from Bangladesh. She is ____.",
+              "options": [
+                "Bangladeshi",
+                "Bangladesh",
+                "Bengal"
+              ],
+              "accepted_answers": [
+                "Bangladeshi"
+              ],
+              "explanation": "Bangladesh é o país; Bangladeshi nomeia a nacionalidade e também funciona como adjetivo.",
+              "lesson_numbers": [
+                16
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Plano futuro. Complete: I ____ tap dance with my friends Thursday night.",
+              "options": [
+                "am going to",
+                "will to",
+                "going"
+              ],
+              "accepted_answers": [
+                "am going to"
+              ],
+              "explanation": "Going to apresenta um plano já combinado; a forma inclui o verbo BE antes de going to.",
+              "lesson_numbers": [
+                17
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Pronome objeto. Complete: The duck's mother cannot find ____.",
+              "options": [
+                "him",
+                "he",
+                "his"
+              ],
+              "accepted_answers": [
+                "him"
+              ],
+              "explanation": "Depois do verbo find precisamos do pronome objeto him; he é forma de sujeito e his indica posse.",
+              "lesson_numbers": [
+                18
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Escolha entre alternativas. Complete: ____ news do you want to hear first, the good news or the bad news?",
+              "options": [
+                "Which",
+                "Who",
+                "Where"
+              ],
+              "accepted_answers": [
+                "Which"
+              ],
+              "explanation": "Which escolhe entre alternativas conhecidas; aqui as opções são good news e bad news.",
+              "lesson_numbers": [
+                19
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Habilidade. Complete a resposta curta: Can you help me? Yes, ____.",
+              "options": [
+                "I can",
+                "I do",
+                "I am"
+              ],
+              "accepted_answers": [
+                "I can"
+              ],
+              "explanation": "A resposta curta repete o modal da pergunta: Can you…? — Yes, I can.",
+              "lesson_numbers": [
+                20
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 20, qual habilidade de Pete pode se transformar em trabalho?",
+              "options": [
+                "escrever",
+                "dirigir",
+                "cozinhar"
+              ],
+              "accepted_answers": [
+                "escrever"
+              ],
+              "explanation": "Pete mantém um blog com muitos seguidores; Anna conclui que ele pode ganhar dinheiro escrevendo.",
+              "lesson_numbers": [
+                20
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "slug": "21-25",
+        "title": "Aulas 21–25",
+        "position": 5,
+        "status": "published",
+        "lesson_start": 21,
+        "lesson_end": 25,
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-21-25-level-1",
+          "title": "Fechamento 21–25",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA com o recorte exato das Aulas 21–25 do Level 1. A VOA publicou reviews dos blocos 20–24 e 25–29, usados apenas como referência curricular. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção — e não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o quinto bloco revendo obrigação com have to, convites e habilidades com can, planos futuros com going to, desejos com want, passado regular e recomendações com should e ought to. A escuta da Aula 25 verifica avisos e conselhos durante o jogo Catch Americana.",
+          "estimated_minutes": 12,
+          "content_version": 1,
+          "review_lesson_number": 25,
+          "listening_lesson_number": 25,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Obrigação. Complete: First, I ____ take a test on the computer.",
+              "options": ["have to", "can to", "am have"],
+              "accepted_answers": ["have to"],
+              "explanation": "Have to + verbo na forma base expressa uma obrigação ou necessidade.",
+              "lesson_numbers": [21]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Plano já organizado. Complete: First, we ____ introduce the subject.",
+              "options": ["are going to", "going", "will to"],
+              "accepted_answers": ["are going to"],
+              "explanation": "Be going to apresenta um plano; com we, a forma do verbo BE é are.",
+              "lesson_numbers": [22]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Desejo. Complete: I ____ the chicken dish.",
+              "options": ["want", "am want", "wanting"],
+              "accepted_answers": ["want"],
+              "explanation": "Want expressa desejo e recebe diretamente o objeto; não precisa do verbo BE.",
+              "lesson_numbers": [23]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Passado regular. Complete: Yesterday, they ____ traditional Basque food.",
+              "options": ["cooked", "cook", "cooking"],
+              "accepted_answers": ["cooked"],
+              "explanation": "Yesterday pede o simple past; cook forma o passado regular com -ed.",
+              "lesson_numbers": [24]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Conselho. Qual frase recomenda uma ação sem impor obrigação?",
+              "options": ["You should be more careful.", "You are more careful yesterday.", "You should to be careful."],
+              "accepted_answers": ["You should be more careful."],
+              "explanation": "Should + verbo na forma base formula uma recomendação.",
+              "lesson_numbers": [25]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 25, que aviso Anna dá antes de recomendar mais cuidado?",
+              "options": ["Watch out!", "Come in!", "Slow music!"],
+              "accepted_answers": ["Watch out!"],
+              "explanation": "Anna usa Watch out! para alertar Dan imediatamente e depois diz que ele deveria ter mais cuidado.",
+              "lesson_numbers": [25]
+            }
+          ]
+        }
+      },
+      {
+        "slug": "26-30",
+        "title": "Aulas 26–30",
+        "position": 6,
+        "status": "published",
+        "lesson_start": 26,
+        "lesson_end": 30,
+        "total_lessons": 5,
+        "review": {
+          "slug": "checkpoint-26-30-level-1",
+          "title": "Fechamento 26–30",
+          "position": 6,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA com o recorte exato das Aulas 26–30 do Level 1. A revisão oficial 25–29 sustenta os objetivos das Aulas 26–29, e a revisão oficial 30–34 sustenta os objetivos da Aula 30; ambas foram usadas apenas como referência curricular. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção — e não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o sexto bloco revendo passado irregular, conselhos de saúde, imperativos, passado de BE, sonhos de infância, infinitivos, comparativos, superlativos e quantidades contáveis e incontáveis. A escuta da Aula 30 verifica as quantidades pedidas no mercado de frutos do mar.",
+          "estimated_minutes": 12,
+          "content_version": 2,
+          "review_lesson_number": 30,
+          "listening_lesson_number": 30,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Passado irregular. Complete: Anna ____ Uncle Sam and ____ forty points.",
+              "options": ["found; won", "finded; winned", "find; win"],
+              "accepted_answers": ["found; won"],
+              "explanation": "Find e win são irregulares: seus passados são found e won.",
+              "lesson_numbers": [26]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Saúde no passado. Complete: Yesterday I ____ fine, but later I ____ the flu.",
+              "options": ["felt; had", "feeled; haved", "feel; have"],
+              "accepted_answers": ["felt; had"],
+              "explanation": "Feel e have formam o passado irregular felt e had.",
+              "lesson_numbers": [27]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Imperativo e passado de BE. Qual frase está correta?",
+              "options": ["Please start the car. Anna was nervous.", "Please to start the car. Anna were nervous.", "Starts the car. Anna did nervous."],
+              "accepted_answers": ["Please start the car. Anna was nervous."],
+              "explanation": "O imperativo usa a forma base; com Anna/she, o passado de BE é was.",
+              "lesson_numbers": [28]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Sonho de infância. Complete: I was a serious child, and I wanted ____ an astronaut.",
+              "options": ["to be", "be", "to was"],
+              "accepted_answers": ["to be"],
+              "explanation": "Want recebe o infinitivo com to: wanted to be.",
+              "lesson_numbers": [29]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Quantidade. Complete: How ____ shrimp and how ____ crabs do you want?",
+              "options": ["much; many", "many; much", "much; much"],
+              "accepted_answers": ["much; many"],
+              "explanation": "Shrimp funciona como quantidade não contada nessa compra; crabs é plural contável.",
+              "lesson_numbers": [30]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 30, quais quantidades entram na compra de Anna?",
+              "options": ["Uma libra de camarão e uma dúzia de caranguejos.", "Uma dúzia de camarões e uma libra de milho.", "Cinco libras de caranguejo e nenhum camarão."],
+              "accepted_answers": ["Uma libra de camarão e uma dúzia de caranguejos."],
+              "explanation": "Pete pede ao colega uma libra de camarão para cinco pessoas; Anna escolhe uma dúzia de caranguejos grandes.",
+              "lesson_numbers": [30]
+            }
+          ]
+        }
+      },
+      {
         "slug": "31-40",
         "title": "Aulas 31–40",
-        "position": 4,
+        "position": 7,
         "status": "published",
         "lesson_start": 31,
         "lesson_end": 40,
-        "total_lessons": 10
+        "total_lessons": 10,
+        "review": {
+          "slug": "checkpoint-31-40-level-1",
+          "title": "Fechamento 31–40",
+          "position": 11,
+          "status": "published",
+          "source_kind": "authorial",
+          "source_title": "Fechamento autoral do Aulas de Inglês",
+          "source_url": null,
+          "source_note": "Não há review oficial da VOA com o recorte exato das Aulas 31–40 do Level 1. As revisões oficiais 30–34, 35–39 e 40–44 sustentam, respectivamente, os objetivos das Aulas 31–34, 35–39 e 40; foram usadas apenas como referências curriculares. Este fechamento é inteiramente autoral — seleção de competências, perguntas, alternativas, explicações e correção — e não equivale a, nem substitui, uma revisão da VOA.",
+          "intro": "Feche o bloco revendo comparativos, objetos diretos e indiretos, presente simples, agentes em -er, possibilidade com might, certeza com will, quantidades, preposições de lugar, possessivos, superlativos, prefixos negativos e advérbios de modo. A escuta da Aula 40 verifica as orientações dadas a Anna durante o ensaio.",
+          "estimated_minutes": 18,
+          "content_version": 1,
+          "review_lesson_number": 40,
+          "listening_lesson_number": 40,
+          "listening_media_position": 0,
+          "questions": [
+            {
+              "position": 1,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Comparação. Complete: A taxi is ____ a bus.",
+              "options": [
+                "faster than",
+                "more faster than",
+                "faster that"
+              ],
+              "accepted_answers": [
+                "faster than"
+              ],
+              "explanation": "Fast é um adjetivo curto: o comparativo recebe -er e é seguido por than.",
+              "lesson_numbers": [
+                31
+              ]
+            },
+            {
+              "position": 2,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Dois objetos. Complete: Kids from all over the world ask ____ questions.",
+              "options": [
+                "us",
+                "we",
+                "our"
+              ],
+              "accepted_answers": [
+                "us"
+              ],
+              "explanation": "Us é o objeto indireto, a pessoa que recebe as perguntas; questions é o objeto direto.",
+              "lesson_numbers": [
+                32
+              ]
+            },
+            {
+              "position": 3,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Presente simples e agente. Complete: First, the ____ pitches the ball to the batter.",
+              "options": [
+                "pitcher",
+                "pitch",
+                "pitching"
+              ],
+              "accepted_answers": [
+                "pitcher"
+              ],
+              "explanation": "O sufixo -er transforma pitch no nome do agente: pitcher é quem arremessa a bola.",
+              "lesson_numbers": [
+                33
+              ]
+            },
+            {
+              "position": 4,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Possibilidade. Complete: I ____ go to the party; I'm not sure.",
+              "options": [
+                "might",
+                "will definitely",
+                "might to"
+              ],
+              "accepted_answers": [
+                "might"
+              ],
+              "explanation": "Might + verbo na forma base expressa uma possibilidade incerta e não recebe to.",
+              "lesson_numbers": [
+                34
+              ]
+            },
+            {
+              "position": 5,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Quantidade e embalagem. Qual frase está correta?",
+              "options": [
+                "I bought two loaves of bread.",
+                "I bought two loafs of bread.",
+                "I bought too much loaves of bread."
+              ],
+              "accepted_answers": [
+                "I bought two loaves of bread."
+              ],
+              "explanation": "O plural irregular de loaf é loaves; como as unidades são contáveis, too much não se aplica.",
+              "lesson_numbers": [
+                35
+              ]
+            },
+            {
+              "position": 6,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Lugar e concordância. Complete: Where ____ the eggs? They are inside the cabinet ____ the sink.",
+              "options": [
+                "are; under",
+                "is; under",
+                "are; in"
+              ],
+              "accepted_answers": [
+                "are; under"
+              ],
+              "explanation": "Eggs é plural e exige are; under localiza o armário abaixo da pia.",
+              "lesson_numbers": [
+                36
+              ]
+            },
+            {
+              "position": 7,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Pronome possessivo. Complete: This is my bag. This bag is ____.",
+              "options": [
+                "mine",
+                "my",
+                "me"
+              ],
+              "accepted_answers": [
+                "mine"
+              ],
+              "explanation": "Mine é pronome possessivo e substitui my bag; my precisaria acompanhar um substantivo.",
+              "lesson_numbers": [
+                37
+              ]
+            },
+            {
+              "position": 8,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Superlativo. Complete: Old friends are ____.",
+              "options": [
+                "the best",
+                "the goodest",
+                "better than"
+              ],
+              "accepted_answers": [
+                "the best"
+              ],
+              "explanation": "Good tem superlativo irregular: the best.",
+              "lesson_numbers": [
+                38
+              ]
+            },
+            {
+              "position": 9,
+              "activity_type": "multiple_choice",
+              "skill": "grammar",
+              "prompt": "Prefixo negativo. Reescreva not perfect com uma palavra: It is ____.",
+              "options": [
+                "imperfect",
+                "unperfect",
+                "disperfect"
+              ],
+              "accepted_answers": [
+                "imperfect"
+              ],
+              "explanation": "O adjetivo perfect forma seu oposto convencional com o prefixo im-: imperfect.",
+              "lesson_numbers": [
+                39
+              ]
+            },
+            {
+              "position": 10,
+              "activity_type": "multiple_choice",
+              "skill": "listening",
+              "prompt": "Na escuta da Aula 40, como o diretor pede que Anna fale?",
+              "options": [
+                "More loudly and more seriously.",
+                "More quietly and more slowly.",
+                "Earlier and less carefully."
+              ],
+              "accepted_answers": [
+                "More loudly and more seriously."
+              ],
+              "explanation": "Durante o ensaio, o diretor diz que Anna fala baixo demais e pede que ela fale more loudly e a little more seriously.",
+              "lesson_numbers": [
+                40
+              ]
+            }
+          ]
+        }
       },
       {
         "slug": "40-44",
         "title": "Aulas 40–44",
-        "position": 5,
+        "position": 8,
         "status": "published",
         "lesson_start": 40,
         "lesson_end": 44,
@@ -564,7 +1071,7 @@
       {
         "slug": "45-49",
         "title": "Aulas 45–49",
-        "position": 6,
+        "position": 9,
         "status": "published",
         "lesson_start": 45,
         "lesson_end": 49,
@@ -702,7 +1209,7 @@
       {
         "slug": "50-52",
         "title": "Aulas 50–52",
-        "position": 7,
+        "position": 10,
         "status": "published",
         "lesson_start": 50,
         "lesson_end": 52,
