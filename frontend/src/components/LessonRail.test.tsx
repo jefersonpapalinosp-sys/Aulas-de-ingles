@@ -27,6 +27,12 @@ function lesson(number: number, unitSlug: string): LessonSummary {
 const firstUnitLessons = Array.from({ length: 14 }, (_, index) =>
   lesson(index + 1, '1-14'),
 )
+const lesson40 = {
+  ...lesson(40, '31-40'),
+  position: 10,
+  title: 'The Woods Are Alive',
+  title_pt: 'A floresta está viva',
+}
 const curriculum: CourseCurriculum = {
   course: {
     id: 1,
@@ -39,7 +45,7 @@ const curriculum: CourseCurriculum = {
     position: 1,
     status: 'published',
     total_lessons: 52,
-    published_lessons: 16,
+    published_lessons: 17,
   },
   units: [
     {
@@ -70,9 +76,32 @@ const curriculum: CourseCurriculum = {
     },
     {
       id: 3,
+      slug: '31-40',
+      title: 'Aulas 31–40',
+      position: 3,
+      status: 'published',
+      lesson_start: 31,
+      lesson_end: 40,
+      total_lessons: 10,
+      published_lessons: 1,
+      lessons: [lesson40],
+      review: {
+        id: 11,
+        slug: 'checkpoint-31-40-level-1',
+        position: 11,
+        title: 'Fechamento 31–40',
+        status: 'published',
+        estimated_minutes: 18,
+        question_count: 10,
+        review_lesson_number: 40,
+        source_kind: 'authorial',
+      },
+    },
+    {
+      id: 4,
       slug: '40-44',
       title: 'Unidade 40–44',
-      position: 3,
+      position: 4,
       status: 'published',
       lesson_start: 40,
       lesson_end: 44,
@@ -92,10 +121,10 @@ const curriculum: CourseCurriculum = {
       },
     },
     {
-      id: 4,
+      id: 5,
       slug: '21-25',
       title: 'Unidade 21–25',
-      position: 4,
+      position: 5,
       status: 'planned',
       lesson_start: 21,
       lesson_end: 25,
@@ -296,14 +325,14 @@ vi.mock('../api/progress', () => ({
   useProgress: (courseSlug: string) => ({
     data: {
       studied_count: 1,
-      total_lessons: courseSlug === 'voa-level-2' ? 15 : 16,
+      total_lessons: courseSlug === 'voa-level-2' ? 15 : 17,
       attempts: 0,
       correct: 0,
       review_due: 2,
       review_cards: 2,
       lessons: (courseSlug === 'voa-level-2'
         ? [...level2FirstUnit, ...level2SecondUnit, ...level2ThirdUnit]
-        : [...firstUnitLessons, lesson(15, '15-20'), lesson(41, '40-44')]
+        : [...firstUnitLessons, lesson(15, '15-20'), lesson40, lesson(41, '40-44')]
       ).map((item) => ({
         course_slug: item.course_slug,
         unit_slug: item.unit_slug,
@@ -433,6 +462,30 @@ describe('LessonRail', () => {
     expect(checkpoint).toHaveTextContent('6 questões · 12 min')
     expect(within(checkpoint).getByText('CP')).toBeInTheDocument()
     expect(checkpoint).not.toHaveTextContent('✓')
+  })
+
+  it('mostra o fechamento 31–40 com dez questões e identifica sua rota ativa', async () => {
+    const user = userEvent.setup()
+    const { container } = renderRailAt('/cursos/voa-level-1/unidades/31-40/checkpoint')
+    const desktop = container.querySelector<HTMLElement>('.rail')
+    expect(desktop).not.toBeNull()
+
+    const unit = within(desktop!).getByRole('button', { name: /Aulas 31–40/ })
+    await waitFor(() => expect(unit).toHaveAttribute('aria-expanded', 'true'))
+    const checkpoint = within(desktop!).getByRole('link', { name: /Fechamento 31–40/ })
+
+    expect(checkpoint).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/31-40/checkpoint',
+    )
+    expect(checkpoint).toHaveTextContent('10 questões · 18 min')
+    expect(checkpoint).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('button', { name: /Abrir trilha de aulas/ })).toHaveTextContent(
+      'Fechamento 31–40',
+    )
+
+    await user.click(unit)
+    expect(unit).toHaveAttribute('aria-expanded', 'false')
   })
 
   it('identifica o checkpoint no cabeçalho móvel da rota ativa', () => {

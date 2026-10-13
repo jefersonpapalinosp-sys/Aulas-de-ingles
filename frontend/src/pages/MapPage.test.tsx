@@ -64,7 +64,17 @@ vi.mock('../api/queries', () => ({
           total_lessons: 10,
           published_lessons: 1,
           lessons: [lesson],
-          review: null,
+          review: {
+            id: 11,
+            slug: 'checkpoint-31-40-level-1',
+            position: 11,
+            title: 'Fechamento 31–40',
+            status: 'published',
+            estimated_minutes: 18,
+            question_count: 10,
+            review_lesson_number: 40,
+            source_kind: 'authorial',
+          },
         },
         {
           id: 2,
@@ -324,6 +334,27 @@ describe('MapPage / painel Hoje', () => {
     expect(within(checkpoint).getByText(/6 questões · cerca de 12 min/)).toBeInTheDocument()
     expect(within(checkpoint).getByText('CP')).toBeInTheDocument()
     expect(checkpoint).not.toHaveTextContent('✓')
+  })
+
+  it('apresenta o fechamento 31–40 com dez questões e duração ampliada', () => {
+    render(
+      <MemoryRouter initialEntries={['/cursos/voa-level-1/unidades/31-40']}>
+        <Routes>
+          <Route
+            path="/cursos/:courseSlug/unidades/:unitSlug"
+            element={<MapPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const checkpoint = screen.getByRole('link', { name: /Fechamento 31–40/ })
+    expect(checkpoint).toHaveAttribute(
+      'href',
+      '/cursos/voa-level-1/unidades/31-40/checkpoint',
+    )
+    expect(within(checkpoint).getByText(/10 questões · cerca de 18 min/)).toBeInTheDocument()
+    expect(within(checkpoint).getByText('CP')).toBeInTheDocument()
   })
 
   it('distingue aulas concluídas do estado ainda desconhecido do checkpoint', () => {

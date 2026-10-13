@@ -29,6 +29,21 @@ const lesson = {
   exercises: [{ id: 1 }, { id: 2 }],
 }
 
+const lessons31To40 = Array.from({ length: 10 }, (_, index) => {
+  const number = 31 + index
+  return {
+    id: number,
+    number,
+    position: index + 1,
+    title:
+      number === 31
+        ? 'Take Me Out to the Ball Game'
+        : number === 40
+          ? 'The Woods Are Alive'
+          : `Lesson ${number}`,
+  }
+})
+
 let lessonFixture = lesson
 
 vi.mock('../api/queries', () => ({
@@ -39,23 +54,38 @@ vi.mock('../api/queries', () => ({
       units: [
         {
           slug: '31-40',
+          lessons: lessons31To40,
+          review: {
+            id: 12,
+            slug: 'checkpoint-31-40-level-1',
+            position: 11,
+            title: 'Fechamento 31–40',
+            status: 'published',
+            estimated_minutes: 18,
+            question_count: 10,
+            review_lesson_number: 40,
+            source_kind: 'authorial',
+          },
+        },
+        {
+          slug: '40-44',
           lessons: [
             {
-              id: 31,
-              number: 31,
+              id: 41,
+              number: 41,
               position: 1,
-              title: lesson.title,
+              title: 'Teamwork Works Best With a Team',
             },
           ],
           review: {
-            id: 12,
-            slug: 'checkpoint-31-40',
-            position: 2,
-            title: 'Checkpoint 31–40',
+            id: 41,
+            slug: 'checkpoint-40-44',
+            position: 5,
+            title: 'Checkpoint 40–44',
             status: 'published',
             estimated_minutes: 12,
             question_count: 6,
-            review_lesson_number: 31,
+            review_lesson_number: 40,
             source_kind: 'mixed',
           },
         },
@@ -141,10 +171,18 @@ describe('LessonPage', () => {
     }
   })
 
-  it('leva a última aula da unidade ao checkpoint curricular', () => {
-    renderLesson()
+  it('leva a Aula 40 ao fechamento curricular da unidade 31–40', () => {
+    lessonFixture = {
+      ...lesson,
+      id: 40,
+      slug: 'lesson-40',
+      position: 10,
+      number: 40,
+      title: 'The Woods Are Alive',
+    }
+    renderLesson('/cursos/voa-level-1/aulas/40')
 
-    expect(screen.getByRole('link', { name: 'Checkpoint 31–40 →' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Fechamento 31–40 →' })).toHaveAttribute(
       'href',
       '/cursos/voa-level-1/unidades/31-40/checkpoint',
     )

@@ -177,6 +177,103 @@ async def test_recommendation_offers_unit_checkpoint_after_required_lessons(
 
 
 @pytest.mark.asyncio
+async def test_today_recomenda_fechamento_31_40_e_depois_a_aula_41(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "today-checkpoint-31-40")
+    user = (
+        await session.execute(
+            select(User).where(User.email == "today-checkpoint-31-40@example.com")
+        )
+    ).scalar_one()
+    level_one = (
+        await session.execute(select(Course).where(Course.slug == "voa-level-1"))
+    ).scalar_one()
+    lessons = list(
+        (
+            await session.execute(
+                select(Lesson).where(
+                    Lesson.course_id == level_one.id,
+                    Lesson.number.between(1, 40),
+                )
+            )
+        ).scalars()
+    )
+    earlier_reviews = list(
+        (
+            await session.execute(
+                select(CourseReview)
+                .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
+                .where(
+                    CourseUnit.course_id == level_one.id,
+                    CourseUnit.position <= 6,
+                    CourseReview.status == "published",
+                )
+            )
+        ).scalars()
+    )
+    assert len(lessons) == 40
+    assert len(earlier_reviews) == 6
+    session.add_all([LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons])
+    session.add_all(
+        [
+            CourseReviewAttempt(
+                user_id=user.id,
+                review_id=review.id,
+                idempotency_key=str(uuid4()),
+                request_hash="0" * 64,
+                content_version=review.content_version,
+                answers=[],
+                result=[],
+                score=1,
+                total=1,
+            )
+            for review in earlier_reviews
+        ]
+    )
+    await session.commit()
+
+    recommendation = (await client.get("/api/me/today", headers=headers)).json()[
+        "recommendation"
+    ]
+    assert recommendation == {
+        **recommendation,
+        "kind": "course_review",
+        "title": "Fechamento 31–40 · Level 1",
+        "href": "/cursos/voa-level-1/unidades/31-40/checkpoint",
+        "course_slug": "voa-level-1",
+        "lesson_number": None,
+    }
+
+    review_url = "/api/courses/voa-level-1/units/31-40/review"
+    detail = (await client.get(review_url, headers=headers)).json()
+    submitted = await client.post(
+        f"{review_url}/attempts",
+        headers=headers,
+        json={
+            "idempotency_key": str(uuid4()),
+            "content_version": detail["content_version"],
+            "answers": [
+                {
+                    "question_id": question["id"],
+                    "answer": question["options"][0],
+                }
+                for question in detail["questions"]
+            ],
+        },
+    )
+    assert submitted.status_code == 201
+
+    after_attempt = (await client.get("/api/me/today", headers=headers)).json()[
+        "recommendation"
+    ]
+    assert after_attempt["kind"] == "start_lesson"
+    assert after_attempt["title"] == "Começar a Aula 41"
+    assert after_attempt["lesson_number"] == 41
+    assert after_attempt["href"] == "/cursos/voa-level-1/aulas/41/estudar"
+
+
+@pytest.mark.asyncio
 async def test_today_isolates_reviews_sessions_and_time_by_course(
     client: AsyncClient, session: AsyncSession
 ) -> None:

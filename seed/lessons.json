@@ -8130,6 +8130,2012 @@
   },
   {
     "course_slug": "voa-level-1",
+    "unit_slug": "16-20",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 34: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 16,
+    "slug": "lesson-16",
+    "position": 1,
+    "title": "Where Are You From?",
+    "title_pt": "De onde você é?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-16-where-are-you-from/3355849.html",
+    "grammar_tag": "Nacionalidades e idiomas",
+    "focus_points": [
+      "What country are you from?",
+      "I am from… / I am…",
+      "What languages do you speak?"
+    ],
+    "story_note": "Anna entrevista turistas em Washington",
+    "lead": "Anna entrevista visitantes de Bangladesh, China e Irã. A aula separa **país**, **nacionalidade** e **idioma** para que você possa perguntar de onde alguém vem e o que fala. A estratégia do guia é **monitorar**: ouvir a própria resposta e conferir se cada nome está na categoria certa.",
+    "warmup_prompt": "Say your country, nationality and the languages you speak.",
+    "listening_focus": "Anote os três pares país–nacionalidade e cada idioma citado.",
+    "goals": [
+      "Perguntar a origem com **What country are you from?** e **Where are you from?**",
+      "Distinguir nome de país e nacionalidade: **Bangladesh / Bangladeshi**.",
+      "Perguntar e dizer idiomas com **What languages do you speak?** / **I speak…**.",
+      "Usar nomes de nacionalidade como substantivo ou adjetivo."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "País e nacionalidade não são a mesma palavra",
+        "why": "O país vem depois de **from**; a nacionalidade vem depois do verbo **BE** e também pode qualificar uma pessoa.",
+        "warning": "Não traduza palavra por palavra. Diga *I am from **China***, mas *I am **Chinese***.",
+        "table_head": ["País", "Nacionalidade", "Frase"],
+        "rows": [
+          {"position": 0, "cells": ["Bangladesh", "Bangladeshi", "She is **from Bangladesh**. She is **Bangladeshi**."]},
+          {"position": 1, "cells": ["China", "Chinese", "He is **from China**. He is **Chinese**."]},
+          {"position": 2, "cells": ["Iran", "Iranian", "She is **from Iran**. She is **Iranian**."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Duas perguntas para descobrir a origem",
+        "why": "**Where are you from?** é a forma geral. **What country are you from?** pede explicitamente o país.",
+        "warning": "A pergunta usa **are** antes do sujeito: *Where **are you** from?*, nunca *Where you are from?*.",
+        "table_head": ["Pergunta", "Resposta curta", "Resposta com nacionalidade"],
+        "rows": [
+          {"position": 0, "cells": ["Where are you from?", "I'm from China.", "I'm Chinese."]},
+          {"position": 1, "cells": ["What country are you from?", "I'm from Iran.", "I'm Iranian."]},
+          {"position": 2, "cells": ["Are you from Washington?", "No, I'm not.", "I'm from China."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "O idioma usa o verbo speak",
+        "why": "Para idioma, a pergunta é **What language(s) do you speak?** e a resposta usa **speak**, sem artigo.",
+        "warning": "País e idioma podem ter nomes diferentes: no Irã se fala **Farsi**; *Iranian* é a nacionalidade.",
+        "table_head": ["Pergunta", "Resposta", "Categoria"],
+        "rows": [
+          {"position": 0, "cells": ["What languages do you speak?", "I speak Chinese and English.", "idiomas"]},
+          {"position": 1, "cells": ["What language do they speak in Iran?", "They speak Farsi.", "idioma"]},
+          {"position": 2, "cells": ["What is your nationality?", "My nationality is Bangladeshi.", "nacionalidade"]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "What **country** are you from?", "text_pt": "De que país você é?", "note": "Pergunta que exige o nome do país."},
+      {"position": 1, "text_en": "I'm from **Bangladesh**.", "text_pt": "Eu sou de Bangladesh.", "note": "Depois de *from*, use o país."},
+      {"position": 2, "text_en": "My **nationality** is Bangladeshi.", "text_pt": "Minha nacionalidade é bengalesa.", "note": "A forma de nacionalidade vem depois do BE."},
+      {"position": 3, "text_en": "What **languages** do you speak?", "text_pt": "Quais idiomas você fala?", "note": "No plural quando mais de um idioma pode entrar na resposta."},
+      {"position": 4, "text_en": "I speak **Chinese and English**.", "text_pt": "Eu falo chinês e inglês.", "note": "Idiomas não recebem artigo nessa construção."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "country", "ipa": "/ˈkʌntri/", "translation_pt": "país", "example_en": "What country are you from?"},
+      {"position": 1, "term": "nationality", "ipa": "/ˌnæʃəˈnæləti/", "translation_pt": "nacionalidade", "example_en": "My nationality is Bangladeshi."},
+      {"position": 2, "term": "language", "ipa": "/ˈlæŋɡwɪdʒ/", "translation_pt": "idioma", "example_en": "What languages do you speak?"},
+      {"position": 3, "term": "tourist", "ipa": "/ˈtʊrɪst/", "translation_pt": "turista", "example_en": "Let's find another tourist."},
+      {"position": 4, "term": "interview", "ipa": "/ˈɪntərvjuː/", "translation_pt": "entrevista; entrevistar", "example_en": "Do you have time for an interview?"},
+      {"position": 5, "term": "monument", "ipa": "/ˈmɑːnjumənt/", "translation_pt": "monumento", "example_en": "Washington has many monuments."},
+      {"position": 6, "term": "memorial", "ipa": "/məˈmɔːriəl/", "translation_pt": "memorial", "example_en": "Which is your favorite memorial?"},
+      {"position": 7, "term": "museum", "ipa": "/mjuːˈziːəm/", "translation_pt": "museu", "example_en": "I really like the art museums."},
+      {"position": 8, "term": "government", "ipa": "/ˈɡʌvərnmənt/", "translation_pt": "governo", "example_en": "I like learning about government."},
+      {"position": 9, "term": "free", "ipa": "/friː/", "translation_pt": "gratuito", "example_en": "Many of the museums are free."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "Where are → where're", "explanation": "Na fala rápida, *where are* pode se comprimir; mantenha o /r/ ligando as palavras."},
+      {"position": 1, "label": "country × nationality", "explanation": "Em *country* o acento cai na primeira sílaba; em *nationality*, na sílaba *nal*."},
+      {"position": 2, "label": "Chinese e Bangladeshi", "explanation": "Os dois terminam com o som longo /iː/; não acrescente outra sílaba no fim."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 16 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/06/02/869a701e-1242-4c34-a679-7a9454a770f1_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 205,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 20, "end_seconds": 32, "speaker": "Anna", "text_en": "Do you have time for an interview?", "text_pt": "Você tem tempo para uma entrevista?"},
+          {"position": 1, "start_seconds": 34, "end_seconds": 48, "speaker": "Anna", "text_en": "What country are you from?", "text_pt": "De que país você é?"},
+          {"position": 2, "start_seconds": 48, "end_seconds": 60, "speaker": "Sabrina", "text_en": "I'm from Bangladesh.", "text_pt": "Eu sou de Bangladesh."},
+          {"position": 3, "start_seconds": 60, "end_seconds": 72, "speaker": "Anna", "text_en": "So, you are Bangladeshi.", "text_pt": "Então, você é bengalesa."},
+          {"position": 4, "start_seconds": 126, "end_seconds": 140, "speaker": "Anna", "text_en": "What languages do you speak?", "text_pt": "Quais idiomas você fala?"}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: I am ____ China.", "hint": null, "explanation": "O país vem depois da preposição *from*.", "hints": ["A resposta indica origem.", "Use a preposição da pergunta *Where are you from?*"], "answers": ["from"], "options": ["from", "Chinese", "at"]},
+      {"position": 1, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: She is from Iran. She is ____.", "hint": null, "explanation": "Iranian é a nacionalidade; Iran é o país.", "hints": ["A lacuna vem depois do BE.", "Escolha a nacionalidade."], "answers": ["Iranian"], "options": ["Iranian", "Iran", "Farsi"]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Complete: What languages do you `____`? (uma palavra)", "hint": "uma palavra", "explanation": "Idiomas usam o verbo *speak*.", "hints": ["Não é *talk*.", "A resposta começa com *I speak*."], "answers": ["speak"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["China", "Chinese", "Iran", "Iranian"], "classification_categories": ["país", "nacionalidade"], "prompt": "Classifique cada nome:", "hint": null, "explanation": "China e Iran são países; Chinese e Iranian são nacionalidades.", "hints": ["Depois de *from* entra o país.", "Depois de *I am* pode entrar a nacionalidade."], "answers": ["{\"China\": \"país\", \"Chinese\": \"nacionalidade\", \"Iran\": \"país\", \"Iranian\": \"nacionalidade\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "De que país Sabrina é?", "hint": null, "explanation": "Sabrina responde *I'm from Bangladesh*.", "hints": ["Anna confirma a nacionalidade logo depois.", "A nacionalidade é Bangladeshi."], "answers": ["Bangladesh"], "options": ["Bangladesh", "China", "Iran"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais idiomas Louis diz que fala?", "hint": null, "explanation": "Louis diz *I speak Chinese and English*.", "hints": ["São dois idiomas.", "Um deles é English."], "answers": ["Chinese and English"], "options": ["Chinese and English", "Farsi and English", "Chinese and Farsi"]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a pergunta de Anna sobre o país de Sabrina.", "hint": null, "explanation": "A pergunta explicita a categoria *country*.", "hints": ["Começa com *What country*.", "Termina com *are you from*."], "answers": ["What country are you from?", "What country are you from"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual idioma Mehrnoush diz que se fala no Irã?", "hint": null, "explanation": "Ela corrige a hipótese e responde *They speak Farsi*.", "hints": ["Não é a nacionalidade.", "Começa com F."], "answers": ["Farsi"], "options": ["Farsi", "Iranian", "Persian nationality"]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Um perfil internacional",
+        "instructions": "Write 6 to 9 sentences in English introducing yourself and two other people. Include each person's country or nationality, name at least two languages, and ask one question with Where are you from or What languages do you speak.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "origem", "terms": ["from", "country", "nationality"]},
+          {"label": "idioma", "terms": ["language", "speak", "English", "Portuguese", "Spanish"]},
+          {"label": "uma pergunta", "terms": ["where are you from", "what country are you from", "what languages do you speak"]}
+        ]
+      }
+    ],
+    "learning_strategy": "monitorar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "16-20",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 34: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 17,
+    "slug": "lesson-17",
+    "position": 2,
+    "title": "Are You Free on Friday?",
+    "title_pt": "Você está livre na sexta-feira?",
+    "voa_url": "https://learningenglish.voanews.com/a/are-you-free-on-friday-lets-learn-english/3355785.html",
+    "grammar_tag": "Futuro com will e going to",
+    "focus_points": [
+      "be going to + verbo",
+      "will + verbo",
+      "Are you free on…?"
+    ],
+    "story_note": "Anna e Marsha procuram um horário para ir ao cinema",
+    "lead": "Anna e Marsha querem ver um filme, mas a agenda das duas está cheia. Os compromissos já planejados aparecem com **be going to**; as decisões tomadas durante a conversa aparecem com **will**. A estratégia do guia é **avaliar**: comparar intenção e decisão antes de escolher a forma do futuro.",
+    "warmup_prompt": "Name three plans for next week and one decision you can make now.",
+    "listening_focus": "Anote os compromissos já planejados e a decisão que Marsha toma no fim.",
+    "goals": [
+      "Perguntar disponibilidade com **Are you free on Friday?** e **Are you busy…?**",
+      "Usar **be going to + verbo** para planos e intenções já formados.",
+      "Usar **will + verbo** para uma decisão tomada no momento da fala.",
+      "Reconhecer as contrações **I'm going to**, **I'll** e **we'll** na fala."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Going to: o plano já estava na agenda",
+        "why": "A conversa usa **am/is/are going to + verbo** quando a pessoa já tem um plano: dançar, correr ou ensinar.",
+        "warning": "Não retire o verbo **BE**. O correto é *I **am going to** teach*, nunca *I going to teach*.",
+        "table_head": ["Sujeito", "Plano", "Momento"],
+        "rows": [
+          {"position": 0, "cells": ["I", "**am going to** tap dance", "Thursday night"]},
+          {"position": 1, "cells": ["I", "**am going to** jog", "Monday night"]},
+          {"position": 2, "cells": ["I", "**am going to** teach children", "Wednesday night"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Will: a decisão nasce agora",
+        "why": "**Will + verbo na forma base** registra uma escolha feita durante a conversa: Anna decide tentar correr e Marsha decide adiar as tarefas.",
+        "warning": "Depois de **will**, não use *to* nem conjugue o verbo: *I will **try***, não *I will to try* ou *I will tries*.",
+        "table_head": ["Situação", "Decisão", "Forma curta"],
+        "rows": [
+          {"position": 0, "cells": ["Anna não corre", "I **will try**.", "**I'll** try."]},
+          {"position": 1, "cells": ["o filme começa logo", "I **will do** my errands on Sunday.", "**I'll** do them Sunday."]},
+          {"position": 2, "cells": ["as agendas não combinam", "We **will find** another time.", "**We'll** find one."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Free ou busy: perguntar pela agenda",
+        "why": "Com dias e partes do dia, **Are you free…?** e **Are you busy…?** verificam se existe espaço para um convite.",
+        "warning": "Use **on** com o dia: *on Friday*. Com *this Friday*, a preposição normalmente desaparece.",
+        "table_head": ["Pergunta", "Resposta", "Próximo passo"],
+        "rows": [
+          {"position": 0, "cells": ["Are you busy **this Thursday**?", "Yes, I am.", "explicar o plano"]},
+          {"position": 1, "cells": ["Are you free **on Friday**?", "No, I'm not.", "propor outro dia"]},
+          {"position": 2, "cells": ["Are you busy **now**?", "No, I'm not.", "aceitar o convite"]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "Do you wanna **see a movie** with me?", "text_pt": "Você quer ver um filme comigo?", "note": "Convite informal; *wanna* representa a pronúncia de *want to*."},
+      {"position": 1, "text_en": "Are you busy **this Thursday at 6 p.m.**?", "text_pt": "Você está ocupada nesta quinta às seis da tarde?", "note": "Pergunta pela disponibilidade em horário específico."},
+      {"position": 2, "text_en": "I am **going to tap dance** with my friends.", "text_pt": "Eu vou sapatear com meus amigos.", "note": "Plano anterior à conversa: *be going to*."},
+      {"position": 3, "text_en": "But I **will try** because it is good for you.", "text_pt": "Mas vou tentar porque faz bem.", "note": "Decisão tomada durante a conversa: *will*."},
+      {"position": 4, "text_en": "**I'll do** my errands on Sunday. Let's go!", "text_pt": "Vou fazer minhas tarefas no domingo. Vamos!", "note": "Marsha decide naquele instante mudar a agenda."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "free", "ipa": "/friː/", "translation_pt": "livre; disponível", "example_en": "Are you free on Friday?"},
+      {"position": 1, "term": "busy", "ipa": "/ˈbɪzi/", "translation_pt": "ocupado", "example_en": "Are you busy this Thursday?"},
+      {"position": 2, "term": "movie", "ipa": "/ˈmuːvi/", "translation_pt": "filme", "example_en": "Do you want to see a movie?"},
+      {"position": 3, "term": "tap dance", "ipa": "/ˈtæp dæns/", "translation_pt": "sapatear", "example_en": "I am going to tap dance."},
+      {"position": 4, "term": "board game", "ipa": "/ˈbɔːrd ɡeɪm/", "translation_pt": "jogo de tabuleiro", "example_en": "Sometimes we play board games."},
+      {"position": 5, "term": "jog", "ipa": "/dʒɑːɡ/", "translation_pt": "correr em ritmo leve", "example_en": "I am going to jog in the park."},
+      {"position": 6, "term": "ukulele", "ipa": "/ˌjuːkəˈleɪli/", "translation_pt": "ukulele", "example_en": "I teach children to play the ukulele."},
+      {"position": 7, "term": "errand", "ipa": "/ˈerənd/", "translation_pt": "tarefa fora de casa", "example_en": "I do my errands on Saturday."},
+      {"position": 8, "term": "as usual", "ipa": "/æz ˈjuːʒuəl/", "translation_pt": "como sempre", "example_en": "Busy as usual."},
+      {"position": 9, "term": "to try", "ipa": "/traɪ/", "translation_pt": "tentar", "example_en": "I will try because it is good for you."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "going to → gonna", "explanation": "Na fala informal, *going to* antes de verbo pode soar como /ˈɡənə/. Escreva **going to** em textos formais."},
+      {"position": 1, "label": "I'll e we'll", "explanation": "As contrações de *I will* e *we will* terminam em /l/. Não acrescente uma vogal depois desse som."},
+      {"position": 2, "label": "busy /ˈbɪzi/", "explanation": "O **s** de *busy* tem som /z/, e o acento fica na primeira sílaba: BÍ-zi."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 17 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/06/07/3cb6442c-001f-4fd7-bf37-7507a49e89e4_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 152,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 18, "end_seconds": 30, "speaker": "Marsha", "text_en": "Hey, do you wanna see a movie with me?", "text_pt": "Ei, você quer ver um filme comigo?"},
+          {"position": 1, "start_seconds": 32, "end_seconds": 44, "speaker": "Marsha", "text_en": "Are you busy this Thursday at 6 p.m.?", "text_pt": "Você está ocupada nesta quinta às seis da tarde?"},
+          {"position": 2, "start_seconds": 44, "end_seconds": 58, "speaker": "Anna", "text_en": "I am going to tap dance with my friends Thursday night.", "text_pt": "Vou sapatear com meus amigos na quinta à noite."},
+          {"position": 3, "start_seconds": 94, "end_seconds": 108, "speaker": "Anna", "text_en": "Okay, I never jog. But I will try because it is good for you.", "text_pt": "Certo, eu nunca corro. Mas vou tentar porque faz bem."},
+          {"position": 4, "start_seconds": 136, "end_seconds": 148, "speaker": "Marsha", "text_en": "I'll do my errands on Sunday. Let's go!", "text_pt": "Vou fazer minhas tarefas no domingo. Vamos!"}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Plano já marcado. Complete: I ____ teach children on Wednesday.", "hint": null, "explanation": "Um plano já formado usa *am going to + verbo*.", "hints": ["A atividade já está na agenda.", "A estrutura começa com o verbo BE."], "answers": ["am going to"], "options": ["am going to", "will to", "going"]},
+      {"position": 1, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Decisão tomada agora. Complete: Okay, I ____ try.", "hint": null, "explanation": "A decisão nasce na conversa, então *will + verbo* é adequado.", "hints": ["Não era um plano anterior.", "Depois da lacuna vem o verbo na forma base."], "answers": ["will"], "options": ["will", "am going", "will to"]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Complete: Are you free `____` Friday? (uma palavra)", "hint": "uma palavra", "explanation": "Dias da semana recebem a preposição *on*.", "hints": ["Pense na preposição usada com dias.", "A resposta tem duas letras."], "answers": ["on"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["a scheduled dance class", "a plan to teach on Wednesday", "a decision to try jogging now", "a decision to move errands to Sunday"], "classification_categories": ["going to", "will"], "prompt": "Classifique o plano anterior e a decisão tomada agora:", "hint": null, "explanation": "Planos já formados usam *going to*; decisões no momento usam *will*.", "hints": ["Olhe para quando a decisão nasceu.", "Agenda anterior e escolha instantânea não usam a mesma forma."], "answers": ["{\"a scheduled dance class\": \"going to\", \"a plan to teach on Wednesday\": \"going to\", \"a decision to try jogging now\": \"will\", \"a decision to move errands to Sunday\": \"will\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Marsha convida Anna para fazer?", "hint": null, "explanation": "Marsha pergunta se Anna quer ver um filme com ela.", "hints": ["É uma atividade de lazer.", "A palavra central é *movie*."], "answers": ["ver um filme"], "options": ["ver um filme", "correr no parque", "jogar Scrabble"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual plano Anna já tem para quinta-feira à noite?", "hint": null, "explanation": "Anna diz que vai sapatear com os amigos.", "hints": ["É uma dança.", "Ela usa *going to*."], "answers": ["sapatear com os amigos"], "options": ["sapatear com os amigos", "visitar os pais", "fazer tarefas"]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a pergunta de Marsha sobre quinta-feira às seis.", "hint": null, "explanation": "A pergunta combina *busy*, o dia e o horário.", "hints": ["Começa com *Are you busy*.", "Termina com *at 6 p.m.*"], "answers": ["Are you busy this Thursday at 6 p.m.?", "Are you busy this Thursday at 6pm?", "Are you busy this Thursday at 6 p.m"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que decisão Marsha toma quando descobre que o filme começa logo?", "hint": null, "explanation": "Ela decide fazer as tarefas no domingo e ir ao cinema agora.", "hints": ["Ela muda uma atividade de dia.", "A resposta contém *Sunday*."], "answers": ["fazer as tarefas no domingo"], "options": ["fazer as tarefas no domingo", "cancelar o filme", "ensinar ukulele"]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Uma semana de planos e decisões",
+        "instructions": "Write 6 to 9 sentences in English about your next week. Describe two existing plans with going to, make two decisions with will, and ask a friend when they are free.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "plano anterior", "terms": ["going to"]},
+          {"label": "decisão", "terms": ["will", "I'll"]},
+          {"label": "disponibilidade", "terms": ["are you free", "are you busy"]}
+        ]
+      }
+    ],
+    "learning_strategy": "avaliar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "16-20",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 34: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 18,
+    "slug": "lesson-18",
+    "position": 3,
+    "title": "She Always Does That",
+    "title_pt": "Ela sempre faz isso",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-18-she-always-does-that/3357748.html",
+    "grammar_tag": "Frequência, pronomes objeto e ordinais",
+    "focus_points": [
+      "always / never / often / rarely",
+      "me / you / him / her / us / them",
+      "first / second / third"
+    ],
+    "story_note": "Anna tenta ler as notícias sem mostrar sentimentos",
+    "lead": "Anna lê as notícias pela primeira vez, mas reage a cada história com tristeza, alegria ou raiva. A aula combina **advérbios de frequência**, **pronomes objeto** e **números ordinais**. A estratégia é **classificar**: separar fatos de sentimentos e agrupar cada forma pela função que desempenha.",
+    "warmup_prompt": "Say how often you read the news and name your first, second and third news sources.",
+    "listening_focus": "Anote os advérbios de frequência, quem recebe cada ação e a ordem das três histórias.",
+    "goals": [
+      "Descrever frequência com **always**, **never**, **often** e **rarely**.",
+      "Substituir o objeto da ação por **me**, **you**, **him**, **her**, **us** ou **them**.",
+      "Organizar uma sequência com **first**, **second** e **third**.",
+      "Distinguir fatos de sentimentos ao resumir uma notícia."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Advérbios mostram com que frequência algo acontece",
+        "why": "Com verbos de ação, o advérbio costuma vir **antes** do verbo principal; com o verbo BE, vem **depois** dele.",
+        "warning": "Não ponha o advérbio depois do verbo principal: *She **often says***, não *She says often* neste padrão básico.",
+        "table_head": ["Frequência", "Posição", "Exemplo da aula"],
+        "rows": [
+          {"position": 0, "cells": ["100%", "antes de *read*", "We **always read** facts."]},
+          {"position": 1, "cells": ["0%", "antes de *show*", "We **never show** our feelings."]},
+          {"position": 2, "cells": ["baixa / alta", "antes do verbo", "She **rarely talks**, but she **often says**…"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "O pronome objeto recebe a ação",
+        "why": "Depois de verbo ou preposição, use a forma objeto: a mãe não encontra **him**; uma família dá um lar a **him**.",
+        "warning": "Sujeito e objeto têm formas diferentes: **he** faz a ação; **him** recebe a ação. Não diga *cannot find he*.",
+        "table_head": ["Sujeito", "Objeto", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["I", "me", "Ms. Weaver helps **me**."]},
+          {"position": 1, "cells": ["he", "him", "His mother cannot find **him**."]},
+          {"position": 2, "cells": ["they", "them", "Reporters ask **them** questions."]},
+          {"position": 3, "cells": ["we", "us", "The story makes **us** sad."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "First, second, third: a ordem das histórias",
+        "why": "Os ordinais indicam posição numa sequência, não quantidade. Ms. Weaver manda Anna tentar a primeira, a segunda e a terceira história.",
+        "warning": "Os três primeiros mudam de forma: **one → first**, **two → second**, **three → third**.",
+        "table_head": ["Número", "Ordinal", "Na conversa"],
+        "rows": [
+          {"position": 0, "cells": ["one", "**first**", "the first story"]},
+          {"position": 1, "cells": ["two", "**second**", "the second story"]},
+          {"position": 2, "cells": ["three", "**third**", "the third story"]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "We are **always reading facts**.", "text_pt": "Estamos sempre lendo fatos.", "note": "Com o BE, *always* aparece depois de *are*."},
+      {"position": 1, "text_en": "We **never show** our feelings.", "text_pt": "Nunca mostramos nossos sentimentos.", "note": "Com verbo principal, *never* vem antes de *show*."},
+      {"position": 2, "text_en": "The duck's mother cannot find **him**.", "text_pt": "A mãe do patinho não consegue encontrá-lo.", "note": "*Him* recebe a ação de *find*."},
+      {"position": 3, "text_en": "Let's read the **second** story.", "text_pt": "Vamos ler a segunda história.", "note": "Ordinal que marca a posição da história."},
+      {"position": 4, "text_en": "She **rarely talks** to reporters, but she **often says**…", "text_pt": "Ela raramente fala com repórteres, mas frequentemente diz…", "note": "Dois graus de frequência contrastados na mesma frase."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "fact", "ipa": "/fækt/", "translation_pt": "fato", "example_en": "We are always reading facts."},
+      {"position": 1, "term": "feeling", "ipa": "/ˈfiːlɪŋ/", "translation_pt": "sentimento", "example_en": "Sad is a feeling."},
+      {"position": 2, "term": "duckling", "ipa": "/ˈdʌklɪŋ/", "translation_pt": "patinho", "example_en": "The book is about a lost duckling."},
+      {"position": 3, "term": "lost", "ipa": "/lɔːst/", "translation_pt": "perdido", "example_en": "It is about a lost duckling."},
+      {"position": 4, "term": "reporter", "ipa": "/rɪˈpɔːrtər/", "translation_pt": "repórter", "example_en": "She rarely talks to reporters."},
+      {"position": 5, "term": "race", "ipa": "/reɪs/", "translation_pt": "corrida", "example_en": "She wins a car race."},
+      {"position": 6, "term": "politician", "ipa": "/ˌpɑːləˈtɪʃən/", "translation_pt": "político", "example_en": "City politicians are using city money."},
+      {"position": 7, "term": "cruise ship", "ipa": "/ˈkruːz ʃɪp/", "translation_pt": "navio de cruzeiro", "example_en": "They have a party on a cruise ship."},
+      {"position": 8, "term": "angry", "ipa": "/ˈæŋɡri/", "translation_pt": "com raiva", "example_en": "That makes me very angry."},
+      {"position": 9, "term": "news desk", "ipa": "/ˈnuːz desk/", "translation_pt": "bancada do telejornal", "example_en": "Put the feelings on the news desk."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "him → 'im", "explanation": "Na fala rápida, o /h/ de *him* pode desaparecer depois do verbo: *find him* soa próximo de *find 'im*."},
+      {"position": 1, "label": "first, second, third", "explanation": "Nos ordinais, pronuncie o grupo final: /st/ em *first*, /nd/ em *second* e /rd/ em *third*."},
+      {"position": 2, "label": "often /ˈɔːfən/", "explanation": "Em uma pronúncia muito comum, o **t** de *often* não aparece; o acento fica na primeira sílaba."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 18 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/06/15/6581d80f-fd20-40f9-b363-3f998c3f1142_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 242,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 18, "end_seconds": 32, "speaker": "Caty", "text_en": "When we read the news, we are always reading facts. We never show our feelings.", "text_pt": "Quando lemos as notícias, sempre lemos fatos. Nunca mostramos nossos sentimentos."},
+          {"position": 1, "start_seconds": 54, "end_seconds": 68, "speaker": "Anna", "text_en": "It is about a lost duckling. The duck's mother cannot find him.", "text_pt": "É sobre um patinho perdido. A mãe dele não consegue encontrá-lo."},
+          {"position": 2, "start_seconds": 112, "end_seconds": 126, "speaker": "Anna", "text_en": "A grandmother is the first 80-year-old woman to win the race.", "text_pt": "Uma avó é a primeira mulher de 80 anos a vencer a corrida."},
+          {"position": 3, "start_seconds": 136, "end_seconds": 150, "speaker": "Anna", "text_en": "She rarely talks to reporters. But when she does, she often says…", "text_pt": "Ela raramente fala com repórteres. Mas, quando fala, frequentemente diz…"},
+          {"position": 4, "start_seconds": 210, "end_seconds": 226, "speaker": "Anna", "text_en": "What can I do? Take out my feelings and put them here on the news desk?", "text_pt": "O que posso fazer? Tirar meus sentimentos e colocá-los aqui na bancada?"}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: She ____ talks to reporters, but she often gives interviews.", "hint": null, "explanation": "*Rarely* expressa baixa frequência e vem antes do verbo principal.", "hints": ["O contraste é com *often*.", "A palavra significa raramente."], "answers": ["rarely"], "options": ["rarely", "rare", "is rarely"]},
+      {"position": 1, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: The mother cannot find ____.", "hint": null, "explanation": "O patinho recebe a ação, então *he* muda para o pronome objeto *him*.", "hints": ["A lacuna vem depois de *find*.", "Troque *he* pela forma objeto."], "answers": ["him"], "options": ["him", "he", "his"]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Complete o ordinal: one, two, three → first, second, `____`. (uma palavra)", "hint": "uma palavra", "explanation": "O ordinal de *three* é *third*.", "hints": ["Não é *three-th*.", "Começa com *thir*."], "answers": ["third"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["always", "rarely", "him", "them"], "classification_categories": ["advérbio de frequência", "pronome objeto"], "prompt": "Classifique cada forma pela função:", "hint": null, "explanation": "*Always* e *rarely* marcam frequência; *him* e *them* recebem a ação.", "hints": ["Duas palavras dizem quantas vezes.", "Duas substituem pessoas ou coisas depois do verbo."], "answers": ["{\"always\": \"advérbio de frequência\", \"rarely\": \"advérbio de frequência\", \"him\": \"pronome objeto\", \"them\": \"pronome objeto\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Segundo Ms. Weaver, o que se lê nas notícias?", "hint": null, "explanation": "Ela ensina que o noticiário apresenta fatos, sem mostrar sentimentos.", "hints": ["A palavra contrasta com *feelings*.", "Começa com f."], "answers": ["fatos"], "options": ["fatos", "opiniões pessoais", "piadas"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quem a mãe do patinho não consegue encontrar?", "hint": null, "explanation": "A fala usa o pronome objeto *him* para o patinho.", "hints": ["É o personagem perdido do livro.", "A resposta é o filhote."], "answers": ["o patinho"], "options": ["o patinho", "o repórter", "a avó"]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a frase sobre a frequência com que a vencedora fala com repórteres.", "hint": null, "explanation": "*Rarely* vem antes do verbo principal *talks*.", "hints": ["Começa com *She rarely*.", "Termina com *to reporters*."], "answers": ["She rarely talks to reporters.", "She rarely talks to reporters"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Onde Anna sugere colocar os sentimentos?", "hint": null, "explanation": "Ela pergunta se deve tirá-los e colocá-los na bancada do telejornal.", "hints": ["É um móvel do estúdio.", "A expressão termina com *desk*."], "answers": ["na bancada do telejornal"], "options": ["na bancada do telejornal", "na biblioteca", "no navio"]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Três notícias, só com fatos",
+        "instructions": "Write 6 to 9 sentences in English summarizing three short news items. Order them with first, second and third, use two adverbs of frequency, and replace one repeated person or thing with an object pronoun.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "ordem", "terms": ["first", "second", "third"]},
+          {"label": "frequência", "terms": ["always", "never", "often", "rarely"]},
+          {"label": "pronome objeto", "terms": ["me", "you", "him", "her", "us", "them"]}
+        ]
+      }
+    ],
+    "learning_strategy": "classificar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "16-20",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 34: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 19,
+    "slug": "lesson-19",
+    "position": 4,
+    "title": "When Do I Start?",
+    "title_pt": "Quando eu começo?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-19-when-do-you-start/3357760.html",
+    "grammar_tag": "Which, which one, next e every",
+    "focus_points": [
+      "Which…? / Which one…?",
+      "next month",
+      "every day"
+    ],
+    "story_note": "Anna recebe uma nova função num programa infantil",
+    "lead": "O metrô fecha, Anna chega atrasada e Ms. Weaver tem uma notícia: ela deixará o telejornal para apresentar um programa infantil. A conversa usa **which** para escolher entre alternativas e **next** e **every** para situar ações no tempo. A estratégia é **resumir**: guardar a escolha, a mudança e quando ela começa.",
+    "warmup_prompt": "Choose between two jobs and say what you will do next month and every week.",
+    "listening_focus": "Anote as escolhas oferecidas, a nova função de Anna e quando ela começa.",
+    "goals": [
+      "Perguntar por uma escolha com **Which…?** e responder com uma das alternativas.",
+      "Usar **which + substantivo** ou **which one** quando a escolha precisa ficar explícita.",
+      "Situar o futuro com **next month** e uma repetição com **every day/week**.",
+      "Resumir uma mudança de trabalho com as informações essenciais."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Which escolhe dentro de um conjunto",
+        "why": "**Which** pergunta qual alternativa a pessoa prefere quando as opções já são conhecidas ou aparecem na própria pergunta.",
+        "warning": "Use **what** para uma pergunta aberta e **which** para uma escolha limitada: *Which do you want, the good news or the bad news?*",
+        "table_head": ["Forma", "Quando usar", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["**Which** + auxiliar", "as opções estão no contexto", "**Which do** you want to hear first?"]},
+          {"position": 1, "cells": ["**Which** + substantivo", "o nome precisa aparecer", "**Which story** do you want?"]},
+          {"position": 2, "cells": ["**What**", "não há conjunto limitado", "**What** will I be doing?"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Which one evita repetir o substantivo",
+        "why": "Quando as alternativas são substantivos contáveis no singular, **one** pode ocupar o lugar do nome já mencionado.",
+        "warning": "**One** substitui o substantivo; não o repita: *Which one?* ou *Which show?*, mas não *Which one show?*.",
+        "table_head": ["Antes", "Forma reduzida", "Resposta"],
+        "rows": [
+          {"position": 0, "cells": ["Which assignment do you want?", "**Which one** do you want?", "The children's show."]},
+          {"position": 1, "cells": ["Which story comes first?", "**Which one** comes first?", "The good news."]},
+          {"position": 2, "cells": ["Which idea is better?", "**Which one** is better?", "The space idea."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Next e every ligam a ação ao calendário",
+        "why": "**Next** aponta para o período seguinte; **every** diz que algo se repete em todos os períodos do tipo indicado.",
+        "warning": "Não use **in/on** antes dessas expressões básicas: *next month* e *every morning*, não *in next month* nem *on every morning*.",
+        "table_head": ["Expressão", "Sentido", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["**next month**", "o mês seguinte", "You start **next month**."]},
+          {"position": 1, "cells": ["**every morning**", "todas as manhãs", "I ride the Metro **every morning**."]},
+          {"position": 2, "cells": ["**every week**", "todas as semanas", "The show is on **every week**."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "The Metro is closed, so I am **walking to work**.", "text_pt": "O metrô está fechado, então estou indo a pé para o trabalho.", "note": "*So* apresenta a consequência do fechamento."},
+      {"position": 1, "text_en": "**Which** do you want to hear first?", "text_pt": "Qual você quer ouvir primeiro?", "note": "As opções — notícia boa ou ruim — já foram apresentadas."},
+      {"position": 2, "text_en": "Starting **next month**, you will not read the news.", "text_pt": "A partir do próximo mês, você não apresentará as notícias.", "note": "*Next month* localiza a mudança no futuro."},
+      {"position": 3, "text_en": "What **will I be doing**?", "text_pt": "O que eu vou fazer?", "note": "Pergunta sobre a nova atividade futura."},
+      {"position": 4, "text_en": "A children's show! That is awesome! **When do I start?**", "text_pt": "Um programa infantil! Isso é incrível! Quando eu começo?", "note": "Anna resume a novidade e pergunta o momento inicial."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "closed", "ipa": "/kloʊzd/", "translation_pt": "fechado", "example_en": "The Metro is closed."},
+      {"position": 1, "term": "to arrive", "ipa": "/əˈraɪv/", "translation_pt": "chegar", "example_en": "When you arrive, come to my office."},
+      {"position": 2, "term": "news", "ipa": "/nuːz/", "translation_pt": "notícia; noticiário", "example_en": "I have important news."},
+      {"position": 3, "term": "to fire", "ipa": "/ˈfaɪər/", "translation_pt": "demitir", "example_en": "You are not firing me."},
+      {"position": 4, "term": "assignment", "ipa": "/əˈsaɪnmənt/", "translation_pt": "tarefa; função", "example_en": "I have a new assignment for you."},
+      {"position": 5, "term": "skill", "ipa": "/skɪl/", "translation_pt": "habilidade", "example_en": "Your skills are perfect for the show."},
+      {"position": 6, "term": "children's show", "ipa": "/ˈtʃɪldrənz ʃoʊ/", "translation_pt": "programa infantil", "example_en": "It is a children's show."},
+      {"position": 7, "term": "outer space", "ipa": "/ˌaʊtər ˈspeɪs/", "translation_pt": "espaço sideral", "example_en": "I can show children outer space."},
+      {"position": 8, "term": "deep", "ipa": "/diːp/", "translation_pt": "profundo", "example_en": "Or in the deep, dark ocean."},
+      {"position": 9, "term": "idea", "ipa": "/aɪˈdiːə/", "translation_pt": "ideia", "example_en": "I have tons of ideas!"}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "which /wɪtʃ/", "explanation": "Termine *which* com /tʃ/, o mesmo som final de *watch*. Ele contrasta com o início sonoro de *vision*."},
+      {"position": 1, "label": "which one: ligação", "explanation": "Na fala contínua, o final de *which* se liga diretamente a *one*: /wɪtʃ wʌn/, sem pausa longa."},
+      {"position": 2, "label": "month /mʌnθ/", "explanation": "Em *month*, a ponta da língua aparece para o /θ/. Evite trocar o final por /t/ ou acrescentar vogal."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 19 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/06/20/11279270-a48f-4bca-851e-e6477329717b_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 170,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 18, "end_seconds": 32, "speaker": "Anna", "text_en": "The Metro is closed. So, I am walking to work.", "text_pt": "O metrô está fechado. Então, estou indo a pé para o trabalho."},
+          {"position": 1, "start_seconds": 56, "end_seconds": 70, "speaker": "Caty", "text_en": "I have good news and I have bad news. Which do you want to hear first?", "text_pt": "Tenho uma notícia boa e uma ruim. Qual você quer ouvir primeiro?"},
+          {"position": 2, "start_seconds": 88, "end_seconds": 102, "speaker": "Caty", "text_en": "Starting next month, you will not read the news.", "text_pt": "A partir do próximo mês, você não apresentará as notícias."},
+          {"position": 3, "start_seconds": 108, "end_seconds": 122, "speaker": "Anna", "text_en": "You are not firing me. I am not reading the news. What will I be doing?", "text_pt": "Você não vai me demitir. Não vou apresentar as notícias. O que vou fazer?"},
+          {"position": 4, "start_seconds": 140, "end_seconds": 156, "speaker": "Caty", "text_en": "Your skills are perfect for a new show — a children's show.", "text_pt": "Suas habilidades são perfeitas para um programa novo — um programa infantil."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Há duas notícias. Complete: ____ do you want to hear first?", "hint": null, "explanation": "Com alternativas conhecidas, a pergunta usa *which*.", "hints": ["A escolha está entre duas opções.", "Não é uma pergunta aberta com *what*."], "answers": ["Which"], "options": ["Which", "What kind", "Where"]},
+      {"position": 1, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Duas funções já foram mencionadas. Complete: ____ do you prefer?", "hint": null, "explanation": "*Which one* substitui o substantivo singular já conhecido.", "hints": ["Evite repetir *job*.", "Use duas palavras."], "answers": ["Which one"], "options": ["Which one", "Which job one", "What one job"]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Complete sem preposição: You start `____` month. (uma palavra)", "hint": "uma palavra", "explanation": "*Next month* aponta para o mês seguinte e não recebe *in*.", "hints": ["É o período seguinte.", "A expressão aparece na fala de Ms. Weaver."], "answers": ["next"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["next month", "next week", "every morning", "every day"], "classification_categories": ["próximo período", "repetição"], "prompt": "Classifique cada expressão de tempo:", "hint": null, "explanation": "*Next* aponta para o período seguinte; *every* marca repetição.", "hints": ["Uma categoria olha adiante uma vez.", "A outra acontece regularmente."], "answers": ["{\"next month\": \"próximo período\", \"next week\": \"próximo período\", \"every morning\": \"repetição\", \"every day\": \"repetição\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Por que Anna vai a pé para o trabalho?", "hint": null, "explanation": "Ela explica que o metrô está fechado.", "hints": ["O problema é no transporte.", "A palavra usada é *closed*."], "answers": ["porque o metrô está fechado"], "options": ["porque o metrô está fechado", "porque quer se exercitar", "porque perdeu o emprego"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que duas opções Ms. Weaver oferece para Anna ouvir primeiro?", "hint": null, "explanation": "Ela oferece a notícia boa e a notícia ruim.", "hints": ["São dois tipos de notícia.", "Uma é *good* e a outra é *bad*."], "answers": ["a notícia boa ou a notícia ruim"], "options": ["a notícia boa ou a notícia ruim", "julho ou agosto", "o espaço ou o oceano"]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a pergunta que Anna faz sobre o início da nova função.", "hint": null, "explanation": "A pergunta que dá título à aula usa o presente para o horário combinado.", "hints": ["Começa com *When*.", "Termina com *I start*."], "answers": ["When do I start?", "When do I start"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Para qual tipo de programa as habilidades de Anna são perfeitas?", "hint": null, "explanation": "Ms. Weaver anuncia uma nova função num programa infantil.", "hints": ["O público é jovem.", "A expressão é *children's show*."], "answers": ["um programa infantil"], "options": ["um programa infantil", "um telejornal", "um programa de corrida"]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "Escolhas para uma nova função",
+        "instructions": "Write 6 to 9 sentences in English about choosing between two activities or jobs. Ask one question with which or which one, say what begins next month, and describe something you do every week.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "uma escolha", "terms": ["which", "which one"]},
+          {"label": "período seguinte", "terms": ["next month", "next week"]},
+          {"label": "repetição", "terms": ["every day", "every week", "every morning"]}
+        ]
+      }
+    ],
+    "learning_strategy": "resumir"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "16-20",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 34: conteúdo autoral conferido com a aula e com o guia oficial de lesson plans do Level 1, que declara Topics, Goals e Learning Strategy.",
+    "number": 20,
+    "slug": "lesson-20",
+    "position": 5,
+    "title": "What Can You Do?",
+    "title_pt": "O que você sabe fazer?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-20-what-can-you-do/3384429.html",
+    "grammar_tag": "Habilidade com can, can't e cannot",
+    "focus_points": [
+      "can + verbo",
+      "can't / cannot",
+      "Can you…? / Yes, I can."
+    ],
+    "story_note": "Anna ajuda Pete a descobrir uma habilidade profissional",
+    "lead": "Pete acha que não tem nenhuma habilidade e não consegue escolher um trabalho. Anna testa o que ele **can** e **can't** fazer até descobrir que ele escreve muito bem. A estratégia é **identificar problemas**: transformar cada dificuldade numa pergunta concreta e procurar a habilidade que resolve o caso.",
+    "warmup_prompt": "Name three things you can do well and two skills you want to learn.",
+    "listening_focus": "Anote cada pergunta com can, as respostas negativas e a habilidade que Anna descobre no fim.",
+    "goals": [
+      "Expressar habilidade com **can + verbo na forma base**.",
+      "Negar habilidade com **can't** ou **cannot**.",
+      "Perguntar e responder com **Can you…? / Yes, I can. / No, I can't.**",
+      "Relacionar habilidades a trabalhos possíveis."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Can + verbo: dizer uma habilidade",
+        "why": "O modal **can** não muda com o sujeito e recebe o verbo principal na forma base.",
+        "warning": "Depois de **can**, não use *to* nem **-s**: *She can **write***, não *can to write* nem *can writes*.",
+        "table_head": ["Sujeito", "Habilidade", "Trabalho possível"],
+        "rows": [
+          {"position": 0, "cells": ["Pete", "can **write**", "writer"]},
+          {"position": 1, "cells": ["you", "can **drive**", "taxi or bus driver"]},
+          {"position": 2, "cells": ["a chef", "can **cook**", "restaurant"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Can't e cannot: duas formas da mesma negação",
+        "why": "**Can't** é a contração comum; **cannot** é a forma por extenso. As duas vêm antes do verbo na forma base.",
+        "warning": "**Cannot** é escrito como uma palavra. Não misture as formas: *I can't cook* ou *I cannot cook*.",
+        "table_head": ["Forma", "Exemplo", "Uso"],
+        "rows": [
+          {"position": 0, "cells": ["**can't**", "I **can't code**.", "fala e escrita cotidiana"]},
+          {"position": 1, "cells": ["**cannot**", "I **cannot teach**.", "ênfase ou escrita mais formal"]},
+          {"position": 2, "cells": ["**can + not**", "Not everyone **can write** well.", "*not* nega o sujeito amplo"]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Can you…? — testar uma habilidade",
+        "why": "Na pergunta, **can** vai antes do sujeito. A resposta curta repete o modal, sem repetir o verbo principal.",
+        "warning": "Não use **do** com *can*: *Can you help?*, nunca *Do you can help?*.",
+        "table_head": ["Pergunta", "Resposta curta", "Resposta completa"],
+        "rows": [
+          {"position": 0, "cells": ["**Can you** help me?", "Yes, I **can**.", "I can help you."]},
+          {"position": 1, "cells": ["**Can you** write code?", "No, I **can't**.", "I can't write code."]},
+          {"position": 2, "cells": ["**Can you** cook?", "No, I **cannot**.", "I cannot cook."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "Sorry, I **can't hear** you.", "text_pt": "Desculpe, não consigo ouvir você.", "note": "*Can't* nega uma capacidade naquele contexto."},
+      {"position": 1, "text_en": "Everyone **has a skill**. You need to find yours.", "text_pt": "Todo mundo tem uma habilidade. Você precisa encontrar a sua.", "note": "*Yours* evita repetir *your skill*."},
+      {"position": 2, "text_en": "**Can you help me?** — Yes, I can.", "text_pt": "Você pode me ajudar? — Sim, posso.", "note": "Pergunta e resposta curta repetem o modal."},
+      {"position": 3, "text_en": "No, I **cannot teach**.", "text_pt": "Não, eu não sei ensinar.", "note": "Forma negativa por extenso antes do verbo base."},
+      {"position": 4, "text_en": "Not everyone **can write well**. You can be a writer!", "text_pt": "Nem todo mundo sabe escrever bem. Você pode ser escritor!", "note": "A habilidade descoberta aponta para um trabalho."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "job", "ipa": "/dʒɑːb/", "translation_pt": "emprego", "example_en": "I don't have a job."},
+      {"position": 1, "term": "skill", "ipa": "/skɪl/", "translation_pt": "habilidade", "example_en": "Everyone has a skill."},
+      {"position": 2, "term": "code", "ipa": "/koʊd/", "translation_pt": "programar; código", "example_en": "Can you write code?"},
+      {"position": 3, "term": "app", "ipa": "/æp/", "translation_pt": "aplicativo", "example_en": "People write code for phone apps."},
+      {"position": 4, "term": "website", "ipa": "/ˈwebsaɪt/", "translation_pt": "site", "example_en": "You can make websites."},
+      {"position": 5, "term": "to drive", "ipa": "/draɪv/", "translation_pt": "dirigir", "example_en": "Can you drive a taxi?"},
+      {"position": 6, "term": "to teach", "ipa": "/tiːtʃ/", "translation_pt": "ensinar", "example_en": "Can you teach?"},
+      {"position": 7, "term": "chef", "ipa": "/ʃef/", "translation_pt": "chef; cozinheiro", "example_en": "You can be a chef in a restaurant."},
+      {"position": 8, "term": "follower", "ipa": "/ˈfɑːloʊər/", "translation_pt": "seguidor", "example_en": "How many followers do you have?"},
+      {"position": 9, "term": "writer", "ipa": "/ˈraɪtər/", "translation_pt": "escritor", "example_en": "You can be a writer!"}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "can forte e fraco", "explanation": "Em frase afirmativa, *can* costuma enfraquecer para /kən/. Em resposta curta — *Yes, I can* — recebe força e soa /kæn/."},
+      {"position": 1, "label": "can × can't", "explanation": "Na negativa, a vogal e o fechamento final ficam mais marcados. Ouça o contexto e o verbo seguinte para não perder a negação."},
+      {"position": 2, "label": "cannot /ˈkænɑːt/", "explanation": "A forma por extenso recebe acento forte na primeira sílaba e deixa a negação mais explícita."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 20 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/06/29/8225db0f-179b-453f-92bb-50f548175c42_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 219,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 38, "end_seconds": 50, "speaker": "Pete", "text_en": "I do not have a job!", "text_pt": "Eu não tenho emprego!"},
+          {"position": 1, "start_seconds": 72, "end_seconds": 86, "speaker": "Pete and Anna", "text_en": "Can you help me? Yes, I can. Let me help.", "text_pt": "Você pode me ajudar? Sim, posso. Deixe-me ajudar."},
+          {"position": 2, "start_seconds": 92, "end_seconds": 108, "speaker": "Anna and Pete", "text_en": "Can you write code? Sure, c-o-l-d. How is this going to help?", "text_pt": "Você sabe programar? Claro, c-o-l-d. Como isso vai ajudar?"},
+          {"position": 3, "start_seconds": 136, "end_seconds": 152, "speaker": "Pete", "text_en": "No, I cannot teach. I can't code! I can't teach! I can't cook!", "text_pt": "Não, não sei ensinar. Não sei programar, ensinar nem cozinhar!"},
+          {"position": 4, "start_seconds": 174, "end_seconds": 190, "speaker": "Anna", "text_en": "Not everyone can write well. You can be a writer!", "text_pt": "Nem todo mundo sabe escrever bem. Você pode ser escritor!"}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: Pete ____ write well.", "hint": null, "explanation": "A habilidade afirmativa usa *can + verbo base*.", "hints": ["Anna descobre uma habilidade de Pete.", "O verbo seguinte já está na forma base."], "answers": ["can"], "options": ["can", "can to", "cans"]},
+      {"position": 1, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Escolha a forma correta: Pete ____ teach.", "hint": null, "explanation": "*Cannot* é uma palavra e vem antes do verbo base.", "hints": ["Pete responde negativamente.", "Use a forma por extenso."], "answers": ["cannot"], "options": ["cannot", "can not to", "doesn't can"]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Complete a resposta curta: Can you help me? Yes, I `____`. (uma palavra)", "hint": "uma palavra", "explanation": "A resposta curta repete o modal *can*.", "hints": ["Não repita *help*.", "É o mesmo modal da pergunta."], "answers": ["can"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["write a blog", "write code", "teach", "cook"], "classification_categories": ["Pete can", "Pete can't"], "prompt": "Classifique as habilidades de Pete na conversa:", "hint": null, "explanation": "Pete sabe escrever um blog, mas diz que não sabe programar, ensinar nem cozinhar.", "hints": ["Só uma habilidade leva ao novo trabalho.", "As outras três recebem negação explícita."], "answers": ["{\"write a blog\": \"Pete can\", \"write code\": \"Pete can't\", \"teach\": \"Pete can't\", \"cook\": \"Pete can't\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual problema Pete conta primeiro?", "hint": null, "explanation": "Pete repete com voz mais forte que não tem emprego.", "hints": ["É por isso que ele está triste.", "A frase contém *job*."], "answers": ["ele não tem emprego"], "options": ["ele não tem emprego", "ele perdeu o ônibus", "ele não tem amigos"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Pete escreve quando Anna pergunta sobre código?", "hint": null, "explanation": "Ele entende *code* como uma palavra para soletrar e diz c-o-l-d.", "hints": ["Há um mal-entendido sonoro.", "Ele soletra quatro letras."], "answers": ["c-o-l-d"], "options": ["c-o-l-d", "c-o-d-e", "a-p-p"]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a resposta completa de Pete sobre ensinar.", "hint": null, "explanation": "Pete usa a forma negativa por extenso seguida do verbo base.", "hints": ["Começa com *No*.", "Use *cannot*, em uma palavra."], "answers": ["No, I cannot teach.", "No, I cannot teach"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual trabalho Anna recomenda no fim?", "hint": null, "explanation": "O grande número de seguidores mostra que Pete sabe escrever bem.", "hints": ["A habilidade vem do blog.", "A resposta usa *writer*."], "answers": ["escritor"], "options": ["escritor", "programador", "chef"]}
+    ],
+    "writing_prompts": [
+      {
+        "position": 0,
+        "title": "As habilidades para um trabalho",
+        "instructions": "Write 6 to 9 sentences in English about a job you could do. Say three things you can do, two things you can't do yet, and ask another person one question with Can you.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {"label": "habilidade", "terms": ["can"]},
+          {"label": "limite atual", "terms": ["can't", "cannot"]},
+          {"label": "uma pergunta", "terms": ["can you"]}
+        ]
+      }
+    ],
+    "learning_strategy": "identificar problemas"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 35: conteúdo autoral conferido com a aula, a revisão oficial 20–24 e o guia oficial de lesson plans do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 21,
+    "slug": "lesson-21",
+    "position": 1,
+    "title": "Can You Come to the Party?",
+    "title_pt": "Você pode vir à festa?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-21-can-you-come-to-the-party/3406732.html",
+    "grammar_tag": "Have to, can e can't em convites",
+    "focus_points": ["have to + verbo", "can / can't para convites e habilidades", "then para sequência e resultado"],
+    "story_note": "Marsha convida Anna para uma festa; as duas conciliam a prova de direção, as tarefas da festa e uma apresentação musical.",
+    "lead": "Um convite simples vira um exercício de agenda: Anna explica obrigações, testa habilidades e usa **then** para chegar a uma solução.",
+    "warmup_prompt": "Invite a friend to an event and say one thing each person has to do first.",
+    "listening_focus": "Ouça as obrigações com have to, os convites com can e a mudança de conclusão depois de then.",
+    "goals": [
+      "Expressar obrigação com **have to + verbo base**.",
+      "Fazer e responder a convites com **Can you…?**, **can** e **can't**.",
+      "Descrever habilidades pessoais com **can** sem acrescentar *to*.",
+      "Usar **then** para ordenar ações ou apresentar um resultado."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Have to: uma obrigação",
+        "why": "Use **have to + verbo base** para algo necessário: uma prova, uma tarefa ou uma responsabilidade.",
+        "warning": "Depois de *have to*, use a forma base: *have to take*, nunca *have to taking*.",
+        "table_head": ["Sujeito", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["I / you / we / they", "have to", "I have to take a test."]},
+          {"position": 1, "cells": ["he / she", "has to", "She has to help her friend."]},
+          {"position": 2, "cells": ["pergunta", "Do … have to?", "Do you have to work all day?"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Can em convite, resposta e habilidade",
+        "why": "**Can you come?** convida; **I can / can't** aceita, recusa ou informa uma habilidade.",
+        "warning": "Can recebe o verbo base sem *to*: *can sing*, não *can to sing*.",
+        "table_head": ["Função", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["convite", "Can you + verbo?", "Can you come with me?"]},
+          {"position": 1, "cells": ["aceite", "I can", "Then I can come to the party."]},
+          {"position": 2, "cells": ["limite", "I can't", "I can't cook."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Then: próxima etapa ou nova conclusão",
+        "why": "**Then** pode ordenar ações ou mostrar a conclusão que surge depois de uma informação nova.",
+        "warning": "First e then precisam acompanhar uma sequência lógica, não apenas frases sem relação.",
+        "table_head": ["Uso", "Pista", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["sequência", "first … then", "First I take one test. Then I take another."]},
+          {"position": 1, "cells": ["resultado", "Oh. Then…", "Oh. Then I can come at night."]},
+          {"position": 2, "cells": ["próxima ação", "then + oração", "Then we can go shopping."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "Can you come with me?", "text_pt": "Você pode vir comigo?", "note": "Convite direto com can."},
+      {"position": 1, "text_en": "Sorry, I can't come with you.", "text_pt": "Desculpe, não posso ir com você.", "note": "Recusa breve acompanhada de desculpa."},
+      {"position": 2, "text_en": "I have to get my driver's license.", "text_pt": "Preciso tirar minha carteira de motorista.", "note": "Have to comunica obrigação."},
+      {"position": 3, "text_en": "Then I can come to the party.", "text_pt": "Então eu posso ir à festa.", "note": "Then apresenta a conclusão após saber o horário."},
+      {"position": 4, "text_en": "That sounds like fun.", "text_pt": "Isso parece divertido.", "note": "Resposta positiva a uma proposta."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "party", "ipa": "/ˈpɑːrti/", "translation_pt": "festa", "example_en": "My friend is having a party."},
+      {"position": 1, "term": "driver's license", "ipa": "/ˈdraɪvərz ˈlaɪsəns/", "translation_pt": "carteira de motorista", "example_en": "I have to get my driver's license."},
+      {"position": 2, "term": "test", "ipa": "/test/", "translation_pt": "prova; teste", "example_en": "First, Anna has to take a test."},
+      {"position": 3, "term": "perform", "ipa": "/pərˈfɔːrm/", "translation_pt": "apresentar-se", "example_en": "You can bring food or perform."},
+      {"position": 4, "term": "recite", "ipa": "/rɪˈsaɪt/", "translation_pt": "recitar", "example_en": "Anna can recite poetry."},
+      {"position": 5, "term": "poetry", "ipa": "/ˈpoʊətri/", "translation_pt": "poesia", "example_en": "She recites poetry at a club."},
+      {"position": 6, "term": "trick", "ipa": "/trɪk/", "translation_pt": "truque", "example_en": "Anna can do a card trick."},
+      {"position": 7, "term": "sing", "ipa": "/sɪŋ/", "translation_pt": "cantar", "example_en": "She can sing at the party."},
+      {"position": 8, "term": "shopping", "ipa": "/ˈʃɑːpɪŋ/", "translation_pt": "compras", "example_en": "Marsha has to go shopping."},
+      {"position": 9, "term": "obligation", "ipa": "/ˌɑːbləˈɡeɪʃən/", "translation_pt": "obrigação", "example_en": "Have to expresses an obligation."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "have to → /ˈhæftə/", "explanation": "Na fala rápida, *have to* pode soar como *hafta*; na escrita, mantenha as duas palavras."},
+      {"position": 1, "label": "can fraco /kən/", "explanation": "Em perguntas e frases afirmativas, can costuma ter vogal reduzida; recebe força em respostas curtas."},
+      {"position": 2, "label": "can't /kænt/", "explanation": "A negativa tende a receber mais destaque; escute o fechamento final e o contexto da resposta."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 21 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/07/11/e0c9e4c4-584b-4bd7-a4d5-a4b1f7bdfa8f_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; a canção apresentada na conversa e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 177,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 18, "end_seconds": 32, "speaker": "Marsha", "text_en": "My friend is having a party on Saturday. Can you come with me?", "text_pt": "Minha amiga vai dar uma festa no sábado. Você pode vir comigo?"},
+          {"position": 1, "start_seconds": 32, "end_seconds": 46, "speaker": "Anna", "text_en": "Sorry, I can't come with you. I have to get my driver's license.", "text_pt": "Desculpe, não posso ir com você. Preciso tirar minha carteira de motorista."},
+          {"position": 2, "start_seconds": 48, "end_seconds": 64, "speaker": "Anna", "text_en": "First, I have to take a test on the computer. Then I have to take a test in the car.", "text_pt": "Primeiro, preciso fazer uma prova no computador. Depois, uma prova no carro."},
+          {"position": 3, "start_seconds": 68, "end_seconds": 82, "speaker": "Anna", "text_en": "Oh. Then I can come with you to the party on Saturday night.", "text_pt": "Ah. Então posso ir com você à festa no sábado à noite."},
+          {"position": 4, "start_seconds": 132, "end_seconds": 148, "speaker": "Marsha", "text_en": "That's it! You can sing at the party.", "text_pt": "É isso! Você pode cantar na festa."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete a obrigação: I ____ take a test.", "hint": null, "explanation": "Have to vem antes do verbo base take.", "hints": ["A prova é necessária.", "Use duas palavras antes de take."], "answers": ["have to"], "options": ["have to", "can to", "am have"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "First I take the computer test. `____` I take the test in the car.", "hint": null, "explanation": "Then introduz a próxima etapa da sequência.", "hints": ["A primeira frase começa com First.", "Use o marcador de próxima etapa."], "answers": ["Then"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Qual convite está correto?", "hint": null, "explanation": "Can recebe o sujeito e o verbo base sem to.", "hints": ["Comece com o modal.", "O verbo come fica na forma base."], "answers": ["Can you come with me?"], "options": ["Can you come with me?", "Do you can come with me?", "Can you to come with me?"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["take the driver's test", "help with the party", "cook", "sing"], "classification_categories": ["have to", "can", "can't"], "prompt": "Classifique as obrigações e habilidades de Anna:", "hint": null, "explanation": "Anna precisa fazer a prova, pode ajudar e cantar, mas diz que não sabe cozinhar.", "hints": ["Separe necessidade de habilidade.", "Uma atividade recebe a negativa can't."], "answers": ["{\"cook\":\"can't\",\"help with the party\":\"can\",\"sing\":\"can\",\"take the driver's test\":\"have to\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quando acontece a festa?", "hint": null, "explanation": "Marsha diz que a festa será no sábado.", "hints": ["Escute on Saturday.", "É um dia do fim de semana."], "answers": ["sábado"], "options": ["sábado", "quinta-feira", "domingo"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Por que Anna recusa o convite no início?", "hint": null, "explanation": "Ela acredita que a prova para a carteira impedirá sua participação.", "hints": ["A resposta usa have to.", "Escute driver's license."], "answers": ["Ela precisa tirar a carteira de motorista."], "options": ["Ela precisa tirar a carteira de motorista.", "Ela precisa trabalhar na livraria.", "Ela não gosta de festas."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva as duas etapas da prova de Anna.", "hint": null, "explanation": "First e then ordenam a prova no computador e a prova no carro.", "hints": ["Começa com First, I have to.", "A segunda frase começa com Then."], "answers": ["First, I have to take a test on the computer. Then I have to take a test in the car.", "First I have to take a test on the computer. Then I have to take a test in the car."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual habilidade Marsha escolhe para Anna apresentar?", "hint": null, "explanation": "Depois de outras tentativas, Marsha conclui que Anna pode cantar.", "hints": ["Escute That's it.", "A atividade usa a voz e música."], "answers": ["cantar"], "options": ["cantar", "cozinhar", "dirigir"]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Convite com plano de tarefas", "instructions": "Write 6 to 9 sentences in English inviting a friend to an event. Say two things you have to do, two things you can do, one thing you can't do, and use first and then.", "min_words": 55, "min_sentences": 6, "requirements": [
+        {"label": "obrigação", "terms": ["have to", "has to"]},
+        {"label": "habilidade", "terms": ["can", "can't", "cannot"]},
+        {"label": "sequência", "terms": ["first", "then"]}
+      ]}
+    ],
+    "learning_strategy": "cooperar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 35: conteúdo autoral conferido com a aula, a revisão oficial 20–24 e o guia oficial de lesson plans do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 22,
+    "slug": "lesson-22",
+    "position": 2,
+    "title": "Next Summer...",
+    "title_pt": "No próximo verão...",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-22/3397314.html",
+    "grammar_tag": "Going to e sequência de planos",
+    "focus_points": ["be going to + verbo", "first, then e finally", "estações e atividades de férias"],
+    "story_note": "Anna e Amelia planejam o primeiro programa infantil e organizam uma viagem imaginária por atividades populares das férias de verão.",
+    "lead": "Planejar bem exige dizer o que vai acontecer e em que ordem: primeiro, depois e finalmente.",
+    "warmup_prompt": "Plan a summer day with three activities and put them in order.",
+    "listening_focus": "Anote cada atividade de férias e os marcadores first, then e finally usados no plano do programa.",
+    "goals": [
+      "Apresentar planos futuros com **be going to + verbo base**.",
+      "Ordenar etapas com **first**, **then** e **finally**.",
+      "Nomear as quatro estações e atividades comuns de férias.",
+      "Resumir oralmente um plano depois de ouvir sua sequência."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Be going to: um plano futuro",
+        "why": "Use **am/is/are going to + verbo base** para uma decisão ou plano já pensado.",
+        "warning": "Não omita o verbo BE: *We are going to introduce*, não *We going to introduce*.",
+        "table_head": ["Sujeito", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["I", "am going to", "I am going to plan the show."]},
+          {"position": 1, "cells": ["he / she", "is going to", "She is going to interview children."]},
+          {"position": 2, "cells": ["we / they", "are going to", "We are going to introduce the subject."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "First, then e finally",
+        "why": "Os marcadores mostram a ordem do plano e ajudam o ouvinte a acompanhar cada etapa.",
+        "warning": "Finally marca a última etapa; não o use para uma ação que ainda será seguida por outra.",
+        "table_head": ["Posição", "Marcador", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["início", "first", "First, we're going to introduce the subject."]},
+          {"position": 1, "cells": ["continuação", "then", "Then we can show pictures."]},
+          {"position": 2, "cells": ["fechamento", "finally", "Finally, we can answer questions."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "When + presente para situações típicas",
+        "why": "Use **when + simple present** para explicar o que normalmente acontece em uma atividade de férias.",
+        "warning": "Mesmo que a atividade esteja em um plano futuro, a explicação geral depois de when usa o presente.",
+        "table_head": ["Atividade", "When-clause", "Resultado"],
+        "rows": [
+          {"position": 0, "cells": ["camping", "When you go camping", "you cook and sleep outdoors."]},
+          {"position": 1, "cells": ["amusement park", "When you visit a park", "you go on rides."]},
+          {"position": 2, "cells": ["beach", "When you go to the beach", "you can swim in the ocean."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "What are we going to talk about?", "text_pt": "Sobre o que vamos falar?", "note": "Pergunta sobre o plano futuro."},
+      {"position": 1, "text_en": "First, we're going to introduce the subject.", "text_pt": "Primeiro, vamos apresentar o assunto.", "note": "First abre a sequência."},
+      {"position": 2, "text_en": "Then we can show pictures and video.", "text_pt": "Depois, podemos mostrar fotos e vídeo.", "note": "Then introduz a segunda etapa."},
+      {"position": 3, "text_en": "Finally, we can read the questions.", "text_pt": "Finalmente, podemos ler as perguntas.", "note": "Finally encerra o plano."},
+      {"position": 4, "text_en": "This show is going to be a lot of fun.", "text_pt": "Este programa vai ser muito divertido.", "note": "Going to também apresenta uma previsão apoiada no plano."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "season", "ipa": "/ˈsiːzən/", "translation_pt": "estação do ano", "example_en": "Summer is Anna's favorite season."},
+      {"position": 1, "term": "vacation", "ipa": "/veɪˈkeɪʃən/", "translation_pt": "férias", "example_en": "They plan a summer vacation show."},
+      {"position": 2, "term": "camping", "ipa": "/ˈkæmpɪŋ/", "translation_pt": "acampamento", "example_en": "Camping means sleeping outdoors."},
+      {"position": 3, "term": "hiking", "ipa": "/ˈhaɪkɪŋ/", "translation_pt": "caminhada", "example_en": "Amelia likes hiking."},
+      {"position": 4, "term": "fishing", "ipa": "/ˈfɪʃɪŋ/", "translation_pt": "pesca", "example_en": "Fishing is another camping activity."},
+      {"position": 5, "term": "amusement park", "ipa": "/əˈmjuːzmənt pɑːrk/", "translation_pt": "parque de diversões", "example_en": "They discuss an amusement park."},
+      {"position": 6, "term": "ride", "ipa": "/raɪd/", "translation_pt": "brinquedo de parque; passeio", "example_en": "You can go on rides."},
+      {"position": 7, "term": "roller coaster", "ipa": "/ˈroʊlər ˌkoʊstər/", "translation_pt": "montanha-russa", "example_en": "They both love roller coasters."},
+      {"position": 8, "term": "beach", "ipa": "/biːtʃ/", "translation_pt": "praia", "example_en": "The beach is the last vacation idea."},
+      {"position": 9, "term": "outdoors", "ipa": "/ˌaʊtˈdɔːrz/", "translation_pt": "ao ar livre", "example_en": "Campers cook and sleep outdoors."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "going to → gonna", "explanation": "Na fala informal, going to pode soar /ˈɡənə/; na escrita de estudo, mantenha *going to*."},
+      {"position": 1, "label": "first, then, finally", "explanation": "Dê destaque aos marcadores e faça uma pequena pausa para tornar a ordem audível."},
+      {"position": 2, "label": "summer /ˈsʌmər/", "explanation": "Use a vogal curta /ʌ/ e acento na primeira sílaba; não alongue como em *soon*."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 22 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/07/25/2dc70acb-f8c2-4e93-9e8d-e3d37348d819_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 194,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 8, "end_seconds": 24, "speaker": "Anna", "text_en": "My favorite season is summer because of summer vacation!", "text_pt": "Minha estação favorita é o verão por causa das férias de verão!"},
+          {"position": 1, "start_seconds": 36, "end_seconds": 50, "speaker": "Amelia", "text_en": "So, what are we going to talk about on the first show?", "text_pt": "Então, sobre o que vamos falar no primeiro programa?"},
+          {"position": 2, "start_seconds": 65, "end_seconds": 82, "speaker": "Anna", "text_en": "First, we're going to introduce the subject. Then we can show pictures and video.", "text_pt": "Primeiro, vamos apresentar o assunto. Depois, podemos mostrar fotos e vídeo."},
+          {"position": 3, "start_seconds": 111, "end_seconds": 128, "speaker": "Anna", "text_en": "When you go camping, you cook, sleep and play outdoors!", "text_pt": "Quando você acampa, cozinha, dorme e brinca ao ar livre!"},
+          {"position": 4, "start_seconds": 164, "end_seconds": 181, "speaker": "Anna", "text_en": "One of the most popular vacations is going to the beach!", "text_pt": "Uma das férias mais populares é ir à praia!"}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete o plano: We ____ introduce the subject.", "hint": null, "explanation": "Com we, going to precisa do auxiliar are.", "hints": ["É um plano já organizado.", "Use are antes de going to."], "answers": ["are going to"], "options": ["are going to", "going to", "will to"]},
+      {"position": 1, "activity_type": "reorder", "skill": "grammar", "objective": "apply", "options": ["first", "then", "finally"], "prompt": "Ordene os marcadores do começo ao fim.", "hint": null, "explanation": "First abre, then continua e finally fecha a sequência.", "hints": ["Qual palavra significa primeiro?", "Qual palavra anuncia a etapa final?"], "answers": ["first then finally"]},
+      {"position": 2, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "When you go camping, you `____` outdoors.", "hint": null, "explanation": "A explicação geral usa simple present: sleep.", "hints": ["A frase descreve uma atividade típica.", "Use o verbo dormir na forma base."], "answers": ["sleep"]},
+      {"position": 3, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Qual frase contém um plano futuro completo?", "hint": null, "explanation": "Am going to + verbo base apresenta a forma completa.", "hints": ["Procure o verbo BE.", "Depois de going to vem a forma base."], "answers": ["I am going to visit the beach."], "options": ["I am going to visit the beach.", "I going visit the beach.", "I am going to visiting the beach."]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual é a estação favorita de Anna?", "hint": null, "explanation": "Anna escolhe summer por causa das férias.", "hints": ["Escute favorite season.", "A razão é summer vacation."], "answers": ["verão"], "options": ["verão", "inverno", "outono"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que vem depois da apresentação do assunto?", "hint": null, "explanation": "Then introduz mostrar fotos e vídeo.", "hints": ["Escute Then.", "A etapa contém pictures and video."], "answers": ["Mostrar fotos e vídeo."], "options": ["Mostrar fotos e vídeo.", "Encerrar o programa.", "Comprar passagens."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a pergunta de Amelia sobre o primeiro programa.", "hint": null, "explanation": "A pergunta usa are we going to talk.", "hints": ["Começa com So, what.", "Termina com on the first show."], "answers": ["So, what are we going to talk about on the first show?", "What are we going to talk about on the first show?"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais ações Anna associa ao camping?", "hint": null, "explanation": "Ela enumera cozinhar, dormir e brincar ao ar livre.", "hints": ["São três verbos.", "A última expressão é outdoors."], "answers": ["Cozinhar, dormir e brincar ao ar livre."], "options": ["Cozinhar, dormir e brincar ao ar livre.", "Dirigir, trabalhar e estudar.", "Nadar, comprar e dançar."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Meu próximo período de férias", "instructions": "Write 6 to 9 sentences in English planning a vacation day. Use going to at least three times and organize the activities with first, then and finally.", "min_words": 55, "min_sentences": 6, "requirements": [
+        {"label": "planos", "terms": ["going to"]},
+        {"label": "sequência", "terms": ["first", "then", "finally"]},
+        {"label": "atividade de férias", "terms": ["camping", "hiking", "beach", "park", "vacation"]}
+      ]}
+    ],
+    "learning_strategy": "planejar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 35: conteúdo autoral conferido com a aula, a revisão oficial 20–24 e o guia oficial de lesson plans do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 23,
+    "slug": "lesson-23",
+    "position": 3,
+    "title": "What Do You Want?",
+    "title_pt": "O que você quer?",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-23-what-do-you-want/3413753.html",
+    "grammar_tag": "Want, horas, preços e troco",
+    "focus_points": ["want + substantivo / want to + verbo", "What time is it? e at + hora", "preço, pagamento e troco"],
+    "story_note": "Anna, Caty e Jonathan almoçam em food trucks para experimentar comidas do mundo enquanto controlam o tempo e contam o troco.",
+    "lead": "Escolher uma refeição também pratica três tarefas reais: dizer o que você quer, perguntar as horas e conferir o troco.",
+    "warmup_prompt": "Order one dish, ask its price and calculate the change from ten dollars.",
+    "listening_focus": "Ouça desejos com want, horários, valores pagos e a expressão out of quando um prato acabou.",
+    "goals": [
+      "Expressar desejos com **want + substantivo** e **want to + verbo**.",
+      "Perguntar e dizer as horas com **What time is it?**.",
+      "Informar preço e contar o troco em uma compra simples.",
+      "Responder de modo adequado quando um item está **out of** stock."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Want: coisa ou ação desejada",
+        "why": "Use **want + substantivo** para uma coisa e **want to + verbo** para uma ação.",
+        "warning": "Não use o verbo BE antes de want: diga *I want chicken*, não *I am want chicken*.",
+        "table_head": ["Desejo", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["coisa", "want + noun", "I want the chicken dish."]},
+          {"position": 1, "cells": ["ação", "want to + verb", "I want to visit Peru."]},
+          {"position": 2, "cells": ["pergunta", "What do you want?", "What do you want now?"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Perguntar e marcar a hora",
+        "why": "Use **What time is it?** para a hora atual e **at + hora** para marcar um encontro.",
+        "warning": "Para horário específico, use at: *at noon*, não *in noon*.",
+        "table_head": ["Função", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["hora atual", "What time is it?", "It's 11:50."]},
+          {"position": 1, "cells": ["encontro", "at + hora", "We are meeting at noon."]},
+          {"position": 2, "cells": ["duração futura", "in + período", "I'll be back in 15 minutes."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Preço, pagamento e troco",
+        "why": "**Cost** informa o preço, **from** informa o valor entregue e **change** é o dinheiro devolvido.",
+        "warning": "Money é incontável; para contar, use dólares, moedas ou uma quantia específica.",
+        "table_head": ["Etapa", "Expressão", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["preço", "costs", "The dish costs five dollars."]},
+          {"position": 1, "cells": ["pagamento", "from + valor", "Here is three dollars back from ten."]},
+          {"position": 2, "cells": ["devolução", "change", "Here is your change."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "What time is it now?", "text_pt": "Que horas são agora?", "note": "Pergunta pela hora atual."},
+      {"position": 1, "text_en": "I want the chicken dish.", "text_pt": "Eu quero o prato de frango.", "note": "Want recebe diretamente o substantivo."},
+      {"position": 2, "text_en": "We're out of chicken.", "text_pt": "Estamos sem frango.", "note": "Out of informa que o item acabou."},
+      {"position": 3, "text_en": "Here is your change.", "text_pt": "Aqui está seu troco.", "note": "Frase usada ao devolver dinheiro."},
+      {"position": 4, "text_en": "What do you want now?", "text_pt": "O que você quer agora?", "note": "Pergunta direta sobre escolha ou desejo."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "food truck", "ipa": "/ˈfuːd trʌk/", "translation_pt": "caminhão de comida", "example_en": "The group eats at food trucks."},
+      {"position": 1, "term": "dish", "ipa": "/dɪʃ/", "translation_pt": "prato de comida", "example_en": "The dish costs five dollars."},
+      {"position": 2, "term": "shrimp", "ipa": "/ʃrɪmp/", "translation_pt": "camarão", "example_en": "Jonathan asks for shrimp."},
+      {"position": 3, "term": "beef", "ipa": "/biːf/", "translation_pt": "carne bovina", "example_en": "He chooses beef instead."},
+      {"position": 4, "term": "chicken", "ipa": "/ˈtʃɪkɪn/", "translation_pt": "frango", "example_en": "Anna wants chicken."},
+      {"position": 5, "term": "change", "ipa": "/tʃeɪndʒ/", "translation_pt": "troco", "example_en": "Count the change carefully."},
+      {"position": 6, "term": "cost", "ipa": "/kɔːst/", "translation_pt": "custar; custo", "example_en": "The meal does not cost a lot."},
+      {"position": 7, "term": "dessert", "ipa": "/dɪˈzɜːrt/", "translation_pt": "sobremesa", "example_en": "They can buy dessert."},
+      {"position": 8, "term": "noon", "ipa": "/nuːn/", "translation_pt": "meio-dia", "example_en": "They meet at noon."},
+      {"position": 9, "term": "punctuality", "ipa": "/ˌpʌŋktʃuˈæləti/", "translation_pt": "pontualidade", "example_en": "Punctuality matters at lunch meetings."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "What do you → /ˈwʌdəjə/", "explanation": "Na fala rápida, as três palavras podem se unir; mantenha a forma completa na escrita."},
+      {"position": 1, "label": "out of → /ˈaʊɾəv/", "explanation": "O /t/ pode soar como um toque rápido e as palavras se conectam."},
+      {"position": 2, "label": "yep /jep/", "explanation": "Yep é uma concordância informal equivalente a yes; use-a apenas em contexto casual."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 23 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/07/27/f5ba9389-58a1-4643-9ec4-3bbfcd8c96e6_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; marcas, imagens e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 177,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 20, "end_seconds": 35, "speaker": "Anna and Jonathan", "text_en": "What time is it now? 11:50. We have to go!", "text_pt": "Que horas são agora? 11h50. Temos que ir!"},
+          {"position": 1, "start_seconds": 43, "end_seconds": 58, "speaker": "Caty", "text_en": "We're not eating at a restaurant. We are eating at food trucks!", "text_pt": "Não vamos comer em um restaurante. Vamos comer em food trucks!"},
+          {"position": 2, "start_seconds": 68, "end_seconds": 83, "speaker": "Caty", "text_en": "Anna, you pick the second country. Here is ten dollars.", "text_pt": "Anna, você escolhe o segundo país. Aqui estão dez dólares."},
+          {"position": 3, "start_seconds": 102, "end_seconds": 119, "speaker": "Jonathan", "text_en": "You're out of shrimp. Okay, I'll have the beef then.", "text_pt": "Vocês estão sem camarão. Certo, vou querer a carne então."},
+          {"position": 4, "start_seconds": 132, "end_seconds": 150, "speaker": "Jonathan", "text_en": "The dish is seven dollars. So, here is three dollars back from your ten.", "text_pt": "O prato custa sete dólares. Então, aqui estão três dólares de volta dos seus dez."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete o desejo: I ____ the chicken dish.", "hint": null, "explanation": "Want recebe diretamente o objeto desejado.", "hints": ["Não use o verbo BE.", "A palavra significa querer."], "answers": ["want"], "options": ["want", "am want", "want to"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "We are meeting `____` noon.", "hint": null, "explanation": "Horários específicos usam a preposição at.", "hints": ["Noon é um horário.", "Use uma preposição curta."], "answers": ["at"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "O prato custa $7 e a pessoa paga $10. Qual troco está correto?", "hint": null, "explanation": "10 menos 7 é 3.", "hints": ["Subtraia o preço do valor entregue.", "Jonathan conta o valor na conversa."], "answers": ["$3"], "options": ["$3", "$7", "$17"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Transforme o desejo por uma coisa em desejo por uma ação: I want a visit to Peru.", "hint": null, "explanation": "Want to + verbo expressa a ação desejada.", "hints": ["Use want to.", "O verbo é visit."], "answers": ["I want to visit Peru"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que horas são quando Anna percebe que precisam ir?", "hint": null, "explanation": "Jonathan responde 11:50.", "hints": ["Escute eleven.", "Faltam dez minutos para o meio-dia."], "answers": ["11:50"], "options": ["11:50", "12:15", "10:50"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Onde o grupo vai almoçar?", "hint": null, "explanation": "Caty revela que comerão em food trucks.", "hints": ["Não é um restaurante.", "São veículos que vendem comida."], "answers": ["Em food trucks."], "options": ["Em food trucks.", "Em casa.", "Em uma cafeteria."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a escolha de Jonathan quando o camarão acabou.", "hint": null, "explanation": "Ele reconhece out of shrimp e escolhe beef.", "hints": ["Começa com You're out of shrimp.", "Termina com beef then."], "answers": ["You're out of shrimp. Okay, I'll have the beef then.", "You are out of shrimp. Okay, I will have the beef then."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quanto troco Jonathan devolve de dez dólares?", "hint": null, "explanation": "O prato custa sete e ele devolve três.", "hints": ["Escute dollars back.", "Calcule 10 menos 7."], "answers": ["três dólares"], "options": ["três dólares", "cinco dólares", "sete dólares"]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Pedido em um food truck", "instructions": "Write a 6-to-9-sentence dialogue in English. Ask the time, order two items with want, include one unavailable item, give two prices and calculate the change.", "min_words": 55, "min_sentences": 6, "requirements": [
+        {"label": "desejo", "terms": ["want", "want to"]},
+        {"label": "hora", "terms": ["what time", "at", "noon"]},
+        {"label": "compra", "terms": ["cost", "change", "dollars", "out of"]}
+      ]}
+    ],
+    "learning_strategy": "responder"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 35: conteúdo autoral conferido com a aula, a revisão oficial 20–24 e o guia oficial de lesson plans do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 24,
+    "slug": "lesson-24",
+    "position": 4,
+    "title": "Yesterday Was Amazing!",
+    "title_pt": "Ontem foi incrível!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-24-yesterday-was-amazing/3439164.html",
+    "grammar_tag": "Passado regular + festivais e cultura",
+    "focus_points": ["simple past de verbos regulares", "was e were", "substituir uma palavra desconhecida por uma descrição"],
+    "story_note": "Anna escreve para Penelope sobre um festival cultural e compara o que viu no momento com a forma de contar a experiência depois.",
+    "lead": "Relatar ontem muda a forma dos verbos: Anna transforma cenas do festival em uma narrativa clara no passado.",
+    "warmup_prompt": "Tell a friend about one event you visited yesterday or last weekend.",
+    "listening_focus": "Ouça os marcadores de passado e contraste as cenas no presente com o relato em walked, danced, cooked e played.",
+    "goals": [
+      "Formar afirmações no simple past com verbos regulares em **-ed**.",
+      "Usar **did not** e **Did…?** com o verbo principal na forma base.",
+      "Escolher **was** ou **were** para descrever pessoas, lugares e eventos passados.",
+      "Substituir um nome desconhecido por uma descrição compreensível."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Passado regular afirmativo",
+        "why": "Em geral, acrescente **-ed** ao verbo para narrar uma ação concluída no passado.",
+        "warning": "Verbos terminados em *e* recebem apenas -d; em consoante + y, troque y por i antes de -ed.",
+        "table_head": ["Forma base", "Passado", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["walk", "walked", "Anna walked to the festival."]},
+          {"position": 1, "cells": ["dance", "danced", "She danced a traditional dance."]},
+          {"position": 2, "cells": ["study", "studied", "They studied the culture."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Negativa e pergunta com did",
+        "why": "Use **did not + verbo base** na negativa e **Did + sujeito + verbo base?** na pergunta.",
+        "warning": "Did já marca o passado; não repita -ed no verbo principal: *Did they cook?*, não *Did they cooked?*.",
+        "table_head": ["Tipo", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["negativa", "did not + base", "They did not play soccer."]},
+          {"position": 1, "cells": ["pergunta", "Did + sujeito + base?", "Did Anna visit the festival?"]},
+          {"position": 2, "cells": ["resposta curta", "Yes, … did.", "Yes, she did."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Was, were e uma descrição substituta",
+        "why": "Use **was** com I/he/she/it e **were** com you/we/they; quando faltar um nome, descreva função, forma ou uso.",
+        "warning": "Was e were não usam did em perguntas: *Was it a festival?*, não *Did it was…?*.",
+        "table_head": ["Sujeito", "BE no passado", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["I / it", "was", "It was a big festival."]},
+          {"position": 1, "cells": ["they / games", "were", "The games were interesting."]},
+          {"position": 2, "cells": ["nome desconhecido", "a kind of + nome", "Pilota is a kind of handball."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "Yesterday was the most amazing day.", "text_pt": "Ontem foi o dia mais incrível.", "note": "Was descreve o dia no passado."},
+      {"position": 1, "text_en": "I walked and walked.", "text_pt": "Eu caminhei e caminhei.", "note": "Walked é passado regular."},
+      {"position": 2, "text_en": "I danced a traditional Basque dance.", "text_pt": "Dancei uma dança basca tradicional.", "note": "Dance recebe apenas -d porque já termina em e."},
+      {"position": 3, "text_en": "They cooked a lot of traditional food.", "text_pt": "Eles cozinharam muita comida tradicional.", "note": "Cooked relata uma ação concluída."},
+      {"position": 4, "text_en": "It's a kind of handball.", "text_pt": "É um tipo de handebol.", "note": "A descrição substitui temporariamente o nome pilota."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "yesterday", "ipa": "/ˈjestərdeɪ/", "translation_pt": "ontem", "example_en": "Yesterday was amazing."},
+      {"position": 1, "term": "festival", "ipa": "/ˈfestəvəl/", "translation_pt": "festival", "example_en": "Anna visited a festival."},
+      {"position": 2, "term": "culture", "ipa": "/ˈkʌltʃər/", "translation_pt": "cultura", "example_en": "The festival shows different cultures."},
+      {"position": 3, "term": "traditional", "ipa": "/trəˈdɪʃənəl/", "translation_pt": "tradicional", "example_en": "They cooked traditional food."},
+      {"position": 4, "term": "Basque", "ipa": "/bæsk/", "translation_pt": "basco", "example_en": "Anna learned about Basque culture."},
+      {"position": 5, "term": "handball", "ipa": "/ˈhændbɔːl/", "translation_pt": "handebol", "example_en": "Pilota is a kind of handball."},
+      {"position": 6, "term": "ship", "ipa": "/ʃɪp/", "translation_pt": "navio", "example_en": "They were making a traditional ship."},
+      {"position": 7, "term": "letter", "ipa": "/ˈletər/", "translation_pt": "carta", "example_en": "Anna writes a letter to Penelope."},
+      {"position": 8, "term": "break", "ipa": "/breɪk/", "translation_pt": "pausa", "example_en": "Anna wanted a break from work."},
+      {"position": 9, "term": "substitute", "ipa": "/ˈsʌbstətuːt/", "translation_pt": "substituir", "example_en": "Substitute a description for an unknown word."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "-ed como /t/", "explanation": "Depois de som surdo, -ed soa /t/: walked /wɔːkt/ e cooked /kʊkt/."},
+      {"position": 1, "label": "-ed como /d/", "explanation": "Depois de som sonoro, -ed soa /d/: played /pleɪd/ e called /kɔːld/."},
+      {"position": 2, "label": "-ed como /ɪd/", "explanation": "Depois de /t/ ou /d/, surge uma sílaba: wanted /ˈwɑːntɪd/."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 24 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/07/29/7202578e-98dd-4e93-8a9b-166c72f520ea_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, obras culturais e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 157,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 5, "end_seconds": 20, "speaker": "Anna", "text_en": "Yesterday was the most amazing day. I want to tell my friend back home about it.", "text_pt": "Ontem foi o dia mais incrível. Quero contar sobre ele à minha amiga que está em casa."},
+          {"position": 1, "start_seconds": 29, "end_seconds": 46, "speaker": "Anna", "text_en": "I was at work. And I wanted a break. So, I walked and walked and walked.", "text_pt": "Eu estava no trabalho e queria uma pausa. Então caminhei, caminhei e caminhei."},
+          {"position": 2, "start_seconds": 53, "end_seconds": 70, "speaker": "Anna", "text_en": "It was the Smithsonian Folklife Festival. Every year the festival shows different cultures.", "text_pt": "Era o Smithsonian Folklife Festival. Todos os anos o festival mostra culturas diferentes."},
+          {"position": 3, "start_seconds": 78, "end_seconds": 96, "speaker": "Anna", "text_en": "At the festival, I danced a traditional Basque dance!", "text_pt": "No festival, dancei uma dança basca tradicional!"},
+          {"position": 4, "start_seconds": 102, "end_seconds": 120, "speaker": "Anna", "text_en": "They played a game with their hands and a small ball. It's a kind of handball.", "text_pt": "Eles jogaram um jogo com as mãos e uma bola pequena. É um tipo de handebol."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: Yesterday, Anna ____ to the festival.", "hint": null, "explanation": "Walk forma o passado regular com -ed.", "hints": ["A pista é Yesterday.", "Acrescente -ed a walk."], "answers": ["walked"], "options": ["walked", "walk", "did walked"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Did they `____` traditional food?", "hint": null, "explanation": "Depois de did, o verbo volta à forma base cook.", "hints": ["Did já marca o passado.", "Retire -ed do verbo principal."], "answers": ["cook"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: It ____ a big festival, and the games ____ interesting.", "hint": null, "explanation": "It usa was; games, no plural, usa were.", "hints": ["A primeira forma concorda com it.", "A segunda concorda com games."], "answers": ["was; were"], "options": ["was; were", "were; was", "did; were"]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["walked", "played", "wanted", "cooked"], "classification_categories": ["-ed /t/", "-ed /d/", "-ed /ɪd/"], "prompt": "Classifique o som final de -ed:", "hint": null, "explanation": "Walked e cooked terminam em /t/, played em /d/ e wanted em /ɪd/.", "hints": ["Observe o último som do verbo base.", "Depois de /t/, -ed cria uma sílaba."], "answers": ["{\"cooked\":\"-ed /t/\",\"played\":\"-ed /d/\",\"walked\":\"-ed /t/\",\"wanted\":\"-ed /ɪd/\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Como Anna descreve o dia anterior?", "hint": null, "explanation": "Ela chama o dia de the most amazing day.", "hints": ["Escute a primeira frase.", "A descrição contém amazing."], "answers": ["Como o dia mais incrível."], "options": ["Como o dia mais incrível.", "Como um dia comum sem novidades.", "Como um dia de trabalho difícil apenas."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Anna queria antes de caminhar?", "hint": null, "explanation": "Ela estava no trabalho e queria uma pausa.", "hints": ["Escute wanted.", "A palavra final é break."], "answers": ["Uma pausa."], "options": ["Uma pausa.", "Uma refeição.", "Uma passagem."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a frase de Anna sobre a dança.", "hint": null, "explanation": "A frase usa danced e nomeia a tradição basca.", "hints": ["Começa com At the festival.", "Termina com Basque dance."], "answers": ["At the festival, I danced a traditional Basque dance!", "At the festival, I danced a traditional Basque dance."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Como Anna descreve pilota antes de usar seu nome?", "hint": null, "explanation": "Ela substitui o nome desconhecido pela descrição a kind of handball.", "hints": ["Escute kind of.", "A comparação usa handball."], "answers": ["Como um tipo de handebol."], "options": ["Como um tipo de handebol.", "Como uma dança lenta.", "Como um instrumento musical."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Ontem em um evento cultural", "instructions": "Write 6 to 9 sentences in English about a festival, fair or event you visited. Use at least four regular past verbs, was or were, and describe one thing whose English name you do not know.", "min_words": 60, "min_sentences": 6, "requirements": [
+        {"label": "passado regular", "terms": ["visited", "walked", "danced", "played", "cooked", "watched"]},
+        {"label": "BE no passado", "terms": ["was", "were"]},
+        {"label": "descrição substituta", "terms": ["a kind of", "it is like", "you use it to"]}
+      ]}
+    ],
+    "learning_strategy": "substituir"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "21-25",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 35: conteúdo autoral conferido com a aula e o lesson plan oficial individual da Aula 25. O lesson plan define Make Associations, adotado aqui como fazer associações; o review agregado 25–29 informa Cooperate por inconsistência editorial. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 25,
+    "slug": "lesson-25",
+    "position": 5,
+    "title": "Watch Out!",
+    "title_pt": "Cuidado!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-25-watch-out/3431138.html",
+    "grammar_tag": "Should, ought to e avisos",
+    "focus_points": ["should + verbo", "ought to + verbo", "avisos e recomendações"],
+    "story_note": "Anna conhece Dan e usa um jogo no celular para encontrar símbolos dos Estados Unidos e aprender fatos sobre presidentes nos memoriais de Washington.",
+    "lead": "Um quase acidente ensina a diferença entre alertar alguém agora e recomendar uma ação mais segura para depois.",
+    "warmup_prompt": "Give one immediate warning and one recommendation for a visitor using should or ought to.",
+    "listening_focus": "Diferencie o aviso urgente Watch out! dos conselhos com should e ought to, e associe símbolos aos lugares.",
+    "goals": [
+      "Dar conselho com **should + verbo base**.",
+      "Fazer recomendações com **ought to + verbo base**.",
+      "Usar **Watch out!** e **Be careful!** como avisos imediatos.",
+      "Criar associações entre símbolos, lugares e fatos para lembrar informações."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Should: conselho e recomendação",
+        "why": "Use **should + verbo base** para dizer que uma ação é uma boa ideia.",
+        "warning": "Should não recebe *to*: *should be*, nunca *should to be*.",
+        "table_head": ["Forma", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["afirmativa", "should + base", "You should be more careful."]},
+          {"position": 1, "cells": ["negativa", "should not + base", "You should not look at the phone while walking."]},
+          {"position": 2, "cells": ["pergunta", "Should + sujeito + base?", "Should I play this game?"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Ought to: outra forma de aconselhar",
+        "why": "**Ought to + verbo base** tem sentido próximo de should e é útil para uma recomendação.",
+        "warning": "Aqui o *to* faz parte da estrutura: *ought to buy*, não *ought buy* nem *ought to buying*.",
+        "table_head": ["Intenção", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["produto", "ought to buy", "You ought to buy the app."]},
+          {"position": 1, "cells": ["visita", "ought to visit", "You ought to visit the memorial."]},
+          {"position": 2, "cells": ["cuidado", "ought to pay attention", "Players ought to pay attention."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Aviso imediato ou conselho",
+        "why": "Use um imperativo curto para perigo imediato; use should ou ought to para orientar uma escolha.",
+        "warning": "Watch out não descreve a recomendação inteira: depois do alerta, explique o risco ou o comportamento esperado.",
+        "table_head": ["Situação", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["perigo agora", "Watch out!", "Watch out! There's a person ahead."]},
+          {"position": 1, "cells": ["cuidado agora", "Be careful!", "Be careful near the street."]},
+          {"position": 2, "cells": ["próxima escolha", "should / ought to", "You should look up from your phone."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "Watch out!", "text_pt": "Cuidado!", "note": "Aviso urgente e direto."},
+      {"position": 1, "text_en": "You should be more careful.", "text_pt": "Você deveria ter mais cuidado.", "note": "Should oferece conselho após o perigo."},
+      {"position": 2, "text_en": "You ought to buy the app.", "text_pt": "Você deveria comprar o aplicativo.", "note": "Ought to recomenda um produto."},
+      {"position": 3, "text_en": "What kind of game is it?", "text_pt": "Que tipo de jogo é esse?", "note": "Pergunta para classificar algo novo."},
+      {"position": 4, "text_en": "Good luck to you too!", "text_pt": "Boa sorte para você também!", "note": "Resposta cordial antes de continuar o jogo."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "watch out", "ipa": "/wɑːtʃ aʊt/", "translation_pt": "cuidado", "example_en": "Watch out! Someone is ahead."},
+      {"position": 1, "term": "careful", "ipa": "/ˈkerfəl/", "translation_pt": "cuidadoso", "example_en": "You should be more careful."},
+      {"position": 2, "term": "scavenger hunt", "ipa": "/ˈskævəndʒər hʌnt/", "translation_pt": "caça ao tesouro", "example_en": "The game is like a scavenger hunt."},
+      {"position": 3, "term": "symbol", "ipa": "/ˈsɪmbəl/", "translation_pt": "símbolo", "example_en": "Find an American symbol."},
+      {"position": 4, "term": "point", "ipa": "/pɔɪnt/", "translation_pt": "ponto", "example_en": "The flag is worth sixty points."},
+      {"position": 5, "term": "memorial", "ipa": "/məˈmɔːriəl/", "translation_pt": "memorial", "example_en": "Anna visits the Jefferson Memorial."},
+      {"position": 6, "term": "president", "ipa": "/ˈprezɪdənt/", "translation_pt": "presidente", "example_en": "The game teaches facts about a president."},
+      {"position": 7, "term": "bald eagle", "ipa": "/ˌbɔːld ˈiːɡəl/", "translation_pt": "águia-careca", "example_en": "Dan is looking for the bald eagle."},
+      {"position": 8, "term": "flag", "ipa": "/flæɡ/", "translation_pt": "bandeira", "example_en": "Anna finds an American flag."},
+      {"position": 9, "term": "association", "ipa": "/əˌsoʊsiˈeɪʃən/", "translation_pt": "associação", "example_en": "An association helps you remember a fact."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "ought to → /ˈɔːtə/", "explanation": "Na fala rápida, o /t/ de ought e o de to se juntam; não acrescente uma sílaba entre eles."},
+      {"position": 1, "label": "should /ʃʊd/", "explanation": "O l não é pronunciado; a negativa shouldn't preserva o som inicial /ʃ/."},
+      {"position": 2, "label": "watch out", "explanation": "Ligue a consoante final de watch à vogal de out e dê força ao aviso inteiro."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 25 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/08/16/c98eed28-bb2e-4055-9d08-6f7834b85aa9_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; o jogo fictício, imagens, símbolos gráficos e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 149,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 4, "end_seconds": 19, "speaker": "Anna", "text_en": "This city has many monuments and memorials. Today I am visiting the ones built in memory of our Presidents.", "text_pt": "Esta cidade tem muitos monumentos e memoriais. Hoje estou visitando os construídos em memória de nossos presidentes."},
+          {"position": 1, "start_seconds": 21, "end_seconds": 35, "speaker": "Anna and Dan", "text_en": "Watch out! Sorry! I didn't see you. You should be more careful.", "text_pt": "Cuidado! Desculpe! Eu não vi você. Você deveria ter mais cuidado."},
+          {"position": 2, "start_seconds": 43, "end_seconds": 58, "speaker": "Dan", "text_en": "You have to find things that aren't really there. They're in your phone.", "text_pt": "Você precisa encontrar coisas que não estão realmente ali. Elas estão no seu celular."},
+          {"position": 3, "start_seconds": 65, "end_seconds": 82, "speaker": "Dan", "text_en": "When you find an American symbol, you win points and a Fun Fact about a U.S. President.", "text_pt": "Quando encontra um símbolo americano, você ganha pontos e um fato curioso sobre um presidente dos Estados Unidos."},
+          {"position": 4, "start_seconds": 95, "end_seconds": 111, "speaker": "Dan", "text_en": "You ought to buy the app right now. It's called Catch Americana.", "text_pt": "Você deveria comprar o aplicativo agora. Ele se chama Catch Americana."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete o conselho: You ____ be more careful.", "hint": null, "explanation": "Should recebe diretamente o verbo base be.", "hints": ["É uma recomendação.", "Não use to depois do modal."], "answers": ["should"], "options": ["should", "should to", "are should"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "You ought `____` buy the app.", "hint": null, "explanation": "Ought exige to antes do verbo base.", "hints": ["A estrutura tem duas palavras antes do verbo.", "Falta a partícula que acompanha ought."], "answers": ["to"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Há perigo imediato. Qual expressão deve vir primeiro?", "hint": null, "explanation": "Watch out! é um aviso urgente; should vem em seguida como orientação.", "hints": ["A pessoa precisa reagir agora.", "Escolha o imperativo curto."], "answers": ["Watch out!"], "options": ["Watch out!", "You should perhaps.", "What kind of game?"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Transforme em recomendação com should: Buy the app.", "hint": null, "explanation": "Acrescente sujeito + should antes do verbo base.", "hints": ["Comece com You.", "Should vem antes de buy."], "answers": ["You should buy the app"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Anna está visitando no início?", "hint": null, "explanation": "Ela visita monumentos e memoriais dedicados a presidentes.", "hints": ["Escute monuments and memorials.", "Eles foram construídos in memory of Presidents."], "answers": ["Monumentos e memoriais de presidentes."], "options": ["Monumentos e memoriais de presidentes.", "Food trucks internacionais.", "Praias e parques de diversões."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Por que Anna diz Watch out!?", "hint": null, "explanation": "Dan não estava olhando e quase esbarra nela.", "hints": ["Dan responde I didn't see you.", "O problema é falta de atenção."], "answers": ["Dan não a viu enquanto caminhava."], "options": ["Dan não a viu enquanto caminhava.", "O aplicativo parou de funcionar.", "Uma águia voou sobre o memorial."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a recomendação de Dan sobre o aplicativo.", "hint": null, "explanation": "A frase usa ought to + buy.", "hints": ["Começa com You ought to.", "Termina com right now."], "answers": ["You ought to buy the app right now.", "You ought to buy the app right now"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que a pessoa ganha ao encontrar um símbolo americano?", "hint": null, "explanation": "O jogo oferece pontos e um fato curioso sobre um presidente.", "hints": ["São duas recompensas.", "Uma delas é Fun Fact."], "answers": ["Pontos e um fato sobre um presidente."], "options": ["Pontos e um fato sobre um presidente.", "Uma carteira de motorista.", "Comida e troco."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Avisos e recomendações para um visitante", "instructions": "Write 6 to 9 sentences in English advising a visitor who is using a phone while walking. Include two immediate warnings, two recommendations with should, one with ought to, and one association that helps remember a place.", "min_words": 60, "min_sentences": 6, "requirements": [
+        {"label": "avisos", "terms": ["watch out", "be careful"]},
+        {"label": "recomendações", "terms": ["should", "ought to"]},
+        {"label": "associação", "terms": ["symbol", "reminds me", "associate", "remember"]}
+      ]}
+    ],
+    "learning_strategy": "fazer associações"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 36: conteúdo autoral conferido com a aula, o guia oficial de lesson plans e a revisão oficial 25–29 do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 26,
+    "slug": "lesson-26",
+    "position": 1,
+    "title": "This Game Is Fun!",
+    "title_pt": "Este jogo é divertido!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-26-this-game-is-fun/3457248.html",
+    "grammar_tag": "Ought to + passado irregular",
+    "focus_points": ["ought to + verbo", "find/found, win/won e know/knew", "símbolos e fatos sobre presidentes"],
+    "story_note": "Anna continua o jogo Catch Americana, associa símbolos aos presidentes e percebe que também precisa prestar atenção por onde anda.",
+    "lead": "O jogo liga símbolos a fatos históricos enquanto o passado irregular conta o que Anna encontrou e ganhou.",
+    "warmup_prompt": "Associate one national symbol with a place or historical person and explain your choice.",
+    "listening_focus": "Ouça found, won e didn't know e identifique qual símbolo aparece em cada memorial.",
+    "goals": [
+      "Usar **ought to + verbo base** para recomendações.",
+      "Narrar descobertas com os passados irregulares **found**, **won** e **knew**.",
+      "Formar perguntas e negativas passadas com **did** e verbo base.",
+      "Criar associações entre símbolos e fatos para apoiar a memória."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Ought to para uma recomendação",
+        "why": "Use **ought to + verbo base** quando uma ação é aconselhável.",
+        "warning": "Ought exige to, mas o verbo seguinte permanece na forma base: *ought to be*.",
+        "table_head": ["Sujeito", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["I", "ought to + base", "I ought to be more careful."]},
+          {"position": 1, "cells": ["you", "ought to + base", "You ought to look ahead."]},
+          {"position": 2, "cells": ["players", "ought to + base", "Players ought to watch where they walk."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Passados irregulares do jogo",
+        "why": "Alguns verbos mudam de forma e não recebem -ed no simple past.",
+        "warning": "Não crie *finded*, *winned* ou *knowed*; memorize as formas em pares.",
+        "table_head": ["Base", "Passado", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["find", "found", "I found Uncle Sam."]},
+          {"position": 1, "cells": ["win", "won", "I won forty points."]},
+          {"position": 2, "cells": ["know", "knew", "I knew the answer."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Did em perguntas e negativas",
+        "why": "Use **Did + sujeito + verbo base?** e **didn't + verbo base** para o passado.",
+        "warning": "Depois de did, volte à forma base: *Did you find?*, não *Did you found?*.",
+        "table_head": ["Tipo", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["pergunta", "Did … find?", "Did you find any symbols?"]},
+          {"position": 1, "cells": ["resposta", "Yes, … did", "Yes, I did."]},
+          {"position": 2, "cells": ["negativa", "didn't + base", "I didn't know that."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "I found Uncle Sam.", "text_pt": "Encontrei o Tio Sam.", "note": "Found é passado de find."},
+      {"position": 1, "text_en": "I won another forty points.", "text_pt": "Ganhei mais quarenta pontos.", "note": "Won é passado de win."},
+      {"position": 2, "text_en": "I didn't know that.", "text_pt": "Eu não sabia disso.", "note": "Depois de didn't, know fica na forma base."},
+      {"position": 3, "text_en": "Did you find the bald eagle?", "text_pt": "Você encontrou a águia-careca?", "note": "Did abre a pergunta passada."},
+      {"position": 4, "text_en": "I ought to be more careful.", "text_pt": "Eu deveria ter mais cuidado.", "note": "Recomendação que Anna faz a si mesma."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "wrestler", "ipa": "/ˈreslər/", "translation_pt": "lutador", "example_en": "Abraham Lincoln was a wrestler."},
+      {"position": 1, "term": "freedom", "ipa": "/ˈfriːdəm/", "translation_pt": "liberdade", "example_en": "Lincoln wanted freedom for all people."},
+      {"position": 2, "term": "plane", "ipa": "/pleɪn/", "translation_pt": "avião", "example_en": "Roosevelt flew in a plane."},
+      {"position": 3, "term": "symbol", "ipa": "/ˈsɪmbəl/", "translation_pt": "símbolo", "example_en": "Anna found another symbol."},
+      {"position": 4, "term": "point", "ipa": "/pɔɪnt/", "translation_pt": "ponto", "example_en": "She won forty points."},
+      {"position": 5, "term": "memorial", "ipa": "/məˈmɔːriəl/", "translation_pt": "memorial", "example_en": "This is the Lincoln Memorial."},
+      {"position": 6, "term": "Statue of Liberty", "ipa": "/ˌstætʃuː əv ˈlɪbərti/", "translation_pt": "Estátua da Liberdade", "example_en": "The Statue of Liberty is a symbol."},
+      {"position": 7, "term": "bald eagle", "ipa": "/ˌbɔːld ˈiːɡəl/", "translation_pt": "águia-careca", "example_en": "They search for the bald eagle."},
+      {"position": 8, "term": "association", "ipa": "/əˌsoʊsiˈeɪʃən/", "translation_pt": "associação", "example_en": "A clear association supports memory."},
+      {"position": 9, "term": "careful", "ipa": "/ˈkerfəl/", "translation_pt": "cuidadoso", "example_en": "Anna ought to be careful."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "ought to /ˈɔːtə/", "explanation": "Na fala rápida, os sons de t se juntam; mantenha as duas palavras na escrita."},
+      {"position": 1, "label": "found /faʊnd/ × won /wʌn/", "explanation": "Diferencie o ditongo /aʊ/ de found da vogal curta /ʌ/ de won."},
+      {"position": 2, "label": "look out", "explanation": "Ligue o /k/ final à vogal de out e dê força ao aviso."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 26 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/08/21/5085086e-5053-401a-9f9c-826aabe8abcb_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; marcas, imagens e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 122,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 3, "end_seconds": 17, "speaker": "Anna", "text_en": "This is the Roosevelt Memorial. Where is the symbol?", "text_pt": "Este é o Memorial Roosevelt. Onde está o símbolo?"},
+          {"position": 1, "start_seconds": 20, "end_seconds": 36, "speaker": "Anna", "text_en": "I found Uncle Sam and I won another forty points!", "text_pt": "Encontrei o Tio Sam e ganhei mais quarenta pontos!"},
+          {"position": 2, "start_seconds": 40, "end_seconds": 56, "speaker": "Voice", "text_en": "Abraham Lincoln was a great wrestler!", "text_pt": "Abraham Lincoln foi um grande lutador!"},
+          {"position": 3, "start_seconds": 57, "end_seconds": 74, "speaker": "Anna", "text_en": "I didn't know that. Lincoln wanted freedom for all people.", "text_pt": "Eu não sabia disso. Lincoln queria liberdade para todas as pessoas."},
+          {"position": 4, "start_seconds": 78, "end_seconds": 94, "speaker": "Anna", "text_en": "Sorry. Hey, it's you! Now, I should be more careful.", "text_pt": "Desculpe. Ei, é você! Agora eu deveria ter mais cuidado."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete a recomendação: I ought ____ more careful.", "hint": null, "explanation": "Ought recebe to e depois o verbo base be.", "hints": ["Faltam duas palavras.", "A estrutura é ought to + base."], "answers": ["to be"], "options": ["to be", "be", "to being"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Yesterday, I `____` Uncle Sam and won forty points.", "hint": null, "explanation": "Found é o passado irregular de find.", "hints": ["A frase está no passado.", "Não use finded."], "answers": ["found"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Qual pergunta passada está correta?", "hint": null, "explanation": "Depois de Did, find retorna à forma base.", "hints": ["Did já marca o passado.", "Não use found depois do auxiliar."], "answers": ["Did you find the symbol?"], "options": ["Did you find the symbol?", "Did you found the symbol?", "Do you found the symbol?"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Passe para o passado negativo: I do not know that.", "hint": null, "explanation": "Did not marca o passado e know permanece na forma base.", "hints": ["Troque do not por did not.", "Não mude know para knew depois de did."], "answers": ["I did not know that", "I didn't know that"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual símbolo Anna encontra no Roosevelt Memorial?", "hint": null, "explanation": "Ela encontra Uncle Sam e ganha quarenta pontos.", "hints": ["Escute found.", "O nome vem antes de won."], "answers": ["Tio Sam"], "options": ["Tio Sam", "águia-careca", "bandeira"]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual fato sobre Lincoln o áudio apresenta?", "hint": null, "explanation": "A voz do jogo diz que Lincoln foi um grande lutador.", "hints": ["Escute great.", "A profissão esportiva começa com w."], "answers": ["Ele foi um grande lutador."], "options": ["Ele foi um grande lutador.", "Ele foi o primeiro presidente a voar.", "Ele inventou o jogo."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva o que Anna encontrou e ganhou.", "hint": null, "explanation": "A frase reúne os passados found e won.", "hints": ["Começa com I found Uncle Sam.", "Termina com forty points."], "answers": ["I found Uncle Sam and I won another forty points!", "I found Uncle Sam and I won another forty points."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que conselho Anna dá a si mesma depois do aviso?", "hint": null, "explanation": "Ela reconhece que deveria ter mais cuidado.", "hints": ["Escute should.", "A qualidade é careful."], "answers": ["Ela deveria ter mais cuidado."], "options": ["Ela deveria ter mais cuidado.", "Ela deveria parar de aprender história.", "Ela deveria apagar o jogo."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Símbolos e fatos que eu lembro", "instructions": "Write 6 to 9 sentences in English about three symbols you found in a game or visit. Use found, won, knew or didn't know, explain two associations and give one recommendation with ought to.", "min_words": 60, "min_sentences": 6, "requirements": [
+        {"label": "passado irregular", "terms": ["found", "won", "knew", "didn't know"]},
+        {"label": "associação", "terms": ["symbol", "reminds me", "works well", "associate"]},
+        {"label": "recomendação", "terms": ["ought to"]}
+      ]}
+    ],
+    "learning_strategy": "fazer associações"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 36: conteúdo autoral conferido com a aula, o guia oficial de lesson plans e a revisão oficial 25–29 do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 27,
+    "slug": "lesson-27",
+    "position": 2,
+    "title": "I Can't Come In",
+    "title_pt": "Não posso ir trabalhar",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-27-i-cant-come-in/3457316.html",
+    "grammar_tag": "Passado irregular + saúde e conselhos",
+    "focus_points": ["felt, cut, built, had, slept e drank", "perguntas sobre sintomas", "should e imperativos para conselhos"],
+    "story_note": "Anna avisa à chefe que está doente e conversa com a médica para separar atividades passadas, sintomas atuais e recomendações de recuperação.",
+    "lead": "Uma consulta eficiente organiza evidências: o que aconteceu ontem, quais sintomas existem agora e o que fazer em seguida.",
+    "warmup_prompt": "Describe two symptoms and give two safe, general recommendations for rest and hydration.",
+    "listening_focus": "Separe os verbos irregulares do relato de ontem das perguntas e instruções médicas no presente.",
+    "goals": [
+      "Usar formas irregulares comuns no simple past.",
+      "Perguntar sobre sintomas com **Do you have…?** e sobre início com **When did…?**.",
+      "Dar recomendações gerais com **should** e imperativos.",
+      "Analisar informações relevantes e descartar detalhes que não ajudam a responder à pergunta."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Passados irregulares em grupos",
+        "why": "Agrupar os verbos por contexto ajuda a memorizar formas que não recebem -ed.",
+        "warning": "Cut não muda na escrita; o tempo é indicado pelo contexto: yesterday I cut wood.",
+        "table_head": ["Base", "Passado", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["feel / have", "felt / had", "I felt fine. I had the flu."]},
+          {"position": 1, "cells": ["cut / build", "cut / built", "I cut wood and built a fire."]},
+          {"position": 2, "cells": ["sleep / drink", "slept / drank", "I slept and drank water."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Perguntas sobre sintomas e início",
+        "why": "Use **Do you have…?** para um sintoma atual e **When did you start…?** para o começo passado.",
+        "warning": "Depois de did, start fica na forma base; não use *did you started*.",
+        "table_head": ["Informação", "Pergunta", "Resposta"],
+        "rows": [
+          {"position": 0, "cells": ["sintoma", "Do you have a cough?", "Yes, I do."]},
+          {"position": 1, "cells": ["estado", "How do you feel?", "I do not feel well."]},
+          {"position": 2, "cells": ["início", "When did you start feeling sick?", "This morning."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Conselho com should e imperativo",
+        "why": "Use **should + verbo base** para uma recomendação e o imperativo para uma instrução direta.",
+        "warning": "Estas frases praticam linguagem, não substituem avaliação médica profissional.",
+        "table_head": ["Tom", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["recomendação", "should + base", "You should call your doctor."]},
+          {"position": 1, "cells": ["instrução positiva", "verbo base", "Drink lots of water."]},
+          {"position": 2, "cells": ["instrução negativa", "don't + base", "Don't go to work for two days."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "I can't come to work today.", "text_pt": "Não posso ir trabalhar hoje.", "note": "Aviso breve sobre ausência."},
+      {"position": 1, "text_en": "Yesterday I felt fine.", "text_pt": "Ontem eu me sentia bem.", "note": "Felt é passado de feel."},
+      {"position": 2, "text_en": "Do you have a sore throat?", "text_pt": "Você está com dor de garganta?", "note": "Pergunta sobre sintoma atual."},
+      {"position": 3, "text_en": "You should call your doctor.", "text_pt": "Você deveria ligar para sua médica.", "note": "Should formula uma recomendação."},
+      {"position": 4, "text_en": "Rest in bed and get lots of sleep.", "text_pt": "Descanse na cama e durma bastante.", "note": "Dois imperativos positivos."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "sick", "ipa": "/sɪk/", "translation_pt": "doente", "example_en": "Anna thinks she is sick."},
+      {"position": 1, "term": "flu", "ipa": "/fluː/", "translation_pt": "gripe", "example_en": "Her boss had the flu."},
+      {"position": 2, "term": "sore throat", "ipa": "/ˌsɔːr ˈθroʊt/", "translation_pt": "dor de garganta", "example_en": "Anna has a sore throat."},
+      {"position": 3, "term": "cough", "ipa": "/kɔːf/", "translation_pt": "tosse; tossir", "example_en": "Do you have a cough?"},
+      {"position": 4, "term": "fever", "ipa": "/ˈfiːvər/", "translation_pt": "febre", "example_en": "The doctor asks about a fever."},
+      {"position": 5, "term": "thermometer", "ipa": "/θərˈmɑːmətər/", "translation_pt": "termômetro", "example_en": "Use the thermometer again."},
+      {"position": 6, "term": "degree", "ipa": "/dɪˈɡriː/", "translation_pt": "grau", "example_en": "The thermometer shows one hundred degrees."},
+      {"position": 7, "term": "rest", "ipa": "/rest/", "translation_pt": "descansar; descanso", "example_en": "Get lots of rest."},
+      {"position": 8, "term": "symptom", "ipa": "/ˈsɪmptəm/", "translation_pt": "sintoma", "example_en": "Describe each symptom clearly."},
+      {"position": 9, "term": "co-worker", "ipa": "/ˈkoʊˌwɜːrkər/", "translation_pt": "colega de trabalho", "example_en": "Anna does not want to make her co-workers sick."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "Wh-question descendente", "explanation": "Em What is wrong? e When did…?, a voz normalmente desce no fim."},
+      {"position": 1, "label": "Yes/No question ascendente", "explanation": "Em Do you have a cough?, a voz pode subir para solicitar confirmação."},
+      {"position": 2, "label": "cough /kɔːf/", "explanation": "As letras gh representam /f/ nesta palavra; não pronuncie um /g/."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 27 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/08/30/4b0918a8-33b1-4b9d-8d88-f54d8a1be9ea_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 201,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 5, "end_seconds": 22, "speaker": "Anna", "text_en": "I am sick. Right now, I'm going to call my boss and tell her I cannot come in to work.", "text_pt": "Estou doente. Agora vou ligar para minha chefe e dizer que não posso ir trabalhar."},
+          {"position": 1, "start_seconds": 31, "end_seconds": 49, "speaker": "Anna", "text_en": "Yesterday I felt fine. In the morning, I painted for hours. In the afternoon, I cut wood.", "text_pt": "Ontem eu estava bem. De manhã pintei por horas. À tarde cortei madeira."},
+          {"position": 2, "start_seconds": 66, "end_seconds": 84, "speaker": "Caty", "text_en": "I was sick last week, too. I had the flu. I slept a lot and I drank a lot of water.", "text_pt": "Eu também estive doente na semana passada. Tive gripe. Dormi muito e bebi muita água."},
+          {"position": 3, "start_seconds": 104, "end_seconds": 122, "speaker": "Dr. Bennett", "text_en": "Do you have a sore throat? Do you have a cough?", "text_pt": "Você está com dor de garganta? Está com tosse?"},
+          {"position": 4, "start_seconds": 151, "end_seconds": 171, "speaker": "Dr. Bennett", "text_en": "I want you to drink lots of water. Rest in bed and get lots of sleep.", "text_pt": "Quero que você beba muita água. Descanse na cama e durma bastante."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: Yesterday I ____ fine, but my boss ____ the flu last week.", "hint": null, "explanation": "Os passados irregulares são felt e had.", "hints": ["Feel muda de forma.", "Have também é irregular."], "answers": ["felt; had"], "options": ["felt; had", "feeled; haved", "feel; has"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "When did you `____` feeling sick?", "hint": null, "explanation": "Depois de did, use a forma base start.", "hints": ["Did já marca o passado.", "Não acrescente -ed."], "answers": ["start"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Qual pergunta investiga um sintoma atual?", "hint": null, "explanation": "Do you have…? pergunta se o sintoma existe agora.", "hints": ["Procure uma parte do corpo.", "A estrutura começa com Do you have."], "answers": ["Do you have a sore throat?"], "options": ["Do you have a sore throat?", "Did you built a fire?", "You should a cough?"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Transforme em conselho com should: Call your doctor.", "hint": null, "explanation": "Sujeito + should + verbo base produz uma recomendação.", "hints": ["Comece com You.", "Should vem antes de call."], "answers": ["You should call your doctor"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Por que Anna liga para a chefe?", "hint": null, "explanation": "Ela está doente e não pode ir trabalhar.", "hints": ["Escute cannot come in.", "A razão aparece antes da ligação."], "answers": ["Porque está doente e não pode ir trabalhar."], "options": ["Porque está doente e não pode ir trabalhar.", "Porque passou na prova de direção.", "Porque quer comprar frutos do mar."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Caty fez quando teve gripe?", "hint": null, "explanation": "Ela dormiu muito e bebeu muita água.", "hints": ["Escute slept.", "O segundo verbo é drank."], "answers": ["Dormiu muito e bebeu muita água."], "options": ["Dormiu muito e bebeu muita água.", "Cortou madeira e fez fogo.", "Trabalhou por dois dias."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva as duas perguntas da médica sobre os sintomas.", "hint": null, "explanation": "As perguntas usam Do you have + sintoma.", "hints": ["A primeira termina com sore throat.", "A segunda termina com cough."], "answers": ["Do you have a sore throat? Do you have a cough?", "Do you have a sore throat? And do you have a cough?"]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais recomendações a médica dá no trecho final?", "hint": null, "explanation": "Ela recomenda água, repouso na cama e sono.", "hints": ["Escute drink lots of water.", "Depois aparecem rest e sleep."], "answers": ["Beber água, descansar na cama e dormir bastante."], "options": ["Beber água, descansar na cama e dormir bastante.", "Dirigir e trabalhar normalmente.", "Tomar café e fazer exercícios."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Telefonema sobre saúde", "instructions": "Write a 7-to-10-sentence dialogue in English between a patient and a health professional. Include three symptoms, two Wh or Yes/No questions, two irregular past verbs and two general recommendations.", "min_words": 65, "min_sentences": 7, "requirements": [
+        {"label": "sintomas", "terms": ["sore throat", "cough", "fever", "sick"]},
+        {"label": "passado irregular", "terms": ["felt", "had", "slept", "drank", "built"]},
+        {"label": "recomendação", "terms": ["should", "drink", "rest", "sleep"]}
+      ]}
+    ],
+    "learning_strategy": "analisar informações"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 36: conteúdo autoral conferido com a aula, o guia oficial de lesson plans e a revisão oficial 25–29 do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 28,
+    "slug": "lesson-28",
+    "position": 3,
+    "title": "I Passed It!",
+    "title_pt": "Eu passei!",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-28-i-passed-it/3487865.html",
+    "grammar_tag": "Imperativos + was e were",
+    "focus_points": ["imperativo afirmativo e negativo", "was / were", "razões, desculpas e self-talk"],
+    "story_note": "Anna conta como falhou na primeira prova de direção, praticou e passou na segunda enquanto relembra as instruções do examinador.",
+    "lead": "Instruções curtas controlam o carro; was e were explicam como as pessoas e o trânsito estavam durante a prova.",
+    "warmup_prompt": "Give three safe driving instructions and describe how you felt during a difficult test.",
+    "listening_focus": "Separe os imperativos do examinador, as desculpas de Anna e as descrições com was e were.",
+    "goals": [
+      "Dar instruções com o imperativo afirmativo e negativo.",
+      "Usar **was** e **were** para estados e situações no passado.",
+      "Pedir desculpas e apresentar uma razão simples.",
+      "Usar self-talk curto para orientar uma tarefa sob pressão."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Imperativo afirmativo",
+        "why": "Comece pela forma base do verbo para dar uma instrução direta; please pode tornar o pedido mais cortês.",
+        "warning": "Não acrescente sujeito ou to: *Start the car*, não *You to start the car*.",
+        "table_head": ["Intenção", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["iniciar", "base verb", "Start the car."]},
+          {"position": 1, "cells": ["pedir", "please + base", "Please turn left."]},
+          {"position": 2, "cells": ["segurança", "base + complemento", "Keep your hands on the wheel."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Imperativo negativo",
+        "why": "Use **don't + verbo base** para dizer que uma ação não deve ser feita.",
+        "warning": "Não use doesn't no imperativo; a forma é sempre don't para qualquer pessoa.",
+        "table_head": ["Risco", "Instrução", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["acelerar", "don't push", "Don't push the gas pedal."]},
+          {"position": 1, "cells": ["virar cedo", "don't turn", "Don't turn now."]},
+          {"position": 2, "cells": ["pânico", "don't worry", "Don't worry; look first."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Was e were no passado",
+        "why": "Use **was** com I/he/she/it e **were** com you/we/they.",
+        "warning": "Com BE no passado, não use did: diga *Was she nervous?*, não *Did she was nervous?*.",
+        "table_head": ["Sujeito", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["I / Anna", "was", "Anna was nervous."]},
+          {"position": 1, "cells": ["you / cars", "were", "There were cars in the street."]},
+          {"position": 2, "cells": ["negativa", "was not / were not", "The test was not easy."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "Please start the car.", "text_pt": "Por favor, ligue o carro.", "note": "Imperativo cortês."},
+      {"position": 1, "text_en": "Stop pushing the gas pedal!", "text_pt": "Pare de pisar no acelerador!", "note": "Instrução urgente."},
+      {"position": 2, "text_en": "Anna was really nervous.", "text_pt": "Anna estava muito nervosa.", "note": "Was descreve o estado passado."},
+      {"position": 3, "text_en": "There were cars in the street.", "text_pt": "Havia carros na rua.", "note": "Were concorda com cars."},
+      {"position": 4, "text_en": "I'm sorry. I was afraid.", "text_pt": "Desculpe. Eu estava com medo.", "note": "Desculpa seguida de uma razão."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "driver's license", "ipa": "/ˈdraɪvərz ˈlaɪsəns/", "translation_pt": "carteira de motorista", "example_en": "Anna got her driver's license."},
+      {"position": 1, "term": "driving test", "ipa": "/ˈdraɪvɪŋ test/", "translation_pt": "prova de direção", "example_en": "She passed the driving test."},
+      {"position": 2, "term": "seatbelt", "ipa": "/ˈsiːtbelt/", "translation_pt": "cinto de segurança", "example_en": "Buckle your seatbelt."},
+      {"position": 3, "term": "engine", "ipa": "/ˈendʒɪn/", "translation_pt": "motor", "example_en": "Listen to the engine."},
+      {"position": 4, "term": "gas pedal", "ipa": "/ˈɡæs pedəl/", "translation_pt": "pedal do acelerador", "example_en": "Do not push the gas pedal."},
+      {"position": 5, "term": "brake", "ipa": "/breɪk/", "translation_pt": "freio; frear", "example_en": "Brake before the car gets close."},
+      {"position": 6, "term": "wheel", "ipa": "/wiːl/", "translation_pt": "volante; roda", "example_en": "Keep your hands on the wheel."},
+      {"position": 7, "term": "traffic", "ipa": "/ˈtræfɪk/", "translation_pt": "trânsito", "example_en": "Washington traffic made Anna nervous."},
+      {"position": 8, "term": "nervous", "ipa": "/ˈnɜːrvəs/", "translation_pt": "nervoso", "example_en": "Anna was nervous."},
+      {"position": 9, "term": "self-talk", "ipa": "/ˈself tɔːk/", "translation_pt": "fala consigo mesmo", "example_en": "Self-talk helps Anna remember the steps."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "Imperativo com verbo forte", "explanation": "Destaque o verbo de ação em Start, Stop, Turn e Brake para tornar a instrução clara."},
+      {"position": 1, "label": "well prolongado", "explanation": "Alongar well pode sinalizar hesitação antes de uma explicação: Well… no."},
+      {"position": 2, "label": "was /wəz/ e were /wər/", "explanation": "Em fala rápida, as vogais podem reduzir; o sujeito ajuda a identificar a forma."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 28 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/09/08/a087a1f8-4939-4f40-8612-e99605e88caf_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 198,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 4, "end_seconds": 21, "speaker": "Anna", "text_en": "This is my driver's license! I passed my driving test! Today, I rented a car.", "text_pt": "Esta é minha carteira de motorista! Passei na prova de direção! Hoje aluguei um carro."},
+          {"position": 1, "start_seconds": 28, "end_seconds": 46, "speaker": "Anna", "text_en": "I was really nervous driving in Washington, D.C. traffic!", "text_pt": "Eu estava muito nervosa dirigindo no trânsito de Washington!"},
+          {"position": 2, "start_seconds": 55, "end_seconds": 73, "speaker": "John and Anna", "text_en": "Please start the car. Okay, Anna, start the car. Good job, Anna.", "text_pt": "Por favor, ligue o carro. Certo, Anna, ligue o carro. Bom trabalho, Anna."},
+          {"position": 3, "start_seconds": 91, "end_seconds": 109, "speaker": "John", "text_en": "Please, stop pushing the gas pedal! Okay, when you are ready, turn.", "text_pt": "Por favor, pare de pisar no acelerador! Certo, quando estiver pronta, vire."},
+          {"position": 4, "start_seconds": 145, "end_seconds": 164, "speaker": "John", "text_en": "You were driving too slow! Anna, stay on the street! Hands on the wheel, Anna.", "text_pt": "Você estava dirigindo devagar demais! Anna, fique na rua! Mãos no volante."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Qual instrução afirmativa está correta?", "hint": null, "explanation": "O imperativo começa com o verbo base Start.", "hints": ["Não use sujeito.", "Não acrescente to."], "answers": ["Start the car."], "options": ["Start the car.", "You to start the car.", "Starts the car."]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "`____` push the gas pedal now.", "hint": null, "explanation": "Don't + verbo base forma o imperativo negativo.", "hints": ["A instrução proíbe a ação.", "Use a contração de do not."], "answers": ["Don't", "Do not"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Complete: Anna ____ nervous, and there ____ cars in the street.", "hint": null, "explanation": "Anna usa was; cars, plural, usa were.", "hints": ["A primeira lacuna tem sujeito singular.", "A segunda apresenta um plural."], "answers": ["was; were"], "options": ["was; were", "were; was", "did; was"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Transforme em instrução negativa: Push the gas pedal.", "hint": null, "explanation": "Don't antes do verbo base cria a proibição.", "hints": ["Comece com Don't.", "Mantenha push na forma base."], "answers": ["Don't push the gas pedal", "Do not push the gas pedal"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Anna mostra no início?", "hint": null, "explanation": "Ela mostra a carteira de motorista que conseguiu após passar.", "hints": ["Escute driver's license.", "O objeto confirma que ela passou."], "answers": ["Sua carteira de motorista."], "options": ["Sua carteira de motorista.", "Um ingresso para o teatro.", "Uma foto do mercado."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Como Anna se sentia no trânsito?", "hint": null, "explanation": "Ela diz que estava really nervous.", "hints": ["Escute was.", "O adjetivo começa com n."], "answers": ["Muito nervosa."], "options": ["Muito nervosa.", "Completamente calma.", "Entediada."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva as instruções sobre o acelerador e a curva.", "hint": null, "explanation": "O examinador usa stop e turn em duas instruções.", "hints": ["A primeira contém gas pedal.", "A segunda termina com turn."], "answers": ["Please, stop pushing the gas pedal! Okay, when you are ready, turn.", "Please stop pushing the gas pedal. Okay, when you are ready, turn."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais duas instruções de segurança aparecem no último trecho?", "hint": null, "explanation": "John manda ficar na rua e manter as mãos no volante.", "hints": ["Escute stay.", "A segunda instrução menciona wheel."], "answers": ["Ficar na rua e manter as mãos no volante."], "options": ["Ficar na rua e manter as mãos no volante.", "Acelerar e fechar os olhos.", "Estacionar e sair do carro."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Uma prova difícil", "instructions": "Write 7 to 10 sentences in English about a practical test. Include four imperative instructions, two sentences with was or were, one apology with a reason, and one line of self-talk.", "min_words": 65, "min_sentences": 7, "requirements": [
+        {"label": "instruções", "terms": ["start", "stop", "look", "keep", "don't"]},
+        {"label": "passado de BE", "terms": ["was", "were"]},
+        {"label": "desculpa e self-talk", "terms": ["sorry", "because", "okay", "good job"]}
+      ]}
+    ],
+    "learning_strategy": "falar consigo mesmo"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 36: conteúdo autoral conferido com a aula, o guia oficial de lesson plans e a revisão oficial 25–29 do Level 1. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 29,
+    "slug": "lesson-29",
+    "position": 4,
+    "title": "A Long Time Ago",
+    "title_pt": "Há muito tempo",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-29-a-long-time-ago/3509519.html",
+    "grammar_tag": "Simple past + adjetivos e infinitivos",
+    "focus_points": ["simple past regular e irregular", "adjetivo antes do substantivo", "want e love seguidos de infinitivo"],
+    "story_note": "Anna e Marsha comparam sonhos de infância: Anna queria ser presidente e Marsha queria ser astronauta.",
+    "lead": "Lembranças de infância conectam verbos no passado, descrições com adjetivos e sonhos expressos por infinitivos.",
+    "warmup_prompt": "Describe what you were like as a child and name one job you wanted to have.",
+    "listening_focus": "Identifique as descrições de Anna e Marsha quando crianças e os verbos que apresentam seus sonhos.",
+    "goals": [
+      "Narrar lembranças com formas regulares e irregulares do simple past.",
+      "Colocar o adjetivo antes do substantivo que ele descreve.",
+      "Usar **wanted to** e **loved to** antes de um verbo base.",
+      "Personalizar o conteúdo relacionando os sonhos das personagens à própria infância."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "Simple past nas lembranças",
+        "why": "Use o simple past para contar ações e estados concluídos na infância.",
+        "warning": "Read tem a mesma grafia no presente e no passado, mas no passado é pronunciado /red/.",
+        "table_head": ["Verbo", "Passado", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["be", "was / were", "I was a serious child."]},
+          {"position": 1, "cells": ["play / study", "played / studied", "Marsha played and studied the stars."]},
+          {"position": 2, "cells": ["read", "read /red/", "Anna read serious books."]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Adjetivo antes do substantivo",
+        "why": "Em inglês, o adjetivo normalmente vem antes do substantivo e não muda no plural.",
+        "warning": "Não acrescente -s ao adjetivo: diga *serious books*, não *seriouses books*.",
+        "table_head": ["Descrição", "Ordem", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["pessoa", "adjetivo + child", "a tall, serious child"]},
+          {"position": 1, "cells": ["objeto", "adjetivo + books", "serious books"]},
+          {"position": 2, "cells": ["atividade", "adjetivo + games", "silly games"]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Sonhos com want e love",
+        "why": "Use **wanted to + verbo base** para um objetivo passado e **loved to + verbo base** para uma atividade apreciada.",
+        "warning": "O marcador to vem antes do verbo: *wanted to be*, não *wanted be*.",
+        "table_head": ["Ideia", "Estrutura", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["objetivo", "wanted to + base", "I wanted to be President."]},
+          {"position": 1, "cells": ["atividade", "loved to + base", "I loved to read serious books."]},
+          {"position": 2, "cells": ["sonho", "wanted to + base", "Marsha wanted to fly into outer space."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "When I was a little girl, I was a tall, serious child.", "text_pt": "Quando eu era pequena, era uma criança alta e séria.", "note": "When introduz uma fase concluída da vida."},
+      {"position": 1, "text_en": "I loved to read serious books.", "text_pt": "Eu adorava ler livros sérios.", "note": "Loved to é seguido do verbo base read."},
+      {"position": 2, "text_en": "I wanted to be President.", "text_pt": "Eu queria ser presidente.", "note": "Wanted to apresenta um sonho passado."},
+      {"position": 3, "text_en": "I studied the stars and the planets.", "text_pt": "Eu estudava as estrelas e os planetas.", "note": "Studied é o passado regular de study."},
+      {"position": 4, "text_en": "Childhood dreams are important.", "text_pt": "Sonhos de infância são importantes.", "note": "Frase para relacionar a história à experiência pessoal."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "childhood", "ipa": "/ˈtʃaɪldhʊd/", "translation_pt": "infância", "example_en": "They talk about childhood dreams."},
+      {"position": 1, "term": "dream", "ipa": "/driːm/", "translation_pt": "sonho; sonhar", "example_en": "Anna remembers a childhood dream."},
+      {"position": 2, "term": "advertisement", "ipa": "/ˌædvərˈtaɪzmənt/", "translation_pt": "anúncio", "example_en": "The advertisement shows Abraham Lincoln."},
+      {"position": 3, "term": "theater", "ipa": "/ˈθiːətər/", "translation_pt": "teatro", "example_en": "The advertisement mentions Ford's Theatre."},
+      {"position": 4, "term": "astronaut", "ipa": "/ˈæstrənɔːt/", "translation_pt": "astronauta", "example_en": "Marsha wanted to be an astronaut."},
+      {"position": 5, "term": "outer space", "ipa": "/ˌaʊtər ˈspeɪs/", "translation_pt": "espaço sideral", "example_en": "She wanted to fly into outer space."},
+      {"position": 6, "term": "playground", "ipa": "/ˈpleɪɡraʊnd/", "translation_pt": "parquinho", "example_en": "Children play at the playground."},
+      {"position": 7, "term": "swing", "ipa": "/swɪŋ/", "translation_pt": "balanço; balançar", "example_en": "The child plays on a swing."},
+      {"position": 8, "term": "slide", "ipa": "/slaɪd/", "translation_pt": "escorregador; escorregar", "example_en": "The slide is beside the swing."},
+      {"position": 9, "term": "serious", "ipa": "/ˈsɪriəs/", "translation_pt": "sério", "example_en": "Anna was a serious child."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "read /riːd/ × read /red/", "explanation": "A grafia não muda: use /riːd/ no presente e /red/ quando o contexto estiver no passado."},
+      {"position": 1, "label": "wanted /ˈwɑːntɪd/", "explanation": "Como want termina em /t/, -ed cria a sílaba adicional /ɪd/."},
+      {"position": 2, "label": "uh-huh e um-hum", "explanation": "Esses sinais curtos mostram que o ouvinte acompanha a lembrança sem interromper a história."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 29 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/09/15/e7c6ba11-8320-4bcc-8fc5-27fa4e385e23_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas, anúncios e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 200,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 4, "end_seconds": 21, "speaker": "Anna", "text_en": "In Washington, D.C., there are many places that bring history to life. But people who live here often do not have time to see them.", "text_pt": "Em Washington, há muitos lugares que dão vida à história. Mas quem mora aqui muitas vezes não tem tempo de visitá-los."},
+          {"position": 1, "start_seconds": 37, "end_seconds": 54, "speaker": "Anna and Marsha", "text_en": "That bus has a photo of Abraham Lincoln! That's an advertisement for Ford's Theatre.", "text_pt": "Aquele ônibus tem uma foto de Abraham Lincoln! É um anúncio do Ford's Theatre."},
+          {"position": 2, "start_seconds": 66, "end_seconds": 86, "speaker": "Anna", "text_en": "When I was a little girl, I was not like other children. I was a tall, serious child.", "text_pt": "Quando eu era pequena, não era como as outras crianças. Era uma criança alta e séria."},
+          {"position": 3, "start_seconds": 91, "end_seconds": 113, "speaker": "Anna", "text_en": "I loved to read serious books. I wanted to be President.", "text_pt": "Eu adorava ler livros sérios. Queria ser presidente."},
+          {"position": 4, "start_seconds": 123, "end_seconds": 145, "speaker": "Marsha", "text_en": "I studied the stars and the planets. I wanted to fly into outer space.", "text_pt": "Eu estudava as estrelas e os planetas. Queria voar para o espaço sideral."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: When Anna was a child, she ____ serious books.", "hint": null, "explanation": "O passado de read mantém a grafia, mas é pronunciado /red/.", "hints": ["O contexto está no passado.", "A grafia é igual à forma base."], "answers": ["read"], "options": ["read", "reads", "reading"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "Marsha wanted ____ fly into outer space.", "hint": null, "explanation": "Wanted exige to antes do verbo base.", "hints": ["Falta o marcador do infinitivo.", "A estrutura é wanted to + base."], "answers": ["to"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Qual grupo usa a ordem correta do adjetivo?", "hint": null, "explanation": "O adjetivo serious vem antes do substantivo books.", "hints": ["Em inglês, descreva antes de nomear.", "O adjetivo não recebe plural."], "answers": ["serious books"], "options": ["serious books", "books serious", "seriouses books"]},
+      {"position": 3, "activity_type": "transformation", "skill": "grammar", "objective": "produce", "prompt": "Reescreva no passado: I want to be an astronaut.", "hint": null, "explanation": "Want é regular e se torna wanted; o infinitivo permanece to be.", "hints": ["Mude apenas o primeiro verbo.", "Preserve to be."], "answers": ["I wanted to be an astronaut"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Por que muitos moradores não visitam os lugares históricos de Washington?", "hint": null, "explanation": "Anna diz que eles frequentemente não têm tempo porque estão ocupados com o trabalho.", "hints": ["Escute do not have time.", "A razão aparece depois de too busy."], "answers": ["Porque estão ocupados com o trabalho."], "options": ["Porque estão ocupados com o trabalho.", "Porque os lugares ficam fechados.", "Porque preferem comprar frutos do mar."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Como Anna se descreve quando criança?", "hint": null, "explanation": "Ela diz que era alta e séria.", "hints": ["Escute dois adjetivos.", "O segundo é serious."], "answers": ["Alta e séria."], "options": ["Alta e séria.", "Baixa e brincalhona.", "Doente e cansada."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva as duas frases de Anna sobre leitura e carreira.", "hint": null, "explanation": "As frases usam loved to read e wanted to be.", "hints": ["A primeira termina com serious books.", "A segunda termina com President."], "answers": ["I loved to read serious books. I wanted to be President.", "I loved to read serious books, and I wanted to be President."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Marsha estudava e o que queria fazer?", "hint": null, "explanation": "Ela estudava estrelas e planetas e queria voar para o espaço.", "hints": ["Escute stars and planets.", "O destino é outer space."], "answers": ["Estudava estrelas e planetas e queria voar para o espaço."], "options": ["Estudava estrelas e planetas e queria voar para o espaço.", "Lia livros e queria ser presidente.", "Estudava medicina e queria trabalhar em casa."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Meu sonho de infância", "instructions": "Write 7 to 10 sentences in English about what you were like and what you wanted to do as a child. Use at least four simple-past verbs, three adjective + noun groups, wanted to, loved to and one comparison with your life now.", "min_words": 70, "min_sentences": 7, "requirements": [
+        {"label": "passado", "terms": ["was", "were", "played", "studied", "read", "wanted", "loved"]},
+        {"label": "infinitivos", "terms": ["wanted to", "loved to"]},
+        {"label": "personalização", "terms": ["when i was", "my dream", "now"]}
+      ]}
+    ],
+    "learning_strategy": "personalizar"
+  },
+  {
+    "course_slug": "voa-level-1",
+    "unit_slug": "26-30",
+    "content_version": 1,
+    "editorial_status": "reviewed",
+    "source_accessed_at": "2026-10-13",
+    "review_note": "Sprint 36: conteúdo autoral conferido com a aula, o guia oficial de lesson plans e a revisão oficial 30–34 do Level 1. Não existe review oficial com recorte exato 26–30; as reviews sobrepostas 25–29 e 30–34 servem apenas como apoio curricular. Os cinco timestamps são aproximações editoriais conservadoras e aguardam QA humana por escuta.",
+    "number": 30,
+    "slug": "lesson-30",
+    "position": 5,
+    "title": "Rolling on the River",
+    "title_pt": "Navegando pelo rio",
+    "voa_url": "https://learningenglish.voanews.com/a/lets-learn-english-lesson-30-rolling-river/3522798.html",
+    "grammar_tag": "Comparativos, superlativos + much e many",
+    "focus_points": ["count e non-count nouns", "how much e how many", "comparativos e superlativos"],
+    "story_note": "Anna compra camarão, caranguejos e milho em um mercado à beira-rio antes de fazer um passeio de barco.",
+    "lead": "Preços e quantidades tornam count e non-count concretos; escolhas no mercado pedem comparação entre tamanhos e qualidade.",
+    "warmup_prompt": "Plan a market purchase: ask for two quantities, compare two products and choose the best one.",
+    "listening_focus": "Anote preços, unidades e quantidades e identifique por que Anna escolhe os caranguejos maiores.",
+    "goals": [
+      "Distinguir substantivos contáveis e não contáveis em compras.",
+      "Perguntar quantidades com **how much** e **how many**.",
+      "Usar unidades como **a pound of**, **a dozen** e **ears of corn**.",
+      "Comparar produtos com formas comparativas e superlativas."
+    ],
+    "grammar_blocks": [
+      {
+        "position": 0,
+        "heading": "How much ou how many",
+        "why": "Use **how much** com massa, dinheiro e alimentos tratados como não contáveis; use **how many** com itens contáveis no plural.",
+        "warning": "Shrimp pode nomear o alimento como massa ou unidades; no mercado, a unidade pound deixa a quantidade clara.",
+        "table_head": ["Tipo", "Pergunta", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["não contável", "How much + nome?", "How much shrimp would you like?"]},
+          {"position": 1, "cells": ["contável", "How many + plural?", "How many crabs do you want?"]},
+          {"position": 2, "cells": ["dinheiro", "How much money?", "How much money can you spend?"]}
+        ]
+      },
+      {
+        "position": 1,
+        "heading": "Medidas e quantidades",
+        "why": "Unidades tornam uma compra específica: pound mede peso, dozen reúne doze itens e ear conta espigas.",
+        "warning": "Depois de números maiores que um, pluralize a unidade: two pounds, two dozen crabs, three ears.",
+        "table_head": ["Produto", "Unidade", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["shrimp", "a pound of", "I'd like a pound of shrimp."]},
+          {"position": 1, "cells": ["crabs", "a dozen", "Give me a dozen crabs."]},
+          {"position": 2, "cells": ["corn", "ears of", "We need six ears of corn."]}
+        ]
+      },
+      {
+        "position": 2,
+        "heading": "Comparar e escolher",
+        "why": "Use **-er** para comparar dois itens e **the -est** ou uma forma irregular para escolher o extremo do grupo.",
+        "warning": "Good muda para better e best; não use *gooder* ou *goodest*.",
+        "table_head": ["Grau", "Forma", "Exemplo"],
+        "rows": [
+          {"position": 0, "cells": ["comparativo", "larger than", "The blue crabs are larger than the others."]},
+          {"position": 1, "cells": ["superlativo", "the freshest", "These are the freshest shrimp."]},
+          {"position": 2, "cells": ["irregular", "the best", "This is the best choice for my budget."]}
+        ]
+      }
+    ],
+    "phrases": [
+      {"position": 0, "text_en": "I can only spend fifty dollars.", "text_pt": "Só posso gastar cinquenta dólares.", "note": "Define o orçamento antes da compra."},
+      {"position": 1, "text_en": "How much shrimp do you want?", "text_pt": "Quanto camarão você quer?", "note": "How much pergunta a quantidade não contável."},
+      {"position": 2, "text_en": "How many crabs do you want?", "text_pt": "Quantos caranguejos você quer?", "note": "How many acompanha o plural contável."},
+      {"position": 3, "text_en": "The larger crabs have the most meat.", "text_pt": "Os caranguejos maiores têm mais carne.", "note": "Larger compara tamanho; most marca a maior quantidade."},
+      {"position": 4, "text_en": "Will that be cash or credit?", "text_pt": "Vai pagar em dinheiro ou no cartão?", "note": "Pergunta comum ao finalizar uma compra."}
+    ],
+    "vocab": [
+      {"position": 0, "term": "seafood", "ipa": "/ˈsiːfuːd/", "translation_pt": "frutos do mar", "example_en": "The market sells fresh seafood."},
+      {"position": 1, "term": "shrimp", "ipa": "/ʃrɪmp/", "translation_pt": "camarão", "example_en": "Anna buys a pound of shrimp."},
+      {"position": 2, "term": "crab", "ipa": "/kræb/", "translation_pt": "caranguejo", "example_en": "The larger crab has more meat."},
+      {"position": 3, "term": "pound", "ipa": "/paʊnd/", "translation_pt": "libra (medida de peso)", "example_en": "How much is a pound?"},
+      {"position": 4, "term": "dozen", "ipa": "/ˈdʌzən/", "translation_pt": "dúzia", "example_en": "A dozen means twelve."},
+      {"position": 5, "term": "corn on the cob", "ipa": "/ˌkɔːrn ɑːn ðə ˈkɑːb/", "translation_pt": "milho na espiga", "example_en": "They sell corn on the cob."},
+      {"position": 6, "term": "market", "ipa": "/ˈmɑːrkɪt/", "translation_pt": "mercado", "example_en": "Anna shops at the outdoor market."},
+      {"position": 7, "term": "cash", "ipa": "/kæʃ/", "translation_pt": "dinheiro em espécie", "example_en": "Can I pay in cash?"},
+      {"position": 8, "term": "credit", "ipa": "/ˈkredɪt/", "translation_pt": "crédito; cartão", "example_en": "She pays by credit card."},
+      {"position": 9, "term": "waterfront", "ipa": "/ˈwɔːtərfrʌnt/", "translation_pt": "orla; zona à beira d'água", "example_en": "The market is on the waterfront."}
+    ],
+    "pronunciation": [
+      {"position": 0, "label": "how much × how many", "explanation": "Dê força ao substantivo depois da pergunta; much termina em /tʃ/ e many começa com /m/."},
+      {"position": 1, "label": "larger /ˈlɑːrdʒər/", "explanation": "O comparativo acrescenta uma sílaba fraca /ər/ após o som /dʒ/."},
+      {"position": 2, "label": "freshest /ˈfreʃɪst/", "explanation": "O superlativo termina em /ɪst/; mantenha o som /ʃ/ de fresh antes dele."}
+    ],
+    "media": [
+      {
+        "position": 0,
+        "kind": "conversation_audio",
+        "label": "Conversa da Aula 30 — Level 1",
+        "source_url": "https://voa-audio.voanews.eu/vle/2016/09/27/a8dbb32b-ada5-4441-a2d1-340924241a4b_hq.mp3",
+        "license_status": "public_domain",
+        "license_url": "https://learningenglish.voanews.com/p/6021.html",
+        "license_note": "Produção da VOA Learning English em domínio público; imagens, marcas e materiais de terceiros não estão incluídos.",
+        "attribution": "Voice of America (VOA Learning English)",
+        "offline_policy": "network_only",
+        "license_reviewed_at": "2026-10-13",
+        "duration_seconds": 199,
+        "listening_exercise_position": 4,
+        "transcript": [],
+        "cues": [
+          {"position": 0, "start_seconds": 5, "end_seconds": 23, "speaker": "Anna", "text_en": "Today, I am at an outdoor seafood market near the Potomac River. I am here to buy seafood.", "text_pt": "Hoje estou em um mercado de frutos do mar ao ar livre perto do Rio Potomac. Vim comprar frutos do mar."},
+          {"position": 1, "start_seconds": 55, "end_seconds": 73, "speaker": "Anna and Pete", "text_en": "I am here to buy some seafood for my dinner party. They have the freshest seafood in town.", "text_pt": "Vim comprar frutos do mar para meu jantar. Eles têm os frutos do mar mais frescos da cidade."},
+          {"position": 2, "start_seconds": 75, "end_seconds": 93, "speaker": "Anna and Pete", "text_en": "I can only spend fifty dollars. First, I want to buy some shrimp. How much shrimp do you want?", "text_pt": "Só posso gastar cinquenta dólares. Primeiro, quero comprar camarão. Quanto camarão você quer?"},
+          {"position": 3, "start_seconds": 98, "end_seconds": 120, "speaker": "Anna and Pete", "text_en": "How much do I need for five people? Give her a pound of shrimp!", "text_pt": "Quanto preciso para cinco pessoas? Dê a ela uma libra de camarão!"},
+          {"position": 4, "start_seconds": 135, "end_seconds": 153, "speaker": "Anna and Pete", "text_en": "I want a dozen crabs. You should get the larger crabs. They have the most meat.", "text_pt": "Quero uma dúzia de caranguejos. Você deveria escolher os maiores. Eles têm mais carne."}
+        ]
+      }
+    ],
+    "exercises": [
+      {"position": 0, "activity_type": "multiple_choice", "skill": "grammar", "objective": "apply", "prompt": "Complete: ____ shrimp do you want?", "hint": null, "explanation": "Shrimp, tratado como alimento não contável aqui, usa how much.", "hints": ["Pense na quantidade por peso.", "Use much, não many."], "answers": ["How much"], "options": ["How much", "How many", "How larger"]},
+      {"position": 1, "activity_type": "gap_fill", "skill": "grammar", "objective": "apply", "prompt": "How ____ crabs are in a dozen?", "hint": null, "explanation": "Crabs é plural contável, portanto pede many.", "hints": ["Os animais podem ser contados.", "A palavra começa com m."], "answers": ["many"]},
+      {"position": 2, "activity_type": "multiple_choice", "skill": "grammar", "objective": "recognize", "prompt": "Qual frase compara corretamente dois grupos?", "hint": null, "explanation": "Larger than é a forma comparativa de large.", "hints": ["Há dois grupos.", "Procure -er + than."], "answers": ["These crabs are larger than those."], "options": ["These crabs are larger than those.", "These crabs are the larger of all.", "These crabs are more large those."]},
+      {"position": 3, "activity_type": "classification", "skill": "grammar", "objective": "recognize", "classification_items": ["shrimp", "money", "crabs", "ears of corn"], "classification_categories": ["how much", "how many"], "prompt": "Classifique a pergunta de quantidade adequada para cada item.", "hint": null, "explanation": "Shrimp como alimento e money usam much; crabs e ears são contáveis e usam many.", "hints": ["Procure plurais que podem ser contados.", "Dinheiro como conceito usa much."], "answers": ["{\"crabs\":\"how many\",\"ears of corn\":\"how many\",\"money\":\"how much\",\"shrimp\":\"how much\"}"]},
+      {"position": 4, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Para que Anna compra frutos do mar?", "hint": null, "explanation": "Ela diz que compra os frutos do mar para seu jantar.", "hints": ["Escute dinner.", "A palavra seguinte é party."], "answers": ["Para seu jantar."], "options": ["Para seu jantar.", "Para abrir uma loja.", "Para alimentar os caranguejos."]},
+      {"position": 5, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual é o orçamento máximo de Anna?", "hint": null, "explanation": "Ela afirma que só pode gastar cinquenta dólares.", "hints": ["Escute only spend.", "O número vem antes de dollars."], "answers": ["Cinquenta dólares."], "options": ["Cinquenta dólares.", "Quarenta dólares.", "Noventa e cinco dólares."]},
+      {"position": 6, "activity_type": "dictation", "skill": "listening", "objective": "listen", "prompt": "Ditado: escreva a pergunta de Anna e a instrução de Pete sobre o camarão.", "hint": null, "explanation": "Anna pergunta a quantidade para cinco pessoas e Pete pede uma libra.", "hints": ["A pergunta termina com five people.", "A instrução termina com a pound of shrimp."], "answers": ["How much do I need for five people? Give her a pound of shrimp!", "How much do I need for five people? Give her a pound of shrimp."]},
+      {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que quantidade de caranguejos Anna quer e qual tamanho Pete recomenda?", "hint": null, "explanation": "Anna quer uma dúzia, e Pete recomenda os caranguejos maiores porque têm mais carne.", "hints": ["Escute dozen.", "A recomendação contém larger."], "answers": ["Uma dúzia dos caranguejos maiores."], "options": ["Uma dúzia dos caranguejos maiores.", "Uma libra dos caranguejos menores.", "Cinco dúzias de camarão."]}
+    ],
+    "writing_prompts": [
+      {"position": 0, "title": "Uma compra no mercado", "instructions": "Write an 8-to-12-sentence dialogue in English between a shopper and a vendor. Include two questions with how much, two with how many, three units of measure, one comparative, one superlative, a total and a payment choice.", "min_words": 80, "min_sentences": 8, "requirements": [
+        {"label": "quantidade", "terms": ["how much", "how many"]},
+        {"label": "medidas", "terms": ["pound", "dozen", "ears"]},
+        {"label": "comparação e pagamento", "terms": ["larger", "freshest", "best", "cash", "credit"]}
+      ]}
+    ],
+    "learning_strategy": "fazer inferências"
+  },
+  {
+    "course_slug": "voa-level-1",
     "unit_slug": "31-40",
     "slug": "lesson-31",
     "position": 1,
