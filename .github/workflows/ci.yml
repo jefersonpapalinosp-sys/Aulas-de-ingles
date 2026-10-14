@@ -24,6 +24,23 @@ jobs:
         run: |
           uv run --project backend ruff check --config backend/pyproject.toml ops
           make test-recovery
+      # Os bancos e o criador de volumes usam a mesma imagem. Baixar uma vez
+      # evita pulls simultâneos e trata o limite transitório do registry.
+      - name: baixa PostgreSQL do laboratório, com espera limitada
+        run: |
+          for tentativa in 1 2 3 4; do
+            if docker compose --env-file infra/e2e.env -p aulas-ingles-recovery -f infra/compose.recovery.yml pull --quiet source-db; then
+              echo "imagem do laboratório baixada na tentativa $tentativa"
+              exit 0
+            fi
+            if [ "$tentativa" -lt 4 ]; then
+              espera=$((tentativa * 45))
+              echo "::warning::pull falhou na tentativa $tentativa; nova tentativa em ${espera}s"
+              sleep "$espera"
+            fi
+          done
+          echo "::error::não foi possível baixar PostgreSQL após 4 tentativas"
+          exit 1
       - name: laboratório sem portas ou volumes de estudo
         run: make recovery-lab-up
       - name: migrations, seed e WAV de silêncio sintético
