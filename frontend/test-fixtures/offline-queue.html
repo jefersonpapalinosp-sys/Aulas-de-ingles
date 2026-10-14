@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head><meta charset="utf-8"><title>Fila — harness isolado</title></head>
+  <body>
+    <h1>Teste isolado da fila offline</h1>
+    <p>Somente dados sintéticos; nenhuma API real é acessada.</p>
+    <script type="module">
+      import * as queue from '/src/features/offline/attemptQueue.ts'
+      import * as session from '/src/api/session.ts'
+      session.setAccessToken('synthetic-access-token')
+      session.setSessionUser(7)
+      session.setSessionReadOnly(false)
+      window.queue = queue
+      window.queueEvents = []
+      window.stopQueueEvents = queue.subscribeAttemptQueue(
+        (event) => window.queueEvents.push({ kind: 'change', detail: event.detail }),
+        (event) => window.queueEvents.push({ kind: 'sync', detail: event.detail }),
+      )
+      window.queueReady = true
+    </script>
+  </body>
+</html>

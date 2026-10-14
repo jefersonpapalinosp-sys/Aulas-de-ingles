@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -20,6 +21,7 @@ class CardOut(BaseModel):
     """Frente, verso, mídia e estado de um item da fila."""
 
     id: int
+    revision: int = 0
     item_type: ReviewItemType
     skill: str
     prompt: str
@@ -47,12 +49,15 @@ class CardOut(BaseModel):
 
 
 class GradeIn(BaseModel):
+    idempotency_key: UUID | None = None
+    expected_revision: int | None = Field(default=None, ge=0)
     quality: int = Field(
         ge=0, le=5, description="0-2 errou · 3 acertou com dificuldade · 4 acertou · 5 fácil"
     )
 
 
 class GradeOut(BaseModel):
+    revision: int = 0
     id: int
     interval_days: int
     ease_factor: float

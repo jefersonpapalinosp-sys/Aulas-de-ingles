@@ -31,3 +31,4 @@ backups/
 # Playwright (S5)
 playwright-report/
 test-results/
+test-results-queue/

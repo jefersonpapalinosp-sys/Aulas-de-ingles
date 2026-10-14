@@ -1,0 +1,75 @@
+# Stack exclusiva: nunca estender compose.prod.yml (tem volumes com nomes globais).
+name: aulas-ingles-e2e
+
+x-api: &api
+  image: aulas-ingles-e2e-api:local
+  build:
+    context: ..
+    dockerfile: backend/Dockerfile.prod
+  environment:
+    APP_ENV: test
+    DATABASE_URL: postgresql+asyncpg://aulas_test:aulas_test_only@db:5432/aulas_ingles_test
+    JWT_SECRET: disposable-e2e-secret-never-use-for-study-or-production
+    COOKIE_SECURE: "false"
+    SPEAKING_STORAGE_DIR: /app/data/speaking
+    ASSIST_WRITING_ENABLED: "false"
+    ASSISTED_FEATURES_ENABLED: "false"
+    ASSIST_TRANSCRIPTION_ENABLED: "false"
+  volumes:
+    - speaking_data:/app/data/speaking
+
+services:
+  db:
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_test_admin
+      POSTGRES_PASSWORD: disposable_admin_only
+      POSTGRES_DB: postgres
+    # Sem porta publicada: nem o pytest do host compartilha esta base.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./test-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U aulas_test -d aulas_ingles_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  prepare:
+    <<: *api
+    command: ["python", "-m", "app.testing", "prepare"]
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    <<: *api
+    depends_on:
+      prepare:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+  web:
+    image: aulas-ingles-e2e-web:local
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "127.0.0.1:5198:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/api/health"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  pgdata:
+    labels:
+      org.aulas.environment: disposable-e2e
+  speaking_data:
+    labels:
+      org.aulas.environment: disposable-e2e

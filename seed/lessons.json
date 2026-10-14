@@ -516,19 +516,31 @@
             "terms": [
               "i am",
               "i'm"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "uma pergunta",
             "terms": [
               "are you"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "de onde você é",
             "terms": [
               "from"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -1083,16 +1095,24 @@
           {
             "label": "três pronomes",
             "terms": [
-              "he ",
-              "she ",
-              "they "
-            ]
+              "he",
+              "she",
+              "they"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "origem",
             "terms": [
               "from"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "cumprimento ou despedida",
@@ -1102,7 +1122,11 @@
               "hi",
               "bye",
               "goodbye"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -1641,21 +1665,33 @@
             "label": "identificação ao telefone",
             "terms": [
               "this is"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "here ou there",
             "terms": [
               "here",
               "there"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "desculpa",
             "terms": [
               "sorry",
               "excuse me"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -2182,17 +2218,25 @@
             "label": "o que você tem",
             "terms": [
               "i have"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "uma negativa",
             "terms": [
               "isn't",
               "is not"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
-            "label": "adjetivo antes do substantivo",
+            "label": "dois adjetivos diferentes (confira a posição antes do substantivo)",
             "terms": [
               "big",
               "small",
@@ -2201,7 +2245,11 @@
               "red",
               "blue",
               "black"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           }
         ]
       }
@@ -2737,19 +2785,31 @@
               "living room",
               "bathroom",
               "bedroom"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "BE + lugar",
             "terms": [
               "in the"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma pergunta",
             "terms": [
               "where"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -3258,13 +3318,21 @@
               "next to",
               "across from",
               "behind"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma pergunta de lugar",
             "terms": [
               "where is"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "nomes de lugares",
@@ -3276,7 +3344,11 @@
               "store",
               "mailroom",
               "garage"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -3798,7 +3870,11 @@
               "am",
               "is",
               "are"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "verbo com -ing",
@@ -3811,13 +3887,21 @@
               "studying",
               "talking",
               "doing"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma pergunta",
             "terms": [
               "what are you doing"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -4341,20 +4425,32 @@
               "in the morning",
               "in the afternoon",
               "in the evening"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "rotina",
             "terms": [
               "every day"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "o agora, no contínuo",
             "terms": [
               "i am",
               "i'm"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -4870,15 +4966,32 @@
             "label": "pergunta com it",
             "terms": [
               "is it"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
-            "label": "resposta curta",
+            "label": "resposta afirmativa",
             "terms": [
-              "yes, it is",
+              "yes, it is"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "resposta negativa",
+            "terms": [
               "no, it is not",
               "no, it isn't"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "adjetivos do tempo",
@@ -4890,7 +5003,11 @@
               "sunny",
               "snowy",
               "rainy"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -5404,20 +5521,32 @@
               "turn left",
               "straight ahead",
               "exit"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "sequência",
             "terms": [
               "then"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "o que existe perto",
             "terms": [
               "there is",
               "there are"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -5934,13 +6063,21 @@
               "three",
               "four",
               "five"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "pergunta de existência",
             "terms": [
               "is there"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "lugar do bairro",
@@ -5951,7 +6088,11 @@
               "store",
               "mailbox",
               "park"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -6475,14 +6616,22 @@
             "terms": [
               "what do",
               "what does"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "produzir algo",
             "terms": [
               "make",
               "makes"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "parentesco",
@@ -6496,7 +6645,11 @@
               "father",
               "brother",
               "sister"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -7012,20 +7165,32 @@
               "always",
               "never",
               "usually"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "a causa",
             "terms": [
               "because"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "comum ou incomum",
             "terms": [
               "usual",
               "unusual"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -7557,13 +7722,21 @@
             "terms": [
               "put on",
               "take off"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma sugestão",
             "terms": [
               "how about"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "cor antes do substantivo",
@@ -7575,7 +7748,11 @@
               "gold",
               "red",
               "white"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -8102,7 +8279,11 @@
               "aren't you",
               "doesn't she",
               "doesn't he"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "adjetivos descritivos",
@@ -8113,7 +8294,11 @@
               "straight",
               "light",
               "dark"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "partes do corpo com have",
@@ -8121,7 +8306,11 @@
               "hair",
               "eyes",
               "skin"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -8261,9 +8450,44 @@
         "min_words": 55,
         "min_sentences": 6,
         "requirements": [
-          {"label": "origem", "terms": ["from", "country", "nationality"]},
-          {"label": "idioma", "terms": ["language", "speak", "English", "Portuguese", "Spanish"]},
-          {"label": "uma pergunta", "terms": ["where are you from", "what country are you from", "what languages do you speak"]}
+          {
+            "label": "origem",
+            "terms": [
+              "from",
+              "country",
+              "nationality"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "idioma",
+            "terms": [
+              "language",
+              "speak",
+              "english",
+              "portuguese",
+              "spanish"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "uma pergunta",
+            "terms": [
+              "where are you from",
+              "what country are you from",
+              "what languages do you speak"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
         ]
       }
     ],
@@ -8402,9 +8626,38 @@
         "min_words": 55,
         "min_sentences": 6,
         "requirements": [
-          {"label": "plano anterior", "terms": ["going to"]},
-          {"label": "decisão", "terms": ["will", "I'll"]},
-          {"label": "disponibilidade", "terms": ["are you free", "are you busy"]}
+          {
+            "label": "plano anterior",
+            "terms": [
+              "going to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "decisão",
+            "terms": [
+              "will",
+              "i'll"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "disponibilidade",
+            "terms": [
+              "are you free",
+              "are you busy"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
         ]
       }
     ],
@@ -8544,9 +8797,46 @@
         "min_words": 55,
         "min_sentences": 6,
         "requirements": [
-          {"label": "ordem", "terms": ["first", "second", "third"]},
-          {"label": "frequência", "terms": ["always", "never", "often", "rarely"]},
-          {"label": "pronome objeto", "terms": ["me", "you", "him", "her", "us", "them"]}
+          {
+            "label": "ordem",
+            "terms": [
+              "first",
+              "second",
+              "third"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "frequência",
+            "terms": [
+              "always",
+              "never",
+              "often",
+              "rarely"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
+          },
+          {
+            "label": "pronome objeto",
+            "terms": [
+              "me",
+              "you",
+              "him",
+              "her",
+              "us",
+              "them"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
         ]
       }
     ],
@@ -8685,9 +8975,40 @@
         "min_words": 55,
         "min_sentences": 6,
         "requirements": [
-          {"label": "uma escolha", "terms": ["which", "which one"]},
-          {"label": "período seguinte", "terms": ["next month", "next week"]},
-          {"label": "repetição", "terms": ["every day", "every week", "every morning"]}
+          {
+            "label": "uma escolha",
+            "terms": [
+              "which",
+              "which one"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "período seguinte",
+            "terms": [
+              "next month",
+              "next week"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "repetição",
+            "terms": [
+              "every day",
+              "every week",
+              "every morning"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
         ]
       }
     ],
@@ -8826,9 +9147,37 @@
         "min_words": 55,
         "min_sentences": 6,
         "requirements": [
-          {"label": "habilidade", "terms": ["can"]},
-          {"label": "limite atual", "terms": ["can't", "cannot"]},
-          {"label": "uma pergunta", "terms": ["can you"]}
+          {
+            "label": "habilidade",
+            "terms": [
+              "can"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
+          },
+          {
+            "label": "limite atual",
+            "terms": [
+              "can't",
+              "cannot"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "uma pergunta",
+            "terms": [
+              "can you"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
         ]
       }
     ],
@@ -8956,11 +9305,58 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Qual habilidade Marsha escolhe para Anna apresentar?", "hint": null, "explanation": "Depois de outras tentativas, Marsha conclui que Anna pode cantar.", "hints": ["Escute That's it.", "A atividade usa a voz e música."], "answers": ["cantar"], "options": ["cantar", "cozinhar", "dirigir"]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Convite com plano de tarefas", "instructions": "Write 6 to 9 sentences in English inviting a friend to an event. Say two things you have to do, two things you can do, one thing you can't do, and use first and then.", "min_words": 55, "min_sentences": 6, "requirements": [
-        {"label": "obrigação", "terms": ["have to", "has to"]},
-        {"label": "habilidade", "terms": ["can", "can't", "cannot"]},
-        {"label": "sequência", "terms": ["first", "then"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Convite com plano de tarefas",
+        "instructions": "Write 6 to 9 sentences in English inviting a friend to an event. Say two things you have to do, two things you can do, one thing you can't do, and use first and then.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "obrigação",
+            "terms": [
+              "have to",
+              "has to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "duas ocorrências de can",
+            "terms": [
+              "can"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "sequência",
+            "terms": [
+              "first",
+              "then"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "um limite com can't ou cannot",
+            "terms": [
+              "can't",
+              "cannot"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "cooperar"
   },
@@ -9086,11 +9482,51 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais ações Anna associa ao camping?", "hint": null, "explanation": "Ela enumera cozinhar, dormir e brincar ao ar livre.", "hints": ["São três verbos.", "A última expressão é outdoors."], "answers": ["Cozinhar, dormir e brincar ao ar livre."], "options": ["Cozinhar, dormir e brincar ao ar livre.", "Dirigir, trabalhar e estudar.", "Nadar, comprar e dançar."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Meu próximo período de férias", "instructions": "Write 6 to 9 sentences in English planning a vacation day. Use going to at least three times and organize the activities with first, then and finally.", "min_words": 55, "min_sentences": 6, "requirements": [
-        {"label": "planos", "terms": ["going to"]},
-        {"label": "sequência", "terms": ["first", "then", "finally"]},
-        {"label": "atividade de férias", "terms": ["camping", "hiking", "beach", "park", "vacation"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Meu próximo período de férias",
+        "instructions": "Write 6 to 9 sentences in English planning a vacation day. Use going to at least three times and organize the activities with first, then and finally.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "planos",
+            "terms": [
+              "going to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
+          },
+          {
+            "label": "sequência",
+            "terms": [
+              "first",
+              "then",
+              "finally"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "atividade de férias",
+            "terms": [
+              "camping",
+              "hiking",
+              "beach",
+              "park",
+              "vacation"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "planejar"
   },
@@ -9216,11 +9652,51 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quanto troco Jonathan devolve de dez dólares?", "hint": null, "explanation": "O prato custa sete e ele devolve três.", "hints": ["Escute dollars back.", "Calcule 10 menos 7."], "answers": ["três dólares"], "options": ["três dólares", "cinco dólares", "sete dólares"]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Pedido em um food truck", "instructions": "Write a 6-to-9-sentence dialogue in English. Ask the time, order two items with want, include one unavailable item, give two prices and calculate the change.", "min_words": 55, "min_sentences": 6, "requirements": [
-        {"label": "desejo", "terms": ["want", "want to"]},
-        {"label": "hora", "terms": ["what time", "at", "noon"]},
-        {"label": "compra", "terms": ["cost", "change", "dollars", "out of"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Pedido em um food truck",
+        "instructions": "Write a 6-to-9-sentence dialogue in English. Ask the time, order two items with want, include one unavailable item, give two prices and calculate the change.",
+        "min_words": 55,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "desejo",
+            "terms": [
+              "want",
+              "want to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "hora",
+            "terms": [
+              "what time",
+              "at",
+              "noon"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "compra",
+            "terms": [
+              "cost",
+              "change",
+              "dollars",
+              "out of"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "responder"
   },
@@ -9346,11 +9822,53 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Como Anna descreve pilota antes de usar seu nome?", "hint": null, "explanation": "Ela substitui o nome desconhecido pela descrição a kind of handball.", "hints": ["Escute kind of.", "A comparação usa handball."], "answers": ["Como um tipo de handebol."], "options": ["Como um tipo de handebol.", "Como uma dança lenta.", "Como um instrumento musical."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Ontem em um evento cultural", "instructions": "Write 6 to 9 sentences in English about a festival, fair or event you visited. Use at least four regular past verbs, was or were, and describe one thing whose English name you do not know.", "min_words": 60, "min_sentences": 6, "requirements": [
-        {"label": "passado regular", "terms": ["visited", "walked", "danced", "played", "cooked", "watched"]},
-        {"label": "BE no passado", "terms": ["was", "were"]},
-        {"label": "descrição substituta", "terms": ["a kind of", "it is like", "you use it to"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Ontem em um evento cultural",
+        "instructions": "Write 6 to 9 sentences in English about a festival, fair or event you visited. Use at least four regular past verbs, was or were, and describe one thing whose English name you do not know.",
+        "min_words": 60,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "passado regular",
+            "terms": [
+              "visited",
+              "walked",
+              "danced",
+              "played",
+              "cooked",
+              "watched"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 4
+          },
+          {
+            "label": "BE no passado",
+            "terms": [
+              "was",
+              "were"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "descrição substituta",
+            "terms": [
+              "a kind of",
+              "it is like",
+              "you use it to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "substituir"
   },
@@ -9476,11 +9994,59 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que a pessoa ganha ao encontrar um símbolo americano?", "hint": null, "explanation": "O jogo oferece pontos e um fato curioso sobre um presidente.", "hints": ["São duas recompensas.", "Uma delas é Fun Fact."], "answers": ["Pontos e um fato sobre um presidente."], "options": ["Pontos e um fato sobre um presidente.", "Uma carteira de motorista.", "Comida e troco."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Avisos e recomendações para um visitante", "instructions": "Write 6 to 9 sentences in English advising a visitor who is using a phone while walking. Include two immediate warnings, two recommendations with should, one with ought to, and one association that helps remember a place.", "min_words": 60, "min_sentences": 6, "requirements": [
-        {"label": "avisos", "terms": ["watch out", "be careful"]},
-        {"label": "recomendações", "terms": ["should", "ought to"]},
-        {"label": "associação", "terms": ["symbol", "reminds me", "associate", "remember"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Avisos e recomendações para um visitante",
+        "instructions": "Write 6 to 9 sentences in English advising a visitor who is using a phone while walking. Include two immediate warnings, two recommendations with should, one with ought to, and one association that helps remember a place.",
+        "min_words": 60,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "avisos",
+            "terms": [
+              "watch out",
+              "be careful"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "duas recomendações com should",
+            "terms": [
+              "should"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "uma recomendação com ought to",
+            "terms": [
+              "ought to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "associação",
+            "terms": [
+              "symbol",
+              "reminds me",
+              "associate",
+              "remember"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "fazer associações"
   },
@@ -9606,11 +10172,51 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que conselho Anna dá a si mesma depois do aviso?", "hint": null, "explanation": "Ela reconhece que deveria ter mais cuidado.", "hints": ["Escute should.", "A qualidade é careful."], "answers": ["Ela deveria ter mais cuidado."], "options": ["Ela deveria ter mais cuidado.", "Ela deveria parar de aprender história.", "Ela deveria apagar o jogo."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Símbolos e fatos que eu lembro", "instructions": "Write 6 to 9 sentences in English about three symbols you found in a game or visit. Use found, won, knew or didn't know, explain two associations and give one recommendation with ought to.", "min_words": 60, "min_sentences": 6, "requirements": [
-        {"label": "passado irregular", "terms": ["found", "won", "knew", "didn't know"]},
-        {"label": "associação", "terms": ["symbol", "reminds me", "works well", "associate"]},
-        {"label": "recomendação", "terms": ["ought to"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Símbolos e fatos que eu lembro",
+        "instructions": "Write 6 to 9 sentences in English about three symbols you found in a game or visit. Use found, won, knew or didn't know, explain two associations and give one recommendation with ought to.",
+        "min_words": 60,
+        "min_sentences": 6,
+        "requirements": [
+          {
+            "label": "passado irregular",
+            "terms": [
+              "found",
+              "won",
+              "knew",
+              "didn't know"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 3
+          },
+          {
+            "label": "associação",
+            "terms": [
+              "symbol",
+              "reminds me",
+              "works well",
+              "associate"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "recomendação",
+            "terms": [
+              "ought to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "fazer associações"
   },
@@ -9736,11 +10342,55 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais recomendações a médica dá no trecho final?", "hint": null, "explanation": "Ela recomenda água, repouso na cama e sono.", "hints": ["Escute drink lots of water.", "Depois aparecem rest e sleep."], "answers": ["Beber água, descansar na cama e dormir bastante."], "options": ["Beber água, descansar na cama e dormir bastante.", "Dirigir e trabalhar normalmente.", "Tomar café e fazer exercícios."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Telefonema sobre saúde", "instructions": "Write a 7-to-10-sentence dialogue in English between a patient and a health professional. Include three symptoms, two Wh or Yes/No questions, two irregular past verbs and two general recommendations.", "min_words": 65, "min_sentences": 7, "requirements": [
-        {"label": "sintomas", "terms": ["sore throat", "cough", "fever", "sick"]},
-        {"label": "passado irregular", "terms": ["felt", "had", "slept", "drank", "built"]},
-        {"label": "recomendação", "terms": ["should", "drink", "rest", "sleep"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Telefonema sobre saúde",
+        "instructions": "Write a 7-to-10-sentence dialogue in English between a patient and a health professional. Include three symptoms, two Wh or Yes/No questions, two irregular past verbs and two general recommendations.",
+        "min_words": 65,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "sintomas",
+            "terms": [
+              "sore throat",
+              "cough",
+              "fever",
+              "sick"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 3
+          },
+          {
+            "label": "passado irregular",
+            "terms": [
+              "felt",
+              "had",
+              "slept",
+              "drank",
+              "built"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
+          },
+          {
+            "label": "recomendação",
+            "terms": [
+              "should",
+              "drink",
+              "rest",
+              "sleep"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          }
+        ]
+      }
     ],
     "learning_strategy": "analisar informações"
   },
@@ -9866,11 +10516,62 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Quais duas instruções de segurança aparecem no último trecho?", "hint": null, "explanation": "John manda ficar na rua e manter as mãos no volante.", "hints": ["Escute stay.", "A segunda instrução menciona wheel."], "answers": ["Ficar na rua e manter as mãos no volante."], "options": ["Ficar na rua e manter as mãos no volante.", "Acelerar e fechar os olhos.", "Estacionar e sair do carro."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Uma prova difícil", "instructions": "Write 7 to 10 sentences in English about a practical test. Include four imperative instructions, two sentences with was or were, one apology with a reason, and one line of self-talk.", "min_words": 65, "min_sentences": 7, "requirements": [
-        {"label": "instruções", "terms": ["start", "stop", "look", "keep", "don't"]},
-        {"label": "passado de BE", "terms": ["was", "were"]},
-        {"label": "desculpa e self-talk", "terms": ["sorry", "because", "okay", "good job"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Uma prova difícil",
+        "instructions": "Write 7 to 10 sentences in English about a practical test. Include four imperative instructions, two sentences with was or were, one apology with a reason, and one line of self-talk.",
+        "min_words": 65,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "instruções",
+            "terms": [
+              "start",
+              "stop",
+              "look",
+              "keep",
+              "don't"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 4
+          },
+          {
+            "label": "passado de BE",
+            "terms": [
+              "was",
+              "were"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "desculpa com motivo",
+            "terms": [
+              "sorry",
+              "because"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "self-talk",
+            "terms": [
+              "okay",
+              "good job"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "falar consigo mesmo"
   },
@@ -9996,11 +10697,54 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "O que Marsha estudava e o que queria fazer?", "hint": null, "explanation": "Ela estudava estrelas e planetas e queria voar para o espaço.", "hints": ["Escute stars and planets.", "O destino é outer space."], "answers": ["Estudava estrelas e planetas e queria voar para o espaço."], "options": ["Estudava estrelas e planetas e queria voar para o espaço.", "Lia livros e queria ser presidente.", "Estudava medicina e queria trabalhar em casa."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Meu sonho de infância", "instructions": "Write 7 to 10 sentences in English about what you were like and what you wanted to do as a child. Use at least four simple-past verbs, three adjective + noun groups, wanted to, loved to and one comparison with your life now.", "min_words": 70, "min_sentences": 7, "requirements": [
-        {"label": "passado", "terms": ["was", "were", "played", "studied", "read", "wanted", "loved"]},
-        {"label": "infinitivos", "terms": ["wanted to", "loved to"]},
-        {"label": "personalização", "terms": ["when i was", "my dream", "now"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Meu sonho de infância",
+        "instructions": "Write 7 to 10 sentences in English about what you were like and what you wanted to do as a child. Use at least four simple-past verbs, three adjective + noun groups, wanted to, loved to and one comparison with your life now.",
+        "min_words": 70,
+        "min_sentences": 7,
+        "requirements": [
+          {
+            "label": "passado",
+            "terms": [
+              "was",
+              "were",
+              "played",
+              "studied",
+              "read",
+              "wanted",
+              "loved"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 4
+          },
+          {
+            "label": "infinitivos",
+            "terms": [
+              "wanted to",
+              "loved to"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "personalização",
+            "terms": [
+              "when i was",
+              "my dream",
+              "now"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "personalizar"
   },
@@ -10126,11 +10870,75 @@
       {"position": 7, "activity_type": "multiple_choice", "skill": "listening", "objective": "listen", "prompt": "Que quantidade de caranguejos Anna quer e qual tamanho Pete recomenda?", "hint": null, "explanation": "Anna quer uma dúzia, e Pete recomenda os caranguejos maiores porque têm mais carne.", "hints": ["Escute dozen.", "A recomendação contém larger."], "answers": ["Uma dúzia dos caranguejos maiores."], "options": ["Uma dúzia dos caranguejos maiores.", "Uma libra dos caranguejos menores.", "Cinco dúzias de camarão."]}
     ],
     "writing_prompts": [
-      {"position": 0, "title": "Uma compra no mercado", "instructions": "Write an 8-to-12-sentence dialogue in English between a shopper and a vendor. Include two questions with how much, two with how many, three units of measure, one comparative, one superlative, a total and a payment choice.", "min_words": 80, "min_sentences": 8, "requirements": [
-        {"label": "quantidade", "terms": ["how much", "how many"]},
-        {"label": "medidas", "terms": ["pound", "dozen", "ears"]},
-        {"label": "comparação e pagamento", "terms": ["larger", "freshest", "best", "cash", "credit"]}
-      ]}
+      {
+        "position": 0,
+        "title": "Uma compra no mercado",
+        "instructions": "Write an 8-to-12-sentence dialogue in English between a shopper and a vendor. Include two questions with how much, two with how many, three units of measure, one comparative, one superlative, a total and a payment choice.",
+        "min_words": 80,
+        "min_sentences": 8,
+        "requirements": [
+          {
+            "label": "quantidade",
+            "terms": [
+              "how much",
+              "how many"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 2
+          },
+          {
+            "label": "medidas",
+            "terms": [
+              "pound",
+              "dozen",
+              "ears"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "marcador comparativo",
+            "terms": [
+              "larger",
+              "cheaper",
+              "better",
+              "more expensive"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "marcador superlativo",
+            "terms": [
+              "freshest",
+              "best",
+              "cheapest",
+              "most expensive"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "forma de pagamento",
+            "terms": [
+              "cash",
+              "credit"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          }
+        ]
+      }
     ],
     "learning_strategy": "fazer inferências"
   },
@@ -10261,14 +11069,22 @@
             "label": "um comparativo com than",
             "terms": [
               "than"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um conselho com should ou ought to",
             "terms": [
               "should",
-              "ought"
-            ]
+              "ought to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -11491,7 +12307,11 @@
               "find them",
               "give her",
               "show him"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma reação ou interjeição",
@@ -11501,7 +12321,11 @@
               "woo-hoo",
               "aw",
               "shh"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -12161,7 +12985,11 @@
               "next",
               "finally",
               "at the end"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           },
           {
             "label": "um agente terminado em -er",
@@ -12171,7 +12999,11 @@
               "pitcher",
               "batter",
               "kicker"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -12982,14 +13814,22 @@
             "label": "possibilidade com might",
             "terms": [
               "might"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "certeza com will ou won’t",
             "terms": [
               "will",
               "won't"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma tag question",
@@ -13000,7 +13840,11 @@
               "will he",
               "won't we",
               "won't they"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -13675,7 +14519,7 @@
         "min_sentences": 5,
         "requirements": [
           {
-            "label": "duas unidades ou embalagens",
+            "label": "três unidades ou embalagens diferentes",
             "terms": [
               "a bag of",
               "a box of",
@@ -13683,14 +14527,22 @@
               "a loaf of",
               "a bunch of",
               "a bottle of"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 3
           },
           {
             "label": "too much ou too many",
             "terms": [
               "too much",
               "too many"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -14340,13 +15192,21 @@
               "in",
               "on",
               "under"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           },
           {
             "label": "uma oferta com I’ll",
             "terms": [
               "i'll"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -15054,10 +15914,15 @@
         "min_sentences": 5,
         "requirements": [
           {
-            "label": "comparação com more … than",
+            "label": "marcadores more e than (confira a comparação)",
             "terms": [
-              "more"
-            ]
+              "more",
+              "than"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "linguagem de opinião",
@@ -15066,7 +15931,11 @@
               "i disagree",
               "i don't think",
               "in my opinion"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um pronome possessivo",
@@ -15077,7 +15946,11 @@
               "hers",
               "ours",
               "theirs"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -15891,13 +16764,21 @@
               "the friendliest",
               "the luckiest",
               "the best"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um superlativo com the most",
             "terms": [
               "the most"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um grupo de comparação",
@@ -15906,7 +16787,11 @@
               "in my family",
               "in my city",
               "of all"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -16691,7 +17576,11 @@
               "looked",
               "was",
               "were"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           },
           {
             "label": "um adjetivo com prefixo negativo",
@@ -16701,7 +17590,11 @@
               "imperfect",
               "dishonest",
               "unbelievable"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -17620,14 +18513,22 @@
               "carefully",
               "seriously",
               "perfectly"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           },
           {
             "label": "too ou enough",
             "terms": [
-              "too ",
+              "too",
               "enough"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma comparação de modo",
@@ -17636,7 +18537,11 @@
               "more seriously",
               "earlier",
               "later"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -18136,11 +19041,15 @@
         "min_sentences": 5,
         "requirements": [
           {
-            "label": "duas condicionais com if + will",
+            "label": "if e will, duas vezes cada (confira as duas condicionais)",
             "terms": [
-              "if ",
-              "will "
-            ]
+              "if",
+              "will"
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma expressão de feedback",
@@ -18149,7 +19058,11 @@
               "ought to",
               "you can improve",
               "work together"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -18658,17 +19571,25 @@
         "min_sentences": 5,
         "requirements": [
           {
-            "label": "duas formas de past continuous",
+            "label": "duas ocorrências de was ou were (confira verbo com -ing)",
             "terms": [
-              "was ",
-              "were "
-            ]
+              "was",
+              "were"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma oração com while",
             "terms": [
-              "while "
-            ]
+              "while"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um pronome reflexivo",
@@ -18679,7 +19600,11 @@
               "himself",
               "ourselves",
               "themselves"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -19183,7 +20108,11 @@
             "terms": [
               "could you",
               "would you"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma desculpa com have to ou too",
@@ -19192,16 +20121,24 @@
               "have got to",
               "too busy",
               "too tired"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma resposta empática",
             "terms": [
-              "I wish I could",
+              "i wish i could",
               "sorry",
               "good luck",
               "thanks anyway"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -19701,23 +20638,35 @@
           {
             "label": "um conselho com should",
             "terms": [
-              "should "
-            ]
+              "should"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma regra com must ou mustn't",
             "terms": [
-              "must ",
-              "mustn't ",
-              "must not "
-            ]
+              "must",
+              "mustn't",
+              "must not"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma escolha opcional com don't have to",
             "terms": [
               "don't have to",
               "do not have to"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -20215,11 +21164,15 @@
         "min_sentences": 5,
         "requirements": [
           {
-            "label": "três ações no future continuous",
+            "label": "três ocorrências de will be ou 'll be (confira verbo com -ing)",
             "terms": [
-              "will be ",
-              "'ll be "
-            ]
+              "will be",
+              "'ll be"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "uma expressão de tempo",
@@ -20228,7 +21181,11 @@
               "at noon",
               "tomorrow",
               "next week"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um destino ou atração",
@@ -20237,7 +21194,11 @@
               "see",
               "trip",
               "sight"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -20737,14 +21698,22 @@
             "terms": [
               "may i borrow",
               "can i borrow"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma oferta com lend ou loan",
             "terms": [
               "lend",
               "loan"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma promessa de devolução",
@@ -20753,7 +21722,11 @@
               "return them",
               "bring it back",
               "bring them back"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -21252,19 +22225,27 @@
         "min_sentences": 6,
         "requirements": [
           {
-            "label": "uma ação no present continuous",
+            "label": "auxiliar am, is ou are (confira o present continuous)",
             "terms": [
-              "am ",
-              "is ",
-              "are "
-            ]
+              "am",
+              "is",
+              "are"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
-            "label": "uma ação no past continuous",
+            "label": "auxiliar was ou were (confira o past continuous)",
             "terms": [
-              "was ",
-              "were "
-            ]
+              "was",
+              "were"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma oferta ou um reflexivo",
@@ -21274,7 +22255,11 @@
               "yourself",
               "himself",
               "herself"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -21773,16 +22758,24 @@
           {
             "label": "uma experiência afirmativa no present perfect",
             "terms": [
-              "i have ",
-              "i've "
-            ]
+              "i have",
+              "i've"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma experiência com never",
             "terms": [
               "have never",
               "'ve never"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma recomendação",
@@ -21790,7 +22783,11 @@
               "you should",
               "you can",
               "i recommend"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -22289,16 +23286,24 @@
           {
             "label": "um resultado no present perfect",
             "terms": [
-              "i have ",
-              "i've "
-            ]
+              "i have",
+              "i've"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma ação no present continuous",
             "terms": [
-              "i am ",
-              "i'm "
-            ]
+              "i am",
+              "i'm"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um evento no simple past com tempo definido",
@@ -22307,7 +23312,11 @@
               "last night",
               "at noon",
               "ago"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -22802,20 +23811,28 @@
         "min_sentences": 5,
         "requirements": [
           {
-            "label": "duas formas do present perfect continuous",
+            "label": "duas ocorrências de have/has been (confira verbo com -ing)",
             "terms": [
-              "have been ",
-              "has been ",
-              "'ve been ",
-              "'s been "
-            ]
+              "have been",
+              "has been",
+              "'ve been",
+              "'s been"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma expressão com for ou since",
             "terms": [
-              "for ",
-              "since "
-            ]
+              "for",
+              "since"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma ação de monitoramento",
@@ -22824,7 +23841,11 @@
               "notice",
               "review",
               "pay attention"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -23322,27 +24343,39 @@
           {
             "label": "uma duração no present perfect continuous",
             "terms": [
-              "have been ",
-              "has been ",
-              "'ve been ",
-              "'s been "
-            ]
+              "have been",
+              "has been",
+              "'ve been",
+              "'s been"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um gerúndio de preferência",
             "terms": [
-              "love ",
-              "like ",
-              "enjoy "
-            ]
+              "love",
+              "like",
+              "enjoy"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um infinitivo de meta",
             "terms": [
-              "want to ",
-              "plan to ",
-              "hope to "
-            ]
+              "want to",
+              "plan to",
+              "hope to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -23844,26 +24877,38 @@
           {
             "label": "uma realização no present perfect",
             "terms": [
-              "i have ",
-              "i've "
-            ]
+              "i have",
+              "i've"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um evento concluído no passado",
             "terms": [
-              "last ",
+              "last",
               "yesterday",
               "ago",
-              "when i "
-            ]
+              "when i"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um próximo passo no futuro",
             "terms": [
-              "i will ",
-              "i'll ",
-              "going to "
-            ]
+              "i will",
+              "i'll",
+              "going to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -24353,18 +25398,26 @@
           {
             "label": "um resultado no present perfect",
             "terms": [
-              "has ",
-              "have ",
-              "i've ",
-              "we've "
-            ]
+              "has",
+              "have",
+              "i've",
+              "we've"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um processo no present perfect continuous",
             "terms": [
-              "has been ",
-              "have been "
-            ]
+              "has been",
+              "have been"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma inferência cuidadosa",
@@ -24372,7 +25425,11 @@
               "must be",
               "might be",
               "could be"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -24873,10 +25930,14 @@
           {
             "label": "duas habilidades",
             "terms": [
-              "i can ",
-              "i am good at ",
+              "i can",
+              "i am good at",
               "my skills"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma realização",
@@ -24885,7 +25946,11 @@
               "i created",
               "i helped",
               "i achieved"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "dois phrasal verbs da aula",
@@ -24894,7 +25959,11 @@
               "team up",
               "find out",
               "go back"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           }
         ]
       }
@@ -25400,7 +26469,11 @@
               "had called",
               "had waited",
               "had forgotten"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "um conector temporal",
@@ -25408,16 +26481,24 @@
               "before",
               "after",
               "by the time"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
-            "label": "dois pontos de vista",
+            "label": "marcador de ponto de vista (compare as duas perspectivas)",
             "terms": [
               "according to",
               "point of view",
               "differently",
               "however"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -25921,7 +27002,11 @@
               "i think",
               "in my view",
               "in my opinion"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma concessão respeitosa",
@@ -25930,7 +27015,11 @@
               "i see your point",
               "however",
               "but i"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma pergunta de esclarecimento",
@@ -25939,7 +27028,11 @@
               "what do you mean",
               "why do you think",
               "are you saying"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -26439,7 +27532,11 @@
               "faster than",
               "better than",
               "less expensive than"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "dois superlativos",
@@ -26449,7 +27546,11 @@
               "the least",
               "the cheapest",
               "the fastest"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma justificativa",
@@ -26457,7 +27558,11 @@
               "because",
               "so i would choose",
               "for me"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -26963,7 +28068,11 @@
               "through",
               "along",
               "into"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 3
           },
           {
             "label": "uma atribuição de fonte",
@@ -26971,15 +28080,23 @@
               "according to",
               "the guide says",
               "the website says"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma justificativa",
             "terms": [
               "because",
               "more reliable",
-              "I trust"
-            ]
+              "i trust"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -27481,15 +28598,23 @@
               "over",
               "across",
               "along"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 4
           },
           {
             "label": "duas recomendações",
             "terms": [
               "should",
               "could",
-              "I recommend"
-            ]
+              "i recommend"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma justificativa",
@@ -27497,7 +28622,11 @@
               "because",
               "so",
               "worth visiting"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -28007,7 +29136,11 @@
               "is cooked",
               "is served",
               "are used"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "uma razão",
@@ -28015,7 +29148,11 @@
               "because",
               "since",
               "that is why"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um advérbio de modo",
@@ -28024,7 +29161,11 @@
               "carefully",
               "traditionally",
               "strongly"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -28522,7 +29663,11 @@
               "may have",
               "could have",
               "must have"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma tag question",
@@ -28531,7 +29676,11 @@
               "don't you?",
               "didn't you?",
               "isn't it?"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um conselho",
@@ -28539,7 +29688,11 @@
               "should",
               "may want to",
               "before adopting"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -29039,26 +30192,38 @@
           {
             "label": "duas esperanças",
             "terms": [
-              "I hope to",
-              "I hope that",
-              "I hope I can"
-            ]
+              "i hope to",
+              "i hope that",
+              "i hope i can"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "dois desejos",
             "terms": [
-              "I wish I could",
-              "I wish I knew",
-              "I wish I were"
-            ]
+              "i wish i could",
+              "i wish i knew",
+              "i wish i were"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "um plano",
             "terms": [
-              "I will",
-              "I am going to",
+              "i will",
+              "i am going to",
               "my first step"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -29556,22 +30721,28 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "uma duração",
+            "label": "marcador has been ou have been (confira duração)",
             "terms": [
               "has been",
-              "have been",
-              "for",
-              "since"
-            ]
+              "have been"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
-            "label": "dois resultados",
+            "label": "dois auxiliares has/have (confira resultados e particípios)",
             "terms": [
               "has",
               "have",
-              "already",
-              "yet"
-            ]
+              "'ve",
+              "'s"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma ação anterior",
@@ -29579,7 +30750,11 @@
               "had",
               "before",
               "by the time"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -30082,28 +31257,47 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "duas condições reais",
+            "label": "duas ocorrências de if (confira condições reais)",
             "terms": [
-              "if",
-              "will",
-              "can"
-            ]
+              "if"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma condição irreal",
             "terms": [
               "would",
               "were",
-              "if I"
-            ]
+              "if i"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
-            "label": "incerteza e razão",
+            "label": "marcador de incerteza",
             "terms": [
               "might",
-              "may",
+              "may"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "razão",
+            "terms": [
               "because"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -30600,7 +31794,11 @@
             "terms": [
               "if",
               "when"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "duas previsões",
@@ -30608,15 +31806,23 @@
               "will",
               "may",
               "might"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma esperança",
             "terms": [
               "hope",
               "we hope",
-              "I hope"
-            ]
+              "i hope"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -31115,16 +32321,21 @@
               "so does",
               "so is",
               "so can"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
-            "label": "duas concordâncias negativas",
+            "label": "duas ocorrências de either (confira concordância negativa)",
             "terms": [
-              "either",
-              "doesn't",
-              "isn't",
-              "can't"
-            ]
+              "either"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "uma qualidade",
@@ -31133,7 +32344,11 @@
               "patient",
               "kind",
               "supportive"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -31639,21 +32854,42 @@
               "after",
               "when",
               "since"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 2
           },
           {
-            "label": "razão e contraste",
+            "label": "razão",
             "terms": [
               "because",
-              "as",
+              "as"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "contraste",
+            "terms": [
               "even though"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma condição",
             "terms": [
               "if"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -32177,13 +33413,21 @@
             "terms": [
               "used to",
               "use to"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "ação repetida com would",
             "terms": [
               "would"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "contraste com o presente",
@@ -32191,7 +33435,11 @@
               "now",
               "today",
               "these days"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -32744,7 +33992,11 @@
               "ourselves",
               "yourselves",
               "themselves"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 3
           },
           {
             "label": "expressão com by",
@@ -32754,7 +34006,11 @@
               "by himself",
               "by herself",
               "by ourselves"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -33284,7 +34540,11 @@
             "label": "cena com while",
             "terms": [
               "while"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "um reflexivo",
@@ -33295,7 +34555,11 @@
               "itself",
               "ourselves",
               "themselves"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "preposição de lugar com pronome comum",
@@ -33306,7 +34570,11 @@
               "around me",
               "next to him",
               "next to her"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -33832,7 +35100,11 @@
               "do you know",
               "i was wondering",
               "would it be possible"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "distinct_terms",
+            "min_count": 3
           },
           {
             "label": "justificativa",
@@ -33840,7 +35112,11 @@
               "because",
               "so that",
               "since"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -34367,14 +35643,19 @@
             "terms": [
               "said",
               "told"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "uma fala entre aspas",
-            "terms": [
-              "\"",
-              "“"
-            ]
+            "terms": [],
+            "kind": "quoted_speech",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "comparar opiniões",
@@ -34384,7 +35665,11 @@
               "while",
               "both",
               "different"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -34911,13 +36196,26 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "talk to e talk about",
+            "label": "talk to ou talked to",
             "terms": [
               "talk to",
-              "talked to",
+              "talked to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "talk about ou talked about",
+            "terms": [
               "talk about",
               "talked about"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "speak num sentido formal",
@@ -34925,13 +36223,21 @@
               "speak",
               "spoke",
               "speaking"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "mudar de assunto",
             "terms": [
               "speaking of"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -35460,7 +36766,11 @@
               "told her",
               "told him",
               "tell me"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "say",
@@ -35468,7 +36778,11 @@
               "said",
               "say",
               "saying"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "expressão fixa",
@@ -35478,7 +36792,11 @@
               "say hello",
               "tell a story",
               "say sorry"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -35985,23 +37303,35 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "will be + -ing",
+            "label": "três ocorrências de will be ou 'll be (confira verbo com -ing)",
             "terms": [
               "will be",
               "'ll be"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
-            "label": "going to be + -ing",
+            "label": "going to be (confira verbo com -ing)",
             "terms": [
               "going to be"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "contraste com futuro simples",
             "terms": [
-              "will "
-            ]
+              "will"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -36529,25 +37859,47 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "had better, inclusive negativo",
+            "label": "duas ocorrências de had better ou 'd better",
             "terms": [
               "had better",
-              "'d better",
-              "better not"
-            ]
+              "'d better"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "would rather",
             "terms": [
               "would rather",
               "'d rather"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "comparação",
             "terms": [
               "than"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "um conselho negativo",
+            "terms": [
+              "had better not",
+              "'d better not"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -37071,22 +38423,34 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "past perfect continuous",
+            "label": "três ocorrências de had been (confira verbo com -ing)",
             "terms": [
               "had been"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 3
           },
           {
             "label": "duração",
             "terms": [
-              "for "
-            ]
+              "for"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "o que interrompeu",
             "terms": [
               "when"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -37623,28 +38987,49 @@
         "min_sentences": 7,
         "requirements": [
           {
-            "label": "look like e look alike",
+            "label": "look like ou looks like",
             "terms": [
               "look like",
-              "looks like",
+              "looks like"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
+          },
+          {
+            "label": "look alike ou looks alike",
+            "terms": [
               "look alike",
               "looks alike"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "dois comparativos",
             "terms": [
               "than"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "intensificador",
             "terms": [
-              "much ",
-              "a lot ",
-              "far ",
-              "a little "
-            ]
+              "much",
+              "a lot",
+              "far",
+              "a little"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -38173,14 +39558,22 @@
             "terms": [
               "why don't",
               "why doesn't"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
             "label": "How about",
             "terms": [
               "how about",
               "what about"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "recusa educada",
@@ -38188,7 +39581,11 @@
               "thanks, but",
               "thank you, but",
               "maybe another time"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -38721,15 +40118,22 @@
               "have to",
               "ought to",
               "supposed to"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "all",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
-            "label": "expectativa não cumprida",
+            "label": "expectativa anterior (explique se foi cumprida)",
             "terms": [
               "was supposed to",
-              "were supposed to",
-              "but"
-            ]
+              "were supposed to"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -39247,16 +40651,22 @@
           {
             "label": "condicional real",
             "terms": [
-              "if "
-            ]
+              "if"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 2
           },
           {
-            "label": "conselho hipotético",
+            "label": "conselho com if I were you",
             "terms": [
-              "if i were",
-              "i would",
-              "i'd "
-            ]
+              "if i were you"
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "vocabulário de emergência",
@@ -39266,7 +40676,11 @@
               "fire",
               "exit",
               "safety"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }
@@ -39807,7 +41221,11 @@
               "dream of",
               "dreamed of",
               "dreaming of"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "infinitivo com to",
@@ -39816,7 +41234,11 @@
               "plan to",
               "would love to",
               "'d love to"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           },
           {
             "label": "o que separa plano de sonho",
@@ -39825,7 +41247,11 @@
               "but",
               "while",
               "whereas"
-            ]
+            ],
+            "kind": "markers",
+            "match_mode": "any",
+            "count_mode": "occurrences",
+            "min_count": 1
           }
         ]
       }

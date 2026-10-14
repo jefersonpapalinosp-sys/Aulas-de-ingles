@@ -73,7 +73,7 @@ const entry = {
   updated_at: '2026-10-08T00:30:00Z',
 }
 
-function mockQueries(entries = [entry]) {
+function mockQueries(entries = [entry], feedbacks: unknown[] = []) {
   clientMocks.GET.mockImplementation(async (path) => {
     if (path === '/api/me/notebook') return { data: entries }
     if (path === '/api/speaking/attempts') return { data: [] }
@@ -91,7 +91,7 @@ function mockQueries(entries = [entry]) {
             draft_text: 'The train is faster.',
             updated_at: '2026-10-08T00:30:00Z',
             revisions: [{ id: 3, version: 1, text: 'The train is fast.', created_at: '2026-10-08T00:20:00Z' }],
-            feedbacks: [],
+            feedbacks,
           },
         ],
       }
@@ -144,6 +144,21 @@ function mockCurriculum() {
 }
 
 describe('NotebookPage', () => {
+  it('explica a regra antiga no histórico sem alterar o resultado salvo', async () => {
+    const user = userEvent.setup()
+    mockCurriculum()
+    mockQueries([], [{
+      id: 77, algorithm_version: 'legacy-v1', rubric_version: null,
+      evaluation_scope: 'Não garante gramática correta.', created_at: '2026-10-08T00:30:00Z',
+    }])
+    renderNotebook()
+    const summary = await screen.findByText('Regras das análises salvas')
+    await user.click(summary)
+    expect(summary.closest('details')).toHaveAttribute('open')
+    expect(screen.getByText('Regra anterior · resultado preservado')).toBeVisible()
+    expect(screen.getByText(/O resultado original não foi recalculado/)).toBeVisible()
+  })
+
   it('cria, edita e exclui uma anotação privada', async () => {
     const user = userEvent.setup()
     mockCurriculum()

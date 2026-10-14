@@ -1,7 +1,7 @@
 """Health check: liveness simples e readiness que de fato toca o banco."""
 
 import logging
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel
@@ -20,9 +20,10 @@ class HealthOut(BaseModel):
     db: str
     version: str | None = None
     env: str
+    code: Literal["service_unavailable"] | None = None
 
 
-@router.get("/health", response_model=HealthOut)
+@router.get("/health", response_model=HealthOut, responses={503: {"model": HealthOut}})
 async def health(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_session)],
@@ -39,9 +40,17 @@ async def health(
         # "PostgreSQL 16.4 (Debian ...) on aarch64..." -> "PostgreSQL 16.4"
         version = " ".join(str(raw).split()[:2])
     except Exception:
-        log.exception("health: banco indisponível")
+        log.warning("health: banco indisponível")
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-        return HealthOut(status="degraded", db="down", version=None, env=settings.app_env)
+        response.headers["X-Error-Code"] = "service_unavailable"
+        response.headers["Cache-Control"] = "no-store"
+        return HealthOut(
+            status="degraded",
+            db="down",
+            version=None,
+            env=settings.app_env,
+            code="service_unavailable",
+        )
 
     return HealthOut(status="ok", db="up", version=version, env=settings.app_env)
 

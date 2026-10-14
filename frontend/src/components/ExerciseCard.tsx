@@ -106,9 +106,10 @@ export function ExerciseCard({
   const firstReorderRef = useRef<HTMLButtonElement>(null)
   const firstClassificationRef = useRef<HTMLSelectElement>(null)
   const qc = useQueryClient()
+  const pendingSubmission = useRef<{ answer: string; key: string } | null>(null)
 
   function saveForLater(answer: string, key: string) {
-    queueAttempt({
+    return queueAttempt({
       userId,
       exerciseId: exercicio.id,
       answer,
@@ -127,7 +128,7 @@ export function ExerciseCard({
     networkMode: 'always',
     mutationFn: async ({ answer, key }: { answer: string; key: string }) => {
       if (!navigator.onLine) {
-        saveForLater(answer, key)
+        await saveForLater(answer, key)
         return { data: null, key }
       }
       let result
@@ -150,14 +151,14 @@ export function ExerciseCard({
           error instanceof TypeError ||
           (error instanceof DOMException && error.name === 'NetworkError')
         ) {
-          saveForLater(answer, key)
+          await saveForLater(answer, key)
           return { data: null, key }
         }
         throw error
       }
       const { data, response } = result
       if (!data && !response) {
-        saveForLater(answer, key)
+        await saveForLater(answer, key)
         return { data: null, key }
       }
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao conferir.`)
@@ -175,6 +176,7 @@ export function ExerciseCard({
         })
         return
       }
+      pendingSubmission.current = null
       setVeredito(
         data.correct
           ? { tipo: 'certo', explicacao: data.explanation }
@@ -326,8 +328,11 @@ export function ExerciseCard({
           className="ex-row"
           onSubmit={(e) => {
             e.preventDefault()
-            if (texto.trim() && !finalizado) {
-              conferir.mutate({ answer: texto, key: crypto.randomUUID() })
+            if (texto.trim() && !finalizado && !ocupado) {
+              if (pendingSubmission.current?.answer !== texto) {
+                pendingSubmission.current = { answer: texto, key: crypto.randomUUID() }
+              }
+              conferir.mutate(pendingSubmission.current)
             }
           }}
         >
@@ -344,7 +349,7 @@ export function ExerciseCard({
                       id={selectId}
                       ref={index === 0 ? firstClassificationRef : undefined}
                       value={classificacoes[item] ?? ''}
-                      disabled={finalizado}
+                      disabled={finalizado || ocupado}
                       onChange={(event) => atualizarClassificacao(item, event.target.value)}
                     >
                       <option value="">Selecione uma categoria</option>
@@ -371,7 +376,7 @@ export function ExerciseCard({
                     type="button"
                     key={`${word}-${index}`}
                     aria-label={`Remover ${word}`}
-                    disabled={finalizado}
+                    disabled={finalizado || ocupado}
                     onClick={() => atualizarOrdem(ordem.filter((_, itemIndex) => itemIndex !== index))}
                   >
                     {word}
@@ -385,7 +390,7 @@ export function ExerciseCard({
                   type="button"
                   key={`${word}-${index}`}
                   ref={index === 0 ? firstReorderRef : undefined}
-                  disabled={finalizado || ordem.includes(word)}
+                  disabled={finalizado || ocupado || ordem.includes(word)}
                   aria-label={`Adicionar ${word}`}
                   onClick={() => atualizarOrdem([...ordem, word])}
                 >
@@ -405,7 +410,7 @@ export function ExerciseCard({
                   name={`exercise-${exercicio.id}`}
                   value={option}
                   checked={texto === option}
-                  disabled={finalizado}
+                  disabled={finalizado || ocupado}
                   onChange={(event) => setTexto(event.target.value)}
                 />
                 <span>{option}</span>
@@ -417,7 +422,7 @@ export function ExerciseCard({
             ref={inputRef}
             type="text"
             value={texto}
-            disabled={finalizado}
+            disabled={finalizado || ocupado}
             onChange={(e) => setTexto(e.target.value)}
             placeholder="sua resposta"
             aria-label={`Resposta do exercício ${numero}`}

@@ -299,8 +299,9 @@ async def test_aula_31_tem_o_conteudo_esperado(client: AsyncClient) -> None:
     }
     assert [item["terms"] for item in a["writing_prompts"][0]["requirements"]] == [
         ["than"],
-        ["should", "ought"],
+        ["should", "ought to"],
     ]
+    assert all(item["match_mode"] == "any" for item in a["writing_prompts"][0]["requirements"])
     assert a["media"][0]["kind"] == "conversation_audio"
     assert a["media"][0]["duration_seconds"] == 209
     assert a["media"][0]["source_url"].endswith("81890cf1-5a16-4426-87db-fdb240c750cc_hq.mp3")

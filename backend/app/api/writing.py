@@ -1,13 +1,16 @@
 """Rascunhos, versões e feedback da produção escrita."""
 
 import asyncio
+from hashlib import sha256
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.assist import assisted_usage
+from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
@@ -22,7 +25,8 @@ from app.db.models import (
     WritingRevision,
 )
 from app.db.session import get_session
-from app.domain.writing import analyze_writing
+from app.domain.writing import analyze_writing, rubric_snapshot
+from app.domain.writing_rubric import ALGORITHM_VERSION, EVALUATION_SCOPE
 from app.schemas.assist import HumanRatingIn
 from app.schemas.writing import (
     WritingDraftIn,
@@ -40,11 +44,16 @@ router = APIRouter(prefix="/writing", tags=["writing"])
 
 def _feedback_out(record: WritingFeedbackRecord) -> WritingFeedbackOut:
     return WritingFeedbackOut(
+        source_text_hash=sha256(record.text.encode()).hexdigest(),
         id=record.id,
         word_count=record.word_count,
         sentence_count=record.sentence_count,
         ready=record.ready,
         checks=[WritingFeedbackCheckOut.model_validate(check) for check in record.checks],
+        algorithm_version=record.algorithm_version,
+        rubric_version=record.rubric_version,
+        rubric_snapshot=record.rubric_snapshot,
+        evaluation_scope=EVALUATION_SCOPE,
         analysis_mode=record.analysis_mode,  # type: ignore[arg-type]
         evaluation_only=record.analysis_mode != "deterministic",
         provider=record.provider,
@@ -84,6 +93,7 @@ def _draft_out(prompt_id: int, draft: WritingDraft | None) -> WritingDraftOut:
     if draft is None:
         return WritingDraftOut(prompt_id=prompt_id, text="", updated_at=None, revisions=[])
     return WritingDraftOut(
+        revision=draft.revision,
         prompt_id=prompt_id,
         text=draft.text,
         updated_at=draft.updated_at,
@@ -92,6 +102,45 @@ def _draft_out(prompt_id: int, draft: WritingDraft | None) -> WritingDraftOut:
             for revision in draft.revisions
         ],
     )
+
+
+async def _locked_draft(
+    session: AsyncSession, prompt: WritingPrompt, user_id: int, body: WritingDraftIn
+) -> WritingDraft:
+    require_revision(body.expected_revision)
+    await session.execute(
+        insert(WritingDraft)
+        .values(
+            user_id=user_id,
+            prompt_id=prompt.id,
+            text="",
+            revision=0,
+        )
+        .on_conflict_do_nothing(constraint="uq_writing_draft_user_prompt")
+    )
+    draft = (
+        await session.execute(
+            select(WritingDraft)
+            .where(
+                WritingDraft.prompt_id == prompt.id,
+                WritingDraft.user_id == user_id,
+            )
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+    ).scalar_one()
+    if (
+        body.expected_revision is not None
+        and body.expected_revision != draft.revision
+        and (body.text != draft.text or body.expected_revision > draft.revision)
+    ):
+        raise conflict(
+            "draft_revision_conflict", _draft_out(prompt.id, draft).model_dump(mode="json")
+        )
+    if draft.text != body.text:
+        draft.text = body.text
+        draft.revision += 1
+    return draft
 
 
 @router.get("/prompts/{prompt_id}/draft", response_model=WritingDraftOut)
@@ -112,11 +161,7 @@ async def salvar_rascunho(
     corpo: Annotated[WritingDraftIn, Body()],
 ) -> WritingDraftOut:
     prompt = await _prompt(session, prompt_id)
-    draft = await _draft(session, prompt, usuario.id)
-    if draft is None:
-        draft = WritingDraft(user_id=usuario.id, prompt_id=prompt.id)
-        session.add(draft)
-    draft.text = corpo.text
+    draft = await _locked_draft(session, prompt, usuario.id, corpo)
     await session.commit()
     await session.refresh(draft)
     return _draft_out(prompt.id, draft)
@@ -134,13 +179,7 @@ async def criar_versao(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Texto vazio."
         )
     prompt = await _prompt(session, prompt_id)
-    draft = await _draft(session, prompt, usuario.id)
-    if draft is None:
-        draft = WritingDraft(user_id=usuario.id, prompt_id=prompt.id, text=corpo.text)
-        session.add(draft)
-        await session.flush()
-    else:
-        draft.text = corpo.text
+    draft = await _locked_draft(session, prompt, usuario.id, corpo)
 
     latest = (
         await session.execute(
@@ -152,7 +191,9 @@ async def criar_versao(
     ).scalar_one_or_none()
     if latest is not None and latest.text == corpo.text:
         await session.commit()
-        return WritingRevisionOut.model_validate(latest, from_attributes=True)
+        return WritingRevisionOut.model_validate(latest, from_attributes=True).model_copy(
+            update={"draft_revision": draft.revision}
+        )
 
     next_version = (
         await session.execute(
@@ -165,7 +206,9 @@ async def criar_versao(
     session.add(revision)
     await session.commit()
     await session.refresh(revision)
-    return WritingRevisionOut.model_validate(revision, from_attributes=True)
+    return WritingRevisionOut.model_validate(revision, from_attributes=True).model_copy(
+        update={"draft_revision": draft.revision}
+    )
 
 
 @router.post("/prompts/{prompt_id}/feedback", response_model=WritingFeedbackOut)
@@ -249,6 +292,13 @@ async def analisar_texto(
                     assisted_confidence = assisted.confidence
                     assisted_cost = assisted.cost_microusd
 
+    rubric_version, snapshot = rubric_snapshot(
+        title=prompt.title,
+        instructions=prompt.instructions,
+        min_words=prompt.min_words,
+        min_sentences=prompt.min_sentences,
+        requirements=prompt.requirements,
+    )
     record = WritingFeedbackRecord(
         user_id=usuario.id,
         prompt_id=prompt.id,
@@ -257,6 +307,9 @@ async def analisar_texto(
         sentence_count=sentence_count,
         ready=ready,
         checks=[check.__dict__ for check in checks],
+        algorithm_version=ALGORITHM_VERSION,
+        rubric_version=rubric_version,
+        rubric_snapshot=snapshot,
         analysis_mode=mode,
         provider=provider,
         assisted_summary=assisted_summary,

@@ -47,10 +47,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Sair
-         * @description Revoga a sessão de refresh e apaga o cookie.
-         */
+        /** Sair */
         post: operations["sair_api_auth_logout_post"];
         delete?: never;
         options?: never;
@@ -84,10 +81,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Renovar
-         * @description Troca o refresh por um access novo. O refresh antigo é revogado.
-         */
+        /** Renovar */
         post: operations["renovar_api_auth_refresh_post"];
         delete?: never;
         options?: never;
@@ -1077,6 +1071,20 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ApiErrorOut */
+        ApiErrorOut: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "session_invalid" | "invalid_credentials" | "conflict" | "service_unavailable";
+            /** Detail */
+            detail: string | {
+                [key: string]: unknown;
+            };
+            /** Request Id */
+            request_id: string;
+        };
         /** AssistStatusOut */
         AssistStatusOut: {
             /** Cost Microusd Today */
@@ -1189,6 +1197,11 @@ export interface components {
             reason: string;
             /** Repetitions */
             repetitions: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
             /** Skill */
             skill: string;
             /**
@@ -1643,6 +1656,10 @@ export interface components {
         };
         /** GradeIn */
         GradeIn: {
+            /** Expected Revision */
+            expected_revision?: number | null;
+            /** Idempotency Key */
+            idempotency_key?: string | null;
             /**
              * Quality
              * @description 0-2 errou · 3 acertou com dificuldade · 4 acertou · 5 fácil
@@ -1666,6 +1683,11 @@ export interface components {
             lapses: number;
             /** Repetitions */
             repetitions: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
         };
         /** GrammarBlockOut */
         GrammarBlockOut: {
@@ -1695,6 +1717,8 @@ export interface components {
         };
         /** HealthOut */
         HealthOut: {
+            /** Code */
+            code?: "service_unavailable" | null;
             /** Db */
             db: string;
             /** Env */
@@ -2452,6 +2476,8 @@ export interface components {
              * @enum {string}
              */
             current_step: "preparar" | "assistir" | "estudar" | "praticar" | "revisar";
+            /** Expected Revision */
+            expected_revision?: number | null;
         };
         /** StudySessionOut */
         StudySessionOut: {
@@ -2466,6 +2492,11 @@ export interface components {
             current_step: "preparar" | "assistir" | "estudar" | "praticar" | "revisar";
             /** Lesson Number */
             lesson_number: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
             /** Started At */
             started_at: string | null;
             /** Total Seconds */
@@ -2653,6 +2684,8 @@ export interface components {
         };
         /** WritingDraftIn */
         WritingDraftIn: {
+            /** Expected Revision */
+            expected_revision?: number | null;
             /** Text */
             text: string;
         };
@@ -2660,6 +2693,11 @@ export interface components {
         WritingDraftOut: {
             /** Prompt Id */
             prompt_id: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
             /** Revisions */
             revisions: components["schemas"]["WritingRevisionOut"][];
             /** Text */
@@ -2685,11 +2723,15 @@ export interface components {
              * @default false
              */
             assisted: boolean;
+            /** Expected Revision */
+            expected_revision?: number | null;
             /** Text */
             text: string;
         };
         /** WritingFeedbackOut */
         WritingFeedbackOut: {
+            /** Algorithm Version */
+            algorithm_version: string;
             /**
              * Analysis Mode
              * @enum {string}
@@ -2722,6 +2764,8 @@ export interface components {
             created_at: string;
             /** Evaluation Only */
             evaluation_only: boolean;
+            /** Evaluation Scope */
+            evaluation_scope: string;
             /** Human Rating */
             human_rating: ("helpful" | "not_helpful") | null;
             /** Id */
@@ -2732,8 +2776,16 @@ export interface components {
             provider: string | null;
             /** Ready */
             ready: boolean;
+            /** Rubric Snapshot */
+            rubric_snapshot: {
+                [key: string]: unknown;
+            } | null;
+            /** Rubric Version */
+            rubric_version: string | null;
             /** Sentence Count */
             sentence_count: number;
+            /** Source Text Hash */
+            source_text_hash: string;
             /** Word Count */
             word_count: number;
         };
@@ -2782,10 +2834,36 @@ export interface components {
             /** Title */
             title: string;
         };
-        /** WritingRequirementOut */
+        /**
+         * WritingRequirementOut
+         * @description Contrato compatível com label/terms; explicita alternativa e quantidade.
+         */
         WritingRequirementOut: {
+            /**
+             * Count Mode
+             * @default occurrences
+             * @enum {string}
+             */
+            count_mode: "occurrences" | "distinct_terms";
+            /**
+             * Kind
+             * @default markers
+             * @enum {string}
+             */
+            kind: "markers" | "quoted_speech";
             /** Label */
             label: string;
+            /**
+             * Match Mode
+             * @default any
+             * @enum {string}
+             */
+            match_mode: "any" | "all";
+            /**
+             * Min Count
+             * @default 1
+             */
+            min_count: number;
             /** Terms */
             terms: string[];
         };
@@ -2796,6 +2874,11 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /**
+             * Draft Revision
+             * @default 0
+             */
+            draft_revision: number;
             /** Id */
             id: number;
             /** Text */
@@ -2830,6 +2913,33 @@ export interface operations {
                     "application/json": components["schemas"]["AssistStatusOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
         };
     };
     entrar_api_auth_login_post: {
@@ -2854,6 +2964,24 @@ export interface operations {
                     "application/json": components["schemas"]["TokenOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -2861,6 +2989,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -2880,6 +3017,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
             };
         };
     };
@@ -2901,6 +3065,33 @@ export interface operations {
                     "application/json": components["schemas"]["UsuarioOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
         };
     };
     renovar_api_auth_refresh_post: {
@@ -2919,6 +3110,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -2945,6 +3163,24 @@ export interface operations {
                     "application/json": components["schemas"]["TokenOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -2952,6 +3188,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -2972,6 +3217,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseSummaryOut"][];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -2996,6 +3268,24 @@ export interface operations {
                     "application/json": components["schemas"]["CourseCompletionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3003,6 +3293,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3027,6 +3326,24 @@ export interface operations {
                     "application/json": components["schemas"]["CourseCurriculumOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3034,6 +3351,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3059,6 +3385,24 @@ export interface operations {
                     "application/json": components["schemas"]["LessonDetailOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3066,6 +3410,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3095,6 +3448,24 @@ export interface operations {
                     "application/json": components["schemas"]["ExerciseOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3102,6 +3473,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3140,6 +3520,24 @@ export interface operations {
                     "application/json": components["schemas"]["PracticeSessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3147,6 +3545,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3179,6 +3586,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3186,6 +3611,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3209,6 +3643,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3216,6 +3668,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3239,6 +3700,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3246,6 +3725,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3271,6 +3759,24 @@ export interface operations {
                     "application/json": components["schemas"]["StudySessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3278,6 +3784,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3307,6 +3822,24 @@ export interface operations {
                     "application/json": components["schemas"]["StudySessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3314,6 +3847,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3339,6 +3881,24 @@ export interface operations {
                     "application/json": components["schemas"]["CourseReviewDetailOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3346,6 +3906,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3384,6 +3953,24 @@ export interface operations {
                     "application/json": components["schemas"]["CourseReviewAttemptOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3391,6 +3978,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3420,6 +4016,24 @@ export interface operations {
                     "application/json": components["schemas"]["ExerciseWithLessonOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3427,6 +4041,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3451,6 +4074,24 @@ export interface operations {
                     "application/json": components["schemas"]["RevealAnswerOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3458,6 +4099,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3486,6 +4136,24 @@ export interface operations {
                     "application/json": components["schemas"]["AttemptOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3493,6 +4161,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3518,6 +4195,24 @@ export interface operations {
                     "application/json": components["schemas"]["ExerciseHintOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3525,6 +4220,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3540,6 +4244,33 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3570,6 +4301,24 @@ export interface operations {
                     "application/json": components["schemas"]["LessonSummaryOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3577,6 +4326,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3601,6 +4359,24 @@ export interface operations {
                     "application/json": components["schemas"]["LessonDetailOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3608,6 +4384,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3630,6 +4415,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3637,6 +4440,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3659,6 +4471,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3666,6 +4496,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3690,6 +4529,24 @@ export interface operations {
                     "application/json": components["schemas"]["StudySessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3697,6 +4554,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3725,6 +4591,24 @@ export interface operations {
                     "application/json": components["schemas"]["StudySessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3732,6 +4616,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3756,6 +4649,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
         };
     };
     exportar_dados_api_me_export_get: {
@@ -3774,6 +4694,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PersonalDataExportOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3801,6 +4748,24 @@ export interface operations {
                     "application/json": components["schemas"]["NotebookEntryOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3808,6 +4773,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3834,6 +4808,24 @@ export interface operations {
                     "application/json": components["schemas"]["NotebookEntryOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3841,6 +4833,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3869,6 +4870,24 @@ export interface operations {
                     "application/json": components["schemas"]["NotebookEntryOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3876,6 +4895,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3898,6 +4926,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3905,6 +4951,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3932,6 +4987,24 @@ export interface operations {
                     "application/json": components["schemas"]["ProgressOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3939,6 +5012,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3964,6 +5046,24 @@ export interface operations {
                     "application/json": components["schemas"]["SkillSummaryOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3971,6 +5071,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -3991,6 +5100,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StudyPlanOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4017,6 +5153,24 @@ export interface operations {
                     "application/json": components["schemas"]["StudyPlanOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4024,6 +5178,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4048,6 +5211,24 @@ export interface operations {
                     "application/json": components["schemas"]["TodayOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4055,6 +5236,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4079,6 +5269,24 @@ export interface operations {
                     "application/json": components["schemas"]["MediaPositionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4086,6 +5294,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4114,6 +5331,24 @@ export interface operations {
                     "application/json": components["schemas"]["MediaPositionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4121,6 +5356,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4143,6 +5387,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4150,6 +5412,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4174,6 +5445,24 @@ export interface operations {
                     "application/json": components["schemas"]["PracticeSessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4181,6 +5470,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4207,6 +5505,24 @@ export interface operations {
                     "application/json": components["schemas"]["PracticeHintOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4214,6 +5530,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4239,6 +5564,24 @@ export interface operations {
                     "application/json": components["schemas"]["PracticeRevealOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4246,6 +5589,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4274,6 +5626,24 @@ export interface operations {
                     "application/json": components["schemas"]["PracticeSessionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4281,6 +5651,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4310,6 +5689,24 @@ export interface operations {
                     "application/json": components["schemas"]["CardOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4317,6 +5714,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4343,6 +5749,24 @@ export interface operations {
                     "application/json": components["schemas"]["CardOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4350,6 +5774,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4374,6 +5807,24 @@ export interface operations {
                     "application/json": components["schemas"]["DeckSummaryOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4381,6 +5832,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4405,6 +5865,24 @@ export interface operations {
                     "application/json": components["schemas"]["DeckSummaryOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4412,6 +5890,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4434,6 +5921,33 @@ export interface operations {
                     "application/json": components["schemas"]["DeckSummaryOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
         };
     };
     excluir_item_api_review__item_id__delete: {
@@ -4454,6 +5968,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4461,6 +5993,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4489,6 +6030,24 @@ export interface operations {
                     "application/json": components["schemas"]["CardOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4496,6 +6055,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4524,6 +6092,24 @@ export interface operations {
                     "application/json": components["schemas"]["GradeOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4531,6 +6117,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4557,6 +6152,24 @@ export interface operations {
                     "application/json": components["schemas"]["SpeakingAttemptOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4564,6 +6177,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4590,6 +6212,24 @@ export interface operations {
                     "application/json": components["schemas"]["SpeakingAttemptOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4597,6 +6237,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4619,6 +6268,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4626,6 +6293,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4650,6 +6326,24 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4657,6 +6351,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4681,6 +6384,24 @@ export interface operations {
                     "application/json": components["schemas"]["SpeakingAttemptOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4688,6 +6409,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4712,6 +6442,24 @@ export interface operations {
                     "application/json": components["schemas"]["TranscriptionJobOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4719,6 +6467,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4741,6 +6498,24 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4748,6 +6523,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4776,6 +6560,24 @@ export interface operations {
                     "application/json": components["schemas"]["TranscriptionJobOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4783,6 +6585,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4810,6 +6621,24 @@ export interface operations {
                     "application/json": components["schemas"]["VocabItemWithLessonOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4817,6 +6646,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4845,6 +6683,24 @@ export interface operations {
                     "application/json": components["schemas"]["WritingFeedbackOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4852,6 +6708,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4877,6 +6742,24 @@ export interface operations {
                     "application/json": components["schemas"]["WritingHistoryItemOut"][];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4884,6 +6767,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4908,6 +6800,24 @@ export interface operations {
                     "application/json": components["schemas"]["WritingDraftOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4915,6 +6825,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4943,6 +6862,24 @@ export interface operations {
                     "application/json": components["schemas"]["WritingDraftOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4950,6 +6887,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -4978,6 +6924,24 @@ export interface operations {
                     "application/json": components["schemas"]["WritingFeedbackOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4985,6 +6949,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };
@@ -5013,6 +6986,24 @@ export interface operations {
                     "application/json": components["schemas"]["WritingRevisionOut"];
                 };
             };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -5020,6 +7011,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
         };

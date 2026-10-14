@@ -29,6 +29,7 @@
   "include": [
     "src",
     "vite.config.ts",
+    "vite.queue-test.config.ts",
     "eslint.config.js"
   ]
 }

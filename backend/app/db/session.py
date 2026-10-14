@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.config import get_settings
+from app.db.role_safety import connect_args, guard_role_engine
+from app.db.test_safety import guard_test_engine, validate_test_target
 
 _engine: AsyncEngine | None = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
@@ -19,12 +21,20 @@ def get_engine() -> AsyncEngine:
     """Engine único do processo, criado na primeira chamada."""
     global _engine
     if _engine is None:
+        settings = get_settings()
+        if settings.app_env == "test":
+            validate_test_target(settings.database_url, settings.app_env)
         _engine = create_async_engine(
-            get_settings().database_url,
+            settings.database_url,
             pool_pre_ping=True,
             pool_size=5,
             max_overflow=5,
+            connect_args=connect_args(settings.database_purpose),
         )
+        if settings.app_env == "test":
+            guard_test_engine(_engine, settings.database_url, settings.app_env)
+        if settings.database_purpose:
+            guard_role_engine(_engine, settings.database_purpose)
     return _engine
 
 

@@ -3,7 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Exercise } from '../api/client'
-import { listQueuedAttempts } from '../features/offline/attemptQueue'
+import { IDBObjectStore } from 'fake-indexeddb'
+import { listQueuedAttempts, queueAttempt } from '../features/offline/attemptQueue'
+import { attemptStore } from '../features/offline/attemptQueueStore'
 import type { PracticeSessionItem } from '../features/practice/types'
 import { ExerciseCard } from './ExerciseCard'
 
@@ -62,6 +64,7 @@ beforeEach(() => {
 afterEach(() => {
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
   vi.resetAllMocks()
+  vi.restoreAllMocks()
 })
 
 describe('ExerciseCard', () => {
@@ -159,7 +162,7 @@ describe('ExerciseCard', () => {
 
     expect(await screen.findByText('Na fila')).toBeInTheDocument()
     expect(api.POST).not.toHaveBeenCalled()
-    expect(listQueuedAttempts(7)).toEqual([
+    expect(await listQueuedAttempts(7)).toEqual([
       expect.objectContaining({
         exerciseId: 1,
         answer: 'faster',
@@ -182,7 +185,7 @@ describe('ExerciseCard', () => {
     const rawRequest = vi.mocked(api.POST).mock.calls[0]?.[1]
     if (!rawRequest) throw new Error('A tentativa não chegou à API.')
     const request = rawRequest as { body: { idempotency_key: string } }
-    expect(listQueuedAttempts(7)).toEqual([
+    expect(await listQueuedAttempts(7)).toEqual([
       expect.objectContaining({
         exerciseId: 1,
         answer: 'faster',
@@ -206,7 +209,59 @@ describe('ExerciseCard', () => {
     await user.click(screen.getByRole('button', { name: 'Verificar' }))
 
     expect(await screen.findByText('Erro')).toBeInTheDocument()
-    expect(listQueuedAttempts(7)).toEqual([])
+    expect(await listQueuedAttempts(7)).toEqual([])
+  })
+
+  it('resposta 101 continua no campo e não é anunciada como salva', async () => {
+    await Promise.all(Array.from({ length: 100 }, (_, index) => queueAttempt({
+      userId: 7, exerciseId: index + 1, answer: 'antiga', idempotencyKey: `full-${index}`,
+      createdAt: '2026-10-13T10:00:00Z',
+    })))
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    const user = userEvent.setup()
+    const activity = vi.fn()
+    montar({ onActivity: activity })
+    await user.type(screen.getByRole('textbox'), 'faster')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+    expect(await screen.findByText(/atingiu 100/)).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toHaveValue('faster')
+    expect(screen.queryByText('Na fila')).not.toBeInTheDocument()
+    expect(activity).not.toHaveBeenCalled()
+    expect(await listQueuedAttempts(7)).toHaveLength(100)
+  })
+
+  it('quota mantém resposta editável e retry conserva a chave da operação incerta', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.POST).mockRejectedValueOnce(new TypeError('Resposta da rede perdida'))
+    const quota = vi.spyOn(IDBObjectStore.prototype, 'add').mockImplementation(() => { throw new DOMException('Quota', 'QuotaExceededError') })
+    montar()
+    await user.type(screen.getByRole('textbox'), 'faster')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+    expect(await screen.findByText(/armazenamento está cheio/)).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toHaveValue('faster')
+    expect(screen.getByRole('textbox')).toBeEnabled()
+    expect(screen.queryByText('Na fila')).not.toBeInTheDocument()
+    quota.mockRestore()
+    vi.mocked(api.POST).mockResolvedValueOnce({ data: feedback(true), response: new Response() } as never)
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+    expect(await screen.findByText('Correto')).toBeInTheDocument()
+    expect(vi.mocked(api.POST).mock.calls[1]?.[1]).toEqual(vi.mocked(api.POST).mock.calls[0]?.[1])
+  })
+
+  it('aguarda confirmação da persistência antes de mostrar Na fila', async () => {
+    const user = userEvent.setup()
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    let confirm!: (value: boolean) => void
+    const pending = new Promise<boolean>((resolve) => { confirm = resolve })
+    vi.spyOn(attemptStore, 'add').mockReturnValueOnce(pending)
+    montar()
+    await user.type(screen.getByRole('textbox'), 'faster')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+    expect(screen.queryByText('Na fila')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verificar' })).toBeDisabled()
+    expect(screen.getByRole('textbox')).toBeDisabled()
+    confirm(true)
+    expect(await screen.findByText('Na fila')).toBeInTheDocument()
   })
 
   it('libera as dicas em níveis e exige tentativa antes da segunda', async () => {
@@ -387,7 +442,7 @@ describe('ExerciseCard', () => {
     await user.click(screen.getByRole('button', { name: 'Verificar' }))
 
     expect(await screen.findByText('Na fila')).toBeInTheDocument()
-    expect(listQueuedAttempts(7)).toEqual([
+    expect(await listQueuedAttempts(7)).toEqual([
       expect.objectContaining({
         answer: '{"careful":"adjective","carefully":"adverb"}',
         courseSlug: 'voa-level-2',

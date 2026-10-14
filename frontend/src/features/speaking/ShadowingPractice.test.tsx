@@ -68,6 +68,7 @@ class FakeMediaRecorder {
 }
 
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.clearAllMocks()
   window.localStorage.clear()
@@ -88,7 +89,34 @@ function renderPractice(courseSlug = 'voa-level-1', lessonNumber = 31) {
   return { ...view, queryClient }
 }
 
+async function recordLocally() {
+  vi.stubGlobal('MediaRecorder', FakeMediaRecorder)
+  vi.stubGlobal('URL', { createObjectURL: vi.fn().mockReturnValue('blob:local-test'), revokeObjectURL: vi.fn() })
+  Object.defineProperty(navigator, 'mediaDevices', { configurable: true,
+    value: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [{ stop: vi.fn() }] }) } })
+  renderPractice()
+  await userEvent.click(screen.getByRole('button', { name: '2. Gravar minha voz' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Parar gravação' }))
+}
+
 describe('ShadowingPractice', () => {
+  it('não anuncia autoavaliação salva quando quota falha', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    await recordLocally()
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
+    await userEvent.click(screen.getByRole('button', { name: 'Confiante' }))
+    expect(screen.getByRole('button', { name: 'Confiante' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText(/Autoavaliação apenas nesta tela/)).toBeInTheDocument()
+    expect(screen.queryByText('Autoavaliação salva neste navegador.')).not.toBeInTheDocument()
+  })
+  it('leitura bloqueada não impede repetir e autoavaliar', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
+    await recordLocally()
+    expect(screen.getByText(/Armazenamento indisponível/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Confiante' }))
+    expect(screen.getByText('Autoavaliação salva neste navegador.')).toBeInTheDocument()
+  })
   it('mantém a prática oral disponível quando a gravação não é suportada', () => {
     clientMocks.GET.mockResolvedValue({ data: [] })
     renderPractice()

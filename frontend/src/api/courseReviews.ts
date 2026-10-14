@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { CourseReviewAttemptInput } from './client'
 import { api } from './client'
+import { ApiError } from './errors'
 
 function reviewError(status: number | undefined): Error {
   if (status === 404) return new Error('Este checkpoint não existe nesta unidade.')
@@ -17,7 +18,7 @@ export function useCourseReview(courseSlug: string, unitSlug: string) {
         '/api/courses/{course_slug}/units/{unit_slug}/review',
         { params: { path: { course_slug: courseSlug, unit_slug: unitSlug } } },
       )
-      if (!data) throw reviewError(response?.status)
+      if (!data) throw new ApiError('o checkpoint da unidade', response)
       return data
     },
     enabled: Boolean(courseSlug && unitSlug),

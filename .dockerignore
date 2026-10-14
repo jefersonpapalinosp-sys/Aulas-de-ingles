@@ -9,6 +9,7 @@ __pycache__/
 .ruff_cache/
 .env
 .env.prod
+backups/
 e2e/
 playwright-report/
 test-results/

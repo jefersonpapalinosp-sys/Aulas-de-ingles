@@ -88,9 +88,12 @@ make seed       # carrega seed/lessons.json (idempotente)
 make openapi    # regrava o baseline do contrato
 
 # testes
-make test       # pytest + vitest
-make cov        # pytest com relatório de cobertura
-make test-e2e   # Playwright contra o compose de produção
+make test       # pytest em banco exclusivo de testes + vitest
+make cov        # prepara o banco exclusivo e roda pytest com cobertura
+make test-db-down # para somente o banco de testes; mantém o volume
+make e2e-up     # stack E2E exclusiva em 5198 (não usa dev/prod)
+make test-e2e   # confere isolamento e executa Playwright
+make e2e-down   # para somente E2E, mantém os volumes sintéticos
 make lint       # ruff + mypy + eslint + tsc
 
 # produção local
@@ -447,6 +450,12 @@ openssl rand -hex 32          # para o JWT_SECRET
 make prod-up                  # http://localhost:5181
 ```
 
+Após a separação de papéis da Sprint 37, o ambiente local existente usa também
+infra/compose.roles.prod.yml e backups/recovery/roles-prod.env. Os comandos
+antigos prod-up/prod-seed são bloqueados nesse perfil. Para manutenção e
+retomada, siga o [runbook local](docs/operacao_sprint_37.md); não reinicie
+código novo antes de aplicar migrations compatíveis.
+
 Diferente do `.env` de dev, aqui **não há default para segredo**: a stack
 recusa subir sem `POSTGRES_PASSWORD`, `DATABASE_URL` e `JWT_SECRET` próprios,
 e a aplicação valida que o segredo tem pelo menos 32 bytes.
@@ -458,8 +467,9 @@ funcionar. Ligue junto com HTTPS, não antes.
 ### Observabilidade
 
 Uma linha de log em JSON por requisição, com `request_id` que também volta no
-cabeçalho `X-Request-ID`. Um id vindo de fora é respeitado, para um proxy na
-frente conseguir amarrar o rastro de ponta a ponta.
+cabeçalho `X-Request-ID`. Um id externo só é aceito com até 128 caracteres
+ASCII seguros (letras, números, ponto, hífen ou underscore); caso contrário
+um identificador novo é gerado, sem registrar o valor inválido.
 
 ```json
 {"ts":"2026-10-07T19:43:50.752Z","level":"INFO","logger":"app.request",
@@ -472,21 +482,344 @@ frente conseguir amarrar o rastro de ponta a ponta.
 
 ### Backup e restore
 
+Os comandos da DB-37 substituem as receitas legadas. Agora o backup é um
+**diretório com PostgreSQL + voz + manifesto/checksums**, não um `.dump`
+isolado. O restore aceita **somente o destino vazio do laboratório**, nunca
+desenvolvimento/produção. Requisitos: Docker local por socket Unix, Compose,
+`uv` e Python 3.12 do projeto (não o Python 3.9 fornecido pelo macOS).
+
 ```bash
-make backup                              # backups/aulas-AAAAMMDD-HHMM.dump
-make restore f=backups/aulas-....dump    # --clean --if-exists
+make test-recovery                 # testes puros, sem banco
+make recovery-lab-up               # projeto/volumes próprios, sem portas
+make recovery-lab-prepare          # só origem vazia; seed + WAV sintético
+make test-recovery-integration     # 2 backups, restore e recusa de repetição
+make recovery-lab-down             # encerra só o laboratório; mantém volumes
 ```
 
-Testado derrubando o schema inteiro (`drop schema public cascade`) e
-restaurando: usuários, cartas de revisão e tentativas voltam intactos.
+Alternativa por etapas, **em vez** de executar o ensaio integrado acima:
+
+```bash
+make backup source=lab
+# Copie o caminho completo publicado pelo comando; não escolha um .partial-*.
+make backup-verify f=backups/recovery/aulas-IDENTIFICADOR-EXATO
+make restore f=backups/recovery/aulas-IDENTIFICADOR-EXATO confirm=aulas-ingles-recovery/target-db
+```
+
+`make backup source=prod` exige uma **janela de manutenção autorizada**: API,
+worker e qualquer outro escritor devem permanecer parados durante toda a
+captura. O comando verifica os serviços, mounts e conexões antes/depois,
+mas não os para, não mata sessões e não impede um administrador de iniciar
+outros escritores. Não há garantia de snapshot online atômico entre banco
+e filesystem. No fechamento técnico da Sprint 37, o backup real foi restaurado
+em destino isolado antes da migration. Há um segundo pacote pós-migration
+verificado, capturado pelo papel limitado de backup. Detalhes e limites no
+[runbook local](docs/operacao_sprint_37.md).
+
+Os pacotes ficam em `backups/recovery/`, com diretórios 700 e arquivos 600,
+fora do Git e do contexto de build Docker. Falhas preservam `.partial-*`
+sem anunciá-los como válidos. Verificar checksums não substitui o restore.
+O destino ocupado é recusado sem limpeza; após o primeiro ensaio ele deve
+ser preservado. Não existe reset automático nem suporte a `--clean`.
+
+Checksums detectam alteração, **não autenticam nem criptografam** o pacote.
+Somente restaure dumps de origem confiável; o laboratório não é sandbox de
+SQL malicioso. Por decisão de Jeferson para o desenvolvimento local, as cópias
+ficam neste Mac (FileVault ativo, sem criptografia independente ou cópia externa).
+Metas acordadas: RPO 24h, RTO 60min a validar, retenção manual 7 diários + 4
+semanais. Sem agendamento instalado ou SLA garantido. Detalhes históricos no
+[registro DB-37](docs/sprints_37_42_banco_de_dados_2026-10-13.md#sétimo-incremento--backup-conjunto-e-restore-isolado-13102026).
 
 ## Testes
 
 | Suíte | O que cobre | Como rodar |
 |---|---|---|
-| pytest | 237 testes contra o Postgres do compose | `make test-api` |
-| vitest | 166 testes de componente, fluxo e parser | `make test-web` |
-| Playwright | 48 cenários em desktop e mobile (96 execuções), contra **produção** | `make prod-up && make test-e2e` |
+| pytest | Unitários e integração em PostgreSQL exclusivo, com guardas de isolamento | `make test-api` |
+| vitest | Componentes, fluxo, armazenamento e parser | `make test-web` |
+| Playwright | Fluxos completos em desktop e mobile, na stack exclusiva | `make e2e-up` e `make test-e2e` |
+
+### Banco exclusivo para testes backend (Sprint 37)
+
+`make test-api` e `make cov` iniciam `infra/compose.test.yml`, verificam o
+destino e aplicam migrations/seed antes da suíte. O projeto Compose é
+`aulas-ingles-test`, o volume é `aulas-ingles-test_test_pgdata` e a porta é
+`127.0.0.1:55435`. Nada disso compartilha o banco de desenvolvimento ou de
+produção local. Não é necessário executar `make up` nem `make prod-up`.
+
+A suíte usa o banco `aulas_ingles_test` e o papel `aulas_test`, sem superusuário,
+criação de bancos ou criação de roles. Esse papel é proprietário **somente do
+banco descartável**, pois as migrations de teste precisam criar tabelas; ele
+não representa o futuro papel runtime da aplicação. As credenciais desse
+Compose são públicas, exclusivas de teste e não devem ser usadas em produção.
+
+Antes da primeira operação da aplicação em cada conexão física, a guarda
+confere ambiente, URL, banco efetivo, usuário, marcador de descarte e
+privilégios. Uma URL de desenvolvimento/produção, marcador ausente ou papel
+administrativo aborta a execução; não existe fallback para as portas 5433/5434.
+O preflight também protege a preparação e o Alembic em `APP_ENV=test`.
+
+Se o terminal exporta `DATABASE_URL` ou `APP_ENV` de outro ambiente, a execução
+é recusada, sem sobrescrever essas variáveis silenciosamente. Use um terminal
+sem essa configuração. `TEST_DATABASE_URL` é opcional para outro host/porta de
+teste, mas exige os mesmos banco, papel e marcador; se `DATABASE_URL` também
+estiver definida, ambas precisam coincidir. O CI backend usa a mesma topologia
+e as mesmas guardas.
+
+Depois de preparar a base, é possível rodar `cd backend && uv run pytest -q`.
+Testes de regras puras não abrem conexão nem executam limpeza de usuários:
+
+```bash
+cd backend
+uv run pytest -q tests/test_sm2.py tests/test_writing_domain.py
+```
+
+`make test-db-down` para apenas o ambiente de testes, preservando seu volume.
+Uma base separada, `aulas_test_sentinel`, contém um registro sintético para
+verificar isolamento; o papel da suíte não tem permissão de conexão nela.
+
+### Stack exclusiva para E2E (Sprint 37)
+
+Instale uma vez `cd e2e && npm ci && npx playwright install chromium`. Na raiz:
+
+```bash
+make e2e-up     # constrói imagens próprias e prepara somente o banco sintético
+make test-e2e   # desktop + mobile; cria contas sintéticas, nunca use sua conta real
+make e2e-down   # encerra os containers E2E; não remove seus volumes
+```
+
+`infra/compose.e2e.yml` usa projeto fixo `aulas-ingles-e2e`, origem exclusiva
+`http://127.0.0.1:5198` e volumes próprios `aulas-ingles-e2e_pgdata` e
+`aulas-ingles-e2e_speaking_data`. Não lê `.env`/`.env.prod`, não publica porta
+de PostgreSQL/API e não herda os volumes globais da produção. O CI usa o mesmo
+comando. Prepare aplica migrations/seed sob a guarda de identidade do banco;
+a API só sobe após a preparação terminar e o web espera o readiness da API.
+
+São os Dockerfiles de produção (bundle/nginx e API sem reload), mas com
+`APP_ENV=test` para habilitar guardas, credenciais públicas **somente de teste**
+e assistência externa desabilitada. Não há worker neste escopo; isto não
+homologa configuração/segredos de produção nem processamento assistido.
+
+Antes de criar contas, o setup do Playwright confere projeto, rede, portas,
+mounts, labels/driver dos volumes, configuração da API, identidade/privilégios
+reais da conexão e readiness HTTP. A base sentinela sintética é lida antes e
+depois da suíte. Falha de verificação aborta, sem fallback para outro ambiente.
+`cd e2e && npm test` também executa essa guarda. Overrides de `E2E_BASE_URL`
+para 5180/5181 ou qualquer outra origem são recusados; testes exigem acesso
+ao Docker local via socket Unix (macOS/Linux). Endpoints Docker TCP/SSH são
+recusados também antes de subir/parar a stack. `cd e2e && npm run test:safety`
+testa as recusas sem banco.
+Estas barreiras evitam enganos operacionais; não são isolamento contra um
+administrador que altere o daemon/configuração durante a execução.
+
+Há uma suíte separada para fila offline e recuperação: `cd e2e && npm run test:queue`.
+Ela inicia seu próprio frontend em `127.0.0.1:5197`, com API simulada e sem proxy
+ou banco. Exige dependências de `frontend`/`e2e` e Chromium do Playwright
+(`cd e2e && npx playwright install chromium`). Não equivale à suíte integrada
+dos comandos acima e pode rodar sem iniciar a stack integrada.
+
+### Escrita v2 — Sprint 37
+
+Atualização da Sprint 37: a escrita usa `writing-rules-v2`, com palavras e
+expressões literais, alternativas `any/all`, quantidade de ocorrências/termos
+distintos e falas entre aspas. Os novos feedbacks guardam um snapshot e hash da
+rubrica usada; os antigos ficam identificados como `legacy-v1`, sem reavaliação.
+O workspace e o Caderno explicitam que passar nos critérios não garante gramática
+correta ou atendimento completo à proposta.
+
+A migration `c95f3d8ba042` deve preceder a ativação do backend novo, seguida da
+carga das rubricas atualizadas. Nesta entrega, ambos foram ensaiados somente na
+base descartável; a atualização das bases de estudo não foi executada. Evidências,
+contrato e pendências estão no [registro da Sprint 37](docs/sprints_37_42_backend_2026-10-13.md).
+
+Validação deste incremento: 668 testes backend (93,79% de cobertura), 169 testes
+frontend, lint, tipagem, build e orçamento de bundle aprovados. Testes E2E e
+homologação visual não foram repetidos nesta entrega.
+
+### Sessão e reenvio — Sprint 37, terceiro incremento
+
+POST/PUT passam a preparar o corpo antes do primeiro envio e repetem uma única
+vez após 401 e renovação válida. JSON, upload de Blob e downloads privados
+compartilham a renovação na mesma aba; streams não são reenviados automaticamente.
+Falhas temporárias na renovação mantêm o trabalho local e mostram uma opção
+de confirmar a sessão novamente, sem tratar 503/rede como logout.
+
+A sessão confirma o proprietário antes de repetir operações, ignora respostas
+de autenticação antigas após logout/troca de conta e pausa a fila se a conta
+mudar durante a sincronização. A correção de capacidade e coordenação entre
+abas foi entregue no quarto incremento abaixo; a Sprint 37 ainda está em andamento.
+
+Validação: 212 testes frontend, lint, tipagem, build e orçamento aprovados,
+incluindo autosave do editor real com refresh 503. Nenhum banco ou serviço foi
+alterado; não houve E2E ou homologação visual. A atualização da escrita v2 na
+base de estudo continua pendente. Detalhes e próxima etapa no
+[registro FE-37](docs/sprints_37_42_frontend_2026-10-13.md).
+
+### Fila offline — Sprint 37, quarto incremento
+
+A fila passa a usar IndexedDB transacional, com limite explícito de 100 respostas
+por aluno e sincronização serializada entre abas por Web Locks. A resposta 101
+fica no campo com aviso, sem eliminar a primeira nem afirmar que foi salva.
+Falhas de quota/commit preservam o texto; um retry da operação incerta conserva
+a chave idempotente. O painel permite consultar respostas e motivos de bloqueio,
+com confirmação antes de remover bloqueadas da fila ativa.
+
+As filas v1/v2 são importadas sem truncamento. As cópias antigas permanecem para
+recuperação; recibos impedem reimportar itens já confirmados/descartados. Feche
+ou recarregue abas antigas antes de usar a nova versão. Não limpe dados do
+navegador para resolver erro de migração: pendências ainda podem existir somente
+neste dispositivo. Sem Web Locks, a fila é preservada e a sincronização apresenta
+um aviso; use HTTPS ou localhost. Retenção/limpeza de snapshots e cópias antigas
+serão tratadas na política de dados locais.
+
+Validação: **236 testes frontend e 3 testes Chromium de duas abas aprovados**,
+além de lint, tipagem, build e orçamento (**168,1 KiB gzip**). Os testes Chromium
+usam armazenamento/locks nativos, mas API simulada; não houve E2E integrado,
+homologação visual/manual ou alteração do banco de estudo neste incremento.
+O `npm audit` encontrou alertas preexistentes nas ferramentas de teste; a
+atualização major sugerida não foi aplicada sem revisão. Detalhes, limitações e
+próximos itens no [registro FE-37](docs/sprints_37_42_frontend_2026-10-13.md).
+
+### Armazenamento e recuperação — Sprint 37, quinto incremento
+
+Falhas de armazenamento local agora são tratadas em escrita, jornada, prática,
+áudio, autoavaliação e perfil. A interface distingue dados apenas na tela de
+dados gravados; quota cheia não impede continuar digitando ou tentar salvar na
+conta. Se uma cópia antiga não puder ser removida, há aviso para conferir ao reabrir.
+
+Barreiras de erro protegem a aplicação e as rotas de estudo. Falha ao carregar
+uma tela oferece recuperação com foco e controles de teclado; recarregar exige
+confirmação, sem limpar rascunhos/fila ou entrar em laço automático. Dados nunca
+persistidos ainda podem ser perdidos ao sair ou recarregar. As mensagens gerais
+deixam de sugerir `make up` ao aluno e oferecem detalhes técnicos opcionais.
+
+Validação: **262 testes frontend, 4 testes Chromium isolados, lint, tipagem,
+build e orçamento aprovados**. O teste novo bloqueia um import real e verifica
+recuperação por teclado e conservação de dados locais sintéticos; não é a
+homologação integrada da aplicação. O bundle ficou em aproximadamente 170 KiB
+gzip, com pouca margem no teto existente. Não houve alteração do banco de estudo
+ou novas dependências nesta etapa. Alertas anteriores das ferramentas de teste,
+isolamento E2E/backup e aceite integrado continuam pendentes. Detalhes no
+[registro FE-37](docs/sprints_37_42_frontend_2026-10-13.md).
+
+### Integração isolada — Sprint 37, sexto incremento
+
+O E2E integrado agora usa exclusivamente `infra/compose.e2e.yml`, porta 5198,
+banco/voz sintéticos e guardas locais; não aponta mais para produção local.
+Comandos e limites estão na [seção de testes](#stack-exclusiva-para-e2e-sprint-37).
+
+Validação final: **48 testes de segurança e 96 execuções E2E aprovados**
+(48 cenários desktop/mobile em uma rodada completa sem retries locais).
+Fila IndexedDB, reenvio idempotente à API real e escrita v2 atravessam a stack
+completa. Build dos containers, configuração Compose e workflow (`actionlint`)
+validados localmente; CI remoto não executado. A sentinela sintética permaneceu
+intacta, e nenhum banco/áudio de estudo foi usado pelos testes.
+
+Naquele incremento, o próximo passo era o backup conjunto, entregue e
+ensaiado com dados sintéticos no registro abaixo. Permanecem papéis mínimos
+de produção, aceites pedagógicos/erros BE-37, alertas das ferramentas de teste
+e homologações humanas. Detalhes no
+[registro DB-37](docs/sprints_37_42_banco_de_dados_2026-10-13.md).
+
+### Backup e recuperação — Sprint 37, sétimo incremento
+
+Rotina operacional separada em `ops/`: pacote conjunto, validação de falhas,
+publicação por rename, manifesto/checksums e restore apenas em destino vazio
+isolado. **29 testes operacionais aprovados**; ensaio real recuperou 82 aulas,
+um usuário e um WAV de silêncio sintéticos, com referência e checksum
+conferidos. Dois backups no mesmo minuto não colidiram; repetir o restore
+no destino preenchido foi recusado sem apagar dados. O CI ganhou um job
+próprio para reproduzir esse ensaio, ainda não executado remotamente.
+
+**Situação histórica do sétimo incremento:** Sprint 37 ainda em andamento.
+Naquele momento, o próximo incremento recomendado era
+ensaiar separação de papéis runtime/worker/migrador/backup, ainda em ambiente
+descartável, antes de alterar credenciais/grants reais. O rollout da escrita
+v2 continua pendente: a produção local permanece em `b84e2c7a9d31`, sem
+interrupção dos serviços e sem backup real neste incremento.
+
+### Sprint 37 — fechamento técnico, 13/10/2026
+
+**FE-37, BE-37 e DB-37 encerradas tecnicamente.** Jeferson autorizou manter a
+homologação pedagógica humana dos 82 exemplos **pendente**, sem declará-la aprovada.
+Naquele fechamento, a próxima implementação era a Sprint 38 conjunta, registrada abaixo.
+
+- Escrita v2 com 82 exemplos naturais, negativos discriminantes e metadados de
+  avaliação; erros seguros comuns de sessão, conflito e indisponibilidade.
+- **765 testes backend**, **93,57% de cobertura**, **263 frontend**, **98 E2E
+  integrados**, 50 guardas E2E, 38 testes operacionais e 4 cenários controlados
+  de browser repetidos duas vezes aprovados. Ruff/mypy, lint/TypeScript,
+  OpenAPI, build e orçamento aprovados.
+- Vitest 4.1.11 e npm audit sem vulnerabilidades reportadas na árvore frontend.
+  Bundle 170,2 KiB gzip; limite total documentado de 172 KiB, individuais mantidos.
+- Backup real restaurado/ensaiado antes de alterar a origem; migration
+  c95f3d8ba042 e 82 rubricas aplicadas sem seed completo nem recálculo histórico.
+  Prova de preservação das 39 tabelas de conteúdo/dados pessoais aprovada.
+- API com aulas_runtime, worker com aulas_worker e voz read-only, migrador
+  separado, owner NOLOGIN e backup de leitura. Administrador preservado para
+  recuperação; segredos fora do Git.
+- **localhost:5181 atualizado e saudável**; desenvolvimento em 5180 não foi
+  migrado/reiniciado. Ensaios sem testes mutáveis na conta real.
+
+Procedimentos, proteção local e limitações:
+[operação da Sprint 37](docs/operacao_sprint_37.md).
+Não houve commit, push ou execução remota do CI nesta entrega.
+Esse registro descreve a entrega e o rollout da Sprint 37.
+
+### Sprint 38 — implementação e implantação local, 14/10/2026
+
+**FE-38, BE-38 e DB-38 implementadas, testadas em ambientes isolados e implantadas
+no estudo em http://localhost:5181/.** Schema instalado: `d06a4e9cb153`.
+O desenvolvimento em 5180 não foi alterado por esta manutenção.
+
+- Escrita com revisão esperada, autosave serial e conflito recuperável: comparar
+  os textos, manter o local, usar o da conta ou preparar cópia dos dois.
+  Análises atrasadas não avaliam outro texto; backups locais ficam identificados.
+- Avaliação SM-2 com chave idempotente e recibo transacional: repetir uma operação
+  após perder a resposta não duplica a nota. Interface bloqueia repetição de atalhos,
+  preserva o item pendente e atualiza Hoje/progresso/competências/conclusão.
+- Refresh concorrente converge para um sucessor; logout revoga a família.
+  Login/cadastro têm limites compartilhados e senhas são processadas fora do
+  event loop, com concorrência limitada. Perfil público exige HTTPS/cookie Secure;
+  implantação de proxy/TLS público não está incluída nem homologada.
+- Migration aditiva `d06a4e9cb153`, preflight sem correção silenciosa, auditoria
+  read-only de 22 regras e permissões mínimas para as novas tabelas. Histórico
+  anterior não foi reavaliado e nenhum recibo antigo foi inventado.
+
+Validação: **789 testes backend (93,54% de cobertura), 270 frontend e 106 E2E**
+em Chromium desktop/mobile. Ensaio adicional de atualização de Hoje por navegação
+interna, sem recarregar, aprovado nos dois viewports. Ruff/mypy (63 arquivos),
+ESLint/TypeScript, OpenAPI, Alembic check e build aprovados. Bundle: **171,8 KiB gzip**,
+limite mantido em 172 KiB. Também passaram 39 testes operacionais, 50 guardas E2E
+e 27 recusas de operações SQL proibidas no laboratório de papéis.
+
+Compatibilidade de clientes antigos sem revisão termina em **13/11/2026 às 00:00 UTC**
+(`LEGACY_WRITES_UNTIL`); depois a API exige atualização do cliente (HTTP 428).
+O frontend novo já envia revisão e chave de operação quando necessárias.
+
+Implantação autorizada em 14/10, com backup prévio restaurado em clone novo,
+migration ensaiada duas vezes e comparação das 39 tabelas históricas antes/depois.
+Há também backup pós-migration verificado. Página, health, catálogo e Aula 31
+responderam 200; API/worker mantiveram papéis mínimos, e o HTML servido corresponde
+ao novo container. Foram aprovados **47 testes operacionais** após acrescentar
+as proteções específicas deste rollout. Nenhum seed completo, reset ou exclusão
+de dados de estudo foi realizado.
+
+A auditoria detectou **20 jornadas antigas sem todos os registros detalhados de
+etapa; 15 também sem data de conclusão**. Foram preservadas, não corrigidas:
+as outras 20 regras passaram e hashes/contagens demonstraram nenhuma regressão.
+Reconciliação dessas jornadas e homologações humanas de leitores de tela/escrita
+permanecem pendentes. Não houve commit/push nem CI remoto.
+
+**Não executar `make up` como atualização da base de estudo.** O procedimento
+Sprint 38 usa `ops/concurrency_rollout.py`; `ops/study_rollout.py` permanece fixo na
+Sprint 37. Procedimentos, backups e limites de recuperação estão no
+[registro operacional](docs/operacao_sprint_37.md#sprint-38--implantação-autorizada-em-14102026).
+
+Contratos, escopo e checklists: [frontend](docs/sprints_37_42_frontend_2026-10-13.md#sprint-38-escrita-e-revisão-sem-conflitos-silenciosos),
+[backend](docs/sprints_37_42_backend_2026-10-13.md#sprint-38-autenticação-e-mutações-concorrentes)
+e [banco](docs/sprints_37_42_banco_de_dados_2026-10-13.md#sprint-38-integridade-transacional-e-eventos-de-revisão).
+Próxima sprint de implementação: **39 — áudio, continuidade offline, tempo de estudo e cotas**.
+
+### Histórico de validação anterior
 
 No fechamento 31–40, os 237 testes backend passaram no fuso local e em
 `Pacific/Kiritimati`; os 166 testes frontend, lint, tipagem e build também passaram.

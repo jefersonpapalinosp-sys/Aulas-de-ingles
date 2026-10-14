@@ -1,0 +1,31 @@
+# Opt-in após backup verificado/provisionamento. Não usar com Compose de dev.
+services:
+  api:
+    environment:
+      DATABASE_URL: ${RUNTIME_DATABASE_URL:?provisione os papéis primeiro}
+      DATABASE_PURPOSE: runtime
+  worker:
+    user: "10001:10001"
+    entrypoint: []
+    environment:
+      DATABASE_URL: ${WORKER_DATABASE_URL:?provisione os papéis primeiro}
+      DATABASE_PURPOSE: worker
+    volumes:
+      - type: volume
+        source: speaking_data_prod
+        target: /app/data/speaking
+        read_only: true
+  migrator:
+    profiles: ["tools"]
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile.prod
+    environment:
+      DATABASE_URL: ${MIGRATOR_DATABASE_URL:?provisione os papéis primeiro}
+      DATABASE_PURPOSE: migrator
+      APP_ENV: prod
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET obrigatório}
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy

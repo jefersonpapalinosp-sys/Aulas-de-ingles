@@ -176,12 +176,23 @@ function renderStudy(route: string) {
 }
 
 afterEach(() => {
+  vi.restoreAllMocks()
   lessonFixture = lesson
   window.localStorage.clear()
   vi.clearAllMocks()
 })
 
 describe('StudyPage', () => {
+  it('quota não impede avançar nem sincronizar, mas não afirma salvamento local', async () => {
+    Object.defineProperty(window, 'scrollTo', { value: vi.fn(), writable: true })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
+    renderStudy('/cursos/voa-level-1/aulas/31/estudar/preparar')
+    expect(screen.getByRole('alert')).toHaveTextContent('Jornada não salva no navegador')
+    await userEvent.click(screen.getByRole('button', { name: /Concluir e ir para Assistir/i }))
+    expect(screen.getByText('Etapa 2 de 5')).toBeInTheDocument()
+    expect(salvarSessao).toHaveBeenLastCalledWith({ current_step: 'assistir', completed_steps: ['preparar'] })
+    expect(screen.queryByText('Salvo neste dispositivo; sincronização pendente.')).not.toBeInTheDocument()
+  })
   it('apresenta a aula como uma jornada de cinco etapas', () => {
     renderStudy('/cursos/voa-level-1/aulas/31/estudar/preparar')
 

@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "playwright test",
+    "test:safety": "node --test safety.test.mjs",
+    "test:queue": "playwright test --config playwright.queue.config.ts",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report"
   },

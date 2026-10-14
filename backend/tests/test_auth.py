@@ -6,9 +6,12 @@ from typing import Any
 import jwt
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.security import criar_token
+from app.db.models import RefreshSession
 
 
 def credenciais(sufixo: str) -> dict[str, str]:
@@ -77,6 +80,7 @@ async def test_login_com_senha_errada_nao_diz_qual_campo_falhou(client: AsyncCli
     )
     assert errada.status_code == inexistente.status_code == 401
     assert errada.json()["detail"] == inexistente.json()["detail"]
+    assert errada.json()["code"] == inexistente.json()["code"] == "invalid_credentials"
 
 
 @pytest.mark.asyncio
@@ -129,13 +133,21 @@ async def test_token_expirado_devolve_401_e_refresh_renova(client: AsyncClient) 
 
 
 @pytest.mark.asyncio
-async def test_refresh_usado_nao_serve_de_novo(client: AsyncClient) -> None:
-    """Rotação: o refresh antigo é revogado assim que vira um novo."""
+async def test_refresh_usado_nao_serve_fora_da_janela(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Replay fora dos 10 segundos não reabre sessão revogada."""
     await registrar(client, "rot")
     antigo = client.cookies.get("refresh_token")
     assert antigo
 
     assert (await client.post("/api/auth/refresh")).status_code == 200
+    await session.execute(
+        update(RefreshSession)
+        .where(RefreshSession.revoked_at.is_not(None))
+        .values(revoked_at=datetime.now(UTC) - timedelta(seconds=11))
+    )
+    await session.commit()
 
     client.cookies.set("refresh_token", antigo, path="/api/auth")
     reusado = await client.post("/api/auth/refresh")

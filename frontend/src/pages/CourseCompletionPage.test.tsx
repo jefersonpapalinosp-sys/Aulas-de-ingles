@@ -139,7 +139,7 @@ describe('CourseCompletionPage', () => {
     })
     renderPage()
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível buscar a conclusão.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar esta área agora.')
     await user.click(screen.getByRole('button', { name: 'Tentar de novo' }))
     expect(hooks.refetch).toHaveBeenCalledOnce()
   })

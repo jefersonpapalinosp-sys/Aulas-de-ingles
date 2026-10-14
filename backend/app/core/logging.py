@@ -7,6 +7,7 @@ amarra todas as linhas de uma mesma requisição — inclusive o traceback.
 
 import json
 import logging
+import re
 import sys
 import time
 import uuid
@@ -66,7 +67,8 @@ async def middleware_request_id(
     Um id vindo de fora é respeitado: num futuro com proxy na frente, é ele
     que amarra o rastro de ponta a ponta.
     """
-    rid = request.headers.get(CABECALHO) or uuid.uuid4().hex[:16]
+    incoming = request.headers.get(CABECALHO, "")
+    rid = incoming if re.fullmatch(r"[a-zA-Z0-9_.-]{1,128}", incoming) else uuid.uuid4().hex[:16]
     token = request_id_atual.set(rid)
     comeco = time.perf_counter()
     try:

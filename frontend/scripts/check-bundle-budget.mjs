@@ -4,7 +4,9 @@ import { extname } from 'node:path'
 
 const assets = readdirSync(new URL('../dist/assets', import.meta.url))
 const limits = { '.js': 140 * 1024, '.css': 15 * 1024 }
-const totalLimit = 170 * 1024
+// FE-37: fila transacional, recuperação e mensagens seguras medem 170,2 KiB.
+// Margem explícita de 1,8 KiB; limites individuais de JS/CSS permanecem iguais.
+const totalLimit = 172 * 1024
 let total = 0
 let failed = false
 

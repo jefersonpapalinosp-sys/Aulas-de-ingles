@@ -1,0 +1,109 @@
+# Não lê configurações/volumes de estudo. Não publica nenhuma porta.
+name: aulas-ingles-recovery
+services:
+  source-db:
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    depends_on:
+      volumes:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_USER: aulas_test_admin
+      POSTGRES_PASSWORD: disposable_admin_only
+      POSTGRES_DB: postgres
+    volumes:
+      - source_db:/var/lib/postgresql/data
+      - ./test-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_test -d aulas_ingles_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  target-db:
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_restore_admin
+      POSTGRES_PASSWORD: restore_admin_disposable_only
+      POSTGRES_DB: postgres
+    volumes:
+      - target_db:/var/lib/postgresql/data
+      - ./restore-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_restore -d aulas_ingles_restore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  study-check-db:
+    profiles: ["study-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_restore_admin
+      POSTGRES_PASSWORD: restore_admin_disposable_only
+      POSTGRES_DB: postgres
+    depends_on:
+      study-check-volume:
+        condition: service_completed_successfully
+    volumes:
+      - study_check_db:/var/lib/postgresql/data
+      - ./restore-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_restore -d aulas_ingles_restore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  study-check-volume:
+    profiles: ["study-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    entrypoint: ["true"]
+    volumes:
+      - study_check_voice:/voice
+  concurrency-check-db:
+    profiles: ["concurrency-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_restore_admin
+      POSTGRES_PASSWORD: restore_admin_disposable_only
+      POSTGRES_DB: postgres
+    depends_on:
+      concurrency-check-volume:
+        condition: service_completed_successfully
+    volumes:
+      - concurrency_check_db:/var/lib/postgresql/data
+      - ./restore-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_restore -d aulas_ingles_restore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  concurrency-check-volume:
+    profiles: ["concurrency-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    entrypoint: ["true"]
+    volumes:
+      - concurrency_check_voice:/voice
+  # Só cria os volumes. Não roda aplicação nem escreve arquivos.
+  volumes:
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    entrypoint: ["true"]
+    volumes:
+      - source_voice:/source-voice
+      - target_voice:/target-voice
+networks:
+  default:
+    internal: true
+volumes:
+  concurrency_check_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  concurrency_check_voice:
+    labels: {org.aulas.environment: disposable-recovery}
+  study_check_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  study_check_voice:
+    labels: {org.aulas.environment: disposable-recovery}
+  source_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  source_voice:
+    labels: {org.aulas.environment: disposable-recovery}
+  target_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  target_voice:
+    labels: {org.aulas.environment: disposable-recovery}

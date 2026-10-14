@@ -42,10 +42,17 @@ def precisa_rehash(hash_guardado: str) -> bool:
     return _hasher.check_needs_rehash(hash_guardado)
 
 
-def criar_token(user_id: int, tipo: TipoToken, jti: str | None = None) -> tuple[str, str]:
+def criar_token(
+    user_id: int,
+    tipo: TipoToken,
+    jti: str | None = None,
+    *,
+    issued_at: datetime | None = None,
+    expires_at: datetime | None = None,
+) -> tuple[str, str]:
     """Devolve (token, jti). O jti identifica a sessão de refresh no banco."""
     s = get_settings()
-    agora = datetime.now(UTC)
+    agora = issued_at or datetime.now(UTC)
     duracao = (
         timedelta(minutes=s.access_token_minutes)
         if tipo == "access"
@@ -57,7 +64,7 @@ def criar_token(user_id: int, tipo: TipoToken, jti: str | None = None) -> tuple[
         "type": tipo,
         "jti": identificador,
         "iat": int(agora.timestamp()),
-        "exp": int((agora + duracao).timestamp()),
+        "exp": int((expires_at or agora + duracao).timestamp()),
     }
     return jwt.encode(payload, s.jwt_secret, algorithm="HS256"), identificador
 
@@ -71,4 +78,14 @@ def ler_token(token: str, tipo_esperado: TipoToken) -> dict[str, Any]:
     if payload.get("type") != tipo_esperado:
         # Um refresh não pode ser usado como access: é mais longo de propósito.
         raise TokenInvalido(f"esperava token do tipo {tipo_esperado}")
+    if (
+        not isinstance(payload.get("sub"), str)
+        or not payload["sub"].isdigit()
+        or int(payload["sub"]) < 1
+    ):
+        raise TokenInvalido("identidade inválida")
+    if not isinstance(payload.get("jti"), str) or not 1 <= len(payload["jti"]) <= 32:
+        raise TokenInvalido("sessão inválida")
+    if not isinstance(payload.get("iat"), int) or not isinstance(payload.get("exp"), int):
+        raise TokenInvalido("validade ausente")
     return payload

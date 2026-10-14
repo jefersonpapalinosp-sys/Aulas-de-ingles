@@ -42,6 +42,7 @@ from app.db.models import (
     WritingPrompt,
 )
 from app.domain.answers import parse_classification
+from app.domain.writing_rubric import WritingRequirement
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +70,22 @@ def find_seed_file() -> Path:
 def load_seed(path: Path | None = None) -> list[dict[str, Any]]:
     data: list[dict[str, Any]] = json.loads((path or find_seed_file()).read_text(encoding="utf-8"))
     return data
+
+
+def validate_writing_prompts(lessons: list[dict[str, Any]]) -> None:
+    """Rejeita rubricas inválidas antes de abrir qualquer escrita do seed."""
+    for lesson in lessons:
+        for prompt in lesson.get("writing_prompts", []):
+            try:
+                if not prompt["requirements"]:
+                    raise ValueError("Proposta sem requisitos.")
+                for requirement in prompt["requirements"]:
+                    WritingRequirement.model_validate(requirement)
+            except ValueError as error:
+                raise ValueError(
+                    f"Rubrica inválida: {lesson['course_slug']}/{lesson['number']}, "
+                    f"proposta {prompt['position']}."
+                ) from error
 
 
 def load_course_seed(path: Path | None = None) -> list[dict[str, Any]]:
@@ -782,7 +799,9 @@ async def _upsert_writing_prompts(
         prompt.instructions = item["instructions"]
         prompt.min_words = item["min_words"]
         prompt.min_sentences = item["min_sentences"]
-        prompt.requirements = item["requirements"]
+        prompt.requirements = [
+            WritingRequirement.model_validate(rule).model_dump() for rule in item["requirements"]
+        ]
         vistas.add(item["position"])
     for position, prompt in existentes.items():
         if position not in vistas:
@@ -795,6 +814,7 @@ async def seed_lessons(session: AsyncSession, path: Path | None = None) -> int:
     catalog_path = path.with_name("courses.json") if path is not None else None
     courses = load_course_seed(catalog_path)
     dados = load_seed(path)
+    validate_writing_prompts(dados)
     validate_exercises(dados)
     validate_course_reviews(courses, dados)
     await _upsert_catalog(session, courses)

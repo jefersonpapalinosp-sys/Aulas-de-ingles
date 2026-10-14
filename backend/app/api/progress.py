@@ -8,6 +8,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_cartas, adicionar_item_revisao
 from app.db.models import (
@@ -120,15 +121,11 @@ async def _marcar_estudada(
     reinicia o agendamento de cartas que já existem.
     """
     aula = await _aula_por_numero(session, number, course_slug)
-    ja = (
-        await session.execute(
-            select(LessonProgress).where(
-                LessonProgress.user_id == usuario.id, LessonProgress.lesson_id == aula.id
-            )
-        )
-    ).scalar_one_or_none()
-    if ja is None:
-        session.add(LessonProgress(user_id=usuario.id, lesson_id=aula.id))
+    await session.execute(
+        insert(LessonProgress)
+        .values(user_id=usuario.id, lesson_id=aula.id)
+        .on_conflict_do_nothing(constraint="uq_progress_user_lesson")
+    )
     await adicionar_cartas(session, usuario, list(aula.vocab))
     await session.commit()
 
@@ -220,6 +217,7 @@ async def _obter_sessao_de_estudo(
         )
     return StudySessionOut(
         lesson_number=number,
+        revision=progresso.revision,
         current_step=cast(StudyStep, progresso.current_step),
         completed_steps=cast(list[StudyStep], progresso.completed_steps),
         started_at=progresso.started_at,
@@ -263,26 +261,51 @@ async def _salvar_sessao_de_estudo(
     corpo: Annotated[StudySessionIn, Body()],
 ) -> StudySessionOut:
     """Cria ou atualiza a retomada da jornada, isolada por conta e aula."""
+    require_revision(corpo.expected_revision)
     aula = await _aula_por_numero(session, number, course_slug)
+    await session.execute(
+        insert(StudySessionProgress)
+        .values(
+            user_id=usuario.id,
+            lesson_id=aula.id,
+            current_step="preparar",
+            completed_steps=[],
+        )
+        .on_conflict_do_nothing(constraint="uq_study_session_user_lesson")
+    )
     progresso = (
         await session.execute(
-            select(StudySessionProgress).where(
+            select(StudySessionProgress)
+            .where(
                 StudySessionProgress.user_id == usuario.id,
                 StudySessionProgress.lesson_id == aula.id,
             )
+            .with_for_update()
+            .execution_options(populate_existing=True)
         )
-    ).scalar_one_or_none()
+    ).scalar_one()
     now = datetime.now(UTC)
-    if progresso is None:
-        progresso = StudySessionProgress(
-            user_id=usuario.id,
-            lesson_id=aula.id,
-            current_step=corpo.current_step,
-            completed_steps=list(corpo.completed_steps),
+    expected = corpo.expected_revision
+    stale = expected is not None and expected != progresso.revision
+    added = set(corpo.completed_steps) - set(progresso.completed_steps)
+    if stale and expected is not None and (
+        expected > progresso.revision
+        or (not added and corpo.current_step != progresso.current_step)
+    ):
+        raise conflict(
+            "study_revision_conflict",
+            {
+                "revision": progresso.revision,
+                "current_step": progresso.current_step,
+                "completed_steps": progresso.completed_steps,
+            },
         )
-        session.add(progresso)
-        await session.flush()
-    else:
+    merged = [
+        step for step in STUDY_STEPS if step in {*progresso.completed_steps, *corpo.completed_steps}
+    ]
+    next_step = progresso.current_step if stale else corpo.current_step
+    changed = next_step != progresso.current_step or merged != progresso.completed_steps
+    if changed:
         # A sessão é salva ao entrar e ao trocar de etapa. O intervalo entre
         # esses eventos é uma aproximação útil do tempo ativo; o teto impede
         # que uma aba esquecida aberta infle a métrica.
@@ -300,15 +323,18 @@ async def _salvar_sessao_de_estudo(
                 previous_step = StepProgress(
                     study_session_id=progresso.id,
                     step=progresso.current_step,
+                    seconds_spent=0,
                 )
                 session.add(previous_step)
             previous_step.seconds_spent += elapsed
             progresso.total_seconds += elapsed
 
-    progresso.current_step = corpo.current_step
-    progresso.completed_steps = list(corpo.completed_steps)
-    progresso.updated_at = now
-    if len(corpo.completed_steps) == len(STUDY_STEPS):
+    progresso.current_step = next_step
+    progresso.completed_steps = list[str](merged)
+    if changed:
+        progresso.updated_at = now
+        progresso.revision += 1
+    if len(merged) == len(STUDY_STEPS):
         progresso.completed_at = progresso.completed_at or now
 
     existing_steps = {
@@ -319,20 +345,21 @@ async def _salvar_sessao_de_estudo(
             )
         ).scalars()
     }
-    for step in {corpo.current_step, *corpo.completed_steps}:
+    for step in {progresso.current_step, *merged}:
         step_progress = existing_steps.get(step)
         if step_progress is None:
             step_progress = StepProgress(study_session_id=progresso.id, step=step)
             session.add(step_progress)
             existing_steps[step] = step_progress
-        if step in corpo.completed_steps and step_progress.completed_at is None:
+        if step in merged and step_progress.completed_at is None:
             step_progress.completed_at = now
     await session.commit()
     await session.refresh(progresso)
     return StudySessionOut(
         lesson_number=number,
-        current_step=corpo.current_step,
-        completed_steps=corpo.completed_steps,
+        revision=progresso.revision,
+        current_step=cast(StudyStep, progresso.current_step),
+        completed_steps=cast(list[StudyStep], progresso.completed_steps),
         started_at=progresso.started_at,
         updated_at=progresso.updated_at,
         completed_at=progresso.completed_at,
