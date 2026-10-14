@@ -9,6 +9,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.domain.writing_rubric import WritingRequirement
+
 
 class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -100,9 +102,8 @@ class LessonVersionOut(ORMModel):
     published_at: datetime | None
 
 
-class WritingRequirementOut(BaseModel):
-    label: str
-    terms: list[str]
+class WritingRequirementOut(WritingRequirement):
+    """Contrato compatível com label/terms; explicita alternativa e quantidade."""
 
 
 class WritingPromptOut(ORMModel):

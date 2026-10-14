@@ -1,5 +1,6 @@
 """Configuração da aplicação, lida do ambiente."""
 
+from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Literal
 from urllib.parse import urlparse
@@ -26,7 +27,15 @@ class Settings(BaseSettings):
     refresh_token_days: int = 30
     # O cookie de refresh só vai por HTTPS fora de dev.
     cookie_secure: bool = False
+    deployment_profile: Literal["local", "public"] = "local"
+    public_origin: str | None = None
+    legacy_writes_until: datetime = datetime(2026, 11, 13, tzinfo=UTC)
+    auth_window_seconds: int = 300
+    auth_identity_limit: int = 20
+    auth_origin_limit: int = 200
+    auth_hash_concurrency: int = 2
     database_url: str = "postgresql+asyncpg://aulas:aulas_local@db:5432/aulas_ingles"
+    database_purpose: Literal["runtime", "worker", "migrator"] | None = None
 
     # As gravações ficam fora do PostgreSQL. O banco guarda somente metadados
     # e uma chave opaca gerada pelo servidor.
@@ -64,6 +73,22 @@ class Settings(BaseSettings):
 
     def validar(self) -> None:
         """Erros de configuração que só podem estourar no boot, nunca em produção silenciosa."""
+        if self.legacy_writes_until.tzinfo is None:
+            raise RuntimeError("LEGACY_WRITES_UNTIL precisa incluir fuso horário.")
+        if (
+            min(
+                self.auth_window_seconds,
+                self.auth_identity_limit,
+                self.auth_origin_limit,
+                self.auth_hash_concurrency,
+            )
+            < 1
+        ):
+            raise RuntimeError("Limites de autenticação precisam ser positivos.")
+        if self.deployment_profile == "public":
+            origin = urlparse(self.public_origin or "")
+            if not self.cookie_secure or origin.scheme != "https" or not origin.hostname:
+                raise RuntimeError("Perfil público exige COOKIE_SECURE=true e PUBLIC_ORIGIN HTTPS.")
         if self.app_env == "prod" and self.jwt_secret.startswith("dev-apenas"):
             raise RuntimeError("JWT_SECRET precisa de um valor próprio quando APP_ENV=prod.")
         if len(self.jwt_secret.encode()) < 32:

@@ -1,13 +1,27 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   loadStudyProgress,
+  readStudyProgress,
   saveStudyProgress,
   studyProgressKey,
 } from './studyProgress'
 
-afterEach(() => window.localStorage.clear())
+afterEach(() => { vi.restoreAllMocks(); window.localStorage.clear() })
 
 describe('progresso da jornada guiada', () => {
+  it('falha de migração mantém o progresso legado e informa indisponibilidade', () => {
+    localStorage.setItem('aulas-ingles:study-progress:v1:7:31', JSON.stringify({ currentStep: 'assistir', completedSteps: ['preparar'] }))
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
+    const result = readStudyProgress(7, 31)
+    expect(result.progress.currentStep).toBe('assistir')
+    expect(result.warning).toContain('cheio')
+    expect(saveStudyProgress(7, 31, result.progress)).toBe(false)
+    expect(localStorage.getItem('aulas-ingles:study-progress:v1:7:31')).not.toBeNull()
+  })
+  it('leitura bloqueada retorna aviso, não lança durante renderização', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
+    expect(readStudyProgress(7, 31).warning).toContain('indisponível')
+  })
   it('começa na primeira etapa quando ainda não há progresso', () => {
     expect(loadStudyProgress(7, 31)).toEqual({
       currentStep: 'preparar',

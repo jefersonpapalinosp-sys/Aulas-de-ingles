@@ -1,9 +1,14 @@
 """Rascunho, versões, feedback e isolamento da produção escrita."""
 
+from copy import deepcopy
+
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.db.models import User, WritingFeedbackRecord, WritingPrompt
 from app.main import create_app
 from app.services import assistance
 
@@ -43,6 +48,7 @@ async def test_rascunho_e_versoes_sobrevivem_a_nova_sessao(client: AsyncClient) 
     base = f"/api/writing/prompts/{prompt['id']}"
     inicial = (await client.get(f"{base}/draft", headers=headers)).json()
     assert inicial == {
+        "revision": 0,
         "prompt_id": prompt["id"],
         "text": "",
         "updated_at": None,
@@ -136,6 +142,11 @@ async def test_feedback_aponta_pendencias_e_aprova_texto_pronto(client: AsyncCli
     assert pronto["ready"] is True
     assert pronto["word_count"] >= 35
     assert pronto["sentence_count"] == 4
+    assert pronto["algorithm_version"] == "writing-rules-v2"
+    assert pronto["rubric_version"].startswith("sha256:")
+    assert pronto["rubric_snapshot"]["min_words"] == 35
+    assert pronto["rubric_snapshot"]["requirements"][1]["terms"] == ["should", "ought to"]
+    assert "Não garante gramática correta" in pronto["evaluation_scope"]
     # Um novo feedback atualiza a origem, mas nunca duplica a revisão.
     assert len((await client.get("/api/review/items?status=active", headers=headers)).json()) == 1
 
@@ -150,6 +161,68 @@ async def test_proposta_inexistente_e_texto_vazio_sao_validados(client: AsyncCli
         "/api/writing/prompts/999999/versions", headers=headers, json={"text": "  "}
     )
     assert vazio.status_code == 422
+
+
+async def test_historico_preserva_resultado_e_rubrica_apos_mudar_proposta(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    headers = await conta(client, "versionamento")
+    prompt = await proposta(client)
+    base = f"/api/writing/prompts/{prompt['id']}"
+    text = "The bus is faster than the train. You ought to take it."
+    await client.put(f"{base}/draft", headers=headers, json={"text": text})
+    first = (await client.post(f"{base}/feedback", headers=headers, json={"text": text})).json()
+    assert first["checks"][2]["passed"] is True
+    user = (await session.execute(select(User))).scalar_one()
+    # Simula um registro legado, sem inventar a rubrica que não era guardada.
+    legacy = WritingFeedbackRecord(
+        user_id=user.id,
+        prompt_id=prompt["id"],
+        text="Are you Anna?",
+        word_count=3,
+        sentence_count=1,
+        ready=False,
+        checks=[
+            {
+                "code": "requirement_0",
+                "label": "are you",
+                "passed": False,
+                "suggestion": "Inclua are you.",
+            }
+        ],
+    )
+    session.add(legacy)
+    await session.commit()
+    legacy_id = legacy.id
+    stored = await session.get(WritingPrompt, prompt["id"])
+    assert stored is not None
+    original = deepcopy(stored.requirements)
+    try:
+        changed = deepcopy(original)
+        changed[0]["terms"] = ["slower than"]
+        stored.requirements = changed
+        await session.commit()
+        second = (
+            await client.post(f"{base}/feedback", headers=headers, json={"text": text})
+        ).json()
+        assert second["rubric_version"] != first["rubric_version"]
+        assert second["checks"][2]["passed"] is False
+        history = (await client.get("/api/writing/history", headers=headers)).json()[0]["feedbacks"]
+        by_id = {item["id"]: item for item in history}
+        assert by_id[first["id"]]["rubric_snapshot"] == first["rubric_snapshot"]
+        assert by_id[first["id"]]["checks"] == first["checks"]
+        assert by_id[legacy_id]["algorithm_version"] == "legacy-v1"
+        assert by_id[legacy_id]["rubric_version"] is None
+        assert by_id[legacy_id]["rubric_snapshot"] is None
+        assert by_id[legacy_id]["checks"][0]["passed"] is False
+        exported = (await client.get("/api/me/export", headers=headers)).json()["writing"][0][
+            "feedbacks"
+        ]
+        assert any(item["rubric_version"] == first["rubric_version"] for item in exported)
+        assert any(item["algorithm_version"] == "legacy-v1" for item in exported)
+    finally:
+        stored.requirements = original
+        await session.commit()
 
 
 @pytest.mark.asyncio

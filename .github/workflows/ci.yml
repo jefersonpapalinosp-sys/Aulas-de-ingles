@@ -9,24 +9,46 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DB_URL: postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles
-
 jobs:
+  recovery:
+    name: recovery · backup de banco e voz + restore isolado
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --project backend --group dev --locked
+      - name: lint e guardas operacionais sem banco
+        run: |
+          uv run --project backend ruff check --config backend/pyproject.toml ops
+          make test-recovery
+      - name: laboratório sem portas ou volumes de estudo
+        run: make recovery-lab-up
+      - name: migrations, seed e WAV de silêncio sintético
+        run: make recovery-lab-prepare
+      - name: dois pacotes, restore verificado e recusa de destino ocupado
+        run: make test-recovery-integration
+      - name: ensaio sintético de papéis separados
+        run: |
+          make roles-lab-up
+          make roles-lab-prepare
+          make test-roles
+      - name: encerra somente laboratório de papéis
+        if: always()
+        run: make roles-lab-down
+      # Não subir dumps/áudios/manifestos para artifacts de CI.
+      - name: encerra só o laboratório; não apaga volumes
+        if: always()
+        run: make recovery-lab-down
+
   backend:
     name: backend · ruff + mypy + pytest
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: public.ecr.aws/docker/library/postgres:16.15-alpine
-        env:
-          POSTGRES_USER: aulas
-          POSTGRES_PASSWORD: aulas_local
-          POSTGRES_DB: aulas_ingles
-        ports: ["5433:5432"]
-        options: >-
-          --health-cmd "pg_isready -U aulas -d aulas_ingles"
-          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql+asyncpg://aulas_test:aulas_test_only@127.0.0.1:55435/aulas_ingles_test
     defaults:
       run:
         working-directory: backend
@@ -40,30 +62,31 @@ jobs:
         run: uv run ruff check .
       - name: mypy (strict)
         run: uv run mypy app
-      - name: migrations (upgrade, downgrade e upgrade de novo)
-        env:
-          DATABASE_URL: ${{ env.DB_URL }}
+      - name: PostgreSQL exclusivo de testes, com papel limitado
         run: |
-          uv run alembic upgrade head
+          docker compose -f ../infra/compose.test.yml up -d --wait
+          uv run python -m app.testing check
+      - name: migrations (ciclo legado reversível, expansão e alinhamento)
+        run: |
+          # A partir da Sprint 38 os recibos não admitem downgrade destrutivo.
+          # Preserva o ciclo antigo na base vazia; a recusa nova tem teste próprio.
+          uv run alembic upgrade c95f3d8ba042
           uv run alembic downgrade base
           uv run alembic upgrade head
+          uv run alembic check
       - name: seed
-        env:
-          DATABASE_URL: ${{ env.DB_URL }}
         run: uv run python -m app.cli seed
       - name: seed de novo é idempotente
-        env:
-          DATABASE_URL: ${{ env.DB_URL }}
         run: uv run python -m app.cli seed
       - name: pytest com piso de cobertura
-        env:
-          DATABASE_URL: ${{ env.DB_URL }}
         run: uv run pytest -q --cov --cov-report=term-missing:skip-covered --cov-fail-under=90
       - name: a suíte roda igual em outro fuso
         env:
-          DATABASE_URL: ${{ env.DB_URL }}
           TZ: Pacific/Kiritimati
         run: uv run pytest -q
+      - name: encerra apenas a base descartável do job
+        if: always()
+        run: docker compose -f ../infra/compose.test.yml down
 
   frontend:
     name: frontend · eslint + tsc + vitest
@@ -94,25 +117,28 @@ jobs:
         run: npm run build
       - name: orçamento de performance
         run: npm run check:budget
+      - name: dependências dos testes de navegador isolados
+        run: npm ci --prefix ../e2e
+      - name: Chromium para validar a fila entre abas (sem API ou banco)
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+      - name: fila entre abas e recuperação de telas (isoladas)
+        working-directory: e2e
+        run: npm run test:queue
 
   e2e:
-    name: e2e · fluxo completo contra o compose de produção
+    name: e2e · fluxo completo na stack descartável
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      - name: prepara o .env.prod
-        run: |
-          sed -e "s/TROQUE_ISTO_POR_32_BYTES_OU_MAIS_DE_VERDADE/$(openssl rand -hex 32)/" \
-              -e "s/TROQUE_ISTO/ci_$(openssl rand -hex 6)/g" \
-              .env.prod.example > .env.prod
       # Registries públicos limitam pull anônimo por janela de tempo, e este job
       # puxa quatro imagens. Esperar e tentar de novo resolve; insistir na hora
       # não, porque a cota só se renova com o tempo.
       - name: baixa as imagens, com espera entre tentativas
         run: |
           for tentativa in 1 2 3 4; do
-            if docker compose --env-file .env.prod -f infra/compose.prod.yml pull --quiet db; then
+            if docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml pull --quiet db; then
               echo "imagens baixadas na tentativa $tentativa"
               exit 0
             fi
@@ -122,11 +148,6 @@ jobs:
           done
           echo "::error::não foi possível baixar as imagens após 4 tentativas"
           exit 1
-      - name: sobe a stack de produção
-        run: |
-          docker compose --env-file .env.prod -f infra/compose.prod.yml up -d --build
-          docker compose --env-file .env.prod -f infra/compose.prod.yml exec -T api alembic upgrade head
-          docker compose --env-file .env.prod -f infra/compose.prod.yml exec -T api python -m app.cli seed
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -137,12 +158,17 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
+      - name: guardas contra alvos/volumes de estudo
+        working-directory: e2e
+        run: npm run test:safety
+      - name: sobe somente a stack descartável (migration e seed sob guarda)
+        run: make e2e-up
       - name: roda o E2E
         working-directory: e2e
         run: npm test
       - name: logs da API quando falha
         if: failure()
-        run: docker compose --env-file .env.prod -f infra/compose.prod.yml logs api
+        run: docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml logs api prepare
       - name: guarda o trace quando falha
         if: failure()
         uses: actions/upload-artifact@v4
@@ -152,3 +178,6 @@ jobs:
             e2e/playwright-report/
             e2e/test-results/
           retention-days: 7
+      - name: encerra somente a stack descartável
+        if: always()
+        run: make e2e-down

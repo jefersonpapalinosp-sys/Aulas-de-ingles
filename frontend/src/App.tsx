@@ -1,10 +1,12 @@
-import { Suspense, lazy } from 'react'
-import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { Fragment, Suspense, lazy } from 'react'
+import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { useSessao } from './api/auth'
 import { LessonRail } from './components/LessonRail'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
 import { ConnectivityStatus } from './features/offline/ConnectivityStatus'
+import { SessionStatus } from './components/SessionStatus'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 /**
  * Cada rota pesada vira um chunk próprio. Mapa e login ficam no bundle
@@ -40,13 +42,14 @@ export function LegacyLessonRedirect({ study = false }: { study?: boolean }) {
 
 export default function App() {
   const { usuario, carregando, offline } = useSessao()
+  const location = useLocation()
   // Enquanto o /refresh não responde, mostrar o login faria a tela piscar
   // para quem já tem sessão válida no cookie.
   if (carregando) return <p className="booting">Carregando…</p>
-  if (!usuario) return <LoginPage />
+  if (!usuario) return <><SessionStatus /><LoginPage /></>
 
   return (
-    <>
+    <Fragment key={usuario.id}>
       <a className="skip-link" href="#main-content">
         Pular para o conteúdo
       </a>
@@ -54,6 +57,8 @@ export default function App() {
       <div className="shell">
         <LessonRail />
         <main id="main-content" tabIndex={-1}>
+          <SessionStatus />
+          <ErrorBoundary resetKey={`${usuario.id}:${location.pathname}`} home={<Link to="/inicio">Voltar ao início</Link>}>
           <Suspense fallback={<p className="muted" role="status">Carregando…</p>}>
             <Routes>
             <Route path="/" element={<Navigate to="/inicio" replace />} />
@@ -120,8 +125,9 @@ export default function App() {
             />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
-    </>
+    </Fragment>
   )
 }

@@ -10,6 +10,7 @@ from app.schemas.assist import HumanRating
 
 class WritingDraftIn(BaseModel):
     text: str = Field(max_length=5000)
+    expected_revision: int | None = Field(default=None, ge=0)
 
 
 class WritingFeedbackIn(WritingDraftIn):
@@ -21,9 +22,11 @@ class WritingRevisionOut(BaseModel):
     version: int
     text: str
     created_at: datetime
+    draft_revision: int = 0
 
 
 class WritingDraftOut(BaseModel):
+    revision: int = 0
     prompt_id: int
     text: str
     updated_at: datetime | None
@@ -38,11 +41,16 @@ class WritingFeedbackCheckOut(BaseModel):
 
 
 class WritingFeedbackOut(BaseModel):
+    source_text_hash: str
     id: int
     word_count: int
     sentence_count: int
     ready: bool
     checks: list[WritingFeedbackCheckOut]
+    algorithm_version: str
+    rubric_version: str | None
+    rubric_snapshot: dict[str, object] | None
+    evaluation_scope: str
     analysis_mode: Literal["deterministic", "assisted", "fallback"]
     automated: Literal[True] = True
     evaluation_only: bool

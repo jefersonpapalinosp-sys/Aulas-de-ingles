@@ -8,6 +8,7 @@ import {
 } from '../../api/client'
 import { useAssistStatus } from '../../api/assist'
 import { formatAudioTime } from '../media/LessonAudioPlayer'
+import { readLocal, writeLocal } from '../../storage/local'
 
 type RecordingStatus = 'idle' | 'requesting' | 'recording' | 'ready' | 'error'
 type SelfRating = 'repeat' | 'almost' | 'confident'
@@ -40,6 +41,7 @@ export function ShadowingPractice({
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null)
   const [recordingDuration, setRecordingDuration] = useState(0)
   const [message, setMessage] = useState('')
+  const [storageWarning, setStorageWarning] = useState('')
   const [modelPlaying, setModelPlaying] = useState(false)
   const [rating, setRating] = useState<SelfRating | null>(null)
   const [consent, setConsent] = useState(false)
@@ -84,13 +86,21 @@ export function ShadowingPractice({
     if (!cue) return
     if (modelRef.current && !modelRef.current.paused) modelRef.current.pause()
     const key = ratingKey(userId, courseSlug, lessonNumber, cue.id)
-    let saved = window.localStorage.getItem(key)
-    if (!saved && courseSlug === 'voa-level-1') {
-      saved = window.localStorage.getItem(
+    const local = readLocal(key)
+    let saved = local.ok ? local.value : null
+    let warning = local.ok ? '' : local.error
+    if (local.ok && !saved && courseSlug === 'voa-level-1') {
+      const legacy = readLocal(
         `aulas-ingles:shadowing-rating:v1:${userId}:${lessonNumber}:${cue.id}`,
       )
-      if (saved) window.localStorage.setItem(key, saved)
+      saved = legacy.ok ? legacy.value : null
+      if (!legacy.ok) warning = legacy.error
+      if (saved) {
+        const result = writeLocal(key, saved)
+        if (!result.ok) warning = result.error
+      }
     }
+    setStorageWarning(warning)
     setRating(
       saved === 'repeat' || saved === 'almost' || saved === 'confident' ? saved : null,
     )
@@ -208,8 +218,9 @@ export function ShadowingPractice({
   function saveRating(value: SelfRating) {
     if (!cue) return
     setRating(value)
-    window.localStorage.setItem(ratingKey(userId, courseSlug, lessonNumber, cue.id), value)
-    setMessage('Autoavaliação salva neste navegador.')
+    const result = writeLocal(ratingKey(userId, courseSlug, lessonNumber, cue.id), value)
+    setStorageWarning(result.ok ? '' : result.error)
+    setMessage(result.ok ? 'Autoavaliação salva neste navegador.' : 'Autoavaliação apenas nesta tela; não foi salva neste navegador.')
   }
 
   function discardLocal() {
@@ -408,6 +419,7 @@ export function ShadowingPractice({
           em voz alta.
         </p>
       )}
+      {storageWarning && <p role="alert" className="erro">{storageWarning}</p>}
       {message && (
         <p className="shadowing-status" role="status">
           {message}

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type StudySessionInput } from './client'
+import { api, type StudySession, type StudySessionInput } from './client'
+import { invalidateStudy } from './invalidateStudy'
+import { ApiError } from './errors'
 
 export function useProgress(courseSlug?: string, unitSlug?: string) {
   return useQuery({
@@ -64,26 +66,26 @@ export function useSalvarStudySession(courseSlug: string, numero: number) {
     mutationKey: ['study-session', courseSlug, numero, 'save'],
     scope: { id: `study-session-${courseSlug}-${numero}` },
     mutationFn: async (body: StudySessionInput) => {
+      const current = qc.getQueryData<StudySession>(['study-session', courseSlug, numero])
+      // Executado dentro do scope serial; lê a revisão da confirmação anterior.
+      const payload = { ...body, expected_revision: current?.revision ?? 0,
+        completed_steps: [...new Set([...(current?.completed_steps ?? []), ...body.completed_steps])] }
       const { data, response } = await api.PUT(
         '/api/courses/{course_slug}/lessons/{number}/study-session',
         {
           params: { path: { course_slug: courseSlug, number: numero } },
-          body,
+          body: payload,
         },
       )
       if (!data) {
-        throw new Error(
-          `A API respondeu ${response?.status ?? 'nada'} ao salvar a sessão de estudo.`,
-        )
+        throw new ApiError('a sessão de estudo', response)
       }
       return data
     },
     onSuccess: async (data) => {
       qc.setQueryData(['study-session', courseSlug, numero], data)
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ['today'] }),
-        qc.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
-      ])
+      await invalidateStudy(qc)
     },
+    onError: () => qc.invalidateQueries({ queryKey: ['study-session', courseSlug, numero] }),
   })
 }

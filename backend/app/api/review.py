@@ -1,14 +1,19 @@
 """Fila de revisão multimodal com agendamento adaptado ao tipo."""
 
+import json
 from datetime import UTC, datetime, timedelta
+from hashlib import sha256
 from typing import Annotated, cast
+from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
 from sqlalchemy import Select, func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
-from app.db.models import Course, CourseUnit, Lesson, ReviewItem, User, VocabItem
+from app.db.models import Course, CourseUnit, Lesson, ReviewEvent, ReviewItem, User, VocabItem
 from app.db.session import get_session
 from app.domain.sm2 import Estado, revisar
 from app.schemas.review import (
@@ -56,15 +61,60 @@ async def adicionar_item_revisao(
     cue_end_seconds: float | None = None,
 ) -> bool:
     """Cria uma origem uma vez; novos erros atualizam o conteúdo sem duplicar."""
+    values = dict(
+        user_id=usuario.id,
+        lesson_id=lesson_id,
+        vocab_item_id=vocab_item_id,
+        item_type=item_type,
+        source_type=source_type,
+        source_id=source_id,
+        source_key=source_key,
+        skill=skill,
+        prompt=prompt,
+        prompt_note=prompt_note,
+        answer=answer,
+        context=context,
+        origin_reason=origin_reason,
+        media_url=media_url,
+        cue_start_seconds=cue_start_seconds,
+        cue_end_seconds=cue_end_seconds,
+        estimated_seconds=estimated_seconds,
+        due_at=datetime.now(UTC),
+    )
+    created = (
+        await session.execute(
+            insert(ReviewItem)
+            .values(**values)
+            .on_conflict_do_nothing(constraint="uq_review_item_user_source")
+            .returning(ReviewItem.id)
+        )
+    ).scalar_one_or_none()
+    if created is not None:
+        return True
     item = (
         await session.execute(
-            select(ReviewItem).where(
+            select(ReviewItem)
+            .where(
                 ReviewItem.user_id == usuario.id,
                 ReviewItem.source_key == source_key,
             )
+            .with_for_update()
+            .execution_options(populate_existing=True)
         )
     ).scalar_one_or_none()
     if item is not None:
+        content_fields = (
+            "prompt",
+            "prompt_note",
+            "answer",
+            "context",
+            "origin_reason",
+            "media_url",
+            "cue_start_seconds",
+            "cue_end_seconds",
+        )
+        if any(getattr(item, field) != values[field] for field in content_fields):
+            item.revision += 1
         item.prompt = prompt
         item.prompt_note = prompt_note
         item.answer = answer
@@ -75,30 +125,7 @@ async def adicionar_item_revisao(
         item.cue_end_seconds = cue_end_seconds
         return False
 
-    session.add(
-        ReviewItem(
-            user_id=usuario.id,
-            lesson_id=lesson_id,
-            vocab_item_id=vocab_item_id,
-            item_type=item_type,
-            source_type=source_type,
-            source_id=source_id,
-            source_key=source_key,
-            skill=skill,
-            prompt=prompt,
-            prompt_note=prompt_note,
-            answer=answer,
-            context=context,
-            origin_reason=origin_reason,
-            media_url=media_url,
-            cue_start_seconds=cue_start_seconds,
-            cue_end_seconds=cue_end_seconds,
-            estimated_seconds=estimated_seconds,
-            due_at=datetime.now(UTC),
-        )
-    )
-    await session.flush()
-    return True
+    return False
 
 
 async def remover_item_por_origem(session: AsyncSession, user_id: int, source_key: str) -> None:
@@ -117,7 +144,7 @@ async def remover_item_por_origem(session: AsyncSession, user_id: int, source_ke
 async def adicionar_cartas(session: AsyncSession, usuario: User, itens: list[VocabItem]) -> int:
     """Compatibilidade do deck: vocabulário agora entra na fila generalizada."""
     novas = 0
-    for item in itens:
+    for item in sorted(itens, key=lambda value: value.id):
         novas += int(
             await adicionar_item_revisao(
                 session,
@@ -153,6 +180,7 @@ def _reason(item: ReviewItem) -> str:
 def _out(item: ReviewItem) -> CardOut:
     return CardOut(
         id=item.id,
+        revision=item.revision,
         item_type=cast(ReviewItemType, item.item_type),
         skill=item.skill,
         prompt=item.prompt,
@@ -322,7 +350,10 @@ async def listar_itens(
 async def _owned_item(session: AsyncSession, item_id: int, user_id: int) -> ReviewItem:
     item = (
         await session.execute(
-            select(ReviewItem).where(ReviewItem.id == item_id, ReviewItem.user_id == user_id)
+            select(ReviewItem)
+            .where(ReviewItem.id == item_id, ReviewItem.user_id == user_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
         )
     ).scalar_one_or_none()
     if item is None:
@@ -337,10 +368,35 @@ async def avaliar(
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[GradeIn, Body()],
 ) -> GradeOut:
+    require_revision(corpo.expected_revision)
+    if corpo.idempotency_key is None:
+        require_revision(None)
+    key = str(corpo.idempotency_key or uuid4())
+    fingerprint = sha256(
+        json.dumps([item_id, corpo.quality, corpo.expected_revision]).encode()
+    ).hexdigest()
+    # Serializa chaves por conta, inclusive a mesma chave enviada para dois itens.
+    # Advisory lock não altera a conta e não conflita com locks FK de suas dependentes.
+    await session.execute(select(func.pg_advisory_xact_lock(3801, usuario.id)))
+    previous = (
+        await session.execute(
+            select(ReviewEvent).where(
+                ReviewEvent.user_id == usuario.id,
+                ReviewEvent.idempotency_key == key,
+            )
+        )
+    ).scalar_one_or_none()
+    if previous is not None:
+        if previous.fingerprint != fingerprint:
+            raise conflict("idempotency_key_reused", {})
+        return GradeOut.model_validate(previous.after_state)
     item = await _owned_item(session, item_id, usuario.id)
+    if corpo.expected_revision is not None and corpo.expected_revision != item.revision:
+        raise conflict("review_revision_conflict", {"id": item.id, "revision": item.revision})
     if item.status != "active":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item suspenso.")
 
+    before = _grade_out(item).model_dump(mode="json")
     now = datetime.now(UTC)
     base, _ = revisar(
         Estado(
@@ -360,10 +416,28 @@ async def avaliar(
     item.lapses = base.lapses
     item.due_at = now + timedelta(days=interval)
     item.last_reviewed_at = now
+    item.revision += 1
+    result = _grade_out(item)
+    session.add(
+        ReviewEvent(
+            user_id=usuario.id,
+            item_id=item.id,
+            idempotency_key=key,
+            fingerprint=fingerprint,
+            quality=corpo.quality,
+            algorithm_version="sm2-multimodal-v1",
+            before_state=before,
+            after_state=result.model_dump(mode="json"),
+        )
+    )
     await session.commit()
+    return result
 
+
+def _grade_out(item: ReviewItem) -> GradeOut:
     return GradeOut(
         id=item.id,
+        revision=item.revision,
         interval_days=item.interval_days,
         ease_factor=item.ease_factor,
         repetitions=item.repetitions,
@@ -380,6 +454,8 @@ async def alterar_status(
     corpo: Annotated[ReviewItemStatusIn, Body()],
 ) -> CardOut:
     item = await _owned_item(session, item_id, usuario.id)
+    if item.status != corpo.status:
+        item.revision += 1
     item.status = corpo.status
     item.suspended_at = datetime.now(UTC) if corpo.status == "suspended" else None
     await session.commit()

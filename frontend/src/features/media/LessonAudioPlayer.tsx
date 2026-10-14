@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { LessonMedia } from '../../api/client'
 import { useClearMediaPosition, useMediaPosition, useSaveMediaPosition } from '../../api/media'
+import { readLocal, removeLocal, writeLocal } from '../../storage/local'
 
 function positionKey(userId: number, mediaId: number): string {
   return `aulas-ingles:media-position:v1:${userId}:${mediaId}`
@@ -35,6 +36,8 @@ function LessonAudioPlayerContent({
   const [loopStart, setLoopStart] = useState<number | null>(null)
   const [loopEnd, setLoopEnd] = useState<number | null>(null)
   const [failed, setFailed] = useState(false)
+  const [localSaved, setLocalSaved] = useState(false)
+  const [storageWarning, setStorageWarning] = useState('')
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [translationOpen, setTranslationOpen] = useState(false)
   const [fullTranscriptOpen, setFullTranscriptOpen] = useState(false)
@@ -54,12 +57,16 @@ function LessonAudioPlayerContent({
       audio.currentTime = remote.position_seconds
       setPosition(remote.position_seconds)
       lastSavedAt.current = remote.position_seconds
-      window.localStorage.setItem(positionKey(userId, media.id), String(remote.position_seconds))
+      const result = writeLocal(positionKey(userId, media.id), String(remote.position_seconds))
+      setLocalSaved(result.ok)
+      setStorageWarning(result.ok ? '' : result.error)
     }
   }, [duration, media.id, position, remotePosition.data, userId])
 
   function persistPosition(at: number) {
-    window.localStorage.setItem(positionKey(userId, media.id), String(at))
+    const result = writeLocal(positionKey(userId, media.id), String(at))
+    setLocalSaved(result.ok)
+    setStorageWarning(result.ok ? '' : `${result.error} A retomada local não está garantida.`)
     lastSavedAt.current = at
     if (userId > 0 && navigator.onLine) saveRemotePosition.mutate(at)
   }
@@ -69,10 +76,12 @@ function LessonAudioPlayerContent({
     if (!audio) return
     if (Number.isFinite(audio.duration)) setDuration(audio.duration)
 
-    const localSaved = Number(window.localStorage.getItem(positionKey(userId, media.id)))
+    const local = readLocal(positionKey(userId, media.id))
+    if (!local.ok) setStorageWarning(local.error)
+    const savedLocalPosition = local.ok ? Number(local.value) : 0
     const saved = remotePosition.data?.updated_at
       ? remotePosition.data.position_seconds
-      : localSaved
+      : savedLocalPosition
     if (Number.isFinite(saved) && saved > 0 && saved < audio.duration - 2) {
       audio.currentTime = saved
       setPosition(saved)
@@ -142,7 +151,9 @@ function LessonAudioPlayerContent({
         onTimeUpdate={onTimeUpdate}
         onPause={() => persistPosition(audioRef.current?.currentTime ?? position)}
         onEnded={() => {
-          window.localStorage.removeItem(positionKey(userId, media.id))
+          const result = removeLocal(positionKey(userId, media.id))
+          setLocalSaved(false)
+          setStorageWarning(result.ok ? '' : result.error)
           if (userId > 0 && navigator.onLine) clearRemotePosition.mutate()
           setPosition(0)
         }}
@@ -171,11 +182,12 @@ function LessonAudioPlayerContent({
 
       <p className="media-sync" aria-live="polite">
         {saveRemotePosition.isError
-          ? 'Posição salva neste dispositivo; sincronização pendente.'
+          ? localSaved ? 'Posição salva neste dispositivo; sincronização pendente.' : 'Não foi possível salvar a posição localmente nem confirmar a sincronização.'
           : saveRemotePosition.isSuccess
             ? 'Posição sincronizada com sua conta.'
             : ''}
       </p>
+      {storageWarning && <p className="erro" role="alert">{storageWarning}</p>}
 
       <div className="audio-toolbar" aria-label="Controles adicionais do áudio">
         <button type="button" onClick={() => skip(-5)}>

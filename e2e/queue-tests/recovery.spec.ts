@@ -1,0 +1,37 @@
+import { expect, test } from '@playwright/test'
+
+test('import bloqueado tem recuperação por teclado, sem reload automático ou limpeza local', async ({ page }) => {
+  const loads: string[] = []
+  page.on('framenavigated', (frame) => { if (frame === page.mainFrame()) loads.push(frame.url()) })
+  await page.route('**/test-fixtures/recovery-page*', (route) => route.abort('failed'))
+  await page.goto('/test-fixtures/recovery.html')
+  await expect(page.getByRole('heading', { name: 'Início de teste' })).toBeVisible()
+  const initialLoads = [...loads]
+  await page.evaluate(() => {
+    localStorage.setItem('recovery-draft-fixture', 'resposta ainda local')
+    localStorage.setItem('recovery-queue-fixture', 'cópia legada de teste')
+  })
+  await page.getByRole('button', { name: 'Abrir aula' }).click()
+  await expect(page.getByRole('heading', { name: 'Não foi possível carregar esta tela' })).toBeFocused()
+  await expect(page.getByRole('navigation')).toBeVisible()
+  await page.setViewportSize({ width: 320, height: 480 })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Voltar ao início' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Recarregar aplicativo…' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Confirmar recarga' })).toBeVisible()
+  expect(loads).toEqual(initialLoads)
+  await page.getByRole('button', { name: 'Cancelar' }).click()
+  await page.getByRole('button', { name: 'Voltar ao início' }).click()
+  await expect(page.getByRole('heading', { name: 'Início de teste' })).toBeVisible()
+  expect(loads).toEqual(initialLoads)
+  await page.getByRole('button', { name: 'Abrir aula' }).click()
+  await page.getByRole('button', { name: 'Recarregar aplicativo…' }).click()
+  await page.getByRole('button', { name: 'Confirmar recarga' }).click()
+  await expect(page.getByRole('heading', { name: 'Início de teste' })).toBeVisible()
+  expect(loads).toHaveLength(initialLoads.length + 1)
+  expect(await page.evaluate(() => [localStorage.getItem('recovery-draft-fixture'), localStorage.getItem('recovery-queue-fixture')]))
+    .toEqual(['resposta ainda local', 'cópia legada de teste'])
+})

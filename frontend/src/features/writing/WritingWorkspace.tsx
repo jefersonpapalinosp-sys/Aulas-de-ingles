@@ -9,8 +9,11 @@ import {
 } from '../../api/client'
 import { useAssistStatus } from '../../api/assist'
 import { wordDiff } from './wordDiff'
+import { WritingFeedbackProvenance } from './WritingFeedbackProvenance'
+import { readLocal, removeLocal, writeLocal } from '../../storage/local'
+import { invalidateStudy } from '../../api/invalidateStudy'
 
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'local'
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'local' | 'unsaved'
 
 function backupKey(userId: number, promptId: number): string {
   return `aulas-ingles:writing-draft:v1:${userId}:${promptId}`
@@ -49,6 +52,8 @@ export function WritingWorkspace({
   const [text, setText] = useState('')
   const [hydrated, setHydrated] = useState(false)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [storageWarning, setStorageWarning] = useState('')
+  const localText = useRef<string | null>(null)
   const [feedback, setFeedback] = useState<WritingFeedback | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [creatingVersion, setCreatingVersion] = useState(false)
@@ -58,47 +63,111 @@ export function WritingWorkspace({
   const textRef = useRef('')
   const lastQueued = useRef('')
   const saveQueue = useRef<Promise<void>>(Promise.resolve())
+  const revision = useRef<number | null>(null)
+  const epoch = useRef(0)
+  const edits = useRef(0)
+  const conflictRef = useRef<WritingDraft | null>(null)
+  const [conflict, setConflict] = useState<WritingDraft | null>(null)
+  const [recovered, setRecovered] = useState(false)
+  const [bothTexts, setBothTexts] = useState('')
 
   useEffect(() => {
+    epoch.current += 1
+    revision.current = null
+    conflictRef.current = null
+    setConflict(null)
+    setBothTexts('')
+    saveQueue.current = Promise.resolve()
     setHydrated(false)
     setFeedback(null)
     setComparison(null)
     setActionMessage('')
+    setAnalyzing(false)
+    setCreatingVersion(false)
+    return () => { epoch.current += 1 }
   }, [prompt.id, userId])
 
   useEffect(() => {
     if (hydrated || (draftQuery.isPending && !draftQuery.isError)) return
     const remote = draftQuery.data?.text ?? ''
-    const backup = window.localStorage.getItem(key)
+    const result = readLocal(key)
+    const backup = result.ok ? result.value : null
+    localText.current = backup
+    setStorageWarning(result.ok ? '' : `${result.error} Pode existir um rascunho local mais recente.`)
     const initial = backup ?? remote
+    revision.current = draftQuery.data ? (draftQuery.data.revision ?? 0) : null
+    setRecovered(backup !== null)
+    const metadata = readLocal(`${key}:revision`)
+    const base = metadata.ok && metadata.value !== null ? Number(metadata.value) : null
+    if (backup !== null && backup !== remote && draftQuery.data &&
+        (base !== revision.current || base === null)) {
+      conflictRef.current = draftQuery.data
+      setConflict(draftQuery.data)
+    }
     textRef.current = initial
     lastQueued.current = remote
     setText(initial)
-    setSaveStatus(draftQuery.isError ? 'local' : 'idle')
+    setSaveStatus(draftQuery.isError ? (backup !== null ? 'local' : 'unsaved') : 'idle')
     setHydrated(true)
   }, [draftQuery.data, draftQuery.isError, draftQuery.isPending, hydrated, key])
 
   const saveDraft = useCallback(
     (value: string) => {
+      const generation = epoch.current
       setSaveStatus('saving')
       saveQueue.current = saveQueue.current
         .catch(() => undefined)
         .then(async () => {
-          const { data } = await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
+          if (generation !== epoch.current || conflictRef.current) return
+          if (revision.current === null) {
+            const { data: remote } = await api.GET('/api/writing/prompts/{prompt_id}/draft', {
+              params: { path: { prompt_id: prompt.id } },
+            })
+            if (!remote) throw new Error('Sem versão confirmada.')
+            if (generation !== epoch.current) return
+            if (remote.text !== value) {
+              conflictRef.current = remote
+              setConflict(remote)
+              setSaveStatus('local')
+              return
+            }
+            revision.current = remote.revision ?? 0
+          }
+          const { data, error, response } = await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
             params: { path: { prompt_id: prompt.id } },
-            body: { text: value },
+            body: { text: value, expected_revision: revision.current },
           })
+          if (generation !== epoch.current) return
+          if (response?.status === 409) {
+            const current = (error as { detail?: { current?: WritingDraft } })?.detail?.current
+            if (current) {
+              conflictRef.current = current
+              setConflict(current)
+            }
+            throw new Error('Conflito de rascunho.')
+          }
           if (!data) throw new Error('Falha ao salvar o rascunho.')
+          revision.current = data.revision ?? 0
           queryClient.setQueryData<WritingDraft>(queryKey, data)
           if (textRef.current === value) {
-            window.localStorage.removeItem(key)
+            const stored = readLocal(key)
+            // Uma confirmação desta aba não apaga o texto diferente de outra.
+            const removed = !stored.ok ? stored : stored.value !== value ? { ok: true as const } : removeLocal(key)
+            if (removed.ok) localText.current = null
+            setStorageWarning(removed.ok ? '' : removed.error)
             setSaveStatus('saved')
+            if (stored.ok && stored.value === value) removeLocal(`${key}:revision`)
+          } else {
+            // O próximo texto local deriva do save confirmado, não da revisão anterior.
+            const stored = readLocal(key)
+            if (stored.ok && stored.value === textRef.current) writeLocal(`${key}:revision`, String(revision.current))
           }
         })
         .catch(() => {
+          if (generation !== epoch.current) return
           if (textRef.current === value) {
             lastQueued.current = ''
-            setSaveStatus('local')
+            setSaveStatus(localText.current === value ? 'local' : 'unsaved')
           }
         })
       return saveQueue.current
@@ -107,23 +176,30 @@ export function WritingWorkspace({
   )
 
   useEffect(() => {
-    if (!hydrated || text === lastQueued.current) return
+    if (!hydrated || conflict || text === lastQueued.current) return
     const timer = window.setTimeout(() => {
       lastQueued.current = text
       void saveDraft(text)
     }, 700)
     return () => window.clearTimeout(timer)
-  }, [hydrated, saveDraft, text])
+  }, [hydrated, conflict, saveDraft, text])
 
   function changeText(value: string) {
+    edits.current += 1
     textRef.current = value
     setText(value)
     setFeedback(null)
     setActionMessage('')
-    window.localStorage.setItem(key, value)
+    const result = writeLocal(key, value)
+    if (revision.current !== null) writeLocal(`${key}:revision`, String(revision.current))
+    localText.current = result.ok ? value : null
+    setStorageWarning(result.ok ? '' : `${result.error} Copie o texto antes de sair.`)
+    setSaveStatus(result.ok ? 'local' : 'unsaved')
   }
 
   async function analyze() {
+    const generation = epoch.current
+    const edit = edits.current
     setAnalyzing(true)
     setActionMessage('')
     try {
@@ -132,21 +208,25 @@ export function WritingWorkspace({
         body: { text, assisted: Boolean(assistStatus.data?.writing_enabled && useAssisted) },
       })
       if (!data) throw new Error('Falha ao analisar o texto.')
-      setFeedback(data)
-      await queryClient.invalidateQueries({ queryKey: ['course-completion'] })
+      if (generation === epoch.current && edit === edits.current) setFeedback(data)
+      await invalidateStudy(queryClient)
     } catch {
-      setActionMessage('Não foi possível analisar agora. Seu texto continua salvo.')
+      if (generation === epoch.current && edit === edits.current)
+        setActionMessage('Análise indisponível; confira o estado de salvamento antes de sair.')
     } finally {
-      setAnalyzing(false)
+      if (generation === epoch.current) setAnalyzing(false)
     }
   }
 
   async function rateFeedback(rating: 'helpful' | 'not_helpful') {
     if (!feedback || feedback.analysis_mode !== 'assisted') return
+    const generation = epoch.current
+    const edit = edits.current
     const { data } = await api.PUT('/api/writing/feedback/{feedback_id}/rating', {
       params: { path: { feedback_id: feedback.id } },
       body: { rating },
     })
+    if (generation !== epoch.current || edit !== edits.current) return
     if (!data) {
       setActionMessage('Não foi possível salvar sua avaliação do feedback.')
       return
@@ -157,27 +237,57 @@ export function WritingWorkspace({
   }
 
   async function createVersion() {
-    if (!text.trim()) return
+    if (!text.trim() || conflictRef.current || revision.current === null) return
+    const generation = epoch.current
+    const value = text
     setCreatingVersion(true)
     setActionMessage('')
-    try {
-      await saveQueue.current
-      const { data } = await api.POST('/api/writing/prompts/{prompt_id}/versions', {
+    const operation = saveQueue.current.catch(() => undefined).then(async () => {
+      if (generation !== epoch.current || conflictRef.current) return
+      const { data, error, response } = await api.POST('/api/writing/prompts/{prompt_id}/versions', {
         params: { path: { prompt_id: prompt.id } },
-        body: { text },
+        body: { text: value, expected_revision: revision.current },
       })
+      if (generation !== epoch.current) return
+      if (response?.status === 409) {
+        const current = (error as { detail?: { current?: WritingDraft } })?.detail?.current
+        if (current) { conflictRef.current = current; setConflict(current) }
+      }
       if (!data) throw new Error('Falha ao criar a versão.')
+      revision.current = data.draft_revision ?? revision.current
       queryClient.setQueryData<WritingDraft>(queryKey, (current) => ({
         prompt_id: prompt.id,
-        text,
+        revision: revision.current ?? 0,
+        text: value,
         updated_at: current?.updated_at ?? null,
         revisions: [data, ...(current?.revisions.filter((item) => item.id !== data.id) ?? [])],
       }))
       setActionMessage(`Versão ${data.version} criada.`)
-    } catch {
-      setActionMessage('Não foi possível criar a versão. O rascunho não foi perdido.')
-    } finally {
-      setCreatingVersion(false)
+    })
+    saveQueue.current = operation.catch(() => {
+      if (generation === epoch.current) setActionMessage('Não foi possível criar a versão. O rascunho não foi perdido.')
+    }).finally(() => { if (generation === epoch.current) setCreatingVersion(false) })
+    await saveQueue.current
+  }
+
+  function resolveConflict(useRemote: boolean) {
+    const remote = conflictRef.current
+    if (!remote) return
+    revision.current = remote.revision ?? 0
+    conflictRef.current = null
+    setConflict(null)
+    setBothTexts('')
+    queryClient.setQueryData(queryKey, remote)
+    if (useRemote) {
+      changeText(remote.text)
+      lastQueued.current = remote.text
+      setSaveStatus('saved')
+      const removed = removeLocal(key)
+      if (removed.ok) localText.current = null
+      setStorageWarning(removed.ok ? '' : removed.error)
+    } else {
+      lastQueued.current = textRef.current
+      void saveDraft(textRef.current)
     }
   }
 
@@ -211,9 +321,9 @@ export function WritingWorkspace({
           onChange={(event) => changeText(event.target.value)}
         />
       </label>
-      <div className="writing-meta" aria-live="polite">
+      <div className="writing-meta">
         <span>{wordCount} palavras · {sentenceCount} frases</span>
-        <span className={saveStatus === 'local' ? 'failed' : ''}>
+        <span role="status" className={saveStatus === 'local' || saveStatus === 'unsaved' ? 'failed' : ''}>
           {!hydrated || draftQuery.isPending
             ? 'Carregando rascunho…'
             : saveStatus === 'saving'
@@ -222,9 +332,27 @@ export function WritingWorkspace({
                 ? 'Rascunho salvo.'
                 : saveStatus === 'local'
                   ? 'Salvo neste dispositivo; sincronização pendente.'
+                  : saveStatus === 'unsaved'
+                    ? 'Texto apenas nesta tela; salvamento não confirmado. Não feche a página.'
                   : 'Pronto para escrever.'}
         </span>
       </div>
+      {storageWarning && <p role="alert" className="erro">{storageWarning}</p>}
+      {recovered && <p>Rascunho recuperado neste dispositivo. Confira a sincronização com sua conta.</p>}
+      {conflict && (
+        <section className="writing-conflict" aria-labelledby="draft-conflict-title">
+          <div role="alert"><h3 id="draft-conflict-title">Há duas versões do rascunho</h3></div>
+          <p>O texto do editor continua neste dispositivo. A conta possui a revisão {conflict.revision ?? 0},
+            salva em {conflict.updated_at ? new Date(conflict.updated_at).toLocaleString() : 'data não informada'}.</p>
+          <label>Texto salvo na conta<textarea readOnly value={conflict.text} /></label>
+          <div className="writing-actions">
+            <button type="button" onClick={() => resolveConflict(false)}>Manter meu texto</button>
+            <button type="button" onClick={() => resolveConflict(true)}>Usar texto da conta</button>
+            <button type="button" onClick={() => setBothTexts(`Neste dispositivo:\n${text}\n\nNa conta:\n${conflict.text}`)}>Preparar cópia dos dois</button>
+          </div>
+          {bothTexts && <label>Selecione e copie os dois textos<textarea readOnly value={bothTexts} onFocus={(event) => event.target.select()} /></label>}
+        </section>
+      )}
 
       <div className="writing-actions">
         <button
@@ -238,12 +366,12 @@ export function WritingWorkspace({
         <button
           type="button"
           className="btn ghost"
-          disabled={!text.trim() || creatingVersion}
+          disabled={!text.trim() || creatingVersion || Boolean(conflict) || revision.current === null}
           onClick={() => void createVersion()}
         >
           {creatingVersion ? 'Criando…' : 'Criar versão'}
         </button>
-        {saveStatus === 'local' && (
+        {!conflict && (saveStatus === 'local' || saveStatus === 'unsaved') && (
           <button
             type="button"
             className="writing-retry"
@@ -281,7 +409,8 @@ export function WritingWorkspace({
                 ? 'Assistência indisponível · rubrica local preservada'
                 : 'Análise automática por regras locais'}
           </p>
-          <h3>{feedback.ready ? 'Texto pronto para uma nova versão' : 'O que revisar agora'}</h3>
+          <h3>{feedback.ready ? 'Critérios automáticos atendidos' : 'O que revisar agora'}</h3>
+          <WritingFeedbackProvenance feedback={feedback} />
           <ul>
             {feedback.checks.map((check) => (
               <li key={check.code} className={check.passed ? 'passed' : ''}>

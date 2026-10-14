@@ -1,6 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ReviewItemType } from './client'
 import { api } from './client'
+import { ApiError } from './errors'
+import { invalidateStudy } from './invalidateStudy'
+
+export type ReviewGradeCommand = {
+  cardId: number
+  quality: number
+  idempotencyKey: string
+  expectedRevision: number
+}
 
 export type ReviewFilters = {
   courseSlug?: string
@@ -68,18 +77,15 @@ export function useSuspendedReviewItems(filters: Pick<ReviewFilters, 'courseSlug
 export function useAvaliar() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async ({ cardId, quality }: { cardId: number; quality: number }) => {
+    mutationFn: async ({ cardId, quality, idempotencyKey, expectedRevision }: ReviewGradeCommand) => {
       const { data, response } = await api.POST('/api/review/{item_id}/grade', {
         params: { path: { item_id: cardId } },
-        body: { quality },
+        body: { quality, idempotency_key: idempotencyKey, expected_revision: expectedRevision },
       })
-      if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao avaliar.`)
+      if (!data) throw new ApiError('o resultado da revisão', response)
       return data
     },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
-    },
+    onSuccess: () => invalidateStudy(qc),
   })
 }
 

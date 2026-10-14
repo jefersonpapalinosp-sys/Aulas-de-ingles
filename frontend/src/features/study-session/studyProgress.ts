@@ -1,3 +1,5 @@
+import { readLocal, writeLocal } from '../../storage/local'
+
 export const STUDY_STEPS = [
   { slug: 'preparar', title: 'Preparar', shortTitle: 'Preparar' },
   { slug: 'assistir', title: 'Assistir e ouvir', shortTitle: 'Assistir' },
@@ -47,8 +49,13 @@ export function loadStudyProgress(
   courseSlugOrLessonNumber: string | number,
   maybeLessonNumber?: number,
 ): StudyProgress {
+  return readStudyProgress(userId, courseSlugOrLessonNumber, maybeLessonNumber).progress
+}
+
+export function readStudyProgress(userId: number, courseSlugOrLessonNumber: string | number,
+  maybeLessonNumber?: number): { progress: StudyProgress; warning: string } {
   const initial: StudyProgress = { currentStep: FIRST_STEP, completedSteps: [] }
-  if (typeof window === 'undefined') return initial
+  let warning = ''
 
   try {
     const { courseSlug, lessonNumber } = progressIdentity(
@@ -56,16 +63,23 @@ export function loadStudyProgress(
       maybeLessonNumber,
     )
     const key = studyProgressKey(userId, courseSlug, lessonNumber)
-    let raw = window.localStorage.getItem(key)
+    const local = readLocal(key)
+    if (!local.ok) return { progress: initial, warning: local.error }
+    let raw = local.value
     // Migração transparente dos dados locais anteriores à identidade multi-curso.
     if (!raw && courseSlug === 'voa-level-1') {
-      raw = window.localStorage.getItem(`aulas-ingles:study-progress:v1:${userId}:${lessonNumber}`)
-      if (raw) window.localStorage.setItem(key, raw)
+      const legacy = readLocal(`aulas-ingles:study-progress:v1:${userId}:${lessonNumber}`)
+      if (!legacy.ok) return { progress: initial, warning: legacy.error }
+      raw = legacy.value
+      if (raw) {
+        const migrated = writeLocal(key, raw)
+        if (!migrated.ok) warning = migrated.error
+      }
     }
-    if (!raw) return initial
+    if (!raw) return { progress: initial, warning }
 
     const parsed: unknown = JSON.parse(raw)
-    if (!parsed || typeof parsed !== 'object') return initial
+    if (!parsed || typeof parsed !== 'object') throw new Error('Invalid progress')
 
     const candidate = parsed as { currentStep?: unknown; completedSteps?: unknown }
     const currentStep =
@@ -78,9 +92,9 @@ export function loadStudyProgress(
         )
       : []
 
-    return { currentStep, completedSteps: [...new Set(completedSteps)] }
+    return { progress: { currentStep, completedSteps: [...new Set(completedSteps)] }, warning }
   } catch {
-    return initial
+    return { progress: initial, warning: 'Jornada local indisponível. Confira o progresso da conta.' }
   }
 }
 
@@ -88,29 +102,28 @@ export function saveStudyProgress(
   userId: number,
   lessonNumber: number,
   progress: StudyProgress,
-): void
+): boolean
 export function saveStudyProgress(
   userId: number,
   courseSlug: string,
   lessonNumber: number,
   progress: StudyProgress,
-): void
+): boolean
 export function saveStudyProgress(
   userId: number,
   courseSlugOrLessonNumber: string | number,
   lessonNumberOrProgress: number | StudyProgress,
   maybeProgress?: StudyProgress,
-): void {
-  if (typeof window === 'undefined') return
+): boolean {
   const legacyCall = typeof courseSlugOrLessonNumber === 'number'
   const courseSlug = legacyCall ? 'voa-level-1' : courseSlugOrLessonNumber
   const lessonNumber = legacyCall
     ? courseSlugOrLessonNumber
     : (lessonNumberOrProgress as number)
   const progress = legacyCall ? (lessonNumberOrProgress as StudyProgress) : maybeProgress
-  if (!progress) return
-  window.localStorage.setItem(
+  if (!progress) return false
+  return writeLocal(
     studyProgressKey(userId, courseSlug, lessonNumber),
     JSON.stringify(progress),
-  )
+  ).ok
 }

@@ -1,0 +1,21 @@
+# Não lê .env/.env.prod e não compartilha portas, roles ou volumes com o aluno.
+name: aulas-ingles-test
+services:
+  db:
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_test_admin
+      POSTGRES_PASSWORD: disposable_admin_only
+      POSTGRES_DB: postgres
+    ports:
+      - "127.0.0.1:55435:5432"
+    volumes:
+      - test_pgdata:/var/lib/postgresql/data
+      - ./test-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U aulas_test -d aulas_ingles_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  test_pgdata:

@@ -64,6 +64,40 @@ function studyPath(
   return step ? `${base}/${step}` : base
 }
 
+type QueueSnapshot = {
+  version: number
+  attempts: Array<{
+    userId: number
+    exerciseId: number
+    answer: string
+    idempotencyKey: string
+    sessionId?: number
+    courseSlug?: string
+    lessonNumber?: number
+  }>
+  receipts: Array<{ userId: number; idempotencyKey: string }>
+}
+
+async function readAttemptQueue(page: Page): Promise<QueueSnapshot> {
+  return page.evaluate(() => new Promise<QueueSnapshot>((resolve, reject) => {
+    const opened = indexedDB.open('aulas:offline-attempts:v3', 1)
+    // Uma fila ausente deve falhar, não ser criada pelo próprio teste.
+    opened.onupgradeneeded = () => opened.transaction?.abort()
+    opened.onerror = () => reject(opened.error)
+    opened.onsuccess = () => {
+      const db = opened.result
+      const tx = db.transaction(['attempts', 'receipts'], 'readonly')
+      const attempts = tx.objectStore('attempts').getAll()
+      const receipts = tx.objectStore('receipts').getAll()
+      tx.oncomplete = () => {
+        db.close()
+        resolve({ version: db.version, attempts: attempts.result, receipts: receipts.result })
+      }
+      tx.onabort = () => { db.close(); reject(tx.error) }
+    }
+  }))
+}
+
 async function expectNoHorizontalScroll(page: Page): Promise<void> {
   await expect
     .poll(() =>
@@ -121,7 +155,12 @@ async function criarConta(page: Page, nome: string): Promise<string> {
   await page.getByLabel('Nome').fill(nome)
   await page.getByLabel('E-mail').fill(email)
   await page.getByLabel('Senha').fill(SENHA)
+  const registered = page.waitForResponse((response) =>
+    response.url().endsWith('/api/auth/register') && response.request().method() === 'POST',
+  )
   await page.getByRole('button', { name: 'Criar conta' }).click()
+  // Aguarda o contrato HTTP antes de medir a transição da UI; mantém timeout global.
+  expect((await registered).status()).toBe(201)
   await expect(page).toHaveURL(/\/inicio$/)
   await expect(page.getByRole('heading', { name: 'Hoje' })).toBeVisible()
   return email
@@ -312,7 +351,7 @@ test('a jornada guiada retoma e conclui a aula 31', async ({ page }) => {
   await expect(writing.getByText('Rascunho salvo.')).toBeVisible()
   await writing.getByRole('button', { name: 'Analisar texto' }).click()
   await expect(
-    writing.getByRole('heading', { name: 'Texto pronto para uma nova versão' }),
+    writing.getByRole('heading', { name: 'Critérios automáticos atendidos' }),
   ).toBeVisible()
   await expect(writing.getByText('Análise automática por regras locais')).toBeVisible()
   await writing.getByRole('button', { name: 'Criar versão' }).click()
@@ -342,7 +381,8 @@ test('a jornada guiada retoma e conclui a aula 31', async ({ page }) => {
   await expect(page.getByText(/Por padrão, a gravação fica somente nesta tela/)).toBeVisible()
   await page.getByRole('button', { name: 'Concluir aula' }).click()
 
-  await expect(page.getByRole('status')).toContainText('Você percorreu as cinco etapas')
+  await expect(page.getByRole('status').filter({ hasText: 'Você percorreu as cinco etapas' }))
+    .toContainText('Você percorreu as cinco etapas')
   await expectCourseProgress(page, 1)
 })
 
@@ -1661,6 +1701,74 @@ test.describe('laboratório de exercícios por aula', () => {
     }
   })
 
+  test('duas abas sincronizam a fila com API real e retry idempotente', async ({ page, context }) => {
+    await criarConta(page, 'Duas abas Sprint 37')
+    const other = await context.newPage()
+    const tabs = [page, other]
+    const lessons = [31, 32]
+    const sessions: number[] = []
+    // Carrega autenticação sequencialmente; concorrência de refresh é escopo BE-38.
+    for (const [index, tab] of tabs.entries()) {
+      const lesson = lessons[index]!
+      await tab.goto(practicePath(lesson))
+      await tab.getByRole('radio', { name: /Desafio rápido/ }).check()
+      const created = tab.waitForResponse((response) =>
+        response.url().endsWith('/api/courses/voa-level-1/lessons/' + lesson + '/practice-sessions')
+        && response.request().method() === 'POST' && response.ok())
+      await tab.getByRole('button', { name: 'Começar Desafio rápido' }).click()
+      sessions.push((await (await created).json()).id)
+      await expect(tab.locator('.practice-question').getByRole('textbox')).toBeVisible()
+    }
+    const results: Array<{ id: number; sessionId: number; token: string }> = []
+    for (const tab of tabs) {
+      tab.on('response', async (response) => {
+        if (/\/api\/exercises\/\d+\/attempt$/.test(new URL(response.url()).pathname)
+          && response.request().method() === 'POST' && response.ok()) {
+          const data = await response.json()
+          results.push({
+            id: data.attempt_id, sessionId: data.session.session_id,
+            token: (await response.request().headerValue('authorization'))!,
+          })
+        }
+      })
+    }
+    await context.setOffline(true)
+    try {
+      await Promise.all(tabs.map(async (tab, index) => {
+        await expect.poll(() => tab.evaluate(() => navigator.onLine)).toBe(false)
+        const question = tab.locator('.practice-question')
+        await question.getByRole('textbox', { name: 'Resposta do exercício 1' }).fill(index === 0 ? 'faster' : 'questions')
+        await question.getByRole('button', { name: 'Verificar' }).click()
+        await expect(question.getByText('Na fila', { exact: true })).toBeVisible()
+      }))
+      const queued = (await readAttemptQueue(page)).attempts
+      expect(queued).toHaveLength(2)
+      expect(new Set(queued.map((item) => item.idempotencyKey)).size).toBe(2)
+      expect(queued.map((item) => item.sessionId).sort()).toEqual(sessions.sort())
+      await context.setOffline(false)
+      await expect.poll(async () => (await readAttemptQueue(page)).attempts.length).toBe(0)
+      await expect.poll(() => results.length).toBe(2)
+      expect((await readAttemptQueue(other)).receipts).toHaveLength(2)
+      for (const attempt of queued) {
+        const first = results.find((item) => item.sessionId === attempt.sessionId)!
+        const retry = await page.request.post('/api/exercises/' + attempt.exerciseId + '/attempt', {
+          headers: { Authorization: first.token },
+          data: {
+            answer: attempt.answer, idempotency_key: attempt.idempotencyKey,
+            practice_session_id: attempt.sessionId,
+          },
+        })
+        expect(retry.status()).toBe(200)
+        expect(await retry.json()).toMatchObject({
+          attempt_id: first.id, session: { session_id: attempt.sessionId, attempt_count: 1 },
+        })
+      }
+    } finally {
+      await context.setOffline(false)
+      await other.close()
+    }
+  })
+
   test('tentativa offline preserva idempotência e contexto da sessão ao sincronizar', async ({
     page,
     context,
@@ -1694,25 +1802,11 @@ test.describe('laboratório de exercícios por aula', () => {
       await questao.getByRole('button', { name: 'Verificar' }).click()
       await expect(questao.getByText('Na fila', { exact: true })).toBeVisible()
 
-      const armazenamento = (await page.evaluate(() => {
-        const raw = localStorage.getItem('aulas:offline-attempts:v2')
-        return raw ? JSON.parse(raw) : null
-      })) as {
-        version: number
-        attempts: Array<{
-          userId: number
-          exerciseId: number
-          answer: string
-          idempotencyKey: string
-          sessionId?: number
-          courseSlug?: string
-          lessonNumber?: number
-        }>
-      } | null
-      expect(armazenamento).not.toBeNull()
-      expect(armazenamento?.version).toBe(2)
-      expect(armazenamento?.attempts).toHaveLength(1)
-      const tentativa = armazenamento!.attempts[0]!
+      const armazenamento = await readAttemptQueue(page)
+      expect(armazenamento.version).toBe(1) // schema IDB, não a antiga versão localStorage
+      expect(armazenamento.attempts).toHaveLength(1)
+      expect(armazenamento.receipts).toHaveLength(0)
+      const tentativa = armazenamento.attempts[0]!
       expect(tentativa.userId).toBeGreaterThan(0)
       expect(tentativa.exerciseId).toBe(sessao.items[0]?.exercise.id)
       expect(tentativa.answer).toBe('faster')
@@ -1731,22 +1825,39 @@ test.describe('laboratório de exercícios por aula', () => {
       await context.setOffline(false)
       offline = false
       const requisicao = await sincronizacao
-      expect(requisicao.postDataJSON()).toMatchObject({
-        answer: 'faster',
-        idempotency_key: tentativa.idempotencyKey,
-        practice_session_id: sessao.id,
+      // Request.clone() pode enviar um stream cujo corpo não é exposto pelo CDP.
+      // Verifica persistência/idempotência na API real, não um corpo simulado.
+      const resposta = await requisicao.response()
+      expect(resposta?.status()).toBe(200)
+      const primeiroResultado = await resposta!.json()
+      expect(primeiroResultado).toMatchObject({
+        correct: true, session: { session_id: sessao.id, attempt_count: 1 },
       })
-      await expect(page.getByText('1 tentativa foi sincronizada.')).toBeVisible()
-      await expect
-        .poll(() =>
-          page.evaluate(() => {
-            const raw = localStorage.getItem('aulas:offline-attempts:v2')
-            if (!raw) return 0
-            const parsed = JSON.parse(raw) as { attempts?: unknown[] }
-            return parsed.attempts?.length ?? 0
-          }),
-        )
-        .toBe(0)
+      const authorization = await requisicao.headerValue('authorization')
+      expect(authorization).toBeTruthy()
+      const repeticao = await page.request.post(`/api/exercises/${tentativa.exerciseId}/attempt`, {
+        headers: { Authorization: authorization! },
+        data: {
+          answer: 'faster',
+          idempotency_key: tentativa.idempotencyKey,
+          practice_session_id: sessao.id,
+        },
+      })
+      expect(repeticao.status()).toBe(200)
+      expect(await repeticao.json()).toMatchObject({
+        attempt_id: primeiroResultado.attempt_id,
+        correct: true, session: { session_id: sessao.id, attempt_count: 1 },
+      })
+      await expect(page.getByRole('complementary', { name: 'Fila de respostas' })
+        .getByRole('status')).toContainText('1 tentativa(s) sincronizada(s).')
+      await expect.poll(async () => (await readAttemptQueue(page)).attempts.length).toBe(0)
+      const expectedReceipt = { userId: tentativa.userId, idempotencyKey: tentativa.idempotencyKey }
+      expect((await readAttemptQueue(page)).receipts).toEqual([expectedReceipt])
+      await page.reload()
+      await expect(page.getByRole('heading', { level: 1, name: 'Take Me Out to the Ball Game' })).toBeVisible()
+      const reaberta = await readAttemptQueue(page)
+      expect(reaberta.attempts).toHaveLength(0)
+      expect(reaberta.receipts).toEqual([expectedReceipt])
     } finally {
       if (offline) await context.setOffline(false)
     }

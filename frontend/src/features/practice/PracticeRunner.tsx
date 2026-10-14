@@ -10,13 +10,13 @@ import {
 } from '../../api/practice'
 import { ExerciseCard } from '../../components/ExerciseCard'
 import {
-  ATTEMPT_QUEUE_EVENT,
-  ATTEMPT_QUEUE_SYNC_EVENT,
   listPendingAttempts,
+  subscribeAttemptQueue,
   type AttemptQueueChangeEventDetail,
   type AttemptQueueSyncEventDetail,
 } from '../offline/attemptQueue'
 import { lessonPath, studyPath } from '../../routing/courseRoutes'
+import { readLocal, removeLocal, writeLocal, type StorageResult } from '../../storage/local'
 import {
   ACTIVITY_TYPE_LABELS,
   PRACTICE_MODE_LABELS,
@@ -45,25 +45,16 @@ function localPositionKey(userId: number, sessionId: number): string {
   return `aulas-ingles:practice-position:v1:${userId}:${sessionId}`
 }
 
-function readLocalPosition(userId: number, session: PracticeSessionData): number | null {
-  try {
-    const raw = localStorage.getItem(localPositionKey(userId, session.id))
-    if (raw === null) return null
-    const position = Number(raw)
-    return session.items.some((item) => item.position === position) ? position : null
-  } catch {
-    return null
-  }
+function readLocalPosition(userId: number, session: PracticeSessionData): StorageResult<number | null> {
+  const result = readLocal(localPositionKey(userId, session.id))
+  if (!result.ok) return result
+  const position = result.value === null ? null : Number(result.value)
+  return { ok: true, value: session.items.some((item) => item.position === position) ? position : null }
 }
 
 function writeLocalPosition(userId: number, sessionId: number, position: number | null) {
-  try {
-    const key = localPositionKey(userId, sessionId)
-    if (position === null) localStorage.removeItem(key)
-    else localStorage.setItem(key, String(position))
-  } catch {
-    // A sessão continua utilizável mesmo quando o navegador bloqueia o storage.
-  }
+  const key = localPositionKey(userId, sessionId)
+  return position === null ? removeLocal(key) : writeLocal(key, String(position))
 }
 
 function unique(values: Array<string | null | undefined>): string[] {
@@ -118,6 +109,7 @@ export function PracticeRunner({
   const [showSummary, setShowSummary] = useState(false)
   const [announcement, setAnnouncement] = useState('')
   const [navigationError, setNavigationError] = useState('')
+  const [storageWarning, setStorageWarning] = useState('')
   const [online, setOnline] = useState(() => navigator.onLine)
   const questionRef = useRef<HTMLHeadingElement>(null)
   const positionSyncingRef = useRef(false)
@@ -166,30 +158,38 @@ export function PracticeRunner({
 
   useEffect(() => {
     if (!session) return
-    setLocalPosition(readLocalPosition(userId, session))
+    const result = readLocalPosition(userId, session)
+    if (result.ok) setLocalPosition(result.value)
+    else setStorageWarning(result.error)
   }, [session, userId])
 
   useEffect(() => {
     if (!session) return
-    const refreshQueued = (event?: Event) => {
+    let alive = true
+    let revision = 0
+    const refreshQueued = async (event?: Event) => {
+      const current = ++revision
       const reason = (event as CustomEvent<AttemptQueueChangeEventDetail> | undefined)?.detail
         ?.reason
       // Durante o sync, o card continua bloqueado como "Na fila" até o GET da
       // sessão confirmar a correção. Assim não existe uma janela para enviar
       // uma segunda tentativa enquanto várias entradas são processadas.
       if (reason === 'synced' || reason === 'blocked') return
-      setQueuedExercises(
-        new Set(
-          listPendingAttempts(userId)
+      try {
+        if (reason === 'external') await refetchPracticeSession()
+        const pending = await listPendingAttempts(userId)
+        if (!alive || current !== revision) return
+        setQueuedExercises(new Set(pending
             .filter((attempt) => attempt.sessionId === session.id)
-            .map((attempt) => attempt.exerciseId),
-        ),
-      )
+            .map((attempt) => attempt.exerciseId)))
+      } catch (error) {
+        if (alive) setNavigationError(error instanceof Error ? error.message : 'Não foi possível consultar as respostas locais.')
+      }
     }
-    refreshQueued()
-    window.addEventListener(ATTEMPT_QUEUE_EVENT, refreshQueued)
-    return () => window.removeEventListener(ATTEMPT_QUEUE_EVENT, refreshQueued)
-  }, [session, userId])
+    void refreshQueued()
+    const unsubscribe = subscribeAttemptQueue((event) => { void refreshQueued(event) })
+    return () => { alive = false; unsubscribe() }
+  }, [session, userId, refetchPracticeSession])
 
   useEffect(() => {
     if (currentExerciseId === undefined || !resumeAccepted) return
@@ -225,13 +225,14 @@ export function PracticeRunner({
             })
           }
         }
-        writeLocalPosition(userId, baseline.id, null)
+        const removed = writeLocalPosition(userId, baseline.id, null)
+        setStorageWarning(removed.ok ? '' : removed.error)
         setLocalPosition(null)
         setNavigationError('')
         return true
       } catch {
         setNavigationError(
-          'A nova posição ficou salva neste dispositivo. Tentaremos sincronizar quando a sessão estiver disponível.',
+          'Posição não sincronizada. Confira o salvamento local antes de sair e tente novamente.',
         )
         return false
       } finally {
@@ -244,7 +245,8 @@ export function PracticeRunner({
   useEffect(() => {
     if (!online || !session || localPosition === null) return
     if (session.current_position === localPosition) {
-      writeLocalPosition(userId, session.id, null)
+      const removed = writeLocalPosition(userId, session.id, null)
+      setStorageWarning(removed.ok ? '' : removed.error)
       setLocalPosition(null)
       setNavigationError('')
       return
@@ -262,18 +264,17 @@ export function PracticeRunner({
       )
       if (synced.length === 0 && rejected.length === 0) return
 
-      void refetchPracticeSession().finally(() => {
+      void refetchPracticeSession().then(() => {
         setQueuedExercises((current) => {
           const next = new Set(current)
           synced.forEach((attempt) => next.delete(attempt.exerciseId))
           rejected.forEach((attempt) => next.delete(attempt.exerciseId))
           return next
         })
-      })
+      }).catch(() => setNavigationError('Não foi possível confirmar o resultado sincronizado. Tente retomar a sessão.'))
     }
 
-    window.addEventListener(ATTEMPT_QUEUE_SYNC_EVENT, handleSync)
-    return () => window.removeEventListener(ATTEMPT_QUEUE_SYNC_EVENT, handleSync)
+    return subscribeAttemptQueue(() => undefined, handleSync)
   }, [refetchPracticeSession, session, userId])
 
   async function begin(
@@ -327,7 +328,8 @@ export function PracticeRunner({
     if (!session || !session.items.some((item) => item.position === position)) return
     setNavigationError('')
     setLocalPosition(position)
-    writeLocalPosition(userId, session.id, position)
+    const saved = writeLocalPosition(userId, session.id, position)
+    setStorageWarning(saved.ok ? '' : `${saved.error} Posição apenas nesta tela até sincronizar.`)
     setAnnouncement(`Questão ${position + 1} de ${session.summary.total}.`)
 
     if (!online) return
@@ -702,6 +704,7 @@ export function PracticeRunner({
         />
       </div>
 
+      {storageWarning && <p role="alert" className="erro">{storageWarning}</p>}
       {navigationError && (
         <p className="practice-navigation-error" role="status">
           {navigationError}

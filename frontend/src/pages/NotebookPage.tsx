@@ -9,6 +9,7 @@ import {
 } from '../api/client'
 import { useCourseCurriculum, useCourses } from '../api/queries'
 import { curriculumLessons } from '../features/curriculum/curriculum'
+import { WritingFeedbackProvenance } from '../features/writing/WritingFeedbackProvenance'
 import { DEFAULT_COURSE_SLUG, studyPath } from '../routing/courseRoutes'
 
 const KINDS: readonly { value: NotebookKind; label: string }[] = [
@@ -395,6 +396,19 @@ export function NotebookPage() {
                 <span>{item.course_title} · Aula {item.lesson_number} · {item.lesson_title}</span>
                 <strong>{item.prompt_title}</strong>
                 <small>{item.revisions.length} versões · {item.feedbacks.length} análises</small>
+                {item.feedbacks.length > 0 && (
+                  <details>
+                    <summary>Regras das análises salvas</summary>
+                    {item.feedbacks.map((feedback) => (
+                      <div key={feedback.id}>
+                        <time dateTime={feedback.created_at}>
+                          {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(feedback.created_at))}
+                        </time>
+                        <WritingFeedbackProvenance feedback={feedback} />
+                      </div>
+                    ))}
+                  </details>
+                )}
               </div>
               <Link
                 to={studyPath(item.course_slug, item.lesson_number, 'revisar')}

@@ -1,0 +1,23 @@
+name: aulas-ingles-roles
+services:
+  db:
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_roles_admin
+      POSTGRES_PASSWORD: roles_lab_only
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./roles-db-init.sql:/docker-entrypoint-initdb.d/01-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_roles_admin -d aulas_roles_lab"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+networks:
+  default:
+    internal: true
+volumes:
+  pgdata:
+    labels:
+      org.aulas.environment: disposable-roles

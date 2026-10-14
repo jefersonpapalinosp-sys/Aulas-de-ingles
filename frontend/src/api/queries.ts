@@ -1,19 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { ApiError } from './errors'
 
 /** Mensagem de erro que o usuário consegue agir em cima. */
-function falhou(status: number | undefined, oque: string): Error {
-  if (status === 404) return new Error(`${oque} não existe.`)
-  if (status === undefined) return new Error(`Não foi possível falar com a API para buscar ${oque}.`)
-  return new Error(`A API respondeu ${status} ao buscar ${oque}.`)
-}
+const falhou = (response: Response | undefined, oque: string): Error => new ApiError(oque, response)
 
 export function useLessons() {
   return useQuery({
     queryKey: ['lessons'],
     queryFn: async () => {
       const { data, response } = await api.GET('/api/lessons')
-      if (!data) throw falhou(response?.status, 'a lista de aulas')
+      if (!data) throw falhou(response, 'a lista de aulas')
       return data
     },
   })
@@ -24,7 +21,7 @@ export function useCourses() {
     queryKey: ['courses'],
     queryFn: async () => {
       const { data, response } = await api.GET('/api/courses')
-      if (!data) throw falhou(response?.status, 'o catálogo de cursos')
+      if (!data) throw falhou(response, 'o catálogo de cursos')
       return data
     },
   })
@@ -37,7 +34,7 @@ export function useCourseCurriculum(courseSlug: string, enabled = true) {
       const { data, response } = await api.GET('/api/courses/{course_slug}/curriculum', {
         params: { path: { course_slug: courseSlug } },
       })
-      if (!data) throw falhou(response?.status, `o currículo de ${courseSlug}`)
+      if (!data) throw falhou(response, `o currículo de ${courseSlug}`)
       return data
     },
     enabled: enabled && Boolean(courseSlug),
@@ -54,7 +51,7 @@ export function useLesson(courseSlug: string, number: number) {
           params: { path: { course_slug: courseSlug, number } },
         },
       )
-      if (!data) throw falhou(response?.status, `a aula ${number}`)
+      if (!data) throw falhou(response, `a aula ${number}`)
       return data
     },
     enabled: Boolean(courseSlug) && Number.isInteger(number),
@@ -73,7 +70,7 @@ export function useAllExercises(courseSlug?: string, unitSlug?: string) {
           },
         },
       })
-      if (!data) throw falhou(response?.status, 'os exercícios do bloco')
+      if (!data) throw falhou(response, 'os exercícios do bloco')
       return data
     },
   })
@@ -84,7 +81,7 @@ export function useHealth() {
     queryKey: ['health'],
     queryFn: async () => {
       const { data, response } = await api.GET('/api/health')
-      if (!data) throw falhou(response?.status, 'o estado da API')
+      if (!data) throw falhou(response, 'o estado da API')
       return data
     },
     retry: false,

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { setAccessToken, setSessionReadOnly, setSessionUser } from '../../api/session'
 import {
   ATTEMPT_QUEUE_EVENT,
   ATTEMPT_QUEUE_STORAGE_KEY,
@@ -26,34 +27,34 @@ const attempt = {
 beforeEach(() => {
   localStorage.clear()
   vi.resetAllMocks()
+  setAccessToken('access')
+  setSessionUser(7)
+  setSessionReadOnly(false)
 })
 
 describe('fila offline de tentativas', () => {
-  it('separa a fila por aluno e não duplica a mesma chave idempotente', () => {
+  it('separa a fila por aluno e não duplica a mesma chave idempotente', async () => {
     const listener = vi.fn()
     window.addEventListener(ATTEMPT_QUEUE_EVENT, listener)
-    queueAttempt(attempt)
-    queueAttempt(attempt)
-    queueAttempt({ ...attempt, userId: 8, idempotencyKey: 'offline-2' })
+    await queueAttempt(attempt)
+    await queueAttempt(attempt)
+    await queueAttempt({ ...attempt, userId: 8, idempotencyKey: 'offline-2' })
 
-    expect(listQueuedAttempts(7)).toEqual([attempt])
-    expect(listQueuedAttempts(8)).toHaveLength(1)
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
+    expect(await listQueuedAttempts(8)).toHaveLength(1)
     expect(listener).toHaveBeenCalledTimes(2)
     window.removeEventListener(ATTEMPT_QUEUE_EVENT, listener)
   })
 
-  it('migra a fila v1 sem perder tentativas ou idempotência', () => {
+  it('migra a fila v1 sem perder tentativas ou idempotência', async () => {
     localStorage.setItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY, JSON.stringify([attempt]))
 
-    expect(listQueuedAttempts(7)).toEqual([attempt])
-    expect(localStorage.getItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY)).toBeNull()
-    expect(JSON.parse(localStorage.getItem(ATTEMPT_QUEUE_STORAGE_KEY) ?? '')).toEqual({
-      version: 2,
-      attempts: [attempt],
-    })
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
+    expect(JSON.parse(localStorage.getItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY)!)).toEqual([attempt])
+    expect(localStorage.getItem(ATTEMPT_QUEUE_STORAGE_KEY)).toBeNull()
 
-    queueAttempt(attempt)
-    expect(listQueuedAttempts(7)).toEqual([attempt])
+    await queueAttempt(attempt)
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
   })
 
   it('preserva o contexto da prática na fila v2 e o envia para a API', async () => {
@@ -63,7 +64,7 @@ describe('fila offline de tentativas', () => {
       courseSlug: 'voa-level-1',
       lessonNumber: 31,
     }
-    queueAttempt(contextualAttempt)
+    await queueAttempt(contextualAttempt)
     vi.mocked(api.POST).mockResolvedValue({
       data: { attempt_id: 401, correct: true },
       response: new Response(),
@@ -101,7 +102,7 @@ describe('fila offline de tentativas', () => {
     const handleSync: EventListener = (event) =>
       listener((event as CustomEvent<AttemptQueueSyncEventDetail>).detail)
     window.addEventListener(ATTEMPT_QUEUE_SYNC_EVENT, handleSync)
-    queueAttempt(attempt)
+    await queueAttempt(attempt)
     vi.mocked(api.POST).mockResolvedValue({
       data: { attempt_id: 402, correct: false },
       response: new Response(),
@@ -145,7 +146,7 @@ describe('fila offline de tentativas', () => {
   })
 
   it('mantém a tentativa quando a rede continua indisponível', async () => {
-    queueAttempt(attempt)
+    await queueAttempt(attempt)
     vi.mocked(api.POST).mockResolvedValue({ data: undefined, response: undefined } as never)
 
     await expect(syncAttemptQueue(7)).resolves.toEqual({
@@ -155,11 +156,11 @@ describe('fila offline de tentativas', () => {
       syncedAttempts: [],
       rejectedAttempts: [],
     })
-    expect(listQueuedAttempts(7)).toEqual([attempt])
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
   })
 
   it('mantém a tentativa quando o fetch rejeita durante a sincronização', async () => {
-    queueAttempt(attempt)
+    await queueAttempt(attempt)
     vi.mocked(api.POST).mockRejectedValueOnce(new TypeError('Failed to fetch'))
 
     await expect(syncAttemptQueue(7)).resolves.toEqual({
@@ -169,7 +170,35 @@ describe('fila offline de tentativas', () => {
       syncedAttempts: [],
       rejectedAttempts: [],
     })
-    expect(listQueuedAttempts(7)).toEqual([attempt])
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
+  })
+
+  it('não sincroniza a fila de outra conta mesmo se chamada por um callback antigo', async () => {
+    await queueAttempt(attempt)
+    setSessionUser(8)
+    expect(await syncAttemptQueue(7)).toMatchObject({ synced: 0, pending: 1 })
+    expect(api.POST).not.toHaveBeenCalled()
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
+  })
+
+  it('interrompe toda a rodada se a conta muda durante a primeira resposta', async () => {
+    await queueAttempt(attempt)
+    await queueAttempt({ ...attempt, exerciseId: 32, idempotencyKey: 'offline-2' })
+    vi.mocked(api.POST).mockImplementationOnce(async () => {
+      setAccessToken('outra-conta')
+      setSessionUser(8)
+      return { data: { attempt_id: 401, correct: true }, response: new Response() } as never
+    })
+    expect(await syncAttemptQueue(7)).toMatchObject({ synced: 0, pending: 2 })
+    expect(api.POST).toHaveBeenCalledTimes(1)
+    expect(await listQueuedAttempts(7)).toHaveLength(2)
+  })
+
+  it('cancelamento preserva o item sem rejeição não tratada', async () => {
+    await queueAttempt(attempt)
+    vi.mocked(api.POST).mockRejectedValueOnce(new DOMException('Sessão mudou', 'AbortError'))
+    expect(await syncAttemptQueue(7)).toMatchObject({ synced: 0, pending: 1, blocked: 0 })
+    expect(await listQueuedAttempts(7)).toEqual([attempt])
   })
 
   it('isola uma tentativa incompatível e sincroniza as seguintes sem perder a resposta', async () => {
@@ -186,8 +215,8 @@ describe('fila offline de tentativas', () => {
       idempotencyKey: 'offline-2',
       sessionId: 92,
     }
-    queueAttempt(staleAttempt)
-    queueAttempt(nextAttempt)
+    await queueAttempt(staleAttempt)
+    await queueAttempt(nextAttempt)
     vi.mocked(api.POST)
       .mockResolvedValueOnce({
         data: undefined,
@@ -216,13 +245,13 @@ describe('fila offline de tentativas', () => {
         },
       ],
     })
-    expect(listQueuedAttempts(7)).toEqual([
+    expect(await listQueuedAttempts(7)).toEqual([
       expect.objectContaining({
         ...staleAttempt,
         syncFailure: expect.objectContaining({ status: 409 }),
       }),
     ])
-    expect(getAttemptQueueStats(7)).toEqual({ pending: 0, blocked: 1, total: 1 })
+    expect(await getAttemptQueueStats(7)).toEqual({ pending: 0, blocked: 1, total: 1 })
 
     vi.mocked(api.POST).mockClear()
     await expect(syncAttemptQueue(7)).resolves.toMatchObject({
@@ -232,7 +261,7 @@ describe('fila offline de tentativas', () => {
     })
     expect(api.POST).not.toHaveBeenCalled()
 
-    discardBlockedAttempts(7)
-    expect(listQueuedAttempts(7)).toEqual([])
+    await discardBlockedAttempts(7)
+    expect(await listQueuedAttempts(7)).toEqual([])
   })
 })

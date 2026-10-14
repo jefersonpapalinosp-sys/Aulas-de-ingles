@@ -88,6 +88,7 @@ class ProgressOut(BaseModel):
 
 
 class StudySessionIn(BaseModel):
+    expected_revision: int | None = Field(default=None, ge=0)
     current_step: StudyStep
     completed_steps: list[StudyStep] = Field(max_length=5)
 
@@ -98,7 +99,10 @@ class StudySessionIn(BaseModel):
         return [step for step in STUDY_STEPS if step in presentes]
 
 
-class StudySessionOut(StudySessionIn):
+class StudySessionOut(BaseModel):
+    current_step: StudyStep
+    completed_steps: list[StudyStep]
+    revision: int = 0
     lesson_number: int
     started_at: datetime | None
     updated_at: datetime | None

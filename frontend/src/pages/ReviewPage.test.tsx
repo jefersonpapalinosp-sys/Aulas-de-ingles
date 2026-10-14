@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -110,6 +110,34 @@ beforeEach(() => {
 })
 
 describe('ReviewPage', () => {
+  it('ignora repetição de tecla/clique e reenvia exatamente a mesma avaliação', async () => {
+    useDueCards.mockReturnValue({ data: [carta], isPending: false, error: null })
+    montar()
+    fireEvent.keyDown(window, { key: 'Enter' })
+    fireEvent.keyDown(window, { key: '3', repeat: true })
+    expect(avaliar).not.toHaveBeenCalled()
+    fireEvent.keyDown(window, { key: '3' })
+    fireEvent.keyDown(window, { key: '3' })
+    expect(avaliar).toHaveBeenCalledTimes(1)
+    const [command, callbacks] = avaliar.mock.calls[0]!
+    act(() => callbacks.onError(new Error('response lost')))
+    expect(screen.getByText(/Sua resposta foi preservada/)).toBeInTheDocument()
+    expect(screen.getByText('sold out')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Reenviar a mesma avaliação' }))
+    expect(avaliar).toHaveBeenCalledTimes(2)
+    expect(avaliar.mock.calls[1]![0]).toEqual(command)
+  })
+
+  it('mantém a carta durante refetch enquanto a confirmação não chegou', () => {
+    useDueCards.mockReturnValue({ data: [carta], isPending: false, error: null })
+    montar()
+    fireEvent.keyDown(window, { key: 'Enter' })
+    fireEvent.keyDown(window, { key: '3' })
+    useDueCards.mockReturnValue({ data: [], isPending: false, error: null })
+    act(() => avaliar.mock.calls[0]![1].onError(new Error('network')))
+    expect(screen.getByText('sold out')).toBeInTheDocument()
+    expect(screen.queryByText('Nada para revisar agora')).not.toBeInTheDocument()
+  })
   it('a frente da carta não entrega a tradução', () => {
     useDueCards.mockReturnValue({ data: [carta], isPending: false, error: null })
     montar()
@@ -204,7 +232,7 @@ describe('ReviewPage', () => {
     await user.keyboard('3')
     await waitFor(() =>
       expect(avaliar).toHaveBeenCalledWith(
-        { cardId: 7, quality: 4 },
+        { cardId: 7, quality: 4, expectedRevision: 0, idempotencyKey: expect.any(String) },
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       ),
     )
@@ -235,7 +263,7 @@ describe('ReviewPage', () => {
     await user.click(screen.getByRole('button', { name: 'Mostrar resposta' }))
     await user.click(screen.getByText('Errei'))
 
-    expect(avaliar.mock.calls[0]![0]).toEqual({ cardId: 7, quality: 1 })
+    expect(avaliar.mock.calls[0]![0]).toEqual({ cardId: 7, quality: 1, expectedRevision: 0, idempotencyKey: expect.any(String) })
   })
 
   it('deck vazio explica como encher', () => {
@@ -253,7 +281,7 @@ describe('ReviewPage', () => {
       refetch: vi.fn(),
     })
     montar()
-    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível falar com a API.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar esta área agora.')
     expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeInTheDocument()
   })
 })

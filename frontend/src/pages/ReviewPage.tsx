@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import type { ReviewItemType } from '../api/client'
+import type { ReviewItem, ReviewItemType } from '../api/client'
+import { ApiError } from '../api/errors'
+import type { ReviewGradeCommand } from '../api/review'
 import {
   useAvaliar,
   useDeleteReviewItem,
@@ -71,8 +73,11 @@ export function ReviewPage() {
   const deleteItem = useDeleteReviewItem()
   const [flipped, setFlipped] = useState(false)
   const [lastMessage, setLastMessage] = useState<string | null>(null)
+  const [pendingGrade, setPendingGrade] = useState<{ command: ReviewGradeCommand; card: ReviewItem } | null>(null)
+  const inFlight = useRef(false)
+  const [gradeFailure, setGradeFailure] = useState<Error | null>(null)
 
-  const item = items?.[0]
+  const item = pendingGrade?.card ?? items?.[0]
   const hasActivityFilters = Boolean(itemType || skill || maxMinutes)
   const hasFilters = Boolean(unitSlug || hasActivityFilters)
 
@@ -88,22 +93,34 @@ export function ReviewPage() {
 
   const answer = useCallback(
     (quality: number) => {
-      if (!item) return
+      if (!item || inFlight.current || (pendingGrade && !gradeFailure)) return
+      if (gradeFailure instanceof ApiError && gradeFailure.status === 409) return
+      const operation = pendingGrade ?? {
+        card: item,
+        command: { cardId: item.id, quality, idempotencyKey: crypto.randomUUID(), expectedRevision: item.revision ?? 0 },
+      }
+      inFlight.current = true
+      setPendingGrade(operation)
+      setGradeFailure(null)
       grade.mutate(
-        { cardId: item.id, quality },
+        operation.command,
         {
           onSuccess: (data) => {
             setLastMessage(`${item.prompt} volta ${inHowLong(data.interval_days)}`)
             setFlipped(false)
+            setPendingGrade(null)
+            inFlight.current = false
           },
+          onError: (error) => { inFlight.current = false; setGradeFailure(error) },
         },
       )
     },
-    [item, grade],
+    [item, grade, pendingGrade, gradeFailure],
   )
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+      if (event.repeat || pendingGrade || inFlight.current) return
       if (
         event.target instanceof Element &&
         event.target.closest(
@@ -127,10 +144,10 @@ export function ReviewPage() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [flipped, answer])
+  }, [flipped, answer, pendingGrade])
 
-  if (isPending) return <Carregando oque="a revisão de hoje" />
-  if (error) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
+  if (isPending && !pendingGrade) return <Carregando oque="a revisão de hoje" />
+  if (error && !pendingGrade) return <Erro erro={error} aoTentarDeNovo={() => void refetch()} />
 
   function suspendCurrent() {
     if (!item) return
@@ -142,7 +159,7 @@ export function ReviewPage() {
   }
 
   function remove(itemId: number) {
-    if (!window.confirm('Excluir este item e todo o histórico de revisão dele?')) return
+    if (!window.confirm('Excluir este item da fila? Os recibos de revisão permanecem na conta.')) return
     deleteItem.mutate(itemId, {
       onSuccess: () => setLastMessage('Item excluído da sua fila.'),
     })
@@ -155,7 +172,7 @@ export function ReviewPage() {
       <h1>{item ? 'Revisar' : hasFilters ? 'Nenhum item com estes filtros' : 'Nada para revisar agora'}</h1>
       <p className="lead">
         {item
-          ? `${items.length} ${items.length === 1 ? 'item disponível' : 'itens disponíveis'} nesta seleção.`
+          ? `${items?.length ?? 1} ${items?.length === 1 ? 'item disponível' : 'itens disponíveis'} nesta seleção.`
           : hasFilters
             ? 'Ajuste os filtros para encontrar outras atividades vencidas.'
             : lastMessage
@@ -256,6 +273,15 @@ export function ReviewPage() {
       </div>
 
       {lastMessage && <p className="ultima" role="status">{lastMessage}</p>}
+      {pendingGrade && <p role="status">{gradeFailure ? 'Resultado não confirmado. Sua resposta foi preservada.' : 'Confirmando revisão…'}</p>}
+      {gradeFailure && pendingGrade && (
+        gradeFailure instanceof ApiError && gradeFailure.status === 409
+          ? <div role="alert"><p>Este item mudou em outra sessão. Confira a fila atual antes de avaliar novamente.</p>
+            <button type="button" onClick={() => void refetch().then(() => {
+              setPendingGrade(null); setGradeFailure(null); setFlipped(false)
+            })}>Conferir fila atual</button></div>
+          : <button type="button" onClick={() => answer(pendingGrade.command.quality)}>Reenviar a mesma avaliação</button>
+      )}
 
       {item && (
         <>
@@ -301,7 +327,7 @@ export function ReviewPage() {
                   key={note.quality}
                   className={`nota ${note.className}`}
                   onClick={() => answer(note.quality)}
-                  disabled={grade.isPending}
+                  disabled={grade.isPending || Boolean(pendingGrade)}
                 >
                   <span className="nota-rotulo">{note.label}</span>
                   <span className="nota-tecla">{note.key}</span>
@@ -317,10 +343,10 @@ export function ReviewPage() {
                 ? 'primeira vez'
                 : `${item.repetitions} acertos, ${item.lapses} tropeços`}
             </span>
-            <button type="button" onClick={suspendCurrent} disabled={setStatus.isPending}>
+            <button type="button" onClick={suspendCurrent} disabled={setStatus.isPending || Boolean(pendingGrade)}>
               Suspender item
             </button>
-            <button type="button" onClick={() => remove(item.id)} disabled={deleteItem.isPending}>
+            <button type="button" onClick={() => remove(item.id)} disabled={deleteItem.isPending || Boolean(pendingGrade)}>
               Excluir item
             </button>
           </div>

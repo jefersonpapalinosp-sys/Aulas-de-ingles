@@ -504,6 +504,7 @@ class SpeakingAttempt(Base):
 
     __tablename__ = "speaking_attempt"
     __table_args__ = (
+        CheckConstraint("status IN ('pending','ready')", name="ck_speaking_status"),
         CheckConstraint("duration_ms > 0", name="ck_speaking_duration_positive"),
         CheckConstraint("duration_ms <= 30000", name="ck_speaking_duration_limit"),
         CheckConstraint(
@@ -819,6 +820,7 @@ class WritingDraft(Base):
 
     __tablename__ = "writing_draft"
     __table_args__ = (
+        CheckConstraint("revision >= 0", name="ck_writing_draft_revision"),
         UniqueConstraint("user_id", "prompt_id", name="uq_writing_draft_user_prompt"),
     )
 
@@ -828,6 +830,7 @@ class WritingDraft(Base):
         ForeignKey("writing_prompt.id", ondelete="CASCADE"), index=True
     )
     text: Mapped[str] = mapped_column(Text, default="")
+    revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -874,6 +877,11 @@ class WritingFeedbackRecord(Base):
             name="ck_writing_feedback_confidence",
         ),
         CheckConstraint("assisted_cost_microusd >= 0", name="ck_writing_feedback_cost_nonnegative"),
+        CheckConstraint(
+            "algorithm_version != 'writing-rules-v2' OR "
+            "(rubric_version IS NOT NULL AND rubric_snapshot IS NOT NULL)",
+            name="ck_writing_feedback_v2_snapshot",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -886,6 +894,13 @@ class WritingFeedbackRecord(Base):
     sentence_count: Mapped[int] = mapped_column(Integer)
     ready: Mapped[bool] = mapped_column(Boolean)
     checks: Mapped[list[dict[str, object]]] = mapped_column(JSONB)
+    algorithm_version: Mapped[str] = mapped_column(
+        String(50), default="legacy-v1", server_default="legacy-v1"
+    )
+    rubric_version: Mapped[str | None] = mapped_column(String(71), default=None)
+    rubric_snapshot: Mapped[dict[str, object] | None] = mapped_column(
+        JSONB(none_as_null=True), default=None
+    )
     analysis_mode: Mapped[str] = mapped_column(String(20), default="deterministic")
     provider: Mapped[str | None] = mapped_column(String(80), default=None)
     assisted_summary: Mapped[str | None] = mapped_column(Text, default=None)
@@ -903,6 +918,13 @@ class NotebookEntry(Base):
     """Anotação pessoal que nunca modifica o conteúdo curricular."""
 
     __tablename__ = "notebook_entry"
+    __table_args__ = (
+        CheckConstraint(
+            "kind IN ('note','favorite_phrase','personal_example',"
+            "'recurring_error','teacher_question')",
+            name="ck_notebook_kind",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
@@ -949,6 +971,8 @@ class RefreshSession(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     jti: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    family_id: Mapped[str] = mapped_column(String(32), index=True)
+    successor_jti: Mapped[str | None] = mapped_column(String(32), default=None)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -975,6 +999,17 @@ class StudySessionProgress(Base):
 
     __tablename__ = "study_session_progress"
     __table_args__ = (
+        CheckConstraint("revision >= 0", name="ck_study_session_progress_revision"),
+        CheckConstraint("total_seconds >= 0", name="ck_study_seconds"),
+        CheckConstraint(
+            "current_step IN ('preparar','assistir','estudar','praticar','revisar')",
+            name="ck_study_step",
+        ),
+        CheckConstraint(
+            "jsonb_typeof(completed_steps) = 'array' AND completed_steps <@ "
+            """'["preparar","assistir","estudar","praticar","revisar"]'::jsonb""",
+            name="ck_study_completed_steps",
+        ),
         UniqueConstraint("user_id", "lesson_id", name="uq_study_session_user_lesson"),
     )
 
@@ -982,6 +1017,7 @@ class StudySessionProgress(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
     current_step: Mapped[str] = mapped_column(String(20))
+    revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     completed_steps: Mapped[list[str]] = mapped_column(JSONB, default=list)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     total_seconds: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
@@ -1004,6 +1040,9 @@ class StepProgress(Base):
 
     __tablename__ = "step_progress"
     __table_args__ = (
+        CheckConstraint(
+            "step IN ('preparar','assistir','estudar','praticar','revisar')", name="ck_step_name"
+        ),
         UniqueConstraint("study_session_id", "step", name="uq_step_progress_session_step"),
         CheckConstraint("seconds_spent >= 0", name="ck_step_progress_seconds_nonnegative"),
     )
@@ -1246,6 +1285,11 @@ class ReviewItem(Base):
 
     __tablename__ = "review_item"
     __table_args__ = (
+        CheckConstraint("revision >= 0", name="ck_review_item_revision"),
+        CheckConstraint(
+            "interval_days >= 0 AND repetitions >= 0 AND lapses >= 0 AND ease_factor >= 1.3",
+            name="ck_review_counters",
+        ),
         UniqueConstraint("user_id", "source_key", name="uq_review_item_user_source"),
         UniqueConstraint("legacy_card_id", name="uq_review_item_legacy_card"),
         CheckConstraint(
@@ -1282,6 +1326,7 @@ class ReviewItem(Base):
     estimated_seconds: Mapped[int] = mapped_column(Integer, default=60)
     status: Mapped[str] = mapped_column(String(20), default="active", index=True)
     suspended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     ease_factor: Mapped[float] = mapped_column(Float, default=2.5)
     interval_days: Mapped[int] = mapped_column(Integer, default=0)
@@ -1293,3 +1338,33 @@ class ReviewItem(Base):
 
     lesson: Mapped[Lesson] = relationship(lazy="selectin")
     vocab_item: Mapped[VocabItem | None] = relationship(lazy="selectin")
+
+
+class ReviewEvent(Base):
+    """Recibo imutável: sobrevive à exclusão do item, não à exclusão da conta."""
+
+    __tablename__ = "review_event"
+    __table_args__ = (
+        UniqueConstraint("user_id", "idempotency_key", name="uq_review_event_key"),
+        CheckConstraint("quality BETWEEN 0 AND 5", name="ck_review_event_quality"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    item_id: Mapped[int | None] = mapped_column(ForeignKey("review_item.id", ondelete="SET NULL"))
+    idempotency_key: Mapped[str] = mapped_column(String(36))
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    quality: Mapped[int] = mapped_column(Integer)
+    algorithm_version: Mapped[str] = mapped_column(String(30))
+    before_state: Mapped[dict[str, object]] = mapped_column(JSONB)
+    after_state: Mapped[dict[str, object]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AuthRateBucket(Base):
+    """Contadores por janela; identidade e origem são HMAC, nunca e-mail/IP em claro."""
+
+    __tablename__ = "auth_rate_bucket"
+    __table_args__ = (CheckConstraint("count > 0", name="ck_auth_rate_count"),)
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    window_start: Mapped[int] = mapped_column(Integer, primary_key=True)
+    count: Mapped[int] = mapped_column(Integer)

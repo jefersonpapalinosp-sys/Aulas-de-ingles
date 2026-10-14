@@ -1,5 +1,10 @@
 import createClient, { type Middleware } from 'openapi-fetch'
 import type { components, paths } from './schema'
+import { encerrarSessao, estadoIndisponivel, renovarSessao, sessionSnapshot } from './session'
+export {
+  onEstadoSessao, onSessaoPerdida, renovarSessao, setAccessToken,
+  setSessionReadOnly, setSessionUser,
+} from './session'
 
 /**
  * Cliente tipado pelo contrato. Os tipos saem de `npm run gen:api`, que lê o
@@ -11,98 +16,93 @@ import type { components, paths } from './schema'
  */
 export const api = createClient<paths>({ baseUrl: '', credentials: 'same-origin' })
 
-/**
- * O access token mora aqui, em memória do módulo — não em localStorage.
- * O que o JavaScript lê, um XSS também lê; o token some ao recarregar a
- * página e volta pelo /refresh, que usa o cookie httpOnly.
- */
-let accessToken: string | null = null
+type Pedido = ReturnType<typeof sessionSnapshot> & { copia: Request | null }
+const pedidos = new WeakMap<Request, Pedido>()
+const rotaAuth = (request: Request) => new URL(request.url).pathname.startsWith('/api/auth/')
 
-export function setAccessToken(token: string | null): void {
-  accessToken = token
+function indisponivel(): Response {
+  // Não devolver o 401 inicial como se a revogação estivesse confirmada.
+  // Mantém o contrato HTTP usado pelas filas: 503 interrompe sem descartar.
+  return new Response(JSON.stringify({ code: 'service_unavailable', detail: 'Não foi possível confirmar sua sessão agora. Tente novamente.' }), {
+    status: 503,
+    headers: { 'Content-Type': 'application/json', 'X-Session-State': estadoIndisponivel(), 'X-Error-Code': 'service_unavailable' },
+  })
 }
 
-/** Faz downloads/uploads binários preservando o token mantido em memória. */
-export function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  const headers = new Headers(init.headers)
-  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
-  return fetch(path, { ...init, headers, credentials: 'same-origin' })
+function preparar(request: Request, reproduzivel: boolean): Pedido {
+  const snapshot = sessionSnapshot()
+  if (snapshot.perfilNaoConfirmado && !rotaAuth(request)) request.headers.delete('Authorization')
+  else if (snapshot.token) request.headers.set('Authorization', `Bearer ${snapshot.token}`)
+  return { ...snapshot, copia: reproduzivel && !rotaAuth(request) ? request.clone() : null }
 }
 
-/** Avisado quando o refresh falha e a sessão realmente acabou. */
-let aoPerderSessao: (() => void) | null = null
-
-export function onSessaoPerdida(callback: (() => void) | null): void {
-  aoPerderSessao = callback
+function envioBloqueado(request: Request, pedido: Pedido): boolean {
+  // GET público ainda pode alcançar o cache textual do service worker, mas
+  // sem token e sem renovar automaticamente a partir de um perfil local.
+  return pedido.perfilNaoConfirmado && !rotaAuth(request) && request.method !== 'GET'
 }
 
-/**
- * Renova o access token, no máximo uma vez por vez.
- *
- * Várias requisições podem levar 401 ao mesmo tempo — uma tela de aula
- * dispara várias. Sem este single-flight, cada uma chamaria /refresh, e como
- * o refresh **rotaciona** (usar um revoga o anterior), a segunda chamada
- * invalidaria a sessão que a primeira acabou de renovar.
- */
-let renovacaoEmCurso: Promise<string | null> | null = null
-
-async function renovarToken(): Promise<string | null> {
-  if (!renovacaoEmCurso) {
-    renovacaoEmCurso = (async () => {
-      try {
-        const resposta = await fetch('/api/auth/refresh', {
-          method: 'POST',
-          credentials: 'same-origin',
-        })
-        if (!resposta.ok) return null
-        const corpo = (await resposta.json()) as { access_token?: string }
-        return corpo.access_token ?? null
-      } catch {
-        return null
-      } finally {
-        // Libera a próxima tentativa só depois que esta terminar.
-        queueMicrotask(() => {
-          renovacaoEmCurso = null
-        })
-      }
-    })()
+function conferirGeracao(request: Request, pedido: Pedido): void {
+  request.signal.throwIfAborted()
+  if (sessionSnapshot().geracao !== pedido.geracao) {
+    throw new DOMException('A sessão mudou. Esta operação não será reenviada em outra conta.', 'AbortError')
   }
-  return renovacaoEmCurso
 }
 
-const CABECALHO_RETENTATIVA = 'X-Retry-After-Refresh'
+async function receber(request: Request, response: Response, pedido: Pedido,
+  enviar: (request: Request) => Promise<Response>): Promise<Response> {
+  if (rotaAuth(request)) return response
+  conferirGeracao(request, pedido)
+  if (response.status !== 401 || pedido.perfilNaoConfirmado) return response
+  // Streams não são copiados: não há garantia de reprodução nem buffer limitado.
+  if (!pedido.copia) return response
+  const atual = sessionSnapshot()
+  if (atual.perfilNaoConfirmado) return indisponivel()
+  const resultado = atual.token && atual.token !== pedido.token
+    ? { estado: 'valida' as const, token: atual.token }
+    : await renovarSessao()
+  if (resultado.estado === 'expirada') return response
+  conferirGeracao(request, pedido)
+  if (resultado.estado !== 'valida') return indisponivel()
+  pedido.copia.headers.set('Authorization', `Bearer ${resultado.token}`)
+  const repetida = await enviar(pedido.copia)
+  conferirGeracao(request, pedido)
+  // Não há recursão: uma única repetição, preservando corpo e chave idempotente.
+  if (repetida.status === 401 && sessionSnapshot().token === resultado.token) {
+    encerrarSessao(pedido.geracao)
+  }
+  return repetida
+}
+
+/** Áudio, exportação e JSON usam as mesmas regras de sessão e repetição. */
+export async function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const url = new URL(path, window.location.href)
+  if (url.origin !== window.location.origin || !url.pathname.startsWith('/api/')) {
+    throw new Error('O transporte autenticado aceita apenas a API desta aplicação.')
+  }
+  const request = new Request(url, { ...init, credentials: 'same-origin' })
+  const reproduzivel = !(typeof ReadableStream !== 'undefined' && init.body instanceof ReadableStream)
+  const pedido = preparar(request, reproduzivel)
+  if (envioBloqueado(request, pedido)) return indisponivel()
+  return receber(request, await fetch(request), pedido, (retry) => fetch(retry))
+}
 
 /** Exportado para o teste montar um cliente com base absoluta. */
 export const autenticacao: Middleware = {
   onRequest({ request }) {
-    if (accessToken) request.headers.set('Authorization', `Bearer ${accessToken}`)
+    const json = request.headers.get('Content-Type')?.includes('application/json') ?? false
+    const pedido = preparar(request, request.body === null || json)
+    if (envioBloqueado(request, pedido)) return indisponivel()
+    pedidos.set(request, pedido)
     return request
   },
-
-  /**
-   * O access token vive 15 minutos. Sem isto, depois desse prazo toda escrita
-   * falhava com 401 e a interface continuava mostrando o usuário logado — o
-   * progresso ficava só no dispositivo, com "sincronização pendente".
-   */
-  async onResponse({ request, response }) {
-    if (response.status !== 401) return response
-    // A própria rota de refresh não é retentada, e cada requisição só tenta
-    // uma vez: sem essas duas guardas, um refresh inválido vira laço infinito.
-    if (new URL(request.url).pathname.startsWith('/api/auth/')) return response
-    if (request.headers.get(CABECALHO_RETENTATIVA)) return response
-
-    const novo = await renovarToken()
-    if (!novo) {
-      accessToken = null
-      aoPerderSessao?.()
-      return response
-    }
-    accessToken = novo
-
-    const retentativa = request.clone()
-    retentativa.headers.set('Authorization', `Bearer ${novo}`)
-    retentativa.headers.set(CABECALHO_RETENTATIVA, '1')
-    return fetch(retentativa)
+  onError({ request }) {
+    pedidos.delete(request)
+  },
+  async onResponse({ request, response, options }) {
+    const pedido = pedidos.get(request)
+    pedidos.delete(request)
+    return pedido ? receber(request, response, pedido, options.fetch) : response
   },
 }
 

@@ -9,6 +9,7 @@ from pathlib import Path
 from app.core.config import get_settings
 from app.db.seed import seed_lessons
 from app.db.session import dispose_engine, get_sessionmaker
+from app.db.writing_update import update_writing_rubrics
 from app.services.assist_gate import (
     Modality,
     collect_gate_metrics,
@@ -40,6 +41,8 @@ def main_com_argumentos(argumentos: list[str]) -> None:
     comando = argumentos[0] if argumentos else ""
     if comando == "seed":
         asyncio.run(_seed())
+    elif comando == "writing-rubrics":
+        asyncio.run(_writing_rubrics())
     elif comando == "assist-gate":
         try:
             modality_index = argumentos.index("--modality") + 1
@@ -73,6 +76,15 @@ def main_com_argumentos(argumentos: list[str]) -> None:
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     main_com_argumentos(sys.argv[1:])
+
+
+async def _writing_rubrics() -> None:
+    try:
+        async with get_sessionmaker()() as session:
+            total = await update_writing_rubrics(session)
+        print(f"Rubricas atualizadas: {total}; evidências e IDs preservados.")
+    finally:
+        await dispose_engine()
 
 
 if __name__ == "__main__":

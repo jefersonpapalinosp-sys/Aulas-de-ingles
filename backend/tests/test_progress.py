@@ -59,6 +59,7 @@ async def test_jornada_guiada_salva_e_normaliza_as_etapas(client: AsyncClient) -
     inicial = initial_response.json()
     assert initial_response.headers["cache-control"] == "private, no-store"
     assert inicial == {
+        "revision": 0,
         "lesson_number": 31,
         "current_step": "preparar",
         "completed_steps": [],

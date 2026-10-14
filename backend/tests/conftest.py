@@ -1,29 +1,31 @@
 import os
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-# Nos testes o Postgres é o do compose, exposto no host.
-os.environ.setdefault(
-    "DATABASE_URL", "postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles"
-)
-os.environ.setdefault("APP_ENV", "test")
+from app.db.test_safety import UnsafeTestDatabase, configure_test_environment
+
+try:
+    configure_test_environment(os.environ)
+except UnsafeTestDatabase as error:
+    raise pytest.UsageError(str(error)) from None
 
 from sqlalchemy import delete  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
-from app.db.models import CourseUnit, User  # noqa: E402
+from app.db.models import AuthRateBucket, CourseUnit, User  # noqa: E402
 from app.db.session import dispose_engine, get_sessionmaker  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 get_settings.cache_clear()
 
 
-@pytest.fixture(autouse=True)
-async def banco_por_teste() -> AsyncIterator[None]:
-    """Isola cada teste.
+@pytest.fixture
+async def banco_por_teste(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[None]:
+    """Limpa somente a base marcada como descartável nos testes de integração.
 
     Duas coisas acontecem no teardown, nesta ordem:
 
@@ -35,29 +37,43 @@ async def banco_por_teste() -> AsyncIterator[None]:
        abre um event loop por teste: sem isso, o teste seguinte pega conexões
        presas no loop anterior, já fechado.
 
-    Por ser autouse, este fixture é montado antes dos outros e desmontado
-    depois — o que garante que a limpeza roda com o loop ainda vivo.
+    client/session dependem desta fixture. Testes puros não abrem conexão e
+    não executam DELETE. A guarda de conexão roda antes do teste e novamente
+    ao obter qualquer nova conexão física (inclusive no teardown).
     """
-    yield
-
-    async with get_sessionmaker()() as s:
-        await s.execute(delete(User))
-        # Unidades sintéticas criadas por testes de "unidade planejada". Se um
-        # teste falhar antes do finally, elas vazariam para os seguintes.
-        await s.execute(delete(CourseUnit).where(CourseUnit.slug == "31-35"))
-        await s.commit()
-    await dispose_engine()
+    # Testes legados exercitam explicitamente a janela expand. Sua expiração
+    # é coberta separadamente em test_concurrency, sem depender do dia do CI.
+    monkeypatch.setattr(
+        get_settings(), "legacy_writes_until", datetime.now(UTC) + timedelta(days=30)
+    )
+    try:
+        async with get_sessionmaker()() as s:
+            await s.connection()
+    except Exception:
+        await dispose_engine()
+        raise
+    try:
+        yield
+    finally:
+        try:
+            async with get_sessionmaker()() as s:
+                await s.execute(delete(User))
+                await s.execute(delete(AuthRateBucket))
+                await s.execute(delete(CourseUnit).where(CourseUnit.slug == "31-35"))
+                await s.commit()
+        finally:
+            await dispose_engine()
 
 
 @pytest.fixture
-async def session() -> AsyncIterator[AsyncSession]:
-    """Sessão direta no Postgres do compose, para testar o seed e os modelos."""
+async def session(banco_por_teste: None) -> AsyncIterator[AsyncSession]:
+    """Sessão direta no Postgres exclusivo dos testes."""
     async with get_sessionmaker()() as s:
         yield s
 
 
 @pytest.fixture
-async def client() -> AsyncIterator[AsyncClient]:
+async def client(banco_por_teste: None) -> AsyncIterator[AsyncClient]:
     app = create_app()
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c

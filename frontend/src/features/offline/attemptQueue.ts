@@ -1,13 +1,13 @@
 import { api } from '../../api/client'
+import { sessionSnapshot } from '../../api/session'
 import type { components } from '../../api/schema'
+import { attemptStore, QueueStorageError, ATTEMPT_QUEUE_STORAGE_KEY, LEGACY_ATTEMPT_QUEUE_STORAGE_KEY } from './attemptQueueStore'
+export { ATTEMPT_QUEUE_STORAGE_KEY, LEGACY_ATTEMPT_QUEUE_STORAGE_KEY, MAX_ATTEMPTS_PER_USER, QueueStorageError } from './attemptQueueStore'
 
 export const ATTEMPT_QUEUE_EVENT = 'aulas:attempt-queue-change'
 export const ATTEMPT_QUEUE_SYNC_EVENT = 'aulas:attempt-queue-sync'
-export const ATTEMPT_QUEUE_STORAGE_KEY = 'aulas:offline-attempts:v2'
-export const LEGACY_ATTEMPT_QUEUE_STORAGE_KEY = 'aulas:offline-attempts:v1'
-const MAX_ATTEMPTS = 100
 
-export type AttemptQueueChangeReason = 'queued' | 'synced' | 'blocked' | 'discarded'
+export type AttemptQueueChangeReason = 'queued' | 'synced' | 'blocked' | 'discarded' | 'external'
 
 export type AttemptQueueChangeEventDetail = {
   reason: AttemptQueueChangeReason
@@ -61,191 +61,81 @@ export type AttemptQueueSyncEventDetail = AttemptQueueSyncResult & {
   userId: number
 }
 
-type AttemptQueueStorageV2 = {
-  version: 2
-  attempts: QueuedAttempt[]
-}
-
 type AttemptRequestBody = components['schemas']['AttemptIn'] & {
   practice_session_id?: number
 }
 
-function optionalPositiveInteger(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : undefined
-}
+export type QueueStats = { pending: number; blocked: number; total: number }
 
-function optionalNonEmptyString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim().length > 0 ? value : undefined
-}
-
-function parseSyncFailure(value: unknown): AttemptSyncFailure | undefined {
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    typeof Reflect.get(value, 'status') !== 'number' ||
-    !Number.isInteger(Reflect.get(value, 'status')) ||
-    typeof Reflect.get(value, 'failedAt') !== 'string'
-  ) {
-    return undefined
-  }
-  return {
-    status: Reflect.get(value, 'status') as number,
-    failedAt: Reflect.get(value, 'failedAt') as string,
-  }
-}
-
-function parseAttempt(item: unknown): QueuedAttempt | null {
-  if (
-    typeof item !== 'object' ||
-    item === null ||
-    typeof Reflect.get(item, 'userId') !== 'number' ||
-    typeof Reflect.get(item, 'exerciseId') !== 'number' ||
-    typeof Reflect.get(item, 'answer') !== 'string' ||
-    typeof Reflect.get(item, 'idempotencyKey') !== 'string' ||
-    typeof Reflect.get(item, 'createdAt') !== 'string'
-  ) {
-    return null
-  }
-
-  const attempt: QueuedAttempt = {
-    userId: Reflect.get(item, 'userId') as number,
-    exerciseId: Reflect.get(item, 'exerciseId') as number,
-    answer: Reflect.get(item, 'answer') as string,
-    idempotencyKey: Reflect.get(item, 'idempotencyKey') as string,
-    createdAt: Reflect.get(item, 'createdAt') as string,
-  }
-  const sessionId = optionalPositiveInteger(Reflect.get(item, 'sessionId'))
-  const courseSlug = optionalNonEmptyString(Reflect.get(item, 'courseSlug'))
-  const lessonNumber = optionalPositiveInteger(Reflect.get(item, 'lessonNumber'))
-  const syncFailure = parseSyncFailure(Reflect.get(item, 'syncFailure'))
-
-  if (sessionId !== undefined) attempt.sessionId = sessionId
-  if (courseSlug !== undefined) attempt.courseSlug = courseSlug
-  if (lessonNumber !== undefined) attempt.lessonNumber = lessonNumber
-  if (syncFailure !== undefined) attempt.syncFailure = syncFailure
-  return attempt
-}
-
-function parseAttempts(raw: string | null, version: 1 | 2): QueuedAttempt[] {
-  if (raw === null) return []
+function publish(kind: 'change' | 'sync', detail: AttemptQueueChangeEventDetail | AttemptQueueSyncEventDetail): void {
+  window.dispatchEvent(new CustomEvent(kind === 'change' ? ATTEMPT_QUEUE_EVENT : ATTEMPT_QUEUE_SYNC_EVENT, { detail }))
   try {
-    const parsed: unknown = JSON.parse(raw)
-    const items =
-      version === 2 &&
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      Reflect.get(parsed, 'version') === 2 &&
-      Array.isArray(Reflect.get(parsed, 'attempts'))
-        ? (Reflect.get(parsed, 'attempts') as unknown[])
-        : version === 1 && Array.isArray(parsed)
-          ? parsed
-          : []
-    return items.flatMap((item) => {
-      const attempt = parseAttempt(item)
-      return attempt ? [attempt] : []
-    })
-  } catch {
-    return []
+    if (typeof BroadcastChannel === 'undefined') return
+    const channel = new BroadcastChannel('aulas:attempt-queue:v3')
+    channel.postMessage({ kind, detail })
+    channel.close()
+  } catch { /* Notificação é opcional; o commit IDB já foi confirmado. */ }
+}
+
+/** Eventos entre abas não carregam respostas, textos nem credenciais. O foco
+ * relê o banco também quando BroadcastChannel não estiver disponível. */
+export function subscribeAttemptQueue(
+  change: (event: Event) => void,
+  sync?: (event: Event) => void,
+): () => void {
+  let channel: BroadcastChannel | null = null
+  try { if (typeof BroadcastChannel !== 'undefined') channel = new BroadcastChannel('aulas:attempt-queue:v3') } catch { /* Foco relê a fila. */ }
+  if (channel) channel.onmessage = ({ data }: MessageEvent) => {
+    if (data?.kind === 'change') change(new CustomEvent(ATTEMPT_QUEUE_EVENT, { detail: data.detail }))
+    if (data?.kind === 'sync') sync?.(new CustomEvent(ATTEMPT_QUEUE_SYNC_EVENT, { detail: data.detail }))
+  }
+  const refresh = () => change(new CustomEvent(ATTEMPT_QUEUE_EVENT, { detail: { reason: 'external' } }))
+  const legacyChanged = (event: StorageEvent) => {
+    if (event.key === ATTEMPT_QUEUE_STORAGE_KEY || event.key === LEGACY_ATTEMPT_QUEUE_STORAGE_KEY) refresh()
+  }
+  window.addEventListener(ATTEMPT_QUEUE_EVENT, change)
+  if (sync) window.addEventListener(ATTEMPT_QUEUE_SYNC_EVENT, sync)
+  window.addEventListener('focus', refresh)
+  window.addEventListener('storage', legacyChanged)
+  return () => {
+    channel?.close()
+    window.removeEventListener(ATTEMPT_QUEUE_EVENT, change)
+    if (sync) window.removeEventListener(ATTEMPT_QUEUE_SYNC_EVENT, sync)
+    window.removeEventListener('focus', refresh)
+    window.removeEventListener('storage', legacyChanged)
   }
 }
 
-function mergeAttempts(legacy: QueuedAttempt[], current: QueuedAttempt[]): QueuedAttempt[] {
-  const merged = [...legacy]
-  const indexes = new Map(merged.map((attempt, index) => [attempt.idempotencyKey, index]))
-
-  for (const attempt of current) {
-    const previousIndex = indexes.get(attempt.idempotencyKey)
-    if (previousIndex === undefined) {
-      indexes.set(attempt.idempotencyKey, merged.length)
-      merged.push(attempt)
-    } else {
-      // A versão v2 pode conter o contexto de sessão que não existia na v1.
-      merged[previousIndex] = attempt
-    }
-  }
-  return merged.slice(-MAX_ATTEMPTS)
+export function listQueuedAttempts(userId: number): Promise<QueuedAttempt[]> {
+  return attemptStore.list(userId)
 }
 
-function persistV2(attempts: QueuedAttempt[]): void {
-  const storage: AttemptQueueStorageV2 = {
-    version: 2,
-    attempts: attempts.slice(-MAX_ATTEMPTS),
-  }
-  localStorage.setItem(ATTEMPT_QUEUE_STORAGE_KEY, JSON.stringify(storage))
+export async function listPendingAttempts(userId: number): Promise<QueuedAttempt[]> {
+  return (await listQueuedAttempts(userId)).filter((attempt) => attempt.syncFailure === undefined)
 }
 
-function readAll(): QueuedAttempt[] {
-  const current = parseAttempts(localStorage.getItem(ATTEMPT_QUEUE_STORAGE_KEY), 2)
-  const legacyRaw = localStorage.getItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY)
-  if (legacyRaw === null) return current
-
-  const merged = mergeAttempts(parseAttempts(legacyRaw, 1), current)
-  try {
-    persistV2(merged)
-    // A chave antiga só sai depois que a gravação v2 foi confirmada pelo browser.
-    localStorage.removeItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY)
-  } catch {
-    // A leitura continua disponível mesmo se a quota ou o modo privado impedir a migração.
-  }
-  return merged
-}
-
-function writeAll(attempts: QueuedAttempt[], reason: AttemptQueueChangeReason): void {
-  persistV2(attempts)
-  localStorage.removeItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY)
-  window.dispatchEvent(
-    new CustomEvent<AttemptQueueChangeEventDetail>(ATTEMPT_QUEUE_EVENT, {
-      detail: { reason },
-    }),
-  )
-}
-
-export function listQueuedAttempts(userId: number): QueuedAttempt[] {
-  return readAll().filter((attempt) => attempt.userId === userId)
-}
-
-export function listPendingAttempts(userId: number): QueuedAttempt[] {
-  return listQueuedAttempts(userId).filter((attempt) => attempt.syncFailure === undefined)
-}
-
-export function getAttemptQueueStats(userId: number): {
-  pending: number
-  blocked: number
-  total: number
-} {
-  const attempts = listQueuedAttempts(userId)
+export async function getAttemptQueueStats(userId: number): Promise<QueueStats> {
+  const attempts = await listQueuedAttempts(userId)
   const blocked = attempts.filter((attempt) => attempt.syncFailure !== undefined).length
   return { pending: attempts.length - blocked, blocked, total: attempts.length }
 }
 
-export function queueAttempt(attempt: QueuedAttempt): void {
-  const attempts = readAll()
-  if (attempts.some((item) => item.idempotencyKey === attempt.idempotencyKey)) return
-  writeAll([...attempts, attempt], 'queued')
+export async function queueAttempt(attempt: QueuedAttempt): Promise<void> {
+  if (await attemptStore.add(attempt)) publish('change', { reason: 'queued' })
 }
 
-function removeAttempt(idempotencyKey: string): void {
-  writeAll(readAll().filter((attempt) => attempt.idempotencyKey !== idempotencyKey), 'synced')
+export async function discardBlockedAttempts(userId: number, keys?: string[]): Promise<void> {
+  await attemptStore.discardBlocked(userId, keys)
+  publish('change', { reason: 'discarded' })
 }
 
-function blockAttempt(idempotencyKey: string, status: number): void {
-  writeAll(
-    readAll().map((attempt) =>
-      attempt.idempotencyKey === idempotencyKey
-        ? { ...attempt, syncFailure: { status, failedAt: new Date().toISOString() } }
-        : attempt,
-    ),
-    'blocked',
-  )
-}
-
-export function discardBlockedAttempts(userId: number): void {
-  writeAll(
-    readAll().filter(
-      (attempt) => attempt.userId !== userId || attempt.syncFailure === undefined,
-    ),
-    'discarded',
-  )
+/** Locks são por origem/usuário e liberados pelo navegador se a aba fechar.
+ * Sem suporte, falhar explicitamente; nunca fingir exclusão mútua com um flag. */
+export async function syncAttemptQueue(userId: number): Promise<AttemptQueueSyncResult> {
+  if (!navigator.locks) throw new QueueStorageError('Este navegador não oferece sincronização segura entre abas. As respostas continuam na fila; use um navegador com Web Locks em HTTPS ou localhost.')
+  const inicio = sessionSnapshot().geracao
+  return navigator.locks.request(`aulas:attempt-queue:sync:${userId}`, { mode: 'exclusive' },
+    () => synchronize(userId, inicio))
 }
 
 function isPermanentClientError(status: number): boolean {
@@ -260,65 +150,82 @@ function isPermanentClientError(status: number): boolean {
   )
 }
 
-export async function syncAttemptQueue(userId: number): Promise<AttemptQueueSyncResult> {
+async function synchronize(userId: number, inicio: number): Promise<AttemptQueueSyncResult> {
   const syncedAttempts: SyncedQueuedAttempt[] = []
   const rejectedAttempts: RejectedQueuedAttempt[] = []
-  for (const attempt of listPendingAttempts(userId)) {
-    const body: AttemptRequestBody = {
-      answer: attempt.answer,
-      idempotency_key: attempt.idempotencyKey,
-      ...(attempt.sessionId === undefined ? {} : { practice_session_id: attempt.sessionId }),
-    }
-    let result
-    try {
-      result = await api.POST('/api/exercises/{exercise_id}/attempt', {
-        params: { path: { exercise_id: attempt.exerciseId } },
-        body,
-      })
-    } catch (error) {
-      if (
-        error instanceof TypeError ||
-        (error instanceof DOMException && error.name === 'NetworkError')
-      ) {
+  const mesmaSessao = () => {
+    const atual = sessionSnapshot()
+    return atual.geracao === inicio && atual.usuarioId === userId && !atual.perfilNaoConfirmado
+  }
+  let failure: unknown
+  try {
+    for (const attempt of await listPendingAttempts(userId)) {
+      // A fila pertence ao aluno, não ao token disponível quando uma Promise
+      // antiga retoma. Logout/troca de conta interrompem também os próximos itens.
+      if (!mesmaSessao()) break
+      const body: AttemptRequestBody = {
+        answer: attempt.answer,
+        idempotency_key: attempt.idempotencyKey,
+        ...(attempt.sessionId === undefined ? {} : { practice_session_id: attempt.sessionId }),
+      }
+      let result
+      try {
+        result = await api.POST('/api/exercises/{exercise_id}/attempt', {
+          params: { path: { exercise_id: attempt.exerciseId } },
+          body,
+        })
+      } catch (error) {
+        if (
+          error instanceof TypeError ||
+          (error instanceof DOMException && ['NetworkError', 'AbortError'].includes(error.name))
+        ) {
+          break
+        }
+        throw error
+      }
+      if (!mesmaSessao()) break
+      const { data, response } = result
+
+      if (!data) {
+        // Falhas permanentes ficam preservadas como bloqueadas, mas não impedem
+        // as tentativas seguintes. Isso é essencial quando uma sessão ficou
+        // incompatível após uma atualização de conteúdo. Rede, autenticação,
+        // limite e erros 5xx continuam interrompendo a rodada para tentar depois.
+        if (response && isPermanentClientError(response.status)) {
+          await attemptStore.block(userId, attempt.idempotencyKey, response.status)
+          publish('change', { reason: 'blocked' })
+          rejectedAttempts.push({
+            exerciseId: attempt.exerciseId,
+            idempotencyKey: attempt.idempotencyKey,
+            status: response.status,
+            ...(attempt.sessionId === undefined ? {} : { sessionId: attempt.sessionId }),
+            ...(attempt.courseSlug === undefined ? {} : { courseSlug: attempt.courseSlug }),
+            ...(attempt.lessonNumber === undefined ? {} : { lessonNumber: attempt.lessonNumber }),
+          })
+          continue
+        }
         break
       }
-      throw error
-    }
-    const { data, response } = result
-
-    if (!data) {
-      // Falhas permanentes ficam preservadas como bloqueadas, mas não impedem
-      // as tentativas seguintes. Isso é essencial quando uma sessão ficou
-      // incompatível após uma atualização de conteúdo. Rede, autenticação,
-      // limite e erros 5xx continuam interrompendo a rodada para tentar depois.
-      if (response && isPermanentClientError(response.status)) {
-        blockAttempt(attempt.idempotencyKey, response.status)
-        rejectedAttempts.push({
-          exerciseId: attempt.exerciseId,
-          idempotencyKey: attempt.idempotencyKey,
-          status: response.status,
-          ...(attempt.sessionId === undefined ? {} : { sessionId: attempt.sessionId }),
-          ...(attempt.courseSlug === undefined ? {} : { courseSlug: attempt.courseSlug }),
-          ...(attempt.lessonNumber === undefined ? {} : { lessonNumber: attempt.lessonNumber }),
-        })
-        continue
+      if (!Number.isInteger(data.attempt_id) || data.attempt_id <= 0 || typeof data.correct !== 'boolean') {
+        throw new QueueStorageError('A API não confirmou a tentativa com um resultado válido. A resposta continua na fila.')
       }
-      break
+
+      await attemptStore.finish(userId, attempt.idempotencyKey)
+      publish('change', { reason: 'synced' })
+      syncedAttempts.push({
+        exerciseId: attempt.exerciseId,
+        idempotencyKey: attempt.idempotencyKey,
+        attemptId: data.attempt_id,
+        correct: data.correct,
+        ...(attempt.sessionId === undefined ? {} : { sessionId: attempt.sessionId }),
+        ...(attempt.courseSlug === undefined ? {} : { courseSlug: attempt.courseSlug }),
+        ...(attempt.lessonNumber === undefined ? {} : { lessonNumber: attempt.lessonNumber }),
+      })
     }
 
-    removeAttempt(attempt.idempotencyKey)
-    syncedAttempts.push({
-      exerciseId: attempt.exerciseId,
-      idempotencyKey: attempt.idempotencyKey,
-      attemptId: data.attempt_id,
-      correct: data.correct,
-      ...(attempt.sessionId === undefined ? {} : { sessionId: attempt.sessionId }),
-      ...(attempt.courseSlug === undefined ? {} : { courseSlug: attempt.courseSlug }),
-      ...(attempt.lessonNumber === undefined ? {} : { lessonNumber: attempt.lessonNumber }),
-    })
-  }
+  } catch (error) { failure = error }
 
-  const stats = getAttemptQueueStats(userId)
+  const stats = await getAttemptQueueStats(userId)
   const result: AttemptQueueSyncResult = {
     synced: syncedAttempts.length,
     pending: stats.pending,
@@ -326,10 +233,7 @@ export async function syncAttemptQueue(userId: number): Promise<AttemptQueueSync
     syncedAttempts,
     rejectedAttempts,
   }
-  window.dispatchEvent(
-    new CustomEvent<AttemptQueueSyncEventDetail>(ATTEMPT_QUEUE_SYNC_EVENT, {
-      detail: { userId, ...result },
-    }),
-  )
+  publish('sync', { userId, ...result })
+  if (failure) throw failure
   return result
 }

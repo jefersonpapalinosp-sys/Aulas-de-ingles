@@ -50,12 +50,34 @@ const media: LessonMedia = {
 const sourcePageUrl = 'https://learningenglish.voanews.com/a/lesson-31/123.html'
 
 afterEach(() => {
+  vi.restoreAllMocks()
   window.localStorage.clear()
   savePosition.mockClear()
   clearPosition.mockClear()
 })
 
 describe('LessonAudioPlayer', () => {
+  it('quota não interrompe controles nem a tentativa de salvar posição remota', () => {
+    const { container } = render(<LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />)
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
+    const audio = container.querySelector('audio')!
+    audio.currentTime = 15
+    fireEvent.timeUpdate(audio)
+    expect(screen.getByRole('alert')).toHaveTextContent('retomada local não está garantida')
+    expect(savePosition).toHaveBeenCalledWith(15)
+    expect(screen.getByText('0:15 / 3:29')).toBeInTheDocument()
+  })
+  it('falha de leitura e remoção não impede reproduzir ou concluir áudio', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
+    const { container } = render(<LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />)
+    const audio = container.querySelector('audio')!
+    fireEvent.loadedMetadata(audio)
+    expect(screen.getByRole('alert')).toHaveTextContent('indisponível')
+    fireEvent.ended(audio)
+    expect(clearPosition).toHaveBeenCalledOnce()
+    expect(screen.getByRole('alert')).toHaveTextContent('Confira os dados ao reabrir')
+  })
   it('mostra o áudio oficial com duração conhecida', () => {
     const { container } = render(
       <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,

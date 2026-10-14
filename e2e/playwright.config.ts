@@ -1,16 +1,16 @@
 import { defineConfig, devices } from '@playwright/test'
+import { assertTarget } from './safety.mjs'
 
 /**
- * A suíte E2E aponta para o alvo via E2E_BASE_URL.
- *
- * O padrão é o compose de **produção** (5181), e não o de dev: o ponto do
- * E2E é exercitar o que vai rodar — bundle buildado atrás do nginx, API sem
- * reload. Para rodar contra o dev: E2E_BASE_URL=http://localhost:5180
+ * Bundle buildado + nginx + API sem reload, mas banco e voz exclusivos de E2E.
+ * O setup verifica containers, volumes e identidade real antes de criar contas.
+ * E2E_BASE_URL não é uma saída para apontar os testes a desenvolvimento/produção.
  */
-const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:5181'
+const baseURL = assertTarget(process.env.E2E_BASE_URL)
 
 export default defineConfig({
   testDir: './testes',
+  globalSetup: './global-setup.ts',
   fullyParallel: false, // os testes compartilham o banco
   workers: 1,
   retries: process.env.CI ? 1 : 0,

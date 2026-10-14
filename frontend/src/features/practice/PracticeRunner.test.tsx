@@ -165,6 +165,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.restoreAllMocks()
   Object.defineProperty(window.navigator, 'onLine', { value: true, configurable: true })
   window.localStorage.clear()
   vi.clearAllMocks()
@@ -172,6 +173,18 @@ afterEach(() => {
 })
 
 describe('PracticeRunner', () => {
+  it('posição offline com quota cheia permanece utilizável e avisa que não persistiu', async () => {
+    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true })
+    const session = makeNavigableSession()
+    practiceApi.active.mockReturnValue(queryResult(session))
+    practiceApi.session.mockReturnValue(queryResult(session))
+    renderRunner()
+    await userEvent.click(screen.getByRole('button', { name: 'Retomar sessão' }))
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
+    await userEvent.click(screen.getByRole('button', { name: 'Próxima →' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Posição apenas nesta tela até sincronizar')
+    expect(localStorage.getItem('aulas-ingles:practice-position:v1:7:71')).toBeNull()
+  })
   it('expõe o estado de carregamento sem montar controles prematuramente', () => {
     practiceApi.active.mockReturnValue({
       data: undefined,

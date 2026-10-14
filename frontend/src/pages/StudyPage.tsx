@@ -16,7 +16,7 @@ import { PracticeRunner } from '../features/practice/PracticeRunner'
 import { WritingWorkspace } from '../features/writing/WritingWorkspace'
 import {
   isStudyStep,
-  loadStudyProgress,
+  readStudyProgress,
   saveStudyProgress,
   STUDY_STEPS,
   type StudyStepSlug,
@@ -291,10 +291,12 @@ export function StudyPage() {
     isError: sincronizacaoFalhou,
     isSuccess: sincronizado,
   } = useSalvarStudySession(courseSlug, lessonNumber)
-  const stored = useMemo(
-    () => loadStudyProgress(usuario?.id ?? 0, courseSlug, lessonNumber),
+  const localRead = useMemo(
+    () => readStudyProgress(usuario?.id ?? 0, courseSlug, lessonNumber),
     [usuario?.id, courseSlug, lessonNumber],
   )
+  const stored = localRead.progress
+  const [localSaved, setLocalSaved] = useState(true)
   const [completedSteps, setCompletedSteps] = useState<StudyStepSlug[]>(stored.completedSteps)
   const [resumeStep, setResumeStep] = useState<StudyStepSlug>(stored.currentStep)
   const [hydrated, setHydrated] = useState(false)
@@ -311,7 +313,7 @@ export function StudyPage() {
     const localMaisCompleto =
       remoto !== null && stored.completedSteps.length > remoto.completed_steps.length
     setCompletedSteps(
-      localMaisCompleto || !remoto ? stored.completedSteps : remoto.completed_steps,
+      [...new Set([...stored.completedSteps, ...(remoto?.completed_steps ?? [])])],
     )
     setResumeStep(localMaisCompleto || !remoto ? stored.currentStep : remoto.current_step)
     setHydrated(true)
@@ -319,10 +321,10 @@ export function StudyPage() {
 
   useEffect(() => {
     if (!usuario || !hydrated || !Number.isInteger(lessonNumber) || !isStudyStep(etapa)) return
-    saveStudyProgress(usuario.id, courseSlug, lessonNumber, {
+    setLocalSaved(saveStudyProgress(usuario.id, courseSlug, lessonNumber, {
       currentStep: etapa,
       completedSteps,
-    })
+    }))
     sincronizarSessao({ current_step: etapa, completed_steps: completedSteps })
   }, [
     usuario,
@@ -333,6 +335,13 @@ export function StudyPage() {
     completedSteps,
     sincronizarSessao,
   ])
+
+  useEffect(() => {
+    if (!hydrated || !serverSession.data) return
+    const confirmed = serverSession.data.completed_steps
+    setCompletedSteps((local) => confirmed.every((step) => local.includes(step))
+      ? local : [...new Set([...local, ...confirmed])])
+  }, [hydrated, serverSession.data])
 
   if (!Number.isInteger(lessonNumber)) return <p className="erro">Número de aula inválido.</p>
   if (!usuario) return null
@@ -363,10 +372,10 @@ export function StudyPage() {
   const isComplete = STUDY_STEPS.every((step) => completedSteps.includes(step.slug))
 
   function persist(currentStep: StudyStepSlug, completed: StudyStepSlug[]) {
-    saveStudyProgress(userId, courseSlug, lessonNumber, {
+    setLocalSaved(saveStudyProgress(userId, courseSlug, lessonNumber, {
       currentStep,
       completedSteps: completed,
-    })
+    }))
   }
 
   function completeAndContinue() {
@@ -435,6 +444,8 @@ export function StudyPage() {
         <p className="study-step-label">
           Etapa {stepIndex + 1} de {STUDY_STEPS.length}
         </p>
+        {localRead.warning && <p role="alert" className="erro">{localRead.warning}</p>}
+        {!localSaved && <p role="alert" className="erro">Jornada não salva no navegador. Confira a sincronização antes de sair.</p>}
         <StepContent lesson={lesson} step={currentStep} userId={userId} />
 
         {isComplete && currentStep === 'revisar' && (
@@ -448,7 +459,7 @@ export function StudyPage() {
               {marcarEstudada.isPending
                 ? 'Salvando a conclusão…'
                 : marcarEstudada.isError
-                  ? 'A jornada foi salva neste navegador, mas não foi possível marcar a aula no servidor. Tente novamente.'
+                  ? 'Não foi possível marcar a aula na conta. Confira o estado de salvamento e tente novamente.'
                   : 'A aula foi marcada como estudada e as palavras do deck voltarão na fila de revisão.'}
             </p>
           </div>
@@ -469,7 +480,7 @@ export function StudyPage() {
           {sincronizando
             ? 'Sincronizando…'
             : sincronizacaoFalhou
-              ? 'Salvo neste dispositivo; sincronização pendente.'
+              ? localSaved ? 'Salvo neste dispositivo; sincronização pendente.' : 'Progresso apenas nesta tela; salvamento não confirmado.'
               : sincronizado
                 ? 'Progresso sincronizado.'
                 : ''}
