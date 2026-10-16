@@ -26,6 +26,7 @@ class TranscriptionResult:
     words: list[dict[str, object]]
     mean_confidence: float
     cost_microusd: int
+    cost_known: bool = True
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,14 @@ class WritingAssistResult:
     suggestions: list[dict[str, object]]
     confidence: float
     cost_microusd: int
+    cost_known: bool = True
+
+
+def _reported_cost(payload: dict[str, Any]) -> tuple[int, bool]:
+    cost = payload.get("cost_microusd")
+    if isinstance(cost, int) and not isinstance(cost, bool) and 0 <= cost <= 2_147_483_647:
+        return cost, True
+    return 0, False
 
 
 def _post_json(
@@ -109,12 +118,13 @@ def call_transcription_provider(
         raise ProviderFailure("invalid_provider_response")
     confidences = [item["confidence"] for item in words]
     mean = sum(value for value in confidences if isinstance(value, float)) / len(words)
-    cost = payload.get("cost_microusd", 0)
+    cost, cost_known = _reported_cost(payload)
     return TranscriptionResult(
         text=text.strip()[:5000],
         words=words,
         mean_confidence=round(mean, 4),
-        cost_microusd=max(0, int(cost)) if isinstance(cost, (int, float)) else 0,
+        cost_microusd=cost,
+        cost_known=cost_known,
     )
 
 
@@ -125,9 +135,17 @@ def call_writing_provider(
     *,
     token: str | None,
     timeout: int,
+    idempotency_key: str | None = None,
 ) -> WritingAssistResult:
     body = json.dumps({"text": text, "rubric": rubric}, ensure_ascii=False).encode()
-    payload = _post_json(url, body, content_type="application/json", token=token, timeout=timeout)
+    payload = _post_json(
+        url,
+        body,
+        content_type="application/json",
+        token=token,
+        timeout=timeout,
+        extra_headers={"Idempotency-Key": idempotency_key} if idempotency_key else None,
+    )
     summary = payload.get("summary")
     raw_suggestions = payload.get("suggestions")
     confidence = payload.get("confidence")
@@ -144,7 +162,7 @@ def call_writing_provider(
         criterion, message = item.get("criterion"), item.get("message")
         if isinstance(criterion, str) and isinstance(message, str):
             suggestions.append({"criterion": criterion[:100], "message": message[:500]})
-    cost = payload.get("cost_microusd", 0)
+    cost, cost_known = _reported_cost(payload)
     try:
         normalized_confidence = max(0.0, min(1.0, float(confidence)))
     except (TypeError, ValueError):
@@ -153,7 +171,8 @@ def call_writing_provider(
         summary=summary.strip()[:1000],
         suggestions=suggestions,
         confidence=normalized_confidence,
-        cost_microusd=max(0, int(cost)) if isinstance(cost, (int, float)) else 0,
+        cost_microusd=cost,
+        cost_known=cost_known,
     )
 
 

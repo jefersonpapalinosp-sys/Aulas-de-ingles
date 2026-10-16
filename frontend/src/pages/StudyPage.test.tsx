@@ -253,7 +253,7 @@ describe('StudyPage', () => {
     await user.click(screen.getByRole('button', { name: 'Concluir aula' }))
 
     expect(marcarEstudada).toHaveBeenCalledWith({ numero: 31, estudada: true })
-    expect(screen.getByRole('status')).toHaveTextContent(
+    expect(screen.getByRole('status', { name: 'Conclusão da jornada' })).toHaveTextContent(
       'Você percorreu as cinco etapas de Level 1 · Aula 31',
     )
   })

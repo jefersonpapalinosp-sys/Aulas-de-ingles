@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { LessonMedia } from '../../api/client'
-import { useClearMediaPosition, useMediaPosition, useSaveMediaPosition } from '../../api/media'
-import { readLocal, removeLocal, writeLocal } from '../../storage/local'
-
-function positionKey(userId: number, mediaId: number): string {
-  return `aulas-ingles:media-position:v1:${userId}:${mediaId}`
-}
+import { useMediaPositionSync } from '../../api/media'
 
 export function formatAudioTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
@@ -20,7 +15,7 @@ type LessonAudioPlayerProps = {
 }
 
 export function LessonAudioPlayer(props: LessonAudioPlayerProps) {
-  return <LessonAudioPlayerContent key={props.media.id} {...props} />
+  return <LessonAudioPlayerContent key={`${props.userId}:${props.media.id}`} {...props} />
 }
 
 function LessonAudioPlayerContent({
@@ -30,68 +25,59 @@ function LessonAudioPlayerContent({
 }: LessonAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const lastSavedAt = useRef(0)
+  const touched = useRef(false)
+  const ended = useRef(false)
+  const [metadataReady, setMetadataReady] = useState(false)
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(media.duration_seconds ?? 0)
   const [rate, setRate] = useState(1)
   const [loopStart, setLoopStart] = useState<number | null>(null)
   const [loopEnd, setLoopEnd] = useState<number | null>(null)
   const [failed, setFailed] = useState(false)
-  const [localSaved, setLocalSaved] = useState(false)
-  const [storageWarning, setStorageWarning] = useState('')
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [translationOpen, setTranslationOpen] = useState(false)
   const [fullTranscriptOpen, setFullTranscriptOpen] = useState(false)
-  const remotePosition = useMediaPosition(media.id, userId)
-  const saveRemotePosition = useSaveMediaPosition(media.id, userId)
-  const clearRemotePosition = useClearMediaPosition(media.id, userId)
+  const sync = useMediaPositionSync(media.id, userId)
   const activeCue = media.cues.find(
     (cue) => position >= cue.start_seconds && position < cue.end_seconds,
   )
 
   useEffect(() => {
     const audio = audioRef.current
-    const remote = remotePosition.data
-    if (!audio || !remote?.updated_at || position > 0) return
-    const upper = Number.isFinite(audio.duration) ? audio.duration : duration
-    if (remote.position_seconds > 0 && remote.position_seconds < upper - 2) {
-      audio.currentTime = remote.position_seconds
-      setPosition(remote.position_seconds)
-      lastSavedAt.current = remote.position_seconds
-      const result = writeLocal(positionKey(userId, media.id), String(remote.position_seconds))
-      setLocalSaved(result.ok)
-      setStorageWarning(result.ok ? '' : result.error)
+    if (!audio || !metadataReady || !sync.ready || touched.current) return
+    const saved = sync.completed ? 0 : sync.position
+    if (saved >= 0 && saved < duration - 2) {
+      audio.currentTime = saved
+      setPosition(saved)
+      lastSavedAt.current = saved
     }
-  }, [duration, media.id, position, remotePosition.data, userId])
+  }, [duration, metadataReady, sync.position, sync.completed, sync.ready])
 
   function persistPosition(at: number) {
-    const result = writeLocal(positionKey(userId, media.id), String(at))
-    setLocalSaved(result.ok)
-    setStorageWarning(result.ok ? '' : `${result.error} A retomada local não está garantida.`)
+    touched.current = true
     lastSavedAt.current = at
-    if (userId > 0 && navigator.onLine) saveRemotePosition.mutate(at)
+    sync.record(at)
   }
 
   function onLoadedMetadata() {
     const audio = audioRef.current
     if (!audio) return
     if (Number.isFinite(audio.duration)) setDuration(audio.duration)
+    setMetadataReady(true)
+  }
 
-    const local = readLocal(positionKey(userId, media.id))
-    if (!local.ok) setStorageWarning(local.error)
-    const savedLocalPosition = local.ok ? Number(local.value) : 0
-    const saved = remotePosition.data?.updated_at
-      ? remotePosition.data.position_seconds
-      : savedLocalPosition
-    if (Number.isFinite(saved) && saved > 0 && saved < audio.duration - 2) {
-      audio.currentTime = saved
-      setPosition(saved)
-      lastSavedAt.current = saved
-    }
+  async function resolvePosition(choice: 'local' | 'remote') {
+    await sync.resolve(choice)
+    if (sync.snapshot().conflict) return
+    const saved = sync.snapshot().position
+    if (audioRef.current) audioRef.current.currentTime = saved
+    setPosition(saved)
+    lastSavedAt.current = saved
   }
 
   function onTimeUpdate() {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio || ended.current || audio.ended) return
 
     if (loopStart !== null && loopEnd !== null && audio.currentTime >= loopEnd) {
       audio.currentTime = loopStart
@@ -108,7 +94,9 @@ function LessonAudioPlayerContent({
     if (!audio) return
     const upper = Number.isFinite(audio.duration) ? audio.duration : duration
     audio.currentTime = Math.max(0, Math.min(audio.currentTime + seconds, upper || Infinity))
+    ended.current = false
     setPosition(audio.currentTime)
+    persistPosition(audio.currentTime)
   }
 
   function changeRate(value: number) {
@@ -125,6 +113,7 @@ function LessonAudioPlayerContent({
   function seekToCue(startSeconds: number) {
     const audio = audioRef.current
     if (!audio) return
+    ended.current = false
     audio.currentTime = startSeconds
     setPosition(startSeconds)
     persistPosition(startSeconds)
@@ -149,12 +138,15 @@ function LessonAudioPlayerContent({
         aria-label={media.label}
         onLoadedMetadata={onLoadedMetadata}
         onTimeUpdate={onTimeUpdate}
-        onPause={() => persistPosition(audioRef.current?.currentTime ?? position)}
+        onPlay={() => { touched.current = true; ended.current = false }}
+        onPause={() => {
+          if (!ended.current && !audioRef.current?.ended) persistPosition(audioRef.current?.currentTime ?? position)
+        }}
         onEnded={() => {
-          const result = removeLocal(positionKey(userId, media.id))
-          setLocalSaved(false)
-          setStorageWarning(result.ok ? '' : result.error)
-          if (userId > 0 && navigator.onLine) clearRemotePosition.mutate()
+          ended.current = true
+          touched.current = true
+          sync.finish()
+          lastSavedAt.current = 0
           setPosition(0)
         }}
         onError={() => setFailed(true)}
@@ -163,6 +155,7 @@ function LessonAudioPlayerContent({
         Seu navegador não consegue reproduzir este áudio.
       </audio>
 
+      <p className="muted">Áudio online · não baixado neste dispositivo.</p>
       <details className="media-rights">
         <summary>Fonte, licença e uso offline</summary>
         <p>
@@ -171,7 +164,7 @@ function LessonAudioPlayerContent({
         <p>
           {media.offline_policy === 'network_only'
             ? 'Reprodução somente online: o aplicativo não armazena este áudio no cache.'
-            : 'Esta mídia pode ser armazenada para uso offline.'}{' '}
+            : 'A licença permite cache, mas este aplicativo ainda não oferece download offline desta mídia.'}{' '}
           {media.license_url && (
             <a href={media.license_url} target="_blank" rel="noopener noreferrer">
               Consultar os termos da fonte
@@ -181,13 +174,22 @@ function LessonAudioPlayerContent({
       </details>
 
       <p className="media-sync" aria-live="polite">
-        {saveRemotePosition.isError
-          ? localSaved ? 'Posição salva neste dispositivo; sincronização pendente.' : 'Não foi possível salvar a posição localmente nem confirmar a sincronização.'
-          : saveRemotePosition.isSuccess
-            ? 'Posição sincronizada com sua conta.'
-            : ''}
+        {sync.pending > 0 ? `${sync.pending} posição(ões) com sincronização pendente.`
+          : sync.confirmed ? 'Posição sincronizada com sua conta.'
+            : sync.ready ? 'Posição disponível neste dispositivo; conta ainda não confirmada.' : 'Consultando posição da conta…'}
       </p>
-      {storageWarning && <p className="erro" role="alert">{storageWarning}</p>}
+      {sync.warning && <p className="erro" role="alert">{sync.warning}</p>}
+      {sync.error && <p role="status">{sync.error} <button type="button" onClick={() => void sync.retry()}>Tentar sincronizar</button></p>}
+      {sync.conflict && (
+        <section className="media-fallback" aria-label="Conflito de posição">
+          <h3>Há duas posições de retomada</h3>
+          <p>Neste dispositivo: {formatAudioTime(sync.position)}{sync.completed ? ' (concluído)' : ''}.
+            Na conta: {formatAudioTime(sync.conflict.position_seconds)}{sync.conflict.completed ? ' (concluído)' : ''}.
+            Escolha a retomada. Nenhuma posição foi substituída.</p>
+          <button type="button" onClick={() => void resolvePosition('local')}>Manter posição deste dispositivo</button>{' '}
+          <button type="button" onClick={() => void resolvePosition('remote')}>Usar posição da conta</button>
+        </section>
+      )}
 
       <div className="audio-toolbar" aria-label="Controles adicionais do áudio">
         <button type="button" onClick={() => skip(-5)}>

@@ -3,13 +3,14 @@
 import asyncio
 from hashlib import sha256
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, tuple_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import raiseload
 
-from app.api.assist import assisted_usage
 from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao
@@ -27,6 +28,12 @@ from app.db.models import (
 from app.db.session import get_session
 from app.domain.writing import analyze_writing, rubric_snapshot
 from app.domain.writing_rubric import ALGORITHM_VERSION, EVALUATION_SCOPE
+from app.pagination import (
+    InvalidCursor,
+    TimeIdCursor,
+    decode_time_id_cursor,
+    encode_time_id_cursor,
+)
 from app.schemas.assist import HumanRatingIn
 from app.schemas.writing import (
     WritingDraftIn,
@@ -34,15 +41,26 @@ from app.schemas.writing import (
     WritingFeedbackCheckOut,
     WritingFeedbackIn,
     WritingFeedbackOut,
+    WritingFeedbackPageOut,
     WritingHistoryItemOut,
+    WritingHistoryPageOut,
+    WritingHistorySummaryOut,
     WritingRevisionOut,
+    WritingRevisionPageOut,
 )
-from app.services import assistance
+from app.services import assist_quota, assistance, editorial_history
+from app.services.publication import (
+    lock_publication,
+    published_lesson_ids,
+    require_published_lesson,
+)
 
 router = APIRouter(prefix="/writing", tags=["writing"])
 
 
-def _feedback_out(record: WritingFeedbackRecord) -> WritingFeedbackOut:
+def _feedback_out(
+    record: WritingFeedbackRecord, *, historical_content_available: bool = False
+) -> WritingFeedbackOut:
     return WritingFeedbackOut(
         source_text_hash=sha256(record.text.encode()).hexdigest(),
         id=record.id,
@@ -53,6 +71,7 @@ def _feedback_out(record: WritingFeedbackRecord) -> WritingFeedbackOut:
         algorithm_version=record.algorithm_version,
         rubric_version=record.rubric_version,
         rubric_snapshot=record.rubric_snapshot,
+        historical_content_status=("available" if historical_content_available else "unavailable"),
         evaluation_scope=EVALUATION_SCOPE,
         analysis_mode=record.analysis_mode,  # type: ignore[arg-type]
         evaluation_only=record.analysis_mode != "deterministic",
@@ -70,10 +89,14 @@ def _feedback_out(record: WritingFeedbackRecord) -> WritingFeedbackOut:
     )
 
 
-async def _prompt(session: AsyncSession, prompt_id: int) -> WritingPrompt:
-    prompt = (
-        await session.execute(select(WritingPrompt).where(WritingPrompt.id == prompt_id))
-    ).scalar_one_or_none()
+async def _prompt(
+    session: AsyncSession, prompt_id: int, *, published_only: bool = True
+) -> WritingPrompt:
+    query = select(WritingPrompt).where(WritingPrompt.id == prompt_id)
+    if published_only:
+        await lock_publication(session)
+        query = query.where(WritingPrompt.lesson_id.in_(published_lesson_ids()))
+    prompt = (await session.execute(query)).scalar_one_or_none()
     if prompt is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Proposta não existe.")
     return prompt
@@ -82,26 +105,34 @@ async def _prompt(session: AsyncSession, prompt_id: int) -> WritingPrompt:
 async def _draft(session: AsyncSession, prompt: WritingPrompt, user_id: int) -> WritingDraft | None:
     return (
         await session.execute(
-            select(WritingDraft).where(
-                WritingDraft.prompt_id == prompt.id, WritingDraft.user_id == user_id
-            )
+            select(WritingDraft)
+            .options(raiseload(WritingDraft.revisions))
+            .where(WritingDraft.prompt_id == prompt.id, WritingDraft.user_id == user_id)
         )
     ).scalar_one_or_none()
 
 
 def _draft_out(prompt_id: int, draft: WritingDraft | None) -> WritingDraftOut:
     if draft is None:
-        return WritingDraftOut(prompt_id=prompt_id, text="", updated_at=None, revisions=[])
+        return WritingDraftOut(prompt_id=prompt_id, text="", updated_at=None)
     return WritingDraftOut(
         revision=draft.revision,
         prompt_id=prompt_id,
         text=draft.text,
         updated_at=draft.updated_at,
-        revisions=[
-            WritingRevisionOut.model_validate(revision, from_attributes=True)
-            for revision in draft.revisions
-        ],
     )
+
+
+def _cursor_boundary(cursor: str | None) -> TimeIdCursor | None:
+    if cursor is None:
+        return None
+    try:
+        return decode_time_id_cursor(cursor)
+    except InvalidCursor as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"code": "invalid_cursor", "message": "Cursor de paginação inválido."},
+        ) from error
 
 
 async def _locked_draft(
@@ -121,6 +152,7 @@ async def _locked_draft(
     draft = (
         await session.execute(
             select(WritingDraft)
+            .options(raiseload(WritingDraft.revisions))
             .where(
                 WritingDraft.prompt_id == prompt.id,
                 WritingDraft.user_id == user_id,
@@ -149,8 +181,11 @@ async def obter_rascunho(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> WritingDraftOut:
-    prompt = await _prompt(session, prompt_id)
-    return _draft_out(prompt.id, await _draft(session, prompt, usuario.id))
+    prompt = await _prompt(session, prompt_id, published_only=False)
+    draft = await _draft(session, prompt, usuario.id)
+    if draft is None:
+        await require_published_lesson(session, prompt.lesson_id)
+    return _draft_out(prompt.id, draft)
 
 
 @router.put("/prompts/{prompt_id}/draft", response_model=WritingDraftOut)
@@ -211,6 +246,48 @@ async def criar_versao(
     )
 
 
+@router.get("/prompts/{prompt_id}/versions", response_model=WritingRevisionPageOut)
+async def listar_versoes(
+    prompt_id: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> WritingRevisionPageOut:
+    boundary = _cursor_boundary(cursor)
+    query = (
+        select(WritingRevision)
+        .join(WritingDraft, WritingRevision.draft_id == WritingDraft.id)
+        .where(
+            WritingDraft.user_id == usuario.id,
+            WritingDraft.prompt_id == prompt_id,
+        )
+    )
+    if boundary is not None:
+        query = query.where(
+            tuple_(WritingRevision.created_at, WritingRevision.id)
+            < tuple_(boundary.timestamp, boundary.row_id)
+        )
+    rows = list(
+        (
+            await session.execute(
+                query.order_by(WritingRevision.created_at.desc(), WritingRevision.id.desc()).limit(
+                    limit + 1
+                )
+            )
+        ).scalars()
+    )
+    page = rows[:limit]
+    return WritingRevisionPageOut(
+        items=[WritingRevisionOut.model_validate(item, from_attributes=True) for item in page],
+        next_cursor=(
+            encode_time_id_cursor(page[-1].created_at, page[-1].id)
+            if len(rows) > limit and page
+            else None
+        ),
+    )
+
+
 @router.post("/prompts/{prompt_id}/feedback", response_model=WritingFeedbackOut)
 async def analisar_texto(
     prompt_id: int,
@@ -234,15 +311,60 @@ async def analisar_texto(
     assisted_confidence: float | None = None
     assisted_cost = 0
     assisted_error: str | None = None
+    reservation_id: int | None = None
+    rubric_version, snapshot = rubric_snapshot(
+        title=prompt.title,
+        instructions=prompt.instructions,
+        min_words=prompt.min_words,
+        min_sentences=prompt.min_sentences,
+        requirements=prompt.requirements,
+    )
     if corpo.assisted:
         mode = "fallback"
         if not settings.assisted_features_enabled or not settings.writing_assist_configured:
             assisted_error = "feature_disabled"
         else:
-            used, _ = await assisted_usage(session, usuario.id)
-            if used >= settings.assist_daily_quota:
+            fingerprint = sha256(
+                f"{prompt.id}:{rubric_version}:{ALGORITHM_VERSION}:{corpo.text}".encode()
+            ).hexdigest()
+            try:
+                reservation, created = await assist_quota.reserve(
+                    session,
+                    usuario.id,
+                    str(corpo.operation_key or uuid4()),
+                    fingerprint,
+                    "writing",
+                )
+            except assist_quota.QuotaExceeded:
                 assisted_error = "quota_exceeded"
             else:
+                if not created:
+                    previous = (
+                        await session.execute(
+                            select(WritingFeedbackRecord).where(
+                                WritingFeedbackRecord.assist_reservation_id == reservation.id,
+                                WritingFeedbackRecord.user_id == usuario.id,
+                            )
+                        )
+                    ).scalar_one_or_none()
+                    if previous is not None:
+                        history_snapshot = await editorial_history.stored_snapshot(
+                            session, "writing", previous.id, usuario.id
+                        )
+                        return _feedback_out(
+                            previous,
+                            historical_content_available=history_snapshot is not None,
+                        )
+                    raise HTTPException(
+                        409, "Análise já iniciada; consulte o histórico antes de reenviar."
+                    )
+                reservation_id = reservation.id
+                provider_key = reservation.provider_key
+                if not await assist_quota.consume(session, reservation_id):
+                    raise HTTPException(409, "Reserva expirada. Solicite uma nova análise.")
+                # Persiste a admissão e devolve a conexão ANTES da chamada externa.
+                # Uma desconexão/timeout posterior não prova ausência de consumo.
+                await session.commit()
                 provider = settings.assist_provider_name
                 # O provedor recebe o resultado da rubrica local, não uma
                 # segunda cópia incompleta das regras. Assim ele só explica
@@ -278,6 +400,7 @@ async def analisar_texto(
                             rubric,
                             token=settings.assist_provider_token,
                             timeout=settings.assist_timeout_seconds,
+                            idempotency_key=provider_key,
                         )
                 except assistance.ProviderFailure as error:
                     assisted_error = error.code
@@ -291,15 +414,10 @@ async def analisar_texto(
                     assisted_suggestions = assisted.suggestions
                     assisted_confidence = assisted.confidence
                     assisted_cost = assisted.cost_microusd
-
-    rubric_version, snapshot = rubric_snapshot(
-        title=prompt.title,
-        instructions=prompt.instructions,
-        min_words=prompt.min_words,
-        min_sentences=prompt.min_sentences,
-        requirements=prompt.requirements,
-    )
+                    if assisted.cost_known:
+                        await assist_quota.record_cost(session, reservation_id, assisted_cost)
     record = WritingFeedbackRecord(
+        assist_reservation_id=reservation_id,
         user_id=usuario.id,
         prompt_id=prompt.id,
         text=corpo.text,
@@ -320,6 +438,23 @@ async def analisar_texto(
     )
     session.add(record)
     await session.flush()
+    await editorial_history.capture(
+        session,
+        "writing",
+        record.id,
+        usuario.id,
+        {
+            "kind": "writing",
+            "source_id": prompt.id,
+            "lesson_id": prompt.lesson_id,
+            "rubric": snapshot,
+            "rubric_version": rubric_version,
+            "algorithm_version": ALGORITHM_VERSION,
+            "checks": [check.__dict__ for check in checks],
+            "ready": ready,
+            "analysis_mode": mode,
+        },
+    )
     passed = sum(1 for check in checks if check.passed)
     score = passed / len(checks) if checks else (1.0 if ready else 0.0)
     session.add(
@@ -352,7 +487,13 @@ async def analisar_texto(
         )
     await session.commit()
     await session.refresh(record)
-    return _feedback_out(record)
+    history_snapshot = await editorial_history.stored_snapshot(
+        session, "writing", record.id, usuario.id
+    )
+    return _feedback_out(
+        record,
+        historical_content_available=history_snapshot is not None,
+    )
 
 
 @router.put("/feedback/{feedback_id}/rating", response_model=WritingFeedbackOut)
@@ -379,7 +520,123 @@ async def avaliar_feedback(
         )
     record.human_rating = corpo.rating
     await session.commit()
-    return _feedback_out(record)
+    history_snapshot = await editorial_history.stored_snapshot(
+        session, "writing", record.id, usuario.id
+    )
+    return _feedback_out(record, historical_content_available=history_snapshot is not None)
+
+
+@router.get("/prompts/{prompt_id}/feedback", response_model=WritingFeedbackPageOut)
+async def listar_feedbacks(
+    prompt_id: int,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> WritingFeedbackPageOut:
+    boundary = _cursor_boundary(cursor)
+    query = select(WritingFeedbackRecord).where(
+        WritingFeedbackRecord.user_id == usuario.id,
+        WritingFeedbackRecord.prompt_id == prompt_id,
+    )
+    if boundary is not None:
+        query = query.where(
+            tuple_(WritingFeedbackRecord.created_at, WritingFeedbackRecord.id)
+            < tuple_(boundary.timestamp, boundary.row_id)
+        )
+    rows = list(
+        (
+            await session.execute(
+                query.order_by(
+                    WritingFeedbackRecord.created_at.desc(), WritingFeedbackRecord.id.desc()
+                ).limit(limit + 1)
+            )
+        ).scalars()
+    )
+    page = rows[:limit]
+    snapshots = await editorial_history.stored_snapshots(
+        session, "writing", [item.id for item in page], usuario.id
+    )
+    return WritingFeedbackPageOut(
+        items=[
+            _feedback_out(item, historical_content_available=item.id in snapshots) for item in page
+        ],
+        next_cursor=(
+            encode_time_id_cursor(page[-1].created_at, page[-1].id)
+            if len(rows) > limit and page
+            else None
+        ),
+    )
+
+
+@router.get("/history/page", response_model=WritingHistoryPageOut)
+async def historico_de_escrita_paginado(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> WritingHistoryPageOut:
+    boundary = _cursor_boundary(cursor)
+    revision_count = (
+        select(func.count(WritingRevision.id))
+        .where(WritingRevision.draft_id == WritingDraft.id)
+        .correlate(WritingDraft)
+        .scalar_subquery()
+    )
+    feedback_count = (
+        select(func.count(WritingFeedbackRecord.id))
+        .where(
+            WritingFeedbackRecord.user_id == WritingDraft.user_id,
+            WritingFeedbackRecord.prompt_id == WritingPrompt.id,
+        )
+        .correlate(WritingDraft, WritingPrompt)
+        .scalar_subquery()
+    )
+    query = (
+        select(
+            WritingDraft.id,
+            WritingPrompt.id.label("prompt_id"),
+            Course.slug.label("course_slug"),
+            Course.title.label("course_title"),
+            CourseUnit.slug.label("unit_slug"),
+            Lesson.number.label("lesson_number"),
+            Lesson.title.label("lesson_title"),
+            WritingPrompt.title.label("prompt_title"),
+            WritingDraft.updated_at,
+            revision_count.label("revision_count"),
+            feedback_count.label("feedback_count"),
+        )
+        .join(WritingPrompt, WritingDraft.prompt_id == WritingPrompt.id)
+        .join(Lesson, WritingPrompt.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(WritingDraft.user_id == usuario.id)
+    )
+    if course is not None:
+        query = query.where(Course.slug == course)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    if boundary is not None:
+        query = query.where(
+            tuple_(WritingDraft.updated_at, WritingDraft.id)
+            < tuple_(boundary.timestamp, boundary.row_id)
+        )
+    rows = (
+        await session.execute(
+            query.order_by(WritingDraft.updated_at.desc(), WritingDraft.id.desc()).limit(limit + 1)
+        )
+    ).all()
+    page = rows[:limit]
+    return WritingHistoryPageOut(
+        items=[WritingHistorySummaryOut.model_validate(row._mapping) for row in page],
+        next_cursor=(
+            encode_time_id_cursor(page[-1].updated_at, page[-1].id)
+            if len(rows) > limit and page
+            else None
+        ),
+    )
 
 
 @router.get("/history", response_model=list[WritingHistoryItemOut])
@@ -418,6 +675,11 @@ async def historico_de_escrita(
         for feedback in feedbacks:
             feedback_by_prompt.setdefault(feedback.prompt_id, []).append(feedback)
 
+    feedback_ids = [feedback.id for items in feedback_by_prompt.values() for feedback in items]
+    snapshots = await editorial_history.stored_snapshots(
+        session, "writing", feedback_ids, usuario.id
+    )
+
     return [
         WritingHistoryItemOut(
             prompt_id=prompt.id,
@@ -433,7 +695,13 @@ async def historico_de_escrita(
                 WritingRevisionOut.model_validate(revision, from_attributes=True)
                 for revision in draft.revisions
             ],
-            feedbacks=[_feedback_out(item) for item in feedback_by_prompt.get(prompt.id, [])],
+            feedbacks=[
+                _feedback_out(
+                    item,
+                    historical_content_available=item.id in snapshots,
+                )
+                for item in feedback_by_prompt.get(prompt.id, [])
+            ],
         )
         for draft, prompt, lesson in rows
     ]

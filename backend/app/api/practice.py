@@ -20,8 +20,10 @@ from app.schemas.practice import (
     PracticePositionIn,
     PracticeRevealOut,
     PracticeSessionCreateIn,
+    PracticeSessionItemOut,
     PracticeSessionOut,
 )
+from app.services import editorial_history
 from app.services.curriculum import lesson_by_course_number
 from app.services.practice import (
     complete_session_if_ready,
@@ -40,6 +42,26 @@ router = APIRouter(tags=["practice"])
 
 def _private(response: Response) -> None:
     response.headers["Cache-Control"] = "private, no-store"
+
+
+async def _practice_out(
+    session: AsyncSession, practice: PracticeSession, user_id: int
+) -> PracticeSessionOut:
+    snapshots = await editorial_history.stored_snapshots(
+        session, "practice", [item.id for item in practice.items], user_id
+    )
+    return practice_session_out(practice, historical_item_ids=set(snapshots))
+
+
+async def _practice_item_out(
+    session: AsyncSession, item: PracticeSessionItem, user_id: int
+) -> PracticeSessionItemOut:
+    snapshot = await editorial_history.stored_snapshot(
+        session, "practice", item.id, user_id
+    )
+    return practice_item_out(
+        item, historical_content_available=snapshot is not None
+    )
 
 
 async def _lesson_or_404(session: AsyncSession, course_slug: str, number: int) -> Lesson:
@@ -162,7 +184,7 @@ async def get_active_practice_session(
     if practice is None:
         response.status_code = status.HTTP_204_NO_CONTENT
         return response
-    return practice_session_out(practice)
+    return await _practice_out(session, practice, usuario.id)
 
 
 @router.post(
@@ -202,7 +224,7 @@ async def create_practice_session(
                 detail="A chave de idempotência já foi usada em outra sessão.",
             )
         response.status_code = status.HTTP_200_OK
-        return practice_session_out(existing_key)
+        return await _practice_out(session, existing_key, usuario.id)
 
     active = (
         await session.execute(
@@ -220,7 +242,7 @@ async def create_practice_session(
             await session.flush()
         elif _same_request(active, body):
             response.status_code = status.HTTP_200_OK
-            return practice_session_out(active)
+            return await _practice_out(session, active, usuario.id)
         else:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -257,6 +279,19 @@ async def create_practice_session(
     ]
     session.add(practice)
     try:
+        await session.flush()
+        for item in practice.items:
+            await editorial_history.capture(
+                session,
+                "practice",
+                item.id,
+                usuario.id,
+                {
+                    **editorial_history.exercise_content(item.exercise),
+                    "lesson_version": practice.lesson_version,
+                    "practice_position": item.position,
+                },
+            )
         await session.commit()
     except IntegrityError:
         await session.rollback()
@@ -276,8 +311,8 @@ async def create_practice_session(
                 detail="Outra sessão foi criada ao mesmo tempo.",
             ) from None
         response.status_code = status.HTTP_200_OK
-        return practice_session_out(winner)
-    return practice_session_out(practice)
+        return await _practice_out(session, winner, usuario.id)
+    return await _practice_out(session, practice, usuario.id)
 
 
 @router.get("/practice-sessions/{session_id}", response_model=PracticeSessionOut)
@@ -288,7 +323,8 @@ async def get_practice_session(
     response: Response,
 ) -> PracticeSessionOut:
     _private(response)
-    return practice_session_out(await get_owned_practice_session(session, session_id, usuario.id))
+    practice = await get_owned_practice_session(session, session_id, usuario.id)
+    return await _practice_out(session, practice, usuario.id)
 
 
 @router.put("/practice-sessions/{session_id}/position", response_model=PracticeSessionOut)
@@ -311,7 +347,7 @@ async def update_practice_position(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"code": "practice_position_idempotency_mismatch"},
             )
-        return practice_session_out(practice)
+        return await _practice_out(session, practice, usuario.id)
     ensure_session_mutable(practice)
     if body.expected_revision != practice.state_revision:
         raise HTTPException(
@@ -331,7 +367,7 @@ async def update_practice_position(
     practice.last_state_key = key
     practice.updated_at = datetime.now(UTC)
     await session.commit()
-    return practice_session_out(practice)
+    return await _practice_out(session, practice, usuario.id)
 
 
 @router.post(
@@ -366,7 +402,7 @@ async def open_practice_hint(
     return PracticeHintOut(
         level=hint.level,
         content=hint.content,
-        item=practice_item_out(item),
+        item=await _practice_item_out(session, item, usuario.id),
     )
 
 
@@ -397,5 +433,5 @@ async def reveal_practice_answer(
     return PracticeRevealOut(
         answers=[answer.value for answer in item.exercise.answers],
         explanation=item.exercise.explanation,
-        item=practice_item_out(item),
+        item=await _practice_item_out(session, item, usuario.id),
     )

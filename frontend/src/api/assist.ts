@@ -10,6 +10,9 @@ export function useAssistStatus(userId: number) {
       return data
     },
     staleTime: 60_000,
+    refetchInterval: (query) => query.state.data?.reserved_today
+      ? 2000
+      : query.state.data?.writing_enabled || query.state.data?.transcription_enabled ? 60_000 : false,
     retry: false,
   })
 }

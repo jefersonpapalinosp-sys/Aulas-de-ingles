@@ -78,7 +78,9 @@ function makeSession(overrides: Partial<PracticeSession> = {}): PracticeSession 
       pending: 2,
     },
     items: exercises.map((exercise, position) => ({
+      id: 700 + position,
       position,
+      historical_content_status: 'available',
       exercise,
       attempt_count: 0,
       first_try_correct: null,

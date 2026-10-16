@@ -46,6 +46,21 @@ class StudyRolloutTests(unittest.TestCase):
                 study_rollout.fingerprints(recovery.STUDY_CHECK)
             self.assertEqual(query.call_count, 1)
 
+    def test_checksum_column_accepts_digits_without_accepting_sql(self):
+        with patch.object(recovery, "query", side_effect=[["speaking_attempt"], []]) as query:
+            study_rollout.fingerprints(
+                recovery.STUDY_CHECK,
+                excluded_columns={"speaking_attempt": ["audio_sha256"]},
+            )
+            self.assertIn("- 'audio_sha256'", query.call_args.args[1])
+        with patch.object(recovery, "query", return_value=["speaking_attempt"]) as query:
+            with self.assertRaises(RecoveryError):
+                study_rollout.fingerprints(
+                    recovery.STUDY_CHECK,
+                    excluded_columns={"speaking_attempt": ["sha'; DROP"]},
+                )
+            self.assertEqual(query.call_count, 1)
+
     def test_clone_migration_has_no_production_network_or_storage(self):
         with (
             patch.object(recovery, "check_target") as check,

@@ -129,6 +129,9 @@ jobs:
       - name: fila entre abas e recuperação de telas (isoladas)
         working-directory: e2e
         run: npm run test:queue
+      - name: atualização PWA entre abas e instalação interrompida (sem API ou banco)
+        working-directory: e2e
+        run: npm run test:pwa
 
   e2e:
     name: e2e · fluxo completo na stack descartável
@@ -147,7 +150,7 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium firefox webkit
       - name: guardas contra alvos/volumes de estudo
         working-directory: e2e
         run: npm run test:safety

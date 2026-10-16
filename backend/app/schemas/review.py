@@ -48,6 +48,11 @@ class CardOut(BaseModel):
     due_at: datetime
 
 
+class ReviewItemPageOut(BaseModel):
+    items: list[CardOut]
+    next_cursor: str | None
+
+
 class GradeIn(BaseModel):
     idempotency_key: UUID | None = None
     expected_revision: int | None = Field(default=None, ge=0)

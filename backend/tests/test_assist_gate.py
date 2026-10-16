@@ -105,6 +105,8 @@ def test_manifesto_rejeita_campos_de_privacidade_ambiguos(tmp_path: Path) -> Non
     ("overrides", "message"),
     [
         ({"assist_timeout_seconds": 0}, "ASSIST_TIMEOUT_SECONDS"),
+        ({"assist_reservation_seconds": 59}, "ASSIST_RESERVATION_SECONDS"),
+        ({"assist_reservation_seconds": 3601}, "ASSIST_RESERVATION_SECONDS"),
         ({"assist_job_max_attempts": 0}, "ASSIST_JOB_MAX_ATTEMPTS"),
         ({"assist_job_retry_base_seconds": -1}, "ASSIST_JOB_RETRY_BASE_SECONDS"),
         (
@@ -114,6 +116,10 @@ def test_manifesto_rejeita_campos_de_privacidade_ambiguos(tmp_path: Path) -> Non
         ({"assist_worker_poll_seconds": 0}, "ASSIST_WORKER_POLL_SECONDS"),
         ({"assist_provider_name": ""}, "ASSIST_PROVIDER_NAME"),
         ({"assist_provider_name": "x" * 81}, "ASSIST_PROVIDER_NAME"),
+        (
+            {"database_statement_timeout_ms": 5_000, "database_lock_timeout_ms": 5_000},
+            "DATABASE_LOCK_TIMEOUT_MS",
+        ),
         (
             {"assist_provider_kind": "ollama", "assist_ollama_base_url": "arquivo-local"},
             "ASSIST_OLLAMA_BASE_URL",

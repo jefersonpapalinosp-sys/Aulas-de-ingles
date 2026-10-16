@@ -10,6 +10,7 @@ import { PhraseList, PronunciationList, VocabTable } from '../components/LessonS
 import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
 import { StepNavigator } from '../features/study-session/StepNavigator'
+import { ActiveStudyTime } from '../features/study-session/ActiveStudyTime'
 import { LessonAudioPlayer } from '../features/media/LessonAudioPlayer'
 import { ShadowingPractice } from '../features/speaking/ShadowingPractice'
 import { PracticeRunner } from '../features/practice/PracticeRunner'
@@ -441,6 +442,7 @@ export function StudyPage() {
       />
 
       <div className="study-body">
+        <ActiveStudyTime key={`${userId}:${lesson.id}`} userId={userId} lessonId={lesson.id} />
         <p className="study-step-label">
           Etapa {stepIndex + 1} de {STUDY_STEPS.length}
         </p>
@@ -449,7 +451,7 @@ export function StudyPage() {
         <StepContent lesson={lesson} step={currentStep} userId={userId} />
 
         {isComplete && currentStep === 'revisar' && (
-          <div className="study-finished" role="status">
+          <div className="study-finished" role="status" aria-label="Conclusão da jornada">
             <p className="study-kicker">Jornada concluída</p>
             <h2>
               Boa! Você percorreu as cinco etapas de {courseLevelLabel(lesson.course_slug)} · Aula{' '}

@@ -476,7 +476,9 @@ describe('ExerciseCard', () => {
 
   it('restaura um item concluído sem permitir uma tentativa duplicada', () => {
     const initialSessionItem: PracticeSessionItem = {
+      id: 401,
       position: 0,
+      historical_content_status: 'available',
       exercise: exercicio,
       attempt_count: 2,
       first_try_correct: false,

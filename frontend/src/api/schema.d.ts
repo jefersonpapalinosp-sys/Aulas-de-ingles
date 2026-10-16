@@ -525,6 +525,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/activity/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Event */
+        post: operations["record_event_api_me_activity_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/activity/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Session */
+        post: operations["start_session_api_me_activity_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/export": {
         parameters: {
             query?: never;
@@ -534,6 +568,23 @@ export interface paths {
         };
         /** Exportar Dados */
         get: operations["exportar_dados_api_me_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/history/{kind}/{evidence_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historical Content */
+        get: operations["historical_content_api_me_history__kind___evidence_id__content_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -554,6 +605,26 @@ export interface paths {
         put?: never;
         /** Criar Anotacao */
         post: operations["criar_anotacao_api_me_notebook_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notebook/page": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar Caderno Paginado
+         * @description Keyset page ordered by the same update recency shown in the UI.
+         */
+        get: operations["listar_caderno_paginado_api_me_notebook_page_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -771,6 +842,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/review/items/page": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Itens Paginados */
+        get: operations["listar_itens_paginados_api_review_items_page_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/review/items/{vocab_item_id}": {
         parameters: {
             query?: never;
@@ -875,6 +963,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/speaking/attempts/page": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Tentativas Paginadas */
+        get: operations["listar_tentativas_paginadas_api_speaking_attempts_page_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/speaking/attempts/{attempt_id}": {
         parameters: {
             query?: never;
@@ -921,6 +1026,23 @@ export interface paths {
         put?: never;
         /** Solicitar Transcricao */
         post: operations["solicitar_transcricao_api_speaking_attempts__attempt_id__transcription_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Politica Audio */
+        get: operations["politica_audio_api_speaking_policy_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1015,6 +1137,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/writing/history/page": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historico De Escrita Paginado */
+        get: operations["historico_de_escrita_paginado_api_writing_history_page_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/writing/prompts/{prompt_id}/draft": {
         parameters: {
             query?: never;
@@ -1040,7 +1179,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Listar Feedbacks */
+        get: operations["listar_feedbacks_api_writing_prompts__prompt_id__feedback_get"];
         put?: never;
         /** Analisar Texto */
         post: operations["analisar_texto_api_writing_prompts__prompt_id__feedback_post"];
@@ -1057,7 +1197,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Listar Versoes */
+        get: operations["listar_versoes_api_writing_prompts__prompt_id__versions_get"];
         put?: never;
         /** Criar Versao */
         post: operations["criar_versao_api_writing_prompts__prompt_id__versions_post"];
@@ -1071,6 +1212,65 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActivityEventIn */
+        ActivityEventIn: {
+            /** Duration Ms */
+            duration_ms: number;
+            /** End Offset Ms */
+            end_offset_ms: number;
+            /**
+             * Operation Key
+             * Format: uuid
+             */
+            operation_key: string;
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+        };
+        /** ActivityEventOut */
+        ActivityEventOut: {
+            /** Credited Ms */
+            credited_ms: number;
+            /** Operation Key */
+            operation_key: string;
+        };
+        /** ActivitySessionIn */
+        ActivitySessionIn: {
+            /** Lesson Id */
+            lesson_id: number;
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+        };
+        /** ActivitySessionOut */
+        ActivitySessionOut: {
+            /**
+             * Max Offset Ms
+             * @default 86400000
+             */
+            max_offset_ms: number;
+            /**
+             * Replay Days
+             * @default 7
+             */
+            replay_days: number;
+            /**
+             * Server Now
+             * Format: date-time
+             */
+            server_now: string;
+            /** Session Id */
+            session_id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+        };
         /** ApiErrorOut */
         ApiErrorOut: {
             /**
@@ -1087,6 +1287,10 @@ export interface components {
         };
         /** AssistStatusOut */
         AssistStatusOut: {
+            /** Consumed Today */
+            consumed_today: number;
+            /** Cost Incomplete */
+            cost_incomplete: boolean;
             /** Cost Microusd Today */
             cost_microusd_today: number;
             /** Daily Quota */
@@ -1097,14 +1301,42 @@ export interface components {
              * @constant
              */
             evaluation_only: true;
+            /** Oldest Queued Seconds */
+            oldest_queued_seconds?: number | null;
+            /**
+             * Queued Jobs
+             * @default 0
+             */
+            queued_jobs: number;
+            /**
+             * Quota Resets At
+             * Format: date-time
+             */
+            quota_resets_at: string;
+            /**
+             * Quota Timezone
+             * @default UTC
+             * @constant
+             */
+            quota_timezone: "UTC";
             /** Remaining Today */
             remaining_today: number;
+            /** Reserved Today */
+            reserved_today: number;
             /** Retention Days */
             retention_days: number;
             /** Transcription Enabled */
             transcription_enabled: boolean;
             /** Used Today */
             used_today: number;
+            /** Worker Seen At */
+            worker_seen_at?: string | null;
+            /**
+             * Worker State
+             * @default unknown
+             * @enum {string}
+             */
+            worker_state: "disabled" | "unknown" | "active" | "stale";
             /** Writing Enabled */
             writing_enabled: boolean;
         };
@@ -1145,6 +1377,24 @@ export interface components {
             explanation: string | null;
             feedback: components["schemas"]["AttemptFeedbackOut"];
             session?: components["schemas"]["PracticeAttemptStateOut"] | null;
+        };
+        /** AudioExportEntry */
+        AudioExportEntry: {
+            /** Attempt Id */
+            attempt_id: number;
+            /** Download Path */
+            download_path: string | null;
+            /** File Size */
+            file_size: number | null;
+            /**
+             * Integrity State
+             * @enum {string}
+             */
+            integrity_state: "unknown" | "verified" | "missing" | "changed";
+            /** Mime Type */
+            mime_type: string | null;
+            /** Sha256 */
+            sha256: string | null;
         };
         /**
          * CardOut
@@ -1644,6 +1894,52 @@ export interface components {
             /** Unit Slug */
             unit_slug: string;
         };
+        /** ExportScope */
+        ExportScope: {
+            /** Audio Access Note */
+            audio_access_note: string;
+            /** Exclusions */
+            exclusions: string[];
+            /** Historical Content Note */
+            historical_content_note: string;
+            /**
+             * Includes Audio Bytes
+             * @default false
+             * @constant
+             */
+            includes_audio_bytes: false;
+            /**
+             * Is Account Backup
+             * @default false
+             * @constant
+             */
+            is_account_backup: false;
+            /**
+             * Isolation
+             * @default repeatable_read
+             * @constant
+             */
+            isolation: "repeatable_read";
+            /** Max Json Bytes */
+            max_json_bytes: number;
+            /** Max Records */
+            max_records: number;
+            /** Row Counts */
+            row_counts: {
+                [key: string]: number;
+            };
+            /**
+             * Snapshot At
+             * Format: date-time
+             */
+            snapshot_at: string;
+            /**
+             * Stored On Server
+             * @default false
+             * @constant
+             */
+            stored_on_server: false;
+        };
         /** FeedbackTokenOut */
         FeedbackTokenOut: {
             /**
@@ -1727,6 +2023,33 @@ export interface components {
             status: string;
             /** Version */
             version?: string | null;
+        };
+        /** HistoricalContentOut */
+        HistoricalContentOut: {
+            /** Captured At */
+            captured_at?: string | null;
+            /** Content */
+            content?: {
+                [key: string]: unknown;
+            } | null;
+            /** Content Sha256 */
+            content_sha256?: string | null;
+            /** Evidence Id */
+            evidence_id: number;
+            /**
+             * Evidence Kind
+             * @enum {string}
+             */
+            evidence_kind: "exercise" | "practice" | "writing" | "speaking" | "checkpoint";
+            /** Note */
+            note: string;
+            /** Schema Version */
+            schema_version?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "available" | "unavailable";
         };
         /** HumanRatingIn */
         HumanRatingIn: {
@@ -1829,8 +2152,14 @@ export interface components {
             license_status: "public_domain" | "permission_granted" | "restricted" | "review_required";
             /** License Url */
             license_url: string | null;
-            /** Listening Exercise Position */
-            listening_exercise_position: number | null;
+            /** Listening Exercise Id */
+            listening_exercise_id?: number | null;
+            /**
+             * Listening Exercise Position
+             * @deprecated
+             * @description Ordem histórica; use listening_exercise_id como vínculo canônico.
+             */
+            listening_exercise_position?: number | null;
             /**
              * Offline Policy
              * @enum {string}
@@ -1894,11 +2223,8 @@ export interface components {
             published_at: string | null;
             /** Review Note */
             review_note: string;
-            /**
-             * Reviewed At
-             * Format: date-time
-             */
-            reviewed_at: string;
+            /** Reviewed At */
+            reviewed_at: string | null;
             /**
              * Status
              * @enum {string}
@@ -1919,15 +2245,40 @@ export interface components {
         };
         /** MediaPositionIn */
         MediaPositionIn: {
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /**
+             * Completed
+             * @default false
+             */
+            completed: boolean;
+            /** Expected Revision */
+            expected_revision: number;
+            /**
+             * Operation Key
+             * Format: uuid
+             */
+            operation_key: string;
             /** Position Seconds */
             position_seconds: number;
         };
         /** MediaPositionOut */
         MediaPositionOut: {
+            /** Changed At */
+            changed_at: string | null;
+            /** Completed */
+            completed: boolean;
             /** Media Id */
             media_id: number;
+            /** Operation Key */
+            operation_key: string | null;
             /** Position Seconds */
             position_seconds: number;
+            /** Revision */
+            revision: number;
             /** Updated At */
             updated_at: string | null;
         };
@@ -2023,6 +2374,13 @@ export interface components {
              */
             kind: "note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question";
         };
+        /** NotebookPageOut */
+        NotebookPageOut: {
+            /** Items */
+            items: components["schemas"]["NotebookEntryOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
         /** PendingCheckpointOut */
         PendingCheckpointOut: {
             /** Content Version */
@@ -2036,6 +2394,32 @@ export interface components {
         };
         /** PersonalDataExportOut */
         PersonalDataExportOut: {
+            /** Active Intervals */
+            active_intervals: {
+                [key: string]: unknown;
+            }[];
+            /** Activity Events */
+            activity_events: {
+                [key: string]: unknown;
+            }[];
+            /** Activity Sessions */
+            activity_sessions: {
+                [key: string]: unknown;
+            }[];
+            /** Assistance Usage */
+            assistance_usage?: {
+                [key: string]: unknown;
+            }[];
+            /** Audio Manifest */
+            audio_manifest?: components["schemas"]["AudioExportEntry"][];
+            /** Checkpoint Attempts */
+            checkpoint_attempts?: {
+                [key: string]: unknown;
+            }[];
+            /** Content Snapshots */
+            content_snapshots?: {
+                [key: string]: unknown;
+            }[];
             /** Exercise Attempts */
             exercise_attempts: {
                 [key: string]: unknown;
@@ -2045,8 +2429,16 @@ export interface components {
              * Format: date-time
              */
             exported_at: string;
+            /** Legacy Review Cards */
+            legacy_review_cards?: {
+                [key: string]: unknown;
+            }[];
             /** Lesson Progress */
             lesson_progress: {
+                [key: string]: unknown;
+            }[];
+            /** Login Sessions */
+            login_sessions?: {
                 [key: string]: unknown;
             }[];
             /** Media Progress */
@@ -2057,16 +2449,29 @@ export interface components {
             notebook: {
                 [key: string]: unknown;
             }[];
+            /** Practice Items */
+            practice_items?: {
+                [key: string]: unknown;
+            }[];
+            /** Practice Sessions */
+            practice_sessions?: {
+                [key: string]: unknown;
+            }[];
             /** Profile */
             profile: {
                 [key: string]: unknown;
             };
+            /** Review Events */
+            review_events?: {
+                [key: string]: unknown;
+            }[];
             /** Review Items */
             review_items: {
                 [key: string]: unknown;
             }[];
             /** Schema Version */
             schema_version: string;
+            scope?: components["schemas"]["ExportScope"] | null;
             /** Skill Evidence */
             skill_evidence: {
                 [key: string]: unknown;
@@ -2089,6 +2494,10 @@ export interface components {
             }[];
             /** Writing */
             writing: {
+                [key: string]: unknown;
+            }[];
+            /** Writing Feedback */
+            writing_feedback?: {
                 [key: string]: unknown;
             }[];
         };
@@ -2191,6 +2600,13 @@ export interface components {
             first_try_correct: boolean | null;
             /** Highest Hint Level */
             highest_hint_level: number;
+            /**
+             * Historical Content Status
+             * @enum {string}
+             */
+            historical_content_status: "available" | "unavailable";
+            /** Id */
+            id: number;
             last_feedback: components["schemas"]["AttemptFeedbackOut"] | null;
             /** Opened Hints */
             opened_hints: components["schemas"]["ExerciseHintOut"][];
@@ -2309,6 +2725,11 @@ export interface components {
             course_slug: string;
             /** Current Step */
             current_step: string;
+            /**
+             * Legacy Minutes
+             * @default 0
+             */
+            legacy_minutes: number;
             /** Lesson Number */
             lesson_number: number;
             /** Lesson Title */
@@ -2365,6 +2786,13 @@ export interface components {
             answers: string[];
             /** Explanation */
             explanation: string;
+        };
+        /** ReviewItemPageOut */
+        ReviewItemPageOut: {
+            /** Items */
+            items: components["schemas"]["CardOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
         };
         /** ReviewItemStatusIn */
         ReviewItemStatusIn: {
@@ -2425,13 +2853,24 @@ export interface components {
             /** Cue Id */
             cue_id: number;
             /** Cue Text */
-            cue_text: string;
+            cue_text: string | null;
             /** Duration Ms */
             duration_ms: number;
             /** File Size */
             file_size: number | null;
+            /**
+             * Historical Content Status
+             * @enum {string}
+             */
+            historical_content_status: "available" | "unavailable";
             /** Id */
             id: number;
+            /**
+             * Integrity State
+             * @default unknown
+             * @enum {string}
+             */
+            integrity_state: "unknown" | "verified" | "missing" | "changed";
             /** Lesson Number */
             lesson_number: number;
             /** Mime Type */
@@ -2447,12 +2886,61 @@ export interface components {
             /** Unit Slug */
             unit_slug: string;
         };
+        /** SpeakingAttemptPageOut */
+        SpeakingAttemptPageOut: {
+            /** Items */
+            items: components["schemas"]["SpeakingAttemptOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** SpeakingPolicyOut */
+        SpeakingPolicyOut: {
+            /**
+             * Content Validation
+             * @default decoded_audio_v1
+             * @constant
+             */
+            content_validation: "decoded_audio_v1";
+            /** Max Bytes */
+            max_bytes: number;
+            /**
+             * Max Channels
+             * @default 2
+             */
+            max_channels: number;
+            /** Max Duration Ms */
+            max_duration_ms: number;
+            /**
+             * Max Sample Rate Hz
+             * @default 48000
+             */
+            max_sample_rate_hz: number;
+            /** Mime Types */
+            mime_types: string[];
+            /**
+             * Min Sample Rate Hz
+             * @default 8000
+             */
+            min_sample_rate_hz: number;
+            /**
+             * Recording Target Ms
+             * @default 29000
+             */
+            recording_target_ms: number;
+            /** Upload Timeout Seconds */
+            upload_timeout_seconds: number;
+        };
         /** StudyPlanIn */
         StudyPlanIn: {
             /** Goal */
             goal: string;
             /** Preferred Days */
             preferred_days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            /**
+             * Timezone
+             * @default UTC
+             */
+            timezone: string;
             /** Weekly Minutes */
             weekly_minutes: number;
         };
@@ -2462,6 +2950,11 @@ export interface components {
             goal: string;
             /** Preferred Days */
             preferred_days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            /**
+             * Timezone
+             * @default UTC
+             */
+            timezone: string;
             /** Updated At */
             updated_at: string | null;
             /** Weekly Minutes */
@@ -2511,6 +3004,12 @@ export interface components {
             recommendation: components["schemas"]["RecommendationOut"];
             /** Recorded Minutes This Week */
             recorded_minutes_this_week: number;
+            /**
+             * Time Measurement
+             * @default active_intervals_v1
+             * @constant
+             */
+            time_measurement: "active_intervals_v1";
         };
         /**
          * TokenOut
@@ -2581,12 +3080,17 @@ export interface components {
              */
             evaluation_only: true;
             /** Expected Text */
-            expected_text: string;
+            expected_text: string | null;
             /**
              * Expires At
              * Format: date-time
              */
             expires_at: string;
+            /**
+             * Historical Content Status
+             * @enum {string}
+             */
+            historical_content_status: "available" | "unavailable";
             /** Human Rating */
             human_rating: ("helpful" | "not_helpful") | null;
             /** Id */
@@ -2698,8 +3202,6 @@ export interface components {
              * @default 0
              */
             revision: number;
-            /** Revisions */
-            revisions: components["schemas"]["WritingRevisionOut"][];
             /** Text */
             text: string;
             /** Updated At */
@@ -2725,6 +3227,8 @@ export interface components {
             assisted: boolean;
             /** Expected Revision */
             expected_revision?: number | null;
+            /** Operation Key */
+            operation_key?: string | null;
             /** Text */
             text: string;
         };
@@ -2766,6 +3270,11 @@ export interface components {
             evaluation_only: boolean;
             /** Evaluation Scope */
             evaluation_scope: string;
+            /**
+             * Historical Content Status
+             * @enum {string}
+             */
+            historical_content_status: "available" | "unavailable";
             /** Human Rating */
             human_rating: ("helpful" | "not_helpful") | null;
             /** Id */
@@ -2789,6 +3298,13 @@ export interface components {
             /** Word Count */
             word_count: number;
         };
+        /** WritingFeedbackPageOut */
+        WritingFeedbackPageOut: {
+            /** Items */
+            items: components["schemas"]["WritingFeedbackOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
         /** WritingHistoryItemOut */
         WritingHistoryItemOut: {
             /** Course Slug */
@@ -2809,6 +3325,39 @@ export interface components {
             prompt_title: string;
             /** Revisions */
             revisions: components["schemas"]["WritingRevisionOut"][];
+            /** Unit Slug */
+            unit_slug: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** WritingHistoryPageOut */
+        WritingHistoryPageOut: {
+            /** Items */
+            items: components["schemas"]["WritingHistorySummaryOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** WritingHistorySummaryOut */
+        WritingHistorySummaryOut: {
+            /** Course Slug */
+            course_slug: string;
+            /** Course Title */
+            course_title: string;
+            /** Feedback Count */
+            feedback_count: number;
+            /** Lesson Number */
+            lesson_number: number;
+            /** Lesson Title */
+            lesson_title: string;
+            /** Prompt Id */
+            prompt_id: number;
+            /** Prompt Title */
+            prompt_title: string;
+            /** Revision Count */
+            revision_count: number;
             /** Unit Slug */
             unit_slug: string;
             /**
@@ -2885,6 +3434,13 @@ export interface components {
             text: string;
             /** Version */
             version: number;
+        };
+        /** WritingRevisionPageOut */
+        WritingRevisionPageOut: {
+            /** Items */
+            items: components["schemas"]["WritingRevisionOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
         };
     };
     responses: never;
@@ -4678,6 +5234,126 @@ export interface operations {
             };
         };
     };
+    record_event_api_me_activity_events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityEventIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityEventOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    start_session_api_me_activity_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivitySessionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivitySessionOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
     exportar_dados_api_me_export_get: {
         parameters: {
             query?: never;
@@ -4712,6 +5388,65 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    historical_content_api_me_history__kind___evidence_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: "exercise" | "practice" | "writing" | "speaking" | "checkpoint";
+                evidence_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoricalContentOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
@@ -4806,6 +5541,69 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NotebookEntryOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    listar_caderno_paginado_api_me_notebook_page_get: {
+        parameters: {
+            query?: {
+                lesson?: number | null;
+                kind?: ("note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question") | null;
+                course?: string | null;
+                unit?: string | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotebookPageOut"];
                 };
             };
             /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
@@ -5371,7 +6169,11 @@ export interface operations {
     };
     limpar_posicao_api_media__media_id__position_delete: {
         parameters: {
-            query?: never;
+            query: {
+                expected_revision: number;
+                operation_key: string;
+                changed_at: string;
+            };
             header?: never;
             path: {
                 media_id: number;
@@ -5747,6 +6549,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CardOut"][];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    listar_itens_paginados_api_review_items_page_get: {
+        parameters: {
+            query?: {
+                status?: "active" | "suspended";
+                course?: string | null;
+                unit?: string | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewItemPageOut"];
                 };
             };
             /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
@@ -6250,6 +7114,68 @@ export interface operations {
             };
         };
     };
+    listar_tentativas_paginadas_api_speaking_attempts_page_get: {
+        parameters: {
+            query?: {
+                lesson?: number | null;
+                course?: string | null;
+                unit?: string | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakingAttemptPageOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
     excluir_tentativa_api_speaking_attempts__attempt_id__delete: {
         parameters: {
             query?: never;
@@ -6467,6 +7393,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    politica_audio_api_speaking_policy_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeakingPolicyOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
                 };
             };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
@@ -6780,6 +7753,67 @@ export interface operations {
             };
         };
     };
+    historico_de_escrita_paginado_api_writing_history_page_get: {
+        parameters: {
+            query?: {
+                course?: string | null;
+                unit?: string | null;
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingHistoryPageOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
     obter_rascunho_api_writing_prompts__prompt_id__draft_get: {
         parameters: {
             query?: never;
@@ -6900,6 +7934,67 @@ export interface operations {
             };
         };
     };
+    listar_feedbacks_api_writing_prompts__prompt_id__feedback_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                prompt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingFeedbackPageOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
     analisar_texto_api_writing_prompts__prompt_id__feedback_post: {
         parameters: {
             query?: never;
@@ -6922,6 +8017,67 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WritingFeedbackOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    listar_versoes_api_writing_prompts__prompt_id__versions_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                prompt_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WritingRevisionPageOut"];
                 };
             };
             /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */

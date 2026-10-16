@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { SessaoProvider } from './api/auth'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { registerPwa } from './features/offline/pwa'
 import './styles.css'
 
 const root = document.getElementById('root')
@@ -35,8 +36,4 @@ createRoot(root).render(
   </StrictMode>,
 )
 
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    void navigator.serviceWorker.register('/sw.js')
-  })
-}
+window.addEventListener('load', registerPwa)

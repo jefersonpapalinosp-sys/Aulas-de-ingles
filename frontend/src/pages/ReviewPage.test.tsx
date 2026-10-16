@@ -37,7 +37,7 @@ vi.mock('../api/queries', () => ({
 vi.mock('../api/review', () => ({
   useDueCards: (filters: unknown) => useDueCards(filters),
   useAvaliar: () => ({ mutate: avaliar, isPending: false }),
-  useSuspendedReviewItems: (filters: unknown) => useSuspended(filters),
+  useSuspendedReviewItems: (filters: unknown, cursor: unknown) => useSuspended(filters, cursor),
   useSetReviewItemStatus: () => ({ mutate: setStatus, isPending: false }),
   useDeleteReviewItem: () => ({ mutate: deleteItem, isPending: false }),
 }))
@@ -83,7 +83,12 @@ function montar(route = '/revisar?course=voa-level-1&unit=45-49') {
 afterEach(() => vi.resetAllMocks())
 
 beforeEach(() => {
-  useSuspended.mockReturnValue({ data: [], isPending: false, error: null })
+  useSuspended.mockReturnValue({
+    data: { items: [], next_cursor: null },
+    isPending: false,
+    isFetching: false,
+    error: null,
+  })
   queryHooks.useCourses.mockReturnValue({ data: [course], isPending: false, error: null })
   queryHooks.useCourseCurriculum.mockReturnValue({
     data: {
@@ -189,10 +194,10 @@ describe('ReviewPage', () => {
       skill: 'grammar',
       maxMinutes: 2,
     })
-    expect(useSuspended).toHaveBeenLastCalledWith({
-      courseSlug: 'voa-level-1',
-      unitSlug: '45-49',
-    })
+    expect(useSuspended).toHaveBeenLastCalledWith(
+      { courseSlug: 'voa-level-1', unitSlug: '45-49' },
+      undefined,
+    )
   })
 
   it('mostra a identidade do curso no card e permite ampliar para todas as unidades', async () => {
@@ -211,14 +216,49 @@ describe('ReviewPage', () => {
     const user = userEvent.setup()
     useDueCards.mockReturnValue({ data: [], isPending: false, error: null })
     useSuspended.mockReturnValue({
-      data: [{ ...carta, status: 'suspended' }],
+      data: { items: [{ ...carta, status: 'suspended' }], next_cursor: null },
       isPending: false,
+      isFetching: false,
       error: null,
     })
     montar()
 
     await user.click(screen.getByRole('button', { name: 'Reativar' }))
-    expect(setStatus).toHaveBeenCalledWith({ itemId: 7, status: 'active' })
+    expect(setStatus).toHaveBeenCalledWith(
+      { itemId: 7, status: 'active' },
+      expect.objectContaining({ onSuccess: expect.any(Function) }),
+    )
+  })
+
+  it('carrega mais suspensos sem perder a página anterior e preserva o foco', async () => {
+    const user = userEvent.setup()
+    const older = { ...carta, id: 6, prompt: 'take a taxi', status: 'suspended' }
+    const firstPage = { items: [{ ...carta, status: 'suspended' }], next_cursor: 'page-2' }
+    const secondPage = { items: [older], next_cursor: null }
+    useDueCards.mockReturnValue({ data: [], isPending: false, error: null })
+    useSuspended.mockImplementation((_filters, cursor) => ({
+      data: cursor ? secondPage : firstPage,
+      isPending: false,
+      isFetching: false,
+      error: null,
+    }))
+    montar()
+
+    expect(await screen.findByText('sold out')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Carregar mais' }))
+
+    expect(await screen.findByText('take a taxi')).toBeVisible()
+    expect(screen.getByText('sold out')).toBeVisible()
+    await waitFor(() => expect(screen.getByText('2 suspensos carregados.')).toHaveFocus())
+    expect(useSuspended).toHaveBeenLastCalledWith(
+      { courseSlug: 'voa-level-1', unitSlug: '45-49' },
+      'page-2',
+    )
+
+    setStatus.mockImplementationOnce((_command, callbacks) => callbacks.onSuccess())
+    await user.click(screen.getAllByRole('button', { name: 'Reativar' })[1]!)
+    expect(screen.queryByText('take a taxi')).not.toBeInTheDocument()
+    expect(screen.getByText('sold out')).toBeVisible()
   })
 
   it('o teclado vira a carta e avalia', async () => {

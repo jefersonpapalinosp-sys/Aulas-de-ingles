@@ -62,17 +62,23 @@ def test_gateway_normaliza_transcricao_e_calcula_semelhanca(
 
 
 def test_gateway_valida_feedback_de_escrita(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        assistance.urllib.request,
-        "urlopen",
-        lambda *args, **kwargs: FakeResponse(
+    captured = {}
+
+    def respond(request, **kwargs):
+        captured["key"] = request.get_header("Idempotency-key")
+        return FakeResponse(
             {
                 "summary": "Clear comparison.",
                 "suggestions": [{"criterion": "detail", "message": "Add one reason."}],
                 "confidence": 0.84,
                 "cost_microusd": 120,
             }
-        ),
+        )
+
+    monkeypatch.setattr(
+        assistance.urllib.request,
+        "urlopen",
+        respond,
     )
     result = assistance.call_writing_provider(
         "https://provider.test/writing",
@@ -80,10 +86,19 @@ def test_gateway_valida_feedback_de_escrita(monkeypatch: pytest.MonkeyPatch) -> 
         [{"code": "comparison"}],
         token=None,
         timeout=2,
+        idempotency_key="writing-stable-key",
     )
     assert result.summary == "Clear comparison."
     assert result.suggestions[0]["criterion"] == "detail"
     assert result.confidence == 0.84
+    assert captured["key"] == "writing-stable-key"
+
+
+@pytest.mark.parametrize("cost", [None, -1, True, 0.5, float("inf"), "12", 2_147_483_648])
+def test_missing_or_invalid_cost_is_unknown_not_free(cost):
+    assert assistance._reported_cost({"cost_microusd": cost}) == (0, False)
+    assert assistance._reported_cost({}) == (0, False)
+    assert assistance._reported_cost({"cost_microusd": 0}) == (0, True)
 
 
 def test_ollama_usa_schema_estrito_e_confiança_conservadora(

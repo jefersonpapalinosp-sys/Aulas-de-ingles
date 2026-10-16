@@ -32,6 +32,7 @@ function PlanEditor({ plan }: { plan: StudyPlan }) {
   const [weeklyMinutes, setWeeklyMinutes] = useState(plan.weekly_minutes)
   const [preferredDays, setPreferredDays] = useState<string[]>(plan.preferred_days)
   const [goal, setGoal] = useState(plan.goal)
+  const [timezone, setTimezone] = useState(plan.timezone ?? 'UTC')
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -39,6 +40,7 @@ function PlanEditor({ plan }: { plan: StudyPlan }) {
       weekly_minutes: weeklyMinutes,
       preferred_days: preferredDays as StudyPlanInput['preferred_days'],
       goal,
+      timezone,
     })
   }
 
@@ -74,6 +76,12 @@ function PlanEditor({ plan }: { plan: StudyPlan }) {
           value={weeklyMinutes}
           onChange={(event) => setWeeklyMinutes(Number(event.target.value))}
         />
+      </label>
+      <label>
+        Fuso horário da semana (IANA)
+        <input value={timezone} required maxLength={80} list="study-timezones"
+          onChange={(event) => setTimezone(event.target.value)} />
+        <datalist id="study-timezones"><option value="UTC" /><option value="America/Sao_Paulo" /></datalist>
       </label>
       <fieldset>
         <legend>Dias preferidos</legend>
@@ -147,6 +155,7 @@ function TodayPanel({
         <div className="today-week" aria-label={`${progress}% da meta semanal registrada`}>
           <strong>{today.data.recorded_minutes_this_week} min</strong>
           <span>de {today.data.plan.weekly_minutes} min nesta semana</span>
+          <small>Tempo ativo desde segunda-feira · {today.data.plan.timezone ?? 'UTC'}</small>
           <div>
             <i style={{ width: `${progress}%` }} />
           </div>
@@ -178,7 +187,8 @@ function TodayPanel({
           </strong>{' '}
           ·{' '}
           {today.data.recent_session.completed_steps}/5 etapas ·{' '}
-          {today.data.recent_session.total_minutes} min registrados
+          {today.data.recent_session.total_minutes} min ativos
+          {(today.data.recent_session.legacy_minutes ?? 0) > 0 && <> · {today.data.recent_session.legacy_minutes} min históricos estimados (fora da meta semanal)</>}
         </p>
       )}
 

@@ -2,6 +2,13 @@
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import get_settings
+from app.db.models import Course, Lesson, NotebookEntry, User
+from app.performance import BYTES_HEADER, POOL_HEADER, SQL_HEADER
+from tests.test_media import position_body
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -33,6 +40,93 @@ def assert_lesson_reference(
         "unit_slug": unit_slug,
         "lesson_number": lesson_number,
     }
+
+
+@pytest.mark.asyncio
+async def test_caderno_paginado_e_estavel_com_datas_empatadas(
+    client: AsyncClient,
+    session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    headers = await conta(client, "pagina")
+    user = (
+        await session.execute(select(User).where(User.email == "caderno-pagina@exemplo.com"))
+    ).scalar_one()
+    lesson = (
+        await session.execute(
+            select(Lesson)
+            .join(Course, Lesson.course_id == Course.id)
+            .where(Course.slug == "voa-level-1", Lesson.number == 31)
+        )
+    ).scalar_one()
+    tied_at = lesson.created_at
+    entries = [
+        NotebookEntry(
+            user_id=user.id,
+            lesson_id=lesson.id,
+            kind="note",
+            content=f"Nota paginada {number}",
+            created_at=tied_at,
+            updated_at=tied_at,
+        )
+        for number in range(5)
+    ]
+    session.add_all(entries)
+    session.add(
+        NotebookEntry(
+            user_id=user.id,
+            lesson_id=lesson.id,
+            kind="teacher_question",
+            content="Não deve entrar no filtro de notas.",
+            created_at=tied_at,
+            updated_at=tied_at,
+        )
+    )
+    await session.commit()
+    expected_ids = sorted((entry.id for entry in entries), reverse=True)
+
+    await conta(client, "pagina-outra")
+    other_user = (
+        await session.execute(select(User).where(User.email == "caderno-pagina-outra@exemplo.com"))
+    ).scalar_one()
+    session.add(
+        NotebookEntry(
+            user_id=other_user.id,
+            lesson_id=lesson.id,
+            kind="note",
+            content="Nota privada de outra conta.",
+            created_at=tied_at,
+            updated_at=tied_at,
+        )
+    )
+    await session.commit()
+    monkeypatch.setattr(get_settings(), "performance_probe_enabled", True)
+
+    received: list[int] = []
+    cursor: str | None = None
+    for expected_size in (2, 2, 1):
+        response = await client.get(
+            "/api/me/notebook/page",
+            headers=headers,
+            params={"kind": "note", "limit": 2, **({"cursor": cursor} if cursor else {})},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["items"]) == expected_size
+        received.extend(item["id"] for item in body["items"])
+        cursor = body["next_cursor"]
+        assert int(response.headers[SQL_HEADER]) == 2
+        assert int(response.headers[POOL_HEADER]) <= 1
+        assert int(response.headers[BYTES_HEADER]) == len(response.content)
+
+    assert received == expected_ids
+    assert cursor is None
+    invalid = await client.get(
+        "/api/me/notebook/page?cursor=not-a-cursor",
+        headers=headers,
+    )
+    assert invalid.status_code == 422
+    assert invalid.json()["detail"]["code"] == "invalid_cursor"
 
 
 @pytest.mark.asyncio
@@ -128,7 +222,7 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
     await client.put(
         f"/api/media/{lesson['media'][0]['id']}/position",
         headers=headers,
-        json={"position_seconds": 42.5},
+        json=position_body(42.5),
     )
     await client.put(
         f"/api/writing/prompts/{prompt['id']}/draft", headers=headers, json={"text": text}
@@ -154,7 +248,7 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
         'attachment; filename="aulas-ingles-dados.json"'
     )
     data = exported.json()
-    assert data["schema_version"] == "1.5"
+    assert data["schema_version"] == "2.0"
     assert data["profile"]["email"] == "caderno-exportacao@exemplo.com"
     for section in (
         "lesson_progress",
@@ -199,7 +293,7 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
     media = await client.put(
         f"/api/media/{lesson['media'][0]['id']}/position",
         headers=headers,
-        json={"position_seconds": 18.0},
+        json=position_body(18.0),
     )
     exercise = await client.post(
         f"/api/exercises/{lesson['exercises'][0]['id']}/attempt",
@@ -245,7 +339,7 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
     exported = await client.get("/api/me/export", headers=headers)
     assert exported.status_code == 200
     data = exported.json()
-    assert data["schema_version"] == "1.5"
+    assert data["schema_version"] == "2.0"
     for section in (
         "lesson_progress",
         "study_sessions",

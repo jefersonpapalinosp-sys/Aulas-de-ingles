@@ -272,6 +272,7 @@ describe('MapPage / painel Hoje', () => {
     await user.click(screen.getByRole('button', { name: 'Salvar plano' }))
 
     expect(savePlan).toHaveBeenCalledWith({
+      timezone: 'UTC',
       weekly_minutes: 120,
       preferred_days: ['mon', 'fri', 'sat'],
       goal: 'Inglês para viagem',

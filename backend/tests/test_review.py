@@ -4,10 +4,12 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.db.models import ReviewItem
+from app.performance import BYTES_HEADER, POOL_HEADER, SQL_HEADER
 
 
 def tentativa(answer: str, key: int = 1) -> dict[str, str]:
@@ -317,6 +319,76 @@ async def test_due_e_items_filtram_curso_unidade_e_expoem_identidade(
     assert [item["id"] for item in suspended_second] == [second[0]["id"]]
     assert suspended_first[0]["unit_slug"] == "31-40"
     assert suspended_second[0]["unit_slug"] == "40-44"
+
+
+@pytest.mark.asyncio
+async def test_itens_paginados_sao_estaveis_limitados_e_isolados(
+    client: AsyncClient,
+    session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    owner = await conta(client, "itens-paginados")
+    await client.post("/api/review/lessons/31", headers=owner)
+    cards = (await client.get("/api/review/due?limit=5", headers=owner)).json()
+    ids = [card["id"] for card in cards]
+    for item_id in ids:
+        response = await client.patch(
+            f"/api/review/{item_id}",
+            headers=owner,
+            json={"status": "suspended"},
+        )
+        assert response.status_code == 200
+
+    tied_at = datetime(2026, 10, 15, 12, tzinfo=UTC)
+    await session.execute(
+        update(ReviewItem).where(ReviewItem.id.in_(ids)).values(created_at=tied_at)
+    )
+    await session.commit()
+
+    intruder = await conta(client, "itens-paginados-intruso")
+    await client.post("/api/review/lessons/31", headers=intruder)
+    intruder_item = (await client.get("/api/review/due?limit=1", headers=intruder)).json()[0]
+    await client.patch(
+        f"/api/review/{intruder_item['id']}",
+        headers=intruder,
+        json={"status": "suspended"},
+    )
+
+    monkeypatch.setattr(get_settings(), "performance_probe_enabled", True)
+    received: list[int] = []
+    cursor = None
+    page_sizes: list[int] = []
+    while True:
+        query = "?status=suspended&course=voa-level-1&unit=31-40&limit=2"
+        if cursor is not None:
+            query += f"&cursor={cursor}"
+        response = await client.get(f"/api/review/items/page{query}", headers=owner)
+        assert response.status_code == 200
+        assert int(response.headers[SQL_HEADER]) == 2
+        assert int(response.headers[POOL_HEADER]) <= 1
+        assert int(response.headers[BYTES_HEADER]) == len(response.content)
+        payload = response.json()
+        page_sizes.append(len(payload["items"]))
+        received.extend(item["id"] for item in payload["items"])
+        assert all(item["course_slug"] == "voa-level-1" for item in payload["items"])
+        assert all(item["unit_slug"] == "31-40" for item in payload["items"])
+        cursor = payload["next_cursor"]
+        if cursor is None:
+            break
+
+    assert page_sizes == [2, 2, 1]
+    assert received == sorted(ids, reverse=True)
+    assert len(received) == len(set(received))
+
+    invalid = await client.get(
+        "/api/review/items/page?cursor=not-a-cursor",
+        headers=owner,
+    )
+    assert invalid.status_code == 422
+    assert invalid.json()["detail"]["code"] == "invalid_cursor"
+
+    other_page = (await client.get("/api/review/items/page", headers=intruder)).json()
+    assert [item["id"] for item in other_page["items"]] == [intruder_item["id"]]
 
 
 @pytest.mark.asyncio

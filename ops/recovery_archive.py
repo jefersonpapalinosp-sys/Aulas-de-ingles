@@ -9,7 +9,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-FORMAT = "aulas-recovery-v1"
+FORMAT = "aulas-recovery-v2"
+LEGACY_FORMAT = "aulas-recovery-v1"
 ARTIFACTS = ("database.dump", "voice.tar")
 MAX_AUDIO = 64 * 1024 * 1024
 MAX_FILES = 100_000
@@ -32,6 +33,17 @@ def safe_key(key):
         and not key.endswith(".tmp"),
         "Chave de áudio insegura ou upload incompleto.",
     )
+
+
+def safe_storage_member(name):
+    """Somente voz plana ou três nomes reservados de uma operação de quarentena."""
+    if isinstance(name, str) and name.startswith(".quarantine/"):
+        require(
+            re.fullmatch(r"\.quarantine/[a-f0-9]{32}/(?:audio|record\.json|restore\.json)", name),
+            "Caminho de quarentena inseguro.",
+        )
+    else:
+        safe_key(name)
 
 
 def digest(stream):
@@ -57,7 +69,7 @@ def audio_inventory(path):
     try:
         with tarfile.open(path, "r:") as archive:
             for member in archive:
-                safe_key(member.name)
+                safe_storage_member(member.name)
                 require(
                     member.isfile() and member.name not in inventory,
                     "Áudio duplicado, link ou arquivo especial no pacote.",
@@ -105,7 +117,7 @@ def check_references(snapshot, inventory):
             "Referência de áudio ausente ou tamanho divergente.",
         )
     # Órfãos são conservados no pacote, não apagados nem escondidos.
-    return len(inventory.keys() - keys)
+    return len({key for key in inventory if not key.startswith(".quarantine/")} - keys)
 
 
 def write_json(path, value):
@@ -135,7 +147,7 @@ def verify_bundle(path):
     try:
         manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
         require(
-            manifest["format"] == FORMAT and manifest["bundle_id"] == path.name,
+            manifest["format"] in {FORMAT, LEGACY_FORMAT} and manifest["bundle_id"] == path.name,
             "Formato ou identidade do pacote divergente.",
         )
         require(set(manifest["artifacts"]) == set(ARTIFACTS), "Manifesto incompleto.")
@@ -147,6 +159,14 @@ def verify_bundle(path):
             )
         inventory = audio_inventory(path / "voice.tar")
         require(inventory == manifest["audio_files"], "Inventário de voz divergente.")
+        quarantined = sum(name.startswith(".quarantine/") for name in inventory)
+        if manifest["format"] == LEGACY_FORMAT:
+            require(quarantined == 0, "Quarentena exige formato de backup v2.")
+        else:
+            require(
+                manifest.get("quarantine_entry_count") == quarantined,
+                "Contagem de entradas de quarentena divergente.",
+            )
         orphans = check_references(manifest["snapshot"], inventory)
         require(
             manifest["unreferenced_audio_count"] == orphans,
@@ -191,6 +211,7 @@ def create_bundle(root, capture):
         "artifacts": artifacts,
         "audio_files": inventory,
         "unreferenced_audio_count": orphans,
+        "quarantine_entry_count": sum(name.startswith(".quarantine/") for name in inventory),
     }
     for name in ARTIFACTS:
         os.chmod(staging / name, 0o600)

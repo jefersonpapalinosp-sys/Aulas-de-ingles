@@ -26,5 +26,15 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
+    {
+      name: 'firefox-sprint41',
+      testMatch: /sprint41-accessibility\.spec\.ts/,
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit-sprint41',
+      testMatch: /sprint41-accessibility\.spec\.ts/,
+      use: { ...devices['Desktop Safari'] },
+    },
   ],
 })

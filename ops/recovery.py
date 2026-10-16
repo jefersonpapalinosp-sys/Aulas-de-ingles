@@ -30,6 +30,10 @@ POSTGRES = "public.ecr.aws/docker/library/postgres:16.15-alpine"
 CONFIRM_TARGET = "aulas-ingles-recovery/target-db"
 CONFIRM_STUDY_CHECK = "aulas-ingles-recovery/study-check-db"
 CONFIRM_CONCURRENCY_CHECK = "aulas-ingles-recovery/concurrency-check-db"
+CONFIRM_DEV_CHECK = "aulas-ingles-recovery/dev-check-db"
+CONFIRM_ASSIST_CHECK = "aulas-ingles-recovery/assist-check-db"
+CONFIRM_DEV39_CHECK = "aulas-ingles-recovery/dev39-check-db"
+CONFIRM_STUDY39_CHECK = "aulas-ingles-recovery/study39-check-db"
 
 
 @dataclass(frozen=True)
@@ -81,10 +85,50 @@ CONCURRENCY_CHECK = Target(
     f"{PROJECT}_concurrency_check_voice",
     "aulas-ingles:recovery-target:v1",
 )
+DEV_CHECK = Target(
+    PROJECT,
+    "dev-check-db",
+    "aulas_ingles_restore",
+    "aulas_restore",
+    f"{PROJECT}_dev_check_db",
+    f"{PROJECT}_dev_check_voice",
+    "aulas-ingles:recovery-target:v1",
+)
+ASSIST_CHECK = Target(
+    PROJECT,
+    "assist-check-db",
+    "aulas_ingles_restore",
+    "aulas_restore",
+    f"{PROJECT}_assist_check_db",
+    f"{PROJECT}_assist_check_voice",
+    "aulas-ingles:recovery-target:v1",
+)
+DEV39_CHECK = Target(
+    PROJECT,
+    "dev39-check-db",
+    "aulas_ingles_restore",
+    "aulas_restore",
+    f"{PROJECT}_dev39_check_db",
+    f"{PROJECT}_dev39_check_voice",
+    "aulas-ingles:recovery-target:v1",
+)
+STUDY39_CHECK = Target(
+    PROJECT,
+    "study39-check-db",
+    "aulas_ingles_restore",
+    "aulas_restore",
+    f"{PROJECT}_study39_check_db",
+    f"{PROJECT}_study39_check_voice",
+    "aulas-ingles:recovery-target:v1",
+)
 DESTINATIONS = {
     CONFIRM_TARGET: RESTORE,
     CONFIRM_STUDY_CHECK: STUDY_CHECK,
     CONFIRM_CONCURRENCY_CHECK: CONCURRENCY_CHECK,
+    CONFIRM_DEV_CHECK: DEV_CHECK,
+    CONFIRM_ASSIST_CHECK: ASSIST_CHECK,
+    CONFIRM_DEV39_CHECK: DEV39_CHECK,
+    CONFIRM_STUDY39_CHECK: STUDY39_CHECK,
 }
 
 
@@ -159,6 +203,14 @@ def lab_resources():
         STUDY_CHECK.voice_volume,
         CONCURRENCY_CHECK.db_volume,
         CONCURRENCY_CHECK.voice_volume,
+        DEV_CHECK.db_volume,
+        DEV_CHECK.voice_volume,
+        ASSIST_CHECK.db_volume,
+        ASSIST_CHECK.voice_volume,
+        DEV39_CHECK.db_volume,
+        DEV39_CHECK.voice_volume,
+        STUDY39_CHECK.db_volume,
+        STUDY39_CHECK.voice_volume,
     ):
         if name in existing:
             volume(name, PROJECT)
@@ -193,24 +245,32 @@ def env_of(info):
 
 
 def source_target(source):
-    require(source in {"lab", "prod"}, "Origem não permitida.")
+    require(source in {"lab", "dev", "prod"}, "Origem não permitida.")
     if source == "lab":
         return LAB
-    env = env_of(container("aulas-ingles-prod", "db"))
+    project = "aulas-ingles" if source == "dev" else "aulas-ingles-prod"
+    env = env_of(container(project, "db"))
     database, role = env.get("POSTGRES_DB", ""), env.get("POSTGRES_USER", "")
-    if env_of(container("aulas-ingles-prod", "api")).get("DATABASE_PURPOSE") == "runtime":
+    api_env = env_of(container(project, "api"))
+    if source == "dev":
+        require(api_env.get("APP_ENV") == "dev", "Origem não é desenvolvimento.")
+        require(
+            not api_env.get("DATABASE_PURPOSE"),
+            "Desenvolvimento com papéis exige novo ensaio.",
+        )
+    if api_env.get("DATABASE_PURPOSE") == "runtime":
         role = "aulas_backup"
     require(
         bool(database) and bool(role) and database not in {"postgres", "template0", "template1"},
-        "Banco/usuário de produção não identificados.",
+        "Banco/usuário da origem não identificados.",
     )
     return Target(
-        "aulas-ingles-prod",
+        project,
         "db",
         database,
         role,
-        "aulas-ingles-pgdata-prod",
-        "aulas-ingles-speaking-data-prod",
+        "aulas-ingles-pgdata" + ("-prod" if source == "prod" else ""),
+        "aulas-ingles-speaking-data" + ("-prod" if source == "prod" else ""),
         None,
     )
 
@@ -278,7 +338,13 @@ def check_target(target):
             "Init SQL inesperado ou gravável.",
         )
     else:
-        require(len(info["Mounts"]) == 1, "Mount adicional no banco de produção.")
+        require(len(info["Mounts"]) == 1, "Mount adicional no banco de origem.")
+        if target.project == "aulas-ingles":
+            require(
+                info["HostConfig"].get("PortBindings")
+                == {"5432/tcp": [{"HostIp": "127.0.0.1", "HostPort": "5433"}]},
+                "Banco de desenvolvimento deve estar somente em 127.0.0.1:5433.",
+            )
     for name in (target.db_volume, target.voice_volume):
         volume(name, target.project, target.project == PROJECT)
     identity = query(
@@ -318,7 +384,7 @@ def check_target(target):
 
 def quiet(target):
     # Não para containers nem encerra sessões; o operador deve abrir janela de manutenção.
-    if target.project == "aulas-ingles-prod":
+    if target.project in {"aulas-ingles", "aulas-ingles-prod"}:
         for service in ("api", "worker"):
             info = container(target.project, service)
             require(
@@ -330,6 +396,10 @@ def quiet(target):
             require(
                 url.hostname == "db" and url.path == f"/{target.database}",
                 "Aplicação aponta para banco diferente da origem.",
+            )
+            require(
+                set(info["NetworkSettings"]["Networks"]) == {f"{target.project}_default"},
+                "Aplicação conectada a rede inesperada.",
             )
             require(
                 env.get("SPEAKING_STORAGE_DIR") == "/app/data/speaking"
@@ -449,7 +519,7 @@ def lease(name):
 
 def application_info(target):
     deployed = []
-    if target.project == "aulas-ingles-prod":
+    if target.project in {"aulas-ingles", "aulas-ingles-prod"}:
         for service in ("api", "worker"):
             info = container(target.project, service)
             deployed.append(
@@ -582,7 +652,10 @@ def restore(path, confirm):
             "Diretório de recibos não pode ser link.",
         )
         receipts.mkdir(mode=0o700, parents=True, exist_ok=True)
-        require(receipts.stat().st_mode & 0o077 == 0, "Diretório de recibos deve ser privado.")
+        require(
+            receipts.stat().st_mode & 0o077 == 0,
+            "Diretório de recibos deve ser privado.",
+        )
         receipt = receipts / f"{manifest['bundle_id']}.json"
         write_json(
             receipt,
@@ -636,7 +709,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     capture = commands.add_parser("backup")
-    capture.add_argument("--source", choices=("lab", "prod"), required=True)
+    capture.add_argument("--source", choices=("lab", "dev", "prod"), required=True)
     verify = commands.add_parser("verify")
     verify.add_argument("bundle", type=Path)
     load = commands.add_parser("restore")

@@ -6,24 +6,46 @@ import logging
 import sys
 from pathlib import Path
 
+from sqlalchemy import func, select
+from sqlalchemy.exc import DBAPIError
+
 from app.core.config import get_settings
-from app.db.seed import seed_lessons
+from app.db.seed import load_seed_graph, preview_seed, seed_lessons
+from app.db.seed_plan import SeedBlocked
 from app.db.session import dispose_engine, get_sessionmaker
-from app.db.writing_update import update_writing_rubrics
 from app.services.assist_gate import (
     Modality,
     collect_gate_metrics,
     evaluate_gate,
     load_provider_review,
 )
+from app.services.editorial_archive import REASONS as ARCHIVE_REASONS
+from app.services.editorial_archive import archive_unit
+from app.services.editorial_audit import preview_editorial_audit
+from app.services.editorial_plan import preview_unit_archive
+from app.services.editorial_reorder import REASONS as REORDER_REASONS
+from app.services.editorial_reorder import apply_editorial_reorder
+from app.services.editorial_reorder_plan import preview_editorial_reorder
+from app.services.maintenance import SCOPES, retention_batch
 from app.services.transcription_queue import run_transcription_worker
 
 
-async def _seed() -> None:
-    async with get_sessionmaker()() as session:
-        total = await seed_lessons(session)
-    await dispose_engine()
-    print(f"✓ seed aplicado: {total} aulas")
+async def _seed(*, dry_run: bool = False, path: Path | None = None) -> bool:
+    try:
+        async with get_sessionmaker()() as session:
+            if dry_run:
+                report = await preview_seed(session, path)
+                print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
+                return bool(report["allowed"])
+            try:
+                total = await seed_lessons(session, path)
+            except SeedBlocked as error:
+                print(json.dumps(error.report, ensure_ascii=False, indent=2, default=str))
+                return False
+        print(f"✓ seed aplicado: {total} aulas")
+        return True
+    finally:
+        await dispose_engine()
 
 
 async def _assist_gate(modality: Modality, review_path: Path) -> bool:
@@ -36,13 +58,189 @@ async def _assist_gate(modality: Modality, review_path: Path) -> bool:
     return report.approved
 
 
+async def _editorial_plan(course_slug: str, unit_slug: str) -> None:
+    try:
+        async with get_sessionmaker()() as session:
+            report = await preview_unit_archive(session, course_slug, unit_slug)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    finally:
+        await dispose_engine()
+
+
+async def _editorial_archive(**kwargs: str) -> None:
+    try:
+        async with get_sessionmaker()() as session:
+            receipt = await archive_unit(session, **kwargs)
+        print(json.dumps(receipt, ensure_ascii=False, indent=2))
+    finally:
+        await dispose_engine()
+
+
+async def _editorial_audit() -> None:
+    try:
+        async with get_sessionmaker()() as session:
+            report = await preview_editorial_audit(session)
+        print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
+    finally:
+        await dispose_engine()
+
+
+async def _editorial_reorder_plan(path: Path | None = None) -> None:
+    try:
+        _, graph = load_seed_graph(path)
+        async with get_sessionmaker()() as session:
+            report = await preview_editorial_reorder(session, graph)
+        print(json.dumps(report, ensure_ascii=False, indent=2, default=str))
+    finally:
+        await dispose_engine()
+
+
+async def _editorial_reorder(path: Path | None = None, **kwargs: str) -> None:
+    try:
+        _, graph = load_seed_graph(path)
+        async with get_sessionmaker()() as session:
+            receipt = await apply_editorial_reorder(session, graph, **kwargs)
+        print(json.dumps(receipt, ensure_ascii=False, indent=2, default=str))
+    finally:
+        await dispose_engine()
+
+
 def main_com_argumentos(argumentos: list[str]) -> None:
     """Separado de main() para o teste poder chamar sem mexer em sys.argv."""
     comando = argumentos[0] if argumentos else ""
     if comando == "seed":
-        asyncio.run(_seed())
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="seed")
+        parser.add_argument("--dry-run", action="store_true")
+        parser.add_argument("--file", type=Path)
+        args = parser.parse_args(argumentos[1:])
+        try:
+            allowed = asyncio.run(_seed(dry_run=args.dry_run, path=args.file))
+        except (ValueError, KeyError, TypeError, OSError):
+            print(
+                "Pacote de seed inválido ou inacessível; nenhuma carga concluída.", file=sys.stderr
+            )
+            raise SystemExit(2) from None
+        except DBAPIError:
+            print(
+                "Seed não concluído: banco ocupado, indisponível ou contrato incompatível. "
+                "Verifique o ambiente/permissões e repita a prévia.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from None
+        if not allowed:
+            raise SystemExit(1)
+    elif comando == "editorial-plan":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="editorial-plan")
+        parser.add_argument("--course", required=True)
+        parser.add_argument("--unit", required=True)
+        args = parser.parse_args(argumentos[1:])
+        try:
+            asyncio.run(_editorial_plan(args.course, args.unit))
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            raise SystemExit(2) from None
+        except (DBAPIError, TimeoutError):
+            print("Prévia indisponível; confira banco, schema e permissões.", file=sys.stderr)
+            raise SystemExit(1) from None
+    elif comando == "editorial-archive":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="editorial-archive")
+        parser.add_argument("--course", dest="course_slug", required=True)
+        parser.add_argument("--unit", dest="unit_slug", required=True)
+        parser.add_argument("--catalog-sha256", dest="expected_catalog_sha256", required=True)
+        parser.add_argument("--operation-key", required=True)
+        parser.add_argument("--operator", dest="operator_label", required=True)
+        parser.add_argument("--reason", dest="reason_code", choices=ARCHIVE_REASONS, required=True)
+        parser.add_argument("--confirm-database", required=True)
+        parser.add_argument("--apply", action="store_true", required=True)
+        archive_args = vars(parser.parse_args(argumentos[1:]))
+        archive_args.pop("apply")
+        try:
+            asyncio.run(_editorial_archive(**archive_args))
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            raise SystemExit(2) from None
+        except (DBAPIError, TimeoutError):
+            print(
+                "Arquivamento não confirmado. Repita a mesma operação/chave para conferir "
+                "o recibo; não execute SQL manual.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from None
+    elif comando == "editorial-audit":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="editorial-audit")
+        parser.parse_args(argumentos[1:])
+        try:
+            asyncio.run(_editorial_audit())
+        except (ValueError, KeyError, TypeError, OSError):
+            print(
+                "Auditoria editorial inválida ou incompleta; nenhuma alteração foi feita.",
+                file=sys.stderr,
+            )
+            raise SystemExit(2) from None
+        except (DBAPIError, TimeoutError):
+            print(
+                "Auditoria editorial indisponível; nenhuma alteração foi feita.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from None
+    elif comando == "editorial-reorder-plan":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="editorial-reorder-plan")
+        parser.add_argument("--file", type=Path)
+        args = parser.parse_args(argumentos[1:])
+        try:
+            asyncio.run(_editorial_reorder_plan(args.file))
+        except (ValueError, KeyError, TypeError, OSError) as error:
+            print(f"Prévia de reordenação inválida: {error}", file=sys.stderr)
+            raise SystemExit(2) from None
+        except (DBAPIError, TimeoutError):
+            print(
+                "Prévia de reordenação indisponível; nenhuma alteração foi feita.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from None
+    elif comando == "editorial-reorder":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="editorial-reorder")
+        parser.add_argument("--file", type=Path)
+        parser.add_argument("--plan-sha256", dest="expected_plan_sha256", required=True)
+        parser.add_argument("--operation-key", required=True)
+        parser.add_argument("--operator", dest="operator_label", required=True)
+        parser.add_argument("--reason", dest="reason_code", choices=REORDER_REASONS, required=True)
+        parser.add_argument("--confirm-database", required=True)
+        parser.add_argument("--apply", action="store_true", required=True)
+        reorder_args = vars(parser.parse_args(argumentos[1:]))
+        path = reorder_args.pop("file")
+        reorder_args.pop("apply")
+        try:
+            asyncio.run(_editorial_reorder(path, **reorder_args))
+        except (ValueError, KeyError, TypeError, OSError) as error:
+            print(str(error), file=sys.stderr)
+            raise SystemExit(2) from None
+        except (DBAPIError, TimeoutError, RuntimeError):
+            print(
+                "Reordenação não confirmada. Repita a mesma operação/chave para conferir "
+                "o recibo; não execute SQL manual.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from None
     elif comando == "writing-rubrics":
-        asyncio.run(_writing_rubrics())
+        print(
+            "Comando desativado: as rubricas divergentes exigem versionamento e homologação. "
+            "Use editorial-audit para a análise somente leitura.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
     elif comando == "assist-gate":
         try:
             modality_index = argumentos.index("--modality") + 1
@@ -67,9 +265,27 @@ def main_com_argumentos(argumentos: list[str]) -> None:
         if not approved:
             raise SystemExit(1)
     elif comando == "assist-worker":
+        from app.core.logging import configurar
+
+        configurar(get_settings().log_level)
         asyncio.run(run_transcription_worker(once="--once" in argumentos[1:]))
+    elif comando == "retention":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="retention")
+        parser.add_argument("--scope", choices=SCOPES, required=True)
+        parser.add_argument("--limit", type=int, default=100)
+        parser.add_argument("--apply", action="store_true")
+        parser.add_argument("--confirm-database")
+        args = parser.parse_args(argumentos[1:])
+        asyncio.run(_retention(args.scope, args.limit, args.apply, args.confirm_database))
     else:
-        print("uso: python -m app.cli seed | assist-gate | assist-worker [--once]", file=sys.stderr)
+        print(
+            "uso: python -m app.cli seed | editorial-audit | editorial-plan | "
+            "editorial-reorder-plan | editorial-reorder | editorial-archive | assist-gate | "
+            "assist-worker [--once]",
+            file=sys.stderr,
+        )
         raise SystemExit(2)
 
 
@@ -78,11 +294,14 @@ def main() -> None:
     main_com_argumentos(sys.argv[1:])
 
 
-async def _writing_rubrics() -> None:
+async def _retention(scope: str, limit: int, apply: bool, confirm_database: str | None) -> None:
     try:
         async with get_sessionmaker()() as session:
-            total = await update_writing_rubrics(session)
-        print(f"Rubricas atualizadas: {total}; evidências e IDs preservados.")
+            database = await session.scalar(select(func.current_database()))
+        if apply and confirm_database != database:
+            raise ValueError("Confirme o banco antes de aplicar retenção.")
+        count = await retention_batch(scope, apply=apply, limit=limit)
+        print(json.dumps({"scope": scope, "limit": limit, "dry_run": not apply, "count": count}))
     finally:
         await dispose_engine()
 

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +16,7 @@ class WritingDraftIn(BaseModel):
 
 class WritingFeedbackIn(WritingDraftIn):
     assisted: bool = False
+    operation_key: UUID | None = None
 
 
 class WritingRevisionOut(BaseModel):
@@ -30,7 +32,6 @@ class WritingDraftOut(BaseModel):
     prompt_id: int
     text: str
     updated_at: datetime | None
-    revisions: list[WritingRevisionOut]
 
 
 class WritingFeedbackCheckOut(BaseModel):
@@ -50,6 +51,7 @@ class WritingFeedbackOut(BaseModel):
     algorithm_version: str
     rubric_version: str | None
     rubric_snapshot: dict[str, object] | None
+    historical_content_status: Literal["available", "unavailable"]
     evaluation_scope: str
     analysis_mode: Literal["deterministic", "assisted", "fallback"]
     automated: Literal[True] = True
@@ -77,3 +79,31 @@ class WritingHistoryItemOut(BaseModel):
     updated_at: datetime
     revisions: list[WritingRevisionOut]
     feedbacks: list[WritingFeedbackOut]
+
+
+class WritingRevisionPageOut(BaseModel):
+    items: list[WritingRevisionOut]
+    next_cursor: str | None
+
+
+class WritingFeedbackPageOut(BaseModel):
+    items: list[WritingFeedbackOut]
+    next_cursor: str | None
+
+
+class WritingHistorySummaryOut(BaseModel):
+    prompt_id: int
+    course_slug: str
+    course_title: str
+    unit_slug: str
+    lesson_number: int
+    lesson_title: str
+    prompt_title: str
+    updated_at: datetime
+    revision_count: int
+    feedback_count: int
+
+
+class WritingHistoryPageOut(BaseModel):
+    items: list[WritingHistorySummaryOut]
+    next_cursor: str | None

@@ -29,7 +29,8 @@ class TranscriptionJobOut(BaseModel):
     next_attempt_at: datetime
     automated: Literal[True] = True
     evaluation_only: Literal[True] = True
-    expected_text: str
+    expected_text: str | None
+    historical_content_status: Literal["available", "unavailable"]
     transcript_text: str | None
     words: list[TranscriptionWordOut]
     mean_confidence: float | None
@@ -50,5 +51,14 @@ class AssistStatusOut(BaseModel):
     daily_quota: int
     used_today: int
     remaining_today: int
+    reserved_today: int
+    consumed_today: int
+    quota_resets_at: datetime
+    quota_timezone: Literal["UTC"] = "UTC"
     retention_days: int
     cost_microusd_today: int
+    cost_incomplete: bool
+    worker_state: Literal["disabled", "unknown", "active", "stale"] = "unknown"
+    worker_seen_at: datetime | None = None
+    queued_jobs: int = 0
+    oldest_queued_seconds: int | None = None

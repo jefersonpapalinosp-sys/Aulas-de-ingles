@@ -20,6 +20,15 @@ REVOKE ALL ON ALL TABLES IN SCHEMA public FROM aulas_runtime, aulas_worker, aula
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM aulas_runtime, aulas_worker, aulas_backup;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO aulas_runtime, aulas_backup;
+-- Audit identifies an operational actor, not a student-facing resource.
+DO $$ BEGIN
+  IF to_regclass('public.editorial_archive_event') IS NOT NULL THEN
+    REVOKE ALL ON editorial_archive_event FROM aulas_runtime, aulas_worker;
+  END IF;
+  IF to_regclass('public.editorial_reorder_event') IS NOT NULL THEN
+    REVOKE ALL ON editorial_reorder_event FROM aulas_runtime, aulas_worker;
+  END IF;
+END $$;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO aulas_backup;
 GRANT INSERT, UPDATE, DELETE ON
   app_user, refresh_session, lesson_progress, study_session_progress, step_progress,
@@ -34,6 +43,13 @@ DO $$ BEGIN
     GRANT INSERT ON review_event TO aulas_runtime;
     GRANT USAGE ON SEQUENCE review_event_id_seq TO aulas_runtime;
     GRANT INSERT, UPDATE, DELETE ON auth_rate_bucket TO aulas_runtime;
+  END IF;
+END $$;
+-- Sprint 39A: âncoras, recibos e intervalos são append-only no runtime.
+DO $$ BEGIN
+  IF to_regclass('public.study_activity_session') IS NOT NULL THEN
+    GRANT INSERT ON study_activity_session, study_activity_event, study_active_interval TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE study_activity_event_id_seq, study_active_interval_id_seq TO aulas_runtime;
   END IF;
 END $$;
 DO $$
@@ -53,7 +69,33 @@ BEGIN
 END $$;
 GRANT SELECT ON transcription_job, speaking_attempt, transcript_cue TO aulas_worker;
 GRANT UPDATE ON transcription_job TO aulas_worker;
+-- Sprint 39F: o consumo sobrevive à exclusão de resultados. Só owner apaga diretamente.
+DO $$ BEGIN
+  IF to_regclass('public.assist_reservation') IS NOT NULL THEN
+    GRANT SELECT, INSERT, UPDATE ON assist_reservation TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE assist_reservation_id_seq TO aulas_runtime;
+    GRANT SELECT, UPDATE ON assist_reservation TO aulas_worker;
+  END IF;
+END $$;
 -- Tabelas futuras não recebem escrita automaticamente; migration deve declarar DML.
+DO $$ BEGIN
+  IF to_regclass('public.evidence_content_snapshot') IS NOT NULL THEN
+    GRANT INSERT ON evidence_content_snapshot TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE evidence_content_snapshot_id_seq TO aulas_runtime;
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF to_regprocedure('public.aulas_speaking_expected_text(integer,integer)') IS NOT NULL THEN
+    GRANT EXECUTE ON FUNCTION public.aulas_speaking_expected_text(integer, integer)
+      TO aulas_worker;
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF to_regclass('public.worker_heartbeat') IS NOT NULL THEN
+    GRANT SELECT, INSERT, UPDATE ON worker_heartbeat TO aulas_worker;
+    GRANT EXECUTE ON FUNCTION public.aulas_retention_batch(text, integer, boolean) TO aulas_worker;
+  END IF;
+END $$;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public
   GRANT SELECT ON TABLES TO aulas_runtime, aulas_backup;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public

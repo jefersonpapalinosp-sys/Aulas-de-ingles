@@ -1,12 +1,13 @@
 """Painel Hoje: plano leve, recomendação explicada e competências."""
 
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
+from typing import Annotated, NamedTuple
 from typing import cast as typing_cast
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
@@ -18,6 +19,7 @@ from app.db.models import (
     Lesson,
     LessonProgress,
     ReviewItem,
+    StudyActiveInterval,
     StudyPlan,
     StudySessionProgress,
 )
@@ -39,6 +41,17 @@ router = APIRouter(prefix="/me", tags=["dashboard"])
 DEFAULT_DAYS: list[Weekday] = ["mon", "wed", "fri"]
 
 
+class _RecentStudy(NamedTuple):
+    lesson_id: int
+    current_step: str
+    completed_steps: list[str]
+    total_seconds: int
+    updated_at: datetime
+    lesson_number: int
+    lesson_title: str
+    course_slug: str
+
+
 def _plan_out(plan: StudyPlan | None) -> StudyPlanOut:
     if plan is None:
         return StudyPlanOut(
@@ -51,6 +64,7 @@ def _plan_out(plan: StudyPlan | None) -> StudyPlanOut:
         weekly_minutes=plan.weekly_minutes,
         preferred_days=typing_cast(list[Weekday], plan.preferred_days),
         goal=plan.goal,
+        timezone=plan.timezone,
         updated_at=plan.updated_at,
     )
 
@@ -82,6 +96,7 @@ async def salvar_plano(
     plan.weekly_minutes = corpo.weekly_minutes
     plan.preferred_days = list(corpo.preferred_days)
     plan.goal = corpo.goal
+    plan.timezone = corpo.timezone
     plan.updated_at = datetime.now(UTC)
     await session.commit()
     await session.refresh(plan)
@@ -93,6 +108,7 @@ async def _recommendation(
     user_id: int,
     due_reviews: int,
     course: Course,
+    resume: _RecentStudy | None,
 ) -> RecommendationOut:
     level_label = f"Level {course.level}"
     if due_reviews:
@@ -105,33 +121,18 @@ async def _recommendation(
             course_slug=course.slug,
         )
 
-    resume = (
-        await session.execute(
-            select(StudySessionProgress, Lesson)
-            .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
-            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-            .where(
-                StudySessionProgress.user_id == user_id,
-                Lesson.course_id == course.id,
-                CourseUnit.status == "published",
-                func.jsonb_array_length(StudySessionProgress.completed_steps) < 5,
-            )
-            .order_by(StudySessionProgress.updated_at.desc())
-            .limit(1)
-        )
-    ).one_or_none()
     if resume is not None:
-        study, lesson = resume
         return RecommendationOut(
             kind="continue_lesson",
-            title=f"Continuar a Aula {lesson.number}",
-            reason=f"Você parou na etapa {study.current_step}; retomar preserva o contexto.",
+            title=f"Continuar a Aula {resume.lesson_number}",
+            reason=f"Você parou na etapa {resume.current_step}; retomar preserva o contexto.",
             href=(
-                f"/cursos/{lesson.course_slug}/aulas/{lesson.number}/estudar/{study.current_step}"
+                f"/cursos/{resume.course_slug}/aulas/{resume.lesson_number}/estudar/"
+                f"{resume.current_step}"
             ),
             estimated_minutes=10,
-            course_slug=lesson.course_slug,
-            lesson_number=lesson.number,
+            course_slug=resume.course_slug,
+            lesson_number=resume.lesson_number,
         )
 
     studied_lesson_ids = (
@@ -151,9 +152,37 @@ async def _recommendation(
         )
         .exists()
     )
-    reviews = (
+    required_lesson = Lesson.__table__.alias("required_lesson")
+    studied_required = (
+        select(LessonProgress.id)
+        .where(
+            LessonProgress.user_id == user_id,
+            LessonProgress.lesson_id == required_lesson.c.id,
+        )
+        .correlate(required_lesson)
+        .exists()
+    )
+    missing_required = (
+        select(required_lesson.c.id)
+        .where(
+            required_lesson.c.course_id == Course.id,
+            or_(
+                required_lesson.c.unit_id == CourseUnit.id,
+                required_lesson.c.number == CourseReview.review_lesson_number,
+            ),
+            ~studied_required,
+        )
+        .correlate(CourseReview, CourseUnit, Course)
+        .exists()
+    )
+    review = (
         await session.execute(
-            select(CourseReview, CourseUnit, Course)
+            select(
+                CourseReview.title,
+                CourseReview.estimated_minutes,
+                CourseUnit.slug.label("unit_slug"),
+                Course.slug.label("course_slug"),
+            )
             .join(CourseUnit, CourseReview.unit_id == CourseUnit.id)
             .join(Course, CourseUnit.course_id == Course.id)
             .where(
@@ -162,38 +191,28 @@ async def _recommendation(
                 Course.status == "published",
                 Course.id == course.id,
                 ~completed_current_review,
+                ~missing_required,
             )
             .order_by(Course.position, CourseUnit.position, CourseReview.position)
+            .limit(1)
         )
-    ).all()
-    for course_review, unit, review_course in reviews:
-        required_ids = select(Lesson.id).where(
-            (Lesson.unit_id == unit.id)
-            | (
-                (Lesson.course_id == review_course.id)
-                & (Lesson.number == course_review.review_lesson_number)
-            )
+    ).one_or_none()
+    if review is not None:
+        return RecommendationOut(
+            kind="course_review",
+            title=f"{review.title} · {level_label}",
+            reason="Você concluiu as aulas da unidade; agora consolide o bloco.",
+            href=(f"/cursos/{review.course_slug}/unidades/{review.unit_slug}/checkpoint"),
+            estimated_minutes=review.estimated_minutes,
+            course_slug=review.course_slug,
         )
-        missing_required = (
-            await session.execute(
-                select(func.count())
-                .select_from(Lesson)
-                .where(Lesson.id.in_(required_ids), Lesson.id.not_in(studied_lesson_ids))
-            )
-        ).scalar_one()
-        if missing_required == 0:
-            return RecommendationOut(
-                kind="course_review",
-                title=f"{course_review.title} · {level_label}",
-                reason="Você concluiu as aulas da unidade; agora consolide o bloco.",
-                href=(f"/cursos/{review_course.slug}/unidades/{unit.slug}/checkpoint"),
-                estimated_minutes=course_review.estimated_minutes,
-                course_slug=review_course.slug,
-            )
 
     next_lesson = (
         await session.execute(
-            select(Lesson)
+            select(
+                Lesson.number,
+                Course.slug.label("course_slug"),
+            )
             .join(Course, Lesson.course_id == Course.id)
             .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
             .where(Lesson.id.not_in(studied_lesson_ids))
@@ -204,7 +223,7 @@ async def _recommendation(
             .order_by(Course.position, CourseUnit.position, Lesson.position)
             .limit(1)
         )
-    ).scalar_one_or_none()
+    ).one_or_none()
     if next_lesson is not None:
         return RecommendationOut(
             kind="start_lesson",
@@ -264,31 +283,66 @@ async def painel_hoje(
             )
         )
     ).scalar_one()
-    latest = (
-        await session.execute(
-            select(StudySessionProgress, Lesson)
-            .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
-            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-            .where(
-                StudySessionProgress.user_id == usuario.id,
-                Lesson.course_id == selected_course.id,
-                CourseUnit.status == "published",
-            )
-            .order_by(StudySessionProgress.updated_at.desc())
-            .limit(1)
+    recent_query = (
+        select(
+            StudySessionProgress.lesson_id,
+            StudySessionProgress.current_step,
+            StudySessionProgress.completed_steps,
+            StudySessionProgress.total_seconds,
+            StudySessionProgress.updated_at,
+            Lesson.number,
+            Lesson.title,
+            Course.slug.label("course_slug"),
         )
-    ).one_or_none()
-    week_start = (now - timedelta(days=now.weekday())).replace(
-        hour=0, minute=0, second=0, microsecond=0
+        .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            StudySessionProgress.user_id == usuario.id,
+            Lesson.course_id == selected_course.id,
+            CourseUnit.status == "published",
+        )
+        .order_by(StudySessionProgress.updated_at.desc())
+    )
+    latest_row = (await session.execute(recent_query.limit(1))).one_or_none()
+    latest = _RecentStudy(*latest_row) if latest_row is not None else None
+    resume = latest
+    if due_reviews == 0 and latest is not None and len(latest.completed_steps) >= 5:
+        resume_row = (
+            await session.execute(
+                recent_query.where(
+                    func.jsonb_array_length(StudySessionProgress.completed_steps) < 5
+                ).limit(1)
+            )
+        ).one_or_none()
+        resume = _RecentStudy(*resume_row) if resume_row is not None else None
+    plan = _plan_out(await _stored_plan(session, usuario.id))
+    local_now = now.astimezone(ZoneInfo(plan.timezone))
+    week_start = (
+        (local_now - timedelta(days=local_now.weekday()))
+        .replace(hour=0, minute=0, second=0, microsecond=0)
+        .astimezone(UTC)
     )
     seconds = (
         await session.execute(
-            select(func.coalesce(func.sum(StudySessionProgress.total_seconds), 0))
-            .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
+            select(
+                func.coalesce(
+                    func.sum(
+                        func.extract(
+                            "epoch",
+                            func.least(StudyActiveInterval.ends_at, now)
+                            - func.greatest(StudyActiveInterval.starts_at, week_start),
+                        )
+                    ),
+                    0,
+                )
+            )
+            .join(Lesson, StudyActiveInterval.lesson_id == Lesson.id)
             .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
             .where(
-                StudySessionProgress.user_id == usuario.id,
-                StudySessionProgress.updated_at >= week_start,
+                StudyActiveInterval.user_id == usuario.id,
+                StudyActiveInterval.ends_at > week_start,
+                StudyActiveInterval.starts_at < now,
                 Lesson.course_id == selected_course.id,
                 CourseUnit.status == "published",
             )
@@ -296,15 +350,32 @@ async def painel_hoje(
     ).scalar_one()
     recent = None
     if latest is not None:
-        study, lesson = latest
+        active_seconds = (
+            await session.execute(
+                select(
+                    func.coalesce(
+                        func.sum(
+                            func.extract(
+                                "epoch", StudyActiveInterval.ends_at - StudyActiveInterval.starts_at
+                            )
+                        ),
+                        0,
+                    )
+                ).where(
+                    StudyActiveInterval.user_id == usuario.id,
+                    StudyActiveInterval.lesson_id == latest.lesson_id,
+                )
+            )
+        ).scalar_one()
         recent = RecentSessionOut(
-            course_slug=lesson.course_slug,
-            lesson_number=lesson.number,
-            lesson_title=lesson.title,
-            current_step=study.current_step,
-            completed_steps=len(study.completed_steps),
-            total_minutes=max(0, round(study.total_seconds / 60)),
-            updated_at=study.updated_at,
+            course_slug=latest.course_slug,
+            lesson_number=latest.lesson_number,
+            lesson_title=latest.lesson_title,
+            current_step=latest.current_step,
+            completed_steps=len(latest.completed_steps),
+            total_minutes=max(0, int(active_seconds) // 60),
+            legacy_minutes=max(0, round(latest.total_seconds / 60)),
+            updated_at=latest.updated_at,
         )
     return TodayOut(
         recommendation=await _recommendation(
@@ -312,9 +383,10 @@ async def painel_hoje(
             usuario.id,
             due_reviews,
             selected_course,
+            resume,
         ),
-        plan=_plan_out(await _stored_plan(session, usuario.id)),
-        recorded_minutes_this_week=max(0, round(int(seconds) / 60)),
+        plan=plan,
+        recorded_minutes_this_week=max(0, int(seconds) // 60),
         recent_session=recent,
     )
 

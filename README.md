@@ -807,7 +807,8 @@ A auditoria detectou **20 jornadas antigas sem todos os registros detalhados de
 etapa; 15 também sem data de conclusão**. Foram preservadas, não corrigidas:
 as outras 20 regras passaram e hashes/contagens demonstraram nenhuma regressão.
 Reconciliação dessas jornadas e homologações humanas de leitores de tela/escrita
-permanecem pendentes. Não houve commit/push nem CI remoto.
+permanecem pendentes. Naquele registro ainda não havia commit/push nem CI remoto;
+posteriormente as Sprints 37/38 foram integradas à main pela PR #23 (`8d6b0da`).
 
 **Não executar `make up` como atualização da base de estudo.** O procedimento
 Sprint 38 usa `ops/concurrency_rollout.py`; `ops/study_rollout.py` permanece fixo na
@@ -817,7 +818,655 @@ Sprint 37. Procedimentos, backups e limites de recuperação estão no
 Contratos, escopo e checklists: [frontend](docs/sprints_37_42_frontend_2026-10-13.md#sprint-38-escrita-e-revisão-sem-conflitos-silenciosos),
 [backend](docs/sprints_37_42_backend_2026-10-13.md#sprint-38-autenticação-e-mutações-concorrentes)
 e [banco](docs/sprints_37_42_banco_de_dados_2026-10-13.md#sprint-38-integridade-transacional-e-eventos-de-revisão).
-Próxima sprint de implementação: **39 — áudio, continuidade offline, tempo de estudo e cotas**.
+Sprint atual: **39 — áudio, continuidade offline, tempo de estudo e cotas**, com
+os incrementos 39A/39B/39C/39D descritos abaixo. Não avançar para 40 como se toda a 39 estivesse pronta.
+
+### Sprint 39A — retomada de áudio e tempo ativo, 14/10/2026
+
+Implementação na branch `sprint/39-audio-tempo-ativo`, sem commit/push/merge.
+**Desenvolvimento em 5180/8010 alinhado em 14/10/2026**, após autorização,
+backup real, restore isolado e ensaio da sequência `b84e2c7a9d31` → `e17b5fad0264`.
+As 39 tabelas históricas e seus 6.766 registros foram preservados; nenhum seed completo,
+reparo de dados ou reprovisionamento de papéis foi executado. API/worker/web dev
+foram reiniciados. A entrega de estudo em **5181 permanece na Sprint 38**, sem alteração.
+
+Passaram 23 verificações HTTP reais pelo proxy em 5180: cadastro/login/refresh,
+catálogo/aula 31, retomada/CAS/conclusão de áudio, atividade idempotente, fuso e exportação.
+A conta sintética foi removida ao final, e os hashes históricos foram novamente
+conferidos. Isso não equivale a nova homologação visual, de microfone ou de áudio externo.
+Backup e recibos privados no Mac; clone parado com volumes preservados.
+Procedimento e limites: [alinhamento dev 39A](docs/operacao_sprint_37.md#sprint-39a--alinhamento-autorizado-do-desenvolvimento-em-14102026).
+
+- Áudio: fila local por conta/mídia/operação, revisão obrigatória, retries imutáveis,
+  conflitos resolvidos pelo aluno e conclusão com tombstone. Um PUT atrasado não
+  restaura posição concluída; cache local não aparece como confirmação atual da conta.
+- Tempo: intervalos curtos ancorados no servidor, relógio monotônico, visibilidade,
+  foco e ociosidade. Sobreposição entre abas/cursos não soma duas vezes. Sem telemetria
+  de teclas ou textos; é estimativa de atividade, não de aprendizagem.
+- Hoje: semana começa na segunda no fuso IANA do plano; histórico estimado antigo
+  permanece separado. Retornar a uma aula abandonada não credita espera como estudo.
+- Banco: migration aditiva `e17b5fad0264`, três tabelas de atividade, recibos idempotentes
+  e permissões append-only para runtime. Exportação pessoal 1.6 inclui os novos dados.
+
+Validações aprovadas: **802 testes backend, 289 frontend, 63 operacionais e 50 guardas
+E2E**; Ruff/mypy, ESLint/TypeScript, contrato gerado, Alembic check e build. Laboratório
+de papéis: **36 recusas de privilégio**, API runtime, worker e backup somente leitura.
+Regressão final do build otimizado: **112 cenários Playwright aprovados**, em Chromium
+desktop e mobile emulado (6,1 min). Laboratórios E2E/papéis encerrados após validação,
+sem remover os volumes sintéticos. Nenhum teste foi executado contra dados de estudo.
+
+Bundle aprovado: **176.099 bytes gzip (171,97 KiB), limite inalterado de 172 KiB**.
+A tentativa inicial com esbuild mediu 176,0 KiB e reprovou; Terser 5.51.2 como
+dependência de desenvolvimento, 4 passes conservadores e no máximo 2 workers resolveu
+sem trocar framework, navegadores-alvo ou retirar funcionalidades. Margem de apenas
+29 bytes: medir novamente nas próximas mudanças.
+
+Limites: iniciar medição exige conexão; fila de tempo aceita replay por 7 dias,
+mas isso não define retenção do banco. Sinais de visibilidade no E2E são simulados
+no DOM; não equivalem a homologação do sistema operacional, Safari/iOS ou Android real.
+Os testes do player simulam eventos de mídia e não homologam o MP3 externo da VOA.
+
+**Pendências atualizadas após 39D:** implantação coordenada no ambiente de estudo (5181),
+recuperação de referências faltantes sem journal, expurgo/retenção aprovados,
+atualização/expiração de cache PWA, cotas/reservas assistidas,
+liberação do pool durante provedor externo, expiração independente/resiliência de jobs
+e retenção auditável. Rollout exige procedimento novo, backup/restore ensaiado e
+atualização coordenada de API/frontend (cliente antigo de mídia recebe 422).
+Não usar os scripts de rollout 37/38, o alinhamento exclusivo de dev ou `make up`
+para aplicar esta migration ao estudo.
+
+Checklists e contratos: [frontend](docs/sprints_37_42_frontend_2026-10-13.md#sprint-39-áudio-e-continuidade-offline),
+[backend](docs/sprints_37_42_backend_2026-10-13.md#sprint-39-tempo-de-estudo-áudio-e-assistência)
+e [banco](docs/sprints_37_42_banco_de_dados_2026-10-13.md#sprint-39-eventos-de-estudo-cota-e-mídia).
+
+### Sprint 39B — upload limitado e microfone, 14/10/2026
+
+Implementação local na mesma branch, **sem commit/push/merge e sem implantação em
+5181**. Não acrescenta migration; o dev permanece em `e17b5fad0264`. API/frontend
+de desenvolvimento usam o código montado; o Nginx buildado foi validado exclusivamente
+no laboratório E2E 5198, sem tocar dados de estudo.
+
+- A prática oral, em **Aula → Estudar → Revisar**, mostra a política da API:
+  até **30 segundos** declarados e **2.000.000 bytes** por padrão. API pode reduzir
+  o limite; proxy não tem mais um teto menor que o contrato padrão.
+- Corpo é recebido em blocos, com limite acumulado e timeout. A conexão SQL é
+  liberada durante a recepção; PUT/DELETE concorrentes são serializados depois dela.
+- Repetir o mesmo PUT retorna a gravação existente sem duplicar arquivo/evidência.
+  Outro conteúdo recebe 409. Perder a resposta não dispara exclusão compensatória.
+- Erros oferecem retry e download do áudio local. Se a sessão expirar durante o envio,
+  há recuperação temporária por cinco minutos na mesma aba/conta/trecho, sem recarga
+  da página e sem armazenamento persistente. Novo consentimento é obrigatório.
+- Microfone e timers são encerrados ao sair/cancelar, inclusive quando a permissão
+  chega atrasada. Formato de gravação é escolhido pela capacidade do navegador.
+
+Validações: **820 testes backend, 307 frontend, 63 operacionais e 50 guardas E2E**;
+Ruff/mypy, ESLint/TypeScript e contrato OpenAPI determinístico aprovados. Seis novos
+cenários de navegador passaram em Chromium desktop/mobile emulado contra API/Nginx
+isolados: tamanho exato/excedido com e sem Content-Length, resposta perdida/retry e
+permissão tardia. Microfone simulado; não homologa hardware nem Safari/iOS/Android real.
+
+Regressão completa: **118 cenários Playwright aprovados (5,7 min)**. Após o último
+ajuste de limpeza de URLs em StrictMode, frontend/build foram revalidados e os seis
+cenários de upload/microfone repetidos no build final passaram novamente (11,3 s).
+Consulta somente leitura a `/api/health` e `/api/speaking/policy` pelo dev 5180
+confirmou API saudável e o contrato novo. Laboratório E2E parado ao final, com volumes
+sintéticos preservados; nenhuma manutenção no ambiente de estudo 5181.
+
+Build: **172.624 bytes gzip (168,58 KiB), limite mantido em 176.128 bytes (172 KiB)**,
+margem de 3.504 bytes. Compartilhamento dos módulos lazy de estudo reduz overhead
+de compressão; Hoje não carrega esse chunk antecipadamente. Tetos individuais e
+navegadores-alvo permanecem iguais. A margem de 29 bytes registrada em 39A é histórica.
+
+**Limitações na entrega 39B (contrato atualizado em 39C abaixo):**
+`content_validation=declared_mime_only`; codec e duração reais ainda
+não são inspecionados. Banco e filesystem não formam uma transação única: falha ambígua
+preserva arquivo até conferir referências, e crash pode deixar órfãos. POST inicial
+com resposta perdida ainda pode deixar metadado `pending`; retry idempotente é do PUT
+com ID conhecido. Recarregar/fechar a aba perde a gravação não baixada/não salva.
+
+Próximo bloco identificado em 39B: validação real e reconciliação dry-run, entregues
+no incremento 39C abaixo. Quarentena/limpeza, PWA, cotas e manutenção continuam abertas.
+A Sprint 39 continua **em andamento**.
+
+### Sprint 39C — inspeção real de áudio e inventário somente leitura, 14/10/2026
+
+Novos uploads passam por decodificação real, fora do processo da API e sem conexão
+SQL retida. **PyAV 19.0.1** fixado no lockfile, com bibliotecas FFmpeg incluídas no
+pacote: não foi instalado programa global no Mac. O contrato informa
+`content_validation=decoded_audio_v1`; MIME falso, vídeo/múltiplas faixas, áudio
+inválido ou com duração real superior a 30 s não chegam a `ready`. Na primeira
+publicação, `duration_ms` recebe a duração medida; gravações antigas não foram
+reescritas nem declaradas retroativamente validadas.
+
+- Formatos: família WebM/Opus ou Vorbis, Ogg/Opus ou Vorbis, MP4/AAC, ALAC ou Opus,
+  MP3 e WAV PCM permitido; uma faixa de áudio, mono/estéreo, 8–48 kHz.
+- Mede amostras decodificadas e extensão temporal dos frames, não apenas cabeçalho
+  ou duração declarada. O gravador tenta parar em 29 s para reservar margem de
+  fechamento; a API continua exigindo até 30 s reais. Não recorta voz silenciosamente.
+- Por processo API: no máximo dois decodificadores, prazo de 8 s, CPU de 5 s,
+  32 descritores e saída limitada a 4 KiB. No Linux, espaço virtual limitado a
+  512 MiB por filho; **não se promete esse teto de memória no macOS**. Uma thread
+  de codec; sem credenciais do banco no ambiente do filho; sem URLs/caminhos de
+  entrada e sem abertura externa pelo demuxer. Não substitui sandbox de segurança
+  do sistema operacional nem auditoria de vulnerabilidades do FFmpeg.
+- Timeout, cancelamento e saída excessiva encerram e recolhem o processo.
+  HTTP 415/422 preserva o áudio local para download; indisponibilidade retorna 503.
+
+Inventário operacional (somente no desenvolvimento configurado):
+
+```bash
+docker compose --env-file .env -f infra/compose.yml exec -T api python -m app.audio_audit --dry-run
+```
+
+Não há opção `--apply`/`--delete`. Snapshot SQL `REPEATABLE READ, READ ONLY` com
+timeout de 5 s; leitura de arquivos acontece após liberar a conexão. Relatório
+aponta referência sem arquivo, tamanho divergente, tentativa pendente antiga e
+candidato sem referência. Protege arquivos recentes por **mtime e ctime**, temporários,
+links e arquivos alterados durante a leitura. Janela conservadora mínima de 24 h
+**não é uma política de retenção nem autorização para exclusão**.
+
+Limites: 10 mil linhas/arquivos, 100 MiB de hashing, orçamento cooperativo de 30 s
+no filesystem. Varredura incompleta retorna `complete=false` e código de saída 2;
+snapshot SQL incompleto não classifica órfãos. Checksum é observação do relatório,
+não baseline persistente capaz de atestar integridade histórica. Relatório não é
+recibo de exclusão: uso posterior exige nova verificação de referências/atividade.
+
+API de desenvolvimento reconstruída sem migrations/seed. Head continua
+`e17b5fad0264`; **5181 não foi atualizado**. Inspeção foi exercitada com silêncio
+sintético; isso não homologa microfone/Safari/iOS/Android real. Banco e filesystem
+continuam sem transação distribuída: quarentena reversível, recuperação de crash e
+limpeza com autorização permanecem pendentes. Sem commit/push/merge.
+
+Validações: **850 testes backend**, cobertura **93,62%** (piso de 90% mantido),
+**308 frontend, 63 operacionais e 50 guardas E2E**; regressão completa no navegador:
+**120 E2E aprovados em 6,4 min**, em desktop e mobile simulados. Ruff/mypy, ESLint/TypeScript,
+contrato gerado determinístico e build aprovados. Bundle: **172.697 bytes gzip**,
+teto inalterado de 176.128 bytes. Cinco codecs foram exercitados também no Linux
+como UID sem privilégios, sem gravar arquivo ou usar banco. Inventário dev somente
+leitura: zero referências/arquivos; [registro operacional](docs/operacao_sprint_37.md#sprint-39c--atualização-da-api-dev-sem-alteração-de-dados-em-14102026).
+
+Referências técnicas: [PyAV — entrada e IO controlado](https://pyav.basswood.io/docs/stable/api/_globals.html),
+[frames de áudio](https://pyav.basswood.io/docs/stable/api/audio.html)
+e [pacote fixado](https://pypi.org/project/av/19.0.1/).
+
+### Sprint 39D — quarentena reversível e retomada operacional, 14/10/2026
+
+Incremento de backend/operação, **sem nova tela, migration ou mudança no contrato HTTP**.
+Uploads sincronizam bytes e diretório com `fsync` antes da publicação SQL. Falha
+nessa persistência não é anunciada como sucesso; eventual órfão é conservado.
+Isso não transforma banco e filesystem em transação distribuída.
+
+`python -m app.audio_quarantine` oferece `quarantine`, `resume` e `restore`, somente
+na configuração dev/test. Não possui purge/delete, agendamento ou seleção em massa.
+O inventário de 39C continua estritamente somente leitura. Para cada ação mutável:
+
+- Confirmação do banco e diretório configurados, chave UUID, checksum SHA-256 e ID
+  de operação conhecido **antes** da chamada. Não confiar em relatório antigo.
+- Lock SQL `EXCLUSIVE NOWAIT` bloqueia a ação se houver upload/exclusão em andamento;
+  reconsulta referências de qualquer status sob o lock. `flock` no diretório serializa
+  operadores do mesmo volume. Leituras normais da aplicação continuam permitidas.
+- Arquivos de até 2.000.000 bytes, privados, do mesmo usuário do processo e com mais
+  de 24 h por mtime **e** ctime; links externos, temporários, nomes desconhecidos e
+  arquivos alterados são recusados. Essa janela não define retenção.
+- Journal privado em `.quarantine/<operação>/record.json`, com checksum, identidade
+  do arquivo/alvo e intenção. Link exclusivo, sincronização e remoção apenas do nome
+  anterior conservam uma cópia; não sobrescreve conteúdo. Restore também registra
+  intenção antes de mover. Repetir `resume` não duplica áudio nem desfaz restore.
+
+Uma operação trata um arquivo, com orçamento cooperativo de 5 s de filesystem e
+timeout SQL de 5 s, sem fila de espera para o lock. É comando operacional dedicado;
+mantém a transação durante essa pequena seção crítica, não dentro de um endpoint.
+Disco travado não tem timeout rígido. Falha/cancelamento preserva journal e cópia
+recuperável; journal parcial/inválido ou conflito exige revisão manual.
+
+Backups novos usam `aulas-recovery-v2`: incluem áudio e journals da quarentena;
+pacotes v1 continuam verificáveis/restauráveis. Em restore para outro volume,
+**bytes são preservados, mas inodes mudam**: não reutilizar o journal como autorização
+para movimentação automática. Não houve novo ensaio completo de dump/restore do
+banco de estudo nem nova comprovação de RPO/RTO.
+
+Não associa órfão a `pending` por suposição, não recria referência SQL, não resolve
+arquivo ausente sem cópia conhecida e não expurga nada. Homologação de perda de
+energia/hardware, rollout em 5181 e retenção/limpeza permanecem pendentes.
+Comandos e limites no [registro operacional](docs/operacao_sprint_37.md#sprint-39d--quarentena-reversível-e-backup-v2-em-14102026).
+
+Validação 39D: **893 testes backend, 93,69% de cobertura**, Ruff/mypy aprovados;
+**72 testes operacionais**; **8 E2E de upload** em desktop/mobile simulados (19,9 s).
+**33 testes puros de quarentena em Linux**, sem rede/volumes do aluno e UID sem
+privilégios. Não foi repetida a suíte completa de 120 E2E nem a suíte frontend nesta
+entrega sem mudança de interface. Laboratório encerrado, volumes preservados.
+Nenhum áudio real foi movido/excluído; nenhum commit/push/merge foi realizado.
+
+Referências: [locks de tabela PostgreSQL](https://www.postgresql.org/docs/current/explicit-locking.html),
+[operações de arquivo Python](https://docs.python.org/3/library/os.html)
+e [flock](https://docs.python.org/3/library/fcntl.html).
+
+### Sprint 39E — atualização segura do PWA e limites offline
+
+No build, **Offline e atualizações** informa textos públicos armazenados, tamanho,
+validade da aula e disponibilidade de atualização. Não promete áudio offline:
+player continua online, e gravação pessoal ainda não enviada tem aviso próprio.
+**Limpar somente textos públicos** pede confirmação e preserva rascunhos, fila de
+respostas, sessão e dados remotos.
+
+A versão do worker deriva do conteúdo do build. Nova versão aguarda todas as abas
+antigas fecharem, sem reload automático. Salve textos e envie/baixe gravações antes
+de fechar. Ao reabrir após atualização, visite as aulas online novamente. Instalação
+incompleta ou HTML de outro build não substitui a versão anterior.
+
+Cache textual: até 120 respostas, 8 MiB e 7 dias por release; shell e assets também
+têm limites. Não guarda credenciais, dados privados da API ou mídia. O navegador
+pode remover cache, e versões podem coexistir enquanto abas antigas estiverem
+abertas: não é backup nem cota total do dispositivo. Novas consultas editoriais
+exigem opt-in público da API; `private/no-store` é respeitado.
+
+O Vite **5180 não registra service worker**. A validação usa build/nginx na stack
+descartável **5198** e o ensaio sintético **5196**. O estudo **5181 permanece na
+Sprint 38**; não houve rollout, commit, push ou merge neste incremento. Também não
+houve migration ou seed nas bases de desenvolvimento/estudo.
+
+Comandos/evidências e limites: [runbook 39E](docs/operacao_sprint_37.md#sprint-39e--pwa-e-cache-público-em-14102026).
+Validação: **912 testes backend (93,70% de cobertura), 334 frontend, 124 E2E e
+2 ensaios isolados de lifecycle PWA** aprovados; lint/tipos/build/budget aprovados.
+**Sprint 39 ainda aberta**: reservas/cotas assistidas, jobs/retenção, rollout e
+homologações reais continuam pendentes.
+
+### Sprint 39F — cotas compartilhadas de assistência
+
+Escrita e transcrição passam a reservar cota por conta/dia UTC de forma atômica.
+Cancelar antes do processamento libera a reserva; falhar ou apagar resultado
+depois de iniciar não devolve a unidade. Reenvio de escrita assistida admitida com a mesma chave e
+conteúdo recupera o resultado, sem outra chamada ao provedor; execução ainda sem
+resultado retorna conflito explicável e mantém o texto.
+
+A interface distingue disponível/reservado/utilizado e custo parcial. Não confunde
+custo não informado com gratuidade. A reserva não iniciada vence em 15 minutos por
+padrão (`ASSIST_RESERVATION_SECONDS`); o consumo já iniciado não usa esse TTL.
+É uma cota local do experimento, não faturamento nem garantia de cobrança única
+por um gateway externo. Ollama continua opcional e os testes usam simuladores.
+
+**Desenvolvimento alinhado em 15/10/2026:** migration `f28c6abe1375` aplicada em
+5433 após backup real, restore em clone exclusivo, ensaio e smoke HTTP autenticado.
+API/worker atualizados juntos; `http://localhost:5180` reaberto. As 44 tabelas
+históricas/6.768 linhas foram preservadas, inclusive após o smoke no DEV. Nenhum
+seed ou provedor externo foi executado. **5181 permanece na Sprint 38**, sem rollout.
+Procedimento e limites: [alinhamento DEV 39F](docs/operacao_sprint_37.md#sprint-39f--alinhamento-do-desenvolvimento-em-15102026).
+
+Estado histórico de 39F: jobs/retenção, checksum durável, rollout e homologações
+ainda estavam pendentes. O incremento abaixo atualiza essa situação.
+
+### Sprint 39G/H — retenção, integridade e rollout, 15/10/2026
+
+Implementados manutenção em lotes, expiração independente do acesso, recuperação
+do worker após indisponibilidade do banco e heartbeat com fila privada. Áudio novo
+tem SHA-256 persistido; leitura bloqueia arquivo alterado. Ferramenta operacional
+confere integridade e restaura referência ausente por cópia conferida, sem apagar
+histórico nem sobrescrever arquivo existente. Legado não recebe hash fictício.
+
+Schema `a39d7bc02486` aplicado em DEV e estudo após backup real, restore em clones
+novos, smoke HTTP e conferência de preservação: 6.768 linhas no DEV e 46.192 no
+estudo. Sem seed, provedores externos ou correção automática das jornadas antigas.
+Estado final da reabertura e instruções no [runbook 39G/H](docs/operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+
+Validação: **955 backend (93,27%)**, **338 frontend**, **126 E2E**, **2 PWA** e
+**88 operacionais**; papéis limitados e retomada real do worker ensaiados em laboratório.
+
+Ainda não há aceite integral: **homologação física Safari/iOS** pendente e política
+adicional de retenção aguardando decisão. `MAINTENANCE_CLEANUP_ENABLED=false`
+preserva refresh/pending antigos; rotinas de 7 dias estão prontas em modo opt-in.
+TTL de transcrições e reservas continua aplicado, sem expurgo de ledger, voz ou
+backups. Não foi feito commit/push/merge nesta entrega.
+Validação: **937 testes backend (93,79% de cobertura), 336 frontend, 126 E2E,
+2 ensaios de lifecycle PWA** e smoke de papéis aprovados; detalhes no runbook.
+Sem commit, push ou merge neste incremento.
+
+### Sprint 40A — Meus dados e exportação consistente, 15/10/2026
+
+Nova página **`/meus-dados`**, pelo menu ou caderno: exportação JSON 2.0,
+downloads autenticados de áudio, inventário de pendências locais e limpeza
+confirmada restrita a textos públicos. Exportar não é fazer backup restaurável
+e não inclui alterações ainda não sincronizadas ou os binários de voz no JSON.
+
+Corrigidas omissões de checkpoints, prática/itens e feedbacks sem draft.
+Resultados existentes, referências e versões são preservados sem fabricar
+histórico editorial. Leituras usam snapshot único `REPEATABLE READ, READ ONLY`;
+teto de 10 mil registros/20 MiB, sem arquivo parcial, cache privado `no-store`.
+Sem migrations, exclusão de contas, seed ou ativação da retenção opcional.
+
+**Sprint 40 continua em andamento**: 40B.1 prévia/barreira do seed entregue;
+40B.2 identidade, snapshots e arquivamento pendentes; 40C exclusão e política
+de backups; 40D interfaces históricas e fechamento. Este incremento está no DEV
+(`http://localhost:5180/meus-dados`); o estudo 5181 permanece no build da Sprint 39.
+Contrato, inventário e evidências no [runbook 40A](docs/operacao_sprint_37.md#sprint-40a--exportação-e-meus-dados-em-15102026).
+Validação: **962 backend**, **347 frontend**, quatro E2E novos e dois PWA;
+regressão E2E 128/130 inicialmente, com o teste de Tab atualizado e revalidado
+4/4 em desktop/mobile. Lint, tipagem, contrato e orçamento de 172 KiB aprovados.
+Sem commit, push ou merge nesta entrega.
+
+### Sprint 40B.2a — snapshots de evidências (ensaio técnico)
+
+Implementada captura imutável para novas tentativas, práticas, feedbacks de escrita,
+falas e checkpoints, com leitura privada em
+`/api/me/history/{kind}/{evidence_id}/content` e seção `content_snapshots` na
+exportação 2.0. Ausência de conteúdo histórico antigo continua explícita.
+
+**Ainda desligada no DEV e estudo.** `EDITORIAL_SNAPSHOTS_ENABLED` permanece false;
+migration `b40e8cd13597` e permissões foram aplicadas somente em laboratórios.
+Não ativar antes de backup, restore e rollout ensaiado. Identidade editorial,
+arquivamento e interfaces históricas seguem pendentes; a Sprint 40 não está fechada.
+[Evidências e próximo passo](docs/operacao_sprint_37.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
+
+### Sprint 40B.2b.1 — disponibilidade e prévia de arquivamento
+
+Novas atividades por ID seguem a mesma publicação exigida por curso/aula, sem
+retirar do dono os históricos, exportação e dados pessoais já existentes.
+Prévia operacional somente leitura:
+
+```sh
+docker compose --env-file .env -f infra/compose.yml exec -T api \
+  python -m app.cli editorial-plan --course voa-level-1 --unit 31-40
+```
+
+Mostra contagens editoriais/pessoais e dependências de checkpoints externos à
+unidade. **Não arquiva** e não possui `--apply`. Identidade estável, aplicação
+auditada, interface/cache e implantação continuam pendentes. Nenhuma migration
+nova ou ativação de snapshots neste incremento.
+[Evidências e próximos passos](docs/operacao_sprint_37.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
+
+### Sprint 40B.2b.2 — identidade editorial estável (ensaio técnico)
+
+Exercícios, propostas de escrita, cues, mídias, vocabulário e questões de checkpoint
+receberam chaves UUID imutáveis, explícitas no seed. **2.194 chaves**, sem mudança
+nos textos/gabaritos/rubricas; IDs e referências existentes preservados. O diff
+reconhece reordenação como alteração da mesma entidade, mas continua **bloqueando
+alterações de conteúdo existente** até o plano editorial estar completo.
+
+Migration c51 ensaiada apenas no PostgreSQL descartável e no laboratório de papéis.
+DEV/estudo não migrados; prévia no schema antigo é identificada como `legacy_projection`
+e não autoriza seed. Captura de snapshots continua desligada nos ambientes de uso.
+Não regenerar chaves de entidades existentes a partir de posição ou texto.
+
+**Sprint 40 ainda em andamento:** arquivamento auditado, proveniência/rubricas,
+histórico/STT, interfaces/cache, exclusão pessoal e rollout continuam pendentes.
+[Contrato e evidências](docs/operacao_sprint_37.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
+
+### Sprint 40B.2b.3 — arquivamento auditado (ensaio local)
+
+Comando operacional `editorial-archive` acrescentado, desativado por padrão e
+**recusado em prod/public**. Exige prévia atual, banco confirmado, operador,
+motivo e chave de operação; grava status da unidade e recibo imutável juntos.
+Admissões de estudo concorrentes são serializadas; dependências externas bloqueiam
+o apply. Retry do mesmo pedido devolve o recibo, sem alterar dados novamente.
+
+Pedidos explícitos de arquivamento no dry-run do seed agora mostram impacto,
+mas não são aplicados pelo seed. Não há exclusão de dados pessoais/áudios,
+republicação automática ou mudança de gabaritos/resultados.
+
+Migration e operação ensaiadas somente em bases isoladas; arquivamentos de teste
+revertidos por rollback. **DEV/estudo não migrados nem arquivados.** A Sprint 40
+continua parcial: proveniência/rubricas, histórico/STT, interface/cache, exclusão
+pessoal e rollout permanecem pendentes.
+[Contrato e evidências](docs/operacao_sprint_37.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
+
+### Sprint 40B.2c — auditoria de rubricas e proveniência
+
+`make editorial-audit` executa uma comparação somente leitura, consistente e
+sem dados pessoais. No DEV, ela classificou as 82 divergências em **18 de
+representação**, **1 de apresentação** e **63 que alteram a avaliação**. O
+comando antigo `writing-rubrics` foi desativado antes de abrir o banco; não use
+SQL direto para contornar a proteção.
+
+O seed não inventa mais 07/10 como data de revisão. Migration e73 representa
+data histórica não comprovada como `null`, preserva datas reais e marca as sete
+notas legadas ausentes como QA pedagógico pendente. O contrato da API reflete a
+nulabilidade. A migration foi ensaiada apenas no banco descartável; **DEV e
+estudo não foram migrados e nenhuma rubrica foi aplicada**.
+
+Validação: **1.088 testes backend** (94%), **347 frontend**, **88 operacionais**,
+Ruff, mypy, Alembic, OpenAPI/tipos, lint, build e orçamento aprovados. As 63
+mudanças precisam de nova versão, snapshots e homologação humana antes de rollout.
+[Detalhes e digest da auditoria](docs/operacao_sprint_37.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
+
+### Sprint 40B.2d — histórico e STT usam a captura original
+
+Prática, escrita e fala informam se existe conteúdo histórico capturado. A lista
+de gravações usa a cue preservada; registros antigos sem captura mostram ausência
+explícita e não oferecem nova transcrição. O worker de STT compara com a cue do
+snapshot, não com a legenda atual, e falha antes de chamar o provedor quando essa
+evidência não existe.
+
+Migration f84 concede ao worker somente uma função limitada por tentativa/conta;
+ele continua sem leitura direta da tabela privada de snapshots. Captura segue
+desligada em DEV/estudo e não houve backfill ou rollout. A Sprint 40 continua em
+andamento para interfaces históricas completas, cache/arquivados, exclusão e aceite.
+[Contrato operacional](docs/operacao_sprint_37.md#sprint-40b2d--histórico-integrado-e-stt-imutável-em-15102026).
+
+### Sprint 40B.2e — listening ligado por identidade estável
+
+Os dois vínculos editoriais que ainda dependiam de posição agora usam FKs estáveis:
+mídia → exercício e checkpoint → aula/mídia. A posição permanece apenas como ordem
+visual e compatibilidade temporária; a API expõe `listening_exercise_id` e resolve
+checkpoint pelos IDs canônicos. O checkpoint 40–44 pode continuar retomando a Aula
+40 porque a constraint exige o mesmo curso, não a mesma unidade.
+
+Migration `a06f2ce1487b` aborta se o backfill legado não for inequívoco, impede
+referências cruzadas inválidas e recusa downgrade depois que uma reordenação tornar
+as posições antigas desatualizadas. Upgrade/downgrade/re-upgrade e a recusa segura
+foram ensaiados só no banco descartável. DEV/estudo não foram migrados nem
+reordenados. O seed ainda bloqueia mudanças em conteúdo existente até a conclusão
+das regras de versão/impacto da 40B.2. Validação: **1.097 backend**, **348
+frontend** e **88 testes operacionais**, além de Alembic sem drift.
+[Evidências](docs/operacao_sprint_37.md#sprint-40b2e--vínculos-editoriais-estáveis-em-15102026).
+
+### Sprint 40B.2f — prévia estrita de reordenação
+
+`make editorial-reorder-plan` analisa o seed atual, ou um pacote alternativo com
+`file=caminho/lessons.json`, em transação `REPEATABLE READ, READ ONLY`. A prévia
+aceita somente permutações de posição de exercícios, mídias, cues, vocabulário,
+propostas de escrita e questões de checkpoint que mantenham UUID, conteúdo e pai.
+
+Toda aula afetada exige uma nova `lesson_version`, exatamente `N+1`, revisada e
+datada. Questões de checkpoint exigem `content_version` exatamente `N+1`. Inclusão,
+omissão, mudança textual, troca de pai, versão sem reordenação ou tabelas ainda
+identificadas pela posição são bloqueadas. O relatório inclui hashes dos catálogos,
+transições e contagens agregadas de referências pessoais diretas, sem expor valores.
+
+Este incremento é deliberadamente **somente leitura**: o comando não aceita
+`--apply`, `--force` ou `--delete`, não altera seed real nem reserva o banco. Uma
+aplicação futura terá de reler o mesmo estado sob lock, atualizar posições de forma
+atômica e gravar recibo imutável. DEV/estudo não foram acessados.
+Validação: **1.110 testes backend**, Ruff e mypy aprovados.
+[Contrato e testes](docs/operacao_sprint_37.md#sprint-40b2f--prévia-controlada-de-reordenação-em-15102026).
+
+### Sprint 40B.2g — aplicação auditada de reordenação
+
+`editorial-reorder` aplica somente um plano 40B.2f ainda válido. O comando exige
+`--apply`, `plan_sha256`, UUIDv4 idempotente, operador, motivo enumerado e confirmação
+literal do banco. A flag `EDITORIAL_REORDER_ENABLED` permanece `false` por padrão;
+`prod` e perfil `public` são recusados mesmo se ela for ligada.
+
+Sob advisory lock exclusivo e locks editoriais `NOWAIT`, o serviço relê o catálogo,
+move as entidades primeiro para posições temporárias sem colisão, grava as posições
+finais, acrescenta a versão da aula ou incrementa o checkpoint e confirma o hash do
+estado resultante. Posição, versão e recibo imutável pertencem à mesma transação.
+Falha em qualquer etapa desfaz tudo; repetir a mesma chave devolve o mesmo recibo.
+
+Migration `b71d4f9e20c3` cria somente a auditoria append-only. Runtime e worker não
+podem lê-la nem alterá-la; backup tem leitura e migrador executa o apply. Ensaios de
+exercício e checkpoint foram revertidos no PostgreSQL descartável; nenhum seed real,
+DEV ou ambiente de estudo foi reordenado.
+Validação: **1.124 testes backend**, 27 focais, 88 operacionais (80 subtestes),
+Ruff, mypy, Alembic sem drift e laboratório real de papéis aprovados.
+[Operação segura](docs/operacao_sprint_37.md#sprint-40b2g--aplicação-auditada-de-reordenação-em-15102026).
+
+### Sprint 41A — baseline agregada de leitura
+
+`PERFORMANCE_PROBE_ENABLED=true` habilita, somente em ambiente local/teste, uma
+medida por request com duração, quantidade de comandos SQL, bytes da resposta e
+checkouts do pool. Os valores aparecem em log JSON e nos headers `X-Perf-*`; texto
+SQL, parâmetros, resposta e dados do aluno não são coletados. A API recusa a flag
+em `prod` ou no perfil `public`.
+
+A primeira medição no PostgreSQL descartável mostrou **1 SQL** para a lista de
+aulas e **18 SQLs** para o detalhe. A consulta do detalhe foi restringida para não
+carregar checkpoint/perguntas da unidade nem gabaritos/explicações privados; a
+mesma resposta pública passou a usar **15 SQLs**. Um teste fixa esses orçamentos.
+O tempo de uma execução isolada não é tratado como p50/p95 ou promessa de produção.
+Validação: **1.129 testes backend**, Ruff e mypy aprovados; 118 testes cobriram
+diretamente as rotas afetadas.
+[Procedimento de medição](docs/operacao_sprint_37.md#sprint-41a--sonda-local-de-performance-em-15102026).
+
+### Sprint 41B — painel Hoje sem N+1 de checkpoints
+
+A sonda comprovou **38 SQLs** para abrir `/api/me/today` com uma conta nova. A
+recomendação percorria checkpoints e executava uma contagem de aulas faltantes por
+item; além disso, entidades completas acionavam relações editoriais que o painel não
+usa. A seleção do checkpoint elegível agora usa um único `NOT EXISTS` correlacionado,
+e sessão recente, checkpoint e próxima aula usam projeções pequenas.
+
+O caso inicial caiu para **8 SQLs**, 493 bytes e um checkout. Retomada incompleta,
+sessão concluída, prioridade da revisão, nova versão de checkpoint e isolamento
+entre cursos preservaram o comportamento existente. São limites locais de regressão,
+não uma promessa de latência de produção.
+Validação: **1.130 testes backend**, Ruff e mypy aprovados.
+
+### Sprint 41C — paginação por cursor no Caderno
+
+O Caderno passou a consumir `GET /api/me/notebook/page`, com páginas de 20 itens e
+ação acessível **Carregar mais anotações**. Trocar curso, unidade, aula ou tipo limpa
+a página acumulada antes da nova consulta; criar, editar e excluir volta a carregar
+a primeira página sem misturar o histórico anterior.
+
+A API ordena por `(updated_at DESC, id DESC)` e devolve um cursor opaco, versionado
+e limitado. Empates de data não causam lacunas ou duplicatas, curso/unidade/tipo e
+identidade continuam aplicados em cada página, e cursor inválido retorna 422. Cada
+página medida usou 2 SQLs e no máximo um checkout. A rota antiga permanece por
+compatibilidade temporária, mas a interface não depende mais da resposta ilimitada.
+
+Validação: **1.137 testes backend**, **349 testes frontend**, OpenAPI/TypeScript,
+Ruff, mypy, ESLint, build e orçamento aprovados. Bundle: **176.122 bytes gzip
+(171,99 KiB)** no teto inalterado de 172 KiB. Massas de 1 mil/10 mil itens,
+`EXPLAIN` e distribuições p50/p95 ainda pertencem aos próximos incrementos da
+Sprint 41.
+
+### Sprint 41D — laboratório 1k/10k e índice medido do Caderno
+
+O laboratório `make notebook-benchmark` cria contas sintéticas somente no
+PostgreSQL descartável, percorre integralmente conjuntos de 1 mil e 10 mil notas,
+mede páginas inicial e profunda e remove exatamente a massa criada. O percurso de
+10 mil itens completou 200 páginas sem lacunas, duplicatas ou troca de ordem; cada
+página continuou usando 2 SQLs e no máximo um checkout.
+
+No ponto de 90% da massa de 10 mil, o índice composto
+`(user_id, updated_at, id)` reduziu o plano direto de 2,047 ms e 706 blocos de
+cache para 0,124 ms e 40 blocos: cerca de 93,9% menos tempo de execução do plano e
+94,3% menos blocos. Em contrapartida, a inserção sintética de 10 mil linhas passou
+de 118,74 ms para 135,81 ms (+14,4%) e o índice ocupou 840 KiB com 21 mil linhas.
+A latência HTTP local teve ruído e seu p95 não melhorou em todos os cenários; esses
+números são evidência de plano e capacidade, não SLO de produção.
+
+A migration `c82f4a9d117e` cria o índice com `CONCURRENTLY`, valida nome, definição
+e estado e recusa artefato parcial/divergente. Upgrade, downgrade e re-upgrade
+foram ensaiados no banco de teste, sem alterar DEV ou o ambiente de estudo. A
+regressão fechou com **1.138 testes backend**, **91 testes operacionais**, Ruff,
+mypy e `alembic check` aprovados.
+
+### Sprint 41E — escrita incremental sem carregar o histórico inteiro
+
+O rascunho e o autosave deixaram de transportar todas as versões. Versões e
+análises agora têm rotas próprias por cursor, com páginas de 20 itens, ordem total
+por `(created_at DESC, id DESC)` e isolamento por conta/prompt. O Caderno usa um
+resumo paginado por `(updated_at DESC, id DESC)`: título, contexto e contagens são
+entregues sem repetir o texto integral do rascunho e seus históricos aninhados.
+
+Na interface, **Carregar mais versões**, **Carregar mais textos** e **Carregar mais
+análises** preservam os itens visíveis. Análises só são buscadas quando o aluno abre
+o detalhe; após uma nova página, o total carregado recebe foco programático para
+confirmar a atualização sem deslocar o contexto.
+
+As páginas medidas consumiram 2 SQLs para versões, 4 para análises com snapshots e
+2 para o resumo do Caderno, sempre incluindo autenticação e com no máximo um
+checkout. Curso, unidade, usuário e prompt permanecem aplicados na consulta; cursor
+inválido retorna 422. A rota histórica antiga continua temporariamente para
+compatibilidade.
+
+Validação: **1.139 testes backend**, **351 testes frontend**, Ruff, mypy, TypeScript,
+ESLint, OpenAPI, build e orçamento aprovados. Estilos comprovadamente órfãos foram
+removidos e dependências das rotas tardias foram agrupadas; o bundle terminou em
+**176.000 bytes gzip (171,88 KiB)**, abaixo do mesmo teto de 172 KiB. Não foi criada
+migration: antes de propor índice para escrita ainda faltam laboratório de 1 mil/10
+mil itens e `EXPLAIN (ANALYZE, BUFFERS)`. Speaking e revisão continuam pendentes na
+Sprint 41.
+
+### Sprint 41F — gravações de speaking paginadas no Caderno
+
+O Caderno passou a consumir `GET /api/speaking/attempts/page`, com páginas de 20
+gravações, cursor estável em `(created_at DESC, id DESC)` e filtros de curso/unidade
+aplicados junto da identidade. **Carregar mais gravações** mantém as páginas já
+visíveis e move o foco para o total carregado; excluir uma gravação remove o item
+do acumulado sem descartar as demais páginas.
+
+A rota nova não instancia o grafo inteiro da aula. Uma projeção traz somente os
+metadados exibidos, enquanto transcrições ativas e snapshots históricos são lidos
+em lote. A sonda caiu de 22 SQLs observados na primeira tentativa ORM para **5 SQLs
+fixos por página**, incluindo autenticação, com um checkout. Cinco timestamps
+empatados foram percorridos em páginas 2/2/1 sem lacunas, repetição, gravações
+pendentes ou vazamento entre contas. A rota ilimitada permanece para o player de
+shadowing e consumidores antigos.
+
+Validação: **1.140 testes backend**, **352 testes frontend**, Ruff, formatação,
+mypy, TypeScript, ESLint, OpenAPI, build e orçamento aprovados. Um seletor CSS
+órfão da navegação antiga foi removido; o bundle ficou em **176.092 bytes gzip
+(171,96 KiB)** no teto inalterado de 172 KiB. Não houve migration nem acesso aos
+dados de estudo. O laboratório de speaking com 1 mil/10 mil itens, paginação da
+revisão e homologações humanas de acessibilidade permanecem abertos na Sprint 41.
+
+### Sprint 41G — itens suspensos da revisão paginados
+
+A lista de itens suspensos passou a consumir `GET /api/review/items/page`. A rota
+usa limite de 1 a 100, cursor estável em `(created_at DESC, id DESC)` e aplica
+identidade, status, curso e unidade antes da paginação. A rota ilimitada
+`/api/review/items` permanece temporariamente para compatibilidade. Uma projeção
+explícita evita carregar o grafo da aula e manteve cada página em **2 SQLs**, já
+incluindo autenticação, com no máximo um checkout.
+
+Na interface, **Carregar mais** preserva as páginas anteriores e leva o foco ao
+total carregado. Curso/unidade reiniciam itens e cursor; reativar ou excluir remove
+somente o item afetado. Cinco datas empatadas foram percorridas em 2/2/1 sem
+lacunas, duplicações ou vazamento entre contas; cursor inválido retorna 422.
+
+Validação: **1.141 testes backend**, **353 testes frontend**, Ruff, formatação,
+mypy, TypeScript, ESLint, OpenAPI, build e orçamento aprovados. A lógica comum das
+listas paginadas foi consolidada e declarações CSS sempre sobrescritas foram
+removidas. O bundle terminou em **176.118 bytes gzip (171,99 KiB)**, 10 bytes
+abaixo do teto de 172 KiB. Não houve migration nem acesso aos dados de estudo.
+Continuam abertos os ensaios 1k/10k de escrita, speaking e revisão, a medição
+humana com listas extensas e as homologações reais de acessibilidade.
+
+### Sprint 41H — laboratório 1k/10k e índice medido da revisão
+
+`make review-benchmark` executa somente em `aulas_ingles_test`, sob o papel
+limitado `aulas_test` e marcador descartável. O laboratório cria contas `.invalid`,
+percorre integralmente 1 mil e 10 mil itens suspensos, mede páginas inicial e
+profunda, compara um índice temporário e remove exatamente a massa criada. Foram
+percorridas 20 e 200 páginas sem lacunas, duplicações ou troca de ordem, sempre com
+2 SQLs e no máximo um checkout por resposta.
+
+Em 10 mil itens, o índice composto reduziu o plano profundo de 2,299 ms para
+0,305 ms e os blocos somados de 1.795 para 56. O p95 interno da API caiu de
+12,41 ms para 8,39 ms; esses tempos locais são diagnóstico, não SLO. A migration
+`d41e7ac905b2` promove `ix_review_item_user_status_created_id` com criação
+concorrente e validação de definição/estado. Upgrade, downgrade, re-upgrade,
+`alembic check` e o contrato do índice passaram no PostgreSQL descartável.
+
+Uma nova execução reconheceu o índice definitivo, não criou candidato, percorreu
+novamente os 10 mil itens e respondeu uma rajada de 10/10 requisições. Nenhuma
+migration foi aplicada ao ambiente de estudo. Antes de aplicar fora dos testes,
+continuam obrigatórios backup verificado, inspeção de locks/capacidade e janela
+operacional. O fechamento passou com **1.142 testes backend**, **94 testes
+operacionais**, Ruff nos arquivos em escopo, mypy e `alembic check`. Permanecem
+abertos os laboratórios de escrita e speaking e as
+homologações humanas de acessibilidade/desempenho no navegador.
 
 ### Histórico de validação anterior
 
@@ -865,11 +1514,22 @@ produção, migrations para frente e para trás, seed rodado duas vezes, piso de
 1. Confirme ou crie o curso e a unidade em `seed/courses.json`.
 2. Acrescente o objeto em `seed/lessons.json`, incluindo `course_slug`, `unit_slug`, `slug` e
    `position` (texto em Markdown, nunca HTML).
-3. `make seed` — é idempotente, as aulas existentes não são recriadas.
+3. `make seed-plan` — prévia somente leitura; depois `make seed` se o pacote for
+   permitido. Na barreira temporária **40B.1**, alterações/omissões de registros
+   existentes e extensões dentro de aula/checkpoint existente são bloqueadas,
+   mesmo aumentando a versão. Reaplicar conteúdo idêntico não recria registros.
+   Publicar/editar conteúdo já existente depende do versionamento/arquivamento
+   **40B.2**; não há opção `--force`. Não apague dados para contornar o bloqueio.
 4. Se o modelo mudou: `make migration m="o que mudou"`, confira o arquivo
    gerado, e `make migrate`.
 5. Se a API mudou: `make openapi` e, no frontend, `npm run gen:api`. Os dois
    arquivos entram no mesmo commit que a mudança.
+
+Prévia operacional: `python -m app.cli seed --dry-run [--file caminho/lessons.json]`
+(o catálogo `courses.json` deve estar ao lado do arquivo informado). Saída JSON;
+código 0 = plano permitido, 1 = bloqueio/falha operacional, 2 = pacote/argumentos
+inválidos. O comando de aplicação revalida o banco e não aceita uma prévia antiga
+como autorização. [Evidências 40B.1 e pendências](docs/operacao_sprint_37.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
 
 ## Estrutura
 

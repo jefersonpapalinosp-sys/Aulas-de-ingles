@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test'
+import { silentWav } from '../audio-fixture'
+import { randomUUID } from 'node:crypto'
 import AxeBuilder from '@axe-core/playwright'
 
 /**
@@ -454,14 +456,16 @@ test('metadados editoriais e posição de mídia atravessam a API', async ({ req
     (
       await request.put(`/api/media/${mediaId}/position`, {
         headers,
-        data: { position_seconds: 42.5 },
+        data: { position_seconds: 42.5, expected_revision: 0, operation_key: randomUUID(), changed_at: new Date().toISOString() },
       })
     ).ok(),
   ).toBeTruthy()
   expect(await (await request.get(`/api/media/${mediaId}/position`, { headers })).json()).toMatchObject({
     position_seconds: 42.5,
   })
-  expect((await request.delete(`/api/media/${mediaId}/position`, { headers })).status()).toBe(204)
+  expect((await request.delete(`/api/media/${mediaId}/position`, {
+    headers, params: { expected_revision: 1, operation_key: randomUUID(), changed_at: new Date().toISOString() },
+  })).status()).toBe(204)
 })
 
 test('checkpoint 40–44 corrige seis questões e restaura o resultado salvo', async ({ page }) => {
@@ -1400,8 +1404,8 @@ test('gravação oral exige consentimento e pode ser excluída', async ({ reques
   expect(created.status()).toBe(201)
   const attemptId = (await created.json()).id as number
   const uploaded = await request.put(`/api/speaking/attempts/${attemptId}/audio`, {
-    headers: { ...headers, 'Content-Type': 'audio/webm' },
-    data: 'audio-e2e',
+    headers: { ...headers, 'Content-Type': 'audio/wav' },
+    data: silentWav(),
   })
   expect(uploaded.ok()).toBeTruthy()
 
@@ -2461,7 +2465,7 @@ test('rota canônica mantém aula ativa e navegação completa por teclado', asy
   await expect(activeLesson).toHaveAttribute('aria-current', 'page')
 
   const shortcuts = navigation.getByRole('navigation', { name: 'Atalhos' })
-  for (const name of ['Hoje', 'Cursos', 'Revisar', 'Caderno', 'Avaliação']) {
+  for (const name of ['Hoje', 'Cursos', 'Revisar', 'Caderno', 'Meus dados', 'Avaliação']) {
     await expect(shortcuts.getByRole('link', { name: new RegExp(`^${name}`) })).toBeVisible()
   }
   expect(
@@ -2482,7 +2486,7 @@ test('rota canônica mantém aula ativa e navegação completa por teclado', asy
 
   const courseSelector = navigation.getByRole('combobox', { name: 'Curso' })
   await courseSelector.focus()
-  for (const name of ['Hoje', 'Cursos', 'Revisar', 'Caderno', 'Avaliação', 'Mapa da unidade']) {
+  for (const name of ['Hoje', 'Cursos', 'Revisar', 'Caderno', 'Meus dados', 'Avaliação', 'Mapa da unidade']) {
     await page.keyboard.press('Tab')
     await expect(shortcuts.getByRole('link', { name: new RegExp(`^${name}`) })).toBeFocused()
   }

@@ -53,16 +53,19 @@ export function useDueCards(filters: ReviewFilters = {}) {
   })
 }
 
-export function useSuspendedReviewItems(filters: Pick<ReviewFilters, 'courseSlug' | 'unitSlug'> = {}) {
+export function useSuspendedReviewItems(
+  filters: Pick<ReviewFilters, 'courseSlug' | 'unitSlug'> = {},
+  cursor?: string,
+) {
   return useQuery({
-    queryKey: ['review', 'items', 'suspended', filters],
+    queryKey: ['review', 'suspended', filters, cursor],
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/review/items', {
+      const { data, response } = await api.GET('/api/review/items/page', {
         params: {
           query: {
-            status: 'suspended',
             course: filters.courseSlug,
             unit: filters.unitSlug,
+            cursor,
           },
         },
       })
@@ -121,23 +124,6 @@ export function useDeleteReviewItem() {
       void qc.invalidateQueries({ queryKey: ['review'] })
       void qc.invalidateQueries({ queryKey: ['progress'] })
       void qc.invalidateQueries({ queryKey: ['today'] })
-    },
-  })
-}
-
-export function useAdicionarItem() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (vocabItemId: number) => {
-      const { data, response } = await api.POST('/api/review/items/{vocab_item_id}', {
-        params: { path: { vocab_item_id: vocabItemId } },
-      })
-      if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao adicionar.`)
-      return data
-    },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
     },
   })
 }

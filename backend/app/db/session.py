@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import (
 from app.core.config import get_settings
 from app.db.role_safety import connect_args, guard_role_engine
 from app.db.test_safety import guard_test_engine, validate_test_target
+from app.performance import install_performance_listeners
 
 _engine: AsyncEngine | None = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
@@ -27,10 +28,18 @@ def get_engine() -> AsyncEngine:
         _engine = create_async_engine(
             settings.database_url,
             pool_pre_ping=True,
-            pool_size=5,
-            max_overflow=5,
-            connect_args=connect_args(settings.database_purpose),
+            pool_size=settings.database_pool_size,
+            max_overflow=settings.database_max_overflow,
+            pool_timeout=settings.database_pool_timeout_seconds,
+            connect_args=connect_args(
+                settings.database_purpose,
+                {
+                    "statement_timeout": str(settings.database_statement_timeout_ms),
+                    "lock_timeout": str(settings.database_lock_timeout_ms),
+                },
+            ),
         )
+        install_performance_listeners(_engine)
         if settings.app_env == "test":
             guard_test_engine(_engine, settings.database_url, settings.app_env)
         if settings.database_purpose:

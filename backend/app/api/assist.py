@@ -1,6 +1,6 @@
 """Status, cota e custo dos experimentos assistidos."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -9,36 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
 from app.core.config import get_settings
-from app.db.models import TranscriptionJob, WritingFeedbackRecord
+from app.db.models import TranscriptionJob, WorkerHeartbeat
 from app.db.session import get_session
 from app.schemas.assist import AssistStatusOut
+from app.services import editorial_history
+from app.services.assist_quota import usage
 
 router = APIRouter(prefix="/assist", tags=["assist"])
-
-
-async def assisted_usage(session: AsyncSession, user_id: int) -> tuple[int, int]:
-    start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
-    transcription = (
-        await session.execute(
-            select(
-                func.count(TranscriptionJob.id),
-                func.coalesce(func.sum(TranscriptionJob.cost_microusd), 0),
-            ).where(TranscriptionJob.user_id == user_id, TranscriptionJob.requested_at >= start)
-        )
-    ).one()
-    writing = (
-        await session.execute(
-            select(
-                func.count(WritingFeedbackRecord.id),
-                func.coalesce(func.sum(WritingFeedbackRecord.assisted_cost_microusd), 0),
-            ).where(
-                WritingFeedbackRecord.user_id == user_id,
-                WritingFeedbackRecord.provider.is_not(None),
-                WritingFeedbackRecord.created_at >= start,
-            )
-        )
-    ).one()
-    return int(transcription[0] + writing[0]), int(transcription[1] + writing[1])
 
 
 @router.get("/status", response_model=AssistStatusOut)
@@ -47,14 +24,52 @@ async def status_assistencia(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> AssistStatusOut:
     settings = get_settings()
-    used, cost = await assisted_usage(session, usuario.id)
+    balance = await usage(session, usuario.id)
     enabled = settings.assisted_features_enabled
+    transcription_enabled = (
+        enabled
+        and bool(settings.assist_transcription_url)
+        and settings.editorial_snapshots_enabled
+        and await editorial_history.schema_available(session)
+    )
+    now = datetime.now(UTC)
+    seen_at = await session.scalar(
+        select(WorkerHeartbeat.seen_at).where(WorkerHeartbeat.name == "transcription")
+    )
+    worker_state = (
+        "disabled"
+        if not (enabled and settings.assist_transcription_url)
+        else (
+            "unknown"
+            if seen_at is None
+            else "active"
+            if seen_at >= now - timedelta(seconds=max(60, settings.assist_timeout_seconds * 2 + 20))
+            else "stale"
+        )
+    )
+    queue = (
+        await session.execute(
+            select(func.count(), func.min(TranscriptionJob.requested_at)).where(
+                TranscriptionJob.user_id == usuario.id,
+                TranscriptionJob.status == "queued",
+                TranscriptionJob.expires_at > now,
+            )
+        )
+    ).one()
     return AssistStatusOut(
-        transcription_enabled=enabled and bool(settings.assist_transcription_url),
+        transcription_enabled=transcription_enabled,
         writing_enabled=enabled and settings.writing_assist_configured,
         daily_quota=settings.assist_daily_quota,
-        used_today=used,
-        remaining_today=max(0, settings.assist_daily_quota - used),
+        used_today=balance.used,
+        reserved_today=balance.reserved,
+        consumed_today=balance.consumed,
+        remaining_today=max(0, settings.assist_daily_quota - balance.used),
+        quota_resets_at=balance.resets_at,
         retention_days=settings.assist_retention_days,
-        cost_microusd_today=cost,
+        cost_microusd_today=balance.cost,
+        cost_incomplete=balance.incomplete,
+        worker_state=worker_state,  # type: ignore[arg-type]
+        worker_seen_at=seen_at,
+        queued_jobs=queue[0],
+        oldest_queued_seconds=max(0, int((now - queue[1]).total_seconds())) if queue[1] else None,
     )

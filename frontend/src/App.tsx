@@ -4,20 +4,23 @@ import { useSessao } from './api/auth'
 import { LessonRail } from './components/LessonRail'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
+import { CourseCatalogPage } from './pages/CourseCatalogPage'
 import { ConnectivityStatus } from './features/offline/ConnectivityStatus'
+import { PwaStatus } from './features/offline/PwaStatus'
 import { SessionStatus } from './components/SessionStatus'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { RouteStatus } from './components/RouteStatus'
 
 /**
  * Cada rota pesada vira um chunk próprio. Mapa e login ficam no bundle
- * inicial porque são as duas primeiras telas; o resto só é baixado quando
+ * inicial porque são as telas de entrada/navegação; o resto só é baixado quando
  * o estudante navega até lá.
  */
-const CourseCatalogPage = lazy(() => import('./pages/CourseCatalogPage').then((m) => ({ default: m.CourseCatalogPage })))
 const CourseCompletionPage = lazy(() => import('./pages/CourseCompletionPage').then((m) => ({ default: m.CourseCompletionPage })))
 const CourseReviewPage = lazy(() => import('./pages/CourseReviewPage').then((m) => ({ default: m.CourseReviewPage })))
 const LessonPage = lazy(() => import('./pages/LessonPage').then((m) => ({ default: m.LessonPage })))
 const NotebookPage = lazy(() => import('./pages/NotebookPage').then((m) => ({ default: m.NotebookPage })))
+const PersonalDataPage = lazy(() => import('./pages/PersonalDataPage').then((m) => ({ default: m.PersonalDataPage })))
 const PracticePage = lazy(() => import('./pages/PracticePage').then((m) => ({ default: m.PracticePage })))
 const ReviewPage = lazy(() => import('./pages/ReviewPage').then((m) => ({ default: m.ReviewPage })))
 const StudyPage = lazy(() => import('./pages/StudyPage').then((m) => ({ default: m.StudyPage })))
@@ -57,6 +60,8 @@ export default function App() {
       <div className="shell">
         <LessonRail />
         <main id="main-content" tabIndex={-1}>
+          <RouteStatus />
+          <PwaStatus />
           <SessionStatus />
           <ErrorBoundary resetKey={`${usuario.id}:${location.pathname}`} home={<Link to="/inicio">Voltar ao início</Link>}>
           <Suspense fallback={<p className="muted" role="status">Carregando…</p>}>
@@ -105,6 +110,7 @@ export default function App() {
             />
             <Route path="/revisar" element={<ReviewPage />} />
             <Route path="/caderno" element={<NotebookPage />} />
+            <Route path="/meus-dados" element={<PersonalDataPage />} />
             <Route
               path="/prova"
               element={

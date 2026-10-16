@@ -103,13 +103,16 @@ async def _course_with_count(session: AsyncSession, course_slug: str) -> tuple[C
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
             Lesson.course_id == Course.id,
+            Course.status == "published",
             CourseUnit.status == "published",
         )
         .correlate(Course)
         .scalar_subquery()
     )
     row = (
-        await session.execute(select(Course, published).where(Course.slug == course_slug))
+        await session.execute(
+            select(Course, published).where(Course.slug == course_slug, Course.status != "archived")
+        )
     ).one_or_none()
     if row is None:
         return None
@@ -439,12 +442,17 @@ async def list_courses(
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
             Lesson.course_id == Course.id,
+            Course.status == "published",
             CourseUnit.status == "published",
         )
         .correlate(Course)
         .scalar_subquery()
     )
-    rows = (await session.execute(select(Course, published).order_by(Course.position))).all()
+    rows = (
+        await session.execute(
+            select(Course, published).where(Course.status != "archived").order_by(Course.position)
+        )
+    ).all()
     return [_course_out(course, int(count)) for course, count in rows]
 
 
@@ -473,7 +481,7 @@ async def get_curriculum(
     unit_rows = (
         await session.execute(
             select(CourseUnit, published)
-            .where(CourseUnit.course_id == course.id)
+            .where(CourseUnit.course_id == course.id, CourseUnit.status != "archived")
             .order_by(CourseUnit.position)
         )
     ).all()
@@ -492,9 +500,9 @@ async def get_curriculum(
                 "lesson_start": unit.lesson_start,
                 "lesson_end": unit.lesson_end,
                 "total_lessons": unit.total_lessons,
-                "published_lessons": int(count),
+                "published_lessons": int(count) if course.status == "published" else 0,
                 "lessons": lessons_by_unit.get(unit.slug, []),
-                "review": _review_out(unit),
+                "review": _review_out(unit) if course.status == "published" else None,
             }
         )
         for unit, count in unit_rows

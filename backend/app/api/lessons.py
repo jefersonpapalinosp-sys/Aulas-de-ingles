@@ -22,6 +22,7 @@ from app.services.curriculum import (
     lesson_by_course_number,
     lesson_summaries,
 )
+from app.services.publication import published_scope
 
 router = APIRouter(tags=["lessons"])
 
@@ -67,8 +68,7 @@ async def listar_vocabulario(
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
             Course.slug == course,
-            Course.status == "published",
-            CourseUnit.status == "published",
+            *published_scope(),
         )
         .order_by(CourseUnit.position, Lesson.position, VocabItem.position)
     )
@@ -105,8 +105,7 @@ async def listar_exercicios(
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
             Course.slug == course,
-            Course.status == "published",
-            CourseUnit.status == "published",
+            *published_scope(),
         )
         .order_by(CourseUnit.position, Lesson.position, Exercise.position)
     )

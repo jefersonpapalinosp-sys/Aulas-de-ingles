@@ -421,6 +421,7 @@ describe('LessonRail', () => {
 
     await user.click(opener)
     const dialog = screen.getByRole('dialog', { name: 'Trilha de estudo' })
+    expect(dialog.tagName).toBe('DIALOG')
     const search = within(dialog).getByRole('searchbox', { name: 'Buscar aula ou checkpoint' })
     await waitFor(() => expect(search).toHaveFocus())
 

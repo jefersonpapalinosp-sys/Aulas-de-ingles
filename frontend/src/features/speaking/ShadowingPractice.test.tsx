@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { StrictMode } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LessonMedia } from '../../api/client'
 import { ShadowingPractice } from './ShadowingPractice'
+import { setAccessToken, setSessionReadOnly, setSessionUser } from '../../api/session'
 
 const clientMocks = vi.hoisted(() => ({
   GET: vi.fn(),
@@ -11,11 +13,13 @@ const clientMocks = vi.hoisted(() => ({
   PUT: vi.fn(),
   DELETE: vi.fn(),
   authenticatedFetch: vi.fn(),
+  policy: vi.fn(),
 }))
 
 vi.mock('../../api/client', () => ({
   api: {
-    GET: clientMocks.GET,
+    GET: (path: string, ...args: unknown[]) => path === '/api/speaking/policy'
+      ? clientMocks.policy() : clientMocks.GET(path, ...args),
     POST: clientMocks.POST,
     PUT: clientMocks.PUT,
     DELETE: clientMocks.DELETE,
@@ -51,6 +55,7 @@ const media: LessonMedia = {
 }
 
 class FakeMediaRecorder {
+  static isTypeSupported = () => true
   state: RecordingState = 'inactive'
   mimeType = 'audio/webm'
   ondataavailable: ((event: BlobEvent) => void) | null = null
@@ -67,6 +72,14 @@ class FakeMediaRecorder {
   }
 }
 
+beforeEach(() => {
+  setAccessToken('synthetic-token')
+  setSessionUser(7)
+  setSessionReadOnly(false)
+  clientMocks.policy.mockResolvedValue({ data: { max_bytes: 2_000_000, max_duration_ms: 30_000,
+    mime_types: ['audio/webm', 'audio/mp4', 'audio/ogg'], upload_timeout_seconds: 30 } })
+})
+
 afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
@@ -77,14 +90,14 @@ afterEach(() => {
 function renderPractice(courseSlug = 'voa-level-1', lessonNumber = 31) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const view = render(
-    <QueryClientProvider client={queryClient}>
+    <StrictMode><QueryClientProvider client={queryClient}>
       <ShadowingPractice
         courseSlug={courseSlug}
         media={media}
         userId={7}
         lessonNumber={lessonNumber}
       />
-    </QueryClientProvider>,
+    </QueryClientProvider></StrictMode>,
   )
   return { ...view, queryClient }
 }
@@ -94,12 +107,100 @@ async function recordLocally() {
   vi.stubGlobal('URL', { createObjectURL: vi.fn().mockReturnValue('blob:local-test'), revokeObjectURL: vi.fn() })
   Object.defineProperty(navigator, 'mediaDevices', { configurable: true,
     value: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [{ stop: vi.fn() }] }) } })
-  renderPractice()
+  const view = renderPractice()
   await userEvent.click(screen.getByRole('button', { name: '2. Gravar minha voz' }))
   await userEvent.click(await screen.findByRole('button', { name: 'Parar gravação' }))
+  return view
 }
 
 describe('ShadowingPractice', () => {
+  it.each(['missing', 'changed'])('preserva histórico e bloqueia reprodução de arquivo %s', async (integrity_state) => {
+    clientMocks.GET.mockResolvedValue({ data: [{ id: 15, lesson_number: 31, cue_id: 21,
+      cue_text: media.cues[0]!.text_en, historical_content_status: 'available',
+      duration_ms: 1500, status: 'ready',
+      integrity_state, mime_type: 'audio/webm', file_size: 5,
+      created_at: '2026-10-07T23:50:00Z' }] })
+    renderPractice()
+    expect(await screen.findByText(/Arquivo ausente ou alterado/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ouvir' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Excluir' })).toBeEnabled()
+    expect(clientMocks.authenticatedFetch).not.toHaveBeenCalled()
+  })
+  it.each([413, 415, 422, 401, 408, 409, 503])('preserva o áudio para ouvir/baixar e tentar novamente após HTTP %s', async (code) => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    clientMocks.POST.mockResolvedValue({ data: { id: 44 } })
+    clientMocks.authenticatedFetch.mockResolvedValueOnce({ ok: false, status: code })
+    await recordLocally()
+    await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    expect(await screen.findByText(/O áudio continua nesta tela; você pode baixá-lo/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Baixar gravação local' })).toHaveAttribute('href', 'blob:local-test')
+    expect(clientMocks.DELETE).not.toHaveBeenCalled()
+    clientMocks.authenticatedFetch.mockResolvedValueOnce({ ok: true })
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
+    expect(clientMocks.POST).toHaveBeenCalledOnce()
+    expect(clientMocks.authenticatedFetch.mock.calls[0]![1].body).toBe(clientMocks.authenticatedFetch.mock.calls[1]![1].body)
+  })
+  it('não apaga tentativa após resposta perdida e reutiliza seu ID', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    clientMocks.POST.mockResolvedValue({ data: { id: 44 } })
+    clientMocks.authenticatedFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    await recordLocally()
+    await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    expect(await screen.findByText(/Falha de conexão/)).toBeInTheDocument()
+    expect(clientMocks.DELETE).not.toHaveBeenCalled()
+    clientMocks.authenticatedFetch.mockResolvedValueOnce({ ok: true })
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
+    expect(clientMocks.POST).toHaveBeenCalledOnce()
+  })
+  it('recupera envio após login na mesma conta, inclusive em StrictMode, sem consentir automaticamente', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    clientMocks.POST.mockResolvedValue({ data: { id: 44 } })
+    const view = await recordLocally()
+    clientMocks.authenticatedFetch.mockImplementationOnce(async () => {
+      setAccessToken(null); setSessionUser(null)
+      view.unmount()
+      return { ok: false, status: 401 }
+    })
+    await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    setAccessToken('new-token'); setSessionUser(7)
+    let urlNumber = 0
+    vi.mocked(URL.createObjectURL).mockImplementation(() => `blob:recovered-${++urlNumber}`)
+    const restoredView = renderPractice()
+    expect(await screen.findByText(/Gravação recuperada nesta aba/)).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /Concordo em salvar/ })).not.toBeChecked()
+    clientMocks.authenticatedFetch.mockResolvedValueOnce({ ok: true })
+    await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
+    expect(clientMocks.POST).toHaveBeenCalledOnce()
+    restoredView.unmount()
+    expect(urlNumber).toBe(2) // setup/cleanup/setup do StrictMode
+    for (let index = 1; index <= urlNumber; index++) {
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith(`blob:recovered-${index}`)
+    }
+  })
+  it('impede envio do blob em outra conta antes de criar tentativa', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    await recordLocally()
+    setSessionUser(99)
+    await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
+    expect(await screen.findByText(/Confirme a sessão da mesma conta/)).toBeInTheDocument()
+    expect(clientMocks.POST).not.toHaveBeenCalled()
+  })
+  it('mantém gravação local mas bloqueia envio enquanto não confirma política', async () => {
+    clientMocks.GET.mockResolvedValue({ data: [] })
+    clientMocks.policy.mockRejectedValue(new Error('offline'))
+    await recordLocally()
+    await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
+    expect(screen.getByRole('button', { name: 'Salvar na minha conta' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'Baixar gravação local' })).toBeInTheDocument()
+  })
   it('não anuncia autoavaliação salva quando quota falha', async () => {
     clientMocks.GET.mockResolvedValue({ data: [] })
     await recordLocally()
@@ -164,6 +265,7 @@ describe('ShadowingPractice', () => {
         lesson_number: 31,
         cue_id: 21,
         cue_text: media.cues[0]!.text_en,
+        historical_content_status: 'available',
         duration_ms: 100,
         self_rating: 'confident',
         consented_at: '2026-10-07T23:50:00Z',
@@ -215,6 +317,7 @@ describe('ShadowingPractice', () => {
     await waitFor(() => expect(clientMocks.POST).toHaveBeenCalledOnce())
     expect(clientMocks.POST).toHaveBeenCalledWith('/api/speaking/attempts', {
       body: expect.objectContaining({ cue_id: 21, self_rating: 'confident', consent: true }),
+      signal: expect.any(AbortSignal),
     })
     expect(clientMocks.authenticatedFetch).toHaveBeenCalledWith(
       '/api/speaking/attempts/44/audio',
@@ -235,6 +338,7 @@ describe('ShadowingPractice', () => {
           lesson_number: 31,
           cue_id: 21,
           cue_text: media.cues[0]!.text_en,
+          historical_content_status: 'available',
           duration_ms: 1500,
           self_rating: 'almost',
           consented_at: '2026-10-07T23:50:00Z',
@@ -276,6 +380,46 @@ describe('ShadowingPractice', () => {
     )
   })
 
+  it('não reconstrói trecho legado nem oferece nova comparação automática', async () => {
+    clientMocks.GET.mockImplementation(async (path) =>
+      path === '/api/assist/status'
+        ? {
+            data: {
+              transcription_enabled: true,
+              writing_enabled: false,
+              evaluation_only: true,
+              daily_quota: 5,
+              used_today: 0,
+              remaining_today: 5,
+              retention_days: 30,
+              cost_microusd_today: 0,
+            },
+          }
+        : {
+            data: [
+              {
+                id: 15,
+                lesson_number: 31,
+                cue_id: 21,
+                cue_text: null,
+                historical_content_status: 'unavailable',
+                duration_ms: 1500,
+                status: 'ready',
+                integrity_state: 'verified',
+                mime_type: 'audio/webm',
+                file_size: 5,
+                created_at: '2026-10-07T23:50:00Z',
+              },
+            ],
+          },
+    )
+    renderPractice()
+
+    expect(await screen.findByText('Texto original indisponível')).toBeInTheDocument()
+    expect(screen.getByText(/sem comparação automática/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Transcrever (experimental)' })).not.toBeInTheDocument()
+  })
+
   it('marca automação e baixa confiança na transcrição experimental', async () => {
     const user = userEvent.setup()
     const transcription = {
@@ -289,6 +433,7 @@ describe('ShadowingPractice', () => {
       automated: true,
       evaluation_only: true,
       expected_text: media.cues[0]!.text_en,
+      historical_content_status: 'available',
       transcript_text: "Don't take the boss",
       words: [
         { text: "Don't", start_ms: 0, end_ms: 100, confidence: 0.96 },
@@ -325,6 +470,7 @@ describe('ShadowingPractice', () => {
                 lesson_number: 31,
                 cue_id: 21,
                 cue_text: media.cues[0]!.text_en,
+                historical_content_status: 'available',
                 duration_ms: 1500,
                 self_rating: 'almost',
                 consented_at: '2026-10-07T23:50:00Z',
@@ -372,6 +518,7 @@ describe('ShadowingPractice', () => {
                 lesson_number: 31,
                 cue_id: 21,
                 cue_text: media.cues[0]!.text_en,
+                historical_content_status: 'available',
                 duration_ms: 1500,
                 self_rating: 'almost',
                 consented_at: '2026-10-07T23:50:00Z',
@@ -390,6 +537,7 @@ describe('ShadowingPractice', () => {
                   automated: true,
                   evaluation_only: true,
                   expected_text: media.cues[0]!.text_en,
+                  historical_content_status: 'available',
                   transcript_text: null,
                   words: [],
                   mean_confidence: null,

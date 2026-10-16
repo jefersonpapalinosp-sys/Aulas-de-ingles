@@ -34,7 +34,10 @@ def fingerprints(target, *, excluded_columns=None, excluded_tables=()):
         if name in excluded_tables:
             continue
         excluded = excluded_columns.get(name, [])
-        require(all(re.fullmatch("[a-z_]+", column) for column in excluded), "Coluna inválida.")
+        require(
+            all(re.fullmatch("[a-z_][a-z0-9_]*", column) for column in excluded),
+            "Coluna inválida.",
+        )
         expression = "to_jsonb(t)" + "".join(f" - '{column}'" for column in excluded)
         # Nada do resultado bruto é impresso/persistido; somente hashes e contagens.
         rows = recovery.query(

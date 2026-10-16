@@ -73,27 +73,54 @@ const entry = {
   updated_at: '2026-10-08T00:30:00Z',
 }
 
-function mockQueries(entries = [entry], feedbacks: unknown[] = []) {
-  clientMocks.GET.mockImplementation(async (path) => {
-    if (path === '/api/me/notebook') return { data: entries }
-    if (path === '/api/speaking/attempts') return { data: [] }
-    if (path === '/api/writing/history') {
+function mockQueries(
+  entries = [entry],
+  feedbacks: unknown[] = [],
+  nextCursor: string | null = null,
+  nextEntries: typeof entries = [],
+  nextWritingCursor: string | null = null,
+  nextWritingEntries: Record<string, unknown>[] = [],
+  speakingEntries: Record<string, unknown>[] = [],
+  nextSpeakingCursor: string | null = null,
+  nextSpeakingEntries: Record<string, unknown>[] = [],
+) {
+  clientMocks.GET.mockImplementation(async (path, options) => {
+    if (path === '/api/me/notebook/page') {
+      const cursor = options?.params?.query?.cursor
+      return cursor
+        ? { data: { items: nextEntries, next_cursor: null } }
+        : { data: { items: entries, next_cursor: nextCursor } }
+    }
+    if (path === '/api/speaking/attempts/page') {
+      return options?.params?.query?.cursor
+        ? { data: { items: nextSpeakingEntries, next_cursor: null } }
+        : { data: { items: speakingEntries, next_cursor: nextSpeakingCursor } }
+    }
+    if (path === '/api/writing/prompts/{prompt_id}/feedback') {
+      return { data: { items: feedbacks, next_cursor: null } }
+    }
+    if (path === '/api/writing/history/page') {
+      if (options?.params?.query?.cursor) {
+        return { data: { items: nextWritingEntries, next_cursor: null } }
+      }
       return {
-        data: [
-          {
-            prompt_id: 4,
-            course_slug: 'voa-level-1',
-            course_title: course.title,
-            unit_slug: '45-49',
-            lesson_number: 45,
-            lesson_title: lesson.title,
-            prompt_title: 'Compare caminhos',
-            draft_text: 'The train is faster.',
-            updated_at: '2026-10-08T00:30:00Z',
-            revisions: [{ id: 3, version: 1, text: 'The train is fast.', created_at: '2026-10-08T00:20:00Z' }],
-            feedbacks,
-          },
-        ],
+        data: {
+          items: [
+            {
+              prompt_id: 4,
+              course_slug: 'voa-level-1',
+              course_title: course.title,
+              unit_slug: '45-49',
+              lesson_number: 45,
+              lesson_title: lesson.title,
+              prompt_title: 'Compare caminhos',
+              updated_at: '2026-10-08T00:30:00Z',
+              revision_count: 1,
+              feedback_count: feedbacks.length,
+            },
+          ],
+          next_cursor: nextWritingCursor,
+        },
       }
     }
     return { data: undefined }
@@ -155,7 +182,7 @@ describe('NotebookPage', () => {
     const summary = await screen.findByText('Regras das análises salvas')
     await user.click(summary)
     expect(summary.closest('details')).toHaveAttribute('open')
-    expect(screen.getByText('Regra anterior · resultado preservado')).toBeVisible()
+    expect(await screen.findByText('Regra anterior · resultado preservado')).toBeVisible()
     expect(screen.getByText(/O resultado original não foi recalculado/)).toBeVisible()
   })
 
@@ -183,13 +210,15 @@ describe('NotebookPage', () => {
       },
     })
 
-    expect(clientMocks.GET).toHaveBeenCalledWith('/api/me/notebook', {
+    expect(clientMocks.GET).toHaveBeenCalledWith('/api/me/notebook/page', {
       params: {
         query: {
           lesson: undefined,
           kind: undefined,
           course: 'voa-level-1',
           unit: '45-49',
+          limit: 20,
+          cursor: undefined,
         },
       },
     })
@@ -210,6 +239,117 @@ describe('NotebookPage', () => {
     expect(clientMocks.DELETE).toHaveBeenCalledWith('/api/me/notebook/{entry_id}', {
       params: { path: { entry_id: 8 } },
     })
+  })
+
+  it('carrega a próxima página sem substituir as anotações visíveis', async () => {
+    const user = userEvent.setup()
+    mockCurriculum()
+    const older = {
+      ...entry,
+      id: 7,
+      content: 'This older note remains in the same filtered history.',
+      updated_at: '2026-10-07T00:30:00Z',
+    }
+    mockQueries([entry], [], 'cursor-page-2', [older])
+    renderNotebook()
+
+    expect(await screen.findByText(entry.content)).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Carregar mais anotações' }))
+
+    expect(await screen.findByText(older.content)).toBeVisible()
+    expect(screen.getByText(entry.content)).toBeVisible()
+    expect(clientMocks.GET).toHaveBeenCalledWith('/api/me/notebook/page', {
+      params: {
+        query: {
+          lesson: undefined,
+          kind: undefined,
+          course: 'voa-level-1',
+          unit: '45-49',
+          limit: 20,
+          cursor: 'cursor-page-2',
+        },
+      },
+    })
+  })
+
+  it('carrega mais textos sem misturar a página anterior e anuncia o novo total', async () => {
+    const user = userEvent.setup()
+    mockCurriculum()
+    const olderWriting = {
+      prompt_id: 3,
+      course_slug: 'voa-level-1',
+      course_title: course.title,
+      unit_slug: '45-49',
+      lesson_number: 45,
+      lesson_title: lesson.title,
+      prompt_title: 'Texto anterior',
+      updated_at: '2026-10-07T00:30:00Z',
+      revision_count: 2,
+      feedback_count: 0,
+    }
+    mockQueries([], [], null, [], 'writing-page-2', [olderWriting])
+    renderNotebook()
+
+    expect(await screen.findByText('Compare caminhos')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Carregar mais textos' }))
+
+    expect(await screen.findByText('Texto anterior')).toBeVisible()
+    expect(screen.getByText('Compare caminhos')).toBeVisible()
+    await waitFor(() => expect(screen.getByText('2 textos carregados.')).toHaveFocus())
+    expect(clientMocks.GET).toHaveBeenCalledWith('/api/writing/history/page', {
+      params: {
+        query: {
+          course: 'voa-level-1',
+          unit: '45-49',
+          limit: 20,
+          cursor: 'writing-page-2',
+        },
+      },
+    })
+  })
+
+  it('carrega mais gravações sem perder a página anterior e preserva o foco', async () => {
+    const user = userEvent.setup()
+    mockCurriculum()
+    const recording = {
+      id: 41,
+      course_slug: 'voa-level-1',
+      course_title: course.title,
+      unit_slug: '45-49',
+      lesson_number: 45,
+      cue_text: 'This land is your land.',
+      duration_ms: 1900,
+      created_at: '2026-10-15T12:00:00Z',
+    }
+    const olderRecording = {
+      ...recording,
+      id: 40,
+      cue_text: 'This land is my land.',
+      created_at: '2026-10-14T12:00:00Z',
+    }
+    mockQueries([], [], null, [], null, [], [recording], 'speaking-page-2', [olderRecording])
+    clientMocks.DELETE.mockResolvedValue({ response: { ok: true } })
+    renderNotebook()
+
+    expect(await screen.findByText('This land is your land.')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Carregar mais gravações' }))
+
+    expect(await screen.findByText('This land is my land.')).toBeVisible()
+    expect(screen.getByText('This land is your land.')).toBeVisible()
+    await waitFor(() => expect(screen.getByText('2 gravações carregadas.')).toHaveFocus())
+    expect(clientMocks.GET).toHaveBeenCalledWith('/api/speaking/attempts/page', {
+      params: {
+        query: {
+          course: 'voa-level-1',
+          unit: '45-49',
+          limit: 20,
+          cursor: 'speaking-page-2',
+        },
+      },
+    })
+    await user.click(screen.getAllByRole('button', { name: 'Excluir' })[1]!)
+    expect(screen.queryByText('This land is my land.')).not.toBeInTheDocument()
+    expect(screen.getByText('This land is your land.')).toBeVisible()
   })
 
   it('baixa a exportação JSON do aluno', async () => {

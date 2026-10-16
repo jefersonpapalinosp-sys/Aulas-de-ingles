@@ -1,6 +1,6 @@
 # Sprints de banco de dados para integridade e recuperação
 
-Atualização: 14 de outubro de 2026. **DB-38 implementada, ensaiada e aplicada na base de estudo após autorização, backup e restore isolado.** Divergências antigas de jornada foram preservadas e estão documentadas, sem reconciliação automática. DB-39 a DB-42 permanecem planejados. As metas RPO/RTO não são SLA.
+Atualização: 16 de outubro de 2026. **DB-39G/H aplicada em DEV 5433 e estudo 5434, head `a39d7bc02486`, após backups reais e ensaios em clones exclusivos; DB-41 tecnicamente concluída no banco descartável.** Dados históricos preservados: 6.768 linhas no DEV e 46.192 no estudo. Limpeza adicional de refresh/pending implementada, mas desativada até aprovação da política. DB-42 permanece planejada. Divergências antigas de jornada preservadas; metas RPO/RTO não são SLA. [Registro 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
 
 Referência: [auditoria técnica](auditoria_tecnica_frontend_backend_banco_2026-10-13.md). Este plano abrange PostgreSQL, migrations, seed, papel da aplicação e consistência com o armazenamento privado de voz. O primeiro incremento cria apenas um ambiente de teste separado; não modifica o banco de estudo nem seus papéis atuais.
 
@@ -471,16 +471,163 @@ Fora do escopo: trocar SM-2 por outro algoritmo e apagar `review_card` legado ne
 
 Achados B06, B07, B08, D02 e D07.
 
+### Incremento 39A — migration `e17b5fad0264` (14/10/2026)
+
+Expand sobre `d06a4e9cb153`, sem reescrever nem redistribuir histórico:
+
+- `media_progress`: revisão não negativa, conclusão com posição zero, UUID/fingerprint
+  da última operação e data declarada de alteração. Linha preservada após conclusão.
+- `study_plan.timezone`: IANA, UTC por padrão, validado pela API.
+- `study_activity_session`: âncora por usuário/aula e UUID transitório de sessão.
+- `study_activity_event`: recibo com chave única `(user_id, operation_key)`, fingerprint,
+  duração 1–30.000 ms, crédito entre zero e duração e recebimento no servidor.
+- `study_active_interval`: trechos creditados de até 30 s; índice `(user_id, ends_at)`
+  para sobreposição/janela semanal. Não sobreposição é garantida na transação API sob
+  lock do usuário, não por uma exclusion constraint do PostgreSQL.
+- Runtime recebe somente SELECT/INSERT nas três tabelas; worker não as acessa.
+  Exclusão de conta por procedimento futuro poderá usar cascades; esses eventos não
+  são ledger de cota e não devem ser reutilizados como tal.
+
+Ensaio transacional em schema sintético preservou posição/plano antigos, comprovou
+defaults e recusas de constraints. Alembic check não detectou drift. PostgreSQL de testes
+55435, E2E 5198 e laboratório de papéis receberam o head; base de estudo não recebeu.
+Laboratório aprovou 36 recusas de privilégios, escrita/leitura HTTP runtime e dump
+read-only incluindo as novas tabelas. 63 testes operacionais puros aprovados.
+
+Alinhamento posterior autorizado do dev 5433: sequência `b84e2c7a9d31` → `c95f3d8ba042`
+→ `d06a4e9cb153` → `e17b5fad0264`, primeiro em clone do backup real e depois na origem.
+39 tabelas/6.766 registros históricos preservados por hashes, 82 aulas, zero usuários
+originais e zero áudios; sem seed, reparos ou alterações de papéis. Auditadas 22 regras,
+sem violações no dev; não confundir com divergências legadas do estudo. Segunda execução
+das migrations sem alterações e Alembic check aprovado nos dois bancos. Após smoke
+HTTP e remoção da conta temporária, hashes históricos novamente idênticos. Banco de
+estudo 5434 continua em `d06a4e9cb153`. [Evidências e limites](operacao_sprint_37.md#sprint-39a--alinhamento-autorizado-do-desenvolvimento-em-14102026).
+
+Não há purge automático novo: 7 dias é janela de aceitação de replay, **não retenção
+do banco**. Retenção/compactação e exclusão auditável seguem pendentes; não apagar
+recibos enquanto puderem autorizar replay duplicado. Downgrade destrutivo bloqueado.
+Rollout futuro em 5181 exige backup/restore ensaiado e atualização coordenada API/frontend;
+os scripts de rollout 37/38 não foram ampliados para 39A e não devem ser usados como
+atalho. `ops/dev_alignment.py` é exclusivo da origem dev em `b84e2c7a9d31`, não aceita
+estudo nem uma base já migrada. Orçamento frontend e 112 cenários Playwright do build
+otimizado aprovados.
+
+### Incremento 39B — concorrência de voz, sem migration (14/10/2026)
+
+O head continua em `e17b5fad0264` no desenvolvimento e nos testes; estudo 5434/5181
+permanece em `d06a4e9cb153`. Não houve alteração de papéis, seed ou SQL operacional.
+O upload libera a transação de leitura antes de receber o corpo e só depois bloqueia
+a linha de `speaking_attempt` para serializar PUT/DELETE. Recarrega o estado após o lock:
+retry idêntico não duplica `skill_evidence` nem revisão; outro conteúdo recebe conflito.
+
+A criação do arquivo e o commit SQL continuam em sistemas separados. Em falha ambígua
+de commit, a API consulta a referência antes de excluir seu arquivo novo; se a consulta
+falhar, preserva o candidato. Os testes cobrem commit efetivado/não efetivado com resposta
+perdida, além de upload/exclusão concorrentes em PostgreSQL. **820 testes backend**
+passaram na base isolada 55435 e **63 operacionais puros** passaram, sem usar dados do aluno.
+
+Não existe coluna de checksum nova: comparação SHA-256 com leitura limitada serve
+somente ao retry de PUT. Não substitui inventário/checksum durável, reconciliação
+dry-run nem retenção de `pending`. Crash/cancelamento podem deixar órfãos; os itens
+de reconciliação abaixo permanecem abertos. Não executar limpeza automática por
+idade do arquivo nem apagar candidatos sem conferir referências e uploads ativos.
+
+### Incremento 39C — inventário read-only e duração medida (14/10/2026)
+
+Nenhuma migration, seed, papel ou limpeza automática foi acrescentado. Head de dev
+continua `e17b5fad0264`, estudo permanece `d06a4e9cb153`. Somente uploads novos,
+na primeira publicação, recebem duração medida pelo decoder na coluna existente
+`duration_ms`; registros prontos antigos conservam o valor histórico. Não existe
+baseline persistente de checksum ou marcador de validação retroativo por tentativa.
+
+`app.audio_audit` usa `REPEATABLE READ, READ ONLY`, `statement_timeout=5s` e projeção
+de ID/status/chave/tamanho/criação, limitada a 10.001 linhas para detectar truncamento.
+Processa no máximo 10 mil referências; libera a transação antes de ler arquivos.
+Não consulta textos de fala, email ou conteúdo pessoal para o relatório.
+
+Inventário: máximo de 10 mil entradas, 100 MiB de hashing e orçamento **cooperativo**
+de 30 s entre leituras; não é timeout rígido de filesystem/disco travado. Hash SHA-256
+em blocos de 64 KiB, comparação de inode/tamanho/mtime/ctime antes/depois e recusa
+de links/hardlinks. Referências de qualquer status protegem arquivos. Temporários,
+desconhecidos, recentes (mtime **ou** ctime < 24 h) e mutáveis não viram candidatos.
+Metadado inválido, referência faltante, tamanho divergente e `pending` antigo são
+achados, não ordens de exclusão. Snapshot incompleto não classifica órfãos;
+orçamento esgotado/erro de leitura marca `complete=false` e saída 2.
+
+Hashes são observações por execução, não prova de integridade histórica. Relatório
+não move/exclui/repara nada e não possui opção apply. O prazo de segurança não define
+retenção. Futuro fluxo de quarentena precisa revalidar referências e uploads ativos
+no momento da ação; reaproveitar um relatório antigo é inseguro.
+
+Teste com PostgreSQL real confirma SQL somente leitura e conexão devolvida antes
+do hashing. Ensaio no laboratório Linux leu 42 referências/26 arquivos recentes,
+todos preservados; não confundir com certificação da base de estudo. Checklists
+de retenção, consumo assistido e reconciliação mutante continuam abertos.
+
+Regressão final backend: **850 testes / 93,62% de cobertura**. Inventário de dev
+executado apenas para leitura: zero referências/arquivos, sem alterações. Nenhuma
+base de estudo foi usada pelos testes. [Registro operacional](operacao_sprint_37.md#sprint-39c--atualização-da-api-dev-sem-alteração-de-dados-em-14102026).
+
+### Incremento 39D — exclusão mútua e journal privado (14/10/2026)
+
+Nenhuma tabela/coluna/papel/migration foi acrescentado. O operador abre transação
+READ COMMITTED, confere `current_database()`, toma `LOCK TABLE speaking_attempt IN
+EXCLUSIVE MODE NOWAIT` e consulta referências atuais. Isso recusa intervenção durante
+`FOR UPDATE`/DML concorrente; SELECT comum continua possível. Statement timeout 5 s.
+Após a ação de filesystem, rollback apenas libera o lock: **não desfaz arquivo**.
+
+Journal no volume, não no PostgreSQL: chave opaca, operação, checksum, tamanho,
+inodes/device, timestamps e nome do banco; sem texto de fala/email/token. É recibo
+de seleção/movimentação, não baseline retroativo de todas as gravações. Fica privado
+e participa do backup v2, separado da contagem de áudios sem referência. Inventário
+39C identifica a pasta protegida sem recursar ou afirmar que a reconciliou.
+
+Quarentena/restore não mudam tentativas, evidências ou progresso. Referência nova
+protege contra movimentação; arquivo recente, modificado, linkado externamente ou
+fora dos limites não é recolhido. Um processo interrompido pode deixar dois nomes
+do mesmo inode: a retomada reconhece apenas esse par, não qualquer hardlink externo.
+
+Backup v2 aceita exclusivamente caminhos reservados de journal/áudio, sem traversal,
+links de tar, arquivos especiais ou extração genérica. Backups v1 seguem suportados.
+Exportação de dois nomes após interrupção conserva ambos como arquivos regulares.
+Restore em volume novo conserva bytes, mas invalida identidade de inode do journal:
+requer revisão, não retoma mutação automaticamente. Sem nova medição de RPO/RTO.
+
+Ensaio limitado à base descartável e arquivos sintéticos; não foi aplicada quarentena
+em dev 5433 nem estudo 5434. Retenção de `pending`, checksum durável de todo áudio
+publicado e expurgo aprovado seguem abertos; estes comandos não substituem esse trabalho.
+
+Evidência: **893 testes backend / 93,69% de cobertura**, incluindo lock concorrente,
+referência nova após seleção e ausência de DML no operador. **72 testes operacionais**
+cobrem v1/v2, checksum, transporte real em diretórios temporários e destinos inseguros.
+
+### Integração 39E — limites do cache no navegador (14/10/2026)
+
+Nenhuma migration, índice, papel, exclusão ou mudança de seed no desenvolvimento/estudo.
+CacheStorage guarda apenas respostas editoriais públicas, com limite e expiração por
+release. Não é substituto de backup, tabela de tentativas ou arquivo privado de voz.
+
+Atualizar o PWA/limpar seus textos não executa DML nem apaga localStorage/IndexedDB.
+Fila e rascunhos conservam os contratos anteriores; a ativação aguarda fechamento
+das abas para não descartar dados ainda em memória por reload automático. Testes
+de duas abas preservam rascunho/fila sintéticos entre versões. Retenção de dados
+pessoais não é confundida com TTL do conteúdo público.
+
+Regressão backend: **912 testes**, cobertura **93,70%**, em PostgreSQL descartável
+55435. Somente essa base foi preparada/migrada/semeada nesta entrega. Sem nova
+medição de RPO/RTO, dump/restore ou alteração da base de estudo em 5434.
+[Registro operacional 39E](operacao_sprint_37.md#sprint-39e--pwa-e-cache-público-em-14102026).
+
 ### Entregas
 
-- [ ] Criar armazenamento de intervalos/eventos ativos com usuário, aula, sessão/dispositivo lógico, timestamps, duração validada e chave de deduplicação.
-- [ ] Definir agregação por dia/semana e fuso; manter totais históricos antigos rotulados como legado sem distribuição temporal fictícia.
-- [ ] Modelar reserva/consumo assistido independente de `TranscriptionJob` e feedback apagáveis, com transições e unicidade idempotente.
-- [ ] Definir operação atômica para respeitar cota diária e prazo para reservas abandonadas; documentar política de reembolso.
-- [ ] Acrescentar índices e estados mínimos para expiração em lotes, evitando transações de limpeza ilimitadas.
-- [ ] Inventariar metadados de voz e relacionamento com arquivos; manter checksums quando úteis à restauração/reconciliação.
-- [ ] Definir reconciliação entre referências e storage com dry-run, período de segurança e isolamento de arquivos candidatos à remoção.
-- [ ] Retenção de refresh expirado, jobs expirados e tentativas pendentes com rotinas separadas e resultado auditável.
+- [x] Criar armazenamento de intervalos/eventos ativos com usuário, aula, sessão/dispositivo lógico, timestamps, duração validada e chave de deduplicação (39A isolada e dev).
+- [x] Definir agregação semanal e fuso; manter totais históricos antigos rotulados como legado sem distribuição temporal fictícia (39A isolada e dev; sem painel diário novo).
+- [x] Modelar reserva/consumo assistido independente de `TranscriptionJob` e feedback apagáveis, com transições e unicidade idempotente (39F, incluída no rollout 39G/H).
+- [x] Definir operação atômica para respeitar cota diária e prazo para reservas abandonadas; documentar política de reembolso (39F, expiração lógica de reserva; purge em lotes separado).
+- [x] Índices de expiração de refresh e estado/data de pending; lotes de até 500 com `SKIP LOCKED`, timeouts e cancelamento entre transações.
+- [x] SHA-256 durável, estado/instante de integridade de voz, inventário e reparação explícita por cópia conferida. Legado `unknown`, sem baseline retroativo fictício.
+- [x] Reconciliação com dry-run e quarentena reversível; estudo exige migrador e alvo confirmado, sem expurgo automático.
+- [x] Rotinas separadas e auditáveis de jobs, reservas, refresh e pending; as duas últimas ficam opt-in desligadas até aprovação da política de 7 dias. Ledger não é expurgado.
 
 ### Critérios de aceite
 
@@ -498,19 +645,80 @@ Não conservar áudio/texto no ledger de consumo. Não escolher retenção jurí
 
 Fora do escopo: data warehouse, rastreamento de navegação detalhado e telemetria de conteúdo digitado.
 
+### Incremento 39F — ledger de assistência (14/10/2026)
+
+`assist_reservation` armazena conta, chave da operação, fingerprint, modalidade,
+chave estável do provedor, estado, motivo, datas e custo reportado. Não conserva
+texto, áudio ou token. Unicidade `(user_id, request_key)` e `provider_key`; checks
+de modalidade, estado, custo não negativo e vencimento posterior à criação.
+Índices `(user_id, created_at)` para o saldo e `(state, expires_at)` para a futura
+rotina limitada; não representam benchmark de volume ou aceite de DB-41.
+
+Feedback/job têm FK nullable e única para a reserva. Apagar resultado não apaga
+ledger. A cascata da conta foi mantida explicitamente: encerrar a identidade apaga
+seu consumo; não é uma operação de reembolso nem proteção contra criar outra conta.
+Runtime recebe SELECT/INSERT/UPDATE e uso da sequence, worker SELECT/UPDATE; ambos
+sem DELETE direto. Somente operador owner pode executar futura retenção controlada.
+
+`f28c6abe1375` expande `e17b5fad0264` sem remover registros históricos. Backfill de
+feedback com provedor e jobs existentes marca `consumed/legacy_observed`, sem
+inventar instante de despacho. Zero legado fica com custo desconhecido, pois o
+contrato antigo confundia zero e ausência. Jobs legados pendentes também são
+conservadoramente consumidos; sua exclusão não devolve unidade. Consumo apagado
+antes da migration não pode ser reconstruído. Downgrade destrutivo é recusado.
+
+Reserva nova vence logicamente após `ASSIST_RESERVATION_SECONDS` (900 por padrão;
+60–3600): deixa de ocupar o saldo sem depender de leitura da listagem. Antes de
+despachar o worker confere e libera a vencida. Consumo confirmado não expira por
+esse TTL. Na entrega 39F, retenção histórica do ledger e limpeza em lotes ficaram para 39G;
+neste incremento ele permanece até exclusão da conta/decisão operacional explícita.
+Não há prazo jurídico presumido, nem uso de `ASSIST_RETENTION_DAYS` como purge
+do ledger. Chaves não devem ser removidas enquanto sustentam deduplicação.
+
+Upgrade/backfill/constraints/exclusão e concorrência foram ensaiados no PostgreSQL
+descartável. A corrida expiração × commit de despacho possui regressão própria.
+Em 15/10, somente DEV 5433 foi migrado: `e17b5fad0264` → `f28c6abe1375`, após
+manutenção, backup/restore e ensaio com imagem imutável. As 44 tabelas históricas e
+6.768 linhas conservaram seus fingerprints; nenhum seed, reconciliação ou mudança
+de papéis foi feito. O backfill real tinha zero resultados assistidos; os casos
+não vazios permanecem cobertos na base sintética 55435. Estudo 5434 não migrado.
+[Alinhamento e recibos](operacao_sprint_37.md#sprint-39f--alinhamento-do-desenvolvimento-em-15102026).
+[Registro 39F](operacao_sprint_37.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
+
+### Incremento 39G/H — aplicado em 15/10/2026
+
+`a39d7bc02486` acrescenta três colunas de integridade em `speaking_attempt`, índices,
+`worker_heartbeat` e função de limpeza `SECURITY DEFINER` com escopos estáticos,
+search_path fixo e execução restrita. Runtime/backup não recebem execução da função;
+worker não recebe DELETE amplo. Upgrade repetido e `alembic check` aprovados.
+
+Clones exclusivos `dev39-check-db` e `study39-check-db`: backup/restore com hash,
+fingerprints por tabela e smoke autenticado antes da origem. DEV preservou 45
+tabelas históricas e estudo 41; exclusões da comparação limitadas às estruturas
+novas de cada base. Backfill de ledger conferido; 15/20 divergências históricas de
+jornada preservadas. Zero arquivos reais nas origens; casos não vazios de áudio e
+restauração cobertos por fixtures sintéticas, sem declarar evidência física.
+
+Detalhes, recibos, retenção ainda opt-in e limites de recuperação no [runbook](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+
 ## Sprint 40 Versionamento editorial e portabilidade
 
 Achados D04, B09 e B11.
 
 ### Entregas
 
-- [ ] Separar identidade estável de conteúdo e ordenação visual; posição não deve ser a única identidade de exercício/prompt/cue referenciado.
-- [ ] Definir versões imutáveis ou snapshots mínimos de enunciado, correção, rubrica e origem suficientes para interpretar tentativa histórica.
+- [x] Separar identidade estável de conteúdo e ordenação visual para exercício/prompt/cue, mídia, vocabulário e questão de checkpoint (40B.2b.2; migration ensaiada em bases isoladas, rollout DEV/estudo pendente).
+- [x] Substituir os vínculos posicionais mídia→exercício e checkpoint→mídia por FKs compostas estáveis, com backfill estrito e downgrade protegido (40B.2e; somente banco descartável).
+- [x] Definir snapshots mínimos imutáveis de enunciado, correção, rubrica e origem para novas evidências, com ausência legada explícita e consumo posterior seguro pelo STT (40B.2a/40B.2d; sem backfill).
+- [x] Criar e ensaiar tabela de snapshots das novas evidências, com FKs, unicidade, dono e proteção contra UPDATE (40B.2a; sem backfill ou rollout).
 - [ ] Adotar arquivamento para conteúdo usado por alunos em vez de cascade destrutivo por desaparecimento do seed.
-- [ ] Acrescentar diff/dry-run de seed com itens criados, alterados, arquivados e impacto em dados pessoais.
+- [x] Acrescentar diff/dry-run de seed com itens novos, diferentes, omitidos e bloqueios, sem DML nem avanço de sequência (40B.1).
+- [ ] Completar o diff com arquivamento e contagens de impacto em dados pessoais após definir identidade/snapshots (40B.2).
+- [x] Implementar prévia independente por unidade com contagens agregadas de referências e dependências entre checkpoints (40B.2b.1; não é aplicação nem diff semântico do seed).
+- [x] Criar recibo append-only e ensaiar arquivamento transacional por unidade, com digest, exclusão mútua e integração de impacto para pedidos explícitos no dry-run do seed (40B.2b.3; sem rollout ou remoção de conteúdo).
 - [ ] Corrigir datas de revisão/publicação por versão editorial e preservar origem/licença auditadas.
-- [ ] Implementar inventário de exportação cobrindo toda entidade pessoal atual, inclusive prática/checkpoint e feedback sem draft.
-- [ ] Garantir snapshot consistente da exportação ou mecanismo de corte/versionamento equivalente para grandes volumes.
+- [x] Implementar inventário de exportação cobrindo toda entidade pessoal atual, inclusive prática/checkpoint e feedback sem draft (40A; exclusões operacionais explícitas).
+- [x] Garantir snapshot consistente da exportação (40A); grandes volumes recusados integralmente acima dos limites documentados.
 - [ ] Planejar exclusão de conta/recursos com tarefa de remoção de binários rastreável e retries seguros, sem transação distribuída implícita.
 - [ ] Definir preservação e expiração de backups após pedidos de exclusão segundo política aprovada.
 
@@ -529,20 +737,267 @@ Snapshots antigos só podem usar informação efetivamente disponível. Quando a
 
 Fora do escopo: CMS completo de autoria, copiar materiais externos sem licença e renumerar a cobertura deliberada da unidade 40–44.
 
+### Incremento 40A — snapshot pessoal consistente, 15/10/2026
+
+Sem migration ou mudança de permissão: mantém `a39d7bc02486`. Exportação usa uma
+transação somente leitura `REPEATABLE READ`, depois da autenticação, com releitura
+do perfil. As três entidades filhas sem `user_id` — `writing_revision`,
+`step_progress`, `practice_session_item` — são delimitadas pelo proprietário do pai.
+Transcrições são incluídas apenas quando válidas no timestamp do snapshot.
+Teste com escrita concorrente confirmada em outra conexão comprovou a preservação
+do estado anterior no arquivo; escrita posterior ao export também funciona,
+verificando que a opção read-only não permaneceu no checkout seguinte.
+
+Inventário cobre 21 tabelas com `user_id`, as três filhas e `app_user`; dados de
+segurança não pessoais/agregados e backups operacionais são exclusões declaradas.
+Cada tabela tem contagem no arquivo; a mesma entidade pode aparecer também numa
+projeção compatível antiga, por isso não somar seções JSON para contar registros.
+Campos secretos/operacionais não fazem parte da portabilidade.
+
+**Sprint em andamento:** 40B preservação editorial/seed, 40C exclusão com retry e
+política de backups, 40D histórico/aceite integrado. Nenhum expurgo ou alteração
+de seed foi executado. [Contrato e verificação](operacao_sprint_37.md#sprint-40a--exportação-e-meus-dados-em-15102026).
+
+### Incremento 40B.1 — proteção antes de migrations editoriais, 15/10/2026
+
+Mantida migration `a39d7bc02486`; nenhum schema/usuário/permissão alterado.
+Prévia lê somente as 19 tabelas editoriais em snapshot consistente. Aplicação
+recusa qualquer alteração ou omissão de conteúdo existente, mesmo não referenciado,
+e extensão de aula/checkpoint existente. Omissão **não é exclusão nem arquivamento**.
+Metadados de versões inferiores à versão solicitada ficam preservados literalmente
+e aparecem como `retained`, sem bloquear reaplicação idêntica. Uma versão superior
+omitida caracteriza tentativa de downgrade e continua bloqueada. Não apagar versões
+para liberar o seed nem interpretar esses metadados como snapshots completos.
+
+Foram eliminados os deletes/reinserts de objetivos, gramática, frases, respostas,
+dicas, vocabulário, prompts, mídia/cues e questões. Reaplicação idêntica preserva
+IDs, timestamps e sequências de todas as tabelas editoriais. Conteúdo genuinamente
+novo é inserido em ordem de dependências, com rollback da transação inteira em
+falha. Sequências podem avançar em uma aplicação que falhe, como no PostgreSQL
+normal; a garantia de não avançar é da prévia e da reaplicação idêntica.
+
+Locks `NOWAIT` serializam a carga frente a outros escritores editoriais sem
+espera indefinida. Dados pessoais não precisam ser bloqueados: nenhum registro
+editorial existente pode ser modificado por esse caminho. Ainda **não** há
+snapshot imutável novo, identidade estável independente de posição, política
+central de arquivamento ou correção das datas legadas de 07/10. 40B.2 permanece
+necessário antes de editar/publicar novas versões em conteúdo existente.
+
+Prévia DEV: 82 diferenças de `writing_prompt.requirements` e 3 registros
+`lesson_version` antigos mantidos. Somente leitura; preservação integral.
+Diferença de representação de rubrica ainda precisa ser distinguida de mudança
+semântica antes de propor migração, sem sobrescrever o estado local automaticamente.
+[Contrato e testes](operacao_sprint_37.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
+
+### Incremento 40B.2a — tabela de evidências imutáveis, 15/10/2026
+
+Migration aditiva `b40e8cd13597`, depois de `a39d7bc02486`, cria
+`evidence_content_snapshot`: proprietário, exatamente uma FK real para tentativa
+de exercício/item de prática/feedback de escrita/fala/checkpoint, conteúdo JSONB,
+schema 1.0, fingerprint SHA-256 e timestamp. Unicidade por evento e trigger de
+validação da conta, incluindo proprietário da sessão pai dos itens de prática.
+Trigger rejeita UPDATE; runtime tem SELECT/INSERT, sem UPDATE/DELETE; worker não
+recebe acesso. Exclusão do evento/conta remove seu snapshot por cascade, mantendo
+o contrato futuro de exclusão pessoal. Não equivale a habilitar cascade editorial.
+
+Nenhum backfill: tabela nasce vazia. Ausência de snapshot antigo é declarada, não
+substituída por conteúdo atual. Limites: 200 mil bytes na serialização canônica do
+serviço e 256 KiB na representação textual JSONB. Fingerprint não é assinatura
+digital nem defesa contra administrador que altere o schema.
+
+Upgrade/downgrade/upgrade ensaiados em schema isolado: downgrade só permite tabela
+vazia e recusa apagar snapshots já gravados. Alembic check sem divergência entre
+modelo e migration. Migration aplicada somente nos laboratórios de teste/papéis;
+DEV e estudo permanecem em `a39d7bc02486`. Permissões reais ensaiadas no laboratório,
+não alteradas nos ambientes de uso.
+
+**Pendentes de 40B.2:** UUID/chave editorial estável, arquivamento, proveniência real,
+impacto no diff e rollout após backup/restore. As 82 rubricas divergentes do DEV
+não foram normalizadas/sobrescritas. [Contrato e verificação](operacao_sprint_37.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
+
+### Incremento 40B.2b.1 — diagnóstico de impacto, 15/10/2026
+
+Prévia `editorial-plan` usa uma transação `REPEATABLE READ, READ ONLY`, teto total
+de 30 s e 20 s por statement. Conta linhas das 19 tabelas editoriais e referências
+pessoais diretas/indiretas, incluindo versões de rascunho, itens de prática,
+checkpoint, eventos de tempo, competências resolvíveis e snapshots quando a tabela
+existe. Detecta referências de checkpoints de outras unidades por números de aula
+e questões JSONB, restringindo sempre ao mesmo curso. Não conta usuários únicos.
+
+Não expõe IDs de alunos, textos, e-mails ou caminhos de áudio. Ausência da tabela
+de snapshots é explícita, não convertida em zero; recibos órfãos, origens não
+resolvíveis, backups e dados somente locais são limites declarados. Nada é escrito,
+arquivado ou apagado; sequências e timestamps editoriais permanecem inalterados.
+Teste concorrente comprova o mesmo instante de leitura em todas as contagens.
+
+No DEV, prévia do bloco 31–40 encontrou 10 aulas, 111 exercícios, 10 prompts,
+48 cues e 1 checkpoint externo dependente; sem dados pessoais atribuíveis ao bloco
+naquele corte. Isso não é inventário de todas as contas/ambientes. Não houve
+migration nem concessão de privilégios. Identidade estável, aplicação auditada e
+integração desse plano ao seed ainda pendentes.
+[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
+
+### Incremento 40B.2b.2 — chaves imutáveis e compatibilidade, 15/10/2026
+
+Migration `c51f9de246a8`, após `b40e8cd13597`, acrescenta UUID `NOT NULL` com unicidade
+por tabela em `exercise`, `writing_prompt`, `transcript_cue`, `lesson_media`,
+`vocab_item` e `course_review_question`. Trigger recusa mudança de chave mesmo pelo
+owner. IDs numéricos, FKs, posições, textos, datas e resultados não são reescritos.
+
+O mapeamento inicial UUIDv5 usa namespace/receita congelados com coordenadas da
+baseline legada; fica persistido no banco e nos dois JSONs do seed. Essa receita
+**não é executada novamente para identificar entidades já migradas**. Editar ou
+reordenar deve carregar a chave original; entidade nova/clonada usa nova chave
+explícita. Inserções SQL sem chave têm default UUIDv4, mas o importador exige chave
+no pacote. Não há backfill de snapshots nem alegação de identidade histórica anterior.
+
+Downgrade recusa tabelas com entidades: remover chaves após reordenação permitiria
+reidentificação incorreta. Reversão vazia/re-upgrade ensaiados em schema temporário.
+Para rollback operacional, preferir código anterior mantendo colunas; eventual
+restore exige plano/backup compatível, não apagar conteúdo para habilitar downgrade.
+
+Ensaio: constraints, imutabilidade, relações e resultados preservados, chave mantida
+após mudança de posição, seed idempotente e `alembic check` sem drift. Papéis runtime,
+worker e backup não podem alterar chaves; runtime lê/captura via HTTP no laboratório.
+Laboratório encerrado com volume preservado. DEV/estudo não receberam migration;
+somente teste descartável e laboratório de papéis estão em c51.
+
+Reordenação continua bloqueada: referências posicionais de listening/checkpoints
+e fingerprints da prática ainda precisam de tratamento no plano editorial futuro.
+Proveniência, 82 rubricas DEV, integração de impacto/arquivamento e rollout pendentes.
+[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
+
+### Incremento 40B.2b.3 — recibo e transação de arquivamento, 15/10/2026
+
+Migration `d62a0ef357b9` após c51 cria `editorial_archive_event`, sem arquivar dados
+ou preencher auditoria legada. PK UUID da operação, FK RESTRICT para unidade,
+constraints de transição/motivo/hash, operador declarado e identidades SQL reais,
+timestamp do banco e impacto agregado. Trigger recusa UPDATE/DELETE; downgrade
+recusa recibos existentes. Não é proteção contra DDL privilegiado do owner.
+
+Runtime/worker não leem nem escrevem a auditoria; backup tem somente leitura.
+O proprietário/migrador aplica por serviço/CLI auditado, sem conceder UPDATE de
+catálogo ao runtime. Status e recibo são atômicos. Retry verifica todos os campos
+do pedido antes de devolver o recibo, sem nova mutação.
+
+Advisory lock global transacional compartilhado nas admissões/exclusivo no seed
+e apply; aquisição não bloqueante evita ciclos com locks pessoais. As 19 tabelas
+editoriais recebem SHARE ROW EXCLUSIVE NOWAIT durante aplicação, congelando
+conteúdo e referências entre unidades. Nenhuma tabela pessoal é bloqueada para
+arquivar. Digest inclui catálogo normalizado completo, IDs, alvo e nome do banco;
+alteração editorial em outra unidade também exige nova prévia, por prudência.
+
+Prévia usa REPEATABLE READ READ ONLY; apply exige READ COMMITTED e tem teto de
+30 s/20 s por statement. Contagens pessoais durante apply são observações, não um
+snapshot global imóvel: jobs admitidos e gestão privada podem continuar. Essas
+contagens não autorizam remoção ou reprocessamento; dependências editoriais estão
+congeladas e checkpoints externos bloqueiam a aplicação.
+
+Migration/constraints/rollback ensaiados no banco descartável e em laboratório de
+papéis. Ensaios de arquivamento foram revertidos integralmente por rollback, sem
+desabilitar triggers para apagar recibos. DEV/estudo não migrados nem arquivados;
+prod/public bloqueados. [Contrato e evidências](operacao_sprint_37.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
+
+### Incremento DB-40B.2c — ausência explícita de data e auditoria read-only
+
+Migration `e73c1a9b40d2` torna `lesson_version.reviewed_at` anulável e corrige o
+timestamp técnico 07/10 para `NULL`; não usa acesso à fonte, migration ou relógio
+atual como substituto de revisão. Datas diferentes são preservadas e downgrade
+com valor desconhecido é recusado. A nota default legada passa a declarar que a
+homologação continua pendente.
+
+O auditor usa snapshot `REPEATABLE READ, READ ONLY`, sem tabelas pessoais. No DEV,
+85 versões tinham a data gerada e 83 antecediam o último acesso da aula à fonte.
+A consulta não fez DML. Upgrade/reseed e migration unitária foram ensaiados apenas
+no banco 55435; `alembic check` ficou limpo. **1.088 backend e 88 testes operacionais**
+passaram. DEV/estudo continuam no schema anterior, sem correção ou rubrica aplicada.
+[Contrato completo](operacao_sprint_37.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
+
+### Incremento DB-40B.2d — projeção mínima do worker
+
+Migration `f84d1b6c2a90`, depois de e73, cria somente a função fixa
+`aulas_speaking_expected_text(attempt_id,user_id)`. Ela lê o snapshot privado como
+definer e retorna apenas a cue inglesa quando tentativa, dono e modalidade
+coincidem. `PUBLIC`, runtime e backup não recebem execução; o worker recebe apenas
+`EXECUTE` e continua proibido de executar `SELECT` na tabela de snapshots.
+
+Não há coluna nova, backfill ou alteração de evidência. A função devolve `NULL`
+para legado ausente, e o worker encerra o job antes do provedor. Migration ensaiada
+somente no PostgreSQL descartável; DEV e estudo permanecem no schema anterior.
+
+### Incremento DB-40B.2e — referências por identidade, não por posição
+
+Migration `a06f2ce1487b`, depois de f84, acrescenta os vínculos canônicos
+`lesson_media.listening_exercise_id` e
+`course_review.listening_course_id/listening_lesson_id/listening_media_id`.
+O backfill resolve o catálogo legado dentro da aula/curso e aborta a transação se
+qualquer referência ficar sem alvo. As colunas antigas de número/posição permanecem
+na janela expand, mas não decidem mais a leitura da API.
+
+FKs compostas garantem que a mídia use exercício da mesma aula e que o checkpoint
+use aula/mídia do mesmo curso. A unidade não é exigida porque checkpoints podem
+retomar legitimamente a aula limítrofe do bloco anterior, como 40–44 → Aula 40.
+Índices cobrem os novos FKs e o modelo/Alembic ficaram sem drift.
+
+Downgrade foi ensaiado antes de reordenar. Após mudar temporariamente a posição de
+um alvo no banco descartável, a reversão foi recusada e a transação preservou o
+head; a posição foi restaurada. A migration não altera snapshots, tentativas,
+textos ou IDs existentes. `alembic check` e **1.097 testes backend** passaram;
+DEV/estudo permaneceram intocados.
+
+### Incremento DB-40B.2f — prévia de permutação sem DML
+
+Nenhuma migration ou alteração de schema foi necessária. A prévia abre snapshot
+`REPEATABLE READ, READ ONLY`, relê as 19 tabelas editoriais e verifica que cada
+grupo afetado conserva o mesmo conjunto de UUIDs, os mesmos pais e exatamente o
+mesmo conjunto de posições. Cues são validadas dentro da própria mídia, não apenas
+no conjunto da aula.
+
+O catálogo atual e o proposto recebem hashes separados. O relatório conta FKs
+diretas de tabelas não editoriais para as identidades afetadas, mas não seleciona
+valores pessoais. Identidade projetada de schema legado bloqueia aceite; somente
+UUID persistido pode sustentar a operação futura.
+
+O ensaio no PostgreSQL descartável confirmou apenas `SELECT`/`SET`, sem avanço de
+sequências ou alteração de linhas. Não existe DML nesta etapa. O apply futuro ainda
+precisa de advisory lock exclusivo, locks editoriais NOWAIT, comparação do digest,
+atualização atômica sem colisão de UNIQUE e recibo append-only. DEV/estudo não foram
+consultados nem migrados.
+
+### Incremento DB-40B.2g — recibo e permutação atômica
+
+Migration `b71d4f9e20c3`, depois de a06, cria `editorial_reorder_event`. A tabela
+guarda chave UUID da operação, operador/motivo, `current_user`/`session_user`, hashes
+do plano/catálogo, mudanças posicionais e impacto agregado. Trigger recusa UPDATE e
+DELETE; downgrade é permitido somente sem recibos. Não há backfill ou alteração de
+conteúdo nessa migration.
+
+Durante o apply todas as tabelas editoriais ficam congeladas. Cada linha afetada
+recebe primeiro uma posição temporária positiva acima do máximo da tabela e depois
+a posição planejada; isso mantém as constraints imediatas válidas durante swaps.
+Versão e auditoria são atômicas com a permutação. O hash do catálogo relido após DML
+precisa coincidir com o estado projetado, que preserva versões históricas omitidas do
+pacote atual.
+
+Upgrade, downgrade vazio, re-upgrade, `alembic check` e seed idempotente passaram no
+banco descartável. O laboratório de papéis confirmou owner/migrador para aplicação,
+backup com SELECT e runtime/worker sem acesso ao recibo. Ensaios com dados sintéticos
+foram revertidos; DEV/estudo não receberam migration nem mudança de posição.
+
 ## Sprint 41 Desempenho de consultas e validação de invariantes
 
 Achados D05, D06 e B10.
 
 ### Entregas
 
-- [ ] Gerar massa sintética isolada para usuários, eventos, escrita, revisão e jobs, em pelo menos dois volumes documentados.
-- [ ] Capturar planos de consultas reais de fila, histórico, painel, currículo e expiração; registrar cardinalidade, buffers e tempo.
-- [ ] Ensaiar índices compostos/parciais candidatos e manter somente os que tragam benefício mensurável na carga definida.
-- [ ] Revisar índices redundantes, custo de escrita, espaço e manutenção; não remover índice de unicidade por parecer sobreposto.
-- [ ] Alinhar índices aos cursores e filtros de BE-41, incluindo desempate por ID.
-- [ ] Validar as constraints adicionadas com verificação de dados e testes de SQL direto em base descartável.
-- [ ] Criar relatório agregado de referências polimórficas órfãs e incoerências de estado, com prazo e ação para cada caso.
-- [ ] Avaliar pool total de API/workers, timeout de statement/lock e orçamento de conexões; não apenas aumentar `max_connections`.
+- [x] Gerar massa sintética isolada para usuários, eventos, escrita, revisão e jobs, em pelo menos dois volumes documentados.
+- [x] Capturar planos de consultas reais de fila, histórico, painel, currículo e expiração; registrar cardinalidade, buffers e tempo.
+- [x] Ensaiar índices compostos/parciais candidatos e manter somente os que tragam benefício mensurável na carga definida.
+- [x] Revisar índices redundantes, custo de escrita, espaço e manutenção; não remover índice de unicidade por parecer sobreposto.
+- [x] Alinhar índices aos cursores e filtros de BE-41, incluindo desempate por ID.
+- [x] Validar as constraints adicionadas com verificação de dados e testes de SQL direto em base descartável.
+- [x] Criar relatório agregado de referências polimórficas órfãs e incoerências de estado, com prazo e ação para cada caso.
+- [x] Avaliar pool total de API/workers, timeout de statement/lock e orçamento de conexões; não apenas aumentar `max_connections`.
 
 ### Candidatos sujeitos a medição
 
@@ -564,6 +1019,203 @@ Achados D05, D06 e B10.
 6. Não se utiliza dado pessoal real para gerar relatório ou benchmark.
 
 Fora do escopo: particionamento/replicação/cache externo sem evidência de necessidade.
+
+### Incremento DB-41A — medir antes de indexar
+
+A sonda do backend conta comandos executados e aquisições do pool sem registrar
+texto SQL ou bind parameters. No PostgreSQL descartável, a lista de aulas fez 1
+comando e o detalhe fez 18. A causa inicial não era ausência de índice: o mapeamento
+carregava automaticamente o checkpoint, suas perguntas e respostas corretas que
+não pertencem ao contrato público.
+
+Depois de delimitar a projeção, o detalhe passou a 15 comandos e manteve um único
+checkout. Nenhuma migration ou índice foi criado, pois ainda não existe plano de
+execução nem massa suficiente que justifique custo de escrita adicional. Os testes
+fixam os orçamentos iniciais, mas os cenários 1k/10k, `EXPLAIN (ANALYZE, BUFFERS)` e
+avaliação de pool concorrente permanecem pendentes.
+
+### Incremento DB-41B — eliminar N+1 antes de criar índice
+
+O painel Hoje executava 38 comandos para uma conta nova. Dez deles eram contagens
+sequenciais de aulas faltantes por checkpoint; outros vinham da hidratação de
+grafos editoriais inteiros para produzir poucos campos de recomendação.
+
+A regra foi expressa como anti-join correlacionado (`NOT EXISTS`) sobre aulas sem
+progresso e tentativa da versão atual. O banco agora escolhe o primeiro checkpoint
+elegível na própria consulta. Projeções de coluna impediram carregamentos laterais e
+o caso medido caiu para 8 comandos e um checkout. Nenhuma migration ou índice foi
+adicionado: planos com massa 1k/10k ainda precisam demonstrar se algum índice traz
+benefício real.
+
+### Incremento DB-41C — keyset composto antes de indexar
+
+A primeira paginação de histórico usa a ordenação total
+`notebook_entry.updated_at DESC, notebook_entry.id DESC` e a fronteira equivalente
+`updated_at < ts OR (updated_at = ts AND id < id_cursor)`. Assim, datas iguais não
+dependem da ordem acidental do banco e não se usa `OFFSET` progressivamente mais
+caro. `user_id` e filtros editoriais são condições da mesma consulta; o cursor não
+substitui nenhuma autorização.
+
+Não houve migration nem índice neste incremento. A página pequena mediu um único
+comando de dados, além da autenticação, e um checkout; isso ainda não demonstra o
+plano para 1 mil/10 mil linhas. Antes de propor um índice composto como
+`(user_id, updated_at DESC, id DESC)`, faltam massa sintética, filtros seletivos,
+`EXPLAIN (ANALYZE, BUFFERS)` e comparação do custo de escrita. A rota ilimitada
+legada continua somente para compatibilidade e deve ter retirada planejada após a
+migração de todos os consumidores.
+
+### Incremento DB-41D — índice composto aprovado por evidência
+
+O laboratório isolado materializou 1 mil e 10 mil notas, com cinco registros por
+timestamp para também pressionar o desempate por `id`. A travessia integral de 10
+mil itens retornou exatamente os ids esperados em 200 páginas. O plano profundo,
+em 90% da massa, caiu de 2,047 ms e 706 blocos de cache para 0,124 ms e 40 blocos
+com o candidato `(user_id, updated_at, id)`: reduções aproximadas de 93,9% no
+tempo do plano e 94,3% nos blocos somados.
+
+O custo foi medido antes da decisão: inserir 10 mil linhas passou de 118,74 ms
+para 135,81 ms (+14,4%); o índice ocupou 456 KiB após 11 mil linhas e 840 KiB
+após 21 mil. A massa é sintética e a latência HTTP apresentou variação, portanto
+os valores não são SLO. O ganho no plano profundo e a contenção do trabalho do
+banco justificam o índice; capacidade e write amplification devem continuar
+monitoradas com volume real anonimizado.
+
+A migration `c82f4a9d117e` usa `CREATE INDEX CONCURRENTLY`, fora da transação
+Alembic, para reduzir bloqueio de escrita. Antes e depois da criação ela consulta
+`pg_index`/`pg_get_indexdef`; um índice homônimo inválido, incompleto ou divergente
+interrompe a migration com instrução de inspeção, sem exclusão automática. O
+downgrade também exige definição válida e usa `DROP INDEX CONCURRENTLY`.
+Upgrade, downgrade, re-upgrade e `alembic check` passaram no PostgreSQL descartável.
+Uma execução posterior reconheceu o índice definitivo, percorreu novamente as 200
+páginas de 10 mil itens e mediu o plano profundo em 0,067 ms e 45 blocos de cache,
+sem criar candidato temporário.
+
+### Incremento DB-41E — escrita keyset sem índice especulativo
+
+Versões e análises usam a fronteira de tupla
+`(created_at, id) < (timestamp_cursor, id_cursor)` na mesma ordem decrescente. O
+resumo do Caderno usa `(writing_draft.updated_at, writing_draft.id)` e mantém
+`user_id`, curso e unidade na consulta. Empates foram exercitados nos testes; o ID
+é o desempate obrigatório e o cursor não carrega autorização.
+
+Não houve migration neste incremento. Nas páginas pequenas, os orçamentos ficaram
+em 2 SQLs para versões, 4 para feedback com snapshots buscados em lote e 2 para o
+resumo, todos já contando autenticação e limitados a um checkout. Isso comprova o
+formato da consulta, mas não custo profundo: índice novo só poderá ser proposto
+depois de massas isoladas de 1 mil/10 mil registros, filtros seletivos, plano com
+buffers e medição do custo de escrita. A migration vigente continua sendo
+`c82f4a9d117e`; nenhum dado do ambiente de estudo foi alterado.
+
+### Incremento DB-41F — speaking keyset e projeção medida
+
+A página de speaking usa a fronteira
+`(speaking_attempt.created_at, speaking_attempt.id) < (timestamp, id)` e mantém
+`user_id`, estado `ready`, curso, unidade e aula na mesma consulta. Tentativas
+pendentes não entram. Transcrição vigente e snapshot histórico são buscados em
+lote somente para os IDs da página.
+
+A abordagem ORM inicial executou 22 SQLs por causa do carregamento indireto das
+coleções da aula. A projeção explícita reduziu o contrato para 5 SQLs fixos por
+página, incluindo autenticação, e um checkout. Datas empatadas foram percorridas em
+2/2/1 sem lacunas ou repetição, mas essa massa de cinco itens não justifica índice.
+
+Não houve migration. Antes de considerar um composto como
+`(user_id, status, created_at DESC, id DESC)`, faltam massa descartável de 1 mil/10
+mil gravações, seletividade dos filtros, `EXPLAIN (ANALYZE, BUFFERS)`, custo de
+inserção e impacto das rotinas de retenção. O ambiente de estudo não foi consultado
+nem alterado.
+
+### Incremento DB-41G — fronteira keyset da revisão sem índice especulativo
+
+A página de itens de revisão usa a fronteira
+`(review_item.created_at, review_item.id) < (timestamp, id)` em ordem decrescente.
+`user_id`, `status`, curso e unidade permanecem na mesma consulta projetada; o
+cursor não carrega nem substitui autorização. Empates foram exercitados em 2/2/1 e
+a rota executou 2 SQLs por página, incluindo autenticação, com um checkout.
+
+Não houve migration. Cinco registros comprovam o contrato, não o custo profundo.
+Antes de considerar um índice como
+`(user_id, status, created_at DESC, id DESC)`, faltam massas descartáveis de 1 mil
+e 10 mil itens, seletividade por curso/unidade, `EXPLAIN (ANALYZE, BUFFERS)` e
+medição do custo de escrita. O banco de estudo não foi consultado nem alterado.
+
+### Incremento DB-41H — índice da revisão aprovado por medição
+
+O laboratório `make review-benchmark` foi executado no banco marcado
+`aulas_ingles_test`, com papel não administrativo `aulas_test`. Ele criou contas
+sintéticas isoladas, inseriu massas de 1 mil/10 mil itens suspensos e validou a
+ordem total `(created_at DESC, id DESC)` durante 20/200 páginas. A ferramenta usa
+advisory lock, confere identidade real antes da conexão útil, remove as contas por
+chave e e-mail e elimina o índice candidato mesmo em falha.
+
+Com 10 mil itens, o plano profundo sem candidato executou em 2,299 ms e somou
+1.795 blocos de cache. O composto `(user_id, status, created_at, id)` reduziu esses
+valores para 0,305 ms e 56 blocos. O índice temporário ocupou 565.248 bytes após
+11 mil linhas e 1.056.768 bytes após 21 mil. A inserção única de 10 mil linhas
+mediu 234,78 ms sem candidato e 191,28 ms com ele; como ordem, cache e aquecimento
+não foram neutralizados, o resultado apenas mostra ausência de regressão grosseira
+nesse ensaio e não demonstra escrita mais barata.
+
+A migration `d41e7ac905b2`, sucessora de `c82f4a9d117e`, cria
+`ix_review_item_user_status_created_id` por `CREATE INDEX CONCURRENTLY`. Preflight
+e pós-verificação exigem índice válido, pronto e definição exata; artefato homônimo
+inválido ou divergente bloqueia a execução para inspeção, sem remoção automática.
+O downgrade também valida a definição e usa `DROP INDEX CONCURRENTLY`.
+
+Upgrade, downgrade, re-upgrade, teste do índice e gate de drift passaram. Com o
+índice final, novo percurso de 10 mil itens fechou 200 páginas; o plano profundo
+mediu 0,722 ms/283 blocos e uma rajada de 10 requisições respondeu integralmente.
+A variação entre execuções confirma que tempos HTTP locais não são SLO. Nenhuma
+migration foi aplicada ao banco de estudo; promoção futura exige backup verificado,
+checagem de locks/capacidade e janela operacional.
+
+### Incremento DB-41I — escrita e speaking medidos antes de indexar
+
+O laboratório de escrita materializou 1 mil/10 mil versões, análises e rascunhos
+resumidos, sempre com timestamps empatados. O composto de feedback
+`(user_id,prompt_id,created_at,id)` reduziu o plano profundo de 1,607 ms e 1.575
+blocos para 0,062 ms e 10 blocos por `Index Only Scan`. Após a migration definitiva,
+o plano repetido ficou em 0,061 ms/8 blocos. Os candidatos de versões e rascunhos
+não foram escolhidos; não foram promovidos.
+
+Speaking percorreu as mesmas escalas. Seu candidato composto não apareceu no plano,
+que continuou usando `ix_speaking_status_created`, e houve regressão no p95 da
+primeira página. Ele foi removido ao fim do ensaio. A decisão deixa explícito que
+mais índices não são automaticamente melhores.
+
+`e41f6c2a8d90` cria somente
+`ix_writing_feedback_user_prompt_created_id` com `CONCURRENTLY`, preflight e
+pós-verificação de validade/prontidão/definição. O ciclo reversível e o gate de
+drift passaram no banco descartável; nenhuma migration foi aplicada ao estudo.
+
+### Incremento DB-41J — volumes restantes, invariantes e orçamento de pool
+
+`make database-benchmark` completou massas isoladas de 1 mil/10 mil usuários,
+eventos/intervalos e jobs. Em 10 mil, os inserts mediram 41,26 ms, 316,60 ms e
+320,70 ms. Os planos reais registraram: lookup de usuário 0,022 ms/4 blocos;
+painel semanal 1,478 ms/178 blocos; fila 0,070 ms/15 blocos; expiração 1,324
+ms/705 blocos; currículo 0,579 ms/45 blocos. Scans sequenciais de painel,
+expiração e currículo foram mantidos porque as massas/seleções medidas não
+justificaram outro índice.
+
+O candidato parcial de fila `(next_attempt_at,id) WHERE status='queued'` foi usado,
+mas reduziu apenas 0,070 para 0,064 ms. Seu build levou 25,67 ms, ocupou 360 KiB
+antes do probe/1.240 KiB depois e elevou o insert de 10 mil jobs de 320,70 para
+362,36 ms (+13,0%). O ganho marginal não justificou manutenção; o índice temporário
+foi removido. A limpeza final confirmou zero usuários sintéticos e índice ausente.
+Durante o desenvolvimento, uma falha do fixture deixou 1.002 contas exclusivamente
+sintéticas; elas foram identificadas pelo prefixo único, removidas do banco de teste
+e a rotina passou a executar rollback defensivo antes da limpeza.
+
+A auditoria read-only existente executou 22 regras agregadas de ownership,
+referências polimórficas e estados, todas com contagem zero e sem expor conteúdo ou
+identidade. Constraints continuam cobertas por SQL direto. O runtime agora aplica
+pool 5 + overflow 5, espera 10 s, statement 30 s e lock 5 s; no compose atual, API
+e worker declaram no máximo 20 conexões diante das 100 do PostgreSQL, preservando
+reserva operacional. Assim, DB-41 fica tecnicamente concluída sem aumentar
+`max_connections` nem promover índice sem benefício material. A cadeia Alembic foi
+confirmada com head único `e41f6c2a8d90`; a regressão integrada aprovou **1.151
+testes backend** e **94 testes operacionais**.
 
 ## Sprint 42 Recuperação e evolução segura do banco
 

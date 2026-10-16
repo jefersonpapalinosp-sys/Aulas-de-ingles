@@ -68,6 +68,7 @@ async def test_today_explains_first_recommendation_and_has_safe_defaults(
         "preferred_days": ["mon", "wed", "fri"],
         "goal": "Criar constância no inglês",
         "updated_at": None,
+        "timezone": "UTC",
     }
     assert today["recent_session"] is None
 
@@ -233,9 +234,7 @@ async def test_today_recomenda_fechamento_31_40_e_depois_a_aula_41(
     )
     await session.commit()
 
-    recommendation = (await client.get("/api/me/today", headers=headers)).json()[
-        "recommendation"
-    ]
+    recommendation = (await client.get("/api/me/today", headers=headers)).json()["recommendation"]
     assert recommendation == {
         **recommendation,
         "kind": "course_review",
@@ -264,9 +263,7 @@ async def test_today_recomenda_fechamento_31_40_e_depois_a_aula_41(
     )
     assert submitted.status_code == 201
 
-    after_attempt = (await client.get("/api/me/today", headers=headers)).json()[
-        "recommendation"
-    ]
+    after_attempt = (await client.get("/api/me/today", headers=headers)).json()["recommendation"]
     assert after_attempt["kind"] == "start_lesson"
     assert after_attempt["title"] == "Começar a Aula 41"
     assert after_attempt["lesson_number"] == 41
@@ -412,14 +409,16 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
             "course_slug": "voa-level-1",
             "lesson_number": None,
         }
-        assert default_today["recorded_minutes_this_week"] == 2
+        assert default_today["recorded_minutes_this_week"] == 0
+        assert default_today["recent_session"]["legacy_minutes"] == 2
         assert default_today["recent_session"]["course_slug"] == "voa-level-1"
         assert default_today["recent_session"]["lesson_number"] == 31
 
         assert level_2_today["recommendation"]["title"] == "Revisar 2 itens"
         assert level_2_today["recommendation"]["href"] == ("/revisar?course=voa-level-2")
         assert level_2_today["recommendation"]["course_slug"] == "voa-level-2"
-        assert level_2_today["recorded_minutes_this_week"] == 5
+        assert level_2_today["recorded_minutes_this_week"] == 0
+        assert level_2_today["recent_session"]["legacy_minutes"] == 5
         assert level_2_today["recent_session"]["course_slug"] == "voa-level-2"
         assert level_2_today["recent_session"]["lesson_number"] == 1
 
@@ -762,7 +761,7 @@ async def test_skills_sao_isoladas_por_curso_e_unidade(
 
 
 @pytest.mark.asyncio
-async def test_session_records_time_steps_and_completion(
+async def test_session_records_steps_without_crediting_abandoned_wall_time(
     client: AsyncClient, session: AsyncSession
 ) -> None:
     headers = await conta(client, "today-time")
@@ -790,7 +789,7 @@ async def test_session_records_time_steps_and_completion(
             "completed_steps": ["preparar", "assistir", "estudar", "praticar", "revisar"],
         },
     )
-    assert completed.json()["total_seconds"] >= 124
+    assert completed.json()["total_seconds"] == 0
     assert completed.json()["completed_at"] is not None
 
     step_count = len(
@@ -804,7 +803,7 @@ async def test_session_records_time_steps_and_completion(
     )
     assert step_count == 5
     today = (await client.get("/api/me/today", headers=headers)).json()
-    assert today["recorded_minutes_this_week"] == 2
+    assert today["recorded_minutes_this_week"] == 0
     assert today["recent_session"]["completed_steps"] == 5
     assert today["recent_session"]["course_slug"] == "voa-level-1"
 

@@ -41,6 +41,8 @@ export function useMarcarEstudada(courseSlug: string) {
 export function useStudySession(courseSlug: string, numero: number, enabled = true) {
   return useQuery({
     queryKey: ['study-session', courseSlug, numero],
+    // Permite falhar offline e hidratar o progresso local, sem ficar pausado para sempre.
+    networkMode: 'always', retry: false,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/lessons/{number}/study-session',

@@ -57,7 +57,9 @@ class PracticeSummaryOut(BaseModel):
 
 
 class PracticeSessionItemOut(BaseModel):
+    id: int
     position: int
+    historical_content_status: Literal["available", "unavailable"]
     exercise: ExerciseOut
     attempt_count: int
     first_try_correct: bool | None

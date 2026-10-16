@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from ops import recovery
 from ops.recovery_archive import (
+    LEGACY_FORMAT,
     MAX_AUDIO,
     RecoveryError,
     audio_inventory,
@@ -197,6 +198,51 @@ class ArchiveTests(unittest.TestCase):
         manifest = verify_bundle(create_bundle(self.root, orphan))
         self.assertEqual(manifest["unreferenced_audio_count"], 1)
         self.assertIn("orphan.wav", manifest["audio_files"])
+
+    def test_quarantine_bytes_and_journal_preserved_and_counted_separately(self):
+        operation = "b" * 32
+        entries = [
+            (KEY, PAYLOAD, tarfile.REGTYPE),
+            (f".quarantine/{operation}/audio", b"orphan voice", tarfile.REGTYPE),
+            (f".quarantine/{operation}/record.json", b'{"version":1}', tarfile.REGTYPE),
+            (f".quarantine/{operation}/restore.json", b'{"intent":"restore"}', tarfile.REGTYPE),
+        ]
+
+        def quarantine(path):
+            metadata = capture(path)
+            write_tar(path / "voice.tar", entries)
+            return metadata
+
+        bundle = create_bundle(self.root, quarantine)
+        manifest = verify_bundle(bundle)
+        self.assertEqual(manifest["quarantine_entry_count"], 3)
+        self.assertEqual(manifest["unreferenced_audio_count"], 0)
+        self.assertEqual(len(manifest["audio_files"]), 4)
+        manifest["format"] = LEGACY_FORMAT
+        (bundle / "manifest.json").write_text(json.dumps(manifest))
+        with self.assertRaises(RecoveryError):
+            verify_bundle(bundle)
+
+    def test_legacy_backup_without_quarantine_remains_readable(self):
+        bundle = create_bundle(self.root, capture)
+        manifest = verify_bundle(bundle)
+        manifest["format"] = LEGACY_FORMAT
+        del manifest["quarantine_entry_count"]
+        (bundle / "manifest.json").write_text(json.dumps(manifest))
+        self.assertEqual(verify_bundle(bundle)["format"], LEGACY_FORMAT)
+
+    def test_quarantine_path_allowlist_rejects_traversal_and_unexpected_files(self):
+        for name in (
+            ".quarantine/../audio",
+            ".quarantine/" + "b" * 32 + "/../voice",
+            ".quarantine/" + "b" * 32 + "/unexpected",
+            ".quarantine/not-uuid/audio",
+        ):
+            with self.subTest(name=name):
+                archive = self.root / "invalid.tar"
+                write_tar(archive, [(name, PAYLOAD, tarfile.REGTYPE)])
+                with self.assertRaises(RecoveryError):
+                    audio_inventory(archive)
 
     def test_public_or_linked_output_directory_rejected(self):
         public = self.root / "public"

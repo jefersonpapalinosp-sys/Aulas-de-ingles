@@ -17,3 +17,7 @@ function run<T>(operation: 'ler' | 'gravar' | 'remover', action: (storage: Stora
 export const readLocal = (key: string): StorageResult<string | null> => run('ler', (s) => s.getItem(key))
 export const writeLocal = (key: string, value: string): StorageResult<void> => run('gravar', (s) => s.setItem(key, value))
 export const removeLocal = (key: string): StorageResult<void> => run('remover', (s) => s.removeItem(key))
+export const listLocal = (prefix: string): StorageResult<string[]> => run('ler', (s) =>
+  Array.from({ length: s.length }, (_, index) => s.key(index)).filter(
+    (key): key is string => key !== null && key.startsWith(prefix),
+  ))

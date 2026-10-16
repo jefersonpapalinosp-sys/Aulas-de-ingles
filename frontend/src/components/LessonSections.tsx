@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Phrase, PronunciationNote, VocabItem } from '../api/client'
-import { useAdicionarItem } from '../api/review'
+import { useAdicionarItem } from '../api/addReviewItem'
 import { Markdown } from './Markdown'
 
 export function PhraseList({ frases }: { frases: Phrase[] }) {

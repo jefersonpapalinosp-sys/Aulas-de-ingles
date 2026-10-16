@@ -10,10 +10,11 @@ ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -
 .DEFAULT_GOAL := help
 
 .PHONY: help up down logs ps reset api web test test-api test-web test-e2e lint fmt health \
-        migrate migration seed openapi assist-gate assist-worker prod-up prod-down prod-logs \
+        migrate migration seed seed-plan editorial-audit editorial-reorder-plan openapi assist-gate assist-worker prod-up prod-down prod-logs \
         prod-seed backup restore cov test-db-up test-db-down test-api-prepare e2e-up e2e-down e2e-check \
         recovery-lab-up recovery-lab-prepare recovery-lab-down backup-verify test-recovery \
-        test-recovery-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down
+        test-recovery-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down \
+        notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark
 
 help: ## Lista os comandos
 	@grep -E '^[a-z0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -85,6 +86,21 @@ cov: test-api-prepare ## pytest com cobertura, somente na base exclusiva de test
 test-api: test-api-prepare ## pytest contra banco descartável, nunca contra dev/prod
 	cd backend && uv run pytest -q
 
+notebook-benchmark: test-api-prepare ## Mede Caderno 1k/10k só no PostgreSQL descartável
+	$(OPS) -m ops.notebook_performance
+
+review-benchmark: test-api-prepare ## Mede Revisão 1k/10k só no PostgreSQL descartável
+	$(OPS) -m ops.review_performance
+
+speaking-benchmark: test-api-prepare ## Mede Speaking 1k/10k só no PostgreSQL descartável
+	$(OPS) -m ops.speaking_performance $(SPEAKING_BENCHMARK_ARGS)
+
+writing-benchmark: test-api-prepare ## Mede escrita 1k/10k só no PostgreSQL descartável
+	$(OPS) -m ops.writing_performance $(WRITING_BENCHMARK_ARGS)
+
+database-benchmark: test-api-prepare ## Mede usuários/eventos/jobs 1k/10k só no banco descartável
+	$(OPS) -m ops.database_performance
+
 test-web: ## vitest
 	cd frontend && npm run test
 
@@ -101,8 +117,17 @@ migrate: ## Aplica as migrations pendentes
 migration: ## Gera uma revisão a partir dos modelos — make migration m="texto"
 	$(COMPOSE) exec -T api alembic revision --autogenerate -m "$(m)"
 
-seed: ## Carrega seed/lessons.json (idempotente)
+seed-plan: ## Prévia somente leitura do seed; código 1 se houver alterações bloqueadas
+	$(COMPOSE) exec -T api python -m app.cli seed --dry-run
+
+seed: ## Insere conteúdo novo; bloqueia alterações/omissões do existente (40B.1)
 	$(COMPOSE) exec -T api python -m app.cli seed
+
+editorial-audit: ## Audita rubricas/proveniência em snapshot somente leitura
+	$(COMPOSE) exec -T api python -m app.cli editorial-audit
+
+editorial-reorder-plan: ## Valida pacote de reordenação sem escrever; file=... é opcional
+	$(COMPOSE) exec -T api python -m app.cli editorial-reorder-plan $(if $(file),--file "$(file)",)
 
 openapi: ## Regrava o baseline do contrato em backend/openapi.json
 	cd backend && uv run python -m app.openapi_dump
@@ -165,7 +190,7 @@ recovery-lab-down: ## Para só o laboratório de recuperação; preserva todos o
 	$(OPS) -m ops.recovery lab-resources
 	$(RECOVERY_COMPOSE) down
 
-backup: ## Banco + voz: make backup source=lab|prod (origem precisa estar em manutenção)
+backup: ## Banco + voz: make backup source=lab|dev|prod (origem precisa estar em manutenção)
 	$(OPS) -m ops.recovery backup --source "$(source)"
 
 backup-verify: ## Confere manifesto/checksums: make backup-verify f=backups/recovery/aulas-...

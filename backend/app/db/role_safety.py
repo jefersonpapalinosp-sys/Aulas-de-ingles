@@ -17,8 +17,13 @@ FROM pg_roles r WHERE r.rolname=session_user
 """
 
 
-def connect_args(purpose: Purpose | None) -> dict[str, Any]:
-    return {"server_settings": {"role": "aulas_owner"}} if purpose == "migrator" else {}
+def connect_args(
+    purpose: Purpose | None, server_settings: dict[str, str] | None = None
+) -> dict[str, Any]:
+    settings = dict(server_settings or {})
+    if purpose == "migrator":
+        settings["role"] = "aulas_owner"
+    return {"server_settings": settings} if settings else {}
 
 
 def validate_identity(row: Sequence[object] | None, purpose: Purpose) -> None:

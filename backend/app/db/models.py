@@ -20,6 +20,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Uuid,
     func,
     text,
 )
@@ -27,6 +28,75 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+
+class EditorialArchiveEvent(Base):
+    """Operational receipt, append-only; contains no student content or identifiers."""
+
+    __tablename__ = "editorial_archive_event"
+    __table_args__ = (
+        CheckConstraint(
+            "before_status = 'published' AND after_status = 'archived'",
+            name="ck_archive_transition",
+        ),
+        CheckConstraint(
+            "reason_code IN ('editorial_review', 'source_unavailable', "
+            "'curriculum_reorganization')",
+            name="ck_archive_reason",
+        ),
+        CheckConstraint("catalog_sha256 ~ '^[0-9a-f]{64}$'", name="ck_archive_hash"),
+    )
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    unit_id: Mapped[int] = mapped_column(ForeignKey("course_unit.id", ondelete="RESTRICT"))
+    course_slug: Mapped[str] = mapped_column(String(100))
+    unit_slug: Mapped[str] = mapped_column(String(100))
+    operator_label: Mapped[str] = mapped_column(String(64))
+    reason_code: Mapped[str] = mapped_column(String(40))
+    db_actor: Mapped[str] = mapped_column(String(128), server_default=text("current_user"))
+    db_login: Mapped[str] = mapped_column(String(128), server_default=text("session_user"))
+    before_status: Mapped[str] = mapped_column(String(20))
+    after_status: Mapped[str] = mapped_column(String(20))
+    catalog_sha256: Mapped[str] = mapped_column(String(64))
+    impact: Mapped[dict[str, object]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EditorialReorderEvent(Base):
+    """Immutable receipt for one explicitly approved position permutation."""
+
+    __tablename__ = "editorial_reorder_event"
+    __table_args__ = (
+        CheckConstraint(
+            "reason_code IN ('pedagogical_sequence', 'accessibility_sequence', "
+            "'curriculum_reorganization')",
+            name="ck_reorder_reason",
+        ),
+        CheckConstraint("plan_sha256 ~ '^[0-9a-f]{64}$'", name="ck_reorder_plan_hash"),
+        CheckConstraint(
+            "catalog_before_sha256 ~ '^[0-9a-f]{64}$'",
+            name="ck_reorder_before_hash",
+        ),
+        CheckConstraint(
+            "catalog_candidate_sha256 ~ '^[0-9a-f]{64}$'",
+            name="ck_reorder_candidate_hash",
+        ),
+        CheckConstraint(
+            "catalog_after_sha256 ~ '^[0-9a-f]{64}$'",
+            name="ck_reorder_after_hash",
+        ),
+    )
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    operator_label: Mapped[str] = mapped_column(String(64))
+    reason_code: Mapped[str] = mapped_column(String(40))
+    db_actor: Mapped[str] = mapped_column(String(128), server_default=text("current_user"))
+    db_login: Mapped[str] = mapped_column(String(128), server_default=text("session_user"))
+    plan_sha256: Mapped[str] = mapped_column(String(64))
+    catalog_before_sha256: Mapped[str] = mapped_column(String(64))
+    catalog_candidate_sha256: Mapped[str] = mapped_column(String(64))
+    catalog_after_sha256: Mapped[str] = mapped_column(String(64))
+    changes: Mapped[list[dict[str, object]]] = mapped_column(JSONB)
+    impact: Mapped[dict[str, object]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Course(Base):
@@ -100,6 +170,7 @@ class CourseUnit(Base):
     )
     review: Mapped["CourseReview | None"] = relationship(
         back_populates="unit",
+        foreign_keys="CourseReview.unit_id",
         cascade="all, delete-orphan",
         uselist=False,
         lazy="selectin",
@@ -126,8 +197,29 @@ class CourseReview(Base):
             name="ck_course_review_listening_position_nonnegative",
         ),
         CheckConstraint(
-            "(listening_lesson_number IS NULL) = (listening_media_position IS NULL)",
+            "(listening_lesson_number IS NULL) = (listening_media_position IS NULL) AND "
+            "(listening_media_position IS NULL) = (listening_course_id IS NULL) AND "
+            "(listening_course_id IS NULL) = (listening_lesson_id IS NULL) AND "
+            "(listening_lesson_id IS NULL) = (listening_media_id IS NULL)",
             name="ck_course_review_listening_pair",
+        ),
+        ForeignKeyConstraint(
+            ["unit_id", "listening_course_id"],
+            ["course_unit.id", "course_unit.course_id"],
+            name="fk_course_review_unit_course",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["listening_lesson_id", "listening_course_id"],
+            ["lesson.id", "lesson.course_id"],
+            name="fk_course_review_listening_lesson_course",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["listening_lesson_id", "listening_media_id"],
+            ["lesson_media.lesson_id", "lesson_media.id"],
+            name="fk_course_review_listening_media_lesson",
+            ondelete="RESTRICT",
         ),
         CheckConstraint(
             "status IN ('planned', 'published', 'archived')", name="ck_course_review_status"
@@ -156,8 +248,15 @@ class CourseReview(Base):
     review_lesson_number: Mapped[int] = mapped_column(Integer)
     listening_lesson_number: Mapped[int | None] = mapped_column(Integer, default=None)
     listening_media_position: Mapped[int | None] = mapped_column(Integer, default=None)
+    # Vínculo canônico. Número/posição permanecem somente para compatibilidade
+    # com o pacote editorial legado e não são usados para resolver a mídia.
+    listening_course_id: Mapped[int | None] = mapped_column(Integer, index=True, default=None)
+    listening_lesson_id: Mapped[int | None] = mapped_column(Integer, index=True, default=None)
+    listening_media_id: Mapped[int | None] = mapped_column(Integer, index=True, default=None)
 
-    unit: Mapped[CourseUnit] = relationship(back_populates="review", lazy="joined")
+    unit: Mapped[CourseUnit] = relationship(
+        back_populates="review", foreign_keys=[unit_id], lazy="joined"
+    )
     questions: Mapped[list["CourseReviewQuestion"]] = relationship(
         back_populates="review",
         cascade="all, delete-orphan",
@@ -170,7 +269,14 @@ class CourseReviewQuestion(Base):
     """Questão autoral de checkpoint; o gabarito nunca sai na leitura inicial."""
 
     __tablename__ = "course_review_question"
+    editorial_key: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        server_default=text("gen_random_uuid()"),
+        deferred=True,
+        deferred_raiseload=True,
+    )
     __table_args__ = (
+        UniqueConstraint("editorial_key", name="uq_course_review_question_editorial_key"),
         UniqueConstraint("review_id", "position", name="uq_course_review_question_position"),
         CheckConstraint("position > 0", name="ck_course_review_question_position_positive"),
         CheckConstraint(
@@ -253,6 +359,7 @@ class Lesson(Base):
         UniqueConstraint("course_id", "number", name="uq_lesson_course_number"),
         UniqueConstraint("course_id", "slug", name="uq_lesson_course_slug"),
         UniqueConstraint("unit_id", "position", name="uq_lesson_unit_position"),
+        UniqueConstraint("id", "course_id", name="uq_lesson_id_course"),
         CheckConstraint("number > 0", name="ck_lesson_number_positive"),
         CheckConstraint("position > 0", name="ck_lesson_position_positive"),
     )
@@ -394,7 +501,9 @@ class LessonVersion(Base):
     status: Mapped[str] = mapped_column(String(20))
     learning_strategy: Mapped[str] = mapped_column(String(100))
     review_note: Mapped[str] = mapped_column(String(500))
-    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    # NULL significa que a revisão legada existe, mas sua data não foi
+    # comprovada. Nunca preencher com a data de acesso ou de execução.
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
 
     lesson: Mapped[Lesson] = relationship(back_populates="versions")
@@ -408,8 +517,22 @@ class LessonMedia(Base):
     """
 
     __tablename__ = "lesson_media"
+    editorial_key: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        server_default=text("gen_random_uuid()"),
+        deferred=True,
+        deferred_raiseload=True,
+    )
     __table_args__ = (
+        UniqueConstraint("editorial_key", name="uq_lesson_media_editorial_key"),
         UniqueConstraint("lesson_id", "position", name="uq_media_lesson_position"),
+        UniqueConstraint("lesson_id", "id", name="uq_lesson_media_lesson_id"),
+        ForeignKeyConstraint(
+            ["lesson_id", "listening_exercise_id"],
+            ["exercise.lesson_id", "exercise.id"],
+            name="fk_lesson_media_listening_exercise_lesson",
+            ondelete="RESTRICT",
+        ),
         CheckConstraint(
             "license_status IN ('public_domain', 'permission_granted', "
             "'restricted', 'review_required')",
@@ -439,7 +562,10 @@ class LessonMedia(Base):
     offline_policy: Mapped[str] = mapped_column(String(20), default="network_only")
     license_reviewed_at: Mapped[date | None] = mapped_column(default=None)
     duration_seconds: Mapped[int | None] = mapped_column(Integer, default=None)
+    # Campo legado: preserva o contrato do seed/API durante a expansão, mas
+    # a referência canônica é o FK abaixo e sobrevive a reordenações.
     listening_exercise_position: Mapped[int | None] = mapped_column(Integer, default=None)
+    listening_exercise_id: Mapped[int | None] = mapped_column(Integer, index=True, default=None)
     transcript: Mapped[list[dict[str, object]]] = mapped_column(JSONB, default=list)
 
     lesson: Mapped[Lesson] = relationship(back_populates="media")
@@ -455,7 +581,14 @@ class TranscriptCue(Base):
     """Trecho curto sincronizado com uma mídia da aula."""
 
     __tablename__ = "transcript_cue"
+    editorial_key: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        server_default=text("gen_random_uuid()"),
+        deferred=True,
+        deferred_raiseload=True,
+    )
     __table_args__ = (
+        UniqueConstraint("editorial_key", name="uq_transcript_cue_editorial_key"),
         UniqueConstraint("media_id", "position", name="uq_transcript_media_position"),
         CheckConstraint("start_seconds >= 0", name="ck_transcript_start_nonnegative"),
         CheckConstraint("end_seconds > start_seconds", name="ck_transcript_end_after_start"),
@@ -482,6 +615,8 @@ class MediaProgress(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "media_id", name="uq_media_progress_user_media"),
         CheckConstraint("position_seconds >= 0", name="ck_media_progress_nonnegative"),
+        CheckConstraint("revision >= 0", name="ck_media_progress_revision"),
+        CheckConstraint("NOT completed OR position_seconds = 0", name="ck_media_completed_zero"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -490,6 +625,11 @@ class MediaProgress(Base):
         ForeignKey("lesson_media.id", ondelete="CASCADE"), index=True
     )
     position_seconds: Mapped[float] = mapped_column(Float, default=0)
+    revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    completed: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    operation_key: Mapped[str | None] = mapped_column(String(36))
+    fingerprint: Mapped[str | None] = mapped_column(String(64))
+    changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -505,6 +645,14 @@ class SpeakingAttempt(Base):
     __tablename__ = "speaking_attempt"
     __table_args__ = (
         CheckConstraint("status IN ('pending','ready')", name="ck_speaking_status"),
+        CheckConstraint(
+            "audio_sha256 IS NULL OR audio_sha256 ~ '^[0-9a-f]{64}$'", name="ck_speaking_sha256"
+        ),
+        CheckConstraint(
+            "integrity_state IN ('unknown','verified','missing','changed')",
+            name="ck_speaking_integrity",
+        ),
+        Index("ix_speaking_status_created", "status", "created_at"),
         CheckConstraint("duration_ms > 0", name="ck_speaking_duration_positive"),
         CheckConstraint("duration_ms <= 30000", name="ck_speaking_duration_limit"),
         CheckConstraint(
@@ -526,9 +674,54 @@ class SpeakingAttempt(Base):
     mime_type: Mapped[str | None] = mapped_column(String(100), default=None)
     file_size: Mapped[int | None] = mapped_column(Integer, default=None)
     storage_key: Mapped[str | None] = mapped_column(String(80), unique=True, default=None)
+    audio_sha256: Mapped[str | None] = mapped_column(String(64), default=None)
+    integrity_state: Mapped[str] = mapped_column(
+        String(20), default="unknown", server_default="unknown"
+    )
+    integrity_checked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=None
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     cue: Mapped[TranscriptCue] = relationship(lazy="selectin")
+
+
+class AssistReservation(Base):
+    """Ledger mínimo de cota, independente dos resultados descartáveis."""
+
+    __tablename__ = "assist_reservation"
+    __table_args__ = (
+        UniqueConstraint("user_id", "request_key", name="uq_assist_user_request"),
+        CheckConstraint("modality IN ('writing','transcription')", name="ck_assist_modality"),
+        CheckConstraint("state IN ('reserved','consumed','released')", name="ck_assist_state"),
+        CheckConstraint("cost_microusd >= 0", name="ck_assist_cost"),
+        CheckConstraint("expires_at > created_at", name="ck_assist_expiry"),
+        Index("ix_assist_user_created", "user_id", "created_at"),
+        Index("ix_assist_state_expiry", "state", "expires_at"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    request_key: Mapped[str] = mapped_column(String(80))
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    modality: Mapped[str] = mapped_column(String(20))
+    provider_key: Mapped[str] = mapped_column(String(64), unique=True)
+    state: Mapped[str] = mapped_column(String(20))
+    reason: Mapped[str | None] = mapped_column(String(50), default=None)
+    cost_microusd: Mapped[int] = mapped_column(Integer, default=0)
+    cost_known: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    dispatched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+
+class WorkerHeartbeat(Base):
+    """Estado agregado de operação, sem conteúdo ou identidade de alunos."""
+
+    __tablename__ = "worker_heartbeat"
+    name: Mapped[str] = mapped_column(String(40), primary_key=True)
+    seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    maintenance_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    maintenance_counts: Mapped[dict[str, int] | None] = mapped_column(JSONB, default=None)
 
 
 class TranscriptionJob(Base):
@@ -554,6 +747,9 @@ class TranscriptionJob(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    assist_reservation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("assist_reservation.id", ondelete="SET NULL"), unique=True, default=None
+    )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     speaking_attempt_id: Mapped[int] = mapped_column(
         ForeignKey("speaking_attempt.id", ondelete="CASCADE"), unique=True, index=True
@@ -661,13 +857,22 @@ class Phrase(Base):
 class VocabItem(Base):
     """Item de vocabulário.
 
-    A chave natural é (lesson_id, term), e não a posição: a partir da S4 as
-    cartas de revisão apontam para cá, e reordenar o seed não pode trocar o
-    item por baixo de uma carta existente.
+    (lesson_id, term) continua único. A chave editorial imutável identifica
+    a entidade mesmo se o termo/ordem mudar; cartas existentes mantêm a FK
+    numérica. O seed ainda bloqueia alterações de conteúdo existente.
     """
 
     __tablename__ = "vocab_item"
-    __table_args__ = (UniqueConstraint("lesson_id", "term", name="uq_vocab_lesson_term"),)
+    editorial_key: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        server_default=text("gen_random_uuid()"),
+        deferred=True,
+        deferred_raiseload=True,
+    )
+    __table_args__ = (
+        UniqueConstraint("lesson_id", "term", name="uq_vocab_lesson_term"),
+        UniqueConstraint("editorial_key", name="uq_vocab_item_editorial_key"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
@@ -698,13 +903,21 @@ class PronunciationNote(Base):
 class Exercise(Base):
     """Exercício de completar.
 
-    Chave natural (lesson_id, position) porque na S3 as tentativas do usuário
-    apontam para cá e não podem perder a referência a cada novo seed.
+    O ID numérico mantém FKs pessoais. editorial_key é imutável; posição é
+    somente ordenação, nunca identidade de uma edição subsequente do seed.
     """
 
     __tablename__ = "exercise"
+    editorial_key: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        server_default=text("gen_random_uuid()"),
+        deferred=True,
+        deferred_raiseload=True,
+    )
     __table_args__ = (
+        UniqueConstraint("editorial_key", name="uq_exercise_editorial_key"),
         UniqueConstraint("lesson_id", "position", name="uq_exercise_lesson_position"),
+        UniqueConstraint("lesson_id", "id", name="uq_exercise_lesson_id"),
         CheckConstraint(
             "objective IN ('recognize', 'apply', 'correct', 'produce', 'listen')",
             name="ck_exercise_objective",
@@ -799,7 +1012,14 @@ class WritingPrompt(Base):
     """Proposta autoral de escrita associada ao objetivo de uma aula."""
 
     __tablename__ = "writing_prompt"
+    editorial_key: Mapped[str] = mapped_column(
+        Uuid(as_uuid=False),
+        server_default=text("gen_random_uuid()"),
+        deferred=True,
+        deferred_raiseload=True,
+    )
     __table_args__ = (
+        UniqueConstraint("editorial_key", name="uq_writing_prompt_editorial_key"),
         UniqueConstraint("lesson_id", "position", name="uq_writing_prompt_lesson_position"),
     )
 
@@ -882,9 +1102,19 @@ class WritingFeedbackRecord(Base):
             "(rubric_version IS NOT NULL AND rubric_snapshot IS NOT NULL)",
             name="ck_writing_feedback_v2_snapshot",
         ),
+        Index(
+            "ix_writing_feedback_user_prompt_created_id",
+            "user_id",
+            "prompt_id",
+            "created_at",
+            "id",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    assist_reservation_id: Mapped[int | None] = mapped_column(
+        ForeignKey("assist_reservation.id", ondelete="SET NULL"), unique=True, default=None
+    )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     prompt_id: Mapped[int] = mapped_column(
         ForeignKey("writing_prompt.id", ondelete="CASCADE"), index=True
@@ -924,6 +1154,7 @@ class NotebookEntry(Base):
             "'recurring_error','teacher_question')",
             name="ck_notebook_kind",
         ),
+        Index("ix_notebook_entry_user_updated_id", "user_id", "updated_at", "id"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -967,6 +1198,7 @@ class RefreshSession(Base):
     """
 
     __tablename__ = "refresh_session"
+    __table_args__ = (Index("ix_refresh_expiry", "expires_at"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
@@ -1076,12 +1308,65 @@ class StudyPlan(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     weekly_minutes: Mapped[int] = mapped_column(Integer, default=90)
+    timezone: Mapped[str] = mapped_column(String(80), default="UTC", server_default="UTC")
     preferred_days: Mapped[list[str]] = mapped_column(JSONB, default=list)
     goal: Mapped[str] = mapped_column(String(200), default="Criar constância no inglês")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class StudyActivitySession(Base):
+    """Âncora de tempo do servidor, sem identificador permanente de dispositivo."""
+
+    __tablename__ = "study_activity_session"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class StudyActivityEvent(Base):
+    """Recibo imutável. Retry não cria intervalos novos."""
+
+    __tablename__ = "study_activity_event"
+    __table_args__ = (
+        UniqueConstraint("user_id", "operation_key", name="uq_activity_event_key"),
+        CheckConstraint("duration_ms BETWEEN 1 AND 30000", name="ck_activity_duration"),
+        CheckConstraint("credited_ms BETWEEN 0 AND duration_ms", name="ck_activity_credit"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    session_id: Mapped[str] = mapped_column(
+        ForeignKey("study_activity_session.id", ondelete="CASCADE"), index=True
+    )
+    operation_key: Mapped[str] = mapped_column(String(36))
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    duration_ms: Mapped[int] = mapped_column(Integer)
+    credited_ms: Mapped[int] = mapped_column(Integer)
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class StudyActiveInterval(Base):
+    """Intervalos disjuntos por conta, inclusive entre aulas/abas diferentes."""
+
+    __tablename__ = "study_active_interval"
+    __table_args__ = (
+        CheckConstraint(
+            "ends_at > starts_at AND ends_at <= starts_at + interval '30 seconds'",
+            name="ck_active_interval_duration",
+        ),
+        Index("ix_active_interval_user_end", "user_id", "ends_at"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey("study_activity_event.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"))
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class SkillEvidence(Base):
@@ -1285,6 +1570,13 @@ class ReviewItem(Base):
 
     __tablename__ = "review_item"
     __table_args__ = (
+        Index(
+            "ix_review_item_user_status_created_id",
+            "user_id",
+            "status",
+            "created_at",
+            "id",
+        ),
         CheckConstraint("revision >= 0", name="ck_review_item_revision"),
         CheckConstraint(
             "interval_days >= 0 AND repetitions >= 0 AND lapses >= 0 AND ease_factor >= 1.3",
@@ -1357,6 +1649,53 @@ class ReviewEvent(Base):
     algorithm_version: Mapped[str] = mapped_column(String(30))
     before_state: Mapped[dict[str, object]] = mapped_column(JSONB)
     after_state: Mapped[dict[str, object]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EvidenceContentSnapshot(Base):
+    """Private, immutable content actually used by a new learning event.
+
+    Exactly one real FK, not an unverifiable polymorphic source_id. Deleting
+    the event/account cascades its snapshot; editing it is forbidden by trigger.
+    No backfill of unknown historical content.
+    """
+
+    __tablename__ = "evidence_content_snapshot"
+    __table_args__ = (
+        CheckConstraint("schema_version = '1.0'", name="ck_snapshot_schema"),
+        CheckConstraint("content_sha256 ~ '^[0-9a-f]{64}$'", name="ck_snapshot_hash"),
+        CheckConstraint(
+            "jsonb_typeof(content) = 'object' AND octet_length(content::text) <= 262144",
+            name="ck_snapshot_content",
+        ),
+        CheckConstraint(
+            "num_nonnulls(exercise_attempt_id, practice_item_id, writing_feedback_id, "
+            "speaking_attempt_id, checkpoint_attempt_id) = 1",
+            name="ck_snapshot_one_parent",
+        ),
+        Index("ix_snapshot_user_created", "user_id", "created_at", "id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    exercise_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("exercise_attempt.id", ondelete="CASCADE"), unique=True
+    )
+    practice_item_id: Mapped[int | None] = mapped_column(
+        ForeignKey("practice_session_item.id", ondelete="CASCADE"), unique=True
+    )
+    writing_feedback_id: Mapped[int | None] = mapped_column(
+        ForeignKey("writing_feedback.id", ondelete="CASCADE"), unique=True
+    )
+    speaking_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("speaking_attempt.id", ondelete="CASCADE"), unique=True
+    )
+    checkpoint_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("course_review_attempt.id", ondelete="CASCADE"), unique=True
+    )
+    schema_version: Mapped[str] = mapped_column(String(10), default="1.0")
+    content: Mapped[dict[str, object]] = mapped_column(JSONB)
+    content_sha256: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

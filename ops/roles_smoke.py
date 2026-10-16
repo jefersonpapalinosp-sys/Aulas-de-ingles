@@ -43,14 +43,79 @@ def main():
         ):
             forbidden(info, role, statement)
     forbidden(info, "aulas_runtime", "UPDATE lesson SET title=title")
+    for table in (
+        "course_review_question",
+        "exercise",
+        "lesson_media",
+        "transcript_cue",
+        "vocab_item",
+        "writing_prompt",
+    ):
+        roles.sql(info, f"SELECT editorial_key FROM {table} LIMIT 1", "aulas_runtime")
+        for role in ("aulas_runtime", "aulas_worker", "aulas_backup"):
+            forbidden(info, role, f"UPDATE {table} SET editorial_key=gen_random_uuid()")
     forbidden(info, "aulas_runtime", "UPDATE alembic_version SET version_num=version_num")
     forbidden(info, "aulas_runtime", "UPDATE review_event SET quality=quality")
     forbidden(info, "aulas_runtime", "DELETE FROM review_event")
+    forbidden(info, "aulas_runtime", "UPDATE evidence_content_snapshot SET content=content")
+    forbidden(info, "aulas_runtime", "DELETE FROM evidence_content_snapshot")
+    forbidden(info, "aulas_worker", "SELECT * FROM evidence_content_snapshot")
+    forbidden(
+        info,
+        "aulas_runtime",
+        "SELECT public.aulas_speaking_expected_text(1,1)",
+    )
+    forbidden(
+        info,
+        "aulas_backup",
+        "SELECT public.aulas_speaking_expected_text(1,1)",
+    )
+    roles.sql(
+        info,
+        "SELECT public.aulas_speaking_expected_text(1,1)",
+        "aulas_worker",
+    )
+    for role in ("aulas_runtime", "aulas_worker"):
+        forbidden(info, role, "SELECT * FROM editorial_archive_event")
+        forbidden(info, role, "INSERT INTO editorial_archive_event DEFAULT VALUES")
+    for role in ("aulas_runtime", "aulas_worker", "aulas_backup"):
+        forbidden(info, role, "DELETE FROM editorial_archive_event")
+        forbidden(info, role, "UPDATE editorial_archive_event SET impact=impact")
+    roles.sql(info, "SELECT count(*) FROM editorial_archive_event", "aulas_backup")
+    for role in ("aulas_runtime", "aulas_worker"):
+        forbidden(info, role, "SELECT * FROM editorial_reorder_event")
+        forbidden(info, role, "INSERT INTO editorial_reorder_event DEFAULT VALUES")
+    for role in ("aulas_runtime", "aulas_worker", "aulas_backup"):
+        forbidden(info, role, "DELETE FROM editorial_reorder_event")
+        forbidden(info, role, "UPDATE editorial_reorder_event SET impact=impact")
+    roles.sql(info, "SELECT count(*) FROM editorial_reorder_event", "aulas_backup")
+    for table in (
+        "study_activity_session",
+        "study_activity_event",
+        "study_active_interval",
+    ):
+        forbidden(info, "aulas_runtime", f"DELETE FROM {table}")
+        forbidden(info, "aulas_runtime", f"UPDATE {table} SET user_id=user_id")
+        forbidden(info, "aulas_worker", f"SELECT * FROM {table}")
     forbidden(info, "aulas_worker", "SELECT * FROM auth_rate_bucket")
     forbidden(info, "aulas_backup", "DELETE FROM app_user")
     forbidden(info, "aulas_worker", "SELECT password_hash FROM app_user")
     forbidden(info, "aulas_worker", "DELETE FROM transcription_job")
+    forbidden(info, "aulas_runtime", "DELETE FROM assist_reservation")
+    forbidden(info, "aulas_worker", "DELETE FROM assist_reservation")
+    forbidden(info, "aulas_worker", "INSERT INTO assist_reservation DEFAULT VALUES")
     forbidden(info, "aulas_worker", "UPDATE speaking_attempt SET status=status")
+    forbidden(info, "aulas_worker", "DELETE FROM refresh_session")
+    forbidden(info, "aulas_runtime", "SELECT public.aulas_retention_batch('refresh',1,true)")
+    forbidden(info, "aulas_backup", "SELECT public.aulas_retention_batch('pending',1,true)")
+    forbidden(info, "aulas_runtime", "UPDATE worker_heartbeat SET seen_at=seen_at")
+    roles.sql(
+        info,
+        "SELECT public.aulas_retention_batch('transcriptions',1,false); "
+        "SELECT public.aulas_retention_batch('refresh',1,false); "
+        "SELECT name FROM worker_heartbeat",
+        "aulas_worker",
+    )
     roles.sql(
         info,
         """
@@ -65,12 +130,17 @@ def main():
     )
     roles.sql(
         info,
-        "SELECT id FROM transcription_job; UPDATE transcription_job SET status=status;",
+        "SELECT id FROM transcription_job; UPDATE transcription_job SET status=status; "
+        "SELECT id FROM assist_reservation; UPDATE assist_reservation SET state=state;",
         "aulas_worker",
     )
     # Migrador realmente usa SET ROLE pelo driver e passa a guarda da conexão.
     roles.lab_run("migrator", "alembic", "upgrade", "head")
+    roles.lab_run("migrator", "python", "/tools/roles_archive_smoke.py")
+    roles.lab_run("migrator", "python", "/tools/roles_reorder_smoke.py")
     roles.lab_run("runtime", "python", "/tools/roles_app_smoke.py")
+    roles.lab_run("runtime", "python", "/tools/roles_assist_smoke.py")
+    roles.lab_run("worker", "python", "/tools/roles_assist_smoke.py")
     roles.lab_run(
         "worker",
         "python",
@@ -99,7 +169,8 @@ def main():
         dump.seek(0)
         recovery.docker("exec", "-i", info[0]["Id"], "pg_restore", "--list", stdin=dump)
     print(
-        "Papéis aprovados: 27 recusas de privilégio, DML runtime, API HTTP, worker e dump limitado."
+        "Papéis aprovados: recusas de privilégio, DML runtime, API HTTP e snapshots, "
+        "cotas/retenção runtime/worker e dump limitado."
     )
 
 

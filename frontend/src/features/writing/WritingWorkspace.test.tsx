@@ -36,6 +36,17 @@ function renderWorkspace() {
   return { ...view, queryClient }
 }
 
+function mockDraft(
+  draft: Record<string, unknown>,
+  versions: Record<string, unknown>[] = [],
+) {
+  apiMocks.GET.mockImplementation(async (path) =>
+    path === '/api/writing/prompts/{prompt_id}/versions'
+      ? { data: { items: versions, next_cursor: null } }
+      : { data: draft },
+  )
+}
+
 afterEach(() => {
   vi.restoreAllMocks()
   vi.clearAllMocks()
@@ -43,8 +54,35 @@ afterEach(() => {
 })
 
 describe('WritingWorkspace', () => {
+  it('reutiliza chave após perda de resposta e mantém texto diante de análise já iniciada', async () => {
+    apiMocks.GET.mockImplementation(async (path) => ({ data: path.includes('assist/status')
+      ? { writing_enabled: true, remaining_today: 2, reserved_today: 0, consumed_today: 1, cost_microusd_today: 0 }
+      : path === '/api/writing/prompts/{prompt_id}/versions'
+        ? { items: [], next_cursor: null }
+        : { prompt_id: 4, revision: 0, text: 'Keep this draft.' } }))
+    apiMocks.POST.mockRejectedValueOnce(new TypeError('network'))
+      .mockResolvedValue({ response: new Response(null, { status: 409 }) })
+    renderWorkspace()
+    const editor = screen.getByRole('textbox', { name: 'Seu texto em inglês' })
+    await waitFor(() => expect(editor).toHaveValue('Keep this draft.'))
+    await userEvent.click(await screen.findByRole('checkbox'))
+    const analyze = screen.getByRole('button', { name: 'Analisar texto' })
+    await userEvent.click(analyze)
+    expect(await screen.findByText(/Análise indisponível/)).toBeInTheDocument()
+    await userEvent.click(analyze)
+    expect(await screen.findByText(/Análise já iniciada/)).toBeInTheDocument()
+    const first = apiMocks.POST.mock.calls[0]![1].body
+    expect(first.assisted).toBe(true)
+    expect(first.operation_key).toMatch(/^[a-f0-9-]{36}$/)
+    expect(apiMocks.POST.mock.calls[1]![1].body.operation_key).toBe(first.operation_key)
+    expect(editor).toHaveValue('Keep this draft.')
+    fireEvent.change(editor, { target: { value: 'Changed text.' } })
+    await userEvent.click(analyze)
+    expect(apiMocks.POST.mock.calls[2]![1].body.operation_key).not.toBe(first.operation_key)
+  })
+
   it('não aplica análise atrasada do texto A ao texto B', async () => {
-    apiMocks.GET.mockResolvedValue({ data: { prompt_id: 4, revision: 0, text: 'Text A.', revisions: [] } })
+    mockDraft({ prompt_id: 4, revision: 0, text: 'Text A.' })
     let resolve!: (value: unknown) => void
     apiMocks.POST.mockReturnValue(new Promise((done) => { resolve = done }))
     renderWorkspace()
@@ -59,7 +97,7 @@ describe('WritingWorkspace', () => {
 
   it('preserva os dois textos no conflito e só sobrescreve após escolha explícita', async () => {
     const remote = { prompt_id: 4, revision: 2, text: 'Other device.', updated_at: '2026-10-14T03:00:00Z', revisions: [] }
-    apiMocks.GET.mockResolvedValue({ data: { ...remote, revision: 1, text: 'Original.' } })
+    mockDraft({ ...remote, revision: 1, text: 'Original.' })
     apiMocks.PUT.mockResolvedValueOnce({ response: new Response(null, { status: 409 }), error: { detail: { current: remote } } })
       .mockResolvedValue({ data: { ...remote, revision: 3, text: 'My draft.' } })
     renderWorkspace()
@@ -81,7 +119,7 @@ describe('WritingWorkspace', () => {
 
   it('backup sem revisão não sobrescreve automaticamente a conta', async () => {
     localStorage.setItem('aulas-ingles:writing-draft:v1:7:4', 'Recovered local.')
-    apiMocks.GET.mockResolvedValue({ data: { prompt_id: 4, revision: 8, text: 'Account text.', revisions: [], updated_at: null } })
+    mockDraft({ prompt_id: 4, revision: 8, text: 'Account text.', updated_at: null })
     renderWorkspace()
     expect(await screen.findByRole('heading', { name: 'Há duas versões do rascunho' })).toBeInTheDocument()
     expect(screen.getByText(/Rascunho recuperado neste dispositivo/)).toBeInTheDocument()
@@ -92,7 +130,7 @@ describe('WritingWorkspace', () => {
   })
 
   it('resposta de autosave desmontado não apaga backup novo', async () => {
-    apiMocks.GET.mockResolvedValue({ data: { prompt_id: 4, revision: 0, text: '', revisions: [] } })
+    mockDraft({ prompt_id: 4, revision: 0, text: '' })
     let resolve!: (value: unknown) => void
     apiMocks.PUT.mockReturnValue(new Promise((done) => { resolve = done }))
     const view = renderWorkspace()
@@ -106,7 +144,7 @@ describe('WritingWorkspace', () => {
     expect(localStorage.getItem('aulas-ingles:writing-draft:v1:7:4')).toBe('Newer local.')
   })
   it('quota e falha remota mantêm texto editável, sem afirmar persistência', async () => {
-    apiMocks.GET.mockResolvedValue({ data: { prompt_id: 4, text: '', revisions: [] } })
+    mockDraft({ prompt_id: 4, text: '' })
     apiMocks.PUT.mockRejectedValue(new TypeError('offline'))
     apiMocks.POST.mockRejectedValue(new TypeError('offline'))
     renderWorkspace()
@@ -125,7 +163,7 @@ describe('WritingWorkspace', () => {
   })
 
   it('leitura bloqueada não desmonta editor nem afirma que recuperou backup', async () => {
-    apiMocks.GET.mockResolvedValue({ data: { prompt_id: 4, text: 'Remote draft.', revisions: [] } })
+    mockDraft({ prompt_id: 4, text: 'Remote draft.' })
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
     renderWorkspace()
     await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('Remote draft.'))
@@ -134,7 +172,7 @@ describe('WritingWorkspace', () => {
   })
 
   it('falha em remover backup não transforma sucesso remoto em falha de salvamento', async () => {
-    apiMocks.GET.mockResolvedValue({ data: { prompt_id: 4, text: '', revisions: [] } })
+    mockDraft({ prompt_id: 4, text: '' })
     apiMocks.PUT.mockResolvedValue({ data: { prompt_id: 4, text: 'Saved.', revisions: [] } })
     renderWorkspace()
     const editor = screen.getByRole('textbox')
@@ -148,9 +186,7 @@ describe('WritingWorkspace', () => {
 
   it('recupera e salva o rascunho automaticamente', async () => {
     const user = userEvent.setup()
-    apiMocks.GET.mockResolvedValue({
-      data: { prompt_id: 4, text: 'Old text.', updated_at: null, revisions: [] },
-    })
+    mockDraft({ prompt_id: 4, text: 'Old text.', updated_at: null })
     apiMocks.PUT.mockImplementation(async (_path, options) => ({
       data: {
         prompt_id: 4,
@@ -177,9 +213,7 @@ describe('WritingWorkspace', () => {
 
   it('mostra critérios de correção e cria uma versão restaurável', async () => {
     const user = userEvent.setup()
-    apiMocks.GET.mockResolvedValue({
-      data: { prompt_id: 4, text: '', updated_at: null, revisions: [] },
-    })
+    mockDraft({ prompt_id: 4, text: '', updated_at: null })
     apiMocks.PUT.mockResolvedValue({
       data: { prompt_id: 4, text: '', updated_at: '2026-10-07T22:30:00Z', revisions: [] },
     })
@@ -237,21 +271,21 @@ describe('WritingWorkspace', () => {
 
   it('compara uma versão salva com o texto atual palavra por palavra', async () => {
     const user = userEvent.setup()
-    apiMocks.GET.mockResolvedValue({
-      data: {
+    mockDraft(
+      {
         prompt_id: 4,
         text: 'The train is faster than the bus.',
         updated_at: '2026-10-08T00:30:00Z',
-        revisions: [
-          {
-            id: 10,
-            version: 1,
-            text: 'The bus is fast.',
-            created_at: '2026-10-07T22:30:00Z',
-          },
-        ],
       },
-    })
+      [
+        {
+          id: 10,
+          version: 1,
+          text: 'The bus is fast.',
+          created_at: '2026-10-07T22:30:00Z',
+        },
+      ],
+    )
 
     const { container } = renderWorkspace()
     await user.click(await screen.findByRole('button', { name: 'Comparar com texto atual' }))
@@ -261,6 +295,55 @@ describe('WritingWorkspace', () => {
     expect(container.querySelector('.writing-diff-copy ins')).toHaveTextContent('train')
     await user.click(screen.getByRole('button', { name: 'Fechar comparação' }))
     expect(screen.queryByRole('heading', { name: 'Versão 1 → texto atual' })).not.toBeInTheDocument()
+  })
+
+  it('carrega mais versões e move o foco para o resultado anunciado', async () => {
+    const user = userEvent.setup()
+    apiMocks.GET.mockImplementation(async (path, options) => {
+      if (path !== '/api/writing/prompts/{prompt_id}/versions') {
+        return { data: { prompt_id: 4, revision: 2, text: 'Current text.' } }
+      }
+      return options?.params?.query?.cursor
+        ? {
+            data: {
+              items: [{ id: 10, version: 1, text: 'First.', created_at: '2026-10-14T12:00:00Z' }],
+              next_cursor: null,
+            },
+          }
+        : {
+            data: {
+              items: [{ id: 11, version: 2, text: 'Second.', created_at: '2026-10-15T12:00:00Z' }],
+              next_cursor: 'versions-page-2',
+            },
+          }
+    })
+    apiMocks.POST.mockResolvedValue({
+      data: {
+        id: 12,
+        version: 3,
+        draft_revision: 2,
+        text: 'Current text.',
+        created_at: '2026-10-15T13:00:00Z',
+      },
+    })
+    renderWorkspace()
+
+    expect(await screen.findByText('Versão 2')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Carregar mais versões' }))
+
+    expect(await screen.findByText('Versão 1')).toBeVisible()
+    expect(screen.getByText('Versão 2')).toBeVisible()
+    await waitFor(() => expect(screen.getByText('2 versões carregadas.')).toHaveFocus())
+    expect(apiMocks.GET).toHaveBeenCalledWith('/api/writing/prompts/{prompt_id}/versions', {
+      params: {
+        path: { prompt_id: 4 },
+        query: { limit: 20, cursor: 'versions-page-2' },
+      },
+    })
+    await user.click(screen.getByRole('button', { name: 'Criar versão' }))
+    expect(await screen.findByText('Versão 3')).toBeVisible()
+    expect(screen.getByText('Versão 2')).toBeVisible()
+    expect(screen.getByText('Versão 1')).toBeVisible()
   })
 
   it('faz opt-in explícito, mostra baixa confiança e permite avaliar a assistência', async () => {
@@ -279,7 +362,9 @@ describe('WritingWorkspace', () => {
               cost_microusd_today: 0,
             },
           }
-        : { data: { prompt_id: 4, text: '', updated_at: null, revisions: [] } },
+        : path === '/api/writing/prompts/{prompt_id}/versions'
+          ? { data: { items: [], next_cursor: null } }
+          : { data: { prompt_id: 4, text: '', updated_at: null } },
     )
     const assistedFeedback = {
       id: 81,
@@ -317,7 +402,7 @@ describe('WritingWorkspace', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Baixa confiança')
     expect(apiMocks.POST).toHaveBeenCalledWith('/api/writing/prompts/{prompt_id}/feedback', {
       params: { path: { prompt_id: 4 } },
-      body: { text: 'The train is faster.', assisted: true },
+      body: { text: 'The train is faster.', assisted: true, operation_key: expect.any(String) },
     })
     await user.click(screen.getByRole('button', { name: 'Sim' }))
     expect(apiMocks.PUT).toHaveBeenCalledWith('/api/writing/feedback/{feedback_id}/rating', {

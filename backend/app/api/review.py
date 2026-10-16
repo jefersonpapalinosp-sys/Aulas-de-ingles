@@ -3,11 +3,11 @@
 import json
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, func, select, tuple_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,16 +16,19 @@ from app.api.deps import UsuarioAtual
 from app.db.models import Course, CourseUnit, Lesson, ReviewEvent, ReviewItem, User, VocabItem
 from app.db.session import get_session
 from app.domain.sm2 import Estado, revisar
+from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
 from app.schemas.review import (
     CardOut,
     DeckSummaryOut,
     GradeIn,
     GradeOut,
+    ReviewItemPageOut,
     ReviewItemStatus,
     ReviewItemStatusIn,
     ReviewItemType,
 )
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
+from app.services.publication import lock_publication, published_lesson_ids
 
 router = APIRouter(prefix="/review", tags=["review"])
 
@@ -167,14 +170,28 @@ async def adicionar_cartas(session: AsyncSession, usuario: User, itens: list[Voc
     return novas
 
 
+def _reason_values(
+    origin_reason: str,
+    last_reviewed_at: datetime | None,
+    lapses: int,
+    interval_days: int,
+) -> str:
+    if last_reviewed_at is None:
+        return f"{origin_reason} É a primeira revisão deste item."
+    if lapses:
+        label = "tropeço" if lapses == 1 else "tropeços"
+        return f"{origin_reason} Ele voltou após {lapses} {label} no histórico."
+    label = "dia" if interval_days == 1 else "dias"
+    return f"{origin_reason} O intervalo atual de {interval_days} {label} venceu."
+
+
 def _reason(item: ReviewItem) -> str:
-    if item.last_reviewed_at is None:
-        return f"{item.origin_reason} É a primeira revisão deste item."
-    if item.lapses:
-        label = "tropeço" if item.lapses == 1 else "tropeços"
-        return f"{item.origin_reason} Ele voltou após {item.lapses} {label} no histórico."
-    label = "dia" if item.interval_days == 1 else "dias"
-    return f"{item.origin_reason} O intervalo atual de {item.interval_days} {label} venceu."
+    return _reason_values(
+        item.origin_reason,
+        item.last_reviewed_at,
+        item.lapses,
+        item.interval_days,
+    )
 
 
 def _out(item: ReviewItem) -> CardOut:
@@ -292,6 +309,93 @@ def _filtered_query(
     return query
 
 
+def _item_page_query(
+    user_id: int,
+    *,
+    item_status: ReviewItemStatus,
+    course: str | None,
+    unit: str | None,
+) -> Any:
+    query = (
+        select(
+            ReviewItem.id,
+            ReviewItem.revision,
+            ReviewItem.item_type,
+            ReviewItem.skill,
+            ReviewItem.prompt,
+            ReviewItem.prompt_note,
+            ReviewItem.answer,
+            ReviewItem.context,
+            Course.slug.label("course_slug"),
+            Course.title.label("course_title"),
+            CourseUnit.slug.label("unit_slug"),
+            Lesson.number.label("lesson_number"),
+            Lesson.title.label("lesson_title"),
+            ReviewItem.origin_reason,
+            ReviewItem.last_reviewed_at,
+            ReviewItem.estimated_seconds,
+            ReviewItem.media_url,
+            ReviewItem.cue_start_seconds,
+            ReviewItem.cue_end_seconds,
+            ReviewItem.status,
+            ReviewItem.vocab_item_id,
+            ReviewItem.ease_factor,
+            ReviewItem.interval_days,
+            ReviewItem.repetitions,
+            ReviewItem.lapses,
+            ReviewItem.due_at,
+            ReviewItem.created_at,
+        )
+        .join(Lesson, ReviewItem.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            ReviewItem.user_id == user_id,
+            ReviewItem.status == item_status,
+        )
+    )
+    if course is not None:
+        query = query.where(Course.slug == course)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    return query
+
+
+def _page_item_out(row: Any) -> CardOut:
+    return CardOut(
+        id=row.id,
+        revision=row.revision,
+        item_type=cast(ReviewItemType, row.item_type),
+        skill=row.skill,
+        prompt=row.prompt,
+        prompt_note=row.prompt_note,
+        answer=row.answer,
+        context=row.context,
+        course_slug=row.course_slug,
+        course_title=row.course_title,
+        unit_slug=row.unit_slug,
+        lesson_number=row.lesson_number,
+        lesson_title=row.lesson_title,
+        reason=_reason_values(
+            row.origin_reason,
+            row.last_reviewed_at,
+            row.lapses,
+            row.interval_days,
+        ),
+        estimated_seconds=row.estimated_seconds,
+        media_url=row.media_url,
+        cue_start_seconds=row.cue_start_seconds,
+        cue_end_seconds=row.cue_end_seconds,
+        status=cast(ReviewItemStatus, row.status),
+        vocab_item_id=row.vocab_item_id,
+        ease_factor=row.ease_factor,
+        interval_days=row.interval_days,
+        repetitions=row.repetitions,
+        lapses=row.lapses,
+        due_at=row.due_at,
+    )
+
+
 @router.get("/due", response_model=list[CardOut])
 async def vencidas(
     usuario: UsuarioAtual,
@@ -345,6 +449,52 @@ async def listar_itens(
         )
     ).scalars()
     return [_out(item) for item in items]
+
+
+@router.get("/items/page", response_model=ReviewItemPageOut)
+async def listar_itens_paginados(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    item_status: Annotated[ReviewItemStatus, Query(alias="status")] = "suspended",
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> ReviewItemPageOut:
+    boundary = None
+    if cursor is not None:
+        try:
+            boundary = decode_time_id_cursor(cursor)
+        except InvalidCursor as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={"code": "invalid_cursor", "message": "Cursor de paginação inválido."},
+            ) from error
+    query = _item_page_query(
+        usuario.id,
+        item_status=item_status,
+        course=course,
+        unit=unit,
+    )
+    if boundary is not None:
+        query = query.where(
+            tuple_(ReviewItem.created_at, ReviewItem.id)
+            < tuple_(boundary.timestamp, boundary.row_id)
+        )
+    rows = (
+        await session.execute(
+            query.order_by(ReviewItem.created_at.desc(), ReviewItem.id.desc()).limit(limit + 1)
+        )
+    ).all()
+    page = rows[:limit]
+    return ReviewItemPageOut(
+        items=[_page_item_out(row) for row in page],
+        next_cursor=(
+            encode_time_id_cursor(page[-1].created_at, page[-1].id)
+            if len(rows) > limit and page
+            else None
+        ),
+    )
 
 
 async def _owned_item(session: AsyncSession, item_id: int, user_id: int) -> ReviewItem:
@@ -481,8 +631,14 @@ async def adicionar_item(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> DeckSummaryOut:
+    await lock_publication(session)
     item = (
-        await session.execute(select(VocabItem).where(VocabItem.id == vocab_item_id))
+        await session.execute(
+            select(VocabItem).where(
+                VocabItem.id == vocab_item_id,
+                VocabItem.lesson_id.in_(published_lesson_ids()),
+            )
+        )
     ).scalar_one_or_none()
     if item is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item não existe.")

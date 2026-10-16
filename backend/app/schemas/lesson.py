@@ -79,7 +79,12 @@ class LessonMediaOut(ORMModel):
     offline_policy: Literal["network_only", "cache_allowed"]
     license_reviewed_at: date | None
     duration_seconds: int | None
-    listening_exercise_position: int | None
+    listening_exercise_position: int | None = Field(
+        default=None,
+        deprecated=True,
+        description="Ordem histórica; use listening_exercise_id como vínculo canônico.",
+    )
+    listening_exercise_id: int | None = None
     cues: list[TranscriptCueOut]
     transcript: list[TranscriptLineOut]
 
@@ -98,7 +103,7 @@ class LessonVersionOut(ORMModel):
     status: Literal["draft", "reviewed", "published"]
     learning_strategy: str
     review_note: str
-    reviewed_at: datetime
+    reviewed_at: datetime | None
     published_at: datetime | None
 
 

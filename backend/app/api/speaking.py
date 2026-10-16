@@ -1,7 +1,8 @@
 """Gravações opcionais da prática oral e transcrição experimental."""
 
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
+from hashlib import sha256
+from typing import Annotated, Any
 from uuid import uuid4
 
 from fastapi import (
@@ -14,12 +15,10 @@ from fastapi import (
     Response,
     status,
 )
-from fastapi.responses import FileResponse
-from sqlalchemy import Select, delete, select
+from sqlalchemy import Select, delete, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.api.assist import assisted_usage
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
@@ -34,10 +33,24 @@ from app.db.models import (
     TranscriptionJob,
 )
 from app.db.session import get_session
+from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
 from app.schemas.assist import HumanRatingIn, TranscriptionJobOut, TranscriptionWordOut
-from app.schemas.speaking import SpeakingAttemptIn, SpeakingAttemptOut
-from app.services.audio_storage import AudioStorage, normalized_mime_type
+from app.schemas.speaking import (
+    SpeakingAttemptIn,
+    SpeakingAttemptOut,
+    SpeakingAttemptPageOut,
+    SpeakingPolicyOut,
+)
+from app.services import assist_quota, editorial_history
+from app.services.audio_inspection import inspect_audio
+from app.services.audio_storage import MIME_EXTENSIONS, AudioStorage, normalized_mime_type
+from app.services.audio_upload import MAX_DURATION_MS, UPLOAD_TIMEOUT_SECONDS, read_audio
 from app.services.curriculum import DEFAULT_COURSE_SLUG
+from app.services.publication import (
+    lock_publication,
+    published_lesson_ids,
+    require_published_lesson,
+)
 
 router = APIRouter(prefix="/speaking", tags=["speaking"])
 
@@ -50,7 +63,119 @@ def _query() -> Select[SpeakingAttempt]:
     )
 
 
-def _transcription_out(job: TranscriptionJob, expected_text: str) -> TranscriptionJobOut:
+def _attempts_query(
+    user_id: int,
+    *,
+    lesson: int | None,
+    course: str | None,
+    unit: str | None,
+) -> Select[SpeakingAttempt]:
+    query = _query().where(
+        SpeakingAttempt.user_id == user_id,
+        SpeakingAttempt.status == "ready",
+    )
+    if lesson is not None or course is not None or unit is not None:
+        query = (
+            query.join(SpeakingAttempt.cue)
+            .join(TranscriptCue.media)
+            .join(LessonMedia.lesson)
+            .join(Lesson.course)
+            .join(Lesson.unit)
+        )
+    if lesson is not None:
+        query = query.where(Lesson.number == lesson)
+    if course is not None:
+        query = query.where(Course.slug == course)
+    elif lesson is not None:
+        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    return query
+
+
+def _attempt_page_query(
+    user_id: int,
+    *,
+    lesson: int | None,
+    course: str | None,
+    unit: str | None,
+) -> Any:
+    query = (
+        select(
+            SpeakingAttempt.id,
+            SpeakingAttempt.duration_ms,
+            SpeakingAttempt.self_rating,
+            SpeakingAttempt.consented_at,
+            SpeakingAttempt.status,
+            SpeakingAttempt.mime_type,
+            SpeakingAttempt.file_size,
+            SpeakingAttempt.created_at,
+            SpeakingAttempt.integrity_state,
+            TranscriptCue.id.label("cue_id"),
+            Course.slug.label("course_slug"),
+            Course.title.label("course_title"),
+            CourseUnit.slug.label("unit_slug"),
+            Lesson.number.label("lesson_number"),
+        )
+        .join(TranscriptCue, SpeakingAttempt.transcript_cue_id == TranscriptCue.id)
+        .join(LessonMedia, TranscriptCue.media_id == LessonMedia.id)
+        .join(Lesson, LessonMedia.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            SpeakingAttempt.user_id == user_id,
+            SpeakingAttempt.status == "ready",
+        )
+    )
+    if lesson is not None:
+        query = query.where(Lesson.number == lesson)
+    if course is not None:
+        query = query.where(Course.slug == course)
+    elif lesson is not None:
+        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    return query
+
+
+async def _active_jobs(
+    session: AsyncSession,
+    attempt_ids: list[int],
+    user_id: int,
+) -> dict[int, TranscriptionJob]:
+    if not attempt_ids:
+        return {}
+    jobs = (
+        await session.execute(
+            select(TranscriptionJob).where(
+                TranscriptionJob.user_id == user_id,
+                TranscriptionJob.speaking_attempt_id.in_(attempt_ids),
+                TranscriptionJob.expires_at > datetime.now(UTC),
+            )
+        )
+    ).scalars()
+    return {job.speaking_attempt_id: job for job in jobs}
+
+
+async def _attempt_outputs(
+    session: AsyncSession,
+    attempts: list[SpeakingAttempt],
+    user_id: int,
+) -> list[SpeakingAttemptOut]:
+    attempt_ids = [item.id for item in attempts]
+    jobs_by_attempt = await _active_jobs(session, attempt_ids, user_id)
+    captured_texts = await editorial_history.speaking_expected_texts(session, attempt_ids, user_id)
+    return [
+        _output(
+            attempt,
+            jobs_by_attempt.get(attempt.id),
+            captured_texts.get(attempt.id),
+        )
+        for attempt in attempts
+    ]
+
+
+def _transcription_out(job: TranscriptionJob, expected_text: str | None) -> TranscriptionJobOut:
     return TranscriptionJobOut(
         id=job.id,
         attempt_id=job.speaking_attempt_id,
@@ -60,6 +185,7 @@ def _transcription_out(job: TranscriptionJob, expected_text: str) -> Transcripti
         max_attempts=job.max_attempts,
         next_attempt_at=job.next_attempt_at,
         expected_text=expected_text,
+        historical_content_status="available" if expected_text is not None else "unavailable",
         transcript_text=job.transcript_text,
         words=[TranscriptionWordOut.model_validate(word) for word in (job.words or [])],
         mean_confidence=job.mean_confidence,
@@ -75,7 +201,9 @@ def _transcription_out(job: TranscriptionJob, expected_text: str) -> Transcripti
 
 
 def _output(
-    attempt: SpeakingAttempt, transcription: TranscriptionJob | None = None
+    attempt: SpeakingAttempt,
+    transcription: TranscriptionJob | None = None,
+    captured_cue_text: str | None = None,
 ) -> SpeakingAttemptOut:
     return SpeakingAttemptOut(
         id=attempt.id,
@@ -84,7 +212,8 @@ def _output(
         unit_slug=attempt.cue.media.lesson.unit.slug,
         lesson_number=attempt.cue.media.lesson.number,
         cue_id=attempt.transcript_cue_id,
-        cue_text=attempt.cue.text_en,
+        cue_text=captured_cue_text,
+        historical_content_status=("available" if captured_cue_text is not None else "unavailable"),
         duration_ms=attempt.duration_ms,
         self_rating=attempt.self_rating,  # type: ignore[arg-type]
         consented_at=attempt.consented_at,
@@ -92,34 +221,58 @@ def _output(
         mime_type=attempt.mime_type,
         file_size=attempt.file_size,
         created_at=attempt.created_at,
+        integrity_state=attempt.integrity_state,  # type: ignore[arg-type]
         transcription=(
-            _transcription_out(transcription, attempt.cue.text_en) if transcription else None
+            _transcription_out(transcription, captured_cue_text) if transcription else None
         ),
     )
 
 
-async def _purge_expired_transcriptions(session: AsyncSession, user_id: int) -> None:
-    await session.execute(
-        delete(TranscriptionJob).where(
+async def _captured_cue_text(session: AsyncSession, attempt_id: int, user_id: int) -> str | None:
+    snapshot = await editorial_history.stored_snapshot(session, "speaking", attempt_id, user_id)
+    return editorial_history.speaking_expected_text(snapshot)
+
+
+async def _purge_expired_transcriptions(
+    session: AsyncSession, user_id: int, attempt_id: int
+) -> None:
+    job = await session.scalar(
+        select(TranscriptionJob)
+        .where(
             TranscriptionJob.user_id == user_id,
-            TranscriptionJob.expires_at < datetime.now(UTC),
+            TranscriptionJob.speaking_attempt_id == attempt_id,
+            TranscriptionJob.expires_at <= datetime.now(UTC),
         )
+        .with_for_update()
     )
+    if job is not None:
+        await assist_quota.release(session, job.assist_reservation_id, "job_expired")
+        await session.delete(job)
+        await session.flush()
 
 
-async def _owned_attempt(session: AsyncSession, attempt_id: int, user_id: int) -> SpeakingAttempt:
-    attempt = (
-        await session.execute(
-            _query().where(
-                SpeakingAttempt.id == attempt_id,
-                SpeakingAttempt.user_id == user_id,
-            )
-        )
-    ).scalar_one_or_none()
+async def _owned_attempt(
+    session: AsyncSession, attempt_id: int, user_id: int, *, lock: bool = False
+) -> SpeakingAttempt:
+    query = _query().where(SpeakingAttempt.id == attempt_id, SpeakingAttempt.user_id == user_id)
+    if lock:
+        query = query.with_for_update(of=SpeakingAttempt).execution_options(populate_existing=True)
+    attempt = (await session.execute(query)).scalar_one_or_none()
     if attempt is None:
         # 404 não revela se a gravação existe em outra conta.
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gravação não existe.")
     return attempt
+
+
+@router.get("/policy", response_model=SpeakingPolicyOut)
+async def politica_audio(response: Response) -> SpeakingPolicyOut:
+    response.headers["Cache-Control"] = "no-store"
+    return SpeakingPolicyOut(
+        max_bytes=get_settings().speaking_max_bytes,
+        max_duration_ms=MAX_DURATION_MS,
+        mime_types=list(MIME_EXTENSIONS),
+        upload_timeout_seconds=UPLOAD_TIMEOUT_SECONDS,
+    )
 
 
 @router.post("/attempts", response_model=SpeakingAttemptOut, status_code=status.HTTP_201_CREATED)
@@ -128,8 +281,16 @@ async def criar_tentativa(
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[SpeakingAttemptIn, Body()],
 ) -> SpeakingAttemptOut:
+    await lock_publication(session)
     cue = (
-        await session.execute(select(TranscriptCue).where(TranscriptCue.id == corpo.cue_id))
+        await session.execute(
+            select(TranscriptCue)
+            .join(LessonMedia, TranscriptCue.media_id == LessonMedia.id)
+            .where(
+                TranscriptCue.id == corpo.cue_id,
+                LessonMedia.lesson_id.in_(published_lesson_ids()),
+            )
+        )
     ).scalar_one_or_none()
     if cue is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trecho não existe.")
@@ -142,8 +303,21 @@ async def criar_tentativa(
         status="pending",
     )
     session.add(attempt)
+    await session.flush()
+    if get_settings().editorial_snapshots_enabled:
+        await editorial_history.capture(
+            session,
+            "speaking",
+            attempt.id,
+            usuario.id,
+            await editorial_history.speaking_content(session, cue),
+        )
     await session.commit()
-    return _output(await _owned_attempt(session, attempt.id, usuario.id))
+    saved = await _owned_attempt(session, attempt.id, usuario.id)
+    return _output(
+        saved,
+        captured_cue_text=await _captured_cue_text(session, saved.id, usuario.id),
+    )
 
 
 @router.put("/attempts/{attempt_id}/audio", response_model=SpeakingAttemptOut)
@@ -153,9 +327,8 @@ async def enviar_audio(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> SpeakingAttemptOut:
-    attempt = await _owned_attempt(session, attempt_id, usuario.id)
-    if attempt.status != "pending":
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Áudio já enviado.")
+    user_id = usuario.id
+    await _owned_attempt(session, attempt_id, user_id)
 
     mime_type = normalized_mime_type(request.headers.get("content-type"))
     if mime_type is None:
@@ -164,33 +337,30 @@ async def enviar_audio(
             detail="Formato de áudio não suportado.",
         )
     settings = get_settings()
-    declared_size = request.headers.get("content-length")
-    if (
-        declared_size
-        and declared_size.isdigit()
-        and int(declared_size) > settings.speaking_max_bytes
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-            detail="Áudio excede o limite de 2 MB.",
-        )
-    data = await request.body()
-    if not data:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Áudio vazio."
-        )
-    if len(data) > settings.speaking_max_bytes:
-        raise HTTPException(
-            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-            detail="Áudio excede o limite de 2 MB.",
-        )
-
+    # Não reter conexão/lock SQL durante recepção lenta. Só leituras até aqui.
+    await session.commit()
+    data = await read_audio(request, settings.speaking_max_bytes)
+    # Decodificador não segura transação nem roda dentro do processo/event loop da API.
+    duration_ms = await inspect_audio(data, mime_type)
+    attempt = await _owned_attempt(session, attempt_id, user_id, lock=True)
     storage = AudioStorage(settings.speaking_storage_dir)
+    if attempt.status == "ready":
+        if attempt.mime_type == mime_type and storage.matches(attempt.storage_key, data):
+            # Resposta perdida: mesmo corpo/tentativa, sem evidência nova.
+            return _output(
+                attempt,
+                captured_cue_text=await _captured_cue_text(session, attempt.id, user_id),
+            )
+        raise HTTPException(409, "A tentativa já contém outro áudio. Não foi sobrescrita.")
     key = storage.save(data, mime_type)
     try:
         attempt.storage_key = key
         attempt.mime_type = mime_type
         attempt.file_size = len(data)
+        attempt.audio_sha256 = sha256(data).hexdigest()
+        attempt.integrity_state = "verified"
+        attempt.integrity_checked_at = datetime.now(UTC)
+        attempt.duration_ms = duration_ms
         attempt.status = "ready"
         rating_scores = {"repeat": 0.35, "almost": 0.7, "confident": 1.0}
         session.add(
@@ -225,9 +395,23 @@ async def enviar_audio(
             )
         await session.commit()
     except Exception:
-        storage.delete(key)
+        # Commit pode ter sido confirmado pelo banco e perdido na conexão. Nunca apagar
+        # arquivo referenciado por um commit cujo resultado é desconhecido.
+        try:
+            await session.rollback()
+            referenced = await session.scalar(
+                select(SpeakingAttempt.id).where(SpeakingAttempt.storage_key == key)
+            )
+            if referenced is None:
+                storage.delete(key)
+        except Exception:
+            pass  # Preservar candidato para reconciliação, não criar referência quebrada.
         raise
-    return _output(await _owned_attempt(session, attempt.id, usuario.id))
+    saved = await _owned_attempt(session, attempt.id, usuario.id)
+    return _output(
+        saved,
+        captured_cue_text=await _captured_cue_text(session, saved.id, usuario.id),
+    )
 
 
 @router.get("/attempts", response_model=list[SpeakingAttemptOut])
@@ -238,43 +422,98 @@ async def listar_tentativas(
     course: Annotated[str | None, Query(max_length=100)] = None,
     unit: Annotated[str | None, Query(max_length=100)] = None,
 ) -> list[SpeakingAttemptOut]:
-    await _purge_expired_transcriptions(session, usuario.id)
-    query = _query().where(
-        SpeakingAttempt.user_id == usuario.id,
-        SpeakingAttempt.status == "ready",
+    query = _attempts_query(
+        usuario.id,
+        lesson=lesson,
+        course=course,
+        unit=unit,
     )
-    if lesson is not None or course is not None or unit is not None:
-        query = (
-            query.join(SpeakingAttempt.cue)
-            .join(TranscriptCue.media)
-            .join(LessonMedia.lesson)
-            .join(Lesson.course)
-            .join(Lesson.unit)
-        )
-    if lesson is not None:
-        query = query.where(Lesson.number == lesson)
-    if course is not None:
-        query = query.where(Course.slug == course)
-    elif lesson is not None:
-        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
-    if unit is not None:
-        query = query.where(CourseUnit.slug == unit)
     attempts = list(
         (await session.execute(query.order_by(SpeakingAttempt.created_at.desc()))).scalars()
     )
-    jobs_by_attempt: dict[int, TranscriptionJob] = {}
-    if attempts:
-        jobs = (
-            await session.execute(
-                select(TranscriptionJob).where(
-                    TranscriptionJob.user_id == usuario.id,
-                    TranscriptionJob.speaking_attempt_id.in_([item.id for item in attempts]),
-                )
-            )
-        ).scalars()
-        jobs_by_attempt = {job.speaking_attempt_id: job for job in jobs}
+    result = await _attempt_outputs(session, attempts, usuario.id)
     await session.commit()
-    return [_output(attempt, jobs_by_attempt.get(attempt.id)) for attempt in attempts]
+    return result
+
+
+@router.get("/attempts/page", response_model=SpeakingAttemptPageOut)
+async def listar_tentativas_paginadas(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    lesson: Annotated[int | None, Query(ge=1)] = None,
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> SpeakingAttemptPageOut:
+    boundary = None
+    if cursor is not None:
+        try:
+            boundary = decode_time_id_cursor(cursor)
+        except InvalidCursor as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={"code": "invalid_cursor", "message": "Cursor de paginação inválido."},
+            ) from error
+    query = _attempt_page_query(
+        usuario.id,
+        lesson=lesson,
+        course=course,
+        unit=unit,
+    )
+    if boundary is not None:
+        query = query.where(
+            tuple_(SpeakingAttempt.created_at, SpeakingAttempt.id)
+            < tuple_(boundary.timestamp, boundary.row_id)
+        )
+    rows = (
+        await session.execute(
+            query.order_by(SpeakingAttempt.created_at.desc(), SpeakingAttempt.id.desc()).limit(
+                limit + 1
+            )
+        )
+    ).all()
+    page = rows[:limit]
+    attempt_ids = [row.id for row in page]
+    jobs_by_attempt = await _active_jobs(session, attempt_ids, usuario.id)
+    captured_texts = await editorial_history.speaking_expected_texts(
+        session, attempt_ids, usuario.id
+    )
+    items = [
+        SpeakingAttemptOut(
+            id=row.id,
+            course_slug=row.course_slug,
+            course_title=row.course_title,
+            unit_slug=row.unit_slug,
+            lesson_number=row.lesson_number,
+            cue_id=row.cue_id,
+            cue_text=captured_texts.get(row.id),
+            historical_content_status=("available" if row.id in captured_texts else "unavailable"),
+            duration_ms=row.duration_ms,
+            self_rating=row.self_rating,
+            consented_at=row.consented_at,
+            status=row.status,
+            mime_type=row.mime_type,
+            file_size=row.file_size,
+            created_at=row.created_at,
+            integrity_state=row.integrity_state,
+            transcription=(
+                _transcription_out(jobs_by_attempt[row.id], captured_texts.get(row.id))
+                if row.id in jobs_by_attempt
+                else None
+            ),
+        )
+        for row in page
+    ]
+    await session.commit()
+    return SpeakingAttemptPageOut(
+        items=items,
+        next_cursor=(
+            encode_time_id_cursor(page[-1].created_at, page[-1].id)
+            if len(rows) > limit and page
+            else None
+        ),
+    )
 
 
 @router.post(
@@ -293,13 +532,19 @@ async def solicitar_transcricao(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Transcrição assistida não está habilitada.",
         )
-    attempt = await _owned_attempt(session, attempt_id, usuario.id)
-    if attempt.status != "ready" or not attempt.storage_key:
+    # Serializa a admissão e a procura de job existente na mesma conta.
+    await assist_quota.lock_user(session, usuario.id)
+    attempt = await _owned_attempt(session, attempt_id, usuario.id, lock=True)
+    if (
+        attempt.status != "ready"
+        or not attempt.storage_key
+        or attempt.integrity_state in {"missing", "changed"}
+    ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Salve o áudio antes de pedir a transcrição.",
         )
-    await _purge_expired_transcriptions(session, usuario.id)
+    await _purge_expired_transcriptions(session, usuario.id, attempt_id)
     existing = (
         await session.execute(
             select(TranscriptionJob).where(
@@ -308,21 +553,42 @@ async def solicitar_transcricao(
             )
         )
     ).scalar_one_or_none()
+    expected_text = await _captured_cue_text(session, attempt.id, usuario.id)
     if existing is not None:
         await session.commit()
-        return _transcription_out(existing, attempt.cue.text_en)
-    used, _ = await assisted_usage(session, usuario.id)
-    if used >= settings.assist_daily_quota:
+        return _transcription_out(existing, expected_text)
+    await require_published_lesson(session, attempt.cue.media.lesson_id)
+    if expected_text is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "historical_content_unavailable",
+                "message": (
+                    "O trecho usado nesta gravação não foi capturado. "
+                    "Grave uma nova tentativa antes de solicitar a transcrição."
+                ),
+            },
+        )
+    try:
+        reservation, _ = await assist_quota.reserve(
+            session,
+            usuario.id,
+            str(uuid4()),
+            sha256(f"transcription:{attempt.id}".encode()).hexdigest(),
+            "transcription",
+        )
+    except assist_quota.QuotaExceeded as error:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Cota diária de análises assistidas atingida.",
-        )
+        ) from error
     job = TranscriptionJob(
+        assist_reservation_id=reservation.id,
         user_id=usuario.id,
         speaking_attempt_id=attempt.id,
         provider=settings.assist_provider_name,
         status="queued",
-        idempotency_key=f"transcription-{uuid4().hex}",
+        idempotency_key=reservation.provider_key,
         max_attempts=settings.assist_job_max_attempts,
         next_attempt_at=datetime.now(UTC),
         expires_at=datetime.now(UTC) + timedelta(days=settings.assist_retention_days),
@@ -330,20 +596,20 @@ async def solicitar_transcricao(
     session.add(job)
     await session.commit()
     await session.refresh(job)
-    return _transcription_out(job, attempt.cue.text_en)
+    return _transcription_out(job, expected_text)
 
 
 async def _owned_transcription(
-    session: AsyncSession, job_id: int, user_id: int
+    session: AsyncSession, job_id: int, user_id: int, *, lock: bool = False
 ) -> TranscriptionJob:
-    job = (
-        await session.execute(
-            select(TranscriptionJob).where(
-                TranscriptionJob.id == job_id,
-                TranscriptionJob.user_id == user_id,
-            )
-        )
-    ).scalar_one_or_none()
+    query = select(TranscriptionJob).where(
+        TranscriptionJob.id == job_id,
+        TranscriptionJob.user_id == user_id,
+        TranscriptionJob.expires_at > datetime.now(UTC),
+    )
+    if lock:
+        query = query.with_for_update().execution_options(populate_existing=True)
+    job = (await session.execute(query)).scalar_one_or_none()
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transcrição não existe.")
     return job
@@ -360,7 +626,10 @@ async def avaliar_transcricao(
     attempt = await _owned_attempt(session, job.speaking_attempt_id, usuario.id)
     job.human_rating = corpo.rating
     await session.commit()
-    return _transcription_out(job, attempt.cue.text_en)
+    return _transcription_out(
+        job,
+        await _captured_cue_text(session, attempt.id, usuario.id),
+    )
 
 
 @router.delete("/transcriptions/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -369,7 +638,8 @@ async def excluir_transcricao(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
-    job = await _owned_transcription(session, job_id, usuario.id)
+    job = await _owned_transcription(session, job_id, usuario.id, lock=True)
+    await assist_quota.release(session, job.assist_reservation_id, "cancelled_before_dispatch")
     await session.delete(job)
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -380,14 +650,26 @@ async def obter_audio(
     attempt_id: int,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> FileResponse:
+) -> Response:
     attempt = await _owned_attempt(session, attempt_id, usuario.id)
     if attempt.status != "ready" or not attempt.storage_key or not attempt.mime_type:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Áudio não existe.")
-    path = AudioStorage(get_settings().speaking_storage_dir).path(attempt.storage_key)
-    if path is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Áudio não existe.")
-    return FileResponse(path, media_type=attempt.mime_type)
+    settings = get_settings()
+    key, digest, mime = attempt.storage_key, attempt.audio_sha256, attempt.mime_type
+    await session.commit()
+    try:
+        data = AudioStorage(settings.speaking_storage_dir).read_verified(
+            key, digest, settings.speaking_max_bytes
+        )
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Áudio não existe."
+        ) from None
+    except (OSError, ValueError):
+        raise HTTPException(
+            409, "Integridade do áudio não confirmada. Preserve a cópia local e grave novamente."
+        ) from None
+    return Response(data, media_type=mime)
 
 
 @router.delete("/attempts/{attempt_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -396,8 +678,23 @@ async def excluir_tentativa(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Response:
-    attempt = await _owned_attempt(session, attempt_id, usuario.id)
+    attempt = await _owned_attempt(session, attempt_id, usuario.id, lock=True)
     storage_key = attempt.storage_key
+    jobs = (
+        (
+            await session.execute(
+                select(TranscriptionJob)
+                .where(
+                    TranscriptionJob.speaking_attempt_id == attempt.id,
+                )
+                .with_for_update()
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for job in jobs:
+        await assist_quota.release(session, job.assist_reservation_id, "audio_deleted")
     await session.execute(
         delete(SkillEvidence).where(
             SkillEvidence.user_id == usuario.id,

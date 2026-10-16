@@ -31,6 +31,7 @@ from app.schemas.progress import (
     FeedbackTokenOut,
     PracticeAttemptStateOut,
 )
+from app.services.publication import require_published_lesson
 
 
 def exercise_fingerprint(exercises: list[Exercise]) -> str:
@@ -88,6 +89,8 @@ async def get_owned_practice_session(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Sessão de exercícios não existe.",
         )
+    if for_update:
+        await require_published_lesson(session, practice.lesson_id)
     return practice
 
 
@@ -168,13 +171,20 @@ def _feedback(item: PracticeSessionItem) -> AttemptFeedbackOut | None:
 
 
 def practice_item_out(
-    item: PracticeSessionItem, *, content_changed: bool = False
+    item: PracticeSessionItem,
+    *,
+    content_changed: bool = False,
+    historical_content_available: bool = False,
 ) -> PracticeSessionItemOut:
     revealed = item.answer_revealed_at is not None
     completed_by_answer = item.completed_at is not None and not revealed
     hints = [] if content_changed else item.exercise.hints[: item.highest_hint_level]
     return PracticeSessionItemOut(
+        id=item.id,
         position=item.position,
+        historical_content_status=(
+            "available" if historical_content_available else "unavailable"
+        ),
         exercise=ExerciseOut.model_validate(exercise_public_payload(item.exercise)),
         attempt_count=item.attempt_count,
         first_try_correct=item.first_try_correct,
@@ -209,8 +219,11 @@ def practice_summary(practice: PracticeSession) -> PracticeSummaryOut:
     )
 
 
-def practice_session_out(practice: PracticeSession) -> PracticeSessionOut:
+def practice_session_out(
+    practice: PracticeSession, *, historical_item_ids: set[int] | None = None
+) -> PracticeSessionOut:
     changed = session_content_changed(practice)
+    historical_item_ids = historical_item_ids or set()
     return PracticeSessionOut(
         id=practice.id,
         course_slug=practice.lesson.course_slug,
@@ -230,7 +243,14 @@ def practice_session_out(practice: PracticeSession) -> PracticeSessionOut:
         updated_at=practice.updated_at,
         completed_at=practice.completed_at,
         summary=practice_summary(practice),
-        items=[practice_item_out(item, content_changed=changed) for item in practice.items],
+        items=[
+            practice_item_out(
+                item,
+                content_changed=changed,
+                historical_content_available=item.id in historical_item_ids,
+            )
+            for item in practice.items
+        ],
     )
 
 

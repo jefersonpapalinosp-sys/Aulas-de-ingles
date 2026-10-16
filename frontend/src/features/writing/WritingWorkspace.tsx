@@ -8,6 +8,7 @@ import {
   type WritingRevision,
 } from '../../api/client'
 import { useAssistStatus } from '../../api/assist'
+import { AssistQuota } from '../assist/AssistQuota'
 import { wordDiff } from './wordDiff'
 import { WritingFeedbackProvenance } from './WritingFeedbackProvenance'
 import { readLocal, removeLocal, writeLocal } from '../../storage/local'
@@ -38,6 +39,17 @@ export function WritingWorkspace({
   const assistStatus = useAssistStatus(userId)
   const key = useMemo(() => backupKey(userId, prompt.id), [prompt.id, userId])
   const queryKey = useMemo(() => ['writing-draft', userId, prompt.id] as const, [prompt.id, userId])
+  const revisionScope = `${userId}:${prompt.id}`
+  const [revisionHistory, setRevisionHistory] = useState<{
+    scope: string
+    items: WritingRevision[]
+    cursor?: string
+  }>({ scope: revisionScope, items: [] })
+  const revisionCursor = revisionHistory.scope === revisionScope
+    ? revisionHistory.cursor
+    : undefined
+  const revisionLoadingMore = useRef(false)
+  const revisionStatusRef = useRef<HTMLParagraphElement>(null)
   const draftQuery = useQuery({
     queryKey,
     queryFn: async () => {
@@ -45,6 +57,22 @@ export function WritingWorkspace({
         params: { path: { prompt_id: prompt.id } },
       })
       if (!data) throw new Error('Não foi possível carregar o rascunho.')
+      return data
+    },
+    retry: false,
+  })
+  const versionsQuery = useQuery({
+    queryKey: ['writing-versions', userId, prompt.id, revisionCursor || 'first'],
+    queryFn: async () => {
+      const { data } = await api.GET('/api/writing/prompts/{prompt_id}/versions', {
+        params: {
+          path: { prompt_id: prompt.id },
+          query: { limit: 20, cursor: revisionCursor },
+        },
+      })
+      if (!data || !Array.isArray(data.items)) {
+        throw new Error('Não foi possível carregar as versões.')
+      }
       return data
     },
     retry: false,
@@ -66,6 +94,7 @@ export function WritingWorkspace({
   const revision = useRef<number | null>(null)
   const epoch = useRef(0)
   const edits = useRef(0)
+  const analysisRequest = useRef<{ payload: string; key: string } | null>(null)
   const conflictRef = useRef<WritingDraft | null>(null)
   const [conflict, setConflict] = useState<WritingDraft | null>(null)
   const [recovered, setRecovered] = useState(false)
@@ -73,6 +102,7 @@ export function WritingWorkspace({
 
   useEffect(() => {
     epoch.current += 1
+    analysisRequest.current = null
     revision.current = null
     conflictRef.current = null
     setConflict(null)
@@ -84,8 +114,27 @@ export function WritingWorkspace({
     setActionMessage('')
     setAnalyzing(false)
     setCreatingVersion(false)
+    setRevisionHistory({ scope: `${userId}:${prompt.id}`, items: [] })
+    revisionLoadingMore.current = false
     return () => { epoch.current += 1 }
   }, [prompt.id, userId])
+
+  useEffect(() => {
+    const result = versionsQuery.data
+    if (!result) return
+    setRevisionHistory((current) => ({
+      scope: revisionScope,
+      items:
+        current.scope === revisionScope && revisionCursor
+          ? [...current.items, ...result.items]
+          : result.items,
+      cursor: revisionCursor,
+    }))
+    if (revisionLoadingMore.current) {
+      revisionLoadingMore.current = false
+      window.requestAnimationFrame(() => revisionStatusRef.current?.focus())
+    }
+  }, [revisionCursor, revisionScope, versionsQuery.data])
 
   useEffect(() => {
     if (hydrated || (draftQuery.isPending && !draftQuery.isError)) return
@@ -203,18 +252,31 @@ export function WritingWorkspace({
     setAnalyzing(true)
     setActionMessage('')
     try {
-      const { data } = await api.POST('/api/writing/prompts/{prompt_id}/feedback', {
+      const assisted = Boolean(assistStatus.data?.writing_enabled && useAssisted)
+      const payload = JSON.stringify([userId, prompt.id, text, assisted])
+      if (analysisRequest.current?.payload !== payload)
+        analysisRequest.current = { payload, key: crypto.randomUUID() }
+      const { data, response } = await api.POST('/api/writing/prompts/{prompt_id}/feedback', {
         params: { path: { prompt_id: prompt.id } },
-        body: { text, assisted: Boolean(assistStatus.data?.writing_enabled && useAssisted) },
+        body: { text, assisted, operation_key: analysisRequest.current.key },
       })
+      if (response?.status === 409) {
+        if (generation === epoch.current && edit === edits.current)
+          setActionMessage('Análise já iniciada. Consulte o histórico antes de reenviar; seu texto foi mantido.')
+        return
+      }
       if (!data) throw new Error('Falha ao analisar o texto.')
-      if (generation === epoch.current && edit === edits.current) setFeedback(data)
+      if (generation === epoch.current && edit === edits.current) {
+        setFeedback(data)
+        analysisRequest.current = null
+      }
       await invalidateStudy(queryClient)
     } catch {
       if (generation === epoch.current && edit === edits.current)
         setActionMessage('Análise indisponível; confira o estado de salvamento antes de sair.')
     } finally {
       if (generation === epoch.current) setAnalyzing(false)
+      await queryClient.invalidateQueries({ queryKey: ['assist-status', userId] })
     }
   }
 
@@ -260,7 +322,16 @@ export function WritingWorkspace({
         revision: revision.current ?? 0,
         text: value,
         updated_at: current?.updated_at ?? null,
-        revisions: [data, ...(current?.revisions.filter((item) => item.id !== data.id) ?? [])],
+      }))
+      setRevisionHistory((current) => ({
+        scope: revisionScope,
+        cursor: current.scope === revisionScope ? current.cursor : undefined,
+        items: [
+          data,
+          ...(current.scope === revisionScope
+            ? current.items.filter((item) => item.id !== data.id)
+            : []),
+        ],
       }))
       setActionMessage(`Versão ${data.version} criada.`)
     })
@@ -293,7 +364,8 @@ export function WritingWorkspace({
 
   const wordCount = countWords(text)
   const sentenceCount = countSentences(text)
-  const revisions = draftQuery.data?.revisions ?? []
+  const revisions = revisionHistory.scope === revisionScope ? revisionHistory.items : []
+  const nextRevisionCursor = versionsQuery.data?.next_cursor ?? undefined
   const comparisonParts = comparison ? wordDiff(comparison.text, text) : []
 
   return (
@@ -394,11 +466,12 @@ export function WritingWorkspace({
           />
           <span>
             Experimentar feedback assistido automatizado. Pode errar; a rubrica local continua
-            sendo aplicada. Restam {assistStatus.data.remaining_today} análises hoje.
+            sendo aplicada.
           </span>
         </label>
       )}
       {actionMessage && <p className="writing-message" role="status">{actionMessage}</p>}
+      {assistStatus.data?.writing_enabled && <AssistQuota status={assistStatus.data} />}
 
       {feedback && (
         <div className={`writing-feedback ${feedback.ready ? 'ready' : ''}`} aria-live="polite">
@@ -465,6 +538,10 @@ export function WritingWorkspace({
         </div>
       )}
 
+      {versionsQuery.isPending && revisions.length === 0 && <p>Carregando versões…</p>}
+      {versionsQuery.isError && revisions.length === 0 && (
+        <p role="alert">Não foi possível carregar as versões salvas.</p>
+      )}
       {revisions.length > 0 && (
         <div className="writing-history">
           <h3>Versões salvas</h3>
@@ -487,6 +564,25 @@ export function WritingWorkspace({
               </li>
             ))}
           </ul>
+          {nextRevisionCursor && (
+            <button
+              type="button"
+              disabled={versionsQuery.isFetching}
+              onClick={() => {
+                revisionLoadingMore.current = true
+                setRevisionHistory((current) => ({
+                  ...current,
+                  scope: revisionScope,
+                  cursor: nextRevisionCursor,
+                }))
+              }}
+            >
+              {versionsQuery.isFetching ? 'Carregando mais…' : 'Carregar mais versões'}
+            </button>
+          )}
+          <p ref={revisionStatusRef} tabIndex={-1} role="status">
+            {revisions.length} {revisions.length === 1 ? 'versão carregada' : 'versões carregadas'}.
+          </p>
         </div>
       )}
 

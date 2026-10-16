@@ -7,8 +7,12 @@ import {
   type SpeakingAttempt,
 } from '../../api/client'
 import { useAssistStatus } from '../../api/assist'
+import { AssistQuota } from '../assist/AssistQuota'
 import { formatAudioTime } from '../media/LessonAudioPlayer'
 import { readLocal, writeLocal } from '../../storage/local'
+import { sessionSnapshot } from '../../api/session'
+import { recordingTypes, VoiceRecorder } from './voiceRecorder'
+import { clearVoiceDraft, retainVoiceDraft, takeVoiceDraft } from './voiceDraft'
 
 type RecordingStatus = 'idle' | 'requesting' | 'recording' | 'ready' | 'error'
 type SelfRating = 'repeat' | 'almost' | 'confident'
@@ -50,11 +54,22 @@ export function ShadowingPractice({
   const [savedAudioUrl, setSavedAudioUrl] = useState<string | null>(null)
   const [playingAttemptId, setPlayingAttemptId] = useState<number | null>(null)
   const modelRef = useRef<HTMLAudioElement>(null)
-  const recorderRef = useRef<MediaRecorder | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const recordingStartedAtRef = useRef(0)
+  const uploadRef = useRef<{ attemptId: number | null; controller: AbortController | null }>({ attemptId: null, controller: null })
+  const recoveredRef = useRef<ReturnType<typeof takeVoiceDraft>>(null)
+  const [pendingAttempt, setPendingAttempt] = useState(false)
+  const recorder = useMemo(() => new VoiceRecorder({
+    started: () => { setStatus('recording'); setMessage('Gravando… fale a frase e pare quando terminar.') },
+    finished: (blob, duration) => {
+      setRecordingBlob(blob)
+      setRecordingDuration(duration)
+      setRecordingUrl(URL.createObjectURL(blob))
+      setStatus('ready')
+      setMessage('Gravação pronta. Compare sua voz com o modelo.')
+    },
+    failed: (text) => { setStatus('error'); setMessage(text) },
+  }), [])
   const cue = media.cues.find((item) => item.id === cueId) ?? firstCue
+  const draftKey = `${userId}:${courseSlug}:${lessonNumber}:${cue?.id}`
   const historyKey = useMemo(
     () => ['speaking-attempts', userId, courseSlug, lessonNumber] as const,
     [courseSlug, lessonNumber, userId],
@@ -77,12 +92,29 @@ export function ShadowingPractice({
         : false,
   })
   const assistStatus = useAssistStatus(userId)
+  const policyQuery = useQuery({
+    queryKey: ['speaking-policy'],
+    queryFn: async () => {
+      const { data } = await api.GET('/api/speaking/policy')
+      if (!data) throw new Error('Não foi possível confirmar os limites de envio.')
+      return data
+    },
+    retry: false,
+  })
+  const policy = policyQuery.data
+  // Margem para o fechamento do codec; o servidor mede e limita a duração real.
+  const maxDuration = policy?.recording_target_ms ?? 29_000
   const supported =
     typeof navigator !== 'undefined' &&
     typeof navigator.mediaDevices?.getUserMedia === 'function' &&
-    typeof MediaRecorder !== 'undefined'
+    typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function'
 
   useEffect(() => {
+    recorder.cancel()
+    uploadRef.current.controller?.abort()
+    uploadRef.current = { attemptId: null, controller: null }
+    setPendingAttempt(false)
+    setSaving(false)
     if (!cue) return
     if (modelRef.current && !modelRef.current.paused) modelRef.current.pause()
     const key = ratingKey(userId, courseSlug, lessonNumber, cue.id)
@@ -111,21 +143,25 @@ export function ShadowingPractice({
     setSavedCurrent(false)
     setStatus('idle')
     setMessage('')
-  }, [courseSlug, cue, lessonNumber, userId])
-
-  useEffect(
-    () => () => {
-      if (stopTimerRef.current) clearTimeout(stopTimerRef.current)
-      const recorder = recorderRef.current
-      if (recorder?.state === 'recording') {
-        recorder.ondataavailable = null
-        recorder.onstop = null
-        recorder.stop()
-      }
-      streamRef.current?.getTracks().forEach((track) => track.stop())
-    },
-    [],
-  )
+    const restored = takeVoiceDraft(draftKey) ?? (recoveredRef.current?.key === draftKey ? recoveredRef.current : null)
+    recoveredRef.current = restored
+    const restoredUrl = restored ? URL.createObjectURL(restored.blob) : null
+    if (restored) {
+      setRecordingBlob(restored.blob)
+      setRecordingDuration(restored.duration)
+      setRecordingUrl(restoredUrl)
+      uploadRef.current.attemptId = restored.attemptId
+      setPendingAttempt(restored.attemptId !== null)
+      setStatus('ready')
+      setMessage('Gravação recuperada nesta aba. Confira e autorize o envio novamente.')
+    }
+    return () => {
+      recorder.cancel()
+      uploadRef.current.controller?.abort()
+      // StrictMode pode limpar este efeito antes de o estado publicar a primeira URL.
+      if (restoredUrl) URL.revokeObjectURL(restoredUrl)
+    }
+  }, [courseSlug, cue, lessonNumber, userId, recorder, draftKey])
 
   useEffect(
     () => () => {
@@ -160,59 +196,18 @@ export function ShadowingPractice({
     }
   }
 
-  function stopStream() {
-    streamRef.current?.getTracks().forEach((track) => track.stop())
-    streamRef.current = null
-  }
-
-  function stopRecording() {
-    if (stopTimerRef.current) clearTimeout(stopTimerRef.current)
-    stopTimerRef.current = null
-    if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
-  }
-
   async function startRecording() {
-    if (!supported) return
+    if (!supported || saving) return
+    recoveredRef.current = null
     setStatus('requesting')
     setMessage('Solicitando acesso ao microfone…')
     setRecordingUrl(null)
     setRecordingBlob(null)
     setConsent(false)
     setSavedCurrent(false)
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-      const recorder = new MediaRecorder(stream)
-      const chunks: Blob[] = []
-      recorderRef.current = recorder
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunks.push(event.data)
-      }
-      recorder.onstop = () => {
-        stopStream()
-        if (chunks.length === 0) {
-          setStatus('error')
-          setMessage('O navegador não produziu áudio. Tente gravar novamente.')
-          return
-        }
-        const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
-        setRecordingBlob(blob)
-        setRecordingDuration(Math.max(1, Math.min(30_000, Date.now() - recordingStartedAtRef.current)))
-        setRecordingUrl(URL.createObjectURL(blob))
-        setStatus('ready')
-        setMessage('Gravação pronta. Compare sua voz com o modelo.')
-      }
-      recorder.start()
-      recordingStartedAtRef.current = Date.now()
-      setStatus('recording')
-      setMessage('Gravando… fale a frase e pare quando terminar.')
-      stopTimerRef.current = setTimeout(stopRecording, 30_000)
-    } catch {
-      stopStream()
-      setStatus('error')
-      setMessage('Não foi possível acessar o microfone. Confira a permissão do navegador.')
-    }
+    uploadRef.current = { attemptId: null, controller: null }
+    setPendingAttempt(false)
+    await recorder.start(maxDuration, policy?.mime_types ?? recordingTypes.map((type) => type.split(';')[0]!))
   }
 
   function saveRating(value: SelfRating) {
@@ -224,6 +219,12 @@ export function ShadowingPractice({
   }
 
   function discardLocal() {
+    recoveredRef.current = null
+    clearVoiceDraft(draftKey)
+    recorder.cancel()
+    uploadRef.current.controller?.abort()
+    uploadRef.current = { attemptId: null, controller: null }
+    setPendingAttempt(false)
     setRecordingUrl(null)
     setRecordingBlob(null)
     setRecordingDuration(0)
@@ -234,27 +235,41 @@ export function ShadowingPractice({
   }
 
   async function saveRecording() {
-    if (!cue || !recordingBlob || !consent || savedCurrent) return
+    if (!cue || !recordingBlob || !consent || savedCurrent || !policy || saving || uploadRef.current.controller) return
+    const session = sessionSnapshot()
+    if (session.usuarioId !== userId || !session.token || session.perfilNaoConfirmado) {
+      setMessage('Confirme a sessão da mesma conta para tentar novamente. O áudio continua nesta tela.')
+      return
+    }
+    const uploadState = uploadRef.current
+    const recovery = { key: draftKey, blob: recordingBlob, duration: recordingDuration, attemptId: uploadState.attemptId }
+    retainVoiceDraft(recovery)
+    const controller = new AbortController()
+    uploadState.controller = controller
+    const current = () => !controller.signal.aborted && uploadRef.current === uploadState
+    const validAccount = () => current() && sessionSnapshot().geracao === session.geracao && sessionSnapshot().usuarioId === userId
     setSaving(true)
     setMessage('Salvando gravação com segurança…')
-    let attemptId: number | null = null
     try {
-      const { data: attempt } = await api.POST('/api/speaking/attempts', {
-        body: {
-          cue_id: cue.id,
-          duration_ms: recordingDuration,
-          self_rating: rating,
-          consent: true,
-        },
-      })
-      if (!attempt) throw new Error('Falha ao registrar a gravação.')
-      attemptId = attempt.id
-      const upload = await authenticatedFetch(`/api/speaking/attempts/${attempt.id}/audio`, {
+      if (uploadState.attemptId === null) {
+        const { data: attempt, response } = await api.POST('/api/speaking/attempts', {
+          body: { cue_id: cue.id, duration_ms: recordingDuration, self_rating: rating, consent: true },
+          signal: controller.signal,
+        })
+        if (!validAccount()) throw new Error('A sessão mudou. Confirme a mesma conta antes de reenviar.')
+        if (!attempt) throw new Error(uploadError(response?.status))
+        uploadState.attemptId = attempt.id
+        recovery.attemptId = attempt.id
+        setPendingAttempt(true)
+      }
+      const upload = await authenticatedFetch(`/api/speaking/attempts/${uploadState.attemptId}/audio`, {
         method: 'PUT',
-        headers: { 'Content-Type': recordingBlob.type || 'audio/webm' },
+        headers: { 'Content-Type': recordingBlob.type },
         body: recordingBlob,
+        signal: controller.signal,
       })
-      if (!upload.ok) throw new Error('Falha ao enviar o áudio.')
+      if (!validAccount()) throw new Error('A sessão mudou. Confirme a mesma conta antes de reenviar.')
+      if (!upload.ok) throw new Error(uploadError(upload.status))
       setSavedCurrent(true)
       setConsent(false)
       setMessage('Gravação salva na sua conta. Você pode ouvi-la ou excluí-la abaixo.')
@@ -262,15 +277,13 @@ export function ShadowingPractice({
         queryClient.invalidateQueries({ queryKey: historyKey }),
         queryClient.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
       ])
-    } catch {
-      if (attemptId !== null) {
-        await api.DELETE('/api/speaking/attempts/{attempt_id}', {
-          params: { path: { attempt_id: attemptId } },
-        })
-      }
-      setMessage('Não foi possível salvar. O áudio continua apenas nesta tela.')
+    } catch (error) {
+      // Falha de rede pode ser só perda da resposta: não apagar uma gravação confirmada.
+      if (current()) setMessage(`${error instanceof Error && error.message !== 'Failed to fetch' ? error.message : 'Falha de conexão. Tente novamente.'} O áudio continua nesta tela; você pode baixá-lo.`)
     } finally {
-      setSaving(false)
+      if (sessionSnapshot().usuarioId !== null) clearVoiceDraft(draftKey, recovery)
+      uploadState.controller = null
+      if (current()) setSaving(false)
     }
   }
 
@@ -304,6 +317,7 @@ export function ShadowingPractice({
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: historyKey }),
       queryClient.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
+      queryClient.invalidateQueries({ queryKey: ['assist-status', userId] }),
     ])
   }
 
@@ -319,6 +333,7 @@ export function ShadowingPractice({
           ? 'A cota diária de análises assistidas foi atingida.'
           : 'O provedor não está disponível. Sua gravação e autoavaliação continuam salvas.',
       )
+      await queryClient.invalidateQueries({ queryKey: ['assist-status', userId] })
       return
     }
     setMessage('Transcrição solicitada. Este resultado será claramente marcado como automático.')
@@ -350,7 +365,10 @@ export function ShadowingPractice({
       return
     }
     setMessage('Transcrição excluída. A gravação foi mantida.')
-    await queryClient.invalidateQueries({ queryKey: historyKey })
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: historyKey }),
+      queryClient.invalidateQueries({ queryKey: ['assist-status', userId] }),
+    ])
   }
 
   return (
@@ -360,13 +378,15 @@ export function ShadowingPractice({
       <p className="study-copy">
         Por padrão, a gravação fica somente nesta tela e é descartada ao sair. Ela só será
         enviada se você marcar o consentimento e escolher salvar na sua conta.
+        Se a sessão expirar durante o envio, tente entrar na mesma conta e retornar
+        a este trecho em até cinco minutos, sem fechar ou recarregar esta aba.
       </p>
 
       <label className="shadowing-select">
         Frase para praticar
         <select
           value={cue.id}
-          disabled={status === 'requesting' || status === 'recording'}
+          disabled={saving || status === 'requesting' || status === 'recording'}
           onChange={(event) => setCueId(Number(event.target.value))}
         >
           {media.cues.map((item) => (
@@ -398,20 +418,24 @@ export function ShadowingPractice({
           {modelPlaying ? 'Ouvindo modelo…' : '1. Ouvir modelo'}
         </button>
         {status === 'recording' ? (
-          <button type="button" className="btn recording" onClick={stopRecording}>
+          <button type="button" className="btn recording" onClick={() => recorder.stop()}>
             Parar gravação
           </button>
         ) : (
           <button
             type="button"
             className="btn"
-            disabled={!supported || status === 'requesting'}
+            disabled={!supported || saving || status === 'requesting'}
             onClick={() => void startRecording()}
           >
             {status === 'requesting' ? 'Abrindo microfone…' : '2. Gravar minha voz'}
           </button>
         )}
       </div>
+
+      {status === 'requesting' && <button type="button" onClick={discardLocal}>Cancelar acesso ao microfone</button>}
+      <p>Gravação local: até {maxDuration / 1000} segundos. {policy ? `Envio: até ${policy.max_bytes.toLocaleString('pt-BR')} bytes e ${policy.max_duration_ms / 1000} segundos reais, somente áudio mono ou estéreo.` : 'Limite de envio ainda não confirmado.'}</p>
+      {policyQuery.isError && <button type="button" onClick={() => void policyQuery.refetch()}>Consultar limites para enviar</button>}
 
       {!supported && (
         <p className="shadowing-warning" role="alert">
@@ -446,6 +470,7 @@ export function ShadowingPractice({
                 key={value}
                 className={rating === value ? 'selected' : ''}
                 aria-pressed={rating === value}
+                disabled={saving || pendingAttempt}
                 onClick={() => saveRating(value)}
               >
                 {label}
@@ -472,7 +497,8 @@ export function ShadowingPractice({
                 !consent ||
                 saving ||
                 savedCurrent ||
-                recordingBlob.size > 2_000_000
+                !policy || recordingBlob.size > policy.max_bytes ||
+                !policy.mime_types.includes(recordingBlob.type.split(';')[0]!)
               }
               onClick={() => void saveRecording()}
             >
@@ -482,10 +508,18 @@ export function ShadowingPractice({
               Descartar gravação local
             </button>
           </div>
-          {recordingBlob && recordingBlob.size > 2_000_000 && (
+          <a href={recordingUrl} download="minha-gravacao">Baixar gravação local</a>
+          {recordingBlob && !savedCurrent && <p role="note">
+            Gravação local — envio não confirmado. Ela não entra na fila de exercícios.
+            Envie ou baixe antes de fechar a aba para não perder esta tentativa.
+          </p>}
+          {recordingBlob && policy && recordingBlob.size > policy.max_bytes && (
             <p className="shadowing-warning" role="alert">
-              O arquivo passou de 2 MB. Faça uma tentativa mais curta para salvar.
+              O arquivo excede {policy.max_bytes.toLocaleString('pt-BR')} bytes. Baixe a gravação ou faça uma tentativa mais curta.
             </p>
+          )}
+          {recordingBlob && policy && !policy.mime_types.includes(recordingBlob.type.split(';')[0]!) && (
+            <p role="alert">Este formato não pode ser enviado. Baixe a gravação ou use outro navegador.</p>
           )}
         </div>
       )}
@@ -501,10 +535,10 @@ export function ShadowingPractice({
         {assistStatus.data?.transcription_enabled && (
           <p className="assist-disclosure">
             Recurso experimental: a transcrição é automatizada, pode errar e expira em{' '}
-            {assistStatus.data.retention_days} dias. Restam {assistStatus.data.remaining_today}{' '}
-            análises hoje.
+            {assistStatus.data.retention_days} dias.
           </p>
         )}
+        {assistStatus.data?.transcription_enabled && <AssistQuota status={assistStatus.data} />}
         {historyQuery.isPending && <p>Carregando histórico…</p>}
         {historyQuery.isError && <p>Não foi possível carregar o histórico.</p>}
         {historyQuery.data?.length === 0 && <p>Nenhuma gravação salva.</p>}
@@ -513,7 +547,11 @@ export function ShadowingPractice({
             {historyQuery.data.map((attempt) => (
               <li key={attempt.id}>
                 <div>
-                  <strong lang="en">{attempt.cue_text}</strong>
+                  {attempt.cue_text ? (
+                    <strong lang="en">{attempt.cue_text}</strong>
+                  ) : (
+                    <strong>Texto original indisponível</strong>
+                  )}
                   <small>
                     {new Intl.DateTimeFormat('pt-BR', {
                       dateStyle: 'short',
@@ -522,9 +560,17 @@ export function ShadowingPractice({
                     {attempt.self_rating ? ` · ${ratingLabel(attempt.self_rating)}` : ''}
                   </small>
                 </div>
-                <button type="button" onClick={() => void playSaved(attempt)}>Ouvir</button>
+                <button type="button" disabled={['missing', 'changed'].includes(attempt.integrity_state ?? '')} onClick={() => void playSaved(attempt)}>Ouvir</button>
+                {['missing', 'changed'].includes(attempt.integrity_state ?? '') && (
+                  <p role="status">Arquivo ausente ou alterado. O histórico foi preservado; grave uma nova tentativa ou solicite restauração de uma cópia conferida.</p>
+                )}
+                {attempt.historical_content_status === 'unavailable' && (
+                  <p role="status">
+                    Sem texto original: ouça o áudio, sem comparação automática.
+                  </p>
+                )}
                 <button type="button" onClick={() => void deleteSaved(attempt.id)}>Excluir</button>
-                {assistStatus.data?.transcription_enabled && !attempt.transcription && (
+                {assistStatus.data?.transcription_enabled && !attempt.transcription && attempt.historical_content_status === 'available' && !['missing', 'changed'].includes(attempt.integrity_state ?? '') && (
                   <button
                     type="button"
                     className="transcription-request"
@@ -626,6 +672,16 @@ export function ShadowingPractice({
       </div>
     </section>
   )
+}
+
+function uploadError(status?: number): string {
+  if (status === 413) return 'Áudio maior que o limite permitido. Grave um trecho mais curto.'
+  if (status === 415) return 'Formato não aceito pelo servidor. Use outro navegador para gravar.'
+  if (status === 422) return 'Áudio inválido ou com duração real acima do limite. Baixe sua gravação e grave um trecho mais curto.'
+  if (status === 401 || status === 403) return 'Sua sessão precisa ser confirmada antes de tentar novamente.'
+  if (status === 409) return 'Esta tentativa já contém outro áudio; nada foi sobrescrito.'
+  if (status === 408) return 'O envio demorou demais. Tente novamente.'
+  return 'Não foi possível confirmar o envio. Tente novamente.'
 }
 
 function ratingLabel(value: NonNullable<SpeakingAttempt['self_rating']>): string {

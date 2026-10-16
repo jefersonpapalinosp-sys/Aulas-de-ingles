@@ -34,6 +34,7 @@ export function usePracticeExercises(
   enabled = true,
 ) {
   return useQuery({
+    networkMode: 'always', retry: false,
     queryKey: [
       'practice-exercises',
       courseSlug,

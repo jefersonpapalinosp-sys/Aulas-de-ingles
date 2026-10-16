@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 StudyStep = Literal["preparar", "assistir", "estudar", "praticar", "revisar"]
 STUDY_STEPS: tuple[StudyStep, ...] = (
@@ -111,9 +111,18 @@ class StudySessionOut(BaseModel):
 
 
 class MediaPositionIn(BaseModel):
-    position_seconds: float = Field(ge=0)
+    position_seconds: float = Field(ge=0, allow_inf_nan=False)
+    expected_revision: int = Field(ge=0)
+    operation_key: UUID
+    changed_at: AwareDatetime
+    completed: bool = False
 
 
-class MediaPositionOut(MediaPositionIn):
+class MediaPositionOut(BaseModel):
+    position_seconds: float
     media_id: int
     updated_at: datetime | None
+    revision: int
+    completed: bool
+    operation_key: str | None
+    changed_at: datetime | None

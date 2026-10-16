@@ -4,40 +4,25 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.api.deps import UsuarioAtual
 from app.api.review import adicionar_item_revisao, remover_item_por_origem
 from app.db.models import (
     Course,
     CourseUnit,
-    Exercise,
-    ExerciseAttempt,
     Lesson,
-    LessonMedia,
-    LessonProgress,
-    MediaProgress,
     NotebookEntry,
-    ReviewItem,
-    SkillEvidence,
-    SpeakingAttempt,
-    StepProgress,
-    StudyPlan,
-    StudySessionProgress,
-    TranscriptCue,
-    TranscriptionJob,
-    WritingDraft,
-    WritingFeedbackRecord,
-    WritingPrompt,
 )
 from app.db.session import get_session
+from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
 from app.schemas.notebook import (
     NotebookEntryIn,
     NotebookEntryOut,
     NotebookEntryUpdate,
     NotebookKind,
+    NotebookPageOut,
     PersonalDataExportOut,
 )
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
@@ -58,15 +43,6 @@ def _entry_out(entry: NotebookEntry) -> NotebookEntryOut:
         created_at=entry.created_at,
         updated_at=entry.updated_at,
     )
-
-
-def _lesson_reference(lesson: Lesson) -> dict[str, str | int]:
-    """Identifica uma aula sem ambiguidade entre cursos e unidades."""
-    return {
-        "course_slug": lesson.course.slug,
-        "unit_slug": lesson.unit.slug,
-        "lesson_number": lesson.number,
-    }
 
 
 async def _owned_entry(session: AsyncSession, entry_id: int, user_id: int) -> NotebookEntry:
@@ -110,6 +86,75 @@ async def listar_caderno(
         query = query.where(NotebookEntry.kind == kind)
     entries = (await session.execute(query.order_by(NotebookEntry.updated_at.desc()))).scalars()
     return [_entry_out(entry) for entry in entries]
+
+
+@router.get("/notebook/page", response_model=NotebookPageOut)
+async def listar_caderno_paginado(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    lesson: Annotated[int | None, Query(ge=1)] = None,
+    kind: Annotated[NotebookKind | None, Query()] = None,
+    course: Annotated[str | None, Query(max_length=100)] = None,
+    unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> NotebookPageOut:
+    """Keyset page ordered by the same update recency shown in the UI."""
+    query = (
+        select(
+            NotebookEntry.id,
+            Course.slug.label("course_slug"),
+            Course.title.label("course_title"),
+            CourseUnit.slug.label("unit_slug"),
+            Lesson.number.label("lesson_number"),
+            Lesson.title.label("lesson_title"),
+            NotebookEntry.kind,
+            NotebookEntry.content,
+            NotebookEntry.created_at,
+            NotebookEntry.updated_at,
+        )
+        .join(Lesson, NotebookEntry.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(NotebookEntry.user_id == usuario.id)
+    )
+    if course is not None:
+        query = query.where(Course.slug == course)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    if lesson is not None:
+        query = query.where(
+            Lesson.number == lesson,
+            Course.slug == (course or DEFAULT_COURSE_SLUG),
+        )
+    if kind is not None:
+        query = query.where(NotebookEntry.kind == kind)
+    if cursor is not None:
+        try:
+            boundary = decode_time_id_cursor(cursor)
+        except InvalidCursor as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={"code": "invalid_cursor", "message": "Cursor de paginação inválido."},
+            ) from error
+        query = query.where(
+            tuple_(NotebookEntry.updated_at, NotebookEntry.id)
+            < tuple_(boundary.timestamp, boundary.row_id)
+        )
+    rows = (
+        await session.execute(
+            query.order_by(NotebookEntry.updated_at.desc(), NotebookEntry.id.desc()).limit(
+                limit + 1
+            )
+        )
+    ).all()
+    page_rows = rows[:limit]
+    items = [NotebookEntryOut.model_validate(row._mapping) for row in page_rows]
+    next_cursor = None
+    if len(rows) > limit and page_rows:
+        last = page_rows[-1]
+        next_cursor = encode_time_id_cursor(last.updated_at, last.id)
+    return NotebookPageOut(items=items, next_cursor=next_cursor)
 
 
 @router.post("/notebook", response_model=NotebookEntryOut, status_code=status.HTTP_201_CREATED)
@@ -204,288 +249,13 @@ async def exportar_dados(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> PersonalDataExportOut:
-    progress = (
-        await session.execute(
-            select(LessonProgress)
-            .where(LessonProgress.user_id == usuario.id)
-            .order_by(LessonProgress.studied_at)
-        )
-    ).scalars()
-    study_rows = (
-        await session.execute(
-            select(StudySessionProgress, Lesson)
-            .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
-            .where(StudySessionProgress.user_id == usuario.id)
-            .order_by(Lesson.number)
-        )
-    ).all()
-    attempt_rows = (
-        await session.execute(
-            select(ExerciseAttempt, Exercise, Lesson)
-            .join(Exercise, ExerciseAttempt.exercise_id == Exercise.id)
-            .join(Lesson, Exercise.lesson_id == Lesson.id)
-            .where(ExerciseAttempt.user_id == usuario.id)
-            .order_by(ExerciseAttempt.created_at)
-        )
-    ).all()
-    review_rows = (
-        await session.execute(
-            select(ReviewItem, Lesson)
-            .join(Lesson, ReviewItem.lesson_id == Lesson.id)
-            .where(ReviewItem.user_id == usuario.id)
-            .order_by(ReviewItem.created_at)
-        )
-    ).all()
-    writing_rows = (
-        await session.execute(
-            select(WritingDraft, WritingPrompt, Lesson)
-            .join(WritingPrompt, WritingDraft.prompt_id == WritingPrompt.id)
-            .join(Lesson, WritingPrompt.lesson_id == Lesson.id)
-            .where(WritingDraft.user_id == usuario.id)
-            .order_by(WritingDraft.updated_at)
-        )
-    ).all()
-    feedbacks = (
-        await session.execute(
-            select(WritingFeedbackRecord)
-            .where(WritingFeedbackRecord.user_id == usuario.id)
-            .order_by(WritingFeedbackRecord.created_at)
-        )
-    ).scalars()
-    feedback_by_prompt: dict[int, list[WritingFeedbackRecord]] = {}
-    for feedback in feedbacks:
-        feedback_by_prompt.setdefault(feedback.prompt_id, []).append(feedback)
-    speaking = list(
-        (
-            await session.execute(
-                select(SpeakingAttempt)
-                .options(
-                    selectinload(SpeakingAttempt.cue)
-                    .selectinload(TranscriptCue.media)
-                    .selectinload(LessonMedia.lesson)
-                )
-                .where(SpeakingAttempt.user_id == usuario.id)
-                .order_by(SpeakingAttempt.created_at)
-            )
-        ).scalars()
-    )
-    transcription_jobs = (
-        await session.execute(
-            select(TranscriptionJob).where(TranscriptionJob.user_id == usuario.id)
-        )
-    ).scalars()
-    transcription_by_attempt = {job.speaking_attempt_id: job for job in transcription_jobs}
-    notebook = (
-        await session.execute(
-            select(NotebookEntry)
-            .where(NotebookEntry.user_id == usuario.id)
-            .order_by(NotebookEntry.created_at)
-        )
-    ).scalars()
-    plan = (
-        await session.execute(select(StudyPlan).where(StudyPlan.user_id == usuario.id))
-    ).scalar_one_or_none()
-    step_rows = (
-        await session.execute(
-            select(StepProgress, StudySessionProgress, Lesson)
-            .join(
-                StudySessionProgress,
-                StepProgress.study_session_id == StudySessionProgress.id,
-            )
-            .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
-            .where(StudySessionProgress.user_id == usuario.id)
-            .order_by(Lesson.number, StepProgress.id)
-        )
-    ).all()
-    evidence = (
-        await session.execute(
-            select(SkillEvidence)
-            .where(SkillEvidence.user_id == usuario.id)
-            .order_by(SkillEvidence.occurred_at)
-        )
-    ).scalars()
-    media_rows = (
-        await session.execute(
-            select(MediaProgress, LessonMedia, Lesson)
-            .join(LessonMedia, MediaProgress.media_id == LessonMedia.id)
-            .join(Lesson, LessonMedia.lesson_id == Lesson.id)
-            .where(MediaProgress.user_id == usuario.id)
-            .order_by(Lesson.number, LessonMedia.position)
-        )
-    ).all()
+    from app.services.personal_export import export_personal_data
 
+    # A autenticação abriu uma transação de leitura; o serviço inicia um novo
+    # snapshot e relê o perfil, sem reter uma segunda conexão do pool.
+    user_id = usuario.id
+    await session.rollback()
+    data = await export_personal_data(session, user_id)
     response.headers["Content-Disposition"] = 'attachment; filename="aulas-ingles-dados.json"'
-    return PersonalDataExportOut(
-        schema_version="1.5",
-        exported_at=datetime.now(UTC),
-        profile={
-            "id": usuario.id,
-            "email": usuario.email,
-            "display_name": usuario.display_name,
-            "created_at": usuario.created_at,
-        },
-        lesson_progress=[
-            {**_lesson_reference(item.lesson), "studied_at": item.studied_at} for item in progress
-        ],
-        study_sessions=[
-            {
-                **_lesson_reference(lesson),
-                "current_step": item.current_step,
-                "completed_steps": item.completed_steps,
-                "started_at": item.started_at,
-                "total_seconds": item.total_seconds,
-                "completed_at": item.completed_at,
-                "updated_at": item.updated_at,
-            }
-            for item, lesson in study_rows
-        ],
-        study_plan=(
-            {
-                "weekly_minutes": plan.weekly_minutes,
-                "preferred_days": plan.preferred_days,
-                "goal": plan.goal,
-                "created_at": plan.created_at,
-                "updated_at": plan.updated_at,
-            }
-            if plan is not None
-            else None
-        ),
-        step_progress=[
-            {
-                **_lesson_reference(lesson),
-                "step": step.step,
-                "seconds_spent": step.seconds_spent,
-                "completed_at": step.completed_at,
-                "updated_at": step.updated_at,
-            }
-            for step, _, lesson in step_rows
-        ],
-        media_progress=[
-            {
-                **_lesson_reference(lesson),
-                "media_label": media.label,
-                "position_seconds": progress.position_seconds,
-                "updated_at": progress.updated_at,
-            }
-            for progress, media, lesson in media_rows
-        ],
-        skill_evidence=[
-            {
-                "skill": item.skill,
-                "source_type": item.source_type,
-                "source_id": item.source_id,
-                "score": item.score,
-                "occurred_at": item.occurred_at,
-            }
-            for item in evidence
-        ],
-        exercise_attempts=[
-            {
-                **_lesson_reference(lesson),
-                "exercise_position": exercise.position,
-                "answer": attempt.answer,
-                "correct": attempt.correct,
-                "created_at": attempt.created_at,
-            }
-            for attempt, exercise, lesson in attempt_rows
-        ],
-        review_items=[
-            {
-                **_lesson_reference(lesson),
-                "item_type": item.item_type,
-                "skill": item.skill,
-                "prompt": item.prompt,
-                "answer": item.answer,
-                "context": item.context,
-                "origin_reason": item.origin_reason,
-                "status": item.status,
-                "interval_days": item.interval_days,
-                "repetitions": item.repetitions,
-                "lapses": item.lapses,
-                "due_at": item.due_at,
-                "last_reviewed_at": item.last_reviewed_at,
-            }
-            for item, lesson in review_rows
-        ],
-        writing=[
-            {
-                **_lesson_reference(lesson),
-                "prompt_title": prompt.title,
-                "draft": draft.text,
-                "updated_at": draft.updated_at,
-                "revisions": [
-                    {
-                        "version": revision.version,
-                        "text": revision.text,
-                        "created_at": revision.created_at,
-                    }
-                    for revision in draft.revisions
-                ],
-                "feedbacks": [
-                    {
-                        "text": feedback.text,
-                        "word_count": feedback.word_count,
-                        "sentence_count": feedback.sentence_count,
-                        "ready": feedback.ready,
-                        "checks": feedback.checks,
-                        "algorithm_version": feedback.algorithm_version,
-                        "rubric_version": feedback.rubric_version,
-                        "rubric_snapshot": feedback.rubric_snapshot,
-                        "analysis_mode": feedback.analysis_mode,
-                        "provider": feedback.provider,
-                        "assisted_summary": feedback.assisted_summary,
-                        "assisted_suggestions": feedback.assisted_suggestions,
-                        "assisted_confidence": feedback.assisted_confidence,
-                        "assisted_cost_microusd": feedback.assisted_cost_microusd,
-                        "assisted_error_code": feedback.assisted_error_code,
-                        "human_rating": feedback.human_rating,
-                        "created_at": feedback.created_at,
-                    }
-                    for feedback in feedback_by_prompt.get(prompt.id, [])
-                ],
-            }
-            for draft, prompt, lesson in writing_rows
-        ],
-        speaking=[
-            {
-                **_lesson_reference(attempt.cue.media.lesson),
-                "cue_text": attempt.cue.text_en,
-                "duration_ms": attempt.duration_ms,
-                "self_rating": attempt.self_rating,
-                "status": attempt.status,
-                "mime_type": attempt.mime_type,
-                "file_size": attempt.file_size,
-                "consented_at": attempt.consented_at,
-                "created_at": attempt.created_at,
-                "transcription": (
-                    {
-                        "status": transcription_by_attempt[attempt.id].status,
-                        "provider": transcription_by_attempt[attempt.id].provider,
-                        "transcript_text": transcription_by_attempt[attempt.id].transcript_text,
-                        "words": transcription_by_attempt[attempt.id].words,
-                        "mean_confidence": transcription_by_attempt[attempt.id].mean_confidence,
-                        "similarity_score": transcription_by_attempt[attempt.id].similarity_score,
-                        "low_confidence": transcription_by_attempt[attempt.id].low_confidence,
-                        "cost_microusd": transcription_by_attempt[attempt.id].cost_microusd,
-                        "human_rating": transcription_by_attempt[attempt.id].human_rating,
-                        "requested_at": transcription_by_attempt[attempt.id].requested_at,
-                        "completed_at": transcription_by_attempt[attempt.id].completed_at,
-                        "expires_at": transcription_by_attempt[attempt.id].expires_at,
-                    }
-                    if attempt.id in transcription_by_attempt
-                    else None
-                ),
-            }
-            for attempt in speaking
-        ],
-        notebook=[
-            {
-                **_lesson_reference(entry.lesson),
-                "kind": entry.kind,
-                "content": entry.content,
-                "created_at": entry.created_at,
-                "updated_at": entry.updated_at,
-            }
-            for entry in notebook
-        ],
-    )
+    response.headers["Cache-Control"] = "no-store"
+    return data

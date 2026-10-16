@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import type { ReviewItem, ReviewItemType } from '../api/client'
 import { ApiError } from '../api/errors'
@@ -14,6 +14,7 @@ import { useCourseCurriculum, useCourses } from '../api/queries'
 import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
 import { DEFAULT_COURSE_SLUG, todayPath } from '../routing/courseRoutes'
+import { usePagedItems } from './usePagedItems'
 
 const NOTES = [
   { key: '1', label: 'Errei', quality: 1, className: 'errei' },
@@ -52,6 +53,10 @@ export function ReviewPage() {
   const [itemType, setItemType] = useState<ReviewItemType | ''>('')
   const [skill, setSkill] = useState('')
   const [maxMinutes, setMaxMinutes] = useState<number | ''>('')
+  const [suspendedCursor, setSuspendedCursor] = useState<string>()
+  const suspendedLoadingMore = useRef(false)
+  const suspendedStatusRef = useRef<HTMLParagraphElement>(null)
+  const suspendedScope = useRef(`${courseSlug}:${unitSlug}`)
   const {
     data: items,
     isPending,
@@ -67,7 +72,13 @@ export function ReviewPage() {
   const suspended = useSuspendedReviewItems({
     courseSlug,
     unitSlug: unitSlug || undefined,
-  })
+  }, suspendedCursor)
+  const [suspendedItems, setSuspendedItems] = usePagedItems<ReviewItem>(
+    suspended.data,
+    suspendedCursor,
+    suspendedLoadingMore,
+    suspendedStatusRef,
+  )
   const grade = useAvaliar()
   const setStatus = useSetReviewItemStatus()
   const deleteItem = useDeleteReviewItem()
@@ -80,6 +91,16 @@ export function ReviewPage() {
   const item = pendingGrade?.card ?? items?.[0]
   const hasActivityFilters = Boolean(itemType || skill || maxMinutes)
   const hasFilters = Boolean(unitSlug || hasActivityFilters)
+  const nextSuspendedCursor = suspended.data?.next_cursor
+
+  useLayoutEffect(() => {
+    const scope = `${courseSlug}:${unitSlug}`
+    if (suspendedScope.current === scope) return
+    suspendedScope.current = scope
+    setSuspendedItems([])
+    setSuspendedCursor(undefined)
+    suspendedLoadingMore.current = false
+  }, [courseSlug, setSuspendedItems, unitSlug])
 
   function setScope(nextCourse: string, nextUnit = '') {
     const next = new URLSearchParams(searchParams)
@@ -153,7 +174,11 @@ export function ReviewPage() {
     if (!item) return
     setStatus.mutate(
       { itemId: item.id, status: 'suspended' },
-      { onSuccess: () => setLastMessage('Item suspenso. Ele saiu da fila de hoje.') },
+      { onSuccess: () => {
+        setLastMessage('Item suspenso. Ele saiu da fila de hoje.')
+        setSuspendedItems([])
+        setSuspendedCursor(undefined)
+      } },
     )
     setFlipped(false)
   }
@@ -161,7 +186,10 @@ export function ReviewPage() {
   function remove(itemId: number) {
     if (!window.confirm('Excluir este item da fila? Os recibos de revisão permanecem na conta.')) return
     deleteItem.mutate(itemId, {
-      onSuccess: () => setLastMessage('Item excluído da sua fila.'),
+      onSuccess: () => {
+        setLastMessage('Item excluído da sua fila.')
+        setSuspendedItems((current) => current.filter((entry) => entry.id !== itemId))
+      },
     })
     setFlipped(false)
   }
@@ -180,7 +208,7 @@ export function ReviewPage() {
               : 'Marque uma aula como estudada ou pratique: vocabulário e erros relevantes entram aqui.'}
       </p>
 
-      <div className="review-filters review-scope" aria-label="Escopo da revisão">
+      <div className="review-filters" aria-label="Escopo da revisão">
         <label>
           Curso
           <select
@@ -353,14 +381,15 @@ export function ReviewPage() {
         </>
       )}
 
-      {(suspended.data?.length ?? 0) > 0 && (
+      {(suspended.error || suspendedItems.length > 0) && (
         <section className="review-suspended">
           <div className="sec-h">
             <span className="num">PAUSA</span>
             <h2>Itens suspensos</h2>
           </div>
+          {suspended.error && <p role="alert">Falha ao carregar.</p>}
           <ul>
-            {suspended.data?.map((suspendedItem) => (
+            {suspendedItems.map((suspendedItem) => (
               <li key={suspendedItem.id}>
                 <div>
                   <span>
@@ -371,7 +400,11 @@ export function ReviewPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setStatus.mutate({ itemId: suspendedItem.id, status: 'active' })}
+                  onClick={() => setStatus.mutate(
+                    { itemId: suspendedItem.id, status: 'active' },
+                    { onSuccess: () => setSuspendedItems((current) =>
+                      current.filter((entry) => entry.id !== suspendedItem.id)) },
+                  )}
                 >
                   Reativar
                 </button>
@@ -379,6 +412,24 @@ export function ReviewPage() {
               </li>
             ))}
           </ul>
+          {nextSuspendedCursor && (
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={suspended.isFetching}
+              onClick={() => {
+                suspendedLoadingMore.current = true
+                setSuspendedCursor(nextSuspendedCursor)
+              }}
+            >
+              {suspended.isFetching ? 'Carregando mais…' : 'Carregar mais'}
+            </button>
+          )}
+          {suspendedItems.length > 0 && (
+            <p ref={suspendedStatusRef} tabIndex={-1} role="status">
+              {suspendedItems.length} suspensos carregados.
+            </p>
+          )}
         </section>
       )}
 

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -15,6 +16,16 @@ class StudyPlanIn(BaseModel):
     weekly_minutes: int = Field(ge=30, le=600)
     preferred_days: list[Weekday] = Field(min_length=1, max_length=7)
     goal: str = Field(min_length=1, max_length=200)
+    timezone: str = Field(default="UTC", max_length=80)
+
+    @field_validator("timezone")
+    @classmethod
+    def valid_timezone(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Escolha um fuso IANA válido, como America/Sao_Paulo.") from None
+        return value
 
     @field_validator("preferred_days")
     @classmethod
@@ -55,6 +66,7 @@ class RecentSessionOut(BaseModel):
     current_step: str
     completed_steps: int
     total_minutes: int
+    legacy_minutes: int = 0
     updated_at: datetime
 
 
@@ -63,6 +75,7 @@ class TodayOut(BaseModel):
     plan: StudyPlanOut
     recorded_minutes_this_week: int
     recent_session: RecentSessionOut | None
+    time_measurement: Literal["active_intervals_v1"] = "active_intervals_v1"
 
 
 class SkillSummaryOut(BaseModel):

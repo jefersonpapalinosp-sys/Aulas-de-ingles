@@ -1,8 +1,8 @@
 # Sprints de frontend para confiabilidade e experiência de estudo
 
-Atualização: 14 de outubro de 2026. **FE-38 implementada, validada em ambiente isolado e implantada em 5181; homologação com leitores de tela reais pendente.** FE-39 a FE-42 permanecem planejados. A homologação pedagógica humana da escrita continua pendente, sem aprovação fictícia.
+Atualização: 16 de outubro de 2026. **Implementação FE-39G/H concluída, implantada e reaberta em DEV 5180 e estudo 5181; FE-41 tecnicamente concluída.** Evidências no [registro operacional 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026). O aceite integral ainda depende das homologações físicas registradas neste plano; FE-42 permanece planejada. Leitores de tela reais e homologação pedagógica humana continuam pendentes, sem aprovação fictícia.
 
-Estado instalado em 5181: Sprint 38; [registro operacional](operacao_sprint_37.md#sprint-38--implantação-autorizada-em-14102026). Desenvolvimento em 5180 não foi atualizado nesta manutenção.
+Schema em ambos os ambientes: `a39d7bc02486`. Frontend do estudo usa build com PWA; desenvolvimento 5180 usa Vite e não registra o service worker. A instalação 39G/H inclui as entregas 39A–F e preserva o histórico anterior. Consulte o registro vigente antes de usar comandos históricos.
 
 Base: [auditoria técnica](auditoria_tecnica_frontend_backend_banco_2026-10-13.md). Os IDs F, B e D referem-se aos achados desse relatório. Estes pacotes não substituem as Sprints 20 a 36 já entregues: a trilha por curso/unidade, o laboratório e a classificação devem ser preservados.
 
@@ -460,17 +460,189 @@ Testes de componente cobrem a regra atual, legado e abertura do histórico.
 
 Achados: F05, F07, B06, B07 e B08.
 
+### Incremento 39A — 14/10/2026 (disponível no desenvolvimento)
+
+Retomada de áudio e tempo ativo implementados na branch `sprint/39-audio-tempo-ativo`.
+A Sprint 39 **não está encerrada**. Não houve commit/push/merge deste incremento.
+O banco dev foi alinhado de `b84e2c7a9d31` para `e17b5fad0264` após backup/restore/ensaio,
+e API/worker/web de 5180 foram reiniciados. As 23 verificações HTTP pelo proxy passaram,
+incluindo áudio e tempo; a conta temporária foi removida. Não houve nova homologação
+visual/de dispositivo nesta manutenção. 5181 permanece na Sprint 38, sem alteração.
+Regressão final do build otimizado aprovada: 112 cenários Playwright, desktop e mobile
+emulado, em 6,1 minutos. Upload/microfone avançaram no incremento 39B abaixo; PWA e cotas
+assistidas continuam pendentes. Implantação em 5181 exige manutenção própria.
+
+Contrato de retomada:
+
+- Fila por conta/mídia/operação; revisão e UUID imutáveis em retries. Cache confirmado
+  não é confundido com confirmação atual da conta. GET antigo não apaga fila offline.
+- Conclusão enfileirada como posição zero e `completed=true`; eventos atrasados
+  de pause/timeupdate não revertem conclusão. API mantém tombstone, não apaga a linha.
+- HTTP 409 exige escolha entre dispositivo e conta. Posição antiga v1 sem data
+  não vence automaticamente uma posição remota. Relógio local não decide o vencedor.
+- Reconexão/foco reprocessam a fila, sempre verificando identidade, token e perfil
+  confirmado. Falhas de quota/leitura/remoção são visíveis; limite de 1.000 comandos
+  por conta/mídia, sem descarte automático de operações pendentes.
+
+Contrato de tempo:
+
+- Somente jornada guiada: aba visível/em foco e interação nos últimos 120 segundos,
+  ou áudio em reprodução. Não coleta tecla, texto digitado ou identificador permanente
+  do dispositivo. É estimativa de atividade, não comprovação de atenção/aprendizagem.
+- Relógio monotônico, âncora do servidor e blocos de aproximadamente 15 segundos;
+  saltos maiores que 2,5 segundos não são contados. Saída persiste o bloco parcial.
+- Primeiro uso exige conexão para obter âncora. Eventos já ancorados podem aguardar
+  offline por até 7 dias; eventos vencidos permanecem locais com aviso e não entram
+  na meta. Limite de 5.000 eventos pendentes por conta; falha de storage é explícita.
+- Plano semanal recebe fuso IANA (padrão UTC, editável); início na segunda-feira
+  local. Histórico estimado antigo fica separado dos minutos ativos da semana.
+
+Validação: API com 802 testes; frontend com 289 testes; cenários E2E registrados no README.
+Build, lint e tipos aprovados. A primeira medição de 176,0 KiB gzip reprovou. A
+minificação Terser 5.51.2, fixada no lockfile, com 4 passes conservadores e 2 workers,
+reduziu para **176.099 bytes / limite 176.128 bytes (171,97 KiB / 172 KiB)**.
+Limites individuais também passaram; nenhum limite ou navegador-alvo foi alterado.
+Margem de somente 29 bytes: a próxima entrega deve medir novamente, não presumir
+folga. Referência de configuração: [Vite 6 — build](https://v6.vite.dev/config/build-options#build-minify).
+Há testes unitários de sinais de foco/visibilidade/ociosidade; E2E
+injeta visibilidade no DOM porque Chromium headless mantém páginas em foco.
+Isso não homologa suspensão/foco do sistema operacional nem Safari/iOS reais.
+
+### Incremento 39B — envio de voz e ciclo do microfone (14/10/2026)
+
+- A prática oral consulta `GET /api/speaking/policy`: teto padrão de **2.000.000
+  bytes decimais**, duração declarada de até **30 segundos** e formatos permitidos.
+  A configuração da API pode reduzir o teto, nunca ultrapassar o Nginx. Sem conseguir
+  consultar a política, é possível gravar/ouvir/baixar localmente, mas não enviar.
+- Limites e erros de formato/tamanho ficam visíveis. HTTP 413, 415, 401/403, 408,
+  409 e falha de conexão têm orientação; a gravação local não é apagada na falha.
+  Retry do PUT usa o mesmo ID e Blob; não faz DELETE compensatório de um envio
+  possivelmente confirmado. A autoavaliação não muda após criar a tentativa.
+- Se a sessão expirar durante o envio, uma referência temporária ao Blob pode ser
+  recuperada por até **cinco minutos**, na **mesma aba, conta, aula e trecho**,
+  sem recarregar/fechar a aba. Só memória; não usa IndexedDB/localStorage nem reenvia
+  automaticamente. Recuperação exige novo consentimento. Download local fica disponível.
+- `VoiceRecorder` invalida permissões tardias, encerra tracks/timer ao sair/cancelar,
+  trata erro de gravação e escolhe WebM/MP4/Ogg conforme `isTypeSupported`, não por
+  identificação do navegador. Libera também URLs temporárias na recuperação em StrictMode.
+- Módulos compartilhados de aula/prática foram agrupados no chunk lazy `lesson-study`,
+  sem mudar os tetos de bundle nem os navegadores-alvo. O E2E verifica que Hoje não
+  antecipa esse download; aulas/prática podem carregar mais recursos juntos.
+
+Validação: **307 testes frontend**, TypeScript e ESLint aprovados; seis novos cenários
+Playwright em Chromium desktop/mobile emulado passaram pelo Nginx real do laboratório
+5198. Cobrem limite exato e excedido com/sem Content-Length, retry após resposta perdida
+e permissão concedida depois da troca de etapa. A suíte backend tem **820 testes**.
+Microfone é simulado; não é homologação física, de Safari/iOS ou Android real. Seleção
+de MP4 tem teste de capacidade simulado, não certificação de gravação/reprodução no Safari.
+
+Regressão completa aprovada: **118 E2E (5,7 min)**. Depois do ajuste final de liberação
+de URLs temporárias, os 307 testes frontend e os seis E2E específicos foram repetidos
+com sucesso. Build final: **172.624 bytes gzip / limite 176.128 bytes** (168,58/172 KiB),
+sem aumentar orçamento; laboratório parado, volumes sintéticos preservados.
+
+Não há persistência durável da gravação não enviada. Resposta perdida no POST inicial
+sem ID conhecido ainda pode deixar metadado `pending`; a idempotência garantida aqui
+é a do PUT de uma tentativa conhecida. Não prometer recuperação após fechar a aba.
+Na entrega 39B, codec/duração decodificados, PWA, cotas e manutenção ficaram pendentes;
+o avanço de inspeção de arquivos está registrado no incremento 39C abaixo.
+Referências: [permissão de microfone](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
+e [capacidade do gravador](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported_static).
+
+### Incremento 39C — contrato de áudio efetivamente inspecionado (14/10/2026)
+
+O servidor agora decodifica o arquivo antes de publicá-lo. A interface mostra o teto
+real de 30 s/2.000.000 bytes e mono/estéreo, enquanto o timer local usa o alvo de
+29 s da política para permitir o fechamento do codec. Não trunca nem altera a voz.
+HTTP 422 (arquivo inválido/duração excedida) recebe orientação específica e mantém
+download local; o teste de retry inclui esse status. Limites de recuperação de 39B
+permanecem: memória transitória, mesma conta/contexto e consentimento renovado.
+
+**308 testes frontend**, ESLint/TypeScript, build e orçamento aprovados. Bundle:
+**172.697 bytes gzip / 176.128 bytes permitidos** (168,65/172 KiB). Oito cenários
+de upload no navegador passaram contra API/Nginx Linux, incluindo MIME falso e
+31 segundos reais declarados como 1 ms. Silêncio WAV do gravador simulado substitui
+strings inválidas nos testes de integração. Testes de codecs reais no backend não
+equivalem a homologação física/Safari. PWA/cotas continuam sem fechamento.
+
+Regressão completa: **120 E2E aprovados em 6,4 min**, incluindo desktop e mobile
+simulados. Isso não substitui testes com microfone e dispositivos reais.
+
+### Integração 39D — sem nova interface (14/10/2026)
+
+A persistência e a quarentena administrativa foram reforçadas no backend, sem mudar
+rotas, respostas ou controles do aluno. Nenhuma gravação do aluno é movida por uma
+ação automática da interface. Download local e retry de 39B/C continuam vigentes.
+O operador não tenta recuperar áudio perdido apenas na memória do navegador e não
+publica uma tentativa `pending` por suposição. PWA, cotas e homologações reais
+continuam pendentes; o incremento operacional não representa fechamento de FE-39.
+
+Regressão direcionada: **8 E2E de upload aprovados em 19,9 s**, desktop/mobile
+simulados contra a imagem Linux atual. Sem reexecução dos 120 E2E ou 308 testes
+frontend completos nesta entrega; os números de 39C permanecem evidência histórica.
+
+### Incremento 39E — PWA, cache limitado e estados offline (14/10/2026)
+
+- O build gera versão por SHA-256 do worker, HTML, assets e manifesto. A instalação
+  confere o hash do HTML e prepara somente entrada/CSS/imports estáticos; não
+  antecipa o chunk de estudo. Assets das outras telas entram no cache ao visitá-las.
+- Sem `skipWaiting`, reload automático ou apagamento de storage pessoal. Nova
+  versão aguarda **todas** as abas/janelas anteriores fecharem. Aviso orienta salvar
+  textos e enviar/baixar voz antes de fechar. Falha de instalação conserva a versão
+  anterior; limpeza das versões anteriores ocorre na ativação segura.
+- Painel recolhível **Offline e atualizações** apresenta quantidade/bytes de textos,
+  validade da aula atual, falha de armazenamento, atualização aguardando e verificação
+  explícita. Limpeza exige confirmação e apaga **somente textos públicos**, não
+  rascunhos, fila IndexedDB, sessão, voz ou dados remotos.
+- Áudio é identificado como online mesmo quando a licença permitir cache; não existe
+  download offline implícito. Gravação local sem confirmação de envio tem aviso
+  próprio e não é confundida com a fila de respostas dos exercícios.
+- Consultas editoriais alcançam o worker offline em vez de ficarem pausadas pelo
+  React Query. A leitura privada da jornada pode falhar e liberar a retomada local;
+  isso **não** torna essa resposta cacheável nem muda o transporte das mutações.
+
+Limites por release (bytes do corpo, sem prometer tamanho físico exato do navegador):
+
+| Cache | Quantidade | Total / item | Validade máxima |
+| --- | --- | --- | --- |
+| Shell | 3 | 1 MiB / 512 KiB | 30 dias |
+| Assets permitidos pelo build | 64 | 8 MiB / 2 MiB | 30 dias |
+| JSON editorial público | 120 | 8 MiB / 512 KiB | 7 dias |
+
+Escritas/podas são serializadas; expiração é verificada no acesso, não por um job
+em segundo plano. Enquanto abas antigas estão abertas, caches de releases anteriores
+podem coexistir e esses limites **não são uma cota global do dispositivo**. O navegador
+pode desalojar storage. Não há promessa de funcionar offline em telas nunca abertas,
+em login novo ou após expiração/desalojamento. Após atualizar, abrir as aulas online
+novamente prepara o cache público da nova versão.
+
+API pública exige marcador explícito `X-Aulas-Offline: public-text-v1`, JSON 200 e
+ausência de política privada; worker usa requisição anônima e chaves sem credenciais.
+Dados de conta, erros privados, uploads, áudio/vídeo e origens externas não são
+interceptados. Navegações usam um único shell sem armazenar URLs individuais.
+
+Validação 39E: **334 testes frontend, 124 E2E (6,2 min) e 2 ensaios de lifecycle
+PWA aprovados**; lint/tipos/build e orçamento original aprovados (170,2 KiB gzip
+de assets JS/CSS, worker adicional medido separadamente no runbook). Nenhuma
+homologação de Safari/iOS, VoiceOver/TalkBack ou Windows real foi adicionada. PWA é exercitado em
+build/5198 e servidor sintético 5196; o Vite 5180 não registra o worker. Estudo 5181
+continua na Sprint 38. Cotas/jobs/retenção de assistência e rollout seguem abertos.
+
+Referências: [ciclo de vida do service worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers),
+[Cache API e expiração controlada pela aplicação](https://developer.mozilla.org/en-US/docs/Web/API/Cache).
+Operação: [runbook 39E](operacao_sprint_37.md#sprint-39e--pwa-e-cache-público-em-14102026).
+
 ### Entregas
 
-- [ ] Unificar indicação de tamanho/duração permitidos de voz com o contrato da API e a configuração do proxy.
-- [ ] Tratar upload 413, formato não suportado, token expirado e falha de rede com opção de tentar novamente sem perder a gravação local.
-- [ ] Controlar o ciclo do microfone para encerrar tracks e timers também quando a permissão chegar depois da troca de rota.
-- [ ] Definir retomada de áudio por revisão e momento de alteração, sem preferir uma posição remota antiga só por existir.
-- [ ] Serializar avanço, pause e término; uma gravação atrasada não deve restaurar posição que acabou de ser limpa.
-- [ ] Mostrar separadamente áudio online, conteúdo textual disponível offline e envio pessoal pendente.
-- [ ] Implementar ciclo de atualização do service worker com versão de release, capacidade/expiração do cache e aplicação segura de atualização.
-- [ ] Informar consumo e indisponibilidade da assistência segundo a reserva/cota do backend, sem tratar 429 como erro genérico.
-- [ ] Integrar sinais de atividade/visibilidade para a métrica de tempo do backend, com privacidade e baixo volume de eventos.
+- [x] Unificar indicação de tamanho/duração permitidos de voz com o contrato da API e a configuração do proxy (39B; duração real decodificada em 39C).
+- [x] Tratar upload 413, formato não suportado, token expirado e falha de rede com opção de tentar novamente sem perder a gravação local (39B; limites de recuperação acima).
+- [x] Controlar o ciclo do microfone para encerrar tracks e timers também quando a permissão chegar depois da troca de rota (39B; homologação em dispositivos reais pendente).
+- [x] Definir retomada de áudio por revisão e momento de alteração, sem preferir uma posição remota antiga só por existir (39A local).
+- [x] Serializar avanço, pause e término; uma gravação atrasada não deve restaurar posição que acabou de ser limpa (39A local).
+- [x] Mostrar separadamente áudio online, conteúdo textual disponível offline e envio pessoal pendente (39E; disponibilidade medida, sem prometer download de mídia).
+- [x] Implementar ciclo de atualização do service worker com versão de release, capacidade/expiração do cache e aplicação segura de atualização (39E; ativação após fechar todas as abas, sem reload forçado; limites por release).
+- [x] Informar consumo, cota e indisponibilidade sem tratar 429 como erro genérico; 39G/H acrescenta heartbeat/idade e quantidade da fila da própria conta.
+- [x] Integrar sinais de atividade/visibilidade para a métrica de tempo do backend, com privacidade e baixo volume de eventos (39A local).
 
 ### Critérios de aceite
 
@@ -484,6 +656,46 @@ Achados: F05, F07, B06, B07 e B08.
 
 Fora do escopo: baixar todos os MP3 da VOA, reconhecimento de fala garantido em todos os navegadores e nota automática de pronúncia apresentada como avaliação especializada.
 
+### Incremento 39F — saldo compartilhado e reenvio da escrita (14/10/2026)
+
+Escrita e speaking exibem o mesmo saldo: disponível, reservado, utilizado, renovação
+à meia-noite UTC e custo confirmado/parcial. O texto informa que exclusões/falhas
+após iniciar processamento não devolvem cota. Consulta privada é atualizada após
+ações; polling enquanto há reservas e atualização periódica quando assistência está
+habilitada mantêm a informação do worker sem publicar saldo em cache offline.
+
+Uma análise de escrita recebe UUID. Perda de resposta conserva a chave para o retry
+do mesmo texto/contexto; 409 orienta consultar histórico, mantendo o editor intacto.
+Chave é de memória, não uma fila offline: recarregar a aba perde essa deduplicação.
+Texto/conta/proposta diferentes geram outra chave; sucesso encerra a operação.
+Transcrição 429 continua distinguida de indisponibilidade do provedor, e exclusão
+atualiza o saldo sem presumir reembolso. Nenhum spinner substitui a correção local.
+
+Testes de interface incluem reenvio por Enter em Chromium desktop/mobile simulado,
+com gateway/status interceptados. Essa simulação não prova a cota real: a admissão
+concorrente é ensaiada separadamente no PostgreSQL. Sem nova homologação em leitor
+de tela real. Contrato OpenAPI/tipos regenerados, sem dependência nova.
+[Evidências e pendências 39F](operacao_sprint_37.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
+
+### Incremento 39G/H — conclusão da implementação (15/10/2026)
+
+- Painel assistido informa processador ativo/sem sinal recente, quantidade própria
+  na fila e espera aproximada. Não exibe volume ou conteúdo de outros estudantes.
+- Gravação marcada pelo operador como ausente/alterada mantém histórico e exibe
+  orientação; reprodução e pedido de transcrição ficam bloqueados. Restauração
+  validada usa nova chave de arquivo e preserva identidade da tentativa.
+- **338 testes frontend**, lint/typecheck/build/orçamento aprovados; **126 E2E**
+  desktop/mobile emulados e **2 PWA** aprovados. A primeira execução da jornada
+  teve timeout transitório; três repetições e a segunda suíte completa passaram.
+- Backend e migrations incluem o rollout coordenado dos incrementos anteriores,
+  após backup/restore em clones exclusivos e smoke autenticado sem provedores.
+
+O navegador interativo não estava disponível; a habilidade de navegador confirmou
+essa limitação. Microfone dos E2E é sintético. **Não homologados:** gravação e
+reprodução física Safari/macOS/iPhone, suspensão do sistema e dispositivos móveis
+reais. O critério de aceite 7 continua pendente; não confundir implementação
+concluída com aprovação integral da sprint. Checklist no [runbook 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+
 ## Sprint 40 Histórico e controle dos dados pessoais
 
 Achados: B09, B11, D04 e D07. Dependências: exportação versionada e política editorial BE-40/DB-40.
@@ -491,7 +703,7 @@ Achados: B09, B11, D04 e D07. Dependências: exportação versionada e política
 ### Entregas
 
 - [ ] Criar área “Meus dados” para exportação, escopo dos arquivos e exclusão/limpeza com confirmação proporcional ao risco.
-- [ ] Diferenciar exportação JSON de backup de conta e download dos áudios pessoais.
+- [x] Diferenciar exportação JSON de backup de conta e download dos áudios pessoais (40A).
 - [ ] Apresentar estados de preparação, processamento, conclusão, expiração e falha de exportações grandes, se o contrato adotar jobs.
 - [ ] Identificar versão do conteúdo em tentativa/checkpoint e permitir consultar resultado histórico sem apresentá-lo como correção da versão atual.
 - [ ] Exibir conteúdo arquivado no histórico conforme política definida, sem criar links quebrados para aula indisponível.
@@ -509,19 +721,169 @@ Achados: B09, B11, D04 e D07. Dependências: exportação versionada e política
 
 Fora do escopo: envio automático por e-mail, armazenamento em serviços externos e mudança de política de retenção sem decisão do responsável.
 
+### Incremento 40A — portabilidade e inventário local, 15/10/2026
+
+Implementado `/meus-dados`, acessível pelo menu e pelo caderno. Exportação explícita,
+estados de preparação/falha/nova tentativa, download do JSON e de cada áudio com a
+sessão autenticada. O download iniciado não é apresentado como salvamento confirmado.
+Saída da rota cancela a requisição; dados do JSON não vão para storage ou React Query.
+Manifesto permanece somente na memória da tela. A rota privada não entra no cache PWA.
+
+Inventário por conta mostra rascunhos, fila pendente/bloqueada, comandos de posição,
+eventos de tempo e cópias de progresso/autoavaliação. Falha de armazenamento aparece
+como **não confirmado**, não como zero. Recuperação de voz em memória é observada
+sem consumir o áudio; outras abas e dados não persistidos têm limitação explícita.
+Limpeza confirma **somente textos públicos**, preservando dados pessoais e remotos.
+A exclusão integral local/remota ainda não foi implementada.
+
+O contrato síncrono 2.0 não cria jobs nem arquivos temporários no servidor. Não há
+link público com prazo: o áudio exige a conta atual e é validado novamente no
+download; o JSON já baixado não expira nem pode ser revogado remotamente.
+Contas acima de 10 mil registros/20 MiB recebem erro explícito, sem exportação parcial.
+
+**Sprint 40 em andamento.** Próximos incrementos: 40B identidade/versionamento,
+arquivamento e prévia do seed; 40C procedimento de exclusão e decisão sobre backups;
+40D interfaces históricas, conclusão/aceite e implantação no estudo. Não marcar os
+itens agregados de exclusão/histórico como concluídos apenas por entregar esta tela.
+Evidências e limites no [runbook 40A](operacao_sprint_37.md#sprint-40a--exportação-e-meus-dados-em-15102026).
+
+### Continuidade 40B.1 — proteção editorial, 15/10/2026
+
+Entrega de infraestrutura do seed, sem mudança de interface, rotas, contrato HTTP
+ou bundle: prévia read-only e bloqueio de alterações/omissões em conteúdo existente.
+Isso impede o seed de reinterpretar ou apagar referências históricas, mas **não**
+entrega visualização de snapshots ou conteúdo arquivado. FE-40 permanece em
+andamento; depende do contrato de identidade/versionamento/arquivamento 40B.2.
+[Evidências e limitações](operacao_sprint_37.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
+
+### Continuidade 40B.2a — contrato histórico disponível para integração
+
+Novo contrato privado por evidência: `/api/me/history/{kind}/{evidence_id}/content`,
+com estados `available/unavailable`; ausência não deve ser exibida como correção
+da versão atual. Exportação 2.0 inclui `content_snapshots` opcionais, sem quebrar
+o download existente. Tipos gerados atualizados; sem novo componente ou nova rota
+de tela nesta etapa. IDs de itens de prática estão na seção `practice_items` da
+exportação; a navegação histórica amigável ainda pertence à integração FE-40.
+
+Não marcar a tela de histórico como entregue: laboratório/prática e apresentações
+legadas ainda dependem da integração explícita dos snapshots. Captura permanece
+desligada no DEV/estudo até o rollout ensaiado. Regressão frontend, tipagem e bundle
+foram conferidos; não houve nova homologação física de acessibilidade.
+[Evidências 40B.2a](operacao_sprint_37.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
+
+### Continuidade 40B.2b.1 — contrato de disponibilidade, 15/10/2026
+
+Backend agora recusa novas atividades também por IDs diretos quando curso/unidade
+não estão publicados; catálogo omite arquivados e não apresenta aulas/checkpoints
+como disponíveis em curso planejado. Dados privados já existentes continuam
+consultáveis por seu dono. Checkpoint não incorpora mídia de outra unidade arquivada.
+
+Não há tela nova nem alteração do schema OpenAPI neste incremento. Faltam mensagens
+de conteúdo arquivado nas telas históricas, navegação sem links quebrados e política
+de invalidação dos textos públicos já cacheados. Não confundir esconder conteúdo na
+API online com revogar cópias offline. Nenhuma unidade foi arquivada no DEV/estudo.
+[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
+
+### Continuidade 40B.2b.2 — identidade para futura integração histórica, 15/10/2026
+
+Backend/seed agora têm chaves editoriais imutáveis para seis tipos de conteúdo.
+Novos snapshots privados podem incluir essas chaves como metadados, mantendo o
+envelope 1.0; não usar conteúdo atual para preencher ausência histórica. Rotas e
+IDs públicos atuais permanecem iguais, sem alteração de OpenAPI/tipos ou tela nova.
+
+**347 testes frontend aprovados** neste incremento. Ainda faltam consumo histórico
+nas telas, mensagens de arquivados, navegação e política de cache/offline. As chaves
+não invalidam cópias antigas sozinhas nem autorizam atualização do conteúdo existente.
+Nenhuma migration ou ativação de snapshots em DEV/estudo. FE-40 continua parcial.
+[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
+
+### Continuidade 40B.2b.3 — arquivamento ensaiado, interface ainda pendente
+
+Aplicação auditada disponível apenas por CLI opt-in para ensaios locais. Novas
+admissões podem receber 503 transitório durante manutenção; após arquivamento,
+permanece a política 404 para conteúdo indisponível e leitura privada do histórico.
+Repetição de operação pessoal continua respeitando seus contratos anteriores.
+
+Não foi criada tela administrativa ou histórica, nem alterado OpenAPI/tipos.
+**347 testes frontend**, lint, tipagem, build e orçamento aprovados (171,9 KiB gzip).
+API online não invalida cópias offline por si só. Mensagens de arquivados, links,
+cache, conclusão versionada e aceite integrado continuam pendentes; por isso
+prod/public permanecem bloqueados e DEV/estudo não receberam arquivamento.
+[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
+
+### Continuidade 40B.2c — contrato de proveniência sem data inventada
+
+O único efeito no frontend é contratual: `LessonVersion.reviewed_at` agora aceita
+`null`, representando data desconhecida. OpenAPI e tipos TypeScript foram regenerados;
+as telas atuais não exibiam a data e não precisaram de mudança visual. Nenhuma
+rubrica do DEV foi atualizada nem feedback histórico recalculado.
+
+**347 testes frontend**, lint, TypeScript, build e orçamento de 171,9 KiB gzip
+aprovados. Uma futura interface editorial deve exibir “data não comprovada” e
+pendência pedagógica, nunca converter `null` em 07/10 ou na data atual.
+[Resultado da auditoria](operacao_sprint_37.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
+
+### Continuidade 40B.2d — ausência histórica honesta na fala
+
+O contrato de prática inclui o ID do item e o estado do snapshot; feedbacks de
+escrita e tentativas/transcrições de fala também recebem
+`historical_content_status`. No histórico oral, `cue_text` vem da captura e pode
+ser `null`: nesse caso a tela apresenta “Texto original indisponível”, mantém o
+áudio reproduzível e oculta a ação de transcrição, sem mostrar a legenda atual
+como se fosse a usada na gravação. OpenAPI e tipos foram regenerados.
+
+Esta etapa ainda não cria uma central visual para abrir todo snapshot de prática
+ou checkpoint. A consulta privada já é correlacionável pelo ID, mas a interface
+histórica completa e o conteúdo arquivado permanecem no restante da FE-40.
+
+### Continuidade 40B.2e — contrato de listening independente da ordem
+
+`LessonMediaOut` agora entrega `listening_exercise_id`, que permanece apontando
+para o mesmo exercício quando a ordem visual muda. O campo
+`listening_exercise_position` continua no contrato durante a transição, marcado
+como obsoleto; nenhuma tela deve adotá-lo como nova identidade. OpenAPI e tipos
+TypeScript foram regenerados.
+
+As telas atuais já selecionavam atividades de listening pelo conjunto recebido e
+não exigiram mudança visual. Este incremento não executou uma reordenação nem cria
+interface editorial. Histórico completo de prática/checkpoint, conteúdo arquivado,
+cache/offline e rollout continuam pendentes; DEV/estudo não foram alterados.
+
+### Continuidade 40B.2f — nenhuma mutação ou interface editorial
+
+A prévia de reordenação é uma ferramenta operacional de backend e não modifica o
+contrato OpenAPI, os tipos TypeScript ou a ordem apresentada ao aluno. Não foi criada
+tela administrativa, nem houve reordenação dos seeds reais. O contrato garante que
+uma futura troca de ordem preserve os IDs já consumidos pelo frontend e exija versão
+nova antes de qualquer apply.
+
+Por isso não há alegação de aceite visual neste incremento. Interface histórica
+completa, comunicação de conteúdo arquivado, invalidação de cache/offline e teste
+integrado após uma reordenação real continuam pendentes na FE-40.
+
+### Continuidade 40B.2g — IDs preservados, interface ainda pendente
+
+O apply operacional preserva os IDs numéricos e UUIDs consumidos pelo frontend;
+somente a posição visual muda e a versão é incrementada. Não houve alteração de
+OpenAPI, tipos TypeScript, componentes ou seeds reais neste incremento.
+
+O ensaio técnico não substitui o aceite da experiência depois de uma reordenação
+curricular real. Ainda faltam validar retomada, histórico, foco, cache/offline e
+explicação de versão no frontend antes de liberar esse fluxo no ambiente de estudo.
+
 ## Sprint 41 Acessibilidade e interfaces sustentáveis
 
 Achados: F09, F11 e B10.
 
 ### Entregas
 
-- [ ] Definir título, foco e anúncio de contexto nas mudanças de rota, mantendo retorno de foco para drawer e diálogos.
+- [x] Definir título, foco e anúncio de contexto nas mudanças de rota, mantendo retorno de foco para drawer e diálogos.
 - [ ] Tornar o fundo de modal realmente inerte e testar navegação virtual do leitor de tela, não só Tab.
 - [ ] Homologar VoiceOver macOS/iOS, TalkBack Android e contraste forçado em Windows real; atualizar a matriz de acessibilidade existente com rotas atuais.
-- [ ] Acrescentar testes WebKit e Firefox a uma matriz suportada e realista, sem considerar emulação mobile como dispositivo real.
-- [ ] Paginar históricos de escrita, voz e caderno; estados vazios e “carregar mais” com foco preservado.
-- [ ] Refatorar componentes extensos por responsabilidade: gravação, transporte, histórico, navegação e apresentação de feedback.
-- [ ] Organizar estilos e tokens sem trocar framework; preservar design atual e comportamento responsivo.
+- [x] Acrescentar testes WebKit e Firefox a uma matriz suportada e realista, sem considerar emulação mobile como dispositivo real.
+- [x] Paginar históricos de escrita, voz e caderno; estados vazios e “carregar mais” com foco preservado.
+- [x] Refatorar componentes extensos por responsabilidade: gravação, transporte, histórico, navegação e apresentação de feedback.
+- [x] Organizar estilos e tokens sem trocar framework; preservar design atual e comportamento responsivo.
 - [ ] Medir performance de carga e interação nas rotas Hoje, aula, laboratório e caderno com dados sintéticos representativos.
 
 ### Critérios de aceite
@@ -534,6 +896,178 @@ Achados: F09, F11 e B10.
 6. A refatoração mantém regressões de todas as modalidades; testes verificam comportamento do aluno, não detalhes internos de implementação.
 
 Dependência externa: acesso aos dispositivos e leitores de tela. Falta de equipamento mantém somente essa homologação pendente; não invalida entregas técnicas verificadas nem autoriza inventar resultado.
+
+### Continuidade 41A — contrato visual preservado
+
+A primeira otimização foi interna ao detalhe da aula: o JSON público permaneceu
+idêntico e nenhum componente ou tipo TypeScript mudou. Em ambiente local com a
+sonda habilitada, os headers agregados de duração, SQL, bytes e pool podem ser
+lidos em mesma origem e estão liberados pelo CORS de desenvolvimento.
+
+Isso ainda não mede Web Vitals, renderização, interação nem as rotas Hoje,
+laboratório e caderno no navegador. A entrega de performance frontend da Sprint 41
+continua aberta e precisará de dados sintéticos representativos, sem usar o header
+de duração da API como substituto da experiência do usuário.
+
+### Continuidade 41B — painel Hoje com contrato estável
+
+A otimização de recomendação não mudou campos, links, prioridade ou estados do
+painel Hoje. Uma conta nova continua recebendo a próxima aula; revisão vencida,
+retomada incompleta e checkpoint elegível mantêm a ordem anterior. O frontend não
+precisou de alteração nem regeneração de tipos.
+
+Os 38 → 8 SQLs medem apenas o trabalho da API. Tempo de carregamento e interação do
+painel no navegador, inclusive rede lenta e listas maiores, continuam pendentes.
+
+### Continuidade 41C — Caderno incremental e escopo estável
+
+O Caderno deixou de baixar todas as anotações em uma resposta. A primeira página
+tem 20 itens e o botão nativo **Carregar mais anotações** acrescenta a página
+seguinte sem substituir o que já está visível. Durante a requisição, a seção mantém
+os itens anteriores e anuncia carregamento; o botão só volta se existir outro
+cursor. Falhas continuam anunciadas pelo estado de erro da seção.
+
+Curso, unidade, aula e tipo pertencem à chave da consulta. Alterar qualquer filtro
+limpa o acumulado e reinicia na primeira página, impedindo mistura visual entre
+escopos. Mutações recarregam a primeira página, e o contrato gerado evita cursores
+montados pelo frontend. Quatro testes da página cobrem CRUD, segunda página,
+histórico de escrita e exportação.
+
+A implementação reutiliza `useQuery` já presente, formata datas uma vez por módulo
+e mantém o carregamento tardio do Caderno. Passaram 349 testes frontend, TypeScript,
+ESLint e build. O bundle ficou em **176.122 bytes gzip (171,99 KiB)**, seis bytes
+abaixo do teto inalterado de 172 KiB. O fluxo ainda precisa de medição humana no
+navegador com 1 mil/10 mil itens, rede lenta e teclado; a margem de bundle exige
+atenção no próximo incremento.
+
+### Continuidade 41D — escala validada sem ampliar o bundle
+
+O incremento não alterou componentes, rotas visuais nem o contrato TypeScript. O
+laboratório de backend percorreu 1 mil e 10 mil notas usando a mesma API consumida
+pelo botão **Carregar mais anotações** e comprovou 200 páginas estáveis no maior
+conjunto, inclusive com timestamps empatados. O índice escolhido é transparente
+para a interface.
+
+Como não houve código frontend, permanecem válidos os 349 testes e o bundle de
+176.122 bytes gzip (171,99 KiB), seis bytes abaixo do teto. A verificação humana
+no navegador com rede lenta, teclado e lista longa continua pendente; o benchmark
+de API não substitui responsividade, foco, anúncio assistivo ou percepção de
+carregamento.
+
+### Continuidade 41E — escrita e correções carregadas sob demanda
+
+O editor separou o rascunho atual da lista de versões. A primeira página contém 20
+versões e **Carregar mais versões** acrescenta a próxima sem apagar as anteriores;
+criar uma versão a insere imediatamente no topo. A troca de usuário ou prompt
+zera visualmente o escopo e impede mistura entre atividades.
+
+No Caderno, textos usam um resumo paginado, sem baixar conteúdo integral, versões e
+análises em cada linha. **Carregar mais textos** mantém o acumulado; o histórico de
+análises só é consultado quando seu detalhe é aberto e também oferece carregamento
+incremental. O total carregado é um status focalizável após a ação, preservando o
+contexto de teclado. Erro e carregamento continuam explícitos e cada consulta inclui
+curso/unidade ou prompt na chave de cache.
+
+Dois testes novos atravessam segundas páginas, conferem os cursores, mantêm itens
+anteriores e verificam o destino do foco. A regressão passou com **351 testes
+frontend**, TypeScript, ESLint e build. Para manter o teto sem remover recursos,
+foram eliminados seletores da navegação antiga sem consumidores e agrupadas no
+chunk tardio as dependências de conclusão, revisão e inventário usadas por essas
+mesmas páginas. Resultado: **176.000 bytes gzip (171,88 KiB)** no teto inalterado
+de 172 KiB.
+
+Ainda faltam speaking/revisão, medição humana com listas extensas/rede lenta e a
+matriz real de leitores de tela. O benchmark de escrita 1k/10k também permanece no
+backend/banco antes de qualquer índice adicional.
+
+### Continuidade 41F — gravações incrementais no Caderno
+
+A seção **Gravações mantidas** deixou de baixar todo o histórico. A primeira página
+traz 20 itens e **Carregar mais gravações** acrescenta a página seguinte sem
+substituir as anteriores. Curso e unidade fazem parte da chave da consulta; trocar
+o escopo limpa itens, cursor e estado de foco. Após carregar, o total focalizável
+confirma a atualização para teclado/leitor de tela.
+
+Reprodução e exclusão continuam usando os endpoints privados já existentes. Depois
+de excluir, o item sai do acumulado sem descartar as outras páginas já carregadas.
+Estados vazio, carregando e erro não apagam itens válidos presentes durante uma
+página adicional.
+
+Um teste novo percorre duas páginas, confirma o cursor, mantém a gravação anterior
+e verifica o foco no anúncio. A regressão fechou com **352 testes frontend**,
+TypeScript, ESLint e build. A remoção de um seletor CSS comprovadamente sem uso
+compensou o código incremental: **176.092 bytes gzip (171,96 KiB)**, apenas 36
+bytes abaixo do teto inalterado de 172 KiB. A margem deve permanecer um gate; não
+autoriza elevar o orçamento na próxima funcionalidade.
+
+Paginação da revisão, medição humana com rede lenta/lista extensa e a matriz real
+de VoiceOver, TalkBack e contraste forçado continuam pendentes.
+
+### Continuidade 41G — suspensos incrementais na revisão
+
+**Itens suspensos** passou a carregar 20 registros por vez. **Carregar mais**
+acrescenta a página seguinte, preserva o que já estava visível e move o foco para
+o total carregado. Trocar curso ou unidade limpa o acumulado e o cursor antes de
+apresentar o novo escopo, inclusive quando a primeira página está em cache.
+Reativar e excluir retiram somente o item afetado das páginas presentes.
+
+A acumulação e o retorno de foco foram consolidados em um hook usado também pelo
+Caderno, sem mudar os contratos de suas listas. A pequena mutação que adiciona
+vocabulário ao deck foi separada da API completa da página, evitando dependência
+cruzada entre os chunks de aula e ferramentas pessoais. Regras CSS do layout
+antigo, sempre sobrescritas pela navegação atual, foram removidas.
+
+O teste novo atravessa duas páginas, preserva o primeiro item, valida cursor/foco e
+reativa um item antigo sem apagar os demais. A regressão fechou com **353 testes
+frontend**, TypeScript, ESLint e build aprovados. O bundle ficou em **176.118 bytes
+gzip (171,99 KiB)**, 10 bytes abaixo do teto de 172 KiB. A margem continua sendo
+gate, não justificativa para elevar o limite.
+
+Permanecem pendentes os ensaios humanos de lista longa/rede lenta, WebKit/Firefox
+e a matriz real de VoiceOver, TalkBack e contraste forçado.
+
+### Continuidade 41H — sustentação medida da lista de revisão
+
+Não houve alteração visual neste incremento. O backend que alimenta **Itens
+suspensos** foi percorrido com 1 mil e 10 mil registros sintéticos através da rota
+real, preservando o contrato consumido pelo hook incremental: 20/200 páginas sem
+lacunas ou duplicatas, 2 SQLs por resposta e no máximo um checkout. O índice
+promovido reduziu o trabalho do plano profundo e uma repetição com o índice final
+respondeu 10/10 páginas concorrentes.
+
+Isso fecha a evidência automatizada do servidor para volume, mas não substitui a
+homologação da interface. Permanecem pendentes lista longa/rede lenta em navegador
+real, WebKit/Firefox, VoiceOver, TalkBack e contraste forçado. O ambiente de estudo
+não foi usado no ensaio e o bundle/frontend não mudou.
+
+### Continuidade 41I — fechamento técnico e matriz preparada, 16/10/2026
+
+`RouteStatus` passou a definir um título específico, anunciar a página em região
+`status` e mover o foco para `#main-content` depois de cada mudança de rota. O
+drawer móvel agora usa o elemento nativo `dialog` aberto com `showModal()`: o
+navegador torna o restante do documento inerte, Escape fecha e o foco retorna ao
+botão que abriu. O fallback existe somente para DOMs de teste sem `showModal`.
+
+A configuração E2E ganhou projetos focais de Firefox e WebKit, além de Chromium
+desktop/mobile. O cenário verifica `:modal`, Escape/retorno de foco, título,
+anúncio e foco pós-rota. Um segundo cenário prepara a coleta das rotas Hoje, aula,
+laboratório e caderno, com ambiente e meta absoluta de 5 s anexados ao relatório.
+`playwright test --list` carregou os quatro projetos e 138 casos totais sem erro de
+configuração, mas nenhum navegador está disponível nesta sessão; por isso a matriz
+e o baseline não são apresentados como executados ou aprovados.
+
+As responsabilidades já estão separadas entre `voiceRecorder`, APIs de transporte,
+`usePagedItems`, painel de navegação e `WritingFeedbackProvenance`. Tokens de cor e
+tipografia permanecem centralizados em `:root`, com regras próprias de contraste
+forçado e movimento reduzido; não houve troca de framework nem alteração do design.
+TypeScript, ESLint, **354 testes frontend**, build e orçamento passaram. O total é
+**176.078 bytes gzip (172,0 KiB)**, 50 bytes abaixo do teto inalterado.
+
+Status honesto: implementação técnica concluída. Permanecem abertas somente as
+evidências dependentes de navegador/dispositivo real: navegação virtual de leitor
+de tela, VoiceOver macOS/iOS, TalkBack Android, contraste forçado no Windows e a
+execução registrada do baseline das quatro rotas. Axe, `:modal` e emulação mobile
+não substituem essas homologações.
 
 ## Sprint 42 Homologação da experiência de estudo
 

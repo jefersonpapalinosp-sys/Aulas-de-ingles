@@ -357,6 +357,7 @@ async def test_todas_as_aulas_tem_audio_trechos_e_listening(client: AsyncClient)
             exercise for exercise in lesson["exercises"] if exercise["skill"] == "listening"
         ]
         assert len(listening) >= 2
+        assert media["listening_exercise_id"] in {exercise["id"] for exercise in listening}
         assert media["listening_exercise_position"] in {
             exercise["position"] for exercise in listening
         }

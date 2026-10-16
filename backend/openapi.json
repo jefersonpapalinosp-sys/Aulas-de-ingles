@@ -1,6 +1,113 @@
 {
     "components": {
         "schemas": {
+            "ActivityEventIn": {
+                "properties": {
+                    "duration_ms": {
+                        "maximum": 30000.0,
+                        "minimum": 1.0,
+                        "title": "Duration Ms",
+                        "type": "integer"
+                    },
+                    "end_offset_ms": {
+                        "maximum": 86400000.0,
+                        "minimum": 1.0,
+                        "title": "End Offset Ms",
+                        "type": "integer"
+                    },
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "session_id": {
+                        "format": "uuid",
+                        "title": "Session Id",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "session_id",
+                    "operation_key",
+                    "end_offset_ms",
+                    "duration_ms"
+                ],
+                "title": "ActivityEventIn",
+                "type": "object"
+            },
+            "ActivityEventOut": {
+                "properties": {
+                    "credited_ms": {
+                        "title": "Credited Ms",
+                        "type": "integer"
+                    },
+                    "operation_key": {
+                        "title": "Operation Key",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "operation_key",
+                    "credited_ms"
+                ],
+                "title": "ActivityEventOut",
+                "type": "object"
+            },
+            "ActivitySessionIn": {
+                "properties": {
+                    "lesson_id": {
+                        "exclusiveMinimum": 0.0,
+                        "title": "Lesson Id",
+                        "type": "integer"
+                    },
+                    "session_id": {
+                        "format": "uuid",
+                        "title": "Session Id",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "session_id",
+                    "lesson_id"
+                ],
+                "title": "ActivitySessionIn",
+                "type": "object"
+            },
+            "ActivitySessionOut": {
+                "properties": {
+                    "max_offset_ms": {
+                        "default": 86400000,
+                        "title": "Max Offset Ms",
+                        "type": "integer"
+                    },
+                    "replay_days": {
+                        "default": 7,
+                        "title": "Replay Days",
+                        "type": "integer"
+                    },
+                    "server_now": {
+                        "format": "date-time",
+                        "title": "Server Now",
+                        "type": "string"
+                    },
+                    "session_id": {
+                        "title": "Session Id",
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "format": "date-time",
+                        "title": "Started At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "session_id",
+                    "started_at",
+                    "server_now"
+                ],
+                "title": "ActivitySessionOut",
+                "type": "object"
+            },
             "ApiErrorOut": {
                 "properties": {
                     "code": {
@@ -40,6 +147,14 @@
             },
             "AssistStatusOut": {
                 "properties": {
+                    "consumed_today": {
+                        "title": "Consumed Today",
+                        "type": "integer"
+                    },
+                    "cost_incomplete": {
+                        "title": "Cost Incomplete",
+                        "type": "boolean"
+                    },
                     "cost_microusd_today": {
                         "title": "Cost Microusd Today",
                         "type": "integer"
@@ -54,8 +169,39 @@
                         "title": "Evaluation Only",
                         "type": "boolean"
                     },
+                    "oldest_queued_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Oldest Queued Seconds"
+                    },
+                    "queued_jobs": {
+                        "default": 0,
+                        "title": "Queued Jobs",
+                        "type": "integer"
+                    },
+                    "quota_resets_at": {
+                        "format": "date-time",
+                        "title": "Quota Resets At",
+                        "type": "string"
+                    },
+                    "quota_timezone": {
+                        "const": "UTC",
+                        "default": "UTC",
+                        "title": "Quota Timezone",
+                        "type": "string"
+                    },
                     "remaining_today": {
                         "title": "Remaining Today",
+                        "type": "integer"
+                    },
+                    "reserved_today": {
+                        "title": "Reserved Today",
                         "type": "integer"
                     },
                     "retention_days": {
@@ -70,6 +216,29 @@
                         "title": "Used Today",
                         "type": "integer"
                     },
+                    "worker_seen_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Worker Seen At"
+                    },
+                    "worker_state": {
+                        "default": "unknown",
+                        "enum": [
+                            "disabled",
+                            "unknown",
+                            "active",
+                            "stale"
+                        ],
+                        "title": "Worker State",
+                        "type": "string"
+                    },
                     "writing_enabled": {
                         "title": "Writing Enabled",
                         "type": "boolean"
@@ -81,8 +250,12 @@
                     "daily_quota",
                     "used_today",
                     "remaining_today",
+                    "reserved_today",
+                    "consumed_today",
+                    "quota_resets_at",
                     "retention_days",
-                    "cost_microusd_today"
+                    "cost_microusd_today",
+                    "cost_incomplete"
                 ],
                 "title": "AssistStatusOut",
                 "type": "object"
@@ -196,6 +369,78 @@
                     "feedback"
                 ],
                 "title": "AttemptOut",
+                "type": "object"
+            },
+            "AudioExportEntry": {
+                "properties": {
+                    "attempt_id": {
+                        "title": "Attempt Id",
+                        "type": "integer"
+                    },
+                    "download_path": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Download Path"
+                    },
+                    "file_size": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "File Size"
+                    },
+                    "integrity_state": {
+                        "enum": [
+                            "unknown",
+                            "verified",
+                            "missing",
+                            "changed"
+                        ],
+                        "title": "Integrity State",
+                        "type": "string"
+                    },
+                    "mime_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Mime Type"
+                    },
+                    "sha256": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Sha256"
+                    }
+                },
+                "required": [
+                    "attempt_id",
+                    "mime_type",
+                    "file_size",
+                    "sha256",
+                    "integrity_state",
+                    "download_path"
+                ],
+                "title": "AudioExportEntry",
                 "type": "object"
             },
             "CardOut": {
@@ -1572,6 +1817,80 @@
                 "title": "ExerciseWithLessonOut",
                 "type": "object"
             },
+            "ExportScope": {
+                "properties": {
+                    "audio_access_note": {
+                        "title": "Audio Access Note",
+                        "type": "string"
+                    },
+                    "exclusions": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Exclusions",
+                        "type": "array"
+                    },
+                    "historical_content_note": {
+                        "title": "Historical Content Note",
+                        "type": "string"
+                    },
+                    "includes_audio_bytes": {
+                        "const": false,
+                        "default": false,
+                        "title": "Includes Audio Bytes",
+                        "type": "boolean"
+                    },
+                    "is_account_backup": {
+                        "const": false,
+                        "default": false,
+                        "title": "Is Account Backup",
+                        "type": "boolean"
+                    },
+                    "isolation": {
+                        "const": "repeatable_read",
+                        "default": "repeatable_read",
+                        "title": "Isolation",
+                        "type": "string"
+                    },
+                    "max_json_bytes": {
+                        "title": "Max Json Bytes",
+                        "type": "integer"
+                    },
+                    "max_records": {
+                        "title": "Max Records",
+                        "type": "integer"
+                    },
+                    "row_counts": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "title": "Row Counts",
+                        "type": "object"
+                    },
+                    "snapshot_at": {
+                        "format": "date-time",
+                        "title": "Snapshot At",
+                        "type": "string"
+                    },
+                    "stored_on_server": {
+                        "const": false,
+                        "default": false,
+                        "title": "Stored On Server",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "snapshot_at",
+                    "row_counts",
+                    "exclusions",
+                    "historical_content_note",
+                    "audio_access_note",
+                    "max_records",
+                    "max_json_bytes"
+                ],
+                "title": "ExportScope",
+                "type": "object"
+            },
             "FeedbackTokenOut": {
                 "properties": {
                     "status": {
@@ -1805,6 +2124,91 @@
                     "env"
                 ],
                 "title": "HealthOut",
+                "type": "object"
+            },
+            "HistoricalContentOut": {
+                "properties": {
+                    "captured_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Captured At"
+                    },
+                    "content": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Content"
+                    },
+                    "content_sha256": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Content Sha256"
+                    },
+                    "evidence_id": {
+                        "title": "Evidence Id",
+                        "type": "integer"
+                    },
+                    "evidence_kind": {
+                        "enum": [
+                            "exercise",
+                            "practice",
+                            "writing",
+                            "speaking",
+                            "checkpoint"
+                        ],
+                        "title": "Evidence Kind",
+                        "type": "string"
+                    },
+                    "note": {
+                        "title": "Note",
+                        "type": "string"
+                    },
+                    "schema_version": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Schema Version"
+                    },
+                    "status": {
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ],
+                        "title": "Status",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "evidence_kind",
+                    "evidence_id",
+                    "status",
+                    "note"
+                ],
+                "title": "HistoricalContentOut",
                 "type": "object"
             },
             "HumanRatingIn": {
@@ -2108,6 +2512,17 @@
                         ],
                         "title": "License Url"
                     },
+                    "listening_exercise_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Listening Exercise Id"
+                    },
                     "listening_exercise_position": {
                         "anyOf": [
                             {
@@ -2117,6 +2532,8 @@
                                 "type": "null"
                             }
                         ],
+                        "deprecated": true,
+                        "description": "Ordem histórica; use listening_exercise_id como vínculo canônico.",
                         "title": "Listening Exercise Position"
                     },
                     "offline_policy": {
@@ -2151,7 +2568,6 @@
                     "offline_policy",
                     "license_reviewed_at",
                     "duration_seconds",
-                    "listening_exercise_position",
                     "cues",
                     "transcript"
                 ],
@@ -2306,9 +2722,16 @@
                         "type": "string"
                     },
                     "reviewed_at": {
-                        "format": "date-time",
-                        "title": "Reviewed At",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Reviewed At"
                     },
                     "status": {
                         "enum": [
@@ -2357,6 +2780,26 @@
             },
             "MediaPositionIn": {
                 "properties": {
+                    "changed_at": {
+                        "format": "date-time",
+                        "title": "Changed At",
+                        "type": "string"
+                    },
+                    "completed": {
+                        "default": false,
+                        "title": "Completed",
+                        "type": "boolean"
+                    },
+                    "expected_revision": {
+                        "minimum": 0.0,
+                        "title": "Expected Revision",
+                        "type": "integer"
+                    },
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
                     "position_seconds": {
                         "minimum": 0.0,
                         "title": "Position Seconds",
@@ -2364,21 +2807,54 @@
                     }
                 },
                 "required": [
-                    "position_seconds"
+                    "position_seconds",
+                    "expected_revision",
+                    "operation_key",
+                    "changed_at"
                 ],
                 "title": "MediaPositionIn",
                 "type": "object"
             },
             "MediaPositionOut": {
                 "properties": {
+                    "changed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Changed At"
+                    },
+                    "completed": {
+                        "title": "Completed",
+                        "type": "boolean"
+                    },
                     "media_id": {
                         "title": "Media Id",
                         "type": "integer"
                     },
+                    "operation_key": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Operation Key"
+                    },
                     "position_seconds": {
-                        "minimum": 0.0,
                         "title": "Position Seconds",
                         "type": "number"
+                    },
+                    "revision": {
+                        "title": "Revision",
+                        "type": "integer"
                     },
                     "updated_at": {
                         "anyOf": [
@@ -2396,7 +2872,11 @@
                 "required": [
                     "position_seconds",
                     "media_id",
-                    "updated_at"
+                    "updated_at",
+                    "revision",
+                    "completed",
+                    "operation_key",
+                    "changed_at"
                 ],
                 "title": "MediaPositionOut",
                 "type": "object"
@@ -2599,6 +3079,34 @@
                 "title": "NotebookEntryUpdate",
                 "type": "object"
             },
+            "NotebookPageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/NotebookEntryOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "NotebookPageOut",
+                "type": "object"
+            },
             "PendingCheckpointOut": {
                 "properties": {
                     "content_version": {
@@ -2629,6 +3137,61 @@
             },
             "PersonalDataExportOut": {
                 "properties": {
+                    "active_intervals": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Active Intervals",
+                        "type": "array"
+                    },
+                    "activity_events": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Activity Events",
+                        "type": "array"
+                    },
+                    "activity_sessions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Activity Sessions",
+                        "type": "array"
+                    },
+                    "assistance_usage": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Assistance Usage",
+                        "type": "array"
+                    },
+                    "audio_manifest": {
+                        "items": {
+                            "$ref": "#/components/schemas/AudioExportEntry"
+                        },
+                        "title": "Audio Manifest",
+                        "type": "array"
+                    },
+                    "checkpoint_attempts": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Checkpoint Attempts",
+                        "type": "array"
+                    },
+                    "content_snapshots": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Content Snapshots",
+                        "type": "array"
+                    },
                     "exercise_attempts": {
                         "items": {
                             "additionalProperties": true,
@@ -2642,12 +3205,28 @@
                         "title": "Exported At",
                         "type": "string"
                     },
+                    "legacy_review_cards": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Legacy Review Cards",
+                        "type": "array"
+                    },
                     "lesson_progress": {
                         "items": {
                             "additionalProperties": true,
                             "type": "object"
                         },
                         "title": "Lesson Progress",
+                        "type": "array"
+                    },
+                    "login_sessions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Login Sessions",
                         "type": "array"
                     },
                     "media_progress": {
@@ -2666,10 +3245,34 @@
                         "title": "Notebook",
                         "type": "array"
                     },
+                    "practice_items": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Practice Items",
+                        "type": "array"
+                    },
+                    "practice_sessions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Practice Sessions",
+                        "type": "array"
+                    },
                     "profile": {
                         "additionalProperties": true,
                         "title": "Profile",
                         "type": "object"
+                    },
+                    "review_events": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Review Events",
+                        "type": "array"
                     },
                     "review_items": {
                         "items": {
@@ -2682,6 +3285,16 @@
                     "schema_version": {
                         "title": "Schema Version",
                         "type": "string"
+                    },
+                    "scope": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ExportScope"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
                     },
                     "skill_evidence": {
                         "items": {
@@ -2734,6 +3347,14 @@
                         },
                         "title": "Writing",
                         "type": "array"
+                    },
+                    "writing_feedback": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Writing Feedback",
+                        "type": "array"
                     }
                 },
                 "required": [
@@ -2745,6 +3366,9 @@
                     "study_plan",
                     "step_progress",
                     "media_progress",
+                    "activity_sessions",
+                    "activity_events",
+                    "active_intervals",
                     "skill_evidence",
                     "exercise_attempts",
                     "review_items",
@@ -3073,6 +3697,18 @@
                         "title": "Highest Hint Level",
                         "type": "integer"
                     },
+                    "historical_content_status": {
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ],
+                        "title": "Historical Content Status",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
                     "last_feedback": {
                         "anyOf": [
                             {
@@ -3106,7 +3742,9 @@
                     }
                 },
                 "required": [
+                    "id",
                     "position",
+                    "historical_content_status",
                     "exercise",
                     "attempt_count",
                     "first_try_correct",
@@ -3393,6 +4031,11 @@
                         "title": "Current Step",
                         "type": "string"
                     },
+                    "legacy_minutes": {
+                        "default": 0,
+                        "title": "Legacy Minutes",
+                        "type": "integer"
+                    },
                     "lesson_number": {
                         "title": "Lesson Number",
                         "type": "integer"
@@ -3536,6 +4179,34 @@
                 "title": "RevealAnswerOut",
                 "type": "object"
             },
+            "ReviewItemPageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/CardOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "ReviewItemPageOut",
+                "type": "object"
+            },
             "ReviewItemStatusIn": {
                 "properties": {
                     "status": {
@@ -3674,8 +4345,15 @@
                         "type": "integer"
                     },
                     "cue_text": {
-                        "title": "Cue Text",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cue Text"
                     },
                     "duration_ms": {
                         "title": "Duration Ms",
@@ -3692,9 +4370,28 @@
                         ],
                         "title": "File Size"
                     },
+                    "historical_content_status": {
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ],
+                        "title": "Historical Content Status",
+                        "type": "string"
+                    },
                     "id": {
                         "title": "Id",
                         "type": "integer"
+                    },
+                    "integrity_state": {
+                        "default": "unknown",
+                        "enum": [
+                            "unknown",
+                            "verified",
+                            "missing",
+                            "changed"
+                        ],
+                        "title": "Integrity State",
+                        "type": "string"
                     },
                     "lesson_number": {
                         "title": "Lesson Number",
@@ -3758,6 +4455,7 @@
                     "lesson_number",
                     "cue_id",
                     "cue_text",
+                    "historical_content_status",
                     "duration_ms",
                     "self_rating",
                     "consented_at",
@@ -3767,6 +4465,91 @@
                     "created_at"
                 ],
                 "title": "SpeakingAttemptOut",
+                "type": "object"
+            },
+            "SpeakingAttemptPageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/SpeakingAttemptOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "SpeakingAttemptPageOut",
+                "type": "object"
+            },
+            "SpeakingPolicyOut": {
+                "properties": {
+                    "content_validation": {
+                        "const": "decoded_audio_v1",
+                        "default": "decoded_audio_v1",
+                        "title": "Content Validation",
+                        "type": "string"
+                    },
+                    "max_bytes": {
+                        "title": "Max Bytes",
+                        "type": "integer"
+                    },
+                    "max_channels": {
+                        "default": 2,
+                        "title": "Max Channels",
+                        "type": "integer"
+                    },
+                    "max_duration_ms": {
+                        "title": "Max Duration Ms",
+                        "type": "integer"
+                    },
+                    "max_sample_rate_hz": {
+                        "default": 48000,
+                        "title": "Max Sample Rate Hz",
+                        "type": "integer"
+                    },
+                    "mime_types": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Mime Types",
+                        "type": "array"
+                    },
+                    "min_sample_rate_hz": {
+                        "default": 8000,
+                        "title": "Min Sample Rate Hz",
+                        "type": "integer"
+                    },
+                    "recording_target_ms": {
+                        "default": 29000,
+                        "title": "Recording Target Ms",
+                        "type": "integer"
+                    },
+                    "upload_timeout_seconds": {
+                        "title": "Upload Timeout Seconds",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "max_bytes",
+                    "max_duration_ms",
+                    "mime_types",
+                    "upload_timeout_seconds"
+                ],
+                "title": "SpeakingPolicyOut",
                 "type": "object"
             },
             "StudyPlanIn": {
@@ -3794,6 +4577,12 @@
                         "minItems": 1,
                         "title": "Preferred Days",
                         "type": "array"
+                    },
+                    "timezone": {
+                        "default": "UTC",
+                        "maxLength": 80,
+                        "title": "Timezone",
+                        "type": "string"
                     },
                     "weekly_minutes": {
                         "maximum": 600.0,
@@ -3835,6 +4624,12 @@
                         "minItems": 1,
                         "title": "Preferred Days",
                         "type": "array"
+                    },
+                    "timezone": {
+                        "default": "UTC",
+                        "maxLength": 80,
+                        "title": "Timezone",
+                        "type": "string"
                     },
                     "updated_at": {
                         "anyOf": [
@@ -4022,6 +4817,12 @@
                     "recorded_minutes_this_week": {
                         "title": "Recorded Minutes This Week",
                         "type": "integer"
+                    },
+                    "time_measurement": {
+                        "const": "active_intervals_v1",
+                        "default": "active_intervals_v1",
+                        "title": "Time Measurement",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -4174,12 +4975,27 @@
                         "type": "boolean"
                     },
                     "expected_text": {
-                        "title": "Expected Text",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Expected Text"
                     },
                     "expires_at": {
                         "format": "date-time",
                         "title": "Expires At",
+                        "type": "string"
+                    },
+                    "historical_content_status": {
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ],
+                        "title": "Historical Content Status",
                         "type": "string"
                     },
                     "human_rating": {
@@ -4283,6 +5099,7 @@
                     "max_attempts",
                     "next_attempt_at",
                     "expected_text",
+                    "historical_content_status",
                     "transcript_text",
                     "words",
                     "mean_confidence",
@@ -4501,13 +5318,6 @@
                         "title": "Revision",
                         "type": "integer"
                     },
-                    "revisions": {
-                        "items": {
-                            "$ref": "#/components/schemas/WritingRevisionOut"
-                        },
-                        "title": "Revisions",
-                        "type": "array"
-                    },
                     "text": {
                         "title": "Text",
                         "type": "string"
@@ -4528,8 +5338,7 @@
                 "required": [
                     "prompt_id",
                     "text",
-                    "updated_at",
-                    "revisions"
+                    "updated_at"
                 ],
                 "title": "WritingDraftOut",
                 "type": "object"
@@ -4580,6 +5389,18 @@
                             }
                         ],
                         "title": "Expected Revision"
+                    },
+                    "operation_key": {
+                        "anyOf": [
+                            {
+                                "format": "uuid",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Operation Key"
                     },
                     "text": {
                         "maxLength": 5000,
@@ -4679,6 +5500,14 @@
                         "title": "Evaluation Scope",
                         "type": "string"
                     },
+                    "historical_content_status": {
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ],
+                        "title": "Historical Content Status",
+                        "type": "string"
+                    },
                     "human_rating": {
                         "anyOf": [
                             {
@@ -4763,6 +5592,7 @@
                     "algorithm_version",
                     "rubric_version",
                     "rubric_snapshot",
+                    "historical_content_status",
                     "evaluation_scope",
                     "analysis_mode",
                     "evaluation_only",
@@ -4777,6 +5607,34 @@
                     "created_at"
                 ],
                 "title": "WritingFeedbackOut",
+                "type": "object"
+            },
+            "WritingFeedbackPageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingFeedbackOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "WritingFeedbackPageOut",
                 "type": "object"
             },
             "WritingHistoryItemOut": {
@@ -4847,6 +5705,93 @@
                     "feedbacks"
                 ],
                 "title": "WritingHistoryItemOut",
+                "type": "object"
+            },
+            "WritingHistoryPageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingHistorySummaryOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "WritingHistoryPageOut",
+                "type": "object"
+            },
+            "WritingHistorySummaryOut": {
+                "properties": {
+                    "course_slug": {
+                        "title": "Course Slug",
+                        "type": "string"
+                    },
+                    "course_title": {
+                        "title": "Course Title",
+                        "type": "string"
+                    },
+                    "feedback_count": {
+                        "title": "Feedback Count",
+                        "type": "integer"
+                    },
+                    "lesson_number": {
+                        "title": "Lesson Number",
+                        "type": "integer"
+                    },
+                    "lesson_title": {
+                        "title": "Lesson Title",
+                        "type": "string"
+                    },
+                    "prompt_id": {
+                        "title": "Prompt Id",
+                        "type": "integer"
+                    },
+                    "prompt_title": {
+                        "title": "Prompt Title",
+                        "type": "string"
+                    },
+                    "revision_count": {
+                        "title": "Revision Count",
+                        "type": "integer"
+                    },
+                    "unit_slug": {
+                        "title": "Unit Slug",
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "format": "date-time",
+                        "title": "Updated At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "prompt_id",
+                    "course_slug",
+                    "course_title",
+                    "unit_slug",
+                    "lesson_number",
+                    "lesson_title",
+                    "prompt_title",
+                    "updated_at",
+                    "revision_count",
+                    "feedback_count"
+                ],
+                "title": "WritingHistorySummaryOut",
                 "type": "object"
             },
             "WritingPromptOut": {
@@ -4987,6 +5932,34 @@
                     "created_at"
                 ],
                 "title": "WritingRevisionOut",
+                "type": "object"
+            },
+            "WritingRevisionPageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/WritingRevisionOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "WritingRevisionPageOut",
                 "type": "object"
             }
         }
@@ -7352,6 +8325,148 @@
                 ]
             }
         },
+        "/api/me/activity/events": {
+            "post": {
+                "operationId": "record_event_api_me_activity_events_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ActivityEventIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ActivityEventOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Record Event",
+                "tags": [
+                    "activity"
+                ]
+            }
+        },
+        "/api/me/activity/sessions": {
+            "post": {
+                "operationId": "start_session_api_me_activity_sessions_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ActivitySessionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ActivitySessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Start Session",
+                "tags": [
+                    "activity"
+                ]
+            }
+        },
         "/api/me/export": {
             "get": {
                 "operationId": "exportar_dados_api_me_export_get",
@@ -7400,6 +8515,95 @@
                 "summary": "Exportar Dados",
                 "tags": [
                     "me"
+                ]
+            }
+        },
+        "/api/me/history/{kind}/{evidence_id}/content": {
+            "get": {
+                "operationId": "historical_content_api_me_history__kind___evidence_id__content_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "kind",
+                        "required": true,
+                        "schema": {
+                            "enum": [
+                                "exercise",
+                                "practice",
+                                "writing",
+                                "speaking",
+                                "checkpoint"
+                            ],
+                            "title": "Kind",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "evidence_id",
+                        "required": true,
+                        "schema": {
+                            "exclusiveMinimum": 0,
+                            "title": "Evidence Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HistoricalContentOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Historical Content",
+                "tags": [
+                    "history"
                 ]
             }
         },
@@ -7608,6 +8812,173 @@
                     }
                 },
                 "summary": "Criar Anotacao",
+                "tags": [
+                    "me"
+                ]
+            }
+        },
+        "/api/me/notebook/page": {
+            "get": {
+                "description": "Keyset page ordered by the same update recency shown in the UI.",
+                "operationId": "listar_caderno_paginado_api_me_notebook_page_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "minimum": 1,
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Lesson"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "kind",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "note",
+                                        "favorite_phrase",
+                                        "personal_example",
+                                        "recurring_error",
+                                        "teacher_question"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Kind"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotebookPageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Listar Caderno Paginado",
                 "tags": [
                     "me"
                 ]
@@ -8164,6 +9535,36 @@
                         "schema": {
                             "title": "Media Id",
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "expected_revision",
+                        "required": true,
+                        "schema": {
+                            "minimum": 0,
+                            "title": "Expected Revision",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "operation_key",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "title": "Operation Key",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "changed_at",
+                        "required": true,
+                        "schema": {
+                            "format": "date-time",
+                            "title": "Changed At",
+                            "type": "string"
                         }
                     }
                 ],
@@ -8980,6 +10381,146 @@
                 ]
             }
         },
+        "/api/review/items/page": {
+            "get": {
+                "operationId": "listar_itens_paginados_api_review_items_page_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "default": "suspended",
+                            "enum": [
+                                "active",
+                                "suspended"
+                            ],
+                            "title": "Status",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReviewItemPageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Listar Itens Paginados",
+                "tags": [
+                    "review"
+                ]
+            }
+        },
         "/api/review/items/{vocab_item_id}": {
             "post": {
                 "operationId": "adicionar_item_api_review_items__vocab_item_id__post",
@@ -9589,6 +11130,149 @@
                 ]
             }
         },
+        "/api/speaking/attempts/page": {
+            "get": {
+                "operationId": "listar_tentativas_paginadas_api_speaking_attempts_page_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "minimum": 1,
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Lesson"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SpeakingAttemptPageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Listar Tentativas Paginadas",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
         "/api/speaking/attempts/{attempt_id}": {
             "delete": {
                 "operationId": "excluir_tentativa_api_speaking_attempts__attempt_id__delete",
@@ -9861,6 +11545,57 @@
                     }
                 },
                 "summary": "Solicitar Transcricao",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/policy": {
+            "get": {
+                "operationId": "politica_audio_api_speaking_policy_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SpeakingPolicyOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Politica Audio",
                 "tags": [
                     "speaking"
                 ]
@@ -10294,6 +12029,132 @@
                 ]
             }
         },
+        "/api/writing/history/page": {
+            "get": {
+                "operationId": "historico_de_escrita_paginado_api_writing_history_page_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Course"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unit",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingHistoryPageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Historico De Escrita Paginado",
+                "tags": [
+                    "writing"
+                ]
+            }
+        },
         "/api/writing/prompts/{prompt_id}/draft": {
             "get": {
                 "operationId": "obter_rascunho_api_writing_prompts__prompt_id__draft_get",
@@ -10447,6 +12308,105 @@
             }
         },
         "/api/writing/prompts/{prompt_id}/feedback": {
+            "get": {
+                "operationId": "listar_feedbacks_api_writing_prompts__prompt_id__feedback_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "prompt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Prompt Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingFeedbackPageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Listar Feedbacks",
+                "tags": [
+                    "writing"
+                ]
+            },
             "post": {
                 "operationId": "analisar_texto_api_writing_prompts__prompt_id__feedback_post",
                 "parameters": [
@@ -10529,6 +12489,105 @@
             }
         },
         "/api/writing/prompts/{prompt_id}/versions": {
+            "get": {
+                "operationId": "listar_versoes_api_writing_prompts__prompt_id__versions_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "prompt_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Prompt Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WritingRevisionPageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Listar Versoes",
+                "tags": [
+                    "writing"
+                ]
+            },
             "post": {
                 "operationId": "criar_versao_api_writing_prompts__prompt_id__versions_post",
                 "parameters": [

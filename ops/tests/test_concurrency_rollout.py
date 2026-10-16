@@ -12,8 +12,9 @@ class ConcurrencyRolloutTests(unittest.TestCase):
         target = recovery.CONCURRENCY_CHECK
         self.assertEqual(recovery.DESTINATIONS[recovery.CONFIRM_CONCURRENCY_CHECK], target)
         self.assertEqual(target.project, recovery.PROJECT)
-        self.assertEqual(len({d.db_volume for d in recovery.DESTINATIONS.values()}), 3)
-        self.assertEqual(len({d.voice_volume for d in recovery.DESTINATIONS.values()}), 3)
+        count = len(recovery.DESTINATIONS)
+        self.assertEqual(len({d.db_volume for d in recovery.DESTINATIONS.values()}), count)
+        self.assertEqual(len({d.voice_volume for d in recovery.DESTINATIONS.values()}), count)
 
     def test_clone_cannot_access_original_network_or_storage(self):
         with (

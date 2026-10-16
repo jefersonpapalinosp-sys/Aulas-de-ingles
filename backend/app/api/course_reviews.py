@@ -29,6 +29,8 @@ from app.schemas.course_review import (
     CourseReviewQuestionResultOut,
 )
 from app.schemas.lesson import LessonMediaOut
+from app.services import editorial_history
+from app.services.publication import lock_publication, published_lesson_ids, published_scope
 
 router = APIRouter(prefix="/courses", tags=["course-reviews"])
 
@@ -38,6 +40,7 @@ def _private(response: Response) -> None:
 
 
 async def _review_or_404(session: AsyncSession, course_slug: str, unit_slug: str) -> CourseReview:
+    await lock_publication(session)
     review = (
         await session.execute(
             select(CourseReview)
@@ -45,9 +48,8 @@ async def _review_or_404(session: AsyncSession, course_slug: str, unit_slug: str
             .join(Course, CourseUnit.course_id == Course.id)
             .where(
                 Course.slug == course_slug,
-                Course.status == "published",
                 CourseUnit.slug == unit_slug,
-                CourseUnit.status == "published",
+                *published_scope(),
                 CourseReview.status == "published",
             )
         )
@@ -63,7 +65,11 @@ async def _review_or_404(session: AsyncSession, course_slug: str, unit_slug: str
 async def _listening_media(
     session: AsyncSession, course_slug: str, review: CourseReview
 ) -> tuple[LessonMedia | None, str | None]:
-    if review.listening_lesson_number is None or review.listening_media_position is None:
+    if (
+        review.listening_course_id is None
+        or review.listening_lesson_id is None
+        or review.listening_media_id is None
+    ):
         return None, None
     row = (
         await session.execute(
@@ -72,8 +78,10 @@ async def _listening_media(
             .join(Course, Lesson.course_id == Course.id)
             .where(
                 Course.slug == course_slug,
-                Lesson.number == review.listening_lesson_number,
-                LessonMedia.position == review.listening_media_position,
+                Course.id == review.listening_course_id,
+                Lesson.id == review.listening_lesson_id,
+                Lesson.id.in_(published_lesson_ids()),
+                LessonMedia.id == review.listening_media_id,
             )
         )
     ).one_or_none()
@@ -288,6 +296,19 @@ async def submit_course_review(
     )
     session.add(attempt)
     try:
+        await session.flush()
+        await editorial_history.capture(
+            session,
+            "checkpoint",
+            attempt.id,
+            usuario.id,
+            {
+                **editorial_history.checkpoint_content(review),
+                "result": result,
+                "score": score,
+                "total": len(questions),
+            },
+        )
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()

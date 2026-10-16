@@ -2,9 +2,11 @@
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defaultload, defer, raiseload
 
-from app.db.models import Course, CourseUnit, Lesson
+from app.db.models import Course, CourseUnit, Exercise, Lesson
 from app.schemas.lesson import LessonSummaryOut
+from app.services.publication import lock_publication, published_scope
 
 DEFAULT_COURSE_SLUG = "voa-level-1"
 
@@ -13,15 +15,27 @@ async def lesson_by_course_number(
     session: AsyncSession, course_slug: str, number: int
 ) -> Lesson | None:
     """Resolve uma aula sem depender da antiga unicidade global do número."""
+    await lock_publication(session)
     return (
         await session.execute(
             select(Lesson)
+            .options(
+                # A unidade entra no payload somente pelo slug. O checkpoint e
+                # suas perguntas pertencem ao currículo, não ao detalhe da aula.
+                defaultload(Lesson.unit).raiseload(CourseUnit.review),
+                # Gabaritos e explicações são liberados somente pelos fluxos
+                # autenticados de correção/feedback.
+                defaultload(Lesson.exercises).options(
+                    raiseload(Exercise.answers),
+                    defer(Exercise.hint),
+                    defer(Exercise.explanation),
+                ),
+            )
             .join(Course, Lesson.course_id == Course.id)
             .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
             .where(
                 Course.slug == course_slug,
-                Course.status == "published",
-                CourseUnit.status == "published",
+                *published_scope(),
                 Lesson.number == number,
             )
         )
@@ -50,8 +64,7 @@ async def lesson_summaries(
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
             Course.slug == course_slug,
-            Course.status == "published",
-            CourseUnit.status == "published",
+            *published_scope(),
         )
         .order_by(CourseUnit.position, Lesson.position)
     )

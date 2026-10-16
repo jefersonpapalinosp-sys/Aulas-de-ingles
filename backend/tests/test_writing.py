@@ -1,6 +1,7 @@
 """Rascunho, versões, feedback e isolamento da produção escrita."""
 
 from copy import deepcopy
+from datetime import UTC, datetime
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -8,8 +9,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.db.models import User, WritingFeedbackRecord, WritingPrompt
+from app.db.models import (
+    User,
+    WritingDraft,
+    WritingFeedbackRecord,
+    WritingPrompt,
+    WritingRevision,
+)
 from app.main import create_app
+from app.performance import BYTES_HEADER, POOL_HEADER, SQL_HEADER
 from app.services import assistance
 
 
@@ -52,7 +60,6 @@ async def test_rascunho_e_versoes_sobrevivem_a_nova_sessao(client: AsyncClient) 
         "prompt_id": prompt["id"],
         "text": "",
         "updated_at": None,
-        "revisions": [],
     }
 
     first_text = "The Metro is faster than the bus. Visitors should take it."
@@ -87,9 +94,12 @@ async def test_rascunho_e_versoes_sobrevivem_a_nova_sessao(client: AsyncClient) 
         )
         second_headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
         retomado = (await outro_navegador.get(f"{base}/draft", headers=second_headers)).json()
+        versions = (await outro_navegador.get(f"{base}/versions", headers=second_headers)).json()
 
     assert retomado["text"] == second_text
-    assert [item["version"] for item in retomado["revisions"]] == [2, 1]
+    assert "revisions" not in retomado
+    assert [item["version"] for item in versions["items"]] == [2, 1]
+    assert versions["next_cursor"] is None
 
 
 @pytest.mark.asyncio
@@ -104,9 +114,118 @@ async def test_rascunho_e_isolado_por_conta(client: AsyncClient) -> None:
     ) as outro:
         bruno = await conta(outro, "bruno")
         draft = (await outro.get(f"{base}/draft", headers=bruno)).json()
+        versions = (await outro.get(f"{base}/versions", headers=bruno)).json()
 
     assert draft["text"] == ""
-    assert draft["revisions"] == []
+    assert "revisions" not in draft
+    assert versions["items"] == []
+
+
+@pytest.mark.asyncio
+async def test_paginas_de_escrita_sao_estaveis_pequenas_e_privadas(
+    client: AsyncClient, session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ana = await conta(client, "paginas-ana")
+    prompt = await proposta(client)
+    base = f"/api/writing/prompts/{prompt['id']}"
+    for number in range(1, 6):
+        response = await client.post(
+            f"{base}/versions",
+            headers=ana,
+            json={"text": f"Version {number} is intentionally distinct."},
+        )
+        assert response.status_code == 200
+    for number in range(3):
+        response = await client.post(
+            f"{base}/feedback",
+            headers=ana,
+            json={"text": f"Feedback sample {number} is private."},
+        )
+        assert response.status_code == 200
+
+    user = await session.scalar(select(User).where(User.email == "escrita-paginas-ana@exemplo.com"))
+    assert user is not None
+    draft = await session.scalar(
+        select(WritingDraft).where(
+            WritingDraft.user_id == user.id,
+            WritingDraft.prompt_id == prompt["id"],
+        )
+    )
+    assert draft is not None
+    tied_at = datetime(2026, 10, 15, 12, tzinfo=UTC)
+    revisions = list(
+        (
+            await session.execute(
+                select(WritingRevision).where(WritingRevision.draft_id == draft.id)
+            )
+        ).scalars()
+    )
+    feedbacks = list(
+        (
+            await session.execute(
+                select(WritingFeedbackRecord).where(
+                    WritingFeedbackRecord.user_id == user.id,
+                    WritingFeedbackRecord.prompt_id == prompt["id"],
+                )
+            )
+        ).scalars()
+    )
+    for item in [*revisions, *feedbacks]:
+        item.created_at = tied_at
+    await session.commit()
+    monkeypatch.setattr(get_settings(), "performance_probe_enabled", True)
+
+    async def collect(path: str, sql_budget: int) -> list[int]:
+        cursor = None
+        found: list[int] = []
+        while True:
+            response = await client.get(
+                path,
+                headers=ana,
+                params={"limit": 2, **({"cursor": cursor} if cursor else {})},
+            )
+            assert response.status_code == 200
+            assert int(response.headers[SQL_HEADER]) <= sql_budget
+            assert int(response.headers[POOL_HEADER]) <= 1
+            assert int(response.headers[BYTES_HEADER]) == len(response.content)
+            body = response.json()
+            found.extend(item["id"] for item in body["items"])
+            cursor = body["next_cursor"]
+            if cursor is None:
+                return found
+
+    assert await collect(f"{base}/versions", 2) == sorted(
+        [item.id for item in revisions], reverse=True
+    )
+    # Autenticação + página + detecção/carga em lote dos snapshots históricos.
+    assert await collect(f"{base}/feedback", 4) == sorted(
+        [item.id for item in feedbacks], reverse=True
+    )
+
+    current_response = await client.get(f"{base}/draft", headers=ana)
+    current = current_response.json()
+    assert "revisions" not in current
+    assert int(current_response.headers[BYTES_HEADER]) < 1000
+    history_response = await client.get(
+        "/api/writing/history/page",
+        headers=ana,
+        params={"course": "voa-level-1", "unit": "31-40", "limit": 1},
+    )
+    assert int(history_response.headers[SQL_HEADER]) <= 2
+    assert int(history_response.headers[POOL_HEADER]) <= 1
+    history = history_response.json()
+    assert history["next_cursor"] is None
+    assert history["items"][0]["revision_count"] == 5
+    assert history["items"][0]["feedback_count"] == 3
+    assert "draft_text" not in history["items"][0]
+
+    invalid = await client.get(f"{base}/versions?cursor=not-a-cursor", headers=ana)
+    assert invalid.status_code == 422
+    assert invalid.json()["detail"]["code"] == "invalid_cursor"
+    bruno = await conta(client, "paginas-bruno")
+    assert (await client.get(f"{base}/versions", headers=bruno)).json()["items"] == []
+    assert (await client.get(f"{base}/feedback", headers=bruno)).json()["items"] == []
+    assert (await client.get("/api/writing/history/page", headers=bruno)).json()["items"] == []
 
 
 @pytest.mark.asyncio

@@ -191,6 +191,9 @@ export function NavigationPanel({
         <NavLink to={notebookPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
           Caderno
         </NavLink>
+        <NavLink to="/meus-dados" onClick={onNavigate}>
+          Meus dados
+        </NavLink>
         {scopeUnitSlug && (
           <NavLink to={assessmentPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
             Avaliação
@@ -400,7 +403,7 @@ export function LessonRail() {
   const [expandedUnit, setExpandedUnit] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const drawerRef = useRef<HTMLDivElement>(null)
+  const drawerRef = useRef<HTMLDialogElement>(null)
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const drawerSearchRef = useRef<HTMLInputElement>(null)
   const desktopActiveRef = useRef<HTMLAnchorElement>(null)
@@ -429,6 +432,11 @@ export function LessonRail() {
 
   useEffect(() => {
     if (!drawerOpen) return
+    const dialog = drawerRef.current
+    if (dialog && !dialog.open) {
+      if (typeof dialog.showModal === 'function') dialog.showModal()
+      else dialog.setAttribute('open', '')
+    }
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     requestAnimationFrame(() => drawerSearchRef.current?.focus())
@@ -442,7 +450,7 @@ export function LessonRail() {
     if (returnFocus) requestAnimationFrame(() => openButtonRef.current?.focus())
   }
 
-  function handleDrawerKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function handleDrawerKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
     if (event.key === 'Escape') {
       event.preventDefault()
       closeDrawer()
@@ -538,19 +546,18 @@ export function LessonRail() {
       </div>
 
       {drawerOpen && (
-        <div
+        <dialog
+          ref={drawerRef}
           className="trail-drawer-backdrop"
+          aria-labelledby="trail-drawer-title"
+          onClose={() => closeDrawer()}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeDrawer()
           }}
+          onKeyDown={handleDrawerKeyDown}
         >
           <div
-            ref={drawerRef}
             className="trail-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="trail-drawer-title"
-            onKeyDown={handleDrawerKeyDown}
           >
             <div className="trail-drawer-titlebar">
               <h2 id="trail-drawer-title">Trilha de estudo</h2>
@@ -566,7 +573,7 @@ export function LessonRail() {
               onNavigate={() => closeDrawer(false)}
             />
           </div>
-        </div>
+        </dialog>
       )}
     </aside>
   )

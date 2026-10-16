@@ -48,6 +48,7 @@ from app.schemas.progress import (
     StudySessionOut,
     StudyStep,
 )
+from app.services import editorial_history
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
 from app.services.practice import (
     complete_session_if_ready,
@@ -57,6 +58,7 @@ from app.services.practice import (
     get_practice_item,
     practice_attempt_state,
 )
+from app.services.publication import lock_publication, published_lesson_ids, published_scope
 
 router = APIRouter(tags=["progress"])
 
@@ -73,8 +75,14 @@ async def _aula_por_numero(
 
 
 async def _exercicio_por_id(session: AsyncSession, exercise_id: int) -> Exercise:
+    await lock_publication(session)
     exercicio = (
-        await session.execute(select(Exercise).where(Exercise.id == exercise_id))
+        await session.execute(
+            select(Exercise).where(
+                Exercise.id == exercise_id,
+                Exercise.lesson_id.in_(published_lesson_ids()),
+            )
+        )
     ).scalar_one_or_none()
     if exercicio is None:
         raise HTTPException(
@@ -106,6 +114,29 @@ def _attempt_out(
             if practice is not None and item is not None
             else None
         ),
+    )
+
+
+async def _historical_attempt_out(
+    session: AsyncSession,
+    attempt: ExerciseAttempt,
+    exercise: Exercise,
+    practice: PracticeSession | None = None,
+    item: PracticeSessionItem | None = None,
+) -> AttemptOut:
+    snapshot = await editorial_history.stored_snapshot(
+        session, "exercise", attempt.id, attempt.user_id
+    )
+    if snapshot is None:
+        return _attempt_out(attempt, exercise, practice, item)
+    result = snapshot.content["result"]
+    assert isinstance(result, dict)
+    return AttemptOut(
+        attempt_id=attempt.id,
+        correct=bool(result["correct"]),
+        explanation=result["explanation"],
+        feedback=AttemptFeedbackOut.model_validate(result["feedback"]),
+        session=practice_attempt_state(practice, item) if practice and item else None,
     )
 
 
@@ -288,9 +319,13 @@ async def _salvar_sessao_de_estudo(
     expected = corpo.expected_revision
     stale = expected is not None and expected != progresso.revision
     added = set(corpo.completed_steps) - set(progresso.completed_steps)
-    if stale and expected is not None and (
-        expected > progresso.revision
-        or (not added and corpo.current_step != progresso.current_step)
+    if (
+        stale
+        and expected is not None
+        and (
+            expected > progresso.revision
+            or (not added and corpo.current_step != progresso.current_step)
+        )
     ):
         raise conflict(
             "study_revision_conflict",
@@ -305,29 +340,8 @@ async def _salvar_sessao_de_estudo(
     ]
     next_step = progresso.current_step if stale else corpo.current_step
     changed = next_step != progresso.current_step or merged != progresso.completed_steps
-    if changed:
-        # A sessão é salva ao entrar e ao trocar de etapa. O intervalo entre
-        # esses eventos é uma aproximação útil do tempo ativo; o teto impede
-        # que uma aba esquecida aberta infle a métrica.
-        elapsed = min(30 * 60, max(0, int((now - progresso.updated_at).total_seconds())))
-        if elapsed:
-            previous_step = (
-                await session.execute(
-                    select(StepProgress).where(
-                        StepProgress.study_session_id == progresso.id,
-                        StepProgress.step == progresso.current_step,
-                    )
-                )
-            ).scalar_one_or_none()
-            if previous_step is None:
-                previous_step = StepProgress(
-                    study_session_id=progresso.id,
-                    step=progresso.current_step,
-                    seconds_spent=0,
-                )
-                session.add(previous_step)
-            previous_step.seconds_spent += elapsed
-            progresso.total_seconds += elapsed
+    # Os totais anteriores são legado, sem distribuição temporal confiável.
+    # Novos minutos vêm exclusivamente de /me/activity, nunca de troca de rota.
 
     progresso.current_step = next_step
     progresso.completed_steps = list[str](merged)
@@ -461,7 +475,7 @@ async def tentar(
             # confirmar a transação; atualize os contadores antes de responder.
             await session.refresh(practice_item)
             await session.refresh(practice)
-        return _attempt_out(existente, exercicio, practice, practice_item)
+        return await _historical_attempt_out(session, existente, exercicio, practice, practice_item)
 
     if practice is not None:
         ensure_session_mutable(practice)
@@ -517,10 +531,18 @@ async def tentar(
             ensure_session_content_current(practice)
             await session.refresh(practice_item)
             await session.refresh(practice)
-        return _attempt_out(existente, exercicio, practice, practice_item)
+        return await _historical_attempt_out(session, existente, exercicio, practice, practice_item)
     tentativa = (
         await session.execute(select(ExerciseAttempt).where(ExerciseAttempt.id == attempt_id))
     ).scalar_one()
+
+    await editorial_history.capture(
+        session,
+        "exercise",
+        tentativa.id,
+        usuario.id,
+        editorial_history.exercise_result(exercicio, answer, certo),
+    )
 
     if practice is not None and practice_item is not None:
         practice_item.attempt_count += 1
@@ -695,8 +717,7 @@ async def meu_progresso(
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
-            Course.status == "published",
-            CourseUnit.status == "published",
+            *published_scope(),
         )
         .order_by(Course.position, CourseUnit.position, Lesson.position)
     )
@@ -725,8 +746,7 @@ async def meu_progresso(
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(
             ReviewItem.user_id == usuario.id,
-            Course.status == "published",
-            CourseUnit.status == "published",
+            *published_scope(),
         )
     )
     if course is not None:

@@ -6,15 +6,11 @@ import { formatAudioTime, LessonAudioPlayer } from './LessonAudioPlayer'
 
 const savePosition = vi.fn()
 const clearPosition = vi.fn()
+let syncState = { position: 0, completed: false, ready: true, pending: 0, warning: '', error: '', conflict: null }
 
 vi.mock('../../api/media', () => ({
-  useMediaPosition: () => ({ data: null }),
-  useSaveMediaPosition: () => ({
-    mutate: savePosition,
-    isError: false,
-    isSuccess: false,
-  }),
-  useClearMediaPosition: () => ({ mutate: clearPosition }),
+  useMediaPositionSync: () => ({ ...syncState, record: savePosition, finish: clearPosition,
+    retry: vi.fn(), resolve: vi.fn(), snapshot: () => syncState }),
 }))
 
 const media: LessonMedia = {
@@ -54,31 +50,32 @@ afterEach(() => {
   window.localStorage.clear()
   savePosition.mockClear()
   clearPosition.mockClear()
+  syncState = { position: 0, completed: false, ready: true, pending: 0, warning: '', error: '', conflict: null }
 })
 
 describe('LessonAudioPlayer', () => {
-  it('quota não interrompe controles nem a tentativa de salvar posição remota', () => {
+  it('avisa quando a retomada local não está garantida sem bloquear controles', () => {
+    syncState.warning = 'A retomada local não está garantida.'
     const { container } = render(<LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />)
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
     const audio = container.querySelector('audio')!
     audio.currentTime = 15
     fireEvent.timeUpdate(audio)
     expect(screen.getByRole('alert')).toHaveTextContent('retomada local não está garantida')
     expect(savePosition).toHaveBeenCalledWith(15)
-    expect(screen.getByText('0:15 / 3:29')).toBeInTheDocument()
   })
-  it('falha de leitura e remoção não impede reproduzir ou concluir áudio', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
-    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
+  it('ignora pause e timeupdate atrasados depois de ended', () => {
     const { container } = render(<LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />)
     const audio = container.querySelector('audio')!
-    fireEvent.loadedMetadata(audio)
-    expect(screen.getByRole('alert')).toHaveTextContent('indisponível')
+    audio.currentTime = 209
     fireEvent.ended(audio)
+    fireEvent.pause(audio)
+    fireEvent.timeUpdate(audio)
     expect(clearPosition).toHaveBeenCalledOnce()
-    expect(screen.getByRole('alert')).toHaveTextContent('Confira os dados ao reabrir')
+    expect(savePosition).not.toHaveBeenCalled()
+    expect(screen.getByText('0:00 / 3:29')).toBeInTheDocument()
   })
   it('mostra o áudio oficial com duração conhecida', () => {
+    syncState.position = 42
     const { container } = render(
       <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,
     )
@@ -91,7 +88,6 @@ describe('LessonAudioPlayer', () => {
 
     const audio = container.querySelector('audio')
     if (!audio) throw new Error('elemento de áudio não renderizado')
-    window.localStorage.setItem('aulas-ingles:media-position:v1:7:9', '42')
     Object.defineProperty(audio, 'duration', { value: 209, configurable: true })
     fireEvent.loadedMetadata(audio)
     expect(audio.currentTime).toBe(42)
@@ -160,17 +156,15 @@ describe('LessonAudioPlayer', () => {
     expect(screen.getByText('A 0:15 · B 0:20')).toBeInTheDocument()
   })
 
-  it('limpa a retomada local e remota ao terminar', () => {
+  it('registra conclusão explícita ao terminar', () => {
     const { container } = render(
       <LessonAudioPlayer media={media} userId={7} sourcePageUrl={sourcePageUrl} />,
     )
     const audio = container.querySelector('audio')
     if (!audio) throw new Error('elemento de áudio não renderizado')
-    window.localStorage.setItem('aulas-ingles:media-position:v1:7:9', '200')
 
     fireEvent.ended(audio)
 
-    expect(window.localStorage.getItem('aulas-ingles:media-position:v1:7:9')).toBeNull()
     expect(clearPosition).toHaveBeenCalledOnce()
   })
 
