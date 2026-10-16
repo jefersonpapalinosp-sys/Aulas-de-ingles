@@ -5,7 +5,7 @@ localhost:5181 é **produção local**, não serviço público. Desenvolvimento 
 5180 tem manutenção independente. Nunca executar pytest/E2E nessas bases.
 
 Estado vigente: Sprint 40 fechada tecnicamente em branch em 16/10/2026, com head
-`f40c2d9a1b73` aprovado somente no PostgreSQL descartável e no laboratório de
+`a42c7d1e9f20` aprovado somente no PostgreSQL descartável e no laboratório de
 papéis. Este incremento não inspecionou nem alterou DEV 5180 ou estudo 5181.
 Aceites físicos/pedagógicos e rollout continuam separados. Comandos antigos são
 históricos e não devem ser repetidos como atualização genérica para sprints posteriores.
@@ -2397,7 +2397,7 @@ e não redefine os critérios externos da VOA.
 - laboratório de papéis real aprovou recusas, DML runtime, worker, API, snapshots,
   cotas/retenção e dump limitado; containers encerrados, volume sintético preservado;
 - Ruff completo, mypy dos 90 módulos, `alembic check` e head
-  `f40c2d9a1b73` aprovados no banco descartável;
+  `a42c7d1e9f20` aprovados no banco descartável;
 - OpenAPI e tipos TypeScript foram regenerados; `git diff --check` passou.
 
 Não houve seed, arquivamento, exclusão real, chamada a provedor, alteração de `.env`,

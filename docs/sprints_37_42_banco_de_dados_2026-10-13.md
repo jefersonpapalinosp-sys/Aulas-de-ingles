@@ -1,6 +1,6 @@
 # Sprints de banco de dados para integridade e recuperação
 
-Atualização: 16 de outubro de 2026. **DB-39G/H aplicada em DEV/estudo; DB-40, DB-41 e o escopo técnico de DB-42 concluídos.** O novo head DB-40 `f40c2d9a1b73` foi validado somente no banco descartável e nos laboratórios; nenhum ambiente de uso foi migrado neste fechamento. O aceite operacional DB-42 permanece bloqueado pela medição completa de RTO e pela comprovação da cadência RPO. Divergências antigas de jornada foram preservadas; RPO/RTO são metas, não SLA. [Matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md).
+Atualização: 16 de outubro de 2026. **DB-39G/H aplicada em DEV/estudo; DB-40, DB-41 e o escopo técnico de DB-42 concluídos.** O head técnico `a42c7d1e9f20`, posterior à migration DB-40 `f40c2d9a1b73`, alinha a posição inicial da unidade 31–40 ao catálogo protegido. Foi validado somente no banco descartável e nos laboratórios; nenhum ambiente de uso foi migrado neste fechamento. O aceite operacional DB-42 permanece bloqueado pela medição completa de RTO e pela comprovação da cadência RPO. Divergências antigas de jornada foram preservadas; RPO/RTO são metas, não SLA. [Matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md).
 
 Referência: [auditoria técnica](auditoria_tecnica_frontend_backend_banco_2026-10-13.md). Este plano abrange PostgreSQL, migrations, seed, papel da aplicação e consistência com o armazenamento privado de voz. O primeiro incremento cria apenas um ambiente de teste separado; não modifica o banco de estudo nem seus papéis atuais.
 

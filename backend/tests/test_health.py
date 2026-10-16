@@ -28,7 +28,7 @@ async def test_health_com_banco_de_pe(client: AsyncClient) -> None:
     assert body["version"].startswith("PostgreSQL")
     assert body["schema"] == "compatible"
     assert body["schema_current"] == body["schema_required"]
-    assert body["schema_current"] == ["f40c2d9a1b73"]
+    assert body["schema_current"] == ["a42c7d1e9f20"]
     assert body["env"] == "test"
 
 

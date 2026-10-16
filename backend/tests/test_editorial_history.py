@@ -344,7 +344,7 @@ async def test_snapshot_table_is_empty_for_preexisting_feedback(session):
     assert await session.scalar(select(func.count()).select_from(EvidenceContentSnapshot)) == 0
     assert (
         await session.execute(text("SELECT version_num FROM alembic_version"))
-    ).scalar_one() == "f40c2d9a1b73"
+    ).scalar_one() == "a42c7d1e9f20"
 
 
 async def test_enabled_without_schema_fails_closed(client, session, monkeypatch):
