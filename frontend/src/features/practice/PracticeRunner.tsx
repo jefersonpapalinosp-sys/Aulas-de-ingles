@@ -86,7 +86,7 @@ function filtersFromSession(session: PracticeSessionData): PracticeFilters {
 }
 
 function modeDescription(mode: PracticeMode): string {
-  if (mode === 'quick') return 'Cinco questões escolhidas em ordem estável, sem cronômetro.'
+  if (mode === 'quick') return 'Até cinco questões em ordem estável. Orçamento sugerido: 10 min; cerca de 2 min por item, sem cronômetro.'
   if (mode === 'mistakes') return 'Uma nova sessão apenas com os itens frágeis desta tentativa.'
   return 'Todos os itens do recorte, com dicas progressivas e explicação.'
 }
@@ -507,7 +507,9 @@ export function PracticeRunner({
         <p className="study-kicker">Laboratório da Aula {lessonNumber}</p>
         <h2 id="practice-intro-title">Escolha como praticar</h2>
         <p className="study-copy">
-          Uma questão por vez, com correção explicada. Não há ranking nem tempo obrigatório.
+          Uma questão por vez. A correção objetiva compara sua resposta com o gabarito
+          autoral deste exercício; não é uma avaliação geral do seu inglês. Não há ranking
+          nem tempo obrigatório.
         </p>
 
         <fieldset className="practice-modes">
@@ -671,6 +673,10 @@ export function PracticeRunner({
           Questão {currentIndex + 1} de {session.summary.total}
         </span>
       </div>
+      <p className="practice-time-budget">
+        Referência de ritmo: cerca de 2 min por item · orçamento sugerido desta sessão:{' '}
+        {session.summary.total * 2} min. Não há cronômetro nem penalidade por levar mais tempo.
+      </p>
 
       <div
         className="practice-progress"

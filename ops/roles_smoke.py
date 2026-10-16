@@ -54,10 +54,14 @@ def main():
         roles.sql(info, f"SELECT editorial_key FROM {table} LIMIT 1", "aulas_runtime")
         for role in ("aulas_runtime", "aulas_worker", "aulas_backup"):
             forbidden(info, role, f"UPDATE {table} SET editorial_key=gen_random_uuid()")
-    forbidden(info, "aulas_runtime", "UPDATE alembic_version SET version_num=version_num")
+    forbidden(
+        info, "aulas_runtime", "UPDATE alembic_version SET version_num=version_num"
+    )
     forbidden(info, "aulas_runtime", "UPDATE review_event SET quality=quality")
     forbidden(info, "aulas_runtime", "DELETE FROM review_event")
-    forbidden(info, "aulas_runtime", "UPDATE evidence_content_snapshot SET content=content")
+    forbidden(
+        info, "aulas_runtime", "UPDATE evidence_content_snapshot SET content=content"
+    )
     forbidden(info, "aulas_runtime", "DELETE FROM evidence_content_snapshot")
     forbidden(info, "aulas_worker", "SELECT * FROM evidence_content_snapshot")
     forbidden(
@@ -106,8 +110,14 @@ def main():
     forbidden(info, "aulas_worker", "INSERT INTO assist_reservation DEFAULT VALUES")
     forbidden(info, "aulas_worker", "UPDATE speaking_attempt SET status=status")
     forbidden(info, "aulas_worker", "DELETE FROM refresh_session")
-    forbidden(info, "aulas_runtime", "SELECT public.aulas_retention_batch('refresh',1,true)")
-    forbidden(info, "aulas_backup", "SELECT public.aulas_retention_batch('pending',1,true)")
+    forbidden(info, "aulas_runtime", "DELETE FROM account_deletion_job")
+    forbidden(info, "aulas_worker", "INSERT INTO account_deletion_job DEFAULT VALUES")
+    forbidden(
+        info, "aulas_runtime", "SELECT public.aulas_retention_batch('refresh',1,true)"
+    )
+    forbidden(
+        info, "aulas_backup", "SELECT public.aulas_retention_batch('pending',1,true)"
+    )
     forbidden(info, "aulas_runtime", "UPDATE worker_heartbeat SET seen_at=seen_at")
     roles.sql(
         info,
@@ -130,8 +140,28 @@ def main():
     )
     roles.sql(
         info,
+        """
+      BEGIN;
+      INSERT INTO account_deletion_job(operation_key,state,file_count,deleted_file_count)
+      VALUES ('f7c88768-32b7-44eb-a577-43e382fc2358','cleanup_pending',1,0);
+      INSERT INTO account_deletion_file(job_operation_key,storage_key)
+      VALUES ('f7c88768-32b7-44eb-a577-43e382fc2358','role-probe.webm');
+      UPDATE account_deletion_job SET last_error_code=NULL
+      WHERE operation_key='f7c88768-32b7-44eb-a577-43e382fc2358';
+      DELETE FROM account_deletion_file WHERE storage_key='role-probe.webm';
+      ROLLBACK;
+    """,
+        "aulas_runtime",
+    )
+    roles.sql(
+        info,
         "SELECT id FROM transcription_job; UPDATE transcription_job SET status=status; "
-        "SELECT id FROM assist_reservation; UPDATE assist_reservation SET state=state;",
+        "SELECT id FROM assist_reservation; UPDATE assist_reservation SET state=state; "
+        "SELECT operation_key FROM account_deletion_job; "
+        "UPDATE account_deletion_job SET state=state; "
+        "SELECT id FROM account_deletion_file; "
+        "UPDATE account_deletion_file SET attempt_count=attempt_count; "
+        "DELETE FROM account_deletion_file WHERE false;",
         "aulas_worker",
     )
     # Migrador realmente usa SET ROLE pelo driver e passa a guarda da conexão.

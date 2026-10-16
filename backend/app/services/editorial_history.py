@@ -29,6 +29,7 @@ from app.db.models import (
     WritingPrompt,
 )
 from app.domain.answers import analisar_resposta
+from app.pagination import TimeIdCursor, encode_time_id_cursor
 
 EvidenceKind = Literal["exercise", "practice", "writing", "speaking", "checkpoint"]
 PARENTS: dict[str, tuple[Any, str]] = {
@@ -49,6 +50,18 @@ class HistoricalContentOut(BaseModel):
     content_sha256: str | None = None
     content: dict[str, Any] | None = None
     note: str
+
+
+class HistoricalEvidenceSummaryOut(BaseModel):
+    evidence_kind: EvidenceKind
+    evidence_id: int
+    captured_at: datetime
+    schema_version: str
+
+
+class HistoricalEvidencePageOut(BaseModel):
+    items: list[HistoricalEvidenceSummaryOut]
+    next_cursor: str | None
 
 
 async def schema_available(session: AsyncSession) -> bool:
@@ -386,4 +399,71 @@ async def get_history(
         content=content,
         note="Conteúdo capturado com o registro, não uma certificação de revisão pedagógica. "
         "Gabarito e hash podem ser ocultados enquanto a prática estiver pendente.",
+    )
+
+
+async def history_page(
+    session: AsyncSession,
+    user_id: int,
+    limit: int,
+    boundary: TimeIdCursor | None,
+) -> HistoricalEvidencePageOut:
+    if not await schema_available(session):
+        return HistoricalEvidencePageOut(items=[], next_cursor=None)
+    columns = (
+        EvidenceContentSnapshot.id,
+        EvidenceContentSnapshot.created_at,
+        EvidenceContentSnapshot.schema_version,
+        EvidenceContentSnapshot.exercise_attempt_id,
+        EvidenceContentSnapshot.practice_item_id,
+        EvidenceContentSnapshot.writing_feedback_id,
+        EvidenceContentSnapshot.speaking_attempt_id,
+        EvidenceContentSnapshot.checkpoint_attempt_id,
+    )
+    query = select(*columns).where(EvidenceContentSnapshot.user_id == user_id)
+    if boundary is not None:
+        query = query.where(
+            (EvidenceContentSnapshot.created_at < boundary.timestamp)
+            | (
+                (EvidenceContentSnapshot.created_at == boundary.timestamp)
+                & (EvidenceContentSnapshot.id < boundary.row_id)
+            )
+        )
+    rows = (
+        await session.execute(
+            query.order_by(
+                EvidenceContentSnapshot.created_at.desc(),
+                EvidenceContentSnapshot.id.desc(),
+            ).limit(limit + 1)
+        )
+    ).all()
+    page = rows[:limit]
+    parent_fields: tuple[tuple[EvidenceKind, str], ...] = (
+        ("exercise", "exercise_attempt_id"),
+        ("practice", "practice_item_id"),
+        ("writing", "writing_feedback_id"),
+        ("speaking", "speaking_attempt_id"),
+        ("checkpoint", "checkpoint_attempt_id"),
+    )
+    items: list[HistoricalEvidenceSummaryOut] = []
+    for row in page:
+        mapping = row._mapping
+        kind, field = next(
+            (kind, field) for kind, field in parent_fields if mapping[field] is not None
+        )
+        items.append(
+            HistoricalEvidenceSummaryOut(
+                evidence_kind=kind,
+                evidence_id=int(mapping[field]),
+                captured_at=mapping["created_at"],
+                schema_version=mapping["schema_version"],
+            )
+        )
+    return HistoricalEvidencePageOut(
+        items=items,
+        next_cursor=(
+            encode_time_id_cursor(page[-1].created_at, page[-1].id)
+            if len(rows) > limit and page
+            else None
+        ),
     )

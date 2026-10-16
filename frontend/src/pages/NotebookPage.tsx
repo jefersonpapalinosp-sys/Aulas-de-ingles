@@ -9,6 +9,7 @@ import {
 } from '../api/client'
 import { useCourseCurriculum, useCourses } from '../api/queries'
 import { curriculumLessons } from '../features/curriculum/curriculum'
+import { HistoricalContentDetails } from '../features/history/HistoricalContentDetails'
 import { WritingFeedbackProvenance } from '../features/writing/WritingFeedbackProvenance'
 import { DEFAULT_COURSE_SLUG, studyPath } from '../routing/courseRoutes'
 import { usePagedItems } from './usePagedItems'
@@ -25,6 +26,13 @@ const SHORT_DATE_TIME = new Intl.DateTimeFormat('pt-BR', {
   dateStyle: 'short',
   timeStyle: 'short',
 })
+const HISTORY_LABELS = {
+  exercise: 'Exercício',
+  practice: 'Prática guiada',
+  writing: 'Correção de escrita',
+  speaking: 'Tentativa de fala',
+  checkpoint: 'Checkpoint',
+} as const
 
 function kindLabel(kind: NotebookKind): string {
   return KINDS.find((item) => item.value === kind)?.label ?? kind
@@ -120,10 +128,13 @@ export function NotebookPage() {
   const [notebookCursor, setNotebookCursor] = useState<string>()
   const [writingCursor, setWritingCursor] = useState<string>()
   const [speakingCursor, setSpeakingCursor] = useState<string>()
+  const [historyCursor, setHistoryCursor] = useState<string>()
   const writingLoadingMore = useRef(false)
   const writingStatusRef = useRef<HTMLParagraphElement>(null)
   const speakingLoadingMore = useRef(false)
   const speakingStatusRef = useRef<HTMLParagraphElement>(null)
+  const historyLoadingMore = useRef(false)
+  const historyStatusRef = useRef<HTMLParagraphElement>(null)
   const entriesQuery = useQuery({
     queryKey: [
       'notebook',
@@ -194,6 +205,17 @@ export function NotebookPage() {
     },
     retry: false,
   })
+  const historyQuery = useQuery({
+    queryKey: ['historical-evidence-page', historyCursor || 'first'],
+    queryFn: async () => {
+      const { data } = await api.GET('/api/me/history/page', {
+        params: { query: { limit: 20, cursor: historyCursor } },
+      })
+      if (!data) throw Error()
+      return data
+    },
+    retry: false,
+  })
   const [notebookEntries, setNotebookEntries] = usePagedItems(
     entriesQuery.data,
     notebookCursor,
@@ -209,6 +231,12 @@ export function NotebookPage() {
     speakingCursor,
     speakingLoadingMore,
     speakingStatusRef,
+  )
+  const [historicalEvidence] = usePagedItems(
+    historyQuery.data,
+    historyCursor,
+    historyLoadingMore,
+    historyStatusRef,
   )
 
   useEffect(
@@ -626,6 +654,57 @@ export function NotebookPage() {
         )}
         {recordingUrl && playingAttemptId !== null && (
           <audio aria-label="Gravação do caderno" controls autoPlay src={recordingUrl} />
+        )}
+      </section>
+
+      <section aria-labelledby="historical-content-title">
+        <p className="study-kicker">Memória do conteúdo</p>
+        <h2 id="historical-content-title">Conteúdo histórico preservado</h2>
+        <p className="muted">
+          Evidências capturadas em todos os cursos permanecem consultáveis mesmo se o conteúdo
+          atual mudar ou for arquivado. Por isso, esta lista não cria links para a aula atual e
+          não é afetada pelos filtros acima.
+        </p>
+        {historyQuery.isPending && historicalEvidence.length === 0 && (
+          <p className="muted">Carregando conteúdo histórico…</p>
+        )}
+        {historyQuery.isError && (
+          <p className="erro">Não foi possível carregar o conteúdo histórico.</p>
+        )}
+        {historicalEvidence.length === 0 && !historyQuery.isPending && !historyQuery.isError && (
+          <p className="notebook-empty">Nenhum conteúdo foi capturado nas evidências desta conta.</p>
+        )}
+        <ul className="notebook-history-list">
+          {historicalEvidence.map((item) => (
+            <li key={`${item.evidence_kind}:${item.evidence_id}`}>
+              <div className="notebook-entry-meta">
+                <span>{HISTORY_LABELS[item.evidence_kind]}</span>
+                <span>snapshot {item.schema_version}</span>
+                <time dateTime={item.captured_at}>
+                  {SHORT_DATE_TIME.format(new Date(item.captured_at))}
+                </time>
+              </div>
+              <HistoricalContentDetails kind={item.evidence_kind} evidenceId={item.evidence_id} />
+            </li>
+          ))}
+        </ul>
+        {historyQuery.data?.next_cursor && (
+          <button
+            type="button"
+            className="btn ghost"
+            disabled={historyQuery.isFetching}
+            onClick={() => {
+              historyLoadingMore.current = true
+              setHistoryCursor(historyQuery.data?.next_cursor ?? undefined)
+            }}
+          >
+            {historyQuery.isFetching ? 'Carregando mais…' : 'Carregar mais conteúdo histórico'}
+          </button>
+        )}
+        {historicalEvidence.length > 0 && (
+          <p ref={historyStatusRef} tabIndex={-1} role="status" className="muted">
+            {historicalEvidence.length} evidências históricas carregadas.
+          </p>
         )}
       </section>
     </div>

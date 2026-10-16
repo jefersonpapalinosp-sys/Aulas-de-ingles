@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "check:budget": "node scripts/check-bundle-budget.mjs",
-    "check:api": "npm run gen:api && git diff --exit-code src/api/schema.d.ts",
+    "check:api": "node scripts/check-api-schema.mjs",
     "dev": "vite",
     "gen:api": "openapi-typescript ../backend/openapi.json -o src/api/schema.d.ts",
     "lint": "eslint src --max-warnings 0",

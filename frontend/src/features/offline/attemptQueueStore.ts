@@ -1,11 +1,12 @@
 import type { QueuedAttempt } from './attemptQueue'
-import { readLocal } from '../../storage/local'
+import { readLocal, removeLocal, writeLocal } from '../../storage/local'
 
 export const ATTEMPT_QUEUE_DB = 'aulas:offline-attempts:v3'
 export const ATTEMPT_QUEUE_STORAGE_KEY = 'aulas:offline-attempts:v2'
 export const LEGACY_ATTEMPT_QUEUE_STORAGE_KEY = 'aulas:offline-attempts:v1'
 export const MAX_ATTEMPTS_PER_USER = 100
 const STORES = ['attempts', 'receipts', 'migration']
+const deletedUserKey = (userId: number) => `deleted-user:${userId}`
 
 export class QueueStorageError extends Error {
   constructor(message = 'Não foi possível gravar a fila neste navegador. A resposta continua na tela; não feche a página.') {
@@ -46,6 +47,37 @@ function parseAttempt(value: unknown): QueuedAttempt {
     ...(v.courseSlug === undefined ? {} : { courseSlug: v.courseSlug }),
     ...(v.lessonNumber === undefined ? {} : { lessonNumber: v.lessonNumber }),
     ...(v.syncFailure === undefined ? {} : { syncFailure: { ...v.syncFailure } }),
+  }
+}
+
+function stripLegacyUser(userId: number): void {
+  for (const [key, version] of [
+    [LEGACY_ATTEMPT_QUEUE_STORAGE_KEY, 1],
+    [ATTEMPT_QUEUE_STORAGE_KEY, 2],
+  ] as const) {
+    const source = readLocal(key)
+    if (!source.ok) throw new QueueStorageError(source.error)
+    if (source.value === null) continue
+    try {
+      const parsed: unknown = JSON.parse(source.value)
+      const items = version === 1 ? parsed
+        : parsed && typeof parsed === 'object' && 'version' in parsed
+          && parsed.version === 2 && 'attempts' in parsed ? parsed.attempts : null
+      if (!Array.isArray(items)) throw new Error('Invalid legacy envelope')
+      const remaining = items.filter((item) => (
+        !item || typeof item !== 'object' || (item as { userId?: unknown }).userId !== userId
+      ))
+      if (remaining.length === items.length) continue
+      const result = remaining.length === 0
+        ? removeLocal(key)
+        : writeLocal(key, JSON.stringify(version === 1 ? remaining : {
+          version: 2, attempts: remaining,
+        }))
+      if (!result.ok) throw new QueueStorageError(result.error)
+    } catch (error) {
+      throw error instanceof QueueStorageError ? error
+        : new QueueStorageError('A fila antiga está inválida e não pôde ser limpa com segurança.')
+    }
   }
 }
 
@@ -137,6 +169,7 @@ async function migrate(db: IDBDatabase): Promise<void> {
     for (const source of sources) {
       if (source.raw === null || await request(migration.get(source.key)) === source.raw) continue
       for (const item of source.attempts) {
+        if (await request(migration.get(deletedUserKey(item.userId)))) continue
         const key = [item.userId, item.idempotencyKey]
         if (await request(receipts.get(key))) continue
         const previous = await request<QueuedAttempt | undefined>(attempts.get(key))
@@ -170,9 +203,12 @@ export const attemptStore = {
   },
   add(value: QueuedAttempt): Promise<boolean> {
     const item = parseAttempt(value)
-    return withDatabase((db) => transaction(db, ['attempts', 'receipts'], 'readwrite', async (tx) => {
+    return withDatabase((db) => transaction(db, STORES, 'readwrite', async (tx) => {
       const store = tx.objectStore('attempts')
       const key = [item.userId, item.idempotencyKey]
+      if (await request(tx.objectStore('migration').get(deletedUserKey(item.userId)))) {
+        throw new QueueStorageError('Os dados locais desta conta já foram removidos.')
+      }
       if (await request(tx.objectStore('receipts').get(key))) {
         throw new QueueStorageError('Esta tentativa já foi processada. Atualize o resultado antes de responder novamente.')
       }
@@ -208,5 +244,22 @@ export const attemptStore = {
         await request(store.delete([userId, item.idempotencyKey]))
       }
     }))
+  },
+  deleteUser(userId: number): Promise<void> {
+    return withDatabase((db) => transaction(db, STORES, 'readwrite', async (tx) => {
+      const attempts = tx.objectStore('attempts')
+      const receipts = tx.objectStore('receipts')
+      await request(tx.objectStore('migration').put(true, deletedUserKey(userId)))
+      for (const item of await request<QueuedAttempt[]>(attempts.index('user').getAll(userId))) {
+        await request(attempts.delete([userId, item.idempotencyKey]))
+      }
+      for (const receipt of await request<{ userId: number; idempotencyKey: string }[]>(
+        receipts.getAll(),
+      )) {
+        if (receipt.userId === userId) {
+          await request(receipts.delete([userId, receipt.idempotencyKey]))
+        }
+      }
+    })).then(() => { stripLegacyUser(userId) })
   },
 }

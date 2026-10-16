@@ -1,6 +1,6 @@
 # Sprints de backend para correção e confiabilidade do estudo
 
-Atualização: 16 de outubro de 2026. **BE-39G/H implementada; schema `a39d7bc02486` aplicado em DEV e estudo após backup e ensaio isolado; BE-41 tecnicamente concluída no banco descartável.** Consulte a reabertura no [registro operacional 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026). Aceite integral da Sprint 39 aguarda homologação física e decisão sobre ativar a retenção adicional; BE-42 segue planejada. Jornadas legadas inconsistentes e a pendência de homologação pedagógica humana foram preservadas.
+Atualização: 16 de outubro de 2026. **BE-39G/H implementada; BE-40, BE-41 e o escopo técnico de BE-42 concluídos.** O head técnico passou a `a42c7d1e9f20`: ele sucede `f40c2d9a1b73` e alinha a posição inicial da unidade 31–40 ao catálogo protegido. Foi aplicado apenas no banco descartável e nos laboratórios, não em DEV/estudo. Consulte o [registro operacional 40C/40D](operacao_sprint_37.md#sprint-40c40d--exclusão-histórico-e-fechamento-técnico-em-16102026) e a [matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md). A triagem Trivy local das imagens foi concluída após substituir as bases vulneráveis; o aceite integral de BE-42 continua bloqueado por HTTPS público real e pela confirmação do inventário no próximo commit da CI.
 
 Referência: [auditoria técnica e achados](auditoria_tecnica_frontend_backend_banco_2026-10-13.md). Este plano mantém FastAPI, SQLAlchemy e o monólito atual. A prioridade é corrigir regras de estudo e transações, não introduzir microserviços.
 
@@ -581,15 +581,15 @@ Prioridade P1/P2. Achados B09, B11 e D04. Dependências: DB-40 antes de migraç�
 - [x] Versionar o formato de exportação e garantir snapshot coerente (40A); teto síncrono explícito, jobs/streaming condicionados a ensaio de volume futuro.
 - [x] Disponibilizar exportação autorizada de binários ou manifesto com downloads protegidos, distinguindo isso do JSON de metadados (40A).
 - [x] Aplicar controle de acesso e expiração das transcrições (40A); não há artefato retido no servidor nem link público temporário.
-- [ ] Definir procedimento de exclusão de conta/recursos, arquivos e tarefas associadas, com autenticação reforçada, confirmação e prazo operacional.
+- [x] Definir procedimento de exclusão de conta/recursos, arquivos e tarefas associadas, com autenticação reforçada, confirmação e prazo operacional (40C).
 - [x] Adotar snapshot suficiente para interpretar novas tentativas e resultados sem reler gabarito/cue mutável; ausência legada permanece explícita (40B.2d; sem backfill e sem rollout DEV/estudo).
 - [x] Implementar captura imutável e leitura privada de novas evidências nas cinco modalidades, ensaiadas com captura opt-in (40B.2a; sem ativação nos ambientes de uso).
 - [x] Acrescentar prévia/diff ao seed e rejeitar remoção destrutiva de conteúdo referenciado sem plano explícito (40B.1; bloqueio conservador inclusive sem referências, sem arquivamento ainda).
-- [ ] Centralizar política de publicação/arquivamento em rotas por slug e por ID, preservando histórico permitido.
+- [x] Centralizar política de publicação/arquivamento em rotas por slug e por ID, preservando histórico permitido (40B.2b/40D).
 - [x] Unificar disponibilidade nas rotas curriculares por slug/ID e preservar leitura pessoal; acrescentar prévia agregada de arquivamento por unidade (40B.2b.1; sem aplicar arquivamento).
 - [x] Separar identidade editorial de posição para exercício, prompt, cue, mídia, vocabulário e questão de checkpoint; exigir chave explícita no seed e registrá-la nos novos snapshots quando disponível (40B.2b.2; ensaio isolado, sem rollout).
 - [x] Implementar aplicação local de arquivamento por unidade com recibo imutável, confirmação, prévia revalidada, retry e serialização das admissões; integrar impacto ao diff de pedidos explícitos (40B.2b.3; prod/public bloqueados e rollout pendente).
-- [ ] Corrigir proveniência editorial: datas e versões vêm da revisão correspondente, não de constante global de 7 de outubro.
+- [x] Corrigir proveniência editorial: datas e versões vêm da revisão correspondente, não de constante global de 7 de outubro (40B.2c; homologação humana continua pendente).
 
 ### Critérios de aceite
 
@@ -904,6 +904,36 @@ e backup somente leitura. A regressão terminou com **1.124 testes backend**, Ru
 mypy; 88 testes operacionais e 80 subtestes também passaram. Nenhum pacote real foi
 aplicado em DEV/estudo.
 
+### Incrementos 40C/40D — exclusão retomável e histórico paginado, 16/10/2026
+
+`DELETE /api/me/account` exige sessão, senha atual, UUID da operação e confirmação
+exata. Argon2 roda sem conexão/lock; a transação depois serializa por usuário,
+revalida existência e hash, captura apenas chaves opacas dos áudios e apaga o perfil.
+As cascades revogam sessões e removem os dados pessoais. O recibo restante não tem
+`user_id`, e-mail ou conteúdo. A resposta 202 sempre confirma que o banco já foi
+excluído e distingue áudio concluído de limpeza pendente.
+
+O worker processa `account_deletion_file` antes da transcrição, faz unlink
+idempotente, usa `SKIP LOCKED`, backoff e no máximo dez tentativas. Falha final fica
+visível apenas como contagem agregada no heartbeat. Runtime pode criar/atualizar o
+recibo e a fila; worker só lê/atualiza e remove tarefas; nenhum deles ganha DELETE
+do recibo. O downgrade recusa apagar tabelas com recibos.
+
+`GET /api/me/history/page` lista snapshots privados com cursor estável
+`(created_at,id)`, limite 1–100 e `private, no-store`. A página informa modalidade,
+ID da evidência, captura e schema, sem retornar o JSON pesado. O conteúdo só é
+buscado sob demanda na rota por evidência. Outra conta vê lista vazia e não consegue
+abrir o registro. Schema ainda não instalado produz lista vazia, sem erro 500 nem
+reconstrução a partir do conteúdo atual.
+
+`CertificateEligibilityOut.rule_version=course-certificate-v1` torna explícita a
+regra atualmente calculada. Não cria emissão, download ou reprocessamento histórico.
+
+Ruff e mypy passaram; 39 testes dirigidos de API/migration passaram em PostgreSQL
+descartável. O laboratório com papéis reais aprovou recusas, DML mínimo, API,
+worker, snapshots, cotas/retenção e dump limitado. Evidência completa e rollout
+permanecem no runbook; homologação pedagógica humana não foi declarada.
+
 ## Sprint 41 Performance e contratos paginados
 
 Prioridade P2. Achados B10, F11 e D06.
@@ -1145,14 +1175,14 @@ Prioridade P1/P2 operacional. Achados B12 e D08; fechamento transversal.
 
 ### Entregas
 
-- [ ] Definir readiness que valide dependências/schema compatíveis, mantendo liveness separado.
-- [ ] Ordenar deploy: backup verificado, migration compatível, verificação de schema/seed e liberação de tráfego. Evitar servir código novo sobre banco antigo.
-- [ ] Expor métricas agregadas de latência/erro, pool, fila, retries, expirados e capacidade de mídia; limitar cardinalidade.
-- [ ] Padronizar request-id validado e correlação de API/worker sem incluir textos, e-mails, tokens ou áudio nos logs.
-- [ ] Acrescentar auditoria de dependências/imagens com triagem e política de atualização, sem falhar release por resultado não analisado.
+- [x] Definir readiness que valide dependências/schema compatíveis, mantendo liveness separado.
+- [x] Ordenar deploy: backup verificado, migration compatível, verificação de schema/seed e liberação de tráfego. Evitar servir código novo sobre banco antigo.
+- [x] Expor métricas agregadas de latência/erro, pool, fila, retries, expirados e capacidade de mídia; limitar cardinalidade.
+- [x] Padronizar request-id validado e correlação de API/worker sem incluir textos, e-mails, tokens ou áudio nos logs.
+- [x] Acrescentar auditoria de dependências/imagens com triagem e política de atualização, sem falhar release por resultado não analisado.
 - [ ] Homologar headers de segurança e HTTPS no perfil público; avaliar CSP com fontes/mídias legítimas e manter ambiente local funcional.
-- [ ] Executar ensaio de recuperação, falha de provedor, banco indisponível e reinício de worker em ambiente isolado.
-- [ ] Publicar runbooks operacionais de incidentes e checklist de release, incluindo bloqueios humanos ainda abertos.
+- [x] Executar ensaio de recuperação, falha de provedor, banco indisponível e reinício de worker em ambiente isolado.
+- [x] Publicar runbooks operacionais de incidentes e checklist de release, incluindo bloqueios humanos ainda abertos.
 
 ### Critérios de aceite
 
@@ -1162,6 +1192,31 @@ Prioridade P1/P2 operacional. Achados B12 e D08; fechamento transversal.
 4. Ensaio restaura banco e voz e valida acesso autorizado aos arquivos, conforme DB-42.
 5. CI cobre contratos, tipagem, isolamento, concorrência e migração representativa; exceções de segurança têm prazo e justificativa.
 6. Backlog residual diferencia defeito, risco aceito, melhoria futura e homologação humana pendente.
+
+### Evidência executada em 16/10/2026
+
+O fluxo legado que iniciava aplicação antes da migration foi bloqueado. O
+laboratório executou backup, restore, migration, `alembic check`, leitura com a
+imagem atual e leitura com a imagem anterior sobre o schema expandido, sem
+downgrade destrutivo.
+
+O alvo `test-failure-rehearsal` aprovou **5 cenários** na base descartável:
+falha transitória de acesso ao banco com backoff/cancelamento, fallback de
+escrita quando o provedor falha, preservação do áudio na falha de transcrição,
+retry com a mesma chave idempotente e retomada de job que ficou `processing`
+após interrupção. O ensaio representa falhas controladas no processo; não é
+alegação de desastre físico real.
+
+A CI agora inventaria locks Python/npm e as imagens candidatas API/web e guarda
+relatórios privados para triagem. A política, prazos e decisões permitidas estão
+em `politica_triagem_seguranca_sprint_42.md`. As dependências locais tiveram
+zero vulnerabilidades conhecidas. O Trivy `v0.76.0` rejeitou as bases anteriores,
+que somavam 2 ocorrências críticas/41 altas na web e 44 altas na API. Após mover
+a web para Nginx `1.30.6-alpine3.24` e a API para Python
+`3.12.15-alpine3.24`, o reteste encontrou zero críticas/altas nas duas imagens.
+O smoke da API confirmou UID 10001, bibliotecas nativas e health compatível no
+banco descartável. O próximo commit ainda deve produzir o artefato equivalente
+na CI; não se declara essa execução remota antes de ela ocorrer.
 
 ## Definição de pronto
 

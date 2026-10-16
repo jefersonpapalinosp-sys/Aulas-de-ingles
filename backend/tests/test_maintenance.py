@@ -155,6 +155,11 @@ async def test_worker_recovers_database_failure_and_remains_cancellable(monkeypa
     monkeypatch.setattr(maintenance, "heartbeat", AsyncMock())
     monkeypatch.setattr(transcription_queue, "dispose_engine", AsyncMock())
     monkeypatch.setattr(
+        transcription_queue.account_deletion,
+        "process_file_batch",
+        AsyncMock(return_value=0),
+    )
+    monkeypatch.setattr(
         transcription_queue,
         "process_next_transcription",
         AsyncMock(side_effect=asyncio.CancelledError),
@@ -182,13 +187,14 @@ async def test_heartbeat_upsert_keeps_last_maintenance_counts(session):
         assert row and row.maintenance_counts == {"transcriptions": 3} and row.maintenance_at
 
 
-async def test_additional_cleanup_is_opt_in(monkeypatch):
+async def test_additional_cleanup_is_opt_in(monkeypatch, session):
     batch = AsyncMock(return_value=0)
     monkeypatch.setattr(maintenance, "retention_batch", batch)
     monkeypatch.setattr(get_settings(), "maintenance_cleanup_enabled", False)
-    assert set(await maintenance.sweep()) == {"transcriptions", "reservations"}
+    deletion_metrics = {"account_deletions_pending", "account_deletions_failed"}
+    assert set(await maintenance.sweep()) == {"transcriptions", "reservations"} | deletion_metrics
     monkeypatch.setattr(get_settings(), "maintenance_cleanup_enabled", True)
-    assert set(await maintenance.sweep()) == set(maintenance.SCOPES)
+    assert set(await maintenance.sweep()) == set(maintenance.SCOPES) | deletion_metrics
 
 
 async def test_worker_status_is_private_and_handles_stale_heartbeat(client, session, monkeypatch):

@@ -45,6 +45,19 @@ function practicePath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
   return `${lessonPath(lessonNumber, courseSlug)}/exercicios`
 }
 
+test('frontend aplica headers de segurança sem bloquear o localhost HTTP', async ({ request }) => {
+  const response = await request.get('/')
+  expect(response.ok()).toBeTruthy()
+  const headers = response.headers()
+  expect(headers['content-security-policy']).toContain("default-src 'self'")
+  expect(headers['content-security-policy']).toContain('https://voa-audio.voanews.eu')
+  expect(headers['content-security-policy']).not.toContain('upgrade-insecure-requests')
+  expect(headers['x-frame-options']).toBe('DENY')
+  expect(headers['x-content-type-options']).toBe('nosniff')
+  expect(headers['referrer-policy']).toBe('no-referrer')
+  expect(headers['permissions-policy']).toContain('microphone=(self)')
+})
+
 function courseReviewPath(unitSlug: string, courseSlug = LEVEL_1_SLUG): string {
   return `${coursePath(courseSlug)}/unidades/${unitSlug}/checkpoint`
 }
@@ -1421,7 +1434,7 @@ test('caderno pessoal persiste, edita, exporta e exclui uma anotação', async (
   await criarConta(page, 'Caderno E2E')
   await (await globalLink(page, /^Caderno$/)).click()
   await expect(page.getByRole('heading', { name: 'Caderno de inglês' })).toBeVisible()
-  await expect(page.getByText(/Estas anotações pertencem somente à sua conta/)).toBeVisible()
+  await expect(page.getByText(/As anotações são privadas e não alteram as aulas/)).toBeVisible()
 
   const compose = page.locator('.notebook-compose')
   await compose.getByLabel('Tipo').selectOption('favorite_phrase')
@@ -1460,7 +1473,7 @@ test('painel Hoje orienta, salva o plano e só calcula competência com amostra'
   await page.getByText('Qua', { exact: true }).click()
   await page.getByText('Sáb', { exact: true }).click()
   await page.getByRole('button', { name: 'Salvar plano' }).click()
-  await expect(page.getByRole('status')).toHaveText('Plano salvo.')
+  await expect(page.locator('.today-save[role="status"]')).toHaveText('Plano salvo.')
   await page.reload()
   await expect(page.getByRole('textbox', { name: 'Meta', exact: true })).toHaveValue(
     'Inglês para uma viagem',
@@ -1507,7 +1520,7 @@ test('revisão multimodal filtra e permite suspender, reativar e excluir', async
   await expect(page.locator('.review-card-meta')).toContainText('Erro gramatical')
 
   await page.getByRole('button', { name: 'Suspender item' }).click()
-  await expect(page.getByRole('status')).toContainText('Item suspenso')
+  await expect(page.locator('.ultima[role="status"]')).toContainText('Item suspenso')
   await expect(page.getByRole('heading', { name: 'Nenhum item com estes filtros' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Itens suspensos' })).toBeVisible()
 
@@ -1516,7 +1529,7 @@ test('revisão multimodal filtra e permite suspender, reativar e excluir', async
 
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Excluir item' }).click()
-  await expect(page.getByRole('status')).toContainText('Item excluído')
+  await expect(page.locator('.ultima[role="status"]')).toContainText('Item excluído')
   await expect(page.getByRole('heading', { name: 'Nenhum item com estes filtros' })).toBeVisible()
 })
 
@@ -2605,8 +2618,13 @@ test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', as
 
   await expect(page).toHaveURL(/\/inicio$/)
   await expect(page.getByRole('heading', { name: 'Hoje' })).toBeVisible()
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toBeFocused()
+  await expect(page.locator('#main-content')).toBeFocused()
+  const skipLink = page.getByRole('link', { name: 'Pular para o conteúdo' })
+  for (let tentativa = 0; tentativa < 100; tentativa += 1) {
+    if (await skipLink.evaluate((element) => element === document.activeElement)) break
+    await page.keyboard.press('Shift+Tab')
+  }
+  await expect(skipLink).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.locator('#main-content')).toBeFocused()
 
@@ -2653,13 +2671,15 @@ test('cadastro e salto ao conteúdo funcionam com teclado real do navegador', as
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { name: 'Caderno de inglês' })).toBeVisible()
 
-  const anotacao = page.getByLabel('Conteúdo')
+  const anotacao = page.getByRole('textbox', { name: 'Conteúdo', exact: true })
   await tabAte(page, anotacao)
   await page.keyboard.type('Comparatives use than.')
   await page.keyboard.press('Tab')
   await expect(page.getByRole('button', { name: 'Salvar no caderno' })).toBeFocused()
   await page.keyboard.press('Space')
-  await expect(page.getByRole('status')).toHaveText('Anotação salva no seu caderno.')
+  await expect(page.locator('.notebook-message[role="status"]')).toHaveText(
+    'Anotação salva no seu caderno.',
+  )
 
   let revisar: Locator
   if (await compactOpen.isVisible()) {

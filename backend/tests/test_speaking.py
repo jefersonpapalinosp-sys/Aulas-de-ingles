@@ -1,6 +1,7 @@
 """Consentimento, persistência e isolamento das gravações de speaking."""
 
 import asyncio
+import logging
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -539,7 +540,10 @@ async def test_upload_valida_formato_tamanho_e_envio_unico(
 
 @pytest.mark.asyncio
 async def test_transcricao_assistida_expoe_confianca_comparacao_custo_e_avaliacao(
-    client: AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    client: AsyncClient,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     settings = get_settings()
     monkeypatch.setattr(settings, "speaking_storage_dir", str(tmp_path))
@@ -548,6 +552,7 @@ async def test_transcricao_assistida_expoe_confianca_comparacao_custo_e_avaliaca
     monkeypatch.setattr(settings, "assist_provider_name", "provider-test")
     monkeypatch.setattr(settings, "assist_daily_quota", 3)
     monkeypatch.setattr(settings, "assist_retention_days", 7)
+    caplog.set_level(logging.INFO)
     monkeypatch.setattr(
         assistance,
         "call_transcription_provider",
@@ -588,6 +593,19 @@ async def test_transcricao_assistida_expoe_confianca_comparacao_custo_e_avaliaca
     assert requested.json()["status"] == "queued"
     assert requested.json()["attempt_count"] == 0
     assert await transcription_queue.process_next_transcription() is True
+    correlated = [
+        record
+        for record in caplog.records
+        if record.getMessage()
+        in {"transcription_queued", "transcription_claimed", "transcription_completed"}
+    ]
+    assert [record.getMessage() for record in correlated] == [
+        "transcription_queued",
+        "transcription_claimed",
+        "transcription_completed",
+    ]
+    assert {record.job_id for record in correlated} == {requested.json()["id"]}
+    assert all(not hasattr(record, "user_id") for record in correlated)
     listed = (await client.get("/api/speaking/attempts?lesson=31", headers=headers)).json()
     transcription = listed[0]["transcription"]
     assert transcription["status"] == "completed"

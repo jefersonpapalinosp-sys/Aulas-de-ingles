@@ -5,13 +5,17 @@ import { authenticatedFetch } from '../api/client'
 import type { components } from '../api/schema'
 import { subscribeAttemptQueue } from '../features/offline/attemptQueue'
 import { inspectCache } from '../features/offline/pwa'
-import { inspectDevice, type DeviceInventory } from '../features/privacy/deviceInventory'
+import {
+  clearDeviceData,
+  inspectDevice,
+  type DeviceInventory,
+} from '../features/privacy/deviceInventory'
 
 type Export = components['schemas']['PersonalDataExportOut']
 type Audio = components['schemas']['AudioExportEntry']
 
 export function PersonalDataPage() {
-  const { usuario, offline } = useSessao()
+  const { usuario, offline, encerrarContaExcluida } = useSessao()
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -20,6 +24,10 @@ export function PersonalDataPage() {
   const [inventory, setInventory] = useState<DeviceInventory | null>(null)
   const [localMessage, setLocalMessage] = useState('')
   const [clearing, setClearing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [password, setPassword] = useState('')
+  const [confirmation, setConfirmation] = useState('')
+  const [deletionError, setDeletionError] = useState('')
   const active = useRef<AbortController | null>(null)
   const releases = useRef<(() => void)[]>([])
   const generation = useRef(0)
@@ -113,6 +121,47 @@ export function PersonalDataPage() {
     finally { setClearing(false); void refresh() }
   }
 
+  async function clearPrivateData() {
+    if (userId === undefined || !window.confirm('Apagar deste navegador os rascunhos, respostas pendentes, posições, progresso e a gravação temporária desta conta? Dados não enviados serão perdidos.')) return
+    setClearing(true)
+    setLocalMessage('')
+    try {
+      const removed = await clearDeviceData(userId)
+      setLocalMessage(`${removed} item(ns) local(is) removido(s). A conta e os dados do servidor foram preservados.`)
+    } catch {
+      setLocalMessage('A limpeza local não pôde ser confirmada por completo. Feche outras abas, atualize o inventário e tente novamente.')
+    } finally { setClearing(false); void refresh() }
+  }
+
+  async function deleteAccount(event: React.FormEvent) {
+    event.preventDefault()
+    if (offline || confirmation !== 'EXCLUIR MINHA CONTA'
+      || !window.confirm('Excluir definitivamente a conta e os dados enviados ao servidor? Esta ação não pode ser desfeita.')) return
+    setDeleting(true)
+    setDeletionError('')
+    try {
+      const response = await authenticatedFetch('/api/me/account', {
+        method: 'DELETE', cache: 'no-store', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation_key: crypto.randomUUID(), password, confirmation }),
+      })
+      if (!response.ok) {
+        if (response.status === 401) throw new Error('Senha incorreta. A conta não foi excluída.')
+        if (response.status === 409) throw new Error('A sessão mudou. Entre novamente antes de excluir a conta.')
+        throw new Error('Não foi possível confirmar a exclusão. A conta foi preservada; tente novamente.')
+      }
+      const result = await response.json() as { state?: string; database_deleted?: boolean }
+      if (result.database_deleted !== true || !['completed', 'cleanup_pending'].includes(result.state ?? '')) {
+        throw new Error('O servidor não confirmou a exclusão. Entre novamente para conferir a conta.')
+      }
+      encerrarContaExcluida(result.state === 'cleanup_pending')
+    } catch (cause) {
+      setDeletionError(cause instanceof Error ? cause.message : 'Falha ao excluir a conta.')
+    } finally {
+      setPassword('')
+      setDeleting(false)
+    }
+  }
+
   const count = (value: number | null | undefined) => value ?? 'Não confirmado'
   return (
     <div className="personal-data-page">
@@ -161,9 +210,30 @@ export function PersonalDataPage() {
         <div className="pwa-actions">
           <button type="button" onClick={() => { void refresh() }}>Atualizar inventário local</button>
           <button type="button" disabled={clearing} onClick={() => { void clearPublicText() }}>Limpar somente textos públicos deste navegador</button>
+          <button type="button" disabled={clearing} onClick={() => { void clearPrivateData() }}>Apagar dados locais desta conta</button>
         </div>
         <p role="status">{localMessage}</p>
-        <p>Essa limpeza não remove rascunhos, respostas, gravações, progresso ou dados da conta. A exclusão integral de conta ainda não está disponível neste incremento.</p>
+        <p>Feche outras abas antes da limpeza privada. Ela não apaga o servidor, outros dispositivos, downloads nem o cache público das aulas.</p>
+      </section>
+      <section className="data-panel estado-erro" aria-labelledby="delete-account-title">
+        <h2 id="delete-account-title">Excluir conta</h2>
+        <p>A exclusão remove o perfil e os dados enviados ao servidor. Áudios são removidos por uma tarefa retomável. Backups de desenvolvimento podem conservar uma cópia temporária conforme a política de retenção.</p>
+        <p>Dados deste navegador, de outras abas ou dispositivos e arquivos que você baixou exigem limpeza separada.</p>
+        <form onSubmit={(event) => { void deleteAccount(event) }}>
+          <label>Senha atual
+            <input type="password" autoComplete="current-password" minLength={8} required
+              value={password} onChange={(event) => setPassword(event.target.value)} />
+          </label>
+          <label>Digite <strong>EXCLUIR MINHA CONTA</strong>
+            <input type="text" autoComplete="off" required value={confirmation}
+              onChange={(event) => setConfirmation(event.target.value)} />
+          </label>
+          <button type="submit" disabled={deleting || offline || confirmation !== 'EXCLUIR MINHA CONTA'}>
+            {deleting ? 'Excluindo conta…' : 'Excluir minha conta definitivamente'}
+          </button>
+        </form>
+        {offline && <p role="status">Conecte-se e confirme a sessão para excluir a conta.</p>}
+        {deletionError && <p role="alert" className="erro">{deletionError}</p>}
       </section>
       <Link to="/caderno">Voltar ao caderno e ao histórico</Link>
     </div>

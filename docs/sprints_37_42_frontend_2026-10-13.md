@@ -1,6 +1,6 @@
 # Sprints de frontend para confiabilidade e experiência de estudo
 
-Atualização: 16 de outubro de 2026. **Implementação FE-39G/H concluída, implantada e reaberta em DEV 5180 e estudo 5181; FE-41 tecnicamente concluída.** Evidências no [registro operacional 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026). O aceite integral ainda depende das homologações físicas registradas neste plano; FE-42 permanece planejada. Leitores de tela reais e homologação pedagógica humana continuam pendentes, sem aprovação fictícia.
+Atualização: 16 de outubro de 2026. **Implementação FE-39G/H concluída e implantada; FE-40, FE-41 e FE-42 tecnicamente concluídas.** O fechamento FE-40/42 está somente na branch e nos laboratórios, sem rollout em DEV/estudo. Evidências no [registro operacional 40C/40D](operacao_sprint_37.md#sprint-40c40d--exclusão-histórico-e-fechamento-técnico-em-16102026) e na [matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md). O aceite integral ainda depende das homologações físicas, auditivas e pedagógicas registradas neste plano; nenhuma recebeu aprovação fictícia.
 
 Schema em ambos os ambientes: `a39d7bc02486`. Frontend do estudo usa build com PWA; desenvolvimento 5180 usa Vite e não registra o service worker. A instalação 39G/H inclui as entregas 39A–F e preserva o histórico anterior. Consulte o registro vigente antes de usar comandos históricos.
 
@@ -702,13 +702,13 @@ Achados: B09, B11, D04 e D07. Dependências: exportação versionada e política
 
 ### Entregas
 
-- [ ] Criar área “Meus dados” para exportação, escopo dos arquivos e exclusão/limpeza com confirmação proporcional ao risco.
+- [x] Criar área “Meus dados” para exportação, escopo dos arquivos e exclusão/limpeza com confirmação proporcional ao risco.
 - [x] Diferenciar exportação JSON de backup de conta e download dos áudios pessoais (40A).
-- [ ] Apresentar estados de preparação, processamento, conclusão, expiração e falha de exportações grandes, se o contrato adotar jobs.
-- [ ] Identificar versão do conteúdo em tentativa/checkpoint e permitir consultar resultado histórico sem apresentá-lo como correção da versão atual.
-- [ ] Exibir conteúdo arquivado no histórico conforme política definida, sem criar links quebrados para aula indisponível.
-- [ ] Oferecer limpeza deste dispositivo separada de exclusão na conta, com inventário de itens não sincronizados.
-- [ ] Apresentar mudança de regra de conclusão de curso com justificativa e versão, preservando o significado de “certificado interno”.
+- [x] Manter estados explícitos no contrato síncrono atual; jobs de exportação grande não foram adotados e volumes acima do teto falham integralmente, sem estado fictício.
+- [x] Identificar versão do conteúdo em tentativa/checkpoint e permitir consultar resultado histórico sem apresentá-lo como correção da versão atual.
+- [x] Exibir conteúdo capturado no histórico conforme política definida, sem criar links quebrados para aula indisponível ou reconstruir legado ausente.
+- [x] Oferecer limpeza deste dispositivo separada de exclusão na conta, com inventário de itens não sincronizados.
+- [x] Apresentar a regra atual de conclusão com justificativa e versão, preservando o significado de “certificado interno”.
 
 ### Critérios de aceite
 
@@ -870,6 +870,34 @@ OpenAPI, tipos TypeScript, componentes ou seeds reais neste incremento.
 O ensaio técnico não substitui o aceite da experiência depois de uma reordenação
 curricular real. Ainda faltam validar retomada, histórico, foco, cache/offline e
 explicação de versão no frontend antes de liberar esse fluxo no ambiente de estudo.
+
+### Fechamento técnico FE-40C/40D — exclusão, histórico e regra versionada, 16/10/2026
+
+A tela “Meus dados” agora separa três ações: cache textual público, limpeza privada
+somente da conta neste navegador e exclusão remota. A limpeza privada remove fila
+offline, recibos, rascunhos, posições, progresso e voz temporária do usuário
+selecionado; mantém outras contas, cache editorial e servidor. Um tombstone impede
+que fontes v1/v2 restaurem a fila apagada. Falha de storage não vira sucesso visual.
+
+A exclusão remota exige senha, frase exata e confirmação nativa. Após a API confirmar
+o banco excluído, a sessão e o cache autenticado são encerrados; arquivo de áudio
+pendente recebe mensagem distinta. Outros dispositivos e downloads continuam
+explicitamente fora do alcance da ação.
+
+O Caderno ganhou a central paginada “Conteúdo histórico preservado” para exercício,
+prática, escrita, fala e checkpoint. Os detalhes são carregados sob demanda da rota
+privada, exibem somente o snapshot original e suas versões. Ausência legada não é
+substituída pelo seed atual. A lista é global à conta, explica que não segue os
+filtros curriculares e não cria link para aula que possa estar arquivada.
+
+Na conclusão, `course-certificate-v1` identifica a regra recalculada no estado atual.
+A interface explica que isso não altera resultados históricos nem representa arquivo
+já emitido. O significado e o fluxo externo da VOA não foram redefinidos.
+
+Validação dirigida: 45 testes frontend, lint e TypeScript aprovados. A suíte completa,
+build e orçamento são registrados no runbook ao final do fechamento integrado.
+Homologações físicas da Sprint 41 continuam externas e não são convertidas em aceite
+por estes testes. [Política operacional](politica_exclusao_e_backups_dev_2026-10-16.md).
 
 ## Sprint 41 Acessibilidade e interfaces sustentáveis
 
@@ -1063,6 +1091,11 @@ forçado e movimento reduzido; não houve troca de framework nem alteração do 
 TypeScript, ESLint, **354 testes frontend**, build e orçamento passaram. O total é
 **176.078 bytes gzip (172,0 KiB)**, 50 bytes abaixo do teto inalterado.
 
+Na auditoria pré-commit de 16/10, `npm run check:api` deixou de depender de
+`git diff`: o gate agora gera o contrato em memória e compara seu conteúdo com
+`schema.d.ts`. Assim, detecta drift real também antes do commit, sem confundir a
+alteração gerada e ainda não versionada com contrato inconsistente.
+
 Status honesto: implementação técnica concluída. Permanecem abertas somente as
 evidências dependentes de navegador/dispositivo real: navegação virtual de leitor
 de tela, VoiceOver macOS/iOS, TalkBack Android, contraste forçado no Windows e a
@@ -1075,13 +1108,13 @@ Achados: F09 a F11, B12 e pendências pedagógicas da auditoria.
 
 ### Entregas
 
-- [ ] Executar jornada integrada com rede estável, rede lenta, offline, expiração de sessão e atualização de versão.
-- [ ] Revisar textos de interface para explicar diferença entre correção objetiva, rubrica de escrita, assistência e autoavaliação oral.
-- [ ] Exibir origem/período/amostra das competências e não apresentar poucos acertos repetidos como certificação de nível.
-- [ ] Separar duração de cada item e orçamento de sessão curta de revisão, caso esse modo seja aprovado no refinamento.
-- [ ] Concluir ou registrar individualmente a conferência auditiva humana dos cues pendentes, com associação à aula/versão.
-- [ ] Consolidar guia do aluno sobre retomada, sincronização, limites offline, privacidade e recuperação de erros.
-- [ ] Registrar a matriz de aceite final e pendências residuais, sem marcar o pacote inteiro como concluído com homologações obrigatórias abertas.
+- [x] Executar jornada integrada com rede estável, rede lenta, offline, expiração de sessão e atualização de versão.
+- [x] Revisar textos de interface para explicar diferença entre correção objetiva, rubrica de escrita, assistência e autoavaliação oral.
+- [x] Exibir origem/período/amostra das competências e não apresentar poucos acertos repetidos como certificação de nível.
+- [x] Separar duração de cada item e orçamento de sessão curta de revisão, caso esse modo seja aprovado no refinamento.
+- [x] Concluir ou registrar individualmente a conferência auditiva humana dos cues pendentes, com associação à aula/versão.
+- [x] Consolidar guia do aluno sobre retomada, sincronização, limites offline, privacidade e recuperação de erros.
+- [x] Registrar a matriz de aceite final e pendências residuais, sem marcar o pacote inteiro como concluído com homologações obrigatórias abertas.
 
 ### Critérios de aceite
 
@@ -1091,11 +1124,32 @@ Achados: F09 a F11, B12 e pendências pedagógicas da auditoria.
 4. Evidências de listening e leitores de tela são humanas quando o critério depende de percepção/tecnologia assistiva real.
 5. Mudanças de competência/conclusão são compreensíveis e versionadas; não se promete certificado oficial VOA.
 
+### Evidência executada em 16/10/2026
+
+No Chromium contra a stack E2E descartável passaram: cadastro até revisão,
+envio deliberadamente atrasado sem duplicação, expiração de sessão com o
+rascunho preservado no dispositivo e aula previamente visitada offline. No
+fixture PWA isolado passaram a troca coordenada entre duas abas, preservando
+rascunho/fila, e a falha de instalação que mantém a versão anterior disponível.
+Foram **6 cenários aprovados**. A homologação física de acessibilidade e a
+escuta humana continuam separadas e não são substituídas por esses testes.
+
+As competências agora informam origem, período, quantidade e limiar de três
+amostras. Correção objetiva, rubrica local, sugestão assistida e autoavaliação
+oral usam textos distintos. O modo rápido comunica orçamento de até 10 minutos
+e referência aproximada de 2 minutos por item, sem transformar a estimativa em
+cronômetro obrigatório.
+
+O inventário versionado identifica os **408 cues** por curso, aula, versão,
+mídia e chave editorial. Todos estão registrados honestamente como
+`pending_human_listening`; registrar cada pendência encerra a tarefa técnica,
+não a homologação auditiva.
+
 ## Regras de conclusão por pacote
 
-- Não usar `make test-api` na base atual até D01 ser resolvido.
+- `make test-api` prepara e usa somente a base marcada como descartável; D01 foi resolvido na Sprint 37.
 - Testes unitários/integração/E2E executados com ambiente, versão e resultado registrados.
 - Cada correção possui vínculo com o achado e teste de regressão; cada melhoria possui comportamento esperado e medida de sucesso.
 - Não remover dados locais antigos sem migração e opção de recuperação.
 - Nenhum novo fluxo coloca tokens em localStorage nem transforma conteúdo privado em cache público.
-- Estado inicial desta lista permanece “planejado”; caixas serão marcadas somente numa implementação autorizada posteriormente.
+- Caixas concluídas acima possuem implementação e evidência; homologações externas permanecem abertas na matriz final.

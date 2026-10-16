@@ -6,6 +6,7 @@ import { useProgress } from '../api/progress'
 import { useCourseCurriculum } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
 import { lessonProgressKey } from '../features/curriculum/curriculum'
+import { SkillEvidenceMeta } from '../features/skills/SkillEvidenceMeta'
 import {
   canonicalizeLegacyHref,
   courseCompletionPath,
@@ -222,6 +223,7 @@ function TodayPanel({
                 {skill.fragile_topics.length > 0 && (
                   <p>Tópico para reforçar: {skill.fragile_topics.join(', ')}</p>
                 )}
+                <SkillEvidenceMeta skill={skill} />
               </li>
             ))}
           </ul>

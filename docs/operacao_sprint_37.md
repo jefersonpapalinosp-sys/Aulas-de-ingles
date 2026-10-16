@@ -1,13 +1,14 @@
-# Operação local — Sprints 37 a 39
+# Operação local — Sprints 37 a 41
 
 Escopo: desenvolvimento no Mac de Jeferson. A stack aulas-ingles-prod em
 localhost:5181 é **produção local**, não serviço público. Desenvolvimento em
 5180 tem manutenção independente. Nunca executar pytest/E2E nessas bases.
 
-Estado vigente: Sprint 39 técnica reaberta em DEV 5180 e estudo 5181, schema
-`a39d7bc02486`, em 15/10/2026. Aceite físico/política adicional ainda pendentes.
-O registro da Sprint 39G/H está no final. Comandos das seções 37/38/39A–F são históricos;
-não devem ser repetidos como atualização genérica para sprints posteriores.
+Estado vigente: Sprint 40 fechada tecnicamente em branch em 16/10/2026, com head
+`a42c7d1e9f20` aprovado somente no PostgreSQL descartável e no laboratório de
+papéis. Este incremento não inspecionou nem alterou DEV 5180 ou estudo 5181.
+Aceites físicos/pedagógicos e rollout continuam separados. Comandos antigos são
+históricos e não devem ser repetidos como atualização genérica para sprints posteriores.
 
 ## Decisões autorizadas em 13/10/2026
 
@@ -2336,3 +2337,70 @@ use janela operacional compatível com este runbook.
 
 Fechamento automatizado: 1.142 testes backend e 94 testes operacionais aprovados;
 Ruff dos arquivos em escopo, mypy e `alembic check` também passaram.
+
+## Sprint 40C/40D — exclusão, histórico e fechamento técnico em 16/10/2026
+
+### Exclusão da conta
+
+Contrato HTTP:
+
+```text
+DELETE /api/me/account
+202 { operation_key, state, database_deleted=true, audio_files_pending }
+```
+
+O pedido requer sessão, senha atual, UUID e a frase exata de confirmação. Argon2
+roda antes da transação; dentro dela a API usa advisory lock por usuário, bloqueia
+o perfil, revalida o hash, bloqueia as tentativas de fala e registra as chaves
+opacas antes de apagar a conta. Cascades removem sessões e dados relacionais. A
+resposta só ocorre depois do commit e apaga o cookie de refresh.
+
+`account_deletion_job` é um recibo anônimo; `account_deletion_file` é a fila
+temporária. O worker a processa antes das transcrições com `SKIP LOCKED`, unlink
+idempotente, espera exponencial e dez tentativas. `failed` permanece observável no
+heartbeat agregado. Não há e-mail, texto, `user_id` ou caminho completo nesses
+registros. Downgrade é recusado enquanto houver recibos.
+
+No navegador, a limpeza privada é outra ação. Ela remove somente o namespace da
+conta atual e grava tombstone no IndexedDB antes de reescrever fontes legadas. Cache
+editorial público, servidor e outras contas permanecem. A exclusão remota não alega
+apagar downloads, outros dispositivos ou abas inacessíveis.
+
+Política aprovada: [exclusão e backups em DEV](politica_exclusao_e_backups_dev_2026-10-16.md).
+RPO 24 h, RTO 60 min e retenção 7 diários + 4 semanais são metas a validar. Backups
+ficam neste Mac durante desenvolvimento e podem reter a conta até expirar; restore
+fica isolado e nunca é promovido diretamente.
+
+### Histórico e conclusão
+
+`GET /api/me/history/page` pagina apenas metadados dos snapshots da conta, em ordem
+`created_at DESC, id DESC`, cursor opaco e limite 1–100. O JSON pesado só sai em
+`/api/me/history/{kind}/{evidence_id}/content`, sob demanda. A central no Caderno
+abrange exercício, prática, escrita, fala e checkpoint, não depende do catálogo
+publicado e não cria link para aula arquivada. Legado sem snapshot permanece
+indisponível; conteúdo atual nunca o substitui.
+
+A regra de elegibilidade passou a declarar `course-certificate-v1`. O frontend
+explica que a tela calcula o estado atual, não altera histórico, não emite arquivo
+e não redefine os critérios externos da VOA.
+
+### Evidências executadas
+
+- 1.156 testes backend aprovados na segunda suíte completa;
+- a primeira suíte completa encontrou sete falhas de tempo após salto observado de
+  aproximadamente 15 minutos no mesmo teste; os nove casos parametrizados afetados
+  passaram isoladamente e a repetição completa passou sem falhas;
+- 360 testes frontend, ESLint, TypeScript e build de produção aprovados;
+- bundle final de 175,7 KiB gzip, com teto explícito de 178 KiB e limites
+  individuais de 140 KiB JS/15 KiB CSS preservados;
+- 94 testes operacionais puros aprovados;
+- laboratório de papéis real aprovou recusas, DML runtime, worker, API, snapshots,
+  cotas/retenção e dump limitado; containers encerrados, volume sintético preservado;
+- Ruff completo, mypy dos 90 módulos, `alembic check` e head
+  `a42c7d1e9f20` aprovados no banco descartável;
+- OpenAPI e tipos TypeScript foram regenerados; `git diff --check` passou.
+
+Não houve seed, arquivamento, exclusão real, chamada a provedor, alteração de `.env`,
+migration em DEV/estudo, commit, push ou merge. O fechamento é técnico no código e
+nos laboratórios. Homologação pedagógica das rubricas e testes físicos da Sprint 41
+continuam pendentes e não foram marcados como aprovados.

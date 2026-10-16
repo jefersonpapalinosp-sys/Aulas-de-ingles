@@ -25,8 +25,10 @@ from ops.recovery_archive import (
 ROOT = Path(__file__).resolve().parents[1]
 BACKUPS = ROOT / "backups" / "recovery"
 PROJECT = "aulas-ingles-recovery"
+UPGRADE_PROJECT = "aulas-ingles-upgrade42"
 HELPER = "aulas-ingles-recovery-tools:local"
 POSTGRES = "public.ecr.aws/docker/library/postgres:16.15-alpine"
+UPGRADE_FROM = "e41f6c2a8d90"
 CONFIRM_TARGET = "aulas-ingles-recovery/target-db"
 CONFIRM_STUDY_CHECK = "aulas-ingles-recovery/study-check-db"
 CONFIRM_CONCURRENCY_CHECK = "aulas-ingles-recovery/concurrency-check-db"
@@ -34,6 +36,7 @@ CONFIRM_DEV_CHECK = "aulas-ingles-recovery/dev-check-db"
 CONFIRM_ASSIST_CHECK = "aulas-ingles-recovery/assist-check-db"
 CONFIRM_DEV39_CHECK = "aulas-ingles-recovery/dev39-check-db"
 CONFIRM_STUDY39_CHECK = "aulas-ingles-recovery/study39-check-db"
+CONFIRM_UPGRADE42 = "aulas-ingles-upgrade42/target-db"
 
 
 @dataclass(frozen=True)
@@ -63,6 +66,24 @@ RESTORE = Target(
     "aulas_restore",
     f"{PROJECT}_target_db",
     f"{PROJECT}_target_voice",
+    "aulas-ingles:recovery-target:v1",
+)
+UPGRADE_LAB = Target(
+    UPGRADE_PROJECT,
+    "source-db",
+    "aulas_ingles_test",
+    "aulas_test",
+    f"{UPGRADE_PROJECT}_source_db",
+    f"{UPGRADE_PROJECT}_source_voice",
+    "aulas-ingles:disposable-test:v1",
+)
+UPGRADE_RESTORE = Target(
+    UPGRADE_PROJECT,
+    "target-db",
+    "aulas_ingles_restore",
+    "aulas_restore",
+    f"{UPGRADE_PROJECT}_target_db",
+    f"{UPGRADE_PROJECT}_target_voice",
     "aulas-ingles:recovery-target:v1",
 )
 
@@ -130,6 +151,7 @@ DESTINATIONS = {
     CONFIRM_DEV39_CHECK: DEV39_CHECK,
     CONFIRM_STUDY39_CHECK: STUDY39_CHECK,
 }
+UPGRADE_DESTINATIONS = {CONFIRM_UPGRADE42: UPGRADE_RESTORE}
 
 
 def run(args, *, stdin=None, stdout=None, timeout=120, reject_stderr=False):
@@ -150,7 +172,9 @@ def run(args, *, stdin=None, stdout=None, timeout=120, reject_stderr=False):
         return result.stdout or b""
     except (OSError, subprocess.SubprocessError) as exc:
         # Não incluir args/stderr: o ambiente errado poderia devolver dados privados.
-        raise RecoveryError("Comando operacional falhou; nenhum sucesso foi confirmado.") from exc
+        raise RecoveryError(
+            "Comando operacional falhou; nenhum sucesso foi confirmado."
+        ) from exc
 
 
 def docker(*args, **kwargs):
@@ -159,9 +183,13 @@ def docker(*args, **kwargs):
 
 def local_daemon():
     if os.environ.get("DOCKER_HOST"):
-        require(os.environ["DOCKER_HOST"].startswith("unix:///"), "Docker remoto recusado.")
+        require(
+            os.environ["DOCKER_HOST"].startswith("unix:///"), "Docker remoto recusado."
+        )
     endpoint = (
-        docker("context", "inspect", "--format", "{{.Endpoints.docker.Host}}").decode().strip()
+        docker("context", "inspect", "--format", "{{.Endpoints.docker.Host}}")
+        .decode()
+        .strip()
     )
     require(
         endpoint.startswith("unix:///"),
@@ -178,7 +206,9 @@ def validate_volume(value, project, name, disposable):
         "Volume incorreto ou redirecionado.",
     )
     labels = value.get("Labels") or {}
-    require(labels.get("com.docker.compose.project") == project, "Volume de outro projeto.")
+    require(
+        labels.get("com.docker.compose.project") == project, "Volume de outro projeto."
+    )
     if disposable:
         require(
             labels.get("org.aulas.environment") == "disposable-recovery",
@@ -193,7 +223,9 @@ def volume(name, project, disposable=True):
 
 def lab_resources():
     local_daemon()
-    existing = set(docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines())
+    existing = set(
+        docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
+    )
     for name in (
         LAB.db_volume,
         LAB.voice_volume,
@@ -214,6 +246,21 @@ def lab_resources():
     ):
         if name in existing:
             volume(name, PROJECT)
+
+
+def upgrade_lab_resources():
+    local_daemon()
+    existing = set(
+        docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
+    )
+    for name in (
+        UPGRADE_LAB.db_volume,
+        UPGRADE_LAB.voice_volume,
+        UPGRADE_RESTORE.db_volume,
+        UPGRADE_RESTORE.voice_volume,
+    ):
+        if name in existing:
+            volume(name, UPGRADE_PROJECT)
 
 
 def container(project, service):
@@ -245,9 +292,11 @@ def env_of(info):
 
 
 def source_target(source):
-    require(source in {"lab", "dev", "prod"}, "Origem não permitida.")
+    require(source in {"lab", "upgrade-lab", "dev", "prod"}, "Origem não permitida.")
     if source == "lab":
         return LAB
+    if source == "upgrade-lab":
+        return UPGRADE_LAB
     project = "aulas-ingles" if source == "dev" else "aulas-ingles-prod"
     env = env_of(container(project, "db"))
     database, role = env.get("POSTGRES_DB", ""), env.get("POSTGRES_USER", "")
@@ -261,7 +310,9 @@ def source_target(source):
     if api_env.get("DATABASE_PURPOSE") == "runtime":
         role = "aulas_backup"
     require(
-        bool(database) and bool(role) and database not in {"postgres", "template0", "template1"},
+        bool(database)
+        and bool(role)
+        and database not in {"postgres", "template0", "template1"},
         "Banco/usuário da origem não identificados.",
     )
     return Target(
@@ -318,19 +369,25 @@ def check_target(target):
         and volumes[0]["Destination"] == "/var/lib/postgresql/data",
         "Mount de banco inesperado.",
     )
-    require(info["Config"]["Image"] == POSTGRES, "Imagem PostgreSQL fora do contrato 16.15.")
+    require(
+        info["Config"]["Image"] == POSTGRES, "Imagem PostgreSQL fora do contrato 16.15."
+    )
     require(
         set(info["NetworkSettings"]["Networks"]) == {f"{target.project}_default"},
         "Banco conectado a rede inesperada.",
     )
-    if target.project == PROJECT:
+    if target.project in {PROJECT, UPGRADE_PROJECT}:
         require(
             not info["HostConfig"].get("PortBindings"),
             "Laboratório não pode publicar portas.",
         )
         require(len(info["Mounts"]) == 2, "Mount adicional no laboratório.")
         init = next((m for m in info["Mounts"] if m["Type"] == "bind"), {})
-        filename = "test-db-init.sql" if target == LAB else "restore-db-init.sql"
+        filename = (
+            "test-db-init.sql"
+            if target in {LAB, UPGRADE_LAB}
+            else "restore-db-init.sql"
+        )
         require(
             expected_bind_source(init.get("Source"), ROOT / "infra" / filename)
             and init.get("Destination") == "/docker-entrypoint-initdb.d/01-test.sql"
@@ -368,14 +425,16 @@ def check_target(target):
         require(
             identity["marker"] == target.marker
             and not any(
-                identity[k] for k in ("super", "createdb", "createrole", "bypassrls", "replication")
+                identity[k]
+                for k in ("super", "createdb", "createrole", "bypassrls", "replication")
             ),
             "Marcador/papel limitado não confirmado.",
         )
     if target.role == "aulas_backup":
         require(
             not any(
-                identity[k] for k in ("super", "createdb", "createrole", "bypassrls", "replication")
+                identity[k]
+                for k in ("super", "createdb", "createrole", "bypassrls", "replication")
             ),
             "Backup não pode usar privilégio global.",
         )
@@ -398,7 +457,8 @@ def quiet(target):
                 "Aplicação aponta para banco diferente da origem.",
             )
             require(
-                set(info["NetworkSettings"]["Networks"]) == {f"{target.project}_default"},
+                set(info["NetworkSettings"]["Networks"])
+                == {f"{target.project}_default"},
                 "Aplicação conectada a rede inesperada.",
             )
             require(
@@ -429,8 +489,21 @@ SELECT json_build_object(
    'lessons',(SELECT count(*) FROM public.lesson),
    'speaking',(SELECT count(*) FROM public.speaking_attempt),
    'writing_feedback',(SELECT count(*) FROM public.writing_feedback),
+   'writing_drafts',(SELECT count(*) FROM public.writing_draft),
+   'writing_revisions',(SELECT count(*) FROM public.writing_revision),
    'attempts',(SELECT count(*) FROM public.exercise_attempt),
-   'review_items',(SELECT count(*) FROM public.review_item)),
+   'practice_sessions',(SELECT count(*) FROM public.practice_session),
+   'practice_items',(SELECT count(*) FROM public.practice_session_item),
+   'review_items',(SELECT count(*) FROM public.review_item),
+   'study_sessions',(SELECT count(*) FROM public.study_session_progress),
+   'step_progress',(SELECT count(*) FROM public.step_progress),
+   'activity_sessions',(SELECT count(*) FROM public.study_activity_session),
+   'activity_events',(SELECT count(*) FROM public.study_activity_event),
+   'active_intervals',(SELECT count(*) FROM public.study_active_interval),
+   'media_progress',(SELECT count(*) FROM public.media_progress),
+   'lesson_progress',(SELECT count(*) FROM public.lesson_progress),
+   'notebook_entries',(SELECT count(*) FROM public.notebook_entry),
+   'transcription_jobs',(SELECT count(*) FROM public.transcription_job)),
  'audio',(SELECT coalesce(json_agg(json_build_object(
    'id',id,'key',storage_key,'size',file_size,'status',status)
    ORDER BY id),'[]'::json) FROM public.speaking_attempt))
@@ -440,7 +513,9 @@ SELECT json_build_object(
 def voice(target, action, *, stdin=None, stdout=None):
     require(action in {"export", "import"}, "Ação de voz inválida.")
     require(
-        action != "import" or target in DESTINATIONS.values(),
+        action != "import"
+        or target in DESTINATIONS.values()
+        or target in UPGRADE_DESTINATIONS.values(),
         "Escrita de voz só no destino descartável.",
     )
     args = [
@@ -598,10 +673,10 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
 
 def restore(path, confirm):
     require(
-        confirm in DESTINATIONS,
+        confirm in DESTINATIONS or confirm in UPGRADE_DESTINATIONS,
         "Confirme explicitamente um destino isolado permitido.",
     )
-    destination = DESTINATIONS[confirm]
+    destination = (DESTINATIONS | UPGRADE_DESTINATIONS)[confirm]
     manifest = verify_bundle(path)  # Antes de qualquer comando Docker ou mutação.
     check_target(destination)
     started = time.monotonic()
@@ -704,19 +779,79 @@ def _prepare_empty_lab():
     docker(*args, "python", "/tools/recovery_fixture.py", timeout=60)
 
 
+def upgrade_lab_prepare():
+    check_target(UPGRADE_LAB)
+    with lease("upgrade42-source"):
+        quiet(UPGRADE_LAB)
+        args = [
+            "run",
+            "--rm",
+            "--network",
+            f"{UPGRADE_PROJECT}_default",
+            "-e",
+            "APP_ENV=test",
+            "-e",
+            "DATABASE_URL=postgresql+asyncpg://aulas_test:aulas_test_only@source-db:5432/aulas_ingles_test",
+            "-e",
+            "SPEAKING_STORAGE_DIR=/app/data/speaking",
+            "--mount",
+            f"type=volume,src={UPGRADE_LAB.voice_volume},dst=/app/data/speaking",
+            "--mount",
+            f"type=bind,src={ROOT / 'ops'},dst=/tools,readonly",
+            HELPER,
+        ]
+        # Nasce diretamente na revisão anterior: nenhum downgrade ou dado
+        # removido é usado para fabricar o ensaio. Uma execução interrompida
+        # pode ser retomada apenas no estado intermediário exato e sem dados
+        # pessoais/editoriais; qualquer outro estado é preservado e recusado.
+        docker(*args, "python", "-m", "app.testing", "check", timeout=60)
+        if query(UPGRADE_LAB, EMPTY_SQL) == 0:
+            docker(*args, "alembic", "upgrade", UPGRADE_FROM, timeout=180)
+        else:
+            state = query(
+                UPGRADE_LAB,
+                "SELECT json_build_object("
+                "'revision',(SELECT json_agg(version_num ORDER BY version_num) "
+                "FROM public.alembic_version),"
+                "'users',(SELECT count(*) FROM public.app_user),"
+                "'lessons',(SELECT count(*) FROM public.lesson))",
+            )
+            require(
+                state == {"revision": [UPGRADE_FROM], "users": 0, "lessons": 0},
+                "Origem de upgrade não está no ponto intermediário retomável.",
+            )
+        with tempfile.TemporaryDirectory(prefix="aulas-upgrade42-source-") as temporary:
+            current_voice = Path(temporary) / "voice.tar"
+            with current_voice.open("xb") as stream:
+                voice(UPGRADE_LAB, "export", stdout=stream)
+            require(
+                not audio_inventory(current_voice),
+                "Origem de voz já contém dados; preparação recusada.",
+            )
+        docker(*args, "python", "/tools/recovery_fixture.py", timeout=60)
+
+
 def main(argv=None):
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     capture = commands.add_parser("backup")
-    capture.add_argument("--source", choices=("lab", "dev", "prod"), required=True)
+    capture.add_argument(
+        "--source", choices=("lab", "upgrade-lab", "dev", "prod"), required=True
+    )
     verify = commands.add_parser("verify")
     verify.add_argument("bundle", type=Path)
     load = commands.add_parser("restore")
     load.add_argument("bundle", type=Path)
-    load.add_argument("--confirm", required=True, choices=tuple(DESTINATIONS))
+    load.add_argument(
+        "--confirm",
+        required=True,
+        choices=tuple(DESTINATIONS | UPGRADE_DESTINATIONS),
+    )
     commands.add_parser("lab-resources")
     commands.add_parser("lab-prepare")
+    commands.add_parser("upgrade-lab-resources")
+    commands.add_parser("upgrade-lab-prepare")
     args = parser.parse_args(argv)
     try:
         if args.command == "backup":
@@ -730,13 +865,21 @@ def main(argv=None):
                 "Integridade do pacote e referências de voz verificadas; isto não executa restore."
             )
         elif args.command == "restore":
-            print(f"Restore isolado verificado. Recibo: {restore(args.bundle, args.confirm)}")
+            print(
+                f"Restore isolado verificado. Recibo: {restore(args.bundle, args.confirm)}"
+            )
         elif args.command == "lab-resources":
             lab_resources()
             print("Recursos locais de recuperação verificados.")
         elif args.command == "lab-prepare":
             lab_prepare()
             print("Origem sintética preparada; nenhum ambiente de estudo foi alterado.")
+        elif args.command == "upgrade-lab-resources":
+            upgrade_lab_resources()
+            print("Recursos isolados do ensaio de upgrade verificados.")
+        elif args.command == "upgrade-lab-prepare":
+            upgrade_lab_prepare()
+            print("Origem sintética criada diretamente na revisão anterior.")
     except RecoveryError as exc:
         print(
             f"Operação recusada: {exc} Parciais são preservados; não use restore legado.",

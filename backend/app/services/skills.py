@@ -23,7 +23,7 @@ from app.db.models import (
     WritingFeedbackRecord,
     WritingPrompt,
 )
-from app.schemas.dashboard import SkillSummaryOut
+from app.schemas.dashboard import SkillEvidenceSourceOut, SkillSummaryOut
 
 SKILL_LABELS = {
     "grammar": "Gramática",
@@ -96,12 +96,34 @@ async def skill_summaries(
                 SkillEvidence.skill,
                 func.count(SkillEvidence.id),
                 func.avg(SkillEvidence.score),
+                func.min(SkillEvidence.occurred_at),
+                func.max(SkillEvidence.occurred_at),
             )
             .where(SkillEvidence.user_id == user_id, scope_filter)
             .group_by(SkillEvidence.skill)
         )
     ).all()
-    by_skill = {skill: (int(samples), float(score)) for skill, samples, score in aggregates}
+    by_skill = {
+        skill: (int(samples), float(score), period_start, period_end)
+        for skill, samples, score, period_start, period_end in aggregates
+    }
+    source_rows = (
+        await session.execute(
+            select(
+                SkillEvidence.skill,
+                SkillEvidence.source_type,
+                func.count(SkillEvidence.id),
+            )
+            .where(SkillEvidence.user_id == user_id, scope_filter)
+            .group_by(SkillEvidence.skill, SkillEvidence.source_type)
+            .order_by(SkillEvidence.skill, SkillEvidence.source_type)
+        )
+    ).all()
+    sources_by_skill: dict[str, list[SkillEvidenceSourceOut]] = {}
+    for skill, source_type, samples in source_rows:
+        sources_by_skill.setdefault(skill, []).append(
+            SkillEvidenceSourceOut(source_type=source_type, samples=int(samples))
+        )
 
     topic_stmt = (
         select(
@@ -134,7 +156,7 @@ async def skill_summaries(
 
     result: list[SkillSummaryOut] = []
     for skill, label in SKILL_LABELS.items():
-        samples, score = by_skill.get(skill, (0, 0.0))
+        samples, score, period_start, period_end = by_skill.get(skill, (0, 0.0, None, None))
         percentage = round(score * 100) if samples >= 3 else None
         state: Literal["insufficient", "developing", "steady", "strong"]
         if percentage is None:
@@ -150,6 +172,9 @@ async def skill_summaries(
                 skill=skill,
                 label=label,
                 samples=samples,
+                period_start=period_start,
+                period_end=period_end,
+                sources=sources_by_skill.get(skill, []),
                 score_percent=percentage,
                 status=state,
                 fragile_topics=fragile.get(skill, [])[:2],

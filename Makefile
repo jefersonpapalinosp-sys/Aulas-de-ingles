@@ -5,6 +5,7 @@ COMPOSE := docker compose --env-file .env -f infra/compose.yml
 TEST_COMPOSE := docker compose -f infra/compose.test.yml
 E2E_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml
 RECOVERY_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-recovery -f infra/compose.recovery.yml
+UPGRADE_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-upgrade42 -f infra/compose.upgrade.yml
 OPS := uv run --project backend python
 ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -f infra/compose.roles.yml
 .DEFAULT_GOAL := help
@@ -12,9 +13,10 @@ ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -
 .PHONY: help up down logs ps reset api web test test-api test-web test-e2e lint fmt health \
         migrate migration seed seed-plan editorial-audit editorial-reorder-plan openapi assist-gate assist-worker prod-up prod-down prod-logs \
         prod-seed backup restore cov test-db-up test-db-down test-api-prepare e2e-up e2e-down e2e-check \
-        recovery-lab-up recovery-lab-prepare recovery-lab-down backup-verify test-recovery \
-        test-recovery-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down \
-        notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark
+        recovery-lab-up recovery-lab-prepare recovery-lab-down upgrade-lab-up upgrade-lab-prepare upgrade-lab-down backup-verify test-recovery \
+        test-recovery-integration test-upgrade-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down \
+        notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark \
+        operations-check cue-audit test-failure-rehearsal
 
 help: ## Lista os comandos
 	@grep -E '^[a-z0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -46,6 +48,20 @@ ps: ## Estado dos containers
 
 health: ## Bate no /api/health e mostra a resposta
 	@curl -s -o /dev/stdout -w "\nHTTP %{http_code}\n" http://localhost:$${API_HOST_PORT:-8010}/api/health
+
+operations-check: ## Avalia readiness/alertas; lê OPERATIONS_TOKEN sem imprimi-lo
+	$(OPS) -m ops.observability_check --base-url "$${OPERATIONS_BASE_URL:-http://127.0.0.1:8011}"
+
+cue-audit: ## Inventaria cada cue/aula/versão e seu aceite auditivo humano
+	$(OPS) -m ops.cue_audit_inventory --summary
+
+test-failure-rehearsal: test-api-prepare ## Ensaia falhas controladas de banco, provedor e retomada do worker
+	cd backend && uv run pytest -q \
+		tests/test_maintenance.py::test_worker_recovers_database_failure_and_remains_cancellable \
+		tests/test_writing.py::test_feedback_assistido_e_opcional_avaliavel_e_tem_fallback \
+		tests/test_speaking.py::test_falha_do_provedor_mantem_audio_e_autoavaliacao \
+		tests/test_speaking.py::test_worker_repete_com_backoff_e_chave_idempotente \
+		tests/test_speaking.py::test_worker_retoma_job_interrompido_apos_timeout
 
 api: .env ## Roda a API no host (contra o Postgres do compose)
 	cd backend && DATABASE_URL=postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles \
@@ -150,16 +166,9 @@ PROD := docker compose --env-file .env.prod -f infra/compose.prod.yml $(PROD_ROL
 	@exit 1
 
 prod-up: .env.prod ## Sobe o compose de produção (nginx + uvicorn + Postgres)
-ifneq ($(PROD_ROLES),)
-	@echo "Papéis separados: deploy exige backup/ensaio/migration; siga docs/operacao_sprint_37.md." >&2
+	@echo "Fluxo legado bloqueado: ele iniciava código antes de migration/seed." >&2
+	@echo "Use o checklist versionado em docs/runbook_sprint_42.md." >&2
 	@exit 1
-else
-	$(PROD) up -d --build
-	$(PROD) exec -T api alembic upgrade head
-	$(PROD) exec -T api python -m app.cli seed
-endif
-	@echo ""
-	@echo "  web  http://localhost:$$(grep WEB_HOST_PORT .env.prod | cut -d= -f2)"
 
 prod-down: ## Derruba o compose de produção (mantém o volume)
 	$(PROD) down
@@ -168,12 +177,9 @@ prod-logs: ## Logs de produção (JSON, uma linha por requisição)
 	$(PROD) logs -f api
 
 prod-seed: ## Recarrega o seed em produção
-ifneq ($(PROD_ROLES),)
-	@echo "Seed completo exige manutenção explícita com o migrador; consulte o README." >&2
+	@echo "Seed completo genérico bloqueado; use plano editorial auditado por release." >&2
+	@echo "Consulte docs/runbook_sprint_42.md." >&2
 	@exit 1
-else
-	$(PROD) exec -T api python -m app.cli seed
-endif
 
 # ---------- backup ----------
 
@@ -190,6 +196,20 @@ recovery-lab-down: ## Para só o laboratório de recuperação; preserva todos o
 	$(OPS) -m ops.recovery lab-resources
 	$(RECOVERY_COMPOSE) down
 
+upgrade-lab-up: ## Sobe laboratório DB-42 novo, interno e separado dos volumes anteriores
+	$(OPS) -m ops.recovery upgrade-lab-resources
+	docker build -f backend/Dockerfile.prod -t aulas-ingles-recovery-tools:local .
+	$(OPS) -m ops.rollback_image
+	$(UPGRADE_COMPOSE) up -d --wait --wait-timeout 120
+	$(OPS) -m ops.recovery upgrade-lab-resources
+
+upgrade-lab-prepare: ## Cria origem DB-42 diretamente na revisão anterior com dados sintéticos
+	$(OPS) -m ops.recovery upgrade-lab-prepare
+
+upgrade-lab-down: ## Para apenas o laboratório DB-42; preserva volumes e recibos
+	$(OPS) -m ops.recovery upgrade-lab-resources
+	$(UPGRADE_COMPOSE) down
+
 backup: ## Banco + voz: make backup source=lab|dev|prod (origem precisa estar em manutenção)
 	$(OPS) -m ops.recovery backup --source "$(source)"
 
@@ -204,6 +224,9 @@ test-recovery: ## Testes operacionais puros, sem Docker ou banco
 
 test-recovery-integration: ## Ensaia 2 backups e 1 restore; exige laboratório preparado e destino vazio
 	$(OPS) -m ops.recovery_smoke
+
+test-upgrade-integration: ## Faz backup/restore/upgrade da revisão anterior e prova preservação
+	$(OPS) -m ops.upgrade_smoke
 
 roles-lab-up: ## Sobe somente o banco sintético para permissões, sem portas
 	$(OPS) -m ops.roles resources

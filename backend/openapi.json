@@ -1,6 +1,69 @@
 {
     "components": {
         "schemas": {
+            "AccountDeletionIn": {
+                "properties": {
+                    "confirmation": {
+                        "const": "EXCLUIR MINHA CONTA",
+                        "title": "Confirmation",
+                        "type": "string"
+                    },
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "password": {
+                        "format": "password",
+                        "maxLength": 128,
+                        "minLength": 8,
+                        "title": "Password",
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "operation_key",
+                    "password",
+                    "confirmation"
+                ],
+                "title": "AccountDeletionIn",
+                "type": "object"
+            },
+            "AccountDeletionOut": {
+                "properties": {
+                    "audio_files_pending": {
+                        "minimum": 0.0,
+                        "title": "Audio Files Pending",
+                        "type": "integer"
+                    },
+                    "database_deleted": {
+                        "const": true,
+                        "default": true,
+                        "title": "Database Deleted",
+                        "type": "boolean"
+                    },
+                    "operation_key": {
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "state": {
+                        "enum": [
+                            "cleanup_pending",
+                            "completed"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "operation_key",
+                    "state",
+                    "audio_files_pending"
+                ],
+                "title": "AccountDeletionOut",
+                "type": "object"
+            },
             "ActivityEventIn": {
                 "properties": {
                     "duration_ms": {
@@ -663,6 +726,12 @@
                     "required_lessons": {
                         "title": "Required Lessons",
                         "type": "integer"
+                    },
+                    "rule_version": {
+                        "const": "course-certificate-v1",
+                        "default": "course-certificate-v1",
+                        "title": "Rule Version",
+                        "type": "string"
                     },
                     "scope_label": {
                         "title": "Scope Label",
@@ -1513,6 +1582,78 @@
                 "title": "CourseUnitOut",
                 "type": "object"
             },
+            "DatabaseMetricsOut": {
+                "properties": {
+                    "connections": {
+                        "title": "Connections",
+                        "type": "integer"
+                    },
+                    "largest_relations": {
+                        "items": {
+                            "$ref": "#/components/schemas/RelationMetricsOut"
+                        },
+                        "title": "Largest Relations",
+                        "type": "array"
+                    },
+                    "pool_checked_out": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pool Checked Out"
+                    },
+                    "pool_overflow": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pool Overflow"
+                    },
+                    "pool_size": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pool Size"
+                    },
+                    "public_relations_bytes": {
+                        "title": "Public Relations Bytes",
+                        "type": "integer"
+                    },
+                    "size_bytes": {
+                        "title": "Size Bytes",
+                        "type": "integer"
+                    },
+                    "waiting_locks": {
+                        "title": "Waiting Locks",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "size_bytes",
+                    "public_relations_bytes",
+                    "connections",
+                    "waiting_locks",
+                    "pool_size",
+                    "pool_checked_out",
+                    "pool_overflow",
+                    "largest_relations"
+                ],
+                "title": "DatabaseMetricsOut",
+                "type": "object"
+            },
             "DeckSummaryOut": {
                 "properties": {
                     "added": {
@@ -1547,6 +1688,24 @@
                     "total_cards"
                 ],
                 "title": "DeckSummaryOut",
+                "type": "object"
+            },
+            "DeletionMetricsOut": {
+                "properties": {
+                    "failed": {
+                        "title": "Failed",
+                        "type": "integer"
+                    },
+                    "pending": {
+                        "title": "Pending",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "pending",
+                    "failed"
+                ],
+                "title": "DeletionMetricsOut",
                 "type": "object"
             },
             "ExerciseHintOut": {
@@ -2085,7 +2244,10 @@
                     "code": {
                         "anyOf": [
                             {
-                                "const": "service_unavailable",
+                                "enum": [
+                                    "service_unavailable",
+                                    "schema_incompatible"
+                                ],
                                 "type": "string"
                             },
                             {
@@ -2101,6 +2263,29 @@
                     "env": {
                         "title": "Env",
                         "type": "string"
+                    },
+                    "schema": {
+                        "enum": [
+                            "compatible",
+                            "incompatible",
+                            "unknown"
+                        ],
+                        "title": "Schema",
+                        "type": "string"
+                    },
+                    "schema_current": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Schema Current",
+                        "type": "array"
+                    },
+                    "schema_required": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Schema Required",
+                        "type": "array"
                     },
                     "status": {
                         "title": "Status",
@@ -2121,6 +2306,9 @@
                 "required": [
                     "status",
                     "db",
+                    "schema",
+                    "schema_current",
+                    "schema_required",
                     "env"
                 ],
                 "title": "HealthOut",
@@ -2211,6 +2399,70 @@
                 "title": "HistoricalContentOut",
                 "type": "object"
             },
+            "HistoricalEvidencePageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/HistoricalEvidenceSummaryOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "HistoricalEvidencePageOut",
+                "type": "object"
+            },
+            "HistoricalEvidenceSummaryOut": {
+                "properties": {
+                    "captured_at": {
+                        "format": "date-time",
+                        "title": "Captured At",
+                        "type": "string"
+                    },
+                    "evidence_id": {
+                        "title": "Evidence Id",
+                        "type": "integer"
+                    },
+                    "evidence_kind": {
+                        "enum": [
+                            "exercise",
+                            "practice",
+                            "writing",
+                            "speaking",
+                            "checkpoint"
+                        ],
+                        "title": "Evidence Kind",
+                        "type": "string"
+                    },
+                    "schema_version": {
+                        "title": "Schema Version",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "evidence_kind",
+                    "evidence_id",
+                    "captured_at",
+                    "schema_version"
+                ],
+                "title": "HistoricalEvidenceSummaryOut",
+                "type": "object"
+            },
             "HumanRatingIn": {
                 "properties": {
                     "rating": {
@@ -2264,6 +2516,29 @@
                     "href"
                 ],
                 "title": "IncompleteUnitOut",
+                "type": "object"
+            },
+            "LegacyReviewMetricsOut": {
+                "properties": {
+                    "cards": {
+                        "title": "Cards",
+                        "type": "integer"
+                    },
+                    "mismatched_links": {
+                        "title": "Mismatched Links",
+                        "type": "integer"
+                    },
+                    "unlinked_cards": {
+                        "title": "Unlinked Cards",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "cards",
+                    "unlinked_cards",
+                    "mismatched_links"
+                ],
+                "title": "LegacyReviewMetricsOut",
                 "type": "object"
             },
             "LessonDetailOut": {
@@ -2778,6 +3053,53 @@
                 "title": "LoginIn",
                 "type": "object"
             },
+            "MediaMetricsOut": {
+                "properties": {
+                    "filesystem_available": {
+                        "title": "Filesystem Available",
+                        "type": "boolean"
+                    },
+                    "filesystem_capacity_bytes": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Filesystem Capacity Bytes"
+                    },
+                    "filesystem_free_bytes": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Filesystem Free Bytes"
+                    },
+                    "referenced_bytes": {
+                        "title": "Referenced Bytes",
+                        "type": "integer"
+                    },
+                    "referenced_files": {
+                        "title": "Referenced Files",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "referenced_files",
+                    "referenced_bytes",
+                    "filesystem_available",
+                    "filesystem_capacity_bytes",
+                    "filesystem_free_bytes"
+                ],
+                "title": "MediaMetricsOut",
+                "type": "object"
+            },
             "MediaPositionIn": {
                 "properties": {
                     "changed_at": {
@@ -3105,6 +3427,44 @@
                     "next_cursor"
                 ],
                 "title": "NotebookPageOut",
+                "type": "object"
+            },
+            "OperationsMetricsOut": {
+                "properties": {
+                    "account_deletions": {
+                        "$ref": "#/components/schemas/DeletionMetricsOut"
+                    },
+                    "database": {
+                        "$ref": "#/components/schemas/DatabaseMetricsOut"
+                    },
+                    "legacy_review": {
+                        "$ref": "#/components/schemas/LegacyReviewMetricsOut"
+                    },
+                    "media": {
+                        "$ref": "#/components/schemas/MediaMetricsOut"
+                    },
+                    "requests": {
+                        "$ref": "#/components/schemas/RequestMetricsOut"
+                    },
+                    "sampled_at": {
+                        "format": "date-time",
+                        "title": "Sampled At",
+                        "type": "string"
+                    },
+                    "transcription_queue": {
+                        "$ref": "#/components/schemas/QueueMetricsOut"
+                    }
+                },
+                "required": [
+                    "sampled_at",
+                    "requests",
+                    "database",
+                    "transcription_queue",
+                    "account_deletions",
+                    "legacy_review",
+                    "media"
+                ],
+                "title": "OperationsMetricsOut",
                 "type": "object"
             },
             "PendingCheckpointOut": {
@@ -4017,6 +4377,116 @@
                 "title": "PronunciationNoteOut",
                 "type": "object"
             },
+            "QueueMetricsOut": {
+                "properties": {
+                    "expired": {
+                        "title": "Expired",
+                        "type": "integer"
+                    },
+                    "failed": {
+                        "title": "Failed",
+                        "type": "integer"
+                    },
+                    "maintenance_age_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Maintenance Age Seconds"
+                    },
+                    "maintenance_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Maintenance At"
+                    },
+                    "maintenance_counts": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": {
+                                    "type": "integer"
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Maintenance Counts"
+                    },
+                    "oldest_queued_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Oldest Queued Seconds"
+                    },
+                    "processing": {
+                        "title": "Processing",
+                        "type": "integer"
+                    },
+                    "queued": {
+                        "title": "Queued",
+                        "type": "integer"
+                    },
+                    "retry_events": {
+                        "title": "Retry Events",
+                        "type": "integer"
+                    },
+                    "worker_age_seconds": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Worker Age Seconds"
+                    },
+                    "worker_seen_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Worker Seen At"
+                    }
+                },
+                "required": [
+                    "queued",
+                    "processing",
+                    "failed",
+                    "retry_events",
+                    "expired",
+                    "oldest_queued_seconds",
+                    "worker_seen_at",
+                    "worker_age_seconds",
+                    "maintenance_at",
+                    "maintenance_age_seconds",
+                    "maintenance_counts"
+                ],
+                "title": "QueueMetricsOut",
+                "type": "object"
+            },
             "RecentSessionOut": {
                 "properties": {
                     "completed_steps": {
@@ -4157,6 +4627,70 @@
                 "title": "RegistroIn",
                 "type": "object"
             },
+            "RelationMetricsOut": {
+                "properties": {
+                    "relation": {
+                        "title": "Relation",
+                        "type": "string"
+                    },
+                    "total_bytes": {
+                        "title": "Total Bytes",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "relation",
+                    "total_bytes"
+                ],
+                "title": "RelationMetricsOut",
+                "type": "object"
+            },
+            "RequestMetricsOut": {
+                "properties": {
+                    "duration_ms_max": {
+                        "title": "Duration Ms Max",
+                        "type": "number"
+                    },
+                    "duration_ms_sum": {
+                        "title": "Duration Ms Sum",
+                        "type": "number"
+                    },
+                    "latency_buckets_ms": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "title": "Latency Buckets Ms",
+                        "type": "object"
+                    },
+                    "process_uptime_seconds": {
+                        "title": "Process Uptime Seconds",
+                        "type": "integer"
+                    },
+                    "requests_total": {
+                        "title": "Requests Total",
+                        "type": "integer"
+                    },
+                    "responses_5xx_total": {
+                        "title": "Responses 5Xx Total",
+                        "type": "integer"
+                    },
+                    "scope": {
+                        "default": "process",
+                        "title": "Scope",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "process_uptime_seconds",
+                    "requests_total",
+                    "responses_5xx_total",
+                    "duration_ms_sum",
+                    "duration_ms_max",
+                    "latency_buckets_ms"
+                ],
+                "title": "RequestMetricsOut",
+                "type": "object"
+            },
             "RevealAnswerOut": {
                 "description": "Só sai quando o usuário pede explicitamente para ver a resposta.",
                 "properties": {
@@ -4224,6 +4758,24 @@
                 "title": "ReviewItemStatusIn",
                 "type": "object"
             },
+            "SkillEvidenceSourceOut": {
+                "properties": {
+                    "samples": {
+                        "title": "Samples",
+                        "type": "integer"
+                    },
+                    "source_type": {
+                        "title": "Source Type",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "source_type",
+                    "samples"
+                ],
+                "title": "SkillEvidenceSourceOut",
+                "type": "object"
+            },
             "SkillSummaryOut": {
                 "properties": {
                     "fragile_topics": {
@@ -4236,6 +4788,35 @@
                     "label": {
                         "title": "Label",
                         "type": "string"
+                    },
+                    "minimum_samples": {
+                        "default": 3,
+                        "title": "Minimum Samples",
+                        "type": "integer"
+                    },
+                    "period_end": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Period End"
+                    },
+                    "period_start": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Period Start"
                     },
                     "samples": {
                         "title": "Samples",
@@ -4256,6 +4837,13 @@
                         "title": "Skill",
                         "type": "string"
                     },
+                    "sources": {
+                        "items": {
+                            "$ref": "#/components/schemas/SkillEvidenceSourceOut"
+                        },
+                        "title": "Sources",
+                        "type": "array"
+                    },
                     "status": {
                         "enum": [
                             "insufficient",
@@ -4271,6 +4859,9 @@
                     "skill",
                     "label",
                     "samples",
+                    "period_start",
+                    "period_end",
+                    "sources",
                     "score_percent",
                     "status",
                     "fragile_topics"
@@ -5961,6 +6552,12 @@
                 ],
                 "title": "WritingRevisionPageOut",
                 "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "HTTPBearer": {
+                "scheme": "bearer",
+                "type": "http"
             }
         }
     },
@@ -7786,7 +8383,7 @@
         },
         "/api/health": {
             "get": {
-                "description": "Readiness.\n\nAbre uma conexão de verdade e pergunta a versão ao Postgres. Se o banco\nnão responder, devolve 503 — é isso que faz o healthcheck valer alguma coisa.",
+                "description": "Readiness.\n\nAbre uma conexão de verdade e exige que a revisão aplicada seja exatamente\no conjunto de heads embarcado. Banco acessível com código/schema divergentes\ncontinua indisponível para tráfego.",
                 "operationId": "health_api_health_get",
                 "responses": {
                     "200": {
@@ -8325,6 +8922,77 @@
                 ]
             }
         },
+        "/api/me/account": {
+            "delete": {
+                "operationId": "excluir_conta_api_me_account_delete",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AccountDeletionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountDeletionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Excluir Conta",
+                "tags": [
+                    "me"
+                ]
+            }
+        },
         "/api/me/activity/events": {
             "post": {
                 "operationId": "record_event_api_me_activity_events_post",
@@ -8515,6 +9183,98 @@
                 "summary": "Exportar Dados",
                 "tags": [
                     "me"
+                ]
+            }
+        },
+        "/api/me/history/page": {
+            "get": {
+                "operationId": "historical_evidence_page_api_me_history_page_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HistoricalEvidencePageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Historical Evidence Page",
+                "tags": [
+                    "history"
                 ]
             }
         },
@@ -9766,6 +10526,63 @@
                 "summary": "Salvar Posicao",
                 "tags": [
                     "media"
+                ]
+            }
+        },
+        "/api/operations/metrics": {
+            "get": {
+                "description": "Snapshot de cardinalidade fixa; nunca retorna texto, e-mail, token ou áudio.",
+                "operationId": "metrics_api_operations_metrics_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperationsMetricsOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "summary": "Metrics",
+                "tags": [
+                    "operations"
                 ]
             }
         },

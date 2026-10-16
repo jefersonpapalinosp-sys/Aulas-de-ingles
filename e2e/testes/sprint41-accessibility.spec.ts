@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 
 const PASSWORD = 'senha-bem-grande'
 
 async function register(page: Page): Promise<void> {
-  const email = `sprint41-${Date.now()}-${Math.random()}@example.invalid`
+  const email = `sprint41-${randomUUID()}@example.com`
   await page.goto('/')
   await page.getByRole('button', { name: 'Ainda não tenho conta' }).click()
   await page.getByLabel('Nome').fill('Teste Sprint 41')

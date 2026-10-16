@@ -15,6 +15,12 @@ export function clearVoiceDraft(key: string, expected?: VoiceDraft) {
   timer = null
 }
 
+export function clearVoiceDraftForUser(userId: number): boolean {
+  if (!hasVoiceDraft(userId)) return false
+  clearVoiceDraft(draft!.key)
+  return true
+}
+
 export function retainVoiceDraft(value: VoiceDraft) {
   if (draft) clearVoiceDraft(draft.key)
   draft = value

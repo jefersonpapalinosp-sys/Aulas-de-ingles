@@ -231,6 +231,8 @@ describe('PracticeRunner', () => {
     expect(screen.getByRole('heading', { name: 'Escolha como praticar' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Prática guiada/ })).toBeChecked()
     expect(screen.getByRole('radio', { name: /Repetir meus erros/ })).toBeDisabled()
+    expect(screen.getByText(/correção objetiva compara sua resposta com o gabarito/)).toBeInTheDocument()
+    expect(screen.getByText(/Orçamento sugerido: 10 min; cerca de 2 min por item/)).toBeInTheDocument()
     expect(screen.getByText('2 de 2 atividades disponíveis neste recorte.')).toBeInTheDocument()
 
     await user.selectOptions(screen.getByLabelText('Objetivo'), 'recognize')
@@ -272,6 +274,7 @@ describe('PracticeRunner', () => {
     const prompt = await screen.findByRole('heading', { name: /Choose the correct comparative/ })
     await waitFor(() => expect(prompt).toHaveFocus())
     expect(screen.getByText('Questão 2 de 2')).toBeInTheDocument()
+    expect(screen.getByText(/orçamento sugerido desta sessão: 4 min/)).toBeInTheDocument()
   })
 
   it('preserva a resposta digitada quando o refetch registra uma dica aberta', async () => {

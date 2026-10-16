@@ -83,6 +83,10 @@ function mockQueries(
   speakingEntries: Record<string, unknown>[] = [],
   nextSpeakingCursor: string | null = null,
   nextSpeakingEntries: Record<string, unknown>[] = [],
+  historicalEntries: Record<string, unknown>[] = [],
+  nextHistoricalCursor: string | null = null,
+  nextHistoricalEntries: Record<string, unknown>[] = [],
+  historicalContent: Record<string, unknown> | null = null,
 ) {
   clientMocks.GET.mockImplementation(async (path, options) => {
     if (path === '/api/me/notebook/page') {
@@ -122,6 +126,14 @@ function mockQueries(
           next_cursor: nextWritingCursor,
         },
       }
+    }
+    if (path === '/api/me/history/page') {
+      return options?.params?.query?.cursor
+        ? { data: { items: nextHistoricalEntries, next_cursor: null } }
+        : { data: { items: historicalEntries, next_cursor: nextHistoricalCursor } }
+    }
+    if (path === '/api/me/history/{kind}/{evidence_id}/content') {
+      return { data: historicalContent ?? undefined }
     }
     return { data: undefined }
   })
@@ -350,6 +362,45 @@ describe('NotebookPage', () => {
     await user.click(screen.getAllByRole('button', { name: 'Excluir' })[1]!)
     expect(screen.queryByText('This land is my land.')).not.toBeInTheDocument()
     expect(screen.getByText('This land is your land.')).toBeVisible()
+  })
+
+  it('consulta o conteúdo realmente capturado sem apontar para a aula atual', async () => {
+    const user = userEvent.setup()
+    mockCurriculum()
+    mockQueries(
+      [], [], null, [], null, [], [], null, [],
+      [{
+        evidence_kind: 'exercise', evidence_id: 91,
+        captured_at: '2026-10-15T12:00:00Z', schema_version: '1.0',
+      }],
+      null,
+      [],
+      {
+        evidence_kind: 'exercise', evidence_id: 91, status: 'available',
+        schema_version: '1.0', captured_at: '2026-10-15T12:00:00Z',
+        content_sha256: 'synthetic',
+        content: {
+          prompt: 'Which train is faster?', lesson_version: 3,
+          algorithm_version: 'answer-comparison-40B2-v1',
+          result: { answer: 'The red train.', correct: true },
+        },
+        note: 'Conteúdo capturado com o registro.',
+      },
+    )
+    renderNotebook()
+
+    const summary = await screen.findByText('Consultar conteúdo de exercício')
+    expect(screen.queryByText('Which train is faster?')).not.toBeInTheDocument()
+    await user.click(summary)
+
+    expect(await screen.findByText('Which train is faster?')).toBeVisible()
+    expect(screen.getByText('The red train.')).toBeVisible()
+    expect(screen.getByText('answer-comparison-40B2-v1')).toBeVisible()
+    expect(screen.queryByRole('link', { name: /aula atual/i })).not.toBeInTheDocument()
+    expect(clientMocks.GET).toHaveBeenCalledWith(
+      '/api/me/history/{kind}/{evidence_id}/content',
+      { params: { path: { kind: 'exercise', evidence_id: 91 } } },
+    )
   })
 
   it('baixa a exportação JSON do aluno', async () => {

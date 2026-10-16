@@ -18,6 +18,8 @@ from app.db.models import (
 from app.db.session import get_session
 from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
 from app.schemas.notebook import (
+    AccountDeletionIn,
+    AccountDeletionOut,
     NotebookEntryIn,
     NotebookEntryOut,
     NotebookEntryUpdate,
@@ -259,3 +261,30 @@ async def exportar_dados(
     response.headers["Content-Disposition"] = 'attachment; filename="aulas-ingles-dados.json"'
     response.headers["Cache-Control"] = "no-store"
     return data
+
+
+@router.delete(
+    "/account",
+    response_model=AccountDeletionOut,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def excluir_conta(
+    corpo: Annotated[AccountDeletionIn, Body()],
+    response: Response,
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> AccountDeletionOut:
+    from app.api.auth import COOKIE
+    from app.core.config import get_settings
+    from app.services.account_deletion import delete_account
+
+    result = await delete_account(session, usuario.id, usuario.password_hash, corpo)
+    response.delete_cookie(
+        COOKIE,
+        path="/api/auth",
+        secure=get_settings().cookie_secure,
+        httponly=True,
+        samesite="lax",
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return result

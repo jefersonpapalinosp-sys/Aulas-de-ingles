@@ -55,6 +55,10 @@ const completionData: CourseCompletion = {
       skill: 'grammar',
       label: 'Gramática',
       samples: 2,
+      minimum_samples: 3,
+      period_start: '2026-10-08T00:00:00Z',
+      period_end: '2026-10-09T00:00:00Z',
+      sources: [{ source_type: 'exercise_attempt', samples: 2 }],
       score_percent: null,
       status: 'insufficient',
       fragile_topics: ['present perfect'],
@@ -63,12 +67,17 @@ const completionData: CourseCompletion = {
       skill: 'listening',
       label: 'Compreensão oral',
       samples: 6,
+      minimum_samples: 3,
+      period_start: '2026-10-01T00:00:00Z',
+      period_end: '2026-10-09T00:00:00Z',
+      sources: [{ source_type: 'exercise_attempt', samples: 6 }],
       score_percent: 83,
       status: 'strong',
       fragile_topics: [],
     },
   ],
   certificate: {
+    rule_version: 'course-certificate-v1',
     eligible: false,
     status: 'ineligible',
     reason: 'Conclua 5 aulas do recorte para liberar o certificado.',
@@ -164,6 +173,8 @@ describe('CourseCompletionPage', () => {
     const grammar = screen.getByText('Gramática').closest('li')
     expect(grammar).not.toBeNull()
     expect(within(grammar!).getByText('Dados insuficientes (2/3)')).toBeInTheDocument()
+    expect(within(grammar!).getByText(/Origem: correção objetiva de exercício \(2\)/)).toBeInTheDocument()
+    expect(within(grammar!).getByText(/Amostra: 2; tendência exibida a partir de 3/)).toBeInTheDocument()
     expect(within(grammar!).queryByText(/%/)).not.toBeInTheDocument()
 
     const listening = screen.getByText('Compreensão oral').closest('li')
@@ -273,6 +284,7 @@ describe('CourseCompletionPage', () => {
       screen.getByText('Todos os checkpoints publicados foram realizados na versão atual.'),
     ).toBeInTheDocument()
     expect(screen.getByText(/Nenhum certificado é baixado automaticamente/)).toBeInTheDocument()
+    expect(screen.getByText(/Versão da regra: course-certificate-v1/)).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Consultar revisão e certificado na VOA' }),
     ).toHaveAttribute('target', '_blank')

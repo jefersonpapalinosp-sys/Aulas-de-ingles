@@ -1,6 +1,6 @@
 # Sprints de banco de dados para integridade e recuperação
 
-Atualização: 16 de outubro de 2026. **DB-39G/H aplicada em DEV 5433 e estudo 5434, head `a39d7bc02486`, após backups reais e ensaios em clones exclusivos; DB-41 tecnicamente concluída no banco descartável.** Dados históricos preservados: 6.768 linhas no DEV e 46.192 no estudo. Limpeza adicional de refresh/pending implementada, mas desativada até aprovação da política. DB-42 permanece planejada. Divergências antigas de jornada preservadas; metas RPO/RTO não são SLA. [Registro 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+Atualização: 16 de outubro de 2026. **DB-39G/H aplicada em DEV/estudo; DB-40, DB-41 e o escopo técnico de DB-42 concluídos.** O head técnico `a42c7d1e9f20`, posterior à migration DB-40 `f40c2d9a1b73`, alinha a posição inicial da unidade 31–40 ao catálogo protegido. Foi validado somente no banco descartável e nos laboratórios; nenhum ambiente de uso foi migrado neste fechamento. O aceite operacional DB-42 permanece bloqueado pela medição completa de RTO e pela comprovação da cadência RPO. Divergências antigas de jornada foram preservadas; RPO/RTO são metas, não SLA. [Matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md).
 
 Referência: [auditoria técnica](auditoria_tecnica_frontend_backend_banco_2026-10-13.md). Este plano abrange PostgreSQL, migrations, seed, papel da aplicação e consistência com o armazenamento privado de voz. O primeiro incremento cria apenas um ambiente de teste separado; não modifica o banco de estudo nem seus papéis atuais.
 
@@ -711,16 +711,16 @@ Achados D04, B09 e B11.
 - [x] Substituir os vínculos posicionais mídia→exercício e checkpoint→mídia por FKs compostas estáveis, com backfill estrito e downgrade protegido (40B.2e; somente banco descartável).
 - [x] Definir snapshots mínimos imutáveis de enunciado, correção, rubrica e origem para novas evidências, com ausência legada explícita e consumo posterior seguro pelo STT (40B.2a/40B.2d; sem backfill).
 - [x] Criar e ensaiar tabela de snapshots das novas evidências, com FKs, unicidade, dono e proteção contra UPDATE (40B.2a; sem backfill ou rollout).
-- [ ] Adotar arquivamento para conteúdo usado por alunos em vez de cascade destrutivo por desaparecimento do seed.
+- [x] Adotar arquivamento para conteúdo usado por alunos em vez de cascade destrutivo por desaparecimento do seed (40B.2b.3).
 - [x] Acrescentar diff/dry-run de seed com itens novos, diferentes, omitidos e bloqueios, sem DML nem avanço de sequência (40B.1).
-- [ ] Completar o diff com arquivamento e contagens de impacto em dados pessoais após definir identidade/snapshots (40B.2).
+- [x] Completar o diff com arquivamento e contagens de impacto em dados pessoais após definir identidade/snapshots (40B.2b.1/40B.2b.3).
 - [x] Implementar prévia independente por unidade com contagens agregadas de referências e dependências entre checkpoints (40B.2b.1; não é aplicação nem diff semântico do seed).
 - [x] Criar recibo append-only e ensaiar arquivamento transacional por unidade, com digest, exclusão mútua e integração de impacto para pedidos explícitos no dry-run do seed (40B.2b.3; sem rollout ou remoção de conteúdo).
-- [ ] Corrigir datas de revisão/publicação por versão editorial e preservar origem/licença auditadas.
+- [x] Corrigir datas de revisão/publicação por versão editorial e preservar origem/licença auditadas (40B.2c; revisão humana permanece pendente).
 - [x] Implementar inventário de exportação cobrindo toda entidade pessoal atual, inclusive prática/checkpoint e feedback sem draft (40A; exclusões operacionais explícitas).
 - [x] Garantir snapshot consistente da exportação (40A); grandes volumes recusados integralmente acima dos limites documentados.
-- [ ] Planejar exclusão de conta/recursos com tarefa de remoção de binários rastreável e retries seguros, sem transação distribuída implícita.
-- [ ] Definir preservação e expiração de backups após pedidos de exclusão segundo política aprovada.
+- [x] Implementar exclusão de conta/recursos com tarefa de remoção de binários rastreável e retries seguros, sem transação distribuída implícita (40C).
+- [x] Definir preservação e expiração de backups após pedidos de exclusão segundo política aprovada para o ambiente DEV (40C).
 
 ### Critérios de aceite
 
@@ -984,6 +984,32 @@ banco descartável. O laboratório de papéis confirmou owner/migrador para apli
 backup com SELECT e runtime/worker sem acesso ao recibo. Ensaios com dados sintéticos
 foram revertidos; DEV/estudo não receberam migration nem mudança de posição.
 
+### Incremento DB-40C — recibo anônimo e fila de arquivos, 16/10/2026
+
+Migration `f40c2d9a1b73`, depois de `e41f6c2a8d90`, cria
+`account_deletion_job` e `account_deletion_file`. O primeiro usa UUID informado pelo
+cliente, estados restritos e contagens coerentes; deliberadamente não referencia a
+conta excluída. O segundo contém somente a chave opaca temporária, retry e próxima
+tentativa, com FK cascade para o recibo e unicidade da chave física.
+
+A transação grava recibo/tarefas antes de apagar `app_user`; todas as entidades
+pessoais continuam saindo pelas FKs inventariadas. A exclusão física ocorre depois,
+fora da transação relacional, e pode ser repetida com segurança. Um recibo só é
+`completed` quando todas as tarefas foram removidas; após dez falhas fica `failed`
+para intervenção explícita. Não há sucesso parcial invisível.
+
+Permissões foram declaradas tanto na migration quanto na política reaplicável. O
+runtime não apaga recibos e o worker não cria operações. Laboratório de papéis real
+aprovou os acessos mínimos; testes de migration cobriram constraints, cascade e
+downgrade bloqueado quando há recibo.
+
+Backups seguem snapshots imutáveis e podem reter uma conta excluída até a expiração
+de 7 diários + 4 semanais. Restore ocorre isolado e não pode ser promovido diretamente,
+pois o recibo anônimo não identifica exclusões posteriores ao snapshot. RPO 24 h e
+RTO 60 min são metas a validar, não SLA; em desenvolvimento as cópias ficam somente
+neste Mac. Detalhes em
+[política de exclusão e backups](politica_exclusao_e_backups_dev_2026-10-16.md).
+
 ## Sprint 41 Desempenho de consultas e validação de invariantes
 
 Achados D05, D06 e B10.
@@ -1223,15 +1249,15 @@ Achados D02, D08 e B12; fechamento de D03/D07.
 
 ### Entregas
 
-- [ ] Criar cenário de upgrade a partir de versão anterior com massa sintética contendo todas as modalidades, inclusive sessões em curso e arquivos de voz.
-- [ ] Verificar divergência entre modelo SQLAlchemy, Alembic e schema aplicado; falhar gate em divergência não aprovada.
-- [ ] Ensaiar upgrade com duração/locks medidos e rollback de aplicação sem assumir downgrade destrutivo como solução padrão.
+- [x] Criar cenário de upgrade a partir de versão anterior com massa sintética contendo todas as modalidades, inclusive sessões em curso e arquivos de voz.
+- [x] Verificar divergência entre modelo SQLAlchemy, Alembic e schema aplicado; falhar gate em divergência não aprovada.
+- [x] Ensaiar upgrade com duração/locks medidos e rollback de aplicação sem assumir downgrade destrutivo como solução padrão.
 - [ ] Restaurar backup completo de banco e voz em ambiente separado, medindo RTO e perda potencial segundo RPO acordado.
-- [ ] Validar permissões pós-restore, checksums de áudio, integridade referencial e leitura pela aplicação.
-- [ ] Integrar revisão compatível de schema ao readiness do backend e à sequência de implantação.
-- [ ] Monitorar capacidade do banco/arquivos, crescimento de tabelas, conexões, locks, idade de jobs e execução das rotinas de retenção.
-- [ ] Decidir permanência/retirada de `review_card` legado com reconciliação, janela de compatibilidade e recuperação aprovadas.
-- [ ] Consolidar runbook com nomes de ambientes, papéis, backups, processo de incidente e comandos que exigem confirmação.
+- [x] Validar permissões pós-restore, checksums de áudio, integridade referencial e leitura pela aplicação.
+- [x] Integrar revisão compatível de schema ao readiness do backend e à sequência de implantação.
+- [x] Monitorar capacidade do banco/arquivos, crescimento de tabelas, conexões, locks, idade de jobs e execução das rotinas de retenção.
+- [x] Decidir permanência/retirada de `review_card` legado com reconciliação, janela de compatibilidade e recuperação aprovadas.
+- [x] Consolidar runbook com nomes de ambientes, papéis, backups, processo de incidente e comandos que exigem confirmação.
 
 ### Critérios de aceite
 
@@ -1241,6 +1267,31 @@ Achados D02, D08 e B12; fechamento de D03/D07.
 4. Restore ensaiado não se conecta ao banco real por fallback e não inicia worker que envie áudio a um provedor externo.
 5. RPO/RTO medidos atendem à meta combinada, ou impedem o aceite operacional até ajuste.
 6. Remoção de legado só ocorre após comprovar ausência de consumidores e preservar o histórico necessário; a escolha de mantê-lo é documentada se ainda houver dependência.
+
+### Evidência executada em 16/10/2026
+
+A origem foi construída diretamente em `e41f6c2a8d90`, com 18 modalidades de
+dado pessoal, sessão ativa e WAV sintético. O pacote conjunto foi restaurado em
+banco/volume novos e migrado ao head. A migration levou **7,475 s** e as
+amostras observaram zero locks aguardando. `alembic check` aprovou e a imagem
+anterior `d0b1f8c` leu o schema expandido, comprovando rollback de aplicação.
+
+As contagens, a referência de voz, 16.044 bytes e seu SHA-256 foram preservados.
+A leitura pós-restore ocorreu como `aulas_restore`, dono apenas do destino, com
+`NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOBYPASSRLS` e
+`NOREPLICATION`. As **80 FKs** do schema público estão validadas e nenhuma ficou
+`NOT VALID`.
+
+O endpoint operacional agora limita as cinco maiores relações e expõe tamanho,
+pool/conexões, locks, idade da manutenção, jobs, retenção, capacidade de voz e
+reconciliação do legado. `review_card` permanece durante a exportação 2.x e
+a janela de rollback; qualquer vínculo ausente ou divergente bloqueia o gate.
+
+O item de restore/RPO/RTO permanece aberto: pacote até recibo consumiu cerca de
+25 s e a migration 7,475 s, mas isso é somente o caminho automatizado. Uma
+execução pontual não comprova a cadência diária necessária ao RPO de 24 horas,
+nem inclui detecção, decisão e liberação do RTO operacional completo. As
+próximas execuções gravam também `technical_recovery_seconds` no recibo.
 
 ## Regras para toda mudança de banco
 

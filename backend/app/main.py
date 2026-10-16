@@ -24,6 +24,7 @@ from app.api import (
     lessons,
     me,
     media,
+    operations,
     practice,
     progress,
     review,
@@ -140,6 +141,7 @@ def create_app() -> FastAPI:
             ],
         )
     app.include_router(health.router, prefix="/api")
+    app.include_router(operations.router, prefix="/api")
     app.include_router(history.router, prefix="/api")
     app.include_router(courses.router, prefix="/api")
     app.include_router(course_reviews.router, prefix="/api")

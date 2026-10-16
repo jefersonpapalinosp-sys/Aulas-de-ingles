@@ -1,6 +1,13 @@
-import { listLocal } from '../../storage/local'
-import { getAttemptQueueStats } from '../offline/attemptQueue'
-import { hasVoiceDraft } from '../speaking/voiceDraft'
+import { listLocal, removeLocal } from '../../storage/local'
+import { deleteAttemptQueueForUser, getAttemptQueueStats } from '../offline/attemptQueue'
+import { clearVoiceDraftForUser, hasVoiceDraft } from '../speaking/voiceDraft'
+
+const PRIVATE_PREFIXES = [
+  'writing-draft:v1', 'media-pending:v2', 'activity-event:v1',
+  'study-progress:v1', 'study-progress:v2', 'shadowing-rating:v1',
+  'shadowing-rating:v2', 'practice-position:v1', 'media-position:v1',
+  'media-position:v2',
+]
 
 export type DeviceInventory = {
   drafts: number | null; mediaCommands: number | null; activityEvents: number | null
@@ -24,4 +31,19 @@ export async function inspectDevice(userId: number): Promise<DeviceInventory> {
     pendingAnswers: queue?.pending ?? null, blockedAnswers: queue?.blocked ?? null,
     voiceDraft: hasVoiceDraft(userId),
   }
+}
+
+/** Remove somente o namespace da conta informada; fontes legadas compartilhadas
+ * ficam preservadas e um tombstone impede que elas restaurem respostas antigas. */
+export async function clearDeviceData(userId: number): Promise<number> {
+  await deleteAttemptQueueForUser(userId)
+  const groups = PRIVATE_PREFIXES.map((prefix) => listLocal(`aulas-ingles:${prefix}:${userId}:`))
+  const failed = groups.find((result) => !result.ok)
+  if (failed && !failed.ok) throw new Error(failed.error)
+  const keys = groups.flatMap((result) => result.ok ? result.value : [])
+  for (const key of keys) {
+    const result = removeLocal(key)
+    if (!result.ok) throw new Error(result.error)
+  }
+  return keys.length + Number(clearVoiceDraftForUser(userId))
 }

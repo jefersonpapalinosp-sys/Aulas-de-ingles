@@ -129,16 +129,18 @@ cookie `httpOnly` da sprint 3.
 `/api/live` é *liveness*: responde 200 enquanto o processo estiver de pé, sem
 tocar em dependência alguma.
 
-`/api/health` é *readiness*: abre uma conexão e pergunta a versão ao Postgres.
+`/api/health` é *readiness*: abre uma conexão, pergunta a versão ao Postgres e
+compara a revisão Alembic aplicada com o head embarcado na mesma imagem da API.
 
 ```bash
 $ make health
-{"status":"ok","db":"up","version":"PostgreSQL 16.10","env":"dev"}
+{"status":"ok","db":"up","version":"PostgreSQL 16.15","schema":"compatible","schema_current":["f40c2d9a1b73"],"schema_required":["f40c2d9a1b73"],"env":"dev","code":null}
 HTTP 200
 ```
 
-Com o banco fora do ar vira `503` com `"db":"down"` — é isso que faz o endpoint
-valer alguma coisa:
+Com o banco fora do ar vira `503` com `"db":"down"`. Banco acessível com
+schema diferente também devolve `503`, agora com `"schema":"incompatible"`;
+`/api/live` permanece 200 enquanto o processo estiver vivo.
 
 ```bash
 docker stop aulas-db && make health   # HTTP 503
@@ -478,7 +480,7 @@ um identificador novo é gerado, sem registrar o valor inválido.
 ```
 
 `/api/live` é *liveness* e não toca em dependência; `/api/health` é
-*readiness* e abre conexão no banco.
+*readiness* e exige conexão mais revisão Alembic compatível com o código.
 
 ### Backup e restore
 

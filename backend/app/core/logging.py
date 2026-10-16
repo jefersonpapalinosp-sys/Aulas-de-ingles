@@ -16,6 +16,8 @@ from contextvars import ContextVar
 
 from fastapi import Request, Response
 
+from app.observability import request_metrics
+
 # ContextVar e não atributo de request: o logger lá embaixo, dentro de um
 # serviço, não recebe o request e ainda assim precisa marcar a linha.
 request_id_atual: ContextVar[str] = ContextVar("request_id", default="-")
@@ -74,18 +76,21 @@ async def middleware_request_id(
     try:
         resposta = await call_next(request)
     except Exception:
+        duration_ms = round((time.perf_counter() - comeco) * 1000, 2)
+        request_metrics.record(500, duration_ms)
         logging.getLogger("app.request").exception(
             "requisição falhou",
             extra={
                 "method": request.method,
                 "path": request.url.path,
-                "duration_ms": round((time.perf_counter() - comeco) * 1000, 2),
+                "duration_ms": duration_ms,
             },
         )
         request_id_atual.reset(token)
         raise
 
     duracao = round((time.perf_counter() - comeco) * 1000, 2)
+    request_metrics.record(resposta.status_code, duracao)
     logging.getLogger("app.request").info(
         "%s %s %s",
         request.method,
