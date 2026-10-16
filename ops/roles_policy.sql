@@ -96,6 +96,17 @@ DO $$ BEGIN
     GRANT EXECUTE ON FUNCTION public.aulas_retention_batch(text, integer, boolean) TO aulas_worker;
   END IF;
 END $$;
+-- Sprint 40C: a API cria o recibo/tarefas e apaga a conta; o worker apenas
+-- conclui a remoção idempotente das chaves opacas de áudio.
+DO $$ BEGIN
+  IF to_regclass('public.account_deletion_job') IS NOT NULL THEN
+    GRANT SELECT, INSERT, UPDATE ON account_deletion_job TO aulas_runtime;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON account_deletion_file TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE account_deletion_file_id_seq TO aulas_runtime;
+    GRANT SELECT, UPDATE ON account_deletion_job TO aulas_worker;
+    GRANT SELECT, UPDATE, DELETE ON account_deletion_file TO aulas_worker;
+  END IF;
+END $$;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public
   GRANT SELECT ON TABLES TO aulas_runtime, aulas_backup;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public

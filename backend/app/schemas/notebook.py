@@ -2,8 +2,9 @@
 
 from datetime import datetime
 from typing import Any, Literal
+from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, SecretStr, field_validator
 
 NotebookKind = Literal[
     "note",
@@ -112,3 +113,16 @@ class PersonalDataExportOut(BaseModel):
     login_sessions: list[dict[str, Any]] = Field(default_factory=list)
     audio_manifest: list[AudioExportEntry] = Field(default_factory=list)
     content_snapshots: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class AccountDeletionIn(BaseModel):
+    operation_key: UUID
+    password: SecretStr = Field(min_length=8, max_length=128)
+    confirmation: Literal["EXCLUIR MINHA CONTA"]
+
+
+class AccountDeletionOut(BaseModel):
+    operation_key: str
+    state: Literal["cleanup_pending", "completed"]
+    database_deleted: Literal[True] = True
+    audio_files_pending: int = Field(ge=0)

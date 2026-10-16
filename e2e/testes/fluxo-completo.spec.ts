@@ -45,6 +45,19 @@ function practicePath(lessonNumber: number, courseSlug = LEVEL_1_SLUG): string {
   return `${lessonPath(lessonNumber, courseSlug)}/exercicios`
 }
 
+test('frontend aplica headers de segurança sem bloquear o localhost HTTP', async ({ request }) => {
+  const response = await request.get('/')
+  expect(response.ok()).toBeTruthy()
+  const headers = response.headers()
+  expect(headers['content-security-policy']).toContain("default-src 'self'")
+  expect(headers['content-security-policy']).toContain('https://voa-audio.voanews.eu')
+  expect(headers['content-security-policy']).not.toContain('upgrade-insecure-requests')
+  expect(headers['x-frame-options']).toBe('DENY')
+  expect(headers['x-content-type-options']).toBe('nosniff')
+  expect(headers['referrer-policy']).toBe('no-referrer')
+  expect(headers['permissions-policy']).toContain('microphone=(self)')
+})
+
 function courseReviewPath(unitSlug: string, courseSlug = LEVEL_1_SLUG): string {
   return `${coursePath(courseSlug)}/unidades/${unitSlug}/checkpoint`
 }

@@ -334,6 +334,7 @@ input[type='text']::placeholder { color: var(--ink-3); }
 
 .carta { margin-top: 30px; border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; padding: 40px 30px; text-align: center; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
 .carta-origem { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.skill-evidence-meta, .practice-time-budget { color: var(--ink-3); font-size: 0.82rem; line-height: 1.5; }
 .carta-termo { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
 .carta-ipa { font-family: var(--mono); font-size: 14px; color: var(--ink-3); }
 .carta-verso { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule-soft); width: 100%; display: flex; flex-direction: column; gap: 10px; }
@@ -652,7 +653,7 @@ input[type='text']::placeholder { color: var(--ink-3); }
 .notebook-filters { display: flex; gap: 8px; }
 .notebook-filters label { min-width: 105px; }
 .notebook-empty { margin-top: 16px; padding: 16px; border: 1px dashed var(--rule); border-radius: 5px; color: var(--ink-3); font-size: 13.5px; }
-.notebook-list, .notebook-writing-list, .notebook-recordings { display: grid; gap: 10px; margin: 17px 0 0; padding: 0; list-style: none; }
+.notebook-list, .notebook-writing-list, .notebook-recordings, .notebook-history-list { display: grid; gap: 10px; margin: 17px 0 0; padding: 0; list-style: none; }
 .notebook-list > li { padding: 15px 16px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
 .notebook-entry-meta { display: flex; flex-wrap: wrap; gap: 7px; color: var(--ink-3); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
 .notebook-entry-meta span:first-child { color: var(--accent); }
@@ -675,6 +676,19 @@ input[type='text']::placeholder { color: var(--ink-3); }
 .notebook-recordings strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .notebook-recordings button { padding: 5px 8px; border: 1px solid var(--rule); border-radius: 3px; background: var(--paper); color: var(--accent); font-size: 12px; }
 .notebook-recordings button:last-child { color: var(--bad); }
+.notebook-history-list > li { padding: 14px 16px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.historical-content-details { margin-top: 9px; }
+.historical-content-details summary { cursor: pointer; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
+.historical-content-body { display: grid; gap: 7px; margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule-soft); overflow-wrap: anywhere; }
+.historical-content-body p { margin: 0; font-size: 13px; }
+.historical-version-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 10px; margin: 3px 0; font-family: var(--mono); font-size: 10px; }
+.historical-version-list dt { color: var(--ink-3); }
+.historical-version-list dd { margin: 0; }
+.historical-question-list { display: grid; gap: 6px; font-size: 13px; }
+.historical-question-list ol { display: grid; gap: 7px; margin: 0; padding-left: 22px; }
+.historical-question-list li { padding-left: 3px; }
+.historical-question-list small { display: block; color: var(--ink-3); }
+.historical-unavailable { margin-top: 10px; color: var(--ink-2); font-size: 13px; }
 .notebook-page section > audio { width: 100%; margin-top: 12px; }
 
 @media (max-width: 600px) {
@@ -1309,6 +1323,10 @@ main { max-width: 1180px; }
 .personal-data-page { max-width: 960px; margin: 0 auto; overflow-wrap: anywhere; }
 .data-panel { margin: 24px 0; padding: clamp(16px, 3vw, 28px); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
 .data-panel h2 { margin-top: 0; }
+.data-panel.estado-erro { align-items: stretch; }
+.data-panel.estado-erro form, .data-panel.estado-erro label { display: grid; gap: 8px; }
+.data-panel.estado-erro form { max-width: 480px; }
+.data-panel.estado-erro input { width: 100%; max-width: none; padding: 9px 11px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); }
 .data-inventory { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
 .data-inventory div { border-bottom: 1px solid var(--rule); padding-bottom: 12px; }
 .data-inventory dd { margin: 6px 0 0; font-weight: 700; }

@@ -20,6 +20,11 @@ export function WritingFeedbackProvenance({ feedback }: { feedback: WritingFeedb
       <p className="muted">
         {feedback.evaluation_scope || 'A verificação automática não garante gramática correta, coerência ou atendimento completo à proposta.'}
       </p>
+      <p className="muted">
+        {feedback.analysis_mode === 'assisted'
+          ? 'A assistência automática acrescenta sugestões experimentais à rubrica; não substitui revisão de professor e pode errar.'
+          : 'A rubrica automática verifica somente critérios observáveis da proposta; ela não corrige livremente todo o texto.'}
+      </p>
     </div>
   )
 }

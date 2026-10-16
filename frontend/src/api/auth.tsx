@@ -20,6 +20,7 @@ type Sessao = {
   entrar: (email: string, senha: string) => Promise<void>
   registrar: (email: string, senha: string, nome: string) => Promise<void>
   sair: () => Promise<void>
+  encerrarContaExcluida: (audioPendente: boolean) => void
 }
 
 const Ctx = createContext<Sessao | null>(null)
@@ -236,6 +237,10 @@ export function SessaoProvider({ children }: { children: React.ReactNode }) {
             setAviso('Você saiu deste dispositivo, mas não foi possível confirmar o encerramento no servidor.')
           }
         }
+      },
+      encerrarContaExcluida: (audioPendente) => {
+        limpar()
+        setAviso(`A conta foi excluída.${audioPendente ? ' A limpeza dos áudios foi agendada.' : ''} Cópias baixadas e dados de outros dispositivos não podem ser removidos daqui.`)
       },
     }),
     [usuario, carregando, estado, revalidando, aviso, revalidar, aplicar, limpar],

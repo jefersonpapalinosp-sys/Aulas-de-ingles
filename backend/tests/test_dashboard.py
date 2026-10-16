@@ -626,6 +626,10 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
     assert empty_response.headers["cache-control"] == "private, no-store"
     grammar = next(item for item in empty if item["skill"] == "grammar")
     assert grammar["samples"] == 0
+    assert grammar["minimum_samples"] == 3
+    assert grammar["period_start"] is None
+    assert grammar["period_end"] is None
+    assert grammar["sources"] == []
     assert grammar["score_percent"] is None
 
     await client.post(
@@ -641,6 +645,9 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
     two = (await client.get("/api/me/skills", headers=headers)).json()
     grammar = next(item for item in two if item["skill"] == "grammar")
     assert grammar["samples"] == 2
+    assert grammar["period_start"] is not None
+    assert grammar["period_end"] is not None
+    assert grammar["sources"] == [{"source_type": "exercise_attempt", "samples": 2}]
     assert grammar["score_percent"] is None
     assert grammar["fragile_topics"]
 
@@ -652,6 +659,7 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
     three = (await client.get("/api/me/skills", headers=headers)).json()
     grammar = next(item for item in three if item["skill"] == "grammar")
     assert grammar["samples"] == 3
+    assert grammar["sources"] == [{"source_type": "exercise_attempt", "samples": 3}]
     assert grammar["score_percent"] == 67
     assert grammar["status"] == "steady"
 

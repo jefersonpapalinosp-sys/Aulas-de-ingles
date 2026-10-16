@@ -35,6 +35,7 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       EDITORIAL_SNAPSHOTS_ENABLED: ${EDITORIAL_SNAPSHOTS_ENABLED:-false}
       PERFORMANCE_PROBE_ENABLED: ${PERFORMANCE_PROBE_ENABLED:-false}
+      OPERATIONS_TOKEN: ${OPERATIONS_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       DEPLOYMENT_PROFILE: ${DEPLOYMENT_PROFILE:-local}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
@@ -76,7 +77,8 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/live').status==200 else 1)\""]
+      # Readiness real: banco acessível e revisão Alembic igual à imagem.
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').status==200 else 1)\""]
       interval: 5s
       timeout: 3s
       retries: 12

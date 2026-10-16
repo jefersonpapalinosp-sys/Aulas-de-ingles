@@ -78,10 +78,19 @@ class TodayOut(BaseModel):
     time_measurement: Literal["active_intervals_v1"] = "active_intervals_v1"
 
 
+class SkillEvidenceSourceOut(BaseModel):
+    source_type: str
+    samples: int
+
+
 class SkillSummaryOut(BaseModel):
     skill: str
     label: str
     samples: int
+    minimum_samples: int = 3
+    period_start: datetime | None
+    period_end: datetime | None
+    sources: list[SkillEvidenceSourceOut]
     score_percent: int | None
     status: Literal["insufficient", "developing", "steady", "strong"]
     fragile_topics: list[str]

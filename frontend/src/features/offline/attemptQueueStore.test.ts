@@ -146,6 +146,25 @@ describe('migração recuperável v1/v2', () => {
     localStorage.setItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY, JSON.stringify([entry(1), entry(2), entry(3)]))
     expect(await listQueuedAttempts(7)).toEqual([entry(3)])
   })
+
+  it('exclui uma conta das filas e impede que fontes legadas a restaurem', async () => {
+    const deleted = entry(1, 91)
+    const preserved = entry(1, 92)
+    localStorage.setItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY, JSON.stringify([deleted, preserved]))
+    expect(await listQueuedAttempts(91)).toEqual([deleted])
+    await attemptStore.deleteUser(91)
+    expect(await listQueuedAttempts(91)).toEqual([])
+    expect(await listQueuedAttempts(92)).toEqual([preserved])
+    expect(JSON.parse(localStorage.getItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY)!)).toEqual([
+      preserved,
+    ])
+    localStorage.setItem(
+      LEGACY_ATTEMPT_QUEUE_STORAGE_KEY,
+      JSON.stringify([deleted, preserved, entry(2, 92)]),
+    )
+    expect(await listQueuedAttempts(91)).toEqual([])
+    await expect(queueAttempt(entry(3, 91))).rejects.toThrow('já foram removidos')
+  })
 })
 
 describe('sincronização exclusiva e recuperação', () => {

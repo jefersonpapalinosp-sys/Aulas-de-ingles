@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import { useCourseCompletion } from '../api/completion'
 import type { CourseCompletion } from '../api/client'
 import { Carregando, Erro } from '../components/States'
+import { SkillEvidenceMeta } from '../features/skills/SkillEvidenceMeta'
 import { coursePath, DEFAULT_COURSE_SLUG } from '../routing/courseRoutes'
 
 type DiagnosticChoice = 'yes' | 'partial' | 'not_yet'
@@ -232,6 +233,7 @@ function SkillsEvidence({ data }: { data: CourseCompletion }) {
                 {skill.fragile_topics.length > 0 && (
                   <p>Pontos para revisar: {skill.fragile_topics.join(', ')}.</p>
                 )}
+                <SkillEvidenceMeta skill={skill} />
               </li>
             )
           })}
@@ -259,6 +261,10 @@ function CertificateStatus({ data }: { data: CourseCompletion }) {
       <p className="completion-certificate-rule">
         Regra deste recorte: {certificate.required_lessons} aulas e{' '}
         {certificate.required_checkpoints} checkpoints atuais.
+      </p>
+      <p className="completion-no-download">
+        Versão da regra: {certificate.rule_version}. Esta tela recalcula a elegibilidade atual;
+        ela não altera resultados históricos nem representa um certificado já emitido.
       </p>
       <p className="completion-no-download">
         Esta tela informa a elegibilidade. Nenhum certificado é baixado automaticamente.

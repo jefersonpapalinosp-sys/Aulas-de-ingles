@@ -97,6 +97,35 @@ async def test_all_modalities_private_export_and_flag_disable_preserves_read(
         ("checkpoint", checkpoint.json()["id"]),
     ]
     other = await conta(client, "snapshot-other")
+    first_page = await client.get("/api/me/history/page", headers=headers, params={"limit": 2})
+    assert first_page.status_code == 200
+    assert first_page.headers["cache-control"] == "private, no-store"
+    assert len(first_page.json()["items"]) == 2
+    assert first_page.json()["next_cursor"]
+    pages = [first_page.json()]
+    while pages[-1]["next_cursor"]:
+        response = await client.get(
+            "/api/me/history/page",
+            headers=headers,
+            params={"limit": 2, "cursor": pages[-1]["next_cursor"]},
+        )
+        assert response.status_code == 200, response.text
+        pages.append(response.json())
+    listed = [item for page in pages for item in page["items"]]
+    assert len(listed) == 9
+    assert len({(item["evidence_kind"], item["evidence_id"]) for item in listed}) == 9
+    assert {item["evidence_kind"] for item in listed} == {
+        "exercise",
+        "practice",
+        "writing",
+        "speaking",
+        "checkpoint",
+    }
+    assert all(item["schema_version"] == "1.0" for item in listed)
+    assert (await client.get("/api/me/history/page", headers=other)).json() == {
+        "items": [],
+        "next_cursor": None,
+    }
     for kind, identifier in targets:
         response = await client.get(history(kind, identifier), headers=headers)
         assert response.status_code == 200, response.text
@@ -256,10 +285,16 @@ async def test_capture_failure_rolls_back_event_and_skills(client, session, monk
 
 async def test_snapshot_lookup_requires_auth_and_valid_kind(client):
     assert (await client.get(history("exercise", 1))).status_code == 401
+    assert (await client.get("/api/me/history/page")).status_code == 401
     headers = await conta(client, "snapshot-route")
     assert (await client.get(history("exercise", 99999999), headers=headers)).status_code == 404
     assert (await client.get(history("unknown", 1), headers=headers)).status_code == 422
     assert (await client.get(history("exercise", 0), headers=headers)).status_code == 422
+    invalid = await client.get(
+        "/api/me/history/page", headers=headers, params={"cursor": "not-a-cursor"}
+    )
+    assert invalid.status_code == 422
+    assert invalid.json()["detail"]["code"] == "invalid_cursor"
 
 
 async def test_read_handles_unmigrated_schema_without_capture(client, monkeypatch):
@@ -273,6 +308,8 @@ async def test_read_handles_unmigrated_schema_without_capture(client, monkeypatc
     monkeypatch.setattr(editorial_history, "schema_available", absent)
     response = await client.get(history("exercise", result["attempt_id"]), headers=headers)
     assert response.status_code == 200 and response.json()["status"] == "unavailable"
+    page = await client.get("/api/me/history/page", headers=headers)
+    assert page.status_code == 200 and page.json() == {"items": [], "next_cursor": None}
 
 
 async def test_limit_refuses_oversized_snapshot_before_insert(session):
@@ -307,7 +344,7 @@ async def test_snapshot_table_is_empty_for_preexisting_feedback(session):
     assert await session.scalar(select(func.count()).select_from(EvidenceContentSnapshot)) == 0
     assert (
         await session.execute(text("SELECT version_num FROM alembic_version"))
-    ).scalar_one() == "e41f6c2a8d90"
+    ).scalar_one() == "f40c2d9a1b73"
 
 
 async def test_enabled_without_schema_fails_closed(client, session, monkeypatch):

@@ -45,6 +45,7 @@ class CheckpointCompletionOut(BaseModel):
 
 
 class CertificateEligibilityOut(BaseModel):
+    rule_version: Literal["course-certificate-v1"] = "course-certificate-v1"
     eligible: bool
     status: Literal["eligible", "ineligible"]
     reason: str

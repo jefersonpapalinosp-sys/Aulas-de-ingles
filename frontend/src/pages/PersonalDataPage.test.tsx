@@ -4,10 +4,18 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PersonalDataPage } from './PersonalDataPage'
 
-const mocks = vi.hoisted(() => ({ fetch: vi.fn(), cache: vi.fn(), offline: false }))
-vi.mock('../api/auth', () => ({ useSessao: () => ({ usuario: { id: 1 }, offline: mocks.offline }) }))
+const mocks = vi.hoisted(() => ({
+  fetch: vi.fn(), cache: vi.fn(), clear: vi.fn(), ended: vi.fn(), offline: false,
+}))
+vi.mock('../api/auth', () => ({ useSessao: () => ({ usuario: { id: 1 },
+  offline: mocks.offline, encerrarContaExcluida: mocks.ended }) }))
 vi.mock('../api/client', () => ({ authenticatedFetch: mocks.fetch }))
 vi.mock('../features/offline/pwa', () => ({ inspectCache: mocks.cache }))
+vi.mock('../features/privacy/deviceInventory', () => ({
+  inspectDevice: async () => ({ drafts: 1, mediaCommands: 0, activityEvents: 0,
+    localCopies: 0, pendingAnswers: 2, blockedAnswers: 1, voiceDraft: false }),
+  clearDeviceData: mocks.clear,
+}))
 vi.mock('../features/offline/attemptQueue', () => ({
   subscribeAttemptQueue: () => () => undefined,
   getAttemptQueueStats: async () => ({ pending: 2, blocked: 1 }),
@@ -22,7 +30,8 @@ const setup = () => render(<MemoryRouter><PersonalDataPage /></MemoryRouter>)
 
 describe('Meus dados', () => {
   beforeEach(() => {
-    vi.restoreAllMocks(); mocks.fetch.mockReset(); mocks.cache.mockReset(); localStorage.clear(); mocks.offline = false
+    vi.restoreAllMocks(); mocks.fetch.mockReset(); mocks.cache.mockReset(); mocks.clear.mockReset()
+    mocks.ended.mockReset(); localStorage.clear(); mocks.offline = false
     vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:download'), revokeObjectURL: vi.fn() }))
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
   })
@@ -113,5 +122,51 @@ describe('Meus dados', () => {
     await user.click(await screen.findByRole('button', { name: 'Baixar gravação 7' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Preserve qualquer cópia local')
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
+  })
+
+  it('limpa dados privados locais somente após confirmação explícita', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true)
+    mocks.clear.mockResolvedValue(4)
+    setup()
+    const button = screen.getByRole('button', { name: 'Apagar dados locais desta conta' })
+    await userEvent.setup().click(button)
+    expect(mocks.clear).not.toHaveBeenCalled()
+    await userEvent.setup().click(button)
+    expect(confirm).toHaveBeenCalledTimes(2)
+    expect(mocks.clear).toHaveBeenCalledExactlyOnceWith(1)
+    expect(await screen.findByText(/4 item\(ns\) local\(is\) removido/)).toBeVisible()
+  })
+
+  it('exige senha, frase e segunda confirmação para excluir a conta', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    mocks.fetch.mockResolvedValue(new Response(JSON.stringify({
+      state: 'cleanup_pending', database_deleted: true,
+    }), { status: 202, headers: { 'Content-Type': 'application/json' } }))
+    setup()
+    const user = userEvent.setup()
+    const submit = screen.getByRole('button', { name: 'Excluir minha conta definitivamente' })
+    expect(submit).toBeDisabled()
+    await user.type(screen.getByLabelText('Senha atual'), 'senha-bem-grande')
+    await user.type(screen.getByLabelText(/Digite EXCLUIR MINHA CONTA/), 'EXCLUIR MINHA CONTA')
+    await user.click(submit)
+    await waitFor(() => expect(mocks.ended).toHaveBeenCalledExactlyOnceWith(true))
+    const [path, options] = mocks.fetch.mock.calls[0]!
+    expect(path).toBe('/api/me/account')
+    expect(options).toMatchObject({ method: 'DELETE', cache: 'no-store' })
+    expect(JSON.parse(options.body)).toMatchObject({
+      password: 'senha-bem-grande', confirmation: 'EXCLUIR MINHA CONTA',
+    })
+  })
+
+  it('senha incorreta preserva a sessão e informa que nada foi excluído', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    mocks.fetch.mockResolvedValue(new Response('{}', { status: 401 }))
+    setup()
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText('Senha atual'), 'senha-incorreta')
+    await user.type(screen.getByLabelText(/Digite EXCLUIR MINHA CONTA/), 'EXCLUIR MINHA CONTA')
+    await user.click(screen.getByRole('button', { name: 'Excluir minha conta definitivamente' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('A conta não foi excluída')
+    expect(mocks.ended).not.toHaveBeenCalled()
   })
 })

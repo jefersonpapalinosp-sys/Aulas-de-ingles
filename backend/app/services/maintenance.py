@@ -27,12 +27,16 @@ async def retention_batch(kind: str, *, apply: bool = False, limit: int = 100) -
 
 
 async def sweep() -> dict[str, int]:
+    from app.services.account_deletion import status_counts
+
     settings = get_settings()
     scopes = SCOPES if settings.maintenance_cleanup_enabled else SCOPES[:2]
-    return {
+    counts = {
         scope: await retention_batch(scope, apply=True, limit=settings.maintenance_batch_size)
         for scope in scopes
     }
+    counts.update(await status_counts())
+    return counts
 
 
 async def heartbeat(counts: dict[str, int] | None = None) -> None:

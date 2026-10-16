@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { queueAttempt } from '../offline/attemptQueue'
 import { clearVoiceDraft, retainVoiceDraft, takeVoiceDraft } from '../speaking/voiceDraft'
-import { inspectDevice } from './deviceInventory'
+import { clearDeviceData, inspectDevice } from './deviceInventory'
 
 describe('inventário local privado', () => {
   beforeEach(() => { localStorage.clear(); vi.restoreAllMocks() })
@@ -31,5 +31,23 @@ describe('inventário local privado', () => {
     expect(await inspectDevice(1)).toMatchObject({ drafts: null, mediaCommands: null,
       activityEvents: null, localCopies: null, pendingAnswers: null })
     clearVoiceDraft('1:voa-level-1:31:2')
+  })
+
+  it('limpa somente dados privados da conta escolhida', async () => {
+    localStorage.setItem('aulas-ingles:writing-draft:v1:31:3', 'apagar')
+    localStorage.setItem('aulas-ingles:writing-draft:v1:32:3', 'preservar')
+    localStorage.setItem('public-cache', 'preservar')
+    await queueAttempt({ userId: 31, exerciseId: 1, answer: 'private',
+      idempotencyKey: 'clear-31', createdAt: new Date().toISOString() })
+    await queueAttempt({ userId: 32, exerciseId: 1, answer: 'other',
+      idempotencyKey: 'keep-32', createdAt: new Date().toISOString() })
+    retainVoiceDraft({ key: '31:voa-level-1:31:2', blob: new Blob(['audio']),
+      duration: 1, attemptId: null })
+
+    expect(await clearDeviceData(31)).toBe(2)
+    expect(await inspectDevice(31)).toMatchObject({ drafts: 0, pendingAnswers: 0,
+      blockedAnswers: 0, voiceDraft: false })
+    expect(await inspectDevice(32)).toMatchObject({ drafts: 1, pendingAnswers: 1 })
+    expect(localStorage.getItem('public-cache')).toBe('preservar')
   })
 })

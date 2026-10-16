@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     editorial_reorder_enabled: bool = False
     # Aggregate diagnostics only; never expose query counts on public/prod deployments.
     performance_probe_enabled: bool = False
+    # Endpoint operacional agregado. Ausente = endpoint desabilitado.
+    operations_token: str | None = None
 
     # As gravações ficam fora do PostgreSQL. O banco guarda somente metadados
     # e uma chave opaca gerada pelo servidor.
@@ -121,6 +123,8 @@ class Settings(BaseSettings):
             self.app_env == "prod" or self.deployment_profile == "public"
         ):
             raise RuntimeError("PERFORMANCE_PROBE_ENABLED é exclusivo de ambiente local/teste.")
+        if self.operations_token and len(self.operations_token.encode()) < 32:
+            raise RuntimeError("OPERATIONS_TOKEN precisa de pelo menos 32 bytes.")
         if self.app_env == "prod" and self.jwt_secret.startswith("dev-apenas"):
             raise RuntimeError("JWT_SECRET precisa de um valor próprio quando APP_ENV=prod.")
         if len(self.jwt_secret.encode()) < 32:

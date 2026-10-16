@@ -724,6 +724,55 @@ class WorkerHeartbeat(Base):
     maintenance_counts: Mapped[dict[str, int] | None] = mapped_column(JSONB, default=None)
 
 
+class AccountDeletionJob(Base):
+    """Recibo sem identidade pessoal para a limpeza assíncrona de arquivos."""
+
+    __tablename__ = "account_deletion_job"
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('cleanup_pending','completed','failed')",
+            name="ck_account_deletion_state",
+        ),
+        CheckConstraint(
+            "file_count >= 0 AND deleted_file_count >= 0 AND deleted_file_count <= file_count",
+            name="ck_account_deletion_counts",
+        ),
+    )
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
+    state: Mapped[str] = mapped_column(String(20))
+    file_count: Mapped[int] = mapped_column(Integer, default=0)
+    deleted_file_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
+    requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    database_deleted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+
+class AccountDeletionFile(Base):
+    """Chave opaca temporária; a linha é removida após o unlink idempotente."""
+
+    __tablename__ = "account_deletion_file"
+    __table_args__ = (
+        CheckConstraint("attempt_count >= 0", name="ck_account_deletion_file_attempts"),
+        UniqueConstraint("storage_key", name="uq_account_deletion_file_storage_key"),
+        Index("ix_account_deletion_file_next", "next_attempt_at", "id"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_operation_key: Mapped[str] = mapped_column(
+        ForeignKey("account_deletion_job.operation_key", ondelete="CASCADE")
+    )
+    storage_key: Mapped[str] = mapped_column(String(80))
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    last_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
+
+
 class TranscriptionJob(Base):
     """Resultado descartável de um provedor de speech-to-text opcional."""
 

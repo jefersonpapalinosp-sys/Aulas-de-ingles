@@ -16,7 +16,7 @@ from sqlalchemy import delete  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
-from app.db.models import AuthRateBucket, CourseUnit, User  # noqa: E402
+from app.db.models import AccountDeletionJob, AuthRateBucket, CourseUnit, User  # noqa: E402
 from app.db.session import dispose_engine, get_sessionmaker  # noqa: E402
 from app.main import create_app  # noqa: E402
 
@@ -58,6 +58,7 @@ async def banco_por_teste(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[None
         try:
             async with get_sessionmaker()() as s:
                 await s.execute(delete(User))
+                await s.execute(delete(AccountDeletionJob))
                 await s.execute(delete(AuthRateBucket))
                 await s.execute(delete(CourseUnit).where(CourseUnit.slug == "31-35"))
                 await s.commit()

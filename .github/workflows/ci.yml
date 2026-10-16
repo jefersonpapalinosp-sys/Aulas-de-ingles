@@ -10,12 +10,83 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  security-inventory:
+    name: segurança · dependências e imagens para triagem
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            e2e/package-lock.json
+      - name: inventário Python bloqueado no lock de produção
+        run: |
+          uv export --project backend --locked --no-dev --no-emit-project \
+            --output-file "$RUNNER_TEMP/backend-requirements.txt"
+          uvx pip-audit -r "$RUNNER_TEMP/backend-requirements.txt" \
+            --format json --output "$RUNNER_TEMP/backend-pip-audit.json"
+        continue-on-error: true
+      - name: inventário npm de produção
+        run: |
+          npm audit --omit=dev --json --prefix frontend \
+            > "$RUNNER_TEMP/frontend-npm-audit.json" || true
+          npm audit --omit=dev --json --prefix e2e \
+            > "$RUNNER_TEMP/e2e-npm-audit.json" || true
+      - name: constrói imagens candidatas sem publicá-las
+        run: |
+          docker build -f backend/Dockerfile.prod -t aulas-ingles-ci-api:${{ github.sha }} .
+          docker build -f frontend/Dockerfile.prod -t aulas-ingles-ci-web:${{ github.sha }} frontend
+      - name: inventário Trivy da imagem da API
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: aulas-ingles-ci-api:${{ github.sha }}
+          version: v0.76.0
+          scanners: vuln
+          format: json
+          output: trivy-api.json
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: '0'
+      - name: inventário Trivy da imagem web
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: aulas-ingles-ci-web:${{ github.sha }}
+          version: v0.76.0
+          scanners: vuln
+          format: json
+          output: trivy-web.json
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: '0'
+      - name: publica relatórios para triagem, sem expor lock exportado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-inventory-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/backend-pip-audit.json
+            ${{ runner.temp }}/frontend-npm-audit.json
+            ${{ runner.temp }}/e2e-npm-audit.json
+            trivy-api.json
+            trivy-web.json
+          if-no-files-found: warn
+          retention-days: 14
+
   recovery:
     name: recovery · backup de banco e voz + restore isolado
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
@@ -32,6 +103,15 @@ jobs:
         run: make recovery-lab-prepare
       - name: dois pacotes, restore verificado e recusa de destino ocupado
         run: make test-recovery-integration
+      - name: laboratório separado na revisão anterior, com todas as modalidades
+        run: |
+          make upgrade-lab-up
+          make upgrade-lab-prepare
+      - name: upgrade representativo, Alembic check e leitura de voz pela aplicação
+        run: make test-upgrade-integration
+      - name: encerra laboratório DB-42 sem remover volumes
+        if: always()
+        run: make upgrade-lab-down
       - name: ensaio sintético de papéis separados
         run: |
           make roles-lab-up
@@ -84,6 +164,9 @@ jobs:
         run: uv run python -m app.cli seed
       - name: pytest com piso de cobertura
         run: uv run pytest -q --cov --cov-report=term-missing:skip-covered --cov-fail-under=90
+      - name: falhas controladas de banco, provedor e retomada do worker
+        working-directory: .
+        run: make test-failure-rehearsal
       - name: a suíte roda igual em outro fuso
         env:
           TZ: Pacific/Kiritimati
@@ -107,10 +190,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - name: tipos em sincronia com o contrato
-        run: |
-          npm run gen:api
-          git diff --exit-code src/api/schema.d.ts \
-            || { echo "::error::src/api/schema.d.ts está desatualizado. Rode 'npm run gen:api' e commite."; exit 1; }
+        run: npm run check:api
       - name: eslint
         run: npm run lint
       - name: tsc

@@ -129,6 +129,11 @@ export async function discardBlockedAttempts(userId: number, keys?: string[]): P
   publish('change', { reason: 'discarded' })
 }
 
+export async function deleteAttemptQueueForUser(userId: number): Promise<void> {
+  await attemptStore.deleteUser(userId)
+  publish('change', { reason: 'discarded' })
+}
+
 /** Locks são por origem/usuário e liberados pelo navegador se a aba fechar.
  * Sem suporte, falhar explicitamente; nunca fingir exclusão mútua com um flag. */
 export async function syncAttemptQueue(userId: number): Promise<AttemptQueueSyncResult> {

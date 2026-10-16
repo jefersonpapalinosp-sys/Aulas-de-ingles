@@ -4,9 +4,6 @@ import asyncio
 from copy import deepcopy
 from uuid import uuid4
 
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import async_sessionmaker
-
 from app.core.config import get_settings
 from app.db import seed
 from app.db.models import EditorialReorderEvent
@@ -14,6 +11,8 @@ from app.db.seed_plan import seed_graph
 from app.db.session import dispose_engine, get_engine, get_sessionmaker
 from app.services.editorial_reorder import apply_editorial_reorder
 from app.services.editorial_reorder_plan import preview_editorial_reorder
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
 def candidate():
@@ -42,7 +41,9 @@ async def main():
 
     engine = get_engine()
     async with engine.connect() as connection:
-        before = await connection.scalar(select(func.count()).select_from(EditorialReorderEvent))
+        before = await connection.scalar(
+            select(func.count()).select_from(EditorialReorderEvent)
+        )
         await connection.rollback()
         async with connection.begin():
             factory = async_sessionmaker(
@@ -68,7 +69,9 @@ async def main():
                 assert replay == {**receipt, "replayed": True}
             finally:
                 await connection.rollback()
-        after = await connection.scalar(select(func.count()).select_from(EditorialReorderEvent))
+        after = await connection.scalar(
+            select(func.count()).select_from(EditorialReorderEvent)
+        )
         assert after == before
     await dispose_engine()
     print("Reordenação auditada e retry pelo migrador aprovados; ensaio revertido.")

@@ -38,6 +38,7 @@ services:
       APP_ENV: ${APP_ENV:-prod}
       EDITORIAL_SNAPSHOTS_ENABLED: ${EDITORIAL_SNAPSHOTS_ENABLED:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      OPERATIONS_TOKEN: ${OPERATIONS_TOKEN:-}
       DEPLOYMENT_PROFILE: ${DEPLOYMENT_PROFILE:-local}
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
       LEGACY_WRITES_UNTIL: ${LEGACY_WRITES_UNTIL:-2026-11-13T00:00:00Z}
@@ -75,7 +76,8 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/live').status==200 else 1)\""]
+      # Não liberar o web com banco acessível porém schema antigo/novo demais.
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').status==200 else 1)\""]
       interval: 5s
       timeout: 3s
       retries: 12

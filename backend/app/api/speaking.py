@@ -1,5 +1,6 @@
 """Gravações opcionais da prática oral e transcrição experimental."""
 
+import logging
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from typing import Annotated, Any
@@ -53,6 +54,7 @@ from app.services.publication import (
 )
 
 router = APIRouter(prefix="/speaking", tags=["speaking"])
+logger = logging.getLogger(__name__)
 
 
 def _query() -> Select[SpeakingAttempt]:
@@ -596,6 +598,9 @@ async def solicitar_transcricao(
     session.add(job)
     await session.commit()
     await session.refresh(job)
+    # O request-id desta linha liga a chamada HTTP ao identificador opaco que
+    # reaparece no worker, sem persistir/logar texto, usuário, token ou áudio.
+    logger.info("transcription_queued", extra={"job_id": job.id})
     return _transcription_out(job, expected_text)
 
 

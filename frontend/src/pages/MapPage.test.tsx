@@ -185,6 +185,10 @@ vi.mock('../api/dashboard', () => ({
         skill: 'grammar',
         label: 'Gramática',
         samples: 2,
+        minimum_samples: 3,
+        period_start: '2026-10-08T00:00:00Z',
+        period_end: '2026-10-09T00:00:00Z',
+        sources: [{ source_type: 'exercise_attempt', samples: 2 }],
         score_percent: null,
         status: 'insufficient',
         fragile_topics: ['Comparativos'],
@@ -193,6 +197,10 @@ vi.mock('../api/dashboard', () => ({
         skill: 'listening',
         label: 'Compreensão oral',
         samples: 5,
+        minimum_samples: 3,
+        period_start: '2026-10-01T00:00:00Z',
+        period_end: '2026-10-09T00:00:00Z',
+        sources: [{ source_type: 'exercise_attempt', samples: 5 }],
         score_percent: 80,
         status: 'steady',
         fragile_topics: [],
@@ -234,6 +242,8 @@ describe('MapPage / painel Hoje', () => {
     const grammar = screen.getByText('Gramática').closest('li')
     expect(grammar).not.toBeNull()
     expect(within(grammar!).getByText('Dados insuficientes (2/3)')).toBeInTheDocument()
+    expect(within(grammar!).getByText(/Origem: correção objetiva de exercício \(2\)/)).toBeInTheDocument()
+    expect(within(grammar!).getByText(/Amostra: 2; tendência exibida a partir de 3/)).toBeInTheDocument()
     expect(within(grammar!).queryByText(/%/)).not.toBeInTheDocument()
     expect(screen.getByText('80%')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Mapa do curso' })).toBeInTheDocument()

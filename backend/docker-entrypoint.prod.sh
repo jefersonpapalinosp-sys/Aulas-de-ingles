@@ -7,4 +7,4 @@ mkdir -p /app/data/speaking
 chown app:app /app/data/speaking
 chmod 700 /app/data/speaking
 
-exec gosu app "$@"
+exec su-exec app "$@"

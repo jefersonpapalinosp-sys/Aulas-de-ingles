@@ -381,6 +381,11 @@ export function ShadowingPractice({
         Se a sessão expirar durante o envio, tente entrar na mesma conta e retornar
         a este trecho em até cinco minutos, sem fechar ou recarregar esta aba.
       </p>
+      <p className="study-copy">
+        A avaliação oral é sua autoavaliação após ouvir e comparar. A transcrição automática,
+        quando ativada, transforma fala em texto, mas não dá nota de pronúncia nem substitui
+        a escuta de um professor.
+      </p>
 
       <label className="shadowing-select">
         Frase para praticar

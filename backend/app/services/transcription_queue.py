@@ -20,7 +20,7 @@ from sqlalchemy.exc import TimeoutError as PoolTimeout
 from app.core.config import get_settings
 from app.db.models import SpeakingAttempt, TranscriptionJob
 from app.db.session import dispose_engine, get_sessionmaker
-from app.services import assist_quota, assistance, editorial_history, maintenance
+from app.services import account_deletion, assist_quota, assistance, editorial_history, maintenance
 from app.services.audio_storage import AudioStorage
 
 logger = logging.getLogger(__name__)
@@ -88,6 +88,7 @@ async def _recover_stale_jobs(now: datetime) -> None:
 
 async def _claim_next_job(now: datetime) -> ClaimedJob | None:
     await _recover_stale_jobs(now)
+    claim: ClaimedJob | None = None
     async with get_sessionmaker()() as session, session.begin():
         job = (
             await session.execute(
@@ -109,7 +110,13 @@ async def _claim_next_job(now: datetime) -> ClaimedJob | None:
         job.attempt_count += 1
         job.processing_started_at = now
         job.error_code = None
-        return ClaimedJob(job.id, job.attempt_count, job.assist_reservation_id)
+        claim = ClaimedJob(job.id, job.attempt_count, job.assist_reservation_id)
+    assert claim is not None
+    logger.info(
+        "transcription_claimed",
+        extra={"job_id": claim.job_id, "attempt": claim.attempt_number},
+    )
+    return claim
 
 
 async def _authorize_dispatch(claim: ClaimedJob) -> bool:
@@ -167,6 +174,15 @@ async def _record_failure(claim: ClaimedJob, code: str, *, retryable: bool) -> N
             await assist_quota.release(session, job.assist_reservation_id, code)
         job.error_code = code
         job.processing_started_at = None
+    logger.warning(
+        "transcription_failed",
+        extra={
+            "job_id": claim.job_id,
+            "attempt": claim.attempt_number,
+            "error_code": code,
+            "retryable": retryable,
+        },
+    )
 
 
 async def _record_success(
@@ -207,6 +223,10 @@ async def _record_success(
         job.error_code = None
         job.processing_started_at = None
         job.completed_at = datetime.now(UTC)
+    logger.info(
+        "transcription_completed",
+        extra={"job_id": claim.job_id, "attempt": claim.attempt_number},
+    )
 
 
 async def process_next_transcription() -> bool:
@@ -229,8 +249,7 @@ async def process_next_transcription() -> bool:
             return True
         attempt = (
             await session.execute(
-                select(SpeakingAttempt)
-                .where(SpeakingAttempt.id == job.speaking_attempt_id)
+                select(SpeakingAttempt).where(SpeakingAttempt.id == job.speaking_attempt_id)
             )
         ).scalar_one_or_none()
         if attempt is None or not attempt.storage_key or not attempt.mime_type:
@@ -303,7 +322,8 @@ async def run_transcription_worker(*, once: bool = False) -> None:
                 elif now - last_heartbeat >= 10:
                     await maintenance.heartbeat()
                     last_heartbeat = now
-                processed = await process_next_transcription()
+                deleted = await account_deletion.process_file_batch(limit=1)
+                processed = bool(deleted) or await process_next_transcription()
                 failures = 0
             except (DBAPIError, PoolTimeout, ConnectionError, TimeoutError, OSError):
                 # Sem SQL, DSN, áudio, texto ou stack do provedor nos logs.

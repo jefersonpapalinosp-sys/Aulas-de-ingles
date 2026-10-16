@@ -1,10 +1,14 @@
-"""Health check: liveness simples e readiness que de fato toca o banco."""
+"""Liveness independente e readiness que valida banco e revisão de schema."""
 
 import logging
+from functools import lru_cache
+from pathlib import Path
 from typing import Annotated, Literal
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi import APIRouter, Depends, Response, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,11 +20,34 @@ router = APIRouter(tags=["health"])
 
 
 class HealthOut(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     status: str
     db: str
     version: str | None = None
+    schema_status: Literal["compatible", "incompatible", "unknown"] = Field(alias="schema")
+    schema_current: list[str]
+    schema_required: list[str]
     env: str
-    code: Literal["service_unavailable"] | None = None
+    code: Literal["service_unavailable", "schema_incompatible"] | None = None
+
+
+@lru_cache(maxsize=1)
+def required_schema_heads() -> tuple[str, ...]:
+    """Retorna os heads embarcados na mesma imagem da API.
+
+    O caminho absoluto evita depender do diretório corrente do processo. A
+    imagem de produção leva ``alembic.ini`` e ``alembic/`` junto com o código.
+    """
+    backend_root = Path(__file__).resolve().parents[2]
+    config = Config(str(backend_root / "alembic.ini"))
+    config.set_main_option("script_location", str(backend_root / "alembic"))
+    return tuple(sorted(ScriptDirectory.from_config(config).get_heads()))
+
+
+async def current_schema_heads(session: AsyncSession) -> tuple[str, ...]:
+    result = await session.execute(text("SELECT version_num FROM alembic_version"))
+    return tuple(sorted(str(value) for value in result.scalars().all()))
 
 
 @router.get("/health", response_model=HealthOut, responses={503: {"model": HealthOut}})
@@ -31,8 +58,9 @@ async def health(
 ) -> HealthOut:
     """Readiness.
 
-    Abre uma conexão de verdade e pergunta a versão ao Postgres. Se o banco
-    não responder, devolve 503 — é isso que faz o healthcheck valer alguma coisa.
+    Abre uma conexão de verdade e exige que a revisão aplicada seja exatamente
+    o conjunto de heads embarcado. Banco acessível com código/schema divergentes
+    continua indisponível para tráfego.
     """
     try:
         result = await session.execute(text("select version()"))
@@ -48,11 +76,48 @@ async def health(
             status="degraded",
             db="down",
             version=None,
+            schema="unknown",
+            schema_current=[],
+            schema_required=list(required_schema_heads()),
             env=settings.app_env,
             code="service_unavailable",
         )
 
-    return HealthOut(status="ok", db="up", version=version, env=settings.app_env)
+    required = required_schema_heads()
+    try:
+        current = await current_schema_heads(session)
+    except Exception as exc:
+        # A conexão já foi comprovada acima. Tabela ausente, permissão incorreta
+        # ou catálogo ilegível são incompatibilidade de schema, não banco "down".
+        log.warning(
+            "health: schema indisponível",
+            extra={"error_type": type(exc).__name__},
+        )
+        current = ()
+    if current != required:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        response.headers["X-Error-Code"] = "schema_incompatible"
+        response.headers["Cache-Control"] = "no-store"
+        return HealthOut(
+            status="degraded",
+            db="up",
+            version=version,
+            schema="incompatible",
+            schema_current=list(current),
+            schema_required=list(required),
+            env=settings.app_env,
+            code="schema_incompatible",
+        )
+
+    return HealthOut(
+        status="ok",
+        db="up",
+        version=version,
+        schema="compatible",
+        schema_current=list(current),
+        schema_required=list(required),
+        env=settings.app_env,
+    )
 
 
 @router.get("/live")

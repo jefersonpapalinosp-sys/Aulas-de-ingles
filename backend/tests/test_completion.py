@@ -107,6 +107,7 @@ async def test_completion_exige_login_e_reconhece_recorte_publicado(client: Asyn
     ]
     assert pilot.json()["certificate"] == {
         **pilot.json()["certificate"],
+        "rule_version": "course-certificate-v1",
         "eligible": False,
         "required_lessons": 30,
         "scope_label": "Aulas 1–30",
@@ -249,6 +250,7 @@ async def test_completion_vazio_explica_regra_e_nao_muta_estado(
     assert all(skill["score_percent"] is None for skill in body["skills"])
     assert {skill["status"] for skill in body["skills"]} == {"insufficient"}
     assert body["certificate"] == {
+        "rule_version": "course-certificate-v1",
         "eligible": False,
         "status": "ineligible",
         "reason": "Conclua 52 aulas do recorte para liberar o certificado.",
@@ -376,9 +378,7 @@ async def test_novo_checkpoint_31_40_revoga_elegibilidade_ate_ser_concluido(
     user = await usuario(session, "completion-new-checkpoint")
     lessons = await level_one_lessons(session)
     reviews = await published_reviews(session)
-    previous_reviews = [
-        review for review in reviews if review.slug != "checkpoint-31-40-level-1"
-    ]
+    previous_reviews = [review for review in reviews if review.slug != "checkpoint-31-40-level-1"]
     assert len(reviews) == 10
     assert len(previous_reviews) == 9
     session.add_all([LessonProgress(user_id=user.id, lesson_id=lesson.id) for lesson in lessons])

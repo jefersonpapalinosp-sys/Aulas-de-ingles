@@ -2,14 +2,40 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
 from app.db.session import get_session
-from app.services.editorial_history import EvidenceKind, HistoricalContentOut, get_history
+from app.pagination import InvalidCursor, decode_time_id_cursor
+from app.services.editorial_history import (
+    EvidenceKind,
+    HistoricalContentOut,
+    HistoricalEvidencePageOut,
+    get_history,
+    history_page,
+)
 
 router = APIRouter(tags=["history"])
+
+
+@router.get("/me/history/page", response_model=HistoricalEvidencePageOut)
+async def historical_evidence_page(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> HistoricalEvidencePageOut:
+    response.headers["Cache-Control"] = "private, no-store"
+    try:
+        boundary = decode_time_id_cursor(cursor) if cursor is not None else None
+    except InvalidCursor as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"code": "invalid_cursor", "message": "Cursor de paginação inválido."},
+        ) from error
+    return await history_page(session, usuario.id, limit, boundary)
 
 
 @router.get("/me/history/{kind}/{evidence_id}/content", response_model=HistoricalContentOut)
