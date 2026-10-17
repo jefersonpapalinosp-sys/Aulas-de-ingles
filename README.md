@@ -491,10 +491,11 @@ primeiro deploy, gere um arquivo novo e substitua o anterior sem o adicionar ao
 Git.
 
 O procedimento completo, domínio, aceite, backup e rollback estão no
-[runbook do EasyPanel](docs/deploy_easypanel.md). O destino definido é o serviço
-`aulas-ingles` no projeto `papalino`, publicado em
-`https://ingles.papalino.com.br`. Enquanto o aceite remoto não estiver anexado,
-o estado permanece **preparado, não publicado**.
+[runbook do EasyPanel](docs/deploy_easypanel.md). O serviço `aulas-ingles` foi
+implantado no projeto `papalino` e está saudável em
+`https://papalino-aulas-ingles.aeuv6j.easypanel.host`. A origem final
+`https://ingles.papalino.com.br` já está associada, mas depende do registro DNS
+para emitir/validar o certificado e receber o aceite final.
 
 ### Observabilidade
 

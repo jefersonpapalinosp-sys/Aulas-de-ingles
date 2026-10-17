@@ -146,7 +146,11 @@ segredos do estudo local:
 A consulta ao painel confirmou capacidade de CPU, RAM e disco para esta stack,
 porém a licença atual retornou `canCreateProject=false` com três projetos
 existentes. O destino escolhido passou a ser o projeto `papalino`, após a remoção
-autorizada dos serviços legados Grandprime, e a origem HTTPS definida é
-`https://ingles.papalino.com.br`. Ainda falta integrar a branch na `main`, criar
-o serviço `aulas-ingles` e executar o checklist remoto. O estado desta etapa é
-**preparado, não publicado**.
+autorizada dos serviços legados Grandprime. A branch foi integrada pelo merge
+`49a6d89` e o primeiro deploy do serviço `aulas-ingles` terminou com banco,
+migration, permissões, API, worker e web saudáveis. Os smokes HTTPS passaram no
+domínio gerado do EasyPanel. A origem final
+`https://ingles.papalino.com.br` está configurada como primária, mas ainda não
+resolve publicamente porque falta o registro DNS. O estado desta etapa é
+**implantado, com aceite remoto parcial**; backup inicial, persistência autenticada
+e homologações humanas permanecem abertos.

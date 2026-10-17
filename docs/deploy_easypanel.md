@@ -7,7 +7,7 @@ segredos dos ambientes locais. O destino escolhido é o projeto `papalino` e a
 origem pública é `https://ingles.papalino.com.br`. Este documento só passa a ser
 registro de publicação depois que o aceite pós-deploy for anexado.
 
-## Estado da preparação
+## Estado da implantação
 
 - capacidade observada no servidor: 2 CPUs, 7,76 GiB de RAM e 51,2 GB livres;
 - estimativa local da aplicação: aproximadamente 0,33 GiB de RAM em repouso e
@@ -18,8 +18,27 @@ registro de publicação depois que o aceite pós-deploy for anexado.
   `canCreateProject=false`: não há cota para criar um quarto projeto;
 - o serviço Compose usará o nome `aulas-ingles` no projeto existente `papalino`;
 - a origem pública definida é `https://ingles.papalino.com.br`;
-- branch preparada localmente: `sprint/43-implantacao-estudo`; publicar somente
-  depois de commit, revisão e merge na `main`.
+- branch integrada na `main` pelo merge `49a6d89be8a0f2e99b9df8f8af47ebde1131545c`;
+- primeiro deploy concluído no serviço `papalino/aulas-ingles`; o domínio próprio
+  continua aguardando o registro DNS público.
+
+### Registro do primeiro deploy — 16/10/2026
+
+- ação EasyPanel: `cmvbsa80x006w06mu6tc4cjfq`;
+- origem Git: `main`, no merge `49a6d89`;
+- build path: `/infra/easypanel`; arquivo: `compose.yml`;
+- imagens de banco, migration, permissões, API, worker e web construídas;
+- banco saudável, migration/seed concluídos, grants concluídos e API saudável;
+- worker e web iniciados; ação encerrada como `done` às `02:37:42 UTC` de
+  17/10/2026;
+- smoke externo aprovado pelo domínio gerado
+  `https://papalino-aulas-ingles.aeuv6j.easypanel.host` para `/`, rota profunda,
+  `/sw.js`, `/api/live` e `/api/health`;
+- schema atual e requerido: `a42c7d1e9f20`; banco `up`, ambiente `prod`;
+- CSP, HSTS, `nosniff`, política de referência e política de permissões presentes;
+- `https://ingles.papalino.com.br` já está associado ao container `web:80` e é o
+  domínio primário, mas não resolve publicamente enquanto faltar o registro DNS
+  `A ingles -> 72.61.39.94`.
 
 ## Arquitetura publicada
 
@@ -108,8 +127,8 @@ No projeto EasyPanel `papalino`:
    `https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles.git`;
 3. use a referência `main` e, se a tela oferecer deploy por SHA, prefira o SHA
    aprovado;
-4. configure o diretório raiz como `/`;
-5. configure o arquivo Compose como `infra/easypanel/compose.yml`;
+4. configure o Build Path como `/infra/easypanel`;
+5. configure o arquivo Compose como `compose.yml`;
 6. salve a definição do serviço sem iniciar o deploy;
 7. obtenha o domínio na etapa seguinte antes de colar o ambiente privado.
 
@@ -225,7 +244,10 @@ O deploy só pode ser chamado de concluído quando houver:
 - backup pós-deploy verificado;
 - evidências sem segredos anexadas ao registro da mudança.
 
-Até esses itens existirem, o estado correto é **preparado, não publicado**.
+Estado atual: **implantado, com aceite remoto parcial**. O domínio gerado está
+saudável; o encerramento integral ainda depende do DNS/certificado do domínio
+próprio, do teste funcional autenticado, da persistência após redeploy e do
+backup inicial verificado.
 
 ## Referências do painel
 
