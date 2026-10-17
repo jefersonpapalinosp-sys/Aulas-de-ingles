@@ -16,7 +16,7 @@ ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -
         recovery-lab-up recovery-lab-prepare recovery-lab-down upgrade-lab-up upgrade-lab-prepare upgrade-lab-down backup-verify test-recovery \
         test-recovery-integration test-upgrade-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down \
         notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark \
-        operations-check cue-audit test-failure-rehearsal
+        operations-check cue-audit test-failure-rehearsal easypanel-env easypanel-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-z0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -62,6 +62,12 @@ test-failure-rehearsal: test-api-prepare ## Ensaia falhas controladas de banco, 
 		tests/test_speaking.py::test_falha_do_provedor_mantem_audio_e_autoavaliacao \
 		tests/test_speaking.py::test_worker_repete_com_backoff_e_chave_idempotente \
 		tests/test_speaking.py::test_worker_retoma_job_interrompido_apos_timeout
+
+easypanel-env: ## Gera segredos locais; origin=https://dominio-publico é opcional
+	python3 -m ops.easypanel_deploy init $(if $(origin),--origin "$(origin)",)
+
+easypanel-check: ## Valida o arquivo privado e o Compose público sem exibir segredos
+	python3 -m ops.easypanel_deploy check
 
 api: .env ## Roda a API no host (contra o Postgres do compose)
 	cd backend && DATABASE_URL=postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles \

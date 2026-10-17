@@ -206,10 +206,22 @@ retry idempotente e retomada de job abandonado por um worker interrompido. A
 rodada de 16/10/2026 aprovou 5 de 5 cenários. Esse teste não toca o banco de
 estudo e não substitui um exercício futuro de indisponibilidade física.
 
+## Implantação local executada em 16/10/2026
+
+O procedimento foi executado no ambiente de estudo com o commit
+`c3ee3cc2e5386b734773d26fafd7e4cf2f0ada03`. A origem `a39d7bc02486` recebeu
+backup conjunto, restore em clone vazio, ensaio até `a42c7d1e9f20`, migration pelo
+papel `aulas_migrator`, readiness/gate antes da web e backup posterior. Contagens,
+referências de voz, constraints e vínculos foram preservados; zero locks ficaram
+aguardando. Veja [Sprint 43](sprint_43_implantacao_estudo_2026-10-16.md).
+
+O token operacional usado no gate foi gerado somente para o container atual e não
+foi versionado. Antes de uma futura recriação, configurar um valor privado e
+persistente de 32+ bytes em `.env.prod`, sem copiá-lo para documentação ou Git.
+
 ## Pendências que impedem o aceite integral
 
-- medir o RTO operacional completo e comprovar a rotina/cadência do RPO de 24 h;
-- confirmar na CI o inventário Trivy já aprovado localmente para as candidatas;
+- medir o RTO de desastre completo e comprovar a rotina/cadência do RPO de 24 h;
 - conferência auditiva, pedagógica, leitores de tela e dispositivos reais;
 - HTTPS público com certificado/proxy reais.
 

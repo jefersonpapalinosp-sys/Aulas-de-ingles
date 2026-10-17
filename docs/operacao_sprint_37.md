@@ -1,14 +1,16 @@
-# Operação local — Sprints 37 a 41
+# Operação local — Sprints 37 a 43
 
 Escopo: desenvolvimento no Mac de Jeferson. A stack aulas-ingles-prod em
 localhost:5181 é **produção local**, não serviço público. Desenvolvimento em
 5180 tem manutenção independente. Nunca executar pytest/E2E nessas bases.
 
-Estado vigente: Sprint 40 fechada tecnicamente em branch em 16/10/2026, com head
-`a42c7d1e9f20` aprovado somente no PostgreSQL descartável e no laboratório de
-papéis. Este incremento não inspecionou nem alterou DEV 5180 ou estudo 5181.
-Aceites físicos/pedagógicos e rollout continuam separados. Comandos antigos são
-históricos e não devem ser repetidos como atualização genérica para sprints posteriores.
+Estado vigente: fechamento técnico das Sprints 40–42 implantado no estudo 5181 em
+16/10/2026, com head `a42c7d1e9f20`. A operação usou backup real anterior,
+restore isolado, ensaio, papel migrador, gates antes da web e backup posterior;
+consulte a [Sprint 43](sprint_43_implantacao_estudo_2026-10-16.md). DEV 5180 não
+foi migrado nesta operação. Aceites físicos e pedagógicos continuam separados.
+Comandos antigos abaixo são históricos e não devem ser repetidos como atualização
+genérica para sprints posteriores.
 
 ## Decisões autorizadas em 13/10/2026
 
