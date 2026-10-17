@@ -1,0 +1,182 @@
+x-backend-build: &backend-build
+  context: ../..
+  dockerfile: backend/Dockerfile.prod
+
+x-backend-common: &backend-common
+  APP_ENV: prod
+  LOG_LEVEL: info
+  DEPLOYMENT_PROFILE: public
+  PUBLIC_ORIGIN: ${EASYPANEL_PUBLIC_ORIGIN:?defina a origem HTTPS primária}
+  COOKIE_SECURE: "true"
+  JWT_SECRET: ${EASYPANEL_JWT_SECRET:?gere um JWT_SECRET privado}
+  OPERATIONS_TOKEN: ${EASYPANEL_OPERATIONS_TOKEN:?gere um token operacional privado}
+  # Aspas são obrigatórias: sem elas, o parser YAML converte o timestamp e o
+  # Compose entrega um formato que o Pydantic recusa.
+  LEGACY_WRITES_UNTIL: "2026-11-13T00:00:00Z"
+  AUTH_IDENTITY_LIMIT: "20"
+  AUTH_ORIGIN_LIMIT: "200"
+  AUTH_WINDOW_SECONDS: "300"
+  AUTH_HASH_CONCURRENCY: "2"
+  DATABASE_POOL_TIMEOUT_SECONDS: "10"
+  DATABASE_STATEMENT_TIMEOUT_MS: "30000"
+  DATABASE_LOCK_TIMEOUT_MS: "5000"
+  SPEAKING_STORAGE_DIR: /app/data/speaking
+  SPEAKING_MAX_BYTES: "2000000"
+  EDITORIAL_SNAPSHOTS_ENABLED: "false"
+  ASSISTED_FEATURES_ENABLED: ${EASYPANEL_ASSISTED_FEATURES_ENABLED:-false}
+  ASSIST_TRANSCRIPTION_URL: ${EASYPANEL_ASSIST_TRANSCRIPTION_URL:-}
+  ASSIST_WRITING_URL: ${EASYPANEL_ASSIST_WRITING_URL:-}
+  ASSIST_PROVIDER_KIND: gateway
+  ASSIST_PROVIDER_NAME: external
+  ASSIST_PROVIDER_TOKEN: ${EASYPANEL_ASSIST_PROVIDER_TOKEN:-}
+  ASSIST_DAILY_QUOTA: "5"
+  ASSIST_RESERVATION_SECONDS: "900"
+  ASSIST_RETENTION_DAYS: "30"
+  ASSIST_TIMEOUT_SECONDS: "20"
+  ASSIST_JOB_MAX_ATTEMPTS: "3"
+  ASSIST_JOB_RETRY_BASE_SECONDS: "5"
+  ASSIST_JOB_STALE_SECONDS: "120"
+  ASSIST_WORKER_POLL_SECONDS: "1"
+  MAINTENANCE_BATCH_SIZE: "100"
+  MAINTENANCE_INTERVAL_SECONDS: "60"
+  MAINTENANCE_CLEANUP_ENABLED: "false"
+
+services:
+  db:
+    build:
+      context: ../..
+      dockerfile: infra/easypanel/Dockerfile.postgres
+    environment:
+      POSTGRES_USER: aulas_admin
+      POSTGRES_PASSWORD: ${EASYPANEL_DB_ADMIN_PASSWORD:?gere a senha administrativa}
+      POSTGRES_DB: aulas_ingles
+      AULAS_MIGRATOR_PASSWORD: ${EASYPANEL_MIGRATOR_PASSWORD:?gere a senha do migrador}
+      AULAS_RUNTIME_PASSWORD: ${EASYPANEL_RUNTIME_PASSWORD:?gere a senha do runtime}
+      AULAS_WORKER_PASSWORD: ${EASYPANEL_WORKER_PASSWORD:?gere a senha do worker}
+      AULAS_BACKUP_PASSWORD: ${EASYPANEL_BACKUP_PASSWORD:?gere a senha de backup}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_admin -d aulas_ingles"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    mem_limit: 768m
+    cpus: 0.75
+    restart: unless-stopped
+
+  migrate:
+    build: *backend-build
+    environment:
+      <<: *backend-common
+      DATABASE_URL: postgresql+asyncpg://aulas_migrator:${EASYPANEL_MIGRATOR_PASSWORD}@db:5432/aulas_ingles
+      DATABASE_PURPOSE: migrator
+    command:
+      - sh
+      - -ec
+      - alembic upgrade head && alembic check && python -m app.cli seed
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 768m
+    cpus: 1.0
+    restart: "no"
+
+  permissions:
+    build:
+      context: ../..
+      dockerfile: infra/easypanel/Dockerfile.postgres
+    entrypoint: ["/opt/aulas/apply-grants.sh"]
+    environment:
+      POSTGRES_USER: aulas_migrator
+      POSTGRES_DB: aulas_ingles
+      PGPASSWORD: ${EASYPANEL_MIGRATOR_PASSWORD:?gere a senha do migrador}
+      PGOPTIONS: "-c role=aulas_owner"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 128m
+    cpus: 0.25
+    restart: "no"
+
+  api:
+    build: *backend-build
+    environment:
+      <<: *backend-common
+      DATABASE_URL: postgresql+asyncpg://aulas_runtime:${EASYPANEL_RUNTIME_PASSWORD}@db:5432/aulas_ingles
+      DATABASE_PURPOSE: runtime
+      DATABASE_POOL_SIZE: "3"
+      DATABASE_MAX_OVERFLOW: "2"
+      DATABASE_PROCESS_BUDGET: "2"
+    volumes:
+      - speaking_data:/app/data/speaking
+    expose:
+      - "8000"
+    depends_on:
+      permissions:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request,sys;
+          request=urllib.request.Request('http://localhost:8000/api/health',
+          headers={'X-Forwarded-Proto':'https'});
+          sys.exit(0 if urllib.request.urlopen(request,timeout=3).status==200 else 1)"
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 15s
+    mem_limit: 768m
+    cpus: 1.0
+    restart: unless-stopped
+
+  worker:
+    build: *backend-build
+    user: "10001:10001"
+    entrypoint: []
+    command: ["python", "-m", "app.cli", "assist-worker"]
+    environment:
+      <<: *backend-common
+      DATABASE_URL: postgresql+asyncpg://aulas_worker:${EASYPANEL_WORKER_PASSWORD}@db:5432/aulas_ingles
+      DATABASE_PURPOSE: worker
+      DATABASE_POOL_SIZE: "2"
+      DATABASE_MAX_OVERFLOW: "1"
+      DATABASE_PROCESS_BUDGET: "1"
+    volumes:
+      - type: volume
+        source: speaking_data
+        target: /app/data/speaking
+        read_only: true
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 512m
+    cpus: 0.5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+    expose:
+      - "80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      # 127.0.0.1 evita que o wget do Alpine escolha ::1 enquanto o nginx
+      # deste container escuta explicitamente em IPv4.
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    mem_limit: 128m
+    cpus: 0.25
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  speaking_data:

@@ -16,6 +16,13 @@ aulas e seis checkpoints**; seu fechamento 26–30 é autoral porque a VOA não 
 uma revisão oficial com esse recorte. Recursos assistidos continuam desligados por
 padrão até passarem pela avaliação humana.
 
+O ambiente local de estudo em <http://localhost:5181> foi promovido em 16/10/2026
+para o schema `a42c7d1e9f20`, com backup anterior, ensaio em clone restaurado,
+gates e backup posterior. O registro está na
+[Sprint 43](docs/sprint_43_implantacao_estudo_2026-10-16.md). Listening humano,
+revisão pedagógica, leitores de tela/dispositivos reais e HTTPS público continuam
+pendentes e não são apresentados como aprovados.
+
 O certificado interno acompanha somente o conteúdo efetivamente publicado no Level 1:
 agora exige **52 aulas e dez checkpoints**. Ele não é um certificado da VOA. A consulta
 ao certificado externo é sempre explícita, respeita os critérios próprios da fonte e
@@ -465,6 +472,29 @@ e a aplicação valida que o segredo tem pelo menos 32 bytes.
 `COOKIE_SECURE=false` em localhost é intencional: com `Secure` ligado o
 navegador simplesmente não envia o cookie por HTTP, e o login para de
 funcionar. Ligue junto com HTTPS, não antes.
+
+### Deploy público no EasyPanel
+
+Existe uma stack separada para o perfil público, sem portas de host, com TLS no
+proxy, papéis mínimos de banco, migrations bloqueantes e volumes persistentes.
+Ela não reutiliza o `.env` de desenvolvimento.
+
+```bash
+# gere uma única vez com a origem pública definida
+make easypanel-env origin=https://ingles.papalino.com.br
+# valide antes de publicar
+make easypanel-check
+```
+
+O gerador não sobrescreve o arquivo privado. Para trocar segredos antes do
+primeiro deploy, gere um arquivo novo e substitua o anterior sem o adicionar ao
+Git.
+
+O procedimento completo, domínio, aceite, backup e rollback estão no
+[runbook do EasyPanel](docs/deploy_easypanel.md). O destino definido é o serviço
+`aulas-ingles` no projeto `papalino`, publicado em
+`https://ingles.papalino.com.br`. Enquanto o aceite remoto não estiver anexado,
+o estado permanece **preparado, não publicado**.
 
 ### Observabilidade
 

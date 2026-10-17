@@ -1,0 +1,9 @@
+FROM public.ecr.aws/docker/library/postgres:16.15-alpine
+
+COPY infra/easypanel/postgres-init.sh /docker-entrypoint-initdb.d/10-aulas-roles.sh
+COPY infra/easypanel/apply-grants.sh /opt/aulas/apply-grants.sh
+COPY ops/roles_policy.sql /opt/aulas/roles_policy.sql
+
+RUN chmod 0555 /docker-entrypoint-initdb.d/10-aulas-roles.sh \
+    /opt/aulas/apply-grants.sh \
+    && chmod 0444 /opt/aulas/roles_policy.sql

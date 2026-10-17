@@ -1,8 +1,8 @@
 # Sprints de frontend para confiabilidade e experiência de estudo
 
-Atualização: 16 de outubro de 2026. **Implementação FE-39G/H concluída e implantada; FE-40, FE-41 e FE-42 tecnicamente concluídas.** O fechamento FE-40/42 está somente na branch e nos laboratórios, sem rollout em DEV/estudo. Evidências no [registro operacional 40C/40D](operacao_sprint_37.md#sprint-40c40d--exclusão-histórico-e-fechamento-técnico-em-16102026) e na [matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md). O aceite integral ainda depende das homologações físicas, auditivas e pedagógicas registradas neste plano; nenhuma recebeu aprovação fictícia.
+Atualização: 16 de outubro de 2026. **Implementação FE-39G/H concluída e FE-40, FE-41 e FE-42 tecnicamente concluídas e implantadas no ambiente de estudo.** A promoção da `main` foi realizada com backup anterior, clone restaurado, gates e backup posterior; consulte a [Sprint 43](sprint_43_implantacao_estudo_2026-10-16.md). O aceite integral ainda depende das homologações físicas, auditivas e pedagógicas registradas neste plano; nenhuma recebeu aprovação fictícia.
 
-Schema em ambos os ambientes: `a39d7bc02486`. Frontend do estudo usa build com PWA; desenvolvimento 5180 usa Vite e não registra o service worker. A instalação 39G/H inclui as entregas 39A–F e preserva o histórico anterior. Consulte o registro vigente antes de usar comandos históricos.
+Schema do estudo: `a42c7d1e9f20`. O frontend de `localhost:5181` usa o build atual com PWA; desenvolvimento 5180 usa Vite e não registra o service worker. O rollout preservou o histórico e os arquivos de voz. Consulte o registro vigente antes de usar comandos históricos.
 
 Base: [auditoria técnica](auditoria_tecnica_frontend_backend_banco_2026-10-13.md). Os IDs F, B e D referem-se aos achados desse relatório. Estes pacotes não substituem as Sprints 20 a 36 já entregues: a trilha por curso/unidade, o laboratório e a classificação devem ser preservados.
 
