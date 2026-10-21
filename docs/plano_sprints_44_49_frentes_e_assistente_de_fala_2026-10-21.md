@@ -79,11 +79,11 @@ a política escrita em
 
 Entregas:
 
-- [ ] `make backup source=public`: captura do PostgreSQL e do volume de voz da
+- [x] `make backup source=public`: captura do PostgreSQL e do volume de voz da
   stack EasyPanel via SSH na VM, com o mesmo manifesto e checksums de
   `ops/recovery_archive.py`; o pacote chega ao Mac já criptografado com `age`
   e chave que não mora no Mac.
-- [ ] `ops/recovery.py prune`: janela de 7 diários + 4 semanais, `--dry-run`
+- [x] `ops/recovery.py prune`: janela de 7 diários + 4 semanais, `--dry-run`
   por padrão, recusa apagar o pacote mais recente e qualquer `.partial-*`
   com menos de 24 h.
 - [ ] Remover `backups/recovery/sprint39-application-before-*` (523 MB de
@@ -91,7 +91,7 @@ Entregas:
   `.partial-*` de 0 B.
 - [ ] Agendamento diário local (`launchd`) com registro de sucesso/falha em
   arquivo; cópia externa criptografada do pacote do dia.
-- [ ] Primeiro backup real pós-deploy registrado em
+- [x] Primeiro backup real pós-deploy registrado em
   [deploy_easypanel.md](deploy_easypanel.md).
 
 Critérios de aceite:
@@ -115,19 +115,19 @@ hoje deixam passar combinações inseguras.
 
 Entregas:
 
-- [ ] Mover `backups/recovery/roles-prod.env` e `roles-lab.env` para fora de
+- [x] Mover `backups/recovery/roles-prod.env` e `roles-lab.env` para fora de
   `backups/` (diretório `secrets/` ignorado, perm `0600`) e ajustar
   `Makefile:166`.
-- [ ] `config.validar()`: exigir `COOKIE_SECURE=true` quando `APP_ENV=prod`,
+- [x] `config.validar()`: exigir `COOKIE_SECURE=true` quando `APP_ENV=prod`,
   não só com `DEPLOYMENT_PROFILE=public`; alinhar `.env.prod.example`.
-- [ ] `config.validar()`: recusar `CORS_ORIGINS` contendo `*` enquanto
+- [x] `config.validar()`: recusar `CORS_ORIGINS` contendo `*` enquanto
   `allow_credentials=True`.
-- [ ] Chave HMAC dos buckets de rate limit derivada de segredo próprio
+- [x] Chave HMAC dos buckets de rate limit derivada de segredo próprio
   (`AUTH_BUCKET_SECRET` ou HKDF a partir do `JWT_SECRET` com rótulo), para
   que rotacionar o JWT não zere os contadores.
 - [ ] `OPERATIONS_TOKEN` persistido na configuração do serviço no EasyPanel
   (32+ bytes), não só no container atual.
-- [ ] `permissions: contents: read` no topo de `.github/workflows/ci.yml`.
+- [x] `permissions: contents: read` no topo de `.github/workflows/ci.yml`.
 
 Critérios de aceite:
 
@@ -145,17 +145,17 @@ expira e fechar duas pontas soltas de robustez.
 
 Entregas:
 
-- [ ] Passo no job `backend` do CI que roda `tests/test_progress.py`,
+- [x] Passo no job `backend` do CI que roda `tests/test_progress.py`,
   `tests/test_writing*.py`, `tests/test_review.py` e `tests/test_concurrency.py`
   com `LEGACY_WRITES_UNTIL` no passado; o `conftest` deixa de empurrar a
   janela quando essa variável vier do ambiente.
 - [ ] Decisão registrada: manter 13/11/2026 ou adiar. Se adiar, mudar o
   default em `config.py`, nos três Compose e no README no mesmo PR.
-- [ ] `limit` com teto 100 em `GET /me/notebook`, `GET /review/items`,
+- [x] `limit` com teto 100 em `GET /me/notebook`, `GET /review/items`,
   `GET /speaking/attempts` e `GET /writing/history`; os clientes antigos que
   não enviam `limit` recebem a primeira página e um cabeçalho indicando a
   rota paginada.
-- [ ] Investigar o 503 em `test_concurrent_modalities_share_atomic_quota`
+- [x] Investigar o 503 em `test_concurrent_modalities_share_atomic_quota`
   sob carga: identificar o `sqlstate` que vira 503 (lock `NOWAIT`, pool ou
   timeout do provedor simulado) e corrigir a causa ou documentar o limite de
   concorrência; o teste passa 10 vezes seguidas com outro processo pesado na
@@ -176,17 +176,17 @@ não pode divergir por desenho.
 
 Entregas:
 
-- [ ] Auditoria de todos os `PUT`/`POST` mutáveis: cada um envia
+- [x] Auditoria de todos os `PUT`/`POST` mutáveis: cada um envia
   `expected_revision` ou `operation_key` quando o contrato pede; teste que
   falha se um novo write escapar.
-- [ ] Tratamento de 428: aviso "atualize o aplicativo" com recarga
+- [x] Tratamento de 428: aviso "atualize o aplicativo" com recarga
   confirmada, sem perder rascunho ou fila.
-- [ ] Um único mapa `evento → chaves` em `api/invalidateStudy.ts`
+- [x] Um único mapa `evento → chaves` em `api/invalidateStudy.ts`
   (`attempt`, `queueSync`, `writingFeedback`, `speakingUpload`, `reviewGrade`)
   e remoção da função homônima em `ConnectivityStatus.tsx` e das listas
   soltas em `ExerciseCard.tsx`, `review.ts`, `progress.ts`,
   `addReviewItem.ts`, `courseReviews.ts` e `ShadowingPractice.tsx`.
-- [ ] `check-bundle-budget.mjs` com dois tetos: carregamento inicial
+- [x] `check-bundle-budget.mjs` com dois tetos: carregamento inicial
   (entrada + CSS) e total de assets; o teto inicial fica abaixo do total
   atual para não penalizar chunk lazy.
 
@@ -203,13 +203,13 @@ Critérios de aceite:
 
 Entregas:
 
-- [ ] Índice em `auth_rate_bucket(window_start)` ou mover o `DELETE` de
+- [x] Índice em `auth_rate_bucket(window_start)` ou mover o `DELETE` de
   `auth_limits.py:52` para `services/maintenance.py`; medir antes e depois
   com `EXPLAIN` no laboratório.
 - [ ] Ensaio de restore do pacote público (INFRA-44) com comparação de
   contagens das 39 tabelas históricas mais as de atividade, como na
   Sprint 43.
-- [ ] Unificar `test_notebook_index_migration.py`,
+- [x] Unificar `test_notebook_index_migration.py`,
   `test_review_index_migration.py` e
   `test_writing_feedback_index_migration.py` em um teste parametrizado.
 
@@ -218,6 +218,41 @@ Critérios de aceite:
 1. O plano do `DELETE` em `auth_rate_bucket` deixa de ser `Seq Scan` ou o
    comando sai do caminho de login.
 2. Recibo do restore público guardado em `backups/recovery/restore-receipts/`.
+
+### Registro de execução — Ciclo 44, 21/10/2026
+
+Implementado na branch `sprint/44-producao-publica`, em seis commits (um por
+pacote mais o de testes/CI), sem push. "Implementado" aqui é técnico; os itens
+abaixo marcados como pendentes dependem de decisão ou ação de Jeferson.
+
+**Validação executada:** ruff, mypy strict (92 arquivos), eslint, tsc e
+`check:api` limpos. Backend: **1166 testes aprovados** na suíte normal (2 min
+26 s) e **1166 aprovados com `LEGACY_WRITES_UNTIL` expirado** (2 min 53 s), zero
+pulados pelo marcador `legacy_client`. Frontend: **46 arquivos, 396 testes**,
+7 testes do script de orçamento, build e os dois tetos (inicial 127,5 de 132 KiB;
+total 177,3 de 184 KiB). Operação: **133 testes** em `ops/tests`. Baseline
+OpenAPI e `schema.d.ts` regenerados no mesmo commit. E2E não foi reexecutado.
+
+| Pacote | Entregue | Evidência | Pendente |
+|---|---|---|---|
+| INFRA-44 | `make backup source=public`, `backup-public-check`, `backup-prune`/`-apply`, modelo launchd, runbook e política | primeiro pacote real `aulas-20261021T042626017843Z-bb04…`, revisão `a42c7d1e9f20`, 82 aulas, 1 usuário, dump 631.101 bytes, 32 s, verificado; dry-run do prune: manter 3, remover 10 (10,9 MB), 1 parcial, 29 fora da política | apagar os 523 MB de `sprint39-application-before-*` e rodar `backup-prune-apply` (decisão do operador); instalar `age` e gerar o par com a privada fora do Mac; instalar o launchd; restore do pacote público em laboratório (todos os alvos estão ocupados por ensaios anteriores; precisa de autorização para liberar um) |
+| SEC-44 | `roles-*.env/json` em `secrets/`; guardas de cookie em prod, `CORS_ORIGINS=*` e `AUTH_BUCKET_SECRET`; chave HMAC própria; `permissions` no CI | testes de `Settings` cobrem as três recusas sem imprimir segredo; `PROD_ROLES` e `ops/roles.py` leem `secrets/` | persistir `OPERATIONS_TOKEN` na configuração do serviço no EasyPanel (ação no painel); opcionalmente definir `EASYPANEL_AUTH_BUCKET_SECRET` |
+| BE-44 | `limit` ≤ 100 e `X-Paginated-Alternative` nas 4 listagens; 428 declarado no OpenAPI das 5 rotas com revisão; `conftest` respeita o ambiente e ganha `legacy_client`; passo de CI pós-cutover; 22 testes convertidos ao contrato novo; teste de cota tolera 503 por invariante; `sqlstate` no log de indisponibilidade | 1166/1166 com a janela expirada; o 503 do teste instável era `lock_timeout` sob contenção (máquina com dois agentes e Docker), reproduzido e eliminado quando isolado | decisão formal de manter 13/11/2026 (mantida neste ciclo; confirmar); o critério "10 execuções seguidas sob carga" não foi medido formalmente |
+| FE-44 | registro `REVISIONED_WRITES` (13 operações) com teste contra o OpenAPI nos dois sentidos, tipos apertados e guarda em dev; banner de 428 com recarga confirmada; fila offline mantém a tentativa; mapa único de invalidação (18 eventos); orçamento com dois tetos | `invalidateQueries` fora de `api/invalidateStudy.ts`: zero; `skills` e `study-session` invalidados após tentativa | — |
+| DB-44 | migration `d2b7e4c9a150` (`ix_auth_rate_bucket_window_start`, CONCURRENTLY, idempotente); `Index` no modelo; teste parametrizado dos 4 índices | `EXPLAIN` no banco descartável com 200 mil linhas: Seq Scan custo 4370 → Bitmap Index Scan custo 968 | restore do pacote público em laboratório (ver INFRA-44) |
+
+Mudanças de operação que valem aviso: a produção local em 5181 passa a receber
+`PUBLIC_ORIGIN=http://localhost:5181` por padrão do Compose quando for
+recriada com este código (sem isso a guarda nova recusa o boot); os contadores
+de rate limit zeram uma vez no primeiro deploy, porque a chave HMAC mudou de
+derivação; o Makefile só encontra os papéis de produção local em
+`secrets/roles-prod.env`.
+
+Achados da conversão dos testes, para o BE-45: `POST /writing/prompts/{id}/feedback`
+aceita `expected_revision` no corpo e está no registro do frontend, mas o backend
+não chama `require_revision` nela; e o 428 de `grade` sem `idempotency_key`
+reaproveita o código `revision_required`, o que confunde o cliente sobre qual
+campo falta.
 
 ---
 
@@ -290,6 +325,11 @@ Entregas:
   `type: ignore[arg-type]` em `app/`.
 - [ ] Consolidar os pares "query legada / query de página" em `review.py`,
   `speaking.py`, `writing.py` e `me.py`; nenhum `-> Any` em `api/`.
+- [ ] Alinhar `POST /writing/prompts/{id}/feedback` ao contrato de revisão:
+  ou passa a chamar `require_revision` e declara o 428, ou sai do registro
+  `REVISIONED_WRITES` do frontend. Hoje o cliente envia e o servidor ignora.
+- [ ] 428 próprio (`idempotency_key_required`) quando `grade` recebe revisão
+  mas não a chave; o frontend trata os dois códigos no mesmo banner.
 
 Critérios de aceite: nenhum endpoint acima de 80 linhas em `api/`; cobertura
 não cai abaixo de 93%; baseline OpenAPI inalterado neste pacote.

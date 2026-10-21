@@ -175,6 +175,19 @@ jobs:
         env:
           TZ: Pacific/Kiritimati
         run: uv run pytest -q
+      - name: o contrato continua válido depois do cutover de 13/11/2026
+        # conftest respeita LEGACY_WRITES_UNTIL do ambiente: writes sem revisão
+        # recebem 428 e testes marcados legacy_client são pulados. Roda os
+        # arquivos que exercitam rotas com expected_revision/idempotency_key.
+        env:
+          LEGACY_WRITES_UNTIL: "2000-01-01T00:00:00Z"
+        run: >-
+          uv run pytest -q -rs
+          tests/test_concurrency.py tests/test_progress.py tests/test_writing.py
+          tests/test_writing_update.py tests/test_review.py tests/test_notebook.py
+          tests/test_dashboard.py tests/test_practice.py tests/test_media.py
+          tests/test_activity.py tests/test_course_reviews.py tests/test_account_deletion.py
+          tests/test_editorial_archive.py tests/test_publication.py tests/test_assist_quota.py
       - name: encerra apenas a base descartável do job
         if: always()
         run: docker compose -f ../infra/compose.test.yml down

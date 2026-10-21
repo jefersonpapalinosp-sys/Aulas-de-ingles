@@ -20,6 +20,7 @@ from app.db.models import (
     StudySessionProgress,
     User,
 )
+from tests.test_progress import salvar_sessao
 
 
 async def conta(client: AsyncClient, suffix: str) -> dict[str, str]:
@@ -98,11 +99,11 @@ async def test_plan_is_editable_normalized_and_validated(client: AsyncClient) ->
 @pytest.mark.asyncio
 async def test_recommendation_prioritizes_due_review_then_resume(client: AsyncClient) -> None:
     headers = await conta(client, "today-order")
-    await client.put(
-        "/api/lessons/31/study-session",
-        headers=headers,
-        json={"current_step": "assistir", "completed_steps": ["preparar"]},
-    )
+    assert (
+        await salvar_sessao(
+            client, headers, "/api/lessons/31/study-session", "assistir", ["preparar"]
+        )
+    ).status_code == 200
     resumed = (await client.get("/api/me/today", headers=headers)).json()["recommendation"]
     assert resumed["kind"] == "continue_lesson"
     assert resumed["course_slug"] == "voa-level-1"
@@ -773,11 +774,8 @@ async def test_session_records_steps_without_crediting_abandoned_wall_time(
     client: AsyncClient, session: AsyncSession
 ) -> None:
     headers = await conta(client, "today-time")
-    await client.put(
-        "/api/lessons/31/study-session",
-        headers=headers,
-        json={"current_step": "preparar", "completed_steps": []},
-    )
+    started = await salvar_sessao(client, headers, "/api/lessons/31/study-session", "preparar", [])
+    assert started.status_code == 200
     user = (
         await session.execute(select(User).where(User.email == "today-time@example.com"))
     ).scalar_one()
@@ -789,14 +787,15 @@ async def test_session_records_steps_without_crediting_abandoned_wall_time(
     study.updated_at = datetime.now(UTC) - timedelta(seconds=125)
     await session.commit()
 
-    completed = await client.put(
+    completed = await salvar_sessao(
+        client,
+        headers,
         "/api/lessons/31/study-session",
-        headers=headers,
-        json={
-            "current_step": "revisar",
-            "completed_steps": ["preparar", "assistir", "estudar", "praticar", "revisar"],
-        },
+        "revisar",
+        ["preparar", "assistir", "estudar", "praticar", "revisar"],
+        revision=started.json()["revision"],
     )
+    assert completed.status_code == 200
     assert completed.json()["total_seconds"] == 0
     assert completed.json()["completed_at"] is not None
 
