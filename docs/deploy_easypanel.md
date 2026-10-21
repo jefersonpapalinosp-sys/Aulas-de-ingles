@@ -40,7 +40,38 @@ registro de publicação depois que o aceite pós-deploy for anexado.
   domínio primário, mas não resolve publicamente enquanto faltar o registro DNS
   `A ingles -> 72.61.39.94`.
 
-## Arquitetura publicada
+### Registro do segundo deploy — 21/10/2026 (Sprint 44)
+
+- origem: `main` no squash `0ebb9be` (PR #25), CI verde nos cinco jobs antes do
+  merge;
+- sequência da Sprint 43 cumprida: backup anterior
+  `aulas-20261021T123725650072Z-1e70…` (cifrado e copiado ao iCloud Drive);
+  migration `a42c7d1e9f20 → d2b7e4c9a150` ensaiada no clone restaurado do backup
+  público em `target-db` (idempotente, `alembic check` limpo, contagens iguais);
+- execução: por SSH, reproduzindo o que o painel executa, porque não há token da
+  API do EasyPanel e o painel só oferece deploy pela interface. O diretório
+  `code/` do serviço não é um repositório Git (é uma exportação); ele foi
+  atualizado com `git archive 0ebb9be | rsync --delete`, preservando
+  `infra/easypanel/.env` e os `docker-compose.override.yml` gerados pelo painel,
+  e a stack subiu com o mesmo comando do painel:
+  `docker compose -p papalino_aulas-ingles --env-file .env -f compose.yml -f
+  docker-compose.override.yml up -d --build --remove-orphans --wait`, em 3 min 08 s;
+- gate: `migrate` aplicou a migration, `alembic check` sem operações, seed
+  idempotente (82 aulas), `permissions` reaplicou os grants; API, worker e web
+  saudáveis; `migrate` e `permissions` com saída 0;
+- aceite: `/`, `/sw.js`, `/api/live`, `/api/health` e `/api/courses` em HTTP 200
+  pelo domínio gerado; `schema_current` e `schema_required` iguais a
+  `d2b7e4c9a150`, ambiente `prod`; CSP, HSTS, `nosniff`, COOP, `X-Frame-Options`,
+  política de referência e de permissões presentes; gate operacional
+  (`make operations-check` contra a origem pública) com status `ok` em todos os
+  sinais;
+- backup posterior `aulas-20261021T124227574247Z-7342…`, cifrado e copiado ao
+  iCloud Drive;
+- efeitos esperados: contadores de rate limit reiniciados uma vez (nova derivação
+  da chave HMAC); `EASYPANEL_AUTH_BUCKET_SECRET` continua opcional e vazio;
+- limitação registrada: o histórico de deploys do painel não mostra esta ação. O
+  próximo deploy pela interface converge para a mesma `main`. Para deploys
+  futuros sem interface, gerar um token da API do EasyPanel.
 
 ```text
 Internet HTTPS

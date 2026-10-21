@@ -269,6 +269,15 @@ refetch e passou a apagar a lista recém-carregada. Correção: os hooks que na
 Reproduzido localmente com a imagem anterior e verificado com a corrigida: 50 de
 50 cenários do fluxo completo no Chromium.
 
+**Merge e deploy público, 21/10/2026.** PR #25 mergeado por squash em `0ebb9be`
+com CI verde nos cinco jobs. Deploy do mesmo SHA na stack do EasyPanel seguindo a
+sequência da Sprint 43 (backup anterior, ensaio da migration no clone público,
+gate `migrate → permissions → api → web`, smokes, gate operacional `ok`, backup
+posterior); registro completo em
+[deploy_easypanel.md](deploy_easypanel.md#registro-do-segundo-deploy--21102026-sprint-44).
+A produção pública está em `d2b7e4c9a150`. Pendências que ficam: copiar a chave
+privada `age` para fora do Mac e recriar a produção local 5181 com este código.
+
 Achados da conversão dos testes, para o BE-45: `POST /writing/prompts/{id}/feedback`
 aceita `expected_revision` no corpo e está no registro do frontend, mas o backend
 não chama `require_revision` nela; e o 428 de `grade` sem `idempotency_key`
