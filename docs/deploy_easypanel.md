@@ -192,21 +192,52 @@ Sprint 43; deploy aprovado não substitui essas homologações.
 
 ## 6. Backup inicial e rotina
 
-No primeiro deploy o banco nasce vazio e é preenchido somente pelo seed. Depois
-do aceite, crie o primeiro backup de banco e do volume `speaking_data` pelo
-mecanismo de backup do host/painel. Registre data, SHA do código, revisão Alembic,
-checksum e resultado de restauração em alvo isolado.
+No primeiro deploy o banco nasce vazio e é preenchido somente pelo seed. O
+backup da stack pública é feito pela rotina do repositório, não pelo painel:
+
+```bash
+make backup-public-check                 # SSH, containers, papel aulas_backup, revisão
+make backup source=public                # pacote aulas-recovery-v2 em backups/recovery/
+make backup source=public recipient=secrets/backup-age-recipient.txt copy_to=/Volumes/externo
+make backup-verify f=backups/recovery/aulas-IDENTIFICADOR
+make backup-prune                        # plano 7 diários + 4 semanais; --apply só via backup-prune-apply
+```
+
+`ops/public_backup.py` conecta por SSH (`BatchMode`, `StrictHostKeyChecking=yes`,
+host em `AULAS_PUBLIC_SSH_HOST` ou o documentado) e lê o banco **dentro do
+container** com o papel `aulas_backup`, por socket local: nenhuma senha é lida ou
+transmitida. O volume de voz sai pelo mesmo `voice_transfer.py` do fluxo local,
+copiado de forma efêmera para a VM e executado em container sem rede e somente
+leitura. Como a stack pública não entra em manutenção, o snapshot do banco é
+conferido antes e depois da captura; divergência não publica o pacote (até três
+tentativas). O recibo fica em `backups/recovery/public-receipts/` e não contém
+segredos nem endereço da VM.
+
+A cópia externa só sai cifrada: `recipient` aponta para um arquivo com a chave
+pública `age1...` cuja chave privada **não** mora neste Mac. Sem `age` instalado
+(`brew install age`) ou sem destinatário, o pacote fica só local.
+
+Primeiro backup real registrado em 21/10/2026: pacote
+`aulas-20261021T042626017843Z-bb04073b9b2947e69be89683970bda70`, revisão
+`a42c7d1e9f20`, 82 aulas, 1 usuário, `database.dump` com 631.101 bytes
+(sha256 `5c484686…415f0`), voz vazia, verificado por `make backup-verify`.
+O restore em alvo isolado desse pacote ainda não foi executado: todos os alvos
+do laboratório estão ocupados por ensaios anteriores e a política não permite
+limpá-los sem decisão explícita.
 
 Metas operacionais ainda a validar:
 
-- RPO máximo de 24 horas;
+- RPO máximo de 24 horas: exige a execução diária agendada
+  (`infra/launchd/aulas-backup-public.plist.example`) com recibos consecutivos;
 - RTO de até 60 minutos;
-- retenção de sete cópias diárias e quatro semanais;
-- cópias mantidas neste Mac apenas durante o estágio de desenvolvimento.
+- retenção de sete cópias diárias e quatro semanais, agora executável por
+  `make backup-prune-apply` após revisão do plano;
+- cópias mantidas neste Mac apenas durante o estágio de desenvolvimento; a cópia
+  externa cifrada é o próximo passo.
 
 Um arquivo de backup só vira evidência após verificação de checksum e restore
-isolado. Antes de migrations futuras, coloque o serviço em manutenção, gere nova
-cópia, restaure-a num alvo descartável e execute a candidata sobre o clone.
+isolado. Antes de migrations futuras, gere nova cópia, restaure-a num alvo
+descartável e execute a candidata sobre o clone.
 
 ## 7. Rollback
 

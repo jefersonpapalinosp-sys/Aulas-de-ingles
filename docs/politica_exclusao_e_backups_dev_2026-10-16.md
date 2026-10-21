@@ -21,6 +21,22 @@ consideradas atingidas sem execução diária e ensaio completo. FileVault prote
 disco em repouso, mas os pacotes não têm criptografia própria e uma falha ou perda do
 Mac pode afetar origem e backup ao mesmo tempo.
 
+### Atualização da Sprint 44 (21/10/2026)
+
+- A janela de 7 diários + 4 semanais passou a ser executável: `make backup-prune`
+  imprime o plano (nada é apagado) e `make backup-prune-apply` o executa. O pacote
+  mais recente nunca é removido; `.partial-*` com menos de 24 h são preservados;
+  recibos, pacotes de rollback nomeados por sprint e arquivos soltos ficam fora da
+  política e são listados, não tocados.
+- A stack pública passou a ter backup pela mesma rotina: `make backup source=public`
+  lê o banco pelo papel `aulas_backup` dentro do container remoto e exporta a voz
+  com o `voice_transfer.py` do fluxo local. Primeiro pacote verificado em 21/10/2026.
+- Credenciais dos papéis (`roles-*.env`, `roles-*.json`) saíram de `backups/` para
+  `secrets/` (perm 700/600, ignorado pelo Git). Chave e cofre não viajam juntos.
+- Cópia externa só sai cifrada com `age` para um destinatário cuja chave privada não
+  mora no Mac (`recipient=secrets/backup-age-recipient.txt`). Instalar `age`,
+  gerar o par fora do Mac e agendar a execução diária continuam pendentes.
+
 ## Contrato da exclusão de conta
 
 1. A pessoa precisa estar autenticada, informar a senha atual, digitar exatamente
