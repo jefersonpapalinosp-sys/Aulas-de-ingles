@@ -9,6 +9,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Nenhum job escreve no repositório; o GITHUB_TOKEN nasce só com leitura.
+permissions:
+  contents: read
+
 jobs:
   security-inventory:
     name: segurança · dependências e imagens para triagem

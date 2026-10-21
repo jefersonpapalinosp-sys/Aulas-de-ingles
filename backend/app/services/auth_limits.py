@@ -45,7 +45,7 @@ async def rate_limit(session: AsyncSession, request: Request, email: str) -> Non
         ("origin:" + origin, settings.auth_origin_limit),
     ]
     hashed = sorted(
-        (hmac.new(settings.jwt_secret.encode(), value.encode(), hashlib.sha256).hexdigest(), limit)
+        (hmac.new(settings.auth_bucket_key, value.encode(), hashlib.sha256).hexdigest(), limit)
         for value, limit in entries
     )
     blocked = False

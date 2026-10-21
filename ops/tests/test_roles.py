@@ -17,7 +17,7 @@ class RolesGuardsTests(unittest.TestCase):
             }
             write_json(root / "roles-lab.json", credentials)
             with (
-                patch.object(recovery, "BACKUPS", root),
+                patch.object(roles, "SECRETS", root),
                 patch.object(roles, "target", return_value=({}, "aulas_roles_lab", "admin")),
                 patch.object(roles, "marked_roles", return_value=[]),
                 patch.object(roles, "sql"),

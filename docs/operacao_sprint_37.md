@@ -50,7 +50,8 @@ Na Sprint 39G/H, somente TTL de transcrições/reservas ganhou execução indepe
 refresh/pending adicionais e expurgo de arquivos continuam sem ativação automática.
 Pacotes parciais, volumes de ensaio e recibos não são descartados silenciosamente.
 
-roles-prod.json e roles-prod.env são segredos. Não imprimir arquivos, Compose
+roles-prod.json e roles-prod.env são segredos e, desde a Sprint 44, moram em
+`secrets/` (não em `backups/recovery/`). Não imprimir arquivos, Compose
 resolvido ou inspect completo; não anexar ao CI. O dump não inclui roles
 globais; recuperação completa precisa dessas credenciais e do provisionamento.
 Hashes detectam corrupção, não autenticam o dump. Restaurar apenas pacotes próprios.
@@ -125,8 +126,8 @@ essa guarda para reaplicar sobre schema já alterado.
 
 Usar o migrador com ambos os env-files e arquivos Compose:
 
-    docker compose --env-file .env.prod --env-file backups/recovery/roles-prod.env -f infra/compose.prod.yml -f infra/compose.roles.prod.yml --profile tools run --rm --no-deps migrator alembic upgrade head
-    docker compose --env-file .env.prod --env-file backups/recovery/roles-prod.env -f infra/compose.prod.yml -f infra/compose.roles.prod.yml --profile tools run --rm --no-deps migrator python -m app.cli writing-rubrics
+    docker compose --env-file .env.prod --env-file secrets/roles-prod.env -f infra/compose.prod.yml -f infra/compose.roles.prod.yml --profile tools run --rm --no-deps migrator alembic upgrade head
+    docker compose --env-file .env.prod --env-file secrets/roles-prod.env -f infra/compose.prod.yml -f infra/compose.roles.prod.yml --profile tools run --rm --no-deps migrator python -m app.cli writing-rubrics
     uv run --project backend python -m ops.study_rollout verify --backup PACOTE
 
 Não rodar seed completo. A atualização dirigida valida todas as propostas antes
@@ -136,7 +137,7 @@ SQL e worker. Não criar contas/tentativas artificiais no estudo para validar.
 
 Com as imagens e migrations já conferidas:
 
-    docker compose --env-file .env.prod --env-file backups/recovery/roles-prod.env -f infra/compose.prod.yml -f infra/compose.roles.prod.yml up -d --no-build --no-deps --wait --wait-timeout 90 api worker web
+    docker compose --env-file .env.prod --env-file secrets/roles-prod.env -f infra/compose.prod.yml -f infra/compose.roles.prod.yml up -d --no-build --no-deps --wait --wait-timeout 90 api worker web
 
 Para apenas retomar containers existentes depois de uma pausa de backup, sem
 trocar imagem/configuração, usar docker start aulas-prod-api aulas-prod-worker.

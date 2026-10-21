@@ -460,7 +460,8 @@ make prod-up                  # http://localhost:5181
 ```
 
 Após a separação de papéis da Sprint 37, o ambiente local existente usa também
-infra/compose.roles.prod.yml e backups/recovery/roles-prod.env. Os comandos
+infra/compose.roles.prod.yml e secrets/roles-prod.env (credenciais moram em
+`secrets/`, fora de `backups/`, desde a Sprint 44). Os comandos
 antigos prod-up/prod-seed são bloqueados nesse perfil. Para manutenção e
 retomada, siga o [runbook local](docs/operacao_sprint_37.md); não reinicie
 código novo antes de aplicar migrations compatíveis.

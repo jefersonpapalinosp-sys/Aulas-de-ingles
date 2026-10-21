@@ -15,6 +15,17 @@ from ops.recovery_archive import file_info, require, verify_bundle, write_json
 PROJECT = "aulas-ingles-roles"
 NAMES = ("aulas_owner", "aulas_migrator", "aulas_runtime", "aulas_worker", "aulas_backup")
 MARKER = "aulas-ingles:role-v1"
+# Credenciais ficam separadas dos pacotes de backup: um diretório privado,
+# ignorado pelo Git, que nunca viaja junto dos dumps que essas senhas protegem.
+SECRETS = recovery.ROOT / "secrets"
+
+
+def secrets_dir():
+    root = SECRETS
+    require(not root.is_symlink() and not root.parent.is_symlink(), "Diretório redirecionado.")
+    root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    require(root.stat().st_mode & 0o077 == 0, "Diretório de credenciais não é privado.")
+    return root
 
 
 def resources():
@@ -113,11 +124,7 @@ def sql(target_info, statement, role=None):
 
 
 def private_credentials(scope):
-    root = recovery.BACKUPS
-    require(not root.is_symlink() and not root.parent.is_symlink(), "Diretório redirecionado.")
-    root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    require(root.stat().st_mode & 0o077 == 0, "Diretório de credenciais não é privado.")
-    path = root / f"roles-{scope}.json"
+    path = secrets_dir() / f"roles-{scope}.json"
     if path.exists():
         require(
             not path.is_symlink() and path.stat().st_mode & 0o077 == 0,
@@ -191,7 +198,7 @@ def provision(scope, backup_path=None):
     if scope == "prod":
         backup_gate(info, backup_path)
     current = marked_roles(info)
-    credentials_path = recovery.BACKUPS / f"roles-{scope}.json"
+    credentials_path = SECRETS / f"roles-{scope}.json"
     require(not current or credentials_path.is_file(), "Papéis existentes sem credenciais locais.")
     credentials = private_credentials(scope)
     existing = {r["name"] for r in current}
@@ -214,7 +221,7 @@ def provision(scope, backup_path=None):
         "COMMIT;",
     ]
     sql(info, "\n".join(statements))
-    env_path = recovery.BACKUPS / f"roles-{scope}.env"
+    env_path = secrets_dir() / f"roles-{scope}.env"
     lines = [
         f"{name.removeprefix('aulas_').upper()}_DATABASE_URL="
         f"postgresql+asyncpg://{name}:{quote(password, safe='')}@db:5432/{quote(info[1], safe='')}"

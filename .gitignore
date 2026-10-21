@@ -21,6 +21,8 @@ dist/
 .env.prod
 .env.easypanel
 config/assist-provider-review.json
+# Credenciais operacionais (papéis de banco, destinatário de criptografia)
+secrets/
 
 # Backups do banco
 backups/

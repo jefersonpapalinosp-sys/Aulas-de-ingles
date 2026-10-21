@@ -1,5 +1,7 @@
 """Configuração da aplicação, lida do ambiente."""
 
+import hashlib
+import hmac
 from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Literal
@@ -37,6 +39,10 @@ class Settings(BaseSettings):
     auth_identity_limit: int = 20
     auth_origin_limit: int = 200
     auth_hash_concurrency: int = 2
+    # Opcional. Separa a chave HMAC dos contadores de login do JWT_SECRET, para
+    # que rotacionar o JWT não zere os limites. Sem valor, deriva do JWT_SECRET
+    # com rótulo próprio (ver auth_bucket_key).
+    auth_bucket_secret: str | None = None
     database_url: str = "postgresql+asyncpg://aulas:aulas_local@db:5432/aulas_ingles"
     database_purpose: Literal["runtime", "worker", "migrator"] | None = None
     database_pool_size: int = Field(default=5, ge=1, le=20)
@@ -96,6 +102,17 @@ class Settings(BaseSettings):
         return self.database_process_budget * (self.database_pool_size + self.database_max_overflow)
 
     @property
+    def auth_bucket_key(self) -> bytes:
+        """Chave dos HMACs de identidade/origem do rate limit de autenticação."""
+
+        explicit = (self.auth_bucket_secret or "").strip()
+        if explicit:
+            return explicit.encode()
+        return hmac.new(
+            self.jwt_secret.encode(), b"aulas-auth-rate-bucket-v1", hashlib.sha256
+        ).digest()
+
+    @property
     def writing_assist_configured(self) -> bool:
         if self.assist_provider_kind == "ollama":
             return bool(self.assist_ollama_base_url.strip() and self.assist_ollama_model.strip())
@@ -119,6 +136,23 @@ class Settings(BaseSettings):
             origin = urlparse(self.public_origin or "")
             if not self.cookie_secure or origin.scheme != "https" or not origin.hostname:
                 raise RuntimeError("Perfil público exige COOKIE_SECURE=true e PUBLIC_ORIGIN HTTPS.")
+        if self.app_env == "prod" and not self.cookie_secure:
+            # Produção local em HTTP é o único caso legítimo de cookie sem Secure
+            # com APP_ENV=prod, e o operador precisa declarar a origem localhost.
+            local_origin = urlparse(self.public_origin or "")
+            if local_origin.scheme != "http" or local_origin.hostname not in {
+                "localhost",
+                "127.0.0.1",
+            }:
+                raise RuntimeError(
+                    "COOKIE_SECURE=false com APP_ENV=prod só é aceito quando PUBLIC_ORIGIN "
+                    "declara http://localhost ou http://127.0.0.1 (produção local)."
+                )
+        if any(origin.strip() == "*" for origin in self.cors_origins):
+            raise RuntimeError("CORS_ORIGINS não aceita '*': a API envia cookies com credenciais.")
+        bucket_secret = (self.auth_bucket_secret or "").strip()
+        if bucket_secret and len(bucket_secret.encode()) < 32:
+            raise RuntimeError("AUTH_BUCKET_SECRET precisa de pelo menos 32 bytes quando definido.")
         if self.performance_probe_enabled and (
             self.app_env == "prod" or self.deployment_profile == "public"
         ):

@@ -306,6 +306,43 @@ def test_public_profile_refuses_insecure_configuration():
     ).validar()
 
 
+PROD_SECRET = {"jwt_secret": "p" * 32}
+
+
+def test_prod_without_secure_cookie_requires_declared_localhost_origin():
+    # Produção local em HTTP continua possível, mas só declarando a origem.
+    Settings(app_env="prod", public_origin="http://localhost:5181", **PROD_SECRET).validar()
+    Settings(app_env="prod", public_origin="http://127.0.0.1:8011", **PROD_SECRET).validar()
+    Settings(app_env="prod", cookie_secure=True, **PROD_SECRET).validar()
+    for origin in (None, "", "https://localhost", "http://study.example.com"):
+        with pytest.raises(RuntimeError, match="COOKIE_SECURE=false com APP_ENV=prod") as error:
+            Settings(app_env="prod", public_origin=origin, **PROD_SECRET).validar()
+        assert "p" * 32 not in str(error.value)
+
+
+def test_cors_wildcard_is_refused_because_credentials_are_sent():
+    with pytest.raises(RuntimeError, match="CORS_ORIGINS"):
+        Settings(cors_origins=["*"]).validar()
+    with pytest.raises(RuntimeError, match="CORS_ORIGINS"):
+        Settings(cors_origins=["https://a.example", " * "]).validar()
+    Settings(cors_origins=["https://a.example"]).validar()
+
+
+def test_auth_bucket_key_is_separate_from_jwt_when_configured():
+    derived = Settings(**PROD_SECRET)
+    assert derived.auth_bucket_key != derived.jwt_secret.encode()
+    assert derived.auth_bucket_key == Settings(**PROD_SECRET).auth_bucket_key
+    explicit = Settings(auth_bucket_secret="b" * 32, **PROD_SECRET)
+    explicit.validar()
+    assert explicit.auth_bucket_key == b"b" * 32
+    # Rotacionar o JWT não muda a chave explícita; sem ela, muda (e zera contadores).
+    assert Settings(auth_bucket_secret="b" * 32, jwt_secret="q" * 32).auth_bucket_key == b"b" * 32
+    assert Settings(jwt_secret="q" * 32).auth_bucket_key != derived.auth_bucket_key
+    with pytest.raises(RuntimeError, match="AUTH_BUCKET_SECRET") as error:
+        Settings(auth_bucket_secret="curta", **PROD_SECRET).validar()
+    assert "curta" not in str(error.value)
+
+
 async def test_public_transport_and_private_headers(client, monkeypatch):
     monkeypatch.setattr(get_settings(), "deployment_profile", "public")
     monkeypatch.setattr(get_settings(), "cookie_secure", True)
