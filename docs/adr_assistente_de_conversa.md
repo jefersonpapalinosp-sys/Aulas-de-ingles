@@ -1,7 +1,8 @@
 # ADR — Parceiro de conversa ancorado nas aulas (IA-45)
 
-Estado: **proposto em 21/10/2026, aguardando aprovação de Jeferson**. Enquanto
-não for aprovado, nenhum schema (DB-45) nem rota (BE-46) do assistente é criado.
+Estado: **aprovado por Jeferson em 21/10/2026** (proposto no mesmo dia). A
+aprovação libera o schema (DB-45) e as rotas (BE-46) do assistente; as decisões
+em aberto listadas ao final continuam abertas e não bloqueiam o DB-45.
 
 Pacote de origem: [plano das Sprints 44–49](plano_sprints_44_49_frentes_e_assistente_de_fala_2026-10-21.md#ia-45-definição-contrato-e-spike-do-parceiro-de-conversa).
 
@@ -161,4 +162,6 @@ reprovada no piloto (IA-48).
 - Confirmar o limite de 12 turnos e a cota diária de 20.
 - Confirmar a voz do navegador como padrão do piloto.
 
-Aprovado por: ____________________ em ____/____/2026.
+Aprovado por: Jeferson Papalino, em 21/10/2026, em conversa com o agente que
+redigiu o documento. Provedor de diálogo/STT, limite de turnos e voz do navegador
+seguem como decisões em aberto, a confirmar antes do piloto (IA-48).
