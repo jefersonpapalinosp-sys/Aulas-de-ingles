@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../api/client'
+import { invalidateStudy } from '../../api/invalidateStudy'
 import { canSyncFor } from '../../api/media'
 import type { components } from '../../api/schema'
 import { listLocal, readLocal, removeLocal, writeLocal } from '../../storage/local'
@@ -65,7 +66,7 @@ export function ActiveStudyTime({ userId, lessonId }: { userId: number; lessonId
           credited = true
         }
         if (!failed && clock) say(memory.size ? 'Tempo ativo pendente de sincronização.' : 'Tempo ativo sincronizado.')
-        if (credited) void queryClient.invalidateQueries({ queryKey: ['today'] })
+        if (credited) void invalidateStudy(queryClient, 'activityCredited')
       } catch { say('Tempo ativo pendente de sincronização; confira a conexão.') }
       finally { syncing = false }
     }

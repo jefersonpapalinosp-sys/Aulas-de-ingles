@@ -144,6 +144,8 @@ export async function syncAttemptQueue(userId: number): Promise<AttemptQueueSync
 }
 
 function isPermanentClientError(status: number): boolean {
+  // 428 é "atualize o aplicativo", não uma resposta incompatível: a tentativa
+  // continua pendente e sincroniza depois da recarga confirmada.
   return (
     status >= 400 &&
     status < 500 &&
@@ -151,6 +153,7 @@ function isPermanentClientError(status: number): boolean {
     status !== 403 &&
     status !== 408 &&
     status !== 425 &&
+    status !== 428 &&
     status !== 429
   )
 }

@@ -324,9 +324,8 @@ describe('ShadowingPractice', () => {
       expect.objectContaining({ method: 'PUT', body: expect.any(Blob) }),
     )
     expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
-    expect(invalidate).toHaveBeenCalledWith({
-      queryKey: ['course-completion', 'voa-level-1'],
-    })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['speaking-attempts'] })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] })
   })
 
   it('reproduz e exclui somente uma gravação escolhida do histórico', async () => {
@@ -374,10 +373,9 @@ describe('ShadowingPractice', () => {
       { params: { path: { attempt_id: 15 } } },
     )
     await waitFor(() =>
-      expect(invalidate).toHaveBeenCalledWith({
-        queryKey: ['course-completion', 'voa-level-1'],
-      }),
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] }),
     )
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['assist-status'] })
   })
 
   it('não reconstrói trecho legado nem oferece nova comparação automática', async () => {

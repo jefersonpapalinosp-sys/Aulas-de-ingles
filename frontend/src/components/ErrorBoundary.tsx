@@ -4,11 +4,21 @@ function isChunkError(error: unknown): boolean {
   return error instanceof Error && /ChunkLoadError|Loading chunk|dynamically imported module|Importing a module script|Failed to load module script|Unable to preload CSS/i.test(`${error.name} ${error.message}`)
 }
 
-export function RecoveryScreen({ chunk, onRetry, home, reload = () => window.location.reload() }: {
+/** Recarga só após confirmação explícita; nenhum storage é limpo. Compartilhado com o aviso de 428. */
+export function ConfirmReload({ reload = () => window.location.reload() }: { reload?: () => void }) {
+  const [confirm, setConfirm] = useState(false)
+  if (!confirm) return <button type="button" onClick={() => setConfirm(true)}>Recarregar aplicativo…</button>
+  return <div className="confirm-reload">
+    <p>Copie textos ainda visíveis. Recarregar pode perder alterações não salvas. Continuar?</p>
+    <button type="button" onClick={reload}>Confirmar recarga</button>
+    <button type="button" onClick={() => setConfirm(false)}>Cancelar</button>
+  </div>
+}
+
+export function RecoveryScreen({ chunk, onRetry, home, reload }: {
   chunk: boolean; onRetry: () => void; home?: ReactNode; reload?: () => void
 }) {
   const heading = useRef<HTMLHeadingElement>(null)
-  const [confirm, setConfirm] = useState(false)
   useEffect(() => { heading.current?.focus() }, [])
   return <section className="estado-erro recovery-screen" role="alert">
     <h1 ref={heading} tabIndex={-1}>{chunk ? 'Não foi possível carregar esta tela' : 'Esta área encontrou um problema'}</h1>
@@ -16,11 +26,7 @@ export function RecoveryScreen({ chunk, onRetry, home, reload = () => window.loc
     <p>Não apagamos rascunhos nem a fila local. Dados apenas na memória podem não ser recuperados.</p>
     {!chunk && <button type="button" onClick={onRetry}>Tentar abrir novamente</button>}
     {home}
-    {!confirm ? <button type="button" onClick={() => setConfirm(true)}>Recarregar aplicativo…</button> : <div>
-      <p>Copie textos ainda visíveis. Recarregar pode perder alterações não salvas. Continuar?</p>
-      <button type="button" onClick={reload}>Confirmar recarga</button>
-      <button type="button" onClick={() => setConfirm(false)}>Cancelar</button>
-    </div>}
+    <ConfirmReload reload={reload} />
   </section>
 }
 

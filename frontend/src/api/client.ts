@@ -1,5 +1,7 @@
 import createClient, { type Middleware } from 'openapi-fetch'
-import type { components, paths } from './schema'
+import type { components } from './schema'
+import { isRevisionRequired, markRevisionRequired } from './revisionRequired'
+import { assertRevisionedWrite, type RevisionedPaths } from './revisionedWrites'
 import { encerrarSessao, estadoIndisponivel, renovarSessao, sessionSnapshot } from './session'
 export {
   onEstadoSessao, onSessaoPerdida, renovarSessao, setAccessToken,
@@ -9,12 +11,14 @@ export {
 /**
  * Cliente tipado pelo contrato. Os tipos saem de `npm run gen:api`, que lê o
  * backend/openapi.json — nenhuma interface desta pasta é escrita à mão.
+ * `RevisionedPaths` só aperta os corpos das escritas do cutover de 13/11/2026:
+ * `expected_revision`/`operation_key`/`idempotency_key` deixam de ser opcionais.
  *
  * baseUrl vazio de propósito: o browser fala com /api na mesma origem e o
  * proxy do Vite leva até a API. Sem CORS, e o cookie httpOnly do refresh
  * viaja sem configuração extra.
  */
-export const api = createClient<paths>({ baseUrl: '', credentials: 'same-origin' })
+export const api = createClient<RevisionedPaths>({ baseUrl: '', credentials: 'same-origin' })
 
 type Pedido = ReturnType<typeof sessionSnapshot> & { copia: Request | null }
 const pedidos = new WeakMap<Request, Pedido>()
@@ -51,6 +55,15 @@ function conferirGeracao(request: Request, pedido: Pedido): void {
 
 async function receber(request: Request, response: Response, pedido: Pedido,
   enviar: (request: Request) => Promise<Response>): Promise<Response> {
+  const final = await receberSessao(request, response, pedido, enviar)
+  // 428 após o cutover: o cliente ficou para trás. A interface pede atualização
+  // com confirmação; nada local é descartado e a resposta segue para o chamador.
+  if (isRevisionRequired(final)) markRevisionRequired()
+  return final
+}
+
+async function receberSessao(request: Request, response: Response, pedido: Pedido,
+  enviar: (request: Request) => Promise<Response>): Promise<Response> {
   if (rotaAuth(request)) return response
   conferirGeracao(request, pedido)
   if (response.status !== 401 || pedido.perfilNaoConfirmado) return response
@@ -82,6 +95,7 @@ export async function authenticatedFetch(path: string, init: RequestInit = {}): 
   }
   const request = new Request(url, { ...init, credentials: 'same-origin' })
   const reproduzivel = !(typeof ReadableStream !== 'undefined' && init.body instanceof ReadableStream)
+  if (reproduzivel) await assertRevisionedWrite(request)
   const pedido = preparar(request, reproduzivel)
   if (envioBloqueado(request, pedido)) return indisponivel()
   return receber(request, await fetch(request), pedido, (retry) => fetch(retry))
@@ -89,8 +103,9 @@ export async function authenticatedFetch(path: string, init: RequestInit = {}): 
 
 /** Exportado para o teste montar um cliente com base absoluta. */
 export const autenticacao: Middleware = {
-  onRequest({ request }) {
+  async onRequest({ request }) {
     const json = request.headers.get('Content-Type')?.includes('application/json') ?? false
+    if (json) await assertRevisionedWrite(request)
     const pedido = preparar(request, request.body === null || json)
     if (envioBloqueado(request, pedido)) return indisponivel()
     pedidos.set(request, pedido)

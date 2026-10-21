@@ -28,13 +28,7 @@ export function useMarcarEstudada(courseSlug: string) {
       })
       if (!response?.ok) throw new Error('Não foi possível salvar a marcação.')
     },
-    onSuccess: async () => {
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ['progress'] }),
-        qc.invalidateQueries({ queryKey: ['today'] }),
-        qc.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
-      ])
-    },
+    onSuccess: () => invalidateStudy(qc, 'studied'),
   })
 }
 
@@ -86,8 +80,8 @@ export function useSalvarStudySession(courseSlug: string, numero: number) {
     },
     onSuccess: async (data) => {
       qc.setQueryData(['study-session', courseSlug, numero], data)
-      await invalidateStudy(qc)
+      await invalidateStudy(qc, 'studySession')
     },
-    onError: () => qc.invalidateQueries({ queryKey: ['study-session', courseSlug, numero] }),
+    onError: () => invalidateStudy(qc, 'studySessionRejected'),
   })
 }

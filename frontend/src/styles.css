@@ -83,6 +83,8 @@ del { opacity: 0.65; }
 .session-status { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0 24px; padding: 14px; border: 1px solid var(--warn); border-radius: 5px; background: var(--warn-wash); color: var(--ink); overflow-wrap: anywhere; }
 .session-status > span { flex: 1 1 20rem; min-width: 0; }
 .session-status button { min-height: 44px; max-width: 100%; padding: 8px 12px; border: 1px solid currentColor; border-radius: 4px; background: var(--surface); color: var(--accent); }
+.update-required .confirm-reload { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1 1 100%; }
+.update-required .confirm-reload p { flex: 1 1 20rem; margin: 0; }
 .shell { display: grid; min-height: 100vh; }
 main { width: 100%; min-width: 0; padding: 44px 46px 100px; }
 

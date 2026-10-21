@@ -223,7 +223,7 @@ describe('SessaoProvider e transporte integrados', () => {
     expect(await screen.findByText('Aluno · indisponivel')).toBeInTheDocument()
     expect(sessionSnapshot().perfilNaoConfirmado).toBe(true)
     const result = await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
-      params: { path: { prompt_id: 31 } }, body: { text: 'Keep this draft.' },
+      params: { path: { prompt_id: 31 } }, body: { text: 'Keep this draft.', expected_revision: 0 },
     })
     expect(result.response.status).toBe(503)
     expect(fetchMock).toHaveBeenCalledTimes(3)

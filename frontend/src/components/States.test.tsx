@@ -7,7 +7,7 @@ import { Erro } from './States'
 afterEach(() => vi.restoreAllMocks())
 
 describe('mensagens de recuperação', () => {
-  it.each([404, 401, 403, 409, 429, 500, 503])('HTTP %i orienta o aluno e oferece request-id opcional', async (status) => {
+  it.each([404, 401, 403, 409, 428, 429, 500, 503])('HTTP %i orienta o aluno e oferece request-id opcional', async (status) => {
     const retry = vi.fn()
     render(<Erro erro={new ApiError('a aula 31', new Response(null, { status, headers: { 'x-request-id': 'req-123' } }))} aoTentarDeNovo={retry} />)
     expect(screen.queryByText(/make up|localhost:8010/)).not.toBeInTheDocument()
@@ -19,7 +19,18 @@ describe('mensagens de recuperação', () => {
     if (status === 404) expect(screen.getByText('Este conteúdo não está disponível.')).toBeVisible()
     if (status === 429) expect(screen.getByText(/muitas solicitações/)).toBeVisible()
     if (status === 409) expect(screen.getByText(/Preserve sua resposta/)).toBeVisible()
+    if (status === 428) {
+      expect(screen.getByText(/precisa ser atualizada/)).toBeVisible()
+      expect(screen.getByText(/Rascunhos e fila local foram preservados/)).toBeVisible()
+    }
     if (status === 503) expect(screen.getByText(/temporariamente indisponível/)).toBeVisible()
+  })
+
+  it('o código revision_required do cabeçalho orienta a atualização mesmo sem o status', () => {
+    const error = new ApiError('o rascunho', new Response(null, { status: 400, headers: { 'x-error-code': 'revision_required' } }))
+    expect(error.code).toBe('revision_required')
+    render(<Erro erro={error} aoTentarDeNovo={vi.fn()} />)
+    expect(screen.getByText(/precisa ser atualizada/)).toBeVisible()
   })
   it('offline não sugere comandos de servidor nem expõe erro arbitrário', () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)

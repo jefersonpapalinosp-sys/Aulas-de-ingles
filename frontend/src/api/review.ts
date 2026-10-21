@@ -88,7 +88,7 @@ export function useAvaliar() {
       if (!data) throw new ApiError('o resultado da revisão', response)
       return data
     },
-    onSuccess: () => invalidateStudy(qc),
+    onSuccess: () => invalidateStudy(qc, 'reviewGrade'),
   })
 }
 
@@ -103,11 +103,7 @@ export function useSetReviewItemStatus() {
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao alterar.`)
       return data
     },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
-      void qc.invalidateQueries({ queryKey: ['today'] })
-    },
+    onSuccess: () => invalidateStudy(qc, 'reviewItemChange'),
   })
 }
 
@@ -120,10 +116,6 @@ export function useDeleteReviewItem() {
       })
       if (!response?.ok) throw new Error('Não foi possível excluir o item.')
     },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
-      void qc.invalidateQueries({ queryKey: ['today'] })
-    },
+    onSuccess: () => invalidateStudy(qc, 'reviewItemChange'),
   })
 }

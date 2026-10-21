@@ -7,6 +7,7 @@ import {
   type SpeakingAttempt,
 } from '../../api/client'
 import { useAssistStatus } from '../../api/assist'
+import { invalidateStudy } from '../../api/invalidateStudy'
 import { AssistQuota } from '../assist/AssistQuota'
 import { formatAudioTime } from '../media/LessonAudioPlayer'
 import { readLocal, writeLocal } from '../../storage/local'
@@ -273,10 +274,7 @@ export function ShadowingPractice({
       setSavedCurrent(true)
       setConsent(false)
       setMessage('Gravação salva na sua conta. Você pode ouvi-la ou excluí-la abaixo.')
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: historyKey }),
-        queryClient.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
-      ])
+      await invalidateStudy(queryClient, 'speakingUpload')
     } catch (error) {
       // Falha de rede pode ser só perda da resposta: não apagar uma gravação confirmada.
       if (current()) setMessage(`${error instanceof Error && error.message !== 'Failed to fetch' ? error.message : 'Falha de conexão. Tente novamente.'} O áudio continua nesta tela; você pode baixá-lo.`)
@@ -314,11 +312,7 @@ export function ShadowingPractice({
       setPlayingAttemptId(null)
     }
     setMessage('Gravação excluída da sua conta.')
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: historyKey }),
-      queryClient.invalidateQueries({ queryKey: ['course-completion', courseSlug] }),
-      queryClient.invalidateQueries({ queryKey: ['assist-status', userId] }),
-    ])
+    await invalidateStudy(queryClient, 'speakingDelete')
   }
 
   async function requestTranscription(attemptId: number) {
@@ -333,14 +327,11 @@ export function ShadowingPractice({
           ? 'A cota diária de análises assistidas foi atingida.'
           : 'O provedor não está disponível. Sua gravação e autoavaliação continuam salvas.',
       )
-      await queryClient.invalidateQueries({ queryKey: ['assist-status', userId] })
+      await invalidateStudy(queryClient, 'assistUsage')
       return
     }
     setMessage('Transcrição solicitada. Este resultado será claramente marcado como automático.')
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: historyKey }),
-      queryClient.invalidateQueries({ queryKey: ['assist-status', userId] }),
-    ])
+    await invalidateStudy(queryClient, 'transcriptionChange')
   }
 
   async function rateTranscription(jobId: number, rating: 'helpful' | 'not_helpful') {
@@ -353,7 +344,7 @@ export function ShadowingPractice({
       return
     }
     setMessage('Obrigado. Sua avaliação ajuda a decidir se o recurso pode ser liberado.')
-    await queryClient.invalidateQueries({ queryKey: historyKey })
+    await invalidateStudy(queryClient, 'transcriptionRating')
   }
 
   async function deleteTranscription(jobId: number) {
@@ -365,10 +356,7 @@ export function ShadowingPractice({
       return
     }
     setMessage('Transcrição excluída. A gravação foi mantida.')
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: historyKey }),
-      queryClient.invalidateQueries({ queryKey: ['assist-status', userId] }),
-    ])
+    await invalidateStudy(queryClient, 'transcriptionChange')
   }
 
   return (

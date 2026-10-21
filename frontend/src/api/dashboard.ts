@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type StudyPlanInput } from './client'
+import { invalidateStudy } from './invalidateStudy'
 
 export function useToday(courseSlug: string) {
   return useQuery({
@@ -38,8 +39,6 @@ export function useSaveStudyPlan() {
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao salvar o plano.`)
       return data
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['today'] })
-    },
+    onSuccess: () => invalidateStudy(queryClient, 'studyPlan'),
   })
 }
