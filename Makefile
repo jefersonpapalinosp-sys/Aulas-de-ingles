@@ -260,3 +260,13 @@ backup-prune-apply: ## Executa a poda planejada; preserva o pacote mais recente 
 	$(OPS) -m ops.recovery prune --apply
 
 .PHONY: backup-prune backup-prune-apply backup-public-check
+
+# ---------- deploy público (EasyPanel por SSH) ----------
+
+deploy-public: ## Publica um SHA de origin/main na stack pública: make deploy-public sha=<sha>
+	bash ops/deploy_public.sh "$(sha)"
+
+deploy-public-dry-run: ## Imprime os comandos do deploy sem contatar a VM: make deploy-public-dry-run sha=<sha>
+	bash ops/deploy_public.sh --dry-run "$(sha)"
+
+.PHONY: deploy-public deploy-public-dry-run
