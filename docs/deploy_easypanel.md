@@ -87,8 +87,15 @@ web:80 (nginx + React)
     └── arquivos estáticos
 
 worker (papel aulas_worker) ──► db
-migrate (papel aulas_migrator) ──► permissions ──► api ──► web
+migrate (papel aulas_migrator) ──► permissions ──► api ──► worker, web, seed
 ```
+
+O gate de release é `migrate` (`alembic upgrade head && alembic check`) e
+`permissions`; o `seed` editorial roda depois, com a API já saudável, pelo
+papel do migrador, e uma falha dele não impede o site de subir. O nginx do `web`
+resolve `api` a cada requisição (DNS embutido do Docker, TTL de 10 s), de modo
+que recriar só o container da API não deixa o `web` em 502; o `worker` tem
+healthcheck próprio pela batida em `worker_heartbeat`.
 
 O serviço público é somente `web`, porta interna `80`. API e banco não têm
 porta de host. Os volumes `pgdata` e `speaking_data` são persistentes. O perfil
@@ -180,14 +187,24 @@ No projeto EasyPanel `papalino`:
 A cadeia esperada é:
 
 1. `db` fica saudável;
-2. `migrate` executa `upgrade`, `check` e seed insert-only;
+2. `migrate` executa `alembic upgrade head && alembic check` (gate bloqueante,
+   só schema);
 3. `permissions` assume `aulas_owner` pelo migrador e reaplica os grants mínimos,
    sem receber a senha administrativa;
 4. `api` passa no readiness;
-5. `worker` e `web` iniciam.
+5. `worker` e `web` iniciam; o `worker` passa a reportar saúde pela batida em
+   `worker_heartbeat` (`python -m app.cli worker-health`, até 60 s de idade,
+   verificado a cada 30 s após 40 s de carência);
+6. `seed` roda uma vez (`python -m app.cli seed`, insert-only, papel do
+   migrador) depois da API saudável e termina com saída 0.
 
 Se `migrate` ou `permissions` falhar, API e web não devem iniciar. Não contorne o
 gate com comandos manuais; leia o primeiro erro, corrija e refaça o deploy.
+
+Se só o `seed` falhar, o site continua no ar com o conteúdo anterior: a falha
+aparece no código de saída do `up --wait`, em `docker compose ps seed` e nos
+logs desse container. Corrija o pacote editorial (`python -m app.cli seed
+--dry-run` localmente) e refaça o deploy; não execute o seed à mão na stack.
 
 Não publique `api` nem `db` separadamente. O Traefik encaminha o protocolo
 externo no cabeçalho `X-Forwarded-Proto`; o nginx o preserva ao chamar a API.
@@ -325,6 +342,106 @@ Estado atual: **implantado, com aceite remoto parcial**. O domínio gerado está
 saudável; o encerramento integral ainda depende do DNS/certificado do domínio
 próprio, do teste funcional autenticado, da persistência após redeploy e do
 backup inicial verificado.
+
+## Deploy automatizado — `make deploy-public` e o job `deploy` (Sprint 45)
+
+A partir da Sprint 45 o procedimento do segundo deploy virou script:
+`ops/deploy_public.sh` reproduz por SSH exatamente o que foi feito à mão em
+21/10/2026, e o job `deploy` do CI o executa a cada push na `main` que passar
+nos quatro jobs bloqueantes.
+
+### O que o script faz
+
+`make deploy-public sha=<sha>` (ou `bash ops/deploy_public.sh <sha>`) executa,
+nesta ordem, parando no primeiro erro:
+
+1. confere **localmente** que o SHA existe e é ancestral de `origin/main`
+   (`git merge-base --is-ancestor`); branch, tag ou commit fora da `main` são
+   recusados antes de qualquer contato com a VM (faça `git fetch origin main`
+   se o seu clone estiver atrasado);
+2. pré-voo por SSH: `code/`, `compose.yml`, o `.env` e o
+   `docker-compose.override.yml` gerados pelo painel, `rsync` e `docker compose`
+   precisam existir — nada é alterado se faltar algo;
+3. `git archive --format=tar <sha> | ssh ... tar -x -C /tmp/aulas-deploy-<sha>`;
+4. `rsync -a --delete` de `/tmp/aulas-deploy-<sha>/` para
+   `/etc/easypanel/projects/papalino/aulas-ingles/code/`, preservando
+   `/docker-compose.override.yml`, `/infra/easypanel/.env` e
+   `/infra/easypanel/docker-compose.override.yml`; grava `code/.deployed-sha`
+   (`<sha> <data UTC> <origem>`, o mesmo formato já usado na VM) e remove o
+   diretório temporário;
+5. em `code/infra/easypanel`: `docker compose -p papalino_aulas-ingles
+   --env-file .env -f compose.yml -f docker-compose.override.yml up -d --build
+   --remove-orphans --wait --wait-timeout 420` — o mesmo comando do painel;
+6. imprime `docker compose ps -a` e os códigos de saída de `migrate`,
+   `permissions` e `seed` (serviço próprio desde a Sprint 45, executado depois
+   da API saudável); `up` reprovado ou qualquer one-shot diferente de 0 mostra
+   os últimos logs de `migrate`/`permissions` e falha o deploy — a stack fica
+   como o Compose a deixou, sem contorno manual. Um `seed` reprovado deixa o
+   site no ar com o conteúdo anterior, mas o deploy sai vermelho para a falha
+   editorial não passar despercebida;
+7. smokes HTTPS em `AULAS_PUBLIC_URL` (padrão: domínio gerado pelo painel):
+   `/`, `/sw.js`, `/api/live`, `/api/health` e `/api/courses` em 200 (até três
+   tentativas cada) e `schema_current == schema_required` no JSON do health.
+
+SSH sempre com `-o BatchMode=yes -o StrictHostKeyChecking=yes`: sem senha
+interativa e sem aceitar host desconhecido. O script nunca lê nem imprime o
+`.env` remoto; só o referencia por `--env-file`. `AULAS_PUBLIC_SSH_HOST` troca o
+destino (padrão `root@72.61.39.94`, o mesmo de `ops/public_backup.py`).
+
+`make deploy-public-dry-run sha=<sha>` imprime cada comando prefixado por
+`[dry-run]` sem executar nada remoto — use antes de um deploy manual ou para
+revisar o que o CI fará. `--skip-smoke` pula a etapa 7. Os testes em
+`ops/tests/test_deploy_public.py` (rodam em `make test-recovery`) simulam `ssh`,
+`git` e `curl` e cobrem recusa de SHA, dry-run sem chamadas remotas, sequência
+dos comandos, one-shot com saída 1, `up` reprovado, smoke com 500 e schema
+divergente.
+
+### O job `deploy` do CI
+
+`needs: [backend, frontend, e2e, recovery]`, só em `push` na `main`, environment
+`production`, 20 minutos de limite e grupo de concorrência `deploy-public` sem
+cancelamento (dois merges seguidos entram em fila). Na `main` o workflow também
+deixou de cancelar a execução anterior, para um merge novo não derrubar um
+`compose up` em andamento. Um CI vermelho não chega ao EasyPanel porque o job
+nem inicia.
+
+Sem o segredo `PUBLIC_DEPLOY_SSH_KEY`, o job emite um `::notice::` dizendo que
+o deploy automatizado está desarmado e termina verde, sem tocar na VM — o deploy
+continua manual (`make deploy-public`). Com o segredo, o job instala a chave em
+`~/.ssh/id_deploy` (0600, `IdentitiesOnly yes`), grava `known_hosts` a partir de
+`PUBLIC_DEPLOY_KNOWN_HOSTS` (recusa se vazio), exporta `AULAS_PUBLIC_SSH_HOST` de
+`PUBLIC_DEPLOY_HOST` e roda `bash ops/deploy_public.sh "$GITHUB_SHA"`. Nenhum
+segredo passa por `echo`.
+
+### Secrets a criar (Settings → Secrets and variables → Actions)
+
+| Secret | Conteúdo | Como obter |
+|---|---|---|
+| `PUBLIC_DEPLOY_SSH_KEY` | chave privada OpenSSH **exclusiva** para deploy | `ssh-keygen -t ed25519 -f deploy-aulas-ingles -C deploy-aulas-ingles -N ""`; cole a privada no segredo, acrescente a pública em `~/.ssh/authorized_keys` do usuário de deploy na VM e apague a privada da máquina |
+| `PUBLIC_DEPLOY_KNOWN_HOSTS` | linha(s) de `known_hosts` da VM | `ssh-keyscan -t ed25519 72.61.39.94`; confira a impressão digital (`ssh-keygen -lf`) contra a já conhecida no Mac (`ssh-keygen -F 72.61.39.94`) antes de colar |
+| `PUBLIC_DEPLOY_HOST` | `root@72.61.39.94` (ou outro usuário) | opcional; sem ele vale o padrão do script |
+
+Recomendações: não reutilizar a chave pessoal do Mac; preferir um usuário da VM
+dedicado ao deploy, com acesso ao Docker e ao diretório do serviço; revogar a
+chave em `authorized_keys` se o segredo vazar. Para exigir aprovação humana
+antes de cada deploy, configure *required reviewers* no environment
+`production` do GitHub — o job já o declara.
+
+Alternativa ao SSH: um token da API do EasyPanel disparando o deploy do serviço
+`papalino/aulas-ingles` e deixando o build para o painel. É o caminho preferido
+quando o token existir, porque o deploy passa a aparecer no histórico do painel;
+o script por SSH continua valendo como contingência.
+
+### Limitações
+
+- O histórico de deploys do painel não registra deploys por SSH; a evidência é
+  `code/.deployed-sha` na VM, o log do job no GitHub e este documento. Um deploy
+  pela interface do painel depois converge para a mesma `main`.
+- O script publica código: variáveis de ambiente continuam sendo editadas no
+  painel (`.env` gerado), e o script as preserva.
+- O backup anterior/posterior e o ensaio da migration no clone restaurado
+  continuam sendo passos humanos da sequência da Sprint 43; o job não os faz.
+  Antes de mergear uma migration na `main`, ensaie-a no clone primeiro.
 
 ## Referências do painel
 

@@ -250,7 +250,7 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
         'attachment; filename="aulas-ingles-dados.json"'
     )
     data = exported.json()
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "2.1"
     assert data["profile"]["email"] == "caderno-exportacao@exemplo.com"
     for section in (
         "lesson_progress",
@@ -344,7 +344,7 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
     exported = await client.get("/api/me/export", headers=headers)
     assert exported.status_code == 200
     data = exported.json()
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "2.1"
     for section in (
         "lesson_progress",
         "study_sessions",

@@ -118,6 +118,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # Mesmo critério do EasyPanel: batida de worker_heartbeat com até 60 s,
+      # medida pelo relógio do banco. Funciona também com o overlay de papéis
+      # (entrypoint vazio, UID 10001): o exec do healthcheck não passa pelo
+      # entrypoint e o venv já está no PATH da imagem.
+      test: ["CMD", "python", "-m", "app.cli", "worker-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
   web:

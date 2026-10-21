@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, text
+from sqlalchemy import extract, func, select, text
 from sqlalchemy.dialects.postgresql import insert
 
 from app.core.config import get_settings
@@ -51,3 +51,18 @@ async def heartbeat(counts: dict[str, int] | None = None) -> None:
                 set_={k: v for k, v in values.items() if k != "name"},
             )
         )
+
+
+async def heartbeat_age_seconds() -> float | None:
+    """Idade da batida mais recente, em segundos; None quando não há linha.
+
+    Mede pelo relógio do banco (`now()`), o mesmo que grava `seen_at`, para o
+    healthcheck não depender do relógio do container. Só lê; nada é alterado.
+    """
+    async with get_sessionmaker()() as session:
+        age = await session.scalar(
+            select(extract("epoch", func.now() - WorkerHeartbeat.seen_at))
+            .order_by(WorkerHeartbeat.seen_at.desc())
+            .limit(1)
+        )
+    return None if age is None else max(0.0, float(age))

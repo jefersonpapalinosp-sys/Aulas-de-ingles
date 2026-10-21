@@ -44,7 +44,8 @@ RULES = {
     ),
     "review_unknown_source": (
         "SELECT count(*) FROM review_item WHERE source_type NOT IN "
-        "('vocab_item','exercise','writing_prompt','transcript_cue','notebook_entry')"
+        "('vocab_item','exercise','writing_prompt','transcript_cue','notebook_entry',"
+        "'dialogue_turn')"
     ),
     "study_completion_timestamp": (
         "SELECT count(*) FROM study_session_progress WHERE "
@@ -67,19 +68,20 @@ for source, table in (
     ("writing_prompt", "writing_prompt"),
     ("transcript_cue", "transcript_cue"),
     ("notebook_entry", "notebook_entry"),
+    ("dialogue_turn", "dialogue_turn"),
 ):
     RULES[f"review_source_{source}"] = (
         f"SELECT count(*) FROM review_item r LEFT JOIN {table} s ON s.id=r.source_id "
         f"WHERE r.source_type='{source}' AND (s.id IS NULL"
-        + (" OR s.user_id != r.user_id" if source == "notebook_entry" else "")
+        + (" OR s.user_id != r.user_id" if source in ("notebook_entry", "dialogue_turn") else "")
         + ")"
     )
 
 RULES["skill_unknown_source"] = (
     "SELECT count(*) FROM skill_evidence WHERE source_type NOT IN "
-    "('exercise_attempt','writing_feedback','speaking_attempt')"
+    "('exercise_attempt','writing_feedback','speaking_attempt','dialogue_turn')"
 )
-for source in ("exercise_attempt", "writing_feedback", "speaking_attempt"):
+for source in ("exercise_attempt", "writing_feedback", "speaking_attempt", "dialogue_turn"):
     RULES[f"skill_source_{source}"] = (
         f"SELECT count(*) FROM skill_evidence e LEFT JOIN {source} s ON s.id=e.source_id "
         f"WHERE e.source_type='{source}' AND (s.id IS NULL OR s.user_id != e.user_id)"

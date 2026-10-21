@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 
 from app.core.config import get_settings
 from app.db.seed import load_seed_graph, preview_seed, seed_lessons
@@ -26,7 +26,7 @@ from app.services.editorial_plan import preview_unit_archive
 from app.services.editorial_reorder import REASONS as REORDER_REASONS
 from app.services.editorial_reorder import apply_editorial_reorder
 from app.services.editorial_reorder_plan import preview_editorial_reorder
-from app.services.maintenance import SCOPES, retention_batch
+from app.services.maintenance import SCOPES, heartbeat_age_seconds, retention_batch
 from app.services.transcription_queue import run_transcription_worker
 
 
@@ -56,6 +56,26 @@ async def _assist_gate(modality: Modality, review_path: Path) -> bool:
     report = evaluate_gate(modality, metrics, review, get_settings())
     print(json.dumps(report.as_dict(), ensure_ascii=False, indent=2, sort_keys=True))
     return report.approved
+
+
+async def _worker_health(max_age_seconds: int) -> bool:
+    """Healthcheck do container do worker: a batida mais recente é fresca?
+
+    Usa a URL e o papel do próprio processo (as variáveis do container). A saída
+    é guardada pelo Docker em `inspect`, por isso só leva idade e veredito: nada
+    de DSN, papel, contagens ou conteúdo.
+    """
+    try:
+        age = await heartbeat_age_seconds()
+    finally:
+        await dispose_engine()
+    if age is None:
+        print("worker-health: nenhuma batida registrada")
+        return False
+    fresh = age <= max_age_seconds
+    estado = "ok" if fresh else "parada"
+    print(f"worker-health: batida há {int(age)}s ({estado}; limite {max_age_seconds}s)")
+    return fresh
 
 
 async def _editorial_plan(course_slug: str, unit_slug: str) -> None:
@@ -269,6 +289,23 @@ def main_com_argumentos(argumentos: list[str]) -> None:
 
         configurar(get_settings().log_level)
         asyncio.run(run_transcription_worker(once="--once" in argumentos[1:]))
+    elif comando == "worker-health":
+        import argparse
+
+        parser = argparse.ArgumentParser(prog="worker-health")
+        parser.add_argument("--max-age-seconds", type=int, default=60)
+        args = parser.parse_args(argumentos[1:])
+        if args.max_age_seconds < 1:
+            parser.error("--max-age-seconds deve ser um inteiro >= 1")
+        try:
+            fresh = asyncio.run(_worker_health(args.max_age_seconds))
+        except (SQLAlchemyError, OSError, TimeoutError, RuntimeError):
+            # 2 = não deu para perguntar ao banco (conexão, papel, timeout).
+            # Sem a exceção na saída: ela pode carregar host, papel ou SQL.
+            print("worker-health: banco inacessível", file=sys.stderr)
+            raise SystemExit(2) from None
+        if not fresh:
+            raise SystemExit(1)
     elif comando == "retention":
         import argparse
 
@@ -283,7 +320,7 @@ def main_com_argumentos(argumentos: list[str]) -> None:
         print(
             "uso: python -m app.cli seed | editorial-audit | editorial-plan | "
             "editorial-reorder-plan | editorial-reorder | editorial-archive | assist-gate | "
-            "assist-worker [--once]",
+            "assist-worker [--once] | worker-health [--max-age-seconds N] | retention",
             file=sys.stderr,
         )
         raise SystemExit(2)

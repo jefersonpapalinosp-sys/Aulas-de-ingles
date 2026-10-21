@@ -42,6 +42,8 @@ PERSONAL_LINKS = {
     "study_activity_event": ("session_id", "study_activity_session"),
     "study_active_interval": ("lesson_id", "lesson"),
     "course_review_attempt": ("review_id", "course_review"),
+    "speaking_dialogue": ("lesson_id", "lesson"),
+    "dialogue_turn": ("dialogue_id", "speaking_dialogue"),
 }
 SNAPSHOT_LINKS = {
     "exercise_attempt_id": "exercise_attempt",
@@ -50,7 +52,7 @@ SNAPSHOT_LINKS = {
     "speaking_attempt_id": "speaking_attempt",
     "checkpoint_attempt_id": "course_review_attempt",
 }
-SKILL_SOURCES = ("exercise_attempt", "writing_feedback", "speaking_attempt")
+SKILL_SOURCES = ("exercise_attempt", "writing_feedback", "speaking_attempt", "dialogue_turn")
 PREVIEW_TIMEOUT_SECONDS = 30
 
 

@@ -296,24 +296,25 @@ campo falta.
 
 Entregas:
 
-- [ ] Job `deploy` no CI com `needs: [backend, frontend, e2e, recovery]`,
-  `if: github.ref == 'refs/heads/main'`, disparo do EasyPanel pela API com
-  o SHA aprovado e smoke pós-deploy (`/`, `/sw.js`, `/api/health`,
-  `/api/courses`, HSTS presente).
-- [ ] Decisão sobre o `seed` no gate de release: `alembic upgrade head &&
-  alembic check` continua bloqueante; o `seed` passa a rodar após a API
-  saudável, com falha visível no gate operacional e sem derrubar o site.
-- [ ] `resolver 127.0.0.11 valid=10s` e `proxy_pass` por variável em
+- [x] Job `deploy` no CI com `needs: [backend, frontend, e2e, recovery]`,
+  só em push na `main`, executando `ops/deploy_public.sh` por SSH (o painel
+  não emitiu token de API); sem a secret `PUBLIC_DEPLOY_SSH_KEY` o job avisa
+  e termina verde, desarmado. Smokes pós-deploy nas cinco rotas e schema
+  compatível.
+- [x] Decisão sobre o `seed` no gate de release: `migrate` só faz `upgrade` +
+  `check`; o `seed` virou serviço próprio depois da API saudável. Falha dele
+  sai vermelha no `up --wait` e no script de deploy, sem derrubar o site.
+- [x] `resolver 127.0.0.11 valid=10s` e `proxy_pass` por variável em
   `frontend/nginx.conf`.
-- [ ] Healthcheck do worker baseado em `worker_heartbeat` nos três Compose
-  que o executam.
-- [ ] `Cache-Control: no-cache, must-revalidate` em `/index.html`; um único
-  `Cache-Control` em `/assets/`.
-- [ ] `timeout-minutes` em todos os jobs; `recovery` passa de 15 para 35 ou
-  perde um dos builds frios.
+- [x] Healthcheck do worker (`python -m app.cli worker-health`) baseado em
+  `worker_heartbeat` nos três Compose; provado no worker de dev.
+- [x] `Cache-Control: no-cache, must-revalidate` em `/` e `/index.html`; um
+  único `Cache-Control` em `/assets/`.
+- [x] `timeout-minutes` em todos os jobs; `recovery` passou de 15 para 35.
 - [ ] Build único da imagem com cache GHA, reutilizado por `security-inventory`,
-  `recovery` e `e2e`.
-- [ ] Trivy em SARIF com `upload-sarif`; `dependabot.yml` para npm, pip e
+  `recovery` e `e2e`. Adiado: a pré-carga por digest (Sprint 44) removeu a
+  causa das falhas e o CI já fecha em cerca de 10 minutos de parede.
+- [x] Trivy em SARIF com `upload-sarif`; `dependabot.yml` para npm, `uv` e
   actions.
 
 Critérios de aceite:
@@ -395,22 +396,22 @@ além de ampliar duas constraints.
 
 Entregas:
 
-- [ ] Tabela `speaking_dialogue`: `user_id`, `lesson_id`, `mode`
+- [x] Tabela `speaking_dialogue`: `user_id`, `lesson_id`, `mode`
   (`script`, `guided`, `free_unit`), `state`, `content_version` e fingerprint
   do recorte da aula, `provider_name`, `rubric_version`, `started_at`,
   `ended_at`, `turn_limit`.
-- [ ] Tabela `dialogue_turn`: `dialogue_id`, `position`, `role`
+- [x] Tabela `dialogue_turn`: `dialogue_id`, `position`, `role`
   (`student`, `partner`), `input_kind` (`audio`, `text`),
   `speaking_attempt_id` opcional, `transcription_job_id` opcional,
   `transcript`, `checks` (JSONB, só códigos e booleanos), `partner_text`,
   `hints` (JSONB, só códigos permitidos), `confidence`, `cost_microusd`,
   `human_rating`, `created_at`; unicidade `(dialogue_id, position)`.
-- [ ] `ck_assist_modality` passa a aceitar `conversation`;
+- [x] `ck_assist_modality` passa a aceitar `conversation`;
   `skill_evidence.source_type` aceita `dialogue_turn`; origem de
   `review_item` aceita `dialogue_missed_term`.
-- [ ] `ondelete` em todas as FKs, `timestamptz`, índice keyset
+- [x] `ondelete` em todas as FKs, `timestamptz`, índice keyset
   `(dialogue_id, position)`, grants para `aulas_runtime` e `aulas_worker`.
-- [ ] Exclusão de conta e exportação pessoal enxergam as duas tabelas.
+- [x] Exclusão de conta e exportação pessoal enxergam as duas tabelas.
 
 Critérios de aceite: `alembic upgrade head` duas vezes e `alembic check`
 limpos no laboratório; downgrade documentado como não destrutivo ou
@@ -445,21 +446,21 @@ browser: exibe transcrição + confiança + checks; fala o partner_text com spee
 
 Entregas:
 
-- [ ] ADR `docs/adr_assistente_de_conversa.md` com: os três modos; o que o
+- [x] ADR `docs/adr_assistente_de_conversa.md` (escrito; aprovação pendente) com: os três modos; o que o
   modelo nunca faz (nota, "score de fluência", correção fonética, juízo
   sobre o aluno); cerca de tópico; limite de turnos por diálogo; fallback
   para o modo Roteiro quando o provedor falha; entrada por texto quando não
   há microfone.
-- [ ] Contrato OpenAPI rascunhado: `POST /api/speaking/dialogues`,
+- [x] Contrato OpenAPI rascunhado (tabela no ADR): `POST /api/speaking/dialogues`,
   `GET /api/speaking/dialogues/{id}`, `PUT .../turns/{position}/audio`,
   `POST .../turns/{position}/text`, `GET .../turns/{position}`,
   `PUT .../turns/{position}/rating`, `DELETE /api/speaking/dialogues/{id}`.
-- [ ] Prompt do sistema e esquema JSON versionados em `app/services/dialogue_prompts.py`,
+- [x] Prompt do sistema e esquema JSON versionados em `app/services/dialogue_prompts.py`,
   derivados exclusivamente de `seed/lessons.json` (objetivos, frases,
   vocabulário, blocos de gramática) e nunca da conversa anterior sem filtro.
 - [ ] Spike de latência: 30 turnos sintéticos em Ollama `qwen2.5:7b` no Mac
   e 30 em um gateway HTTPS; registrar p50/p95 e custo por turno.
-- [ ] Decisão de TTS: `speechSynthesis` do navegador como padrão (zero custo,
+- [x] Decisão de TTS (registrada no ADR): `speechSynthesis` do navegador como padrão (zero custo,
   dado não sai do dispositivo, funciona offline); gateway de TTS fica para
   depois do piloto, se a qualidade da voz for reprovada.
 - [ ] Manifesto de homologação do provedor para a modalidade `conversation`
@@ -476,6 +477,22 @@ Critérios de aceite:
 Fora do escopo definitivo: feedback fonético por fonema, nota única de
 fluência, ranking, armazenar áudio no PostgreSQL, importar conteúdo novo da
 VOA.
+
+### Registro de execução — Ciclo 45, andamento em 21/10/2026
+
+Branch `sprint/45-deploy-e-fundacao`. Três pacotes avançaram no mesmo dia do
+fechamento do ciclo 44; os demais (BE-45, FE-45, SEC-45) não começaram.
+
+| Pacote | Entregue | Pendente |
+|---|---|---|
+| INFRA-45 | nginx resolve a API por requisição e deixa `/` e `/index.html` sem cache; `worker-health` + healthcheck nos três Compose (provado no worker de dev: ok com 60 s, reprovado com 1 s); `seed` fora do gate como serviço próprio no EasyPanel; `ops/deploy_public.sh` (13 testes simulados, dry-run sem contato com a VM) e `make deploy-public`; job `deploy` gated por secrets; SARIF do Trivy na aba Security; `timeout-minutes` em todos os jobs; `cancel-in-progress` só fora da `main`; `dependabot.yml`. 161 testes operacionais verdes | criar as secrets `PUBLIC_DEPLOY_SSH_KEY`, `PUBLIC_DEPLOY_KNOWN_HOSTS` e `PUBLIC_DEPLOY_HOST` (ação de Jeferson, com chave SSH exclusiva); provas dos critérios 1 a 3 (PR vermelho não implanta; recriar só a API sem 502; worker travado reiniciado) ficam para quando a stack E2E ou a pública rodar o código novo; build único com cache GHA adiado |
+| IA-45 | ADR `adr_assistente_de_conversa.md` com modos, pipeline, vedações, códigos de check, contrato HTTP, cota/retenção e voz do navegador; `app/services/dialogue_prompts.py` (brief do seed, roteiro por falante, prompt `dialogue-prompt-v1`, schema restrito aos códigos reprovados, saneamento) com 8 testes puros; `ops/dialogue_latency_spike.py` (mock, Ollama, gateway) com 6 testes e execução simulada 30/30 | ADR **aprovado por Jeferson em 21/10/2026**, liberando DB-45. Provedor escolhido: Cloudflare Workers AI; spike real com 4 corridas de 30 turnos (tabela no ADR): modelo p95 ≈ 2 s; critério de 8 s atendido só com `whisper-tiny-en` (turno p95 3,6 s, ~5,4 neurons, ~1.850 turnos/dia na cota); `turbo` e `base` reprovam pela cauda da transcrição. Resta o manifesto da modalidade `conversation` em `config/assist-provider-review.example.json` (IA-48) |
+| DB-45 | Migration `e3a1c7d9b250`, aditiva: `speaking_dialogue` e `dialogue_turn` com `ondelete` em todas as FKs, `timestamptz`, unicidade/keyset `(dialogue_id, position)`, checks de forma (`jsonb_typeof` em `checks`/`hints`), estados, limites e `expires_at` para a retenção dos textos; `ck_assist_modality` aceita `conversation`; a auditoria de origens aceita `dialogue_turn` em `review_item` (motivo `dialogue_missed_term`) e em `skill_evidence`; grants por coluna na migration e em `ops/roles_policy.sql` (API só altera `human_rating` do turno; worker preenche o resultado e nunca apaga; cascatas são do PostgreSQL); exclusão de conta por cascata e exportação 2.1 com `dialogues`/`dialogue_turns`; prévia editorial conta as duas tabelas. Provas em 21/10/2026: `alembic upgrade head` duas vezes e `alembic check` limpos na base de teste; laboratório de papéis reprovisionado do zero e `make test-roles` verde com as sondas novas; downgrade não destrutivo (reverte só com tabelas vazias, senão bloqueia com motivo); teste da migration em schema sintético, testes de exportação e de exclusão | Aplicar no clone do estudo e na produção pela sequência de release (DB-46). Retenção de `transcript`/`partner_text` entra com o job em BE-46 (`expires_at` já existe). Decisões registradas: `dialogue_turn.user_id` desnormalizado para as regras de posse e a exportação; `state`, `error_code`, `fallback` e `completed_at` no turno para o contrato GET. Dois pontos exigem migration própria em BE-46: áudio do Guiado sem `transcript_cue` (`speaking_attempt.transcript_cue_id` é obrigatório hoje) e o job de diálogo na fila (`transcription_job.speaking_attempt_id` é obrigatório); o worker também precisará de SELECT nas tabelas de conteúdo que montam o brief |
+
+Dois agentes que implementavam o INFRA-45 foram interrompidos por limite de
+sessão da API durante as validações; o trabalho foi revisado linha a linha,
+um teste corrigido (vazamento de variável de ambiente no cenário de host) e as
+validações concluídas antes do commit.
 
 ---
 

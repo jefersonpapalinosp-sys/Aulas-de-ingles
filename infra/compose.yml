@@ -113,6 +113,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # O worker grava worker_heartbeat.seen_at a cada ~10 s; o comando lê a
+      # batida mais recente pelo relógio do banco e sai 0 (<= 60 s), 1 (parada
+      # ou sem linha) ou 2 (banco inacessível). Nada de DSN na saída.
+      test: ["CMD", "python", "-m", "app.cli", "worker-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
   web:
