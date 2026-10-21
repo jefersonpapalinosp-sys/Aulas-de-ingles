@@ -185,11 +185,12 @@ mostrada antes da resposta do parceiro), não um modelo maior.
 
 ## Decisões em aberto, para Jeferson
 
-- Provedor de diálogo e de STT em produção (qual gateway). Sem essa escolha, o
-  spike só roda no modo simulado e no Ollama local, e o critério 2 fica em aberto.
+- ~~Provedor de diálogo e de STT em produção.~~ Decidido em 21/10/2026: Cloudflare
+  Workers AI, `llama-3.1-8b-instruct` + `whisper-tiny-en` (resultado do spike acima).
 - Confirmar o limite de 12 turnos e a cota diária de 20.
 - Confirmar a voz do navegador como padrão do piloto.
 
 Aprovado por: Jeferson Papalino, em 21/10/2026, em conversa com o agente que
-redigiu o documento. Provedor de diálogo/STT, limite de turnos e voz do navegador
-seguem como decisões em aberto, a confirmar antes do piloto (IA-48).
+redigiu o documento. Provedor de diálogo/STT decidido no mesmo dia (Cloudflare
+Workers AI); limite de turnos e voz do navegador seguem como decisões em aberto,
+a confirmar antes do piloto (IA-48).

@@ -692,7 +692,9 @@ class AssistReservation(Base):
     __tablename__ = "assist_reservation"
     __table_args__ = (
         UniqueConstraint("user_id", "request_key", name="uq_assist_user_request"),
-        CheckConstraint("modality IN ('writing','transcription')", name="ck_assist_modality"),
+        CheckConstraint(
+            "modality IN ('writing','transcription','conversation')", name="ck_assist_modality"
+        ),
         CheckConstraint("state IN ('reserved','consumed','released')", name="ck_assist_state"),
         CheckConstraint("cost_microusd >= 0", name="ck_assist_cost"),
         CheckConstraint("expires_at > created_at", name="ck_assist_expiry"),
@@ -825,6 +827,103 @@ class TranscriptionJob(Base):
     requested_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class SpeakingDialogue(Base):
+    """Diálogo do parceiro de conversa, ancorado em uma aula (ADR IA-45).
+
+    Guarda metadados e o recorte da aula (versão e fingerprint). O texto dos
+    turnos fica em ``dialogue_turn`` e segue a retenção da assistência.
+    """
+
+    __tablename__ = "speaking_dialogue"
+    __table_args__ = (
+        UniqueConstraint("user_id", "operation_key", name="uq_dialogue_user_operation"),
+        CheckConstraint("mode IN ('script','guided','free_unit')", name="ck_dialogue_mode"),
+        CheckConstraint("state IN ('active','completed','abandoned')", name="ck_dialogue_state"),
+        CheckConstraint("turn_limit > 0 AND turn_limit <= 50", name="ck_dialogue_turn_limit"),
+        CheckConstraint("ended_at IS NULL OR ended_at >= started_at", name="ck_dialogue_ended"),
+        Index("ix_dialogue_user_started", "user_id", "started_at", "id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
+    mode: Mapped[str] = mapped_column(String(20))
+    state: Mapped[str] = mapped_column(String(20), default="active")
+    partner_speaker: Mapped[str | None] = mapped_column(String(80), default=None)
+    content_version: Mapped[int] = mapped_column(Integer)
+    content_fingerprint: Mapped[str] = mapped_column(String(64))
+    provider_name: Mapped[str | None] = mapped_column(String(80), default=None)
+    rubric_version: Mapped[str] = mapped_column(String(40))
+    turn_limit: Mapped[int] = mapped_column(Integer, default=12)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+
+class DialogueTurn(Base):
+    """Um turno do diálogo: fala do aluno ou resposta do parceiro.
+
+    ``checks`` guarda só códigos e booleanos; ``hints`` só códigos permitidos,
+    com uma frase cada. O áudio continua em ``speaking_attempt``. ``transcript``,
+    ``partner_text`` e ``hints`` expiram em ``expires_at``; os metadados ficam.
+    """
+
+    __tablename__ = "dialogue_turn"
+    __table_args__ = (
+        UniqueConstraint("dialogue_id", "position", name="uq_dialogue_turn_position"),
+        UniqueConstraint("speaking_attempt_id", name="uq_dialogue_turn_speaking_attempt"),
+        UniqueConstraint("transcription_job_id", name="uq_dialogue_turn_transcription_job"),
+        CheckConstraint("position > 0", name="ck_dialogue_turn_position"),
+        CheckConstraint("role IN ('student','partner')", name="ck_dialogue_turn_role"),
+        CheckConstraint(
+            "(role = 'student') = (input_kind IS NOT NULL) "
+            "AND (input_kind IS NULL OR input_kind IN ('audio','text'))",
+            name="ck_dialogue_turn_input",
+        ),
+        CheckConstraint("state IN ('pending','completed','failed')", name="ck_dialogue_turn_state"),
+        CheckConstraint(
+            "confidence IS NULL OR (confidence >= 0 AND confidence <= 1)",
+            name="ck_dialogue_turn_confidence",
+        ),
+        CheckConstraint("cost_microusd >= 0", name="ck_dialogue_turn_cost"),
+        CheckConstraint(
+            "jsonb_typeof(checks) = 'object' AND jsonb_typeof(hints) = 'array'",
+            name="ck_dialogue_turn_json",
+        ),
+        CheckConstraint("expires_at > created_at", name="ck_dialogue_turn_expiry"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dialogue_id: Mapped[int] = mapped_column(ForeignKey("speaking_dialogue.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    role: Mapped[str] = mapped_column(String(20))
+    input_kind: Mapped[str | None] = mapped_column(String(20), default=None)
+    speaking_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("speaking_attempt.id", ondelete="SET NULL"), default=None
+    )
+    transcription_job_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transcription_job.id", ondelete="SET NULL"), default=None
+    )
+    state: Mapped[str] = mapped_column(String(20), default="pending")
+    transcript: Mapped[str | None] = mapped_column(Text, default=None)
+    checks: Mapped[dict[str, bool]] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'::jsonb")
+    )
+    partner_text: Mapped[str | None] = mapped_column(Text, default=None)
+    hints: Mapped[list[dict[str, str]]] = mapped_column(
+        JSONB, default=list, server_default=text("'[]'::jsonb")
+    )
+    confidence: Mapped[float | None] = mapped_column(Float, default=None)
+    fallback: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
+    cost_microusd: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    error_code: Mapped[str | None] = mapped_column(String(50), default=None)
+    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 

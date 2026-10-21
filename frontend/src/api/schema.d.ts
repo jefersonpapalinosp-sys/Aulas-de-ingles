@@ -2624,6 +2624,14 @@ export interface components {
             content_snapshots?: {
                 [key: string]: unknown;
             }[];
+            /** Dialogue Turns */
+            dialogue_turns?: {
+                [key: string]: unknown;
+            }[];
+            /** Dialogues */
+            dialogues?: {
+                [key: string]: unknown;
+            }[];
             /** Exercise Attempts */
             exercise_attempts: {
                 [key: string]: unknown;

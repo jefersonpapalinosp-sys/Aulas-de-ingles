@@ -99,7 +99,7 @@ async def test_event_replay_and_concurrent_overlap_across_courses(client, sessio
     )
     assert float(seconds) == 45
     exported = (await client.get("/api/me/export", headers=headers)).json()
-    assert exported["schema_version"] == "2.0"
+    assert exported["schema_version"] == "2.1"
     assert len(exported["activity_sessions"]) == 2
     assert len(exported["activity_events"]) == 3
     assert len(exported["active_intervals"]) == 2

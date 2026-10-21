@@ -16,7 +16,7 @@ from app.db.models import Lesson, NotebookEntry, ReviewItem, SkillEvidence, User
 
 async def test_audit_empty_personal_data_reports_counts_only(session):
     report = await audit(session)
-    assert len(report) == 22
+    assert len(report) == 24  # 22 da Sprint 38 + origem `dialogue_turn` em revisão e evidência
     assert all(isinstance(count, int) and count == 0 for count in report.values())
 
 

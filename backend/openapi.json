@@ -3552,6 +3552,22 @@
                         "title": "Content Snapshots",
                         "type": "array"
                     },
+                    "dialogue_turns": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Dialogue Turns",
+                        "type": "array"
+                    },
+                    "dialogues": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Dialogues",
+                        "type": "array"
+                    },
                     "exercise_attempts": {
                         "items": {
                             "additionalProperties": true,

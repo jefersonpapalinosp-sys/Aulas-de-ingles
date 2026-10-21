@@ -113,6 +113,8 @@ class PersonalDataExportOut(BaseModel):
     login_sessions: list[dict[str, Any]] = Field(default_factory=list)
     audio_manifest: list[AudioExportEntry] = Field(default_factory=list)
     content_snapshots: list[dict[str, Any]] = Field(default_factory=list)
+    dialogues: list[dict[str, Any]] = Field(default_factory=list)
+    dialogue_turns: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AccountDeletionIn(BaseModel):

@@ -54,14 +54,10 @@ def main():
         roles.sql(info, f"SELECT editorial_key FROM {table} LIMIT 1", "aulas_runtime")
         for role in ("aulas_runtime", "aulas_worker", "aulas_backup"):
             forbidden(info, role, f"UPDATE {table} SET editorial_key=gen_random_uuid()")
-    forbidden(
-        info, "aulas_runtime", "UPDATE alembic_version SET version_num=version_num"
-    )
+    forbidden(info, "aulas_runtime", "UPDATE alembic_version SET version_num=version_num")
     forbidden(info, "aulas_runtime", "UPDATE review_event SET quality=quality")
     forbidden(info, "aulas_runtime", "DELETE FROM review_event")
-    forbidden(
-        info, "aulas_runtime", "UPDATE evidence_content_snapshot SET content=content"
-    )
+    forbidden(info, "aulas_runtime", "UPDATE evidence_content_snapshot SET content=content")
     forbidden(info, "aulas_runtime", "DELETE FROM evidence_content_snapshot")
     forbidden(info, "aulas_worker", "SELECT * FROM evidence_content_snapshot")
     forbidden(
@@ -112,12 +108,38 @@ def main():
     forbidden(info, "aulas_worker", "DELETE FROM refresh_session")
     forbidden(info, "aulas_runtime", "DELETE FROM account_deletion_job")
     forbidden(info, "aulas_worker", "INSERT INTO account_deletion_job DEFAULT VALUES")
-    forbidden(
-        info, "aulas_runtime", "SELECT public.aulas_retention_batch('refresh',1,true)"
+    # DB-45: fora de human_rating, a API não altera turnos; o worker nunca apaga
+    # nem avalia; o backup só lê.
+    for statement in (
+        "DELETE FROM dialogue_turn",
+        "UPDATE dialogue_turn SET transcript=transcript",
+        "UPDATE dialogue_turn SET partner_text=partner_text",
+        "UPDATE dialogue_turn SET state=state",
+        "UPDATE dialogue_turn SET cost_microusd=cost_microusd",
+        "UPDATE speaking_dialogue SET user_id=user_id",
+        "UPDATE speaking_dialogue SET turn_limit=turn_limit",
+    ):
+        forbidden(info, "aulas_runtime", statement)
+    for statement in (
+        "DELETE FROM dialogue_turn",
+        "DELETE FROM speaking_dialogue",
+        "INSERT INTO speaking_dialogue DEFAULT VALUES",
+        "UPDATE dialogue_turn SET human_rating=human_rating",
+        "UPDATE dialogue_turn SET user_id=user_id",
+        "UPDATE speaking_dialogue SET mode=mode",
+    ):
+        forbidden(info, "aulas_worker", statement)
+    forbidden(info, "aulas_backup", "INSERT INTO dialogue_turn DEFAULT VALUES")
+    roles.sql(info, "UPDATE dialogue_turn SET human_rating=human_rating", "aulas_runtime")
+    roles.sql(
+        info,
+        "UPDATE dialogue_turn SET state=state, checks=checks, hints=hints; "
+        "UPDATE speaking_dialogue SET state=state; SELECT count(*) FROM speaking_dialogue",
+        "aulas_worker",
     )
-    forbidden(
-        info, "aulas_backup", "SELECT public.aulas_retention_batch('pending',1,true)"
-    )
+    roles.sql(info, "SELECT count(*) FROM dialogue_turn", "aulas_backup")
+    forbidden(info, "aulas_runtime", "SELECT public.aulas_retention_batch('refresh',1,true)")
+    forbidden(info, "aulas_backup", "SELECT public.aulas_retention_batch('pending',1,true)")
     forbidden(info, "aulas_runtime", "UPDATE worker_heartbeat SET seen_at=seen_at")
     roles.sql(
         info,

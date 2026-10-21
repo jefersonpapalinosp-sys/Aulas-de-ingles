@@ -100,7 +100,7 @@ class ConcurrencyRolloutTests(unittest.TestCase):
         with patch.object(recovery, "query", return_value=1) as query, patch("builtins.print"):
             with self.assertRaises(RecoveryError):
                 rollout.audit(recovery.CONCURRENCY_CHECK)
-            self.assertEqual(query.call_count, 22)
+            self.assertEqual(query.call_count, 24)  # 22 da Sprint 38 + 2 origens `dialogue_turn`
             self.assertTrue(
                 all(
                     call.args[1].lstrip().upper().startswith("SELECT")
