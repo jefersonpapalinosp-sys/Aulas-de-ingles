@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from app.services import dialogue_prompts as dp
 
 SEED = Path(__file__).resolve().parents[2] / "seed" / "lessons.json"

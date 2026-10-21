@@ -74,10 +74,12 @@ services:
       <<: *backend-common
       DATABASE_URL: postgresql+asyncpg://aulas_migrator:${EASYPANEL_MIGRATOR_PASSWORD}@db:5432/aulas_ingles
       DATABASE_PURPOSE: migrator
+    # Gate de release: só schema. O seed editorial roda depois, no serviço
+    # `seed`, para uma falha de conteúdo não impedir a API e o web de subir.
     command:
       - sh
       - -ec
-      - alembic upgrade head && alembic check && python -m app.cli seed
+      - alembic upgrade head && alembic check
     depends_on:
       db:
         condition: service_healthy
@@ -154,9 +156,36 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      # O worker grava worker_heartbeat.seen_at a cada ~10 s. O comando usa a
+      # URL/papel deste container, lê a batida mais recente pelo relógio do
+      # banco e sai 0 (<= 60 s), 1 (parada ou sem linha) ou 2 (banco
+      # inacessível), sem DSN na saída. Roda como UID 10001 e sem entrypoint.
+      test: ["CMD", "python", "-m", "app.cli", "worker-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     mem_limit: 512m
     cpus: 0.5
     restart: unless-stopped
+
+  # Seed editorial insert-only, fora do gate de release: roda com a API já
+  # saudável, pelo mesmo papel do migrador. Se falhar, a stack continua no ar e
+  # a falha aparece na saída do `up --wait` e em `docker compose ps seed`.
+  seed:
+    build: *backend-build
+    environment:
+      <<: *backend-common
+      DATABASE_URL: postgresql+asyncpg://aulas_migrator:${EASYPANEL_MIGRATOR_PASSWORD}@db:5432/aulas_ingles
+      DATABASE_PURPOSE: migrator
+    command: ["python", "-m", "app.cli", "seed"]
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 768m
+    cpus: 1.0
+    restart: "no"
 
   web:
     build:
