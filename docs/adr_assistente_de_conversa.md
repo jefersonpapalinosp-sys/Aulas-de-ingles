@@ -155,6 +155,34 @@ reprovada no piloto (IA-48).
 3. Nenhum prompt contém dado pessoal além do texto do turno; teste automatizado
    em `backend/tests/test_dialogue_prompts.py`.
 
+### Resultado do spike — 21/10/2026, Cloudflare Workers AI
+
+Provedor escolhido por Jeferson para o piloto: Cloudflare Workers AI (não treina
+com o conteúdo, zero retenção por padrão, 10.000 neurons/dia gratuitos). Medição
+com `ops/dialogue_latency_spike.py`: 30 turnos sintéticos por corrida, aula 31,
+diálogo com `@cf/meta/llama-3.1-8b-instruct` sob JSON Schema e transcrição de um
+WAV sintético de ruído (sem voz real: mede transporte e processamento, não
+qualidade). Todas as corridas: 30 de 30 respostas válidas após saneamento, zero
+falhas de transporte.
+
+| Transcrição | Áudio | STT p50 / p95 | Modelo p95 | Turno p50 / p95 | Critério 2 (< 8 s) | Neurons por turno | Turnos/dia na cota |
+|---|---|---|---|---|---|---|---|
+| `whisper-large-v3-turbo` | 8 s | 3,9 s / 10,0 s | 2,1 s | 5,2 s / 11,1 s | **não** | 11,6 | ~860 |
+| `whisper-large-v3-turbo` | 5 s | 4,1 s / 9,6 s | 1,6 s | 5,0 s / 10,3 s | **não** | 9,2 | ~1.085 |
+| `whisper` (base) | 8 s | 5,8 s / 8,2 s | 1,8 s | 6,7 s / 9,4 s | **não** | 5,5 | ~1.827 |
+| `whisper-tiny-en` | 8 s | 1,8 s / 2,6 s | 1,5 s | 2,7 s / 3,6 s | **sim** | 5,4 | ~1.857 |
+
+Leitura: o modelo de diálogo é estável (p95 em torno de 2 s) e barato; o gargalo é
+a cauda da transcrição com os Whisper maiores no plano gratuito, independente do
+comprimento do áudio. O critério 2 é atendido apenas com `whisper-tiny-en`.
+
+Decisão para o ciclo 46: o modo Guiado avança com `whisper-tiny-en` como STT
+padrão do diálogo (inglês apenas, o que serve ao caso) e `llama-3.1-8b-instruct`
+como modelo, ambos atrás do gateway do projeto. A qualidade da transcrição do
+`tiny` não foi medida aqui e é exatamente o que o gate humano do IA-48 avalia;
+se reprovar, a alternativa é o `turbo` com o turno em dois tempos (transcrição
+mostrada antes da resposta do parceiro), não um modelo maior.
+
 ## Decisões em aberto, para Jeferson
 
 - Provedor de diálogo e de STT em produção (qual gateway). Sem essa escolha, o
