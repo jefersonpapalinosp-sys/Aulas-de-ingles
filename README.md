@@ -16,10 +16,13 @@ aulas e seis checkpoints**; seu fechamento 26–30 é autoral porque a VOA não 
 uma revisão oficial com esse recorte. Recursos assistidos continuam desligados por
 padrão até passarem pela avaliação humana.
 
-O ambiente local de estudo em <http://localhost:5181> foi promovido em 16/10/2026
-para o schema `a42c7d1e9f20`, com backup anterior, ensaio em clone restaurado,
-gates e backup posterior. O registro está na
-[Sprint 43](docs/sprint_43_implantacao_estudo_2026-10-16.md). Listening humano,
+O ambiente local de estudo em <http://localhost:5181> foi promovido em 21/10/2026
+para o schema `d2b7e4c9a150` (Sprint 44), com backup anterior, ensaio em clone
+restaurado, migration pelo papel migrador, gates e backup posterior. O registro
+está no [runbook de operação](docs/operacao_sprint_37.md#sprint-44--implantação-autorizada-no-estudo-em-21102026);
+a promoção anterior, para `a42c7d1e9f20`, está na
+[Sprint 43](docs/sprint_43_implantacao_estudo_2026-10-16.md). A produção pública
+no EasyPanel está no mesmo schema desde o mesmo dia. Listening humano,
 revisão pedagógica, leitores de tela/dispositivos reais e HTTPS público continuam
 pendentes e não são apresentados como aprovados.
 

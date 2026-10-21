@@ -2407,3 +2407,45 @@ Não houve seed, arquivamento, exclusão real, chamada a provedor, alteração d
 migration em DEV/estudo, commit, push ou merge. O fechamento é técnico no código e
 nos laboratórios. Homologação pedagógica das rubricas e testes físicos da Sprint 41
 continuam pendentes e não foram marcados como aprovados.
+
+## Sprint 44 — implantação autorizada no estudo em 21/10/2026
+
+Autorizada por Jeferson. Origem `main` em `b42de48` (squash do PR #25 `0ebb9be`
+mais o registro do deploy público e a correção do `PUBLIC_ORIGIN` no worker e no
+migrador da produção local). O estudo em `localhost:5181` saiu de `a42c7d1e9f20`
+para `d2b7e4c9a150`, seguindo o checklist da Sprint 42 na ordem:
+
+1. imagens candidatas de API, worker, web e migrador construídas antes da
+   manutenção, com o estudo ainda servindo;
+2. prova de boot das settings do migrador e do worker candidatos com a guarda
+   nova de cookie (`PUBLIC_ORIGIN=http://localhost:5181` por padrão do Compose);
+3. web, API e worker parados; o banco não foi parado;
+4. backup anterior `aulas-20261021T130616196889Z-75fe…` (prod, `a42c7d1e9f20`,
+   4.186 usuários, 1.735 tentativas, 4.968 itens de revisão, 1.971.824 bytes),
+   verificado;
+5. alvo `study-check` liberado do ensaio da Sprint 43 (volumes removidos com
+   autorização) e o backup restaurado nele em 7 s, com recibo verificado;
+6. no clone: migration `a42c7d1e9f20 → d2b7e4c9a150` aplicada, segunda execução
+   vazia, `alembic check` sem operações, `seed --dry-run` permitido e sem
+   alterações, contagens idênticas antes e depois, índice
+   `ix_auth_rate_bucket_window_start` válido;
+7. na origem, pelo papel `aulas_migrator`: `upgrade head`, `current` em
+   `d2b7e4c9a150 (head)`, `check` limpo, `seed --dry-run` permitido;
+8. API e worker iniciados antes da web; readiness interno com schema compatível;
+   gate operacional executado por dentro da rede da stack (API não publica porta)
+   com status `ok` nos nove sinais;
+9. web liberada; `/`, `/inicio`, `/sw.js`, `/api/live`, `/api/health` e
+   `/api/courses` em HTTP 200; CSP, `nosniff`, `X-Frame-Options`, política de
+   referência e COOP presentes; service worker com release nova;
+10. escritores parados de novo para o backup posterior
+    `aulas-20261021T131251097155Z-0b0a…` (`d2b7e4c9a150`, contagens iguais ao
+    anterior), verificado; serviços religados e saudáveis.
+
+Imagens implantadas (IDs curtos): API `7ffd3f67d28f`, worker `8094e58b230d`, web
+`cc0bb360280c`. Janela total de indisponibilidade da web: cerca de 8 minutos, entre
+a parada e a liberação, mais 1 minuto para o backup posterior.
+
+Não houve seed completo, reset, exclusão de dados de estudo ou alteração de
+`.env.prod` além do `OPERATIONS_TOKEN` já persistido no mesmo dia. O laboratório
+foi encerrado com os volumes do clone preservados. Homologações humanas pendentes
+continuam como na [matriz da Sprint 42](matriz_aceite_sprint_42_2026-10-16.md).

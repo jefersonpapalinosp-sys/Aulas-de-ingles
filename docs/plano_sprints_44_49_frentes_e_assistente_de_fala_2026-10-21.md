@@ -275,8 +275,12 @@ sequência da Sprint 43 (backup anterior, ensaio da migration no clone público,
 gate `migrate → permissions → api → web`, smokes, gate operacional `ok`, backup
 posterior); registro completo em
 [deploy_easypanel.md](deploy_easypanel.md#registro-do-segundo-deploy--21102026-sprint-44).
-A produção pública está em `d2b7e4c9a150`. Pendências que ficam: copiar a chave
-privada `age` para fora do Mac e recriar a produção local 5181 com este código.
+A produção pública está em `d2b7e4c9a150`. No mesmo dia, com autorização, a
+produção local de estudo em 5181 foi recriada com este código pela sequência da
+Sprint 43 (registro no [runbook](operacao_sprint_37.md#sprint-44--implantação-autorizada-no-estudo-em-21102026));
+a correção do `PUBLIC_ORIGIN` no worker e no migrador locais (`b42de48`) saiu
+dessa implantação. Pendência que fica: copiar a chave privada `age` para fora
+do Mac.
 
 Achados da conversão dos testes, para o BE-45: `POST /writing/prompts/{id}/feedback`
 aceita `expected_revision` no corpo e está no registro do frontend, mas o backend
