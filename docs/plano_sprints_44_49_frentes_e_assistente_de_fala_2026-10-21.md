@@ -86,11 +86,11 @@ Entregas:
 - [x] `ops/recovery.py prune`: janela de 7 diários + 4 semanais, `--dry-run`
   por padrão, recusa apagar o pacote mais recente e qualquer `.partial-*`
   com menos de 24 h.
-- [ ] Remover `backups/recovery/sprint39-application-before-*` (523 MB de
+- [x] Remover `backups/recovery/sprint39-application-before-*` (523 MB de
   `api.tar`/`worker.tar` byte-idênticos, reconstruíveis do Git) e o
   `.partial-*` de 0 B.
-- [ ] Agendamento diário local (`launchd`) com registro de sucesso/falha em
-  arquivo; cópia externa criptografada do pacote do dia.
+- [x] Agendamento diário local (`launchd`) com registro de sucesso/falha em
+  arquivo; cópia externa criptografada do pacote do dia (iCloud Drive).
 - [x] Primeiro backup real pós-deploy registrado em
   [deploy_easypanel.md](deploy_easypanel.md).
 
@@ -125,8 +125,8 @@ Entregas:
 - [x] Chave HMAC dos buckets de rate limit derivada de segredo próprio
   (`AUTH_BUCKET_SECRET` ou HKDF a partir do `JWT_SECRET` com rótulo), para
   que rotacionar o JWT não zere os contadores.
-- [ ] `OPERATIONS_TOKEN` persistido na configuração do serviço no EasyPanel
-  (32+ bytes), não só no container atual.
+- [x] `OPERATIONS_TOKEN` persistido: conferido na configuração do EasyPanel e
+  gravado no `.env.prod` da produção local, que vivia só no container.
 - [x] `permissions: contents: read` no topo de `.github/workflows/ci.yml`.
 
 Critérios de aceite:
@@ -149,8 +149,8 @@ Entregas:
   `tests/test_writing*.py`, `tests/test_review.py` e `tests/test_concurrency.py`
   com `LEGACY_WRITES_UNTIL` no passado; o `conftest` deixa de empurrar a
   janela quando essa variável vier do ambiente.
-- [ ] Decisão registrada: manter 13/11/2026 ou adiar. Se adiar, mudar o
-  default em `config.py`, nos três Compose e no README no mesmo PR.
+- [x] Decisão registrada: **13/11/2026 mantida**, confirmada por Jeferson em
+  21/10/2026. Nenhum default muda.
 - [x] `limit` com teto 100 em `GET /me/notebook`, `GET /review/items`,
   `GET /speaking/attempts` e `GET /writing/history`; os clientes antigos que
   não enviam `limit` recebem a primeira página e um cabeçalho indicando a
@@ -206,9 +206,9 @@ Entregas:
 - [x] Índice em `auth_rate_bucket(window_start)` ou mover o `DELETE` de
   `auth_limits.py:52` para `services/maintenance.py`; medir antes e depois
   com `EXPLAIN` no laboratório.
-- [ ] Ensaio de restore do pacote público (INFRA-44) com comparação de
-  contagens das 39 tabelas históricas mais as de atividade, como na
-  Sprint 43.
+- [x] Ensaio de restore do pacote público (INFRA-44) com comparação de
+  contagens pela rotina de snapshot, como na Sprint 43 (recibo verificado em
+  21/10/2026).
 - [x] Unificar `test_notebook_index_migration.py`,
   `test_review_index_migration.py` e
   `test_writing_feedback_index_migration.py` em um teste parametrizado.
@@ -235,11 +235,11 @@ OpenAPI e `schema.d.ts` regenerados no mesmo commit. E2E não foi reexecutado.
 
 | Pacote | Entregue | Evidência | Pendente |
 |---|---|---|---|
-| INFRA-44 | `make backup source=public`, `backup-public-check`, `backup-prune`/`-apply`, modelo launchd, runbook e política | primeiro pacote real `aulas-20261021T042626017843Z-bb04…`, revisão `a42c7d1e9f20`, 82 aulas, 1 usuário, dump 631.101 bytes, 32 s, verificado; dry-run do prune: manter 3, remover 10 (10,9 MB), 1 parcial, 29 fora da política | apagar os 523 MB de `sprint39-application-before-*` e rodar `backup-prune-apply` (decisão do operador); instalar `age` e gerar o par com a privada fora do Mac; instalar o launchd; restore do pacote público em laboratório (todos os alvos estão ocupados por ensaios anteriores; precisa de autorização para liberar um) |
-| SEC-44 | `roles-*.env/json` em `secrets/`; guardas de cookie em prod, `CORS_ORIGINS=*` e `AUTH_BUCKET_SECRET`; chave HMAC própria; `permissions` no CI | testes de `Settings` cobrem as três recusas sem imprimir segredo; `PROD_ROLES` e `ops/roles.py` leem `secrets/` | persistir `OPERATIONS_TOKEN` na configuração do serviço no EasyPanel (ação no painel); opcionalmente definir `EASYPANEL_AUTH_BUCKET_SECRET` |
-| BE-44 | `limit` ≤ 100 e `X-Paginated-Alternative` nas 4 listagens; 428 declarado no OpenAPI das 5 rotas com revisão; `conftest` respeita o ambiente e ganha `legacy_client`; passo de CI pós-cutover; 22 testes convertidos ao contrato novo; teste de cota tolera 503 por invariante; `sqlstate` no log de indisponibilidade | 1166/1166 com a janela expirada; o 503 do teste instável era `lock_timeout` sob contenção (máquina com dois agentes e Docker), reproduzido e eliminado quando isolado | decisão formal de manter 13/11/2026 (mantida neste ciclo; confirmar); o critério "10 execuções seguidas sob carga" não foi medido formalmente |
+| INFRA-44 | `make backup source=public`, `backup-public-check`, `backup-prune`/`-apply`, modelo launchd, runbook e política | primeiro pacote real `aulas-20261021T042626017843Z-bb04…`, revisão `a42c7d1e9f20`, 82 aulas, 1 usuário, dump 631.101 bytes, 32 s, verificado; dry-run do prune: manter 3, remover 10 (10,9 MB), 1 parcial, 29 fora da política | **feitos em 21/10/2026 com autorização:** 523 MB removidos e `backup-prune-apply` executado (`backups/` de 540 MB para 5,6 MB, 4 pacotes); `age` 1.3.2 instalado; par gerado em `secrets/`; destino externo no iCloud Drive; launchd diário instalado e testado (saída 0, recibo, cópia cifrada); pacote público restaurado em `target-db` (recibo verificado, 124 s). **Resta:** copiar `secrets/backup-age-identity.txt` para fora do Mac e comprovar recibos em dias consecutivos |
+| SEC-44 | `roles-*.env/json` em `secrets/`; guardas de cookie em prod, `CORS_ORIGINS=*` e `AUTH_BUCKET_SECRET`; chave HMAC própria; `permissions` no CI | testes de `Settings` cobrem as três recusas sem imprimir segredo; `PROD_ROLES` e `ops/roles.py` leem `secrets/` | `OPERATIONS_TOKEN` conferido no EasyPanel (já persistido na configuração do serviço) e gravado no `.env.prod` local em 21/10/2026, que também passou a 600; opcionalmente definir `EASYPANEL_AUTH_BUCKET_SECRET` |
+| BE-44 | `limit` ≤ 100 e `X-Paginated-Alternative` nas 4 listagens; 428 declarado no OpenAPI das 5 rotas com revisão; `conftest` respeita o ambiente e ganha `legacy_client`; passo de CI pós-cutover; 22 testes convertidos ao contrato novo; teste de cota tolera 503 por invariante; `sqlstate` no log de indisponibilidade | 1166/1166 com a janela expirada; o 503 do teste instável era `lock_timeout` sob contenção (máquina com dois agentes e Docker), reproduzido e eliminado quando isolado | data de 13/11/2026 **confirmada por Jeferson em 21/10/2026**; o critério "10 execuções seguidas sob carga" não foi medido formalmente |
 | FE-44 | registro `REVISIONED_WRITES` (13 operações) com teste contra o OpenAPI nos dois sentidos, tipos apertados e guarda em dev; banner de 428 com recarga confirmada; fila offline mantém a tentativa; mapa único de invalidação (18 eventos); orçamento com dois tetos | `invalidateQueries` fora de `api/invalidateStudy.ts`: zero; `skills` e `study-session` invalidados após tentativa | — |
-| DB-44 | migration `d2b7e4c9a150` (`ix_auth_rate_bucket_window_start`, CONCURRENTLY, idempotente); `Index` no modelo; teste parametrizado dos 4 índices | `EXPLAIN` no banco descartável com 200 mil linhas: Seq Scan custo 4370 → Bitmap Index Scan custo 968 | restore do pacote público em laboratório (ver INFRA-44) |
+| DB-44 | migration `d2b7e4c9a150` (`ix_auth_rate_bucket_window_start`, CONCURRENTLY, idempotente); `Index` no modelo; teste parametrizado dos 4 índices | `EXPLAIN` no banco descartável com 200 mil linhas: Seq Scan custo 4370 → Bitmap Index Scan custo 968; restore do pacote público em laboratório verificado em 21/10/2026 | — |
 
 Mudanças de operação que valem aviso: a produção local em 5181 passa a receber
 `PUBLIC_ORIGIN=http://localhost:5181` por padrão do Compose quando for

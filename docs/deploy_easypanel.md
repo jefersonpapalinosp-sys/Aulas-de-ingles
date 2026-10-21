@@ -221,19 +221,34 @@ Primeiro backup real registrado em 21/10/2026: pacote
 `aulas-20261021T042626017843Z-bb04073b9b2947e69be89683970bda70`, revisão
 `a42c7d1e9f20`, 82 aulas, 1 usuário, `database.dump` com 631.101 bytes
 (sha256 `5c484686…415f0`), voz vazia, verificado por `make backup-verify`.
-O restore em alvo isolado desse pacote ainda não foi executado: todos os alvos
-do laboratório estão ocupados por ensaios anteriores e a política não permite
-limpá-los sem decisão explícita.
+Esse pacote foi restaurado em 21/10/2026 no alvo `aulas-ingles-recovery/target-db`,
+liberado com autorização de Jeferson (os volumes do ensaio da Sprint 37 foram
+removidos para isso). Recibo em `backups/recovery/restore-receipts/`, `verified`
+verdadeiro, 124 s; o clone respondeu revisão `a42c7d1e9f20`, 82 aulas e 1 usuário
+pela mesma rotina de snapshot. Laboratório encerrado com volumes preservados.
+
+Ainda em 21/10/2026, após autorização: `age` 1.3.2 instalado em `~/.local/bin` a
+partir do release oficial (sha256 do tarball
+`e2020b073c44f692685a24d6abc378817eb81ffaaf49fd0531ef8565f767f2f5`); par de
+chaves gerado em `secrets/` (`backup-age-identity.txt` e `backup-age-recipient.txt`,
+600); destino externo `~/Library/Mobile Documents/com~apple~CloudDocs/aulas-ingles-backups`
+(iCloud Drive, só recebe `.tar.age`); agente launchd
+`br.com.papalino.aulas-backup-public` instalado para 03:10 diário, com uma
+execução de teste concluída com saída 0, recibo e cópia externa. Dois pacotes
+cifrados já estão no destino externo; a decifra foi conferida listando o conteúdo.
 
 Metas operacionais ainda a validar:
 
-- RPO máximo de 24 horas: exige a execução diária agendada
-  (`infra/launchd/aulas-backup-public.plist.example`) com recibos consecutivos;
-- RTO de até 60 minutos;
-- retenção de sete cópias diárias e quatro semanais, agora executável por
-  `make backup-prune-apply` após revisão do plano;
-- cópias mantidas neste Mac apenas durante o estágio de desenvolvimento; a cópia
-  externa cifrada é o próximo passo.
+- RPO máximo de 24 horas: o agendamento está instalado; falta comprovar recibos
+  em dias consecutivos (o Mac precisa estar ligado às 03:10);
+- RTO de até 60 minutos: a janela medida foi de 124 s de restore mais a captura,
+  sem incluir detecção e decisão;
+- retenção de sete cópias diárias e quatro semanais: `make backup-prune-apply`
+  executado em 21/10/2026 (10 pacotes e 1 parcial removidos, 4 mantidos);
+- **custódia da chave privada**: `secrets/backup-age-identity.txt` ainda mora só
+  neste Mac. Copie para um gerenciador de senhas ou outro dispositivo e, se
+  decidir, apague a cópia local. Sem isso, perder o Mac perde também a chave das
+  cópias externas.
 
 Um arquivo de backup só vira evidência após verificação de checksum e restore
 isolado. Antes de migrations futuras, gere nova cópia, restaure-a num alvo

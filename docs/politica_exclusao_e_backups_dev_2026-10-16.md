@@ -33,9 +33,12 @@ Mac pode afetar origem e backup ao mesmo tempo.
   com o `voice_transfer.py` do fluxo local. Primeiro pacote verificado em 21/10/2026.
 - Credenciais dos papéis (`roles-*.env`, `roles-*.json`) saíram de `backups/` para
   `secrets/` (perm 700/600, ignorado pelo Git). Chave e cofre não viajam juntos.
-- Cópia externa só sai cifrada com `age` para um destinatário cuja chave privada não
-  mora no Mac (`recipient=secrets/backup-age-recipient.txt`). Instalar `age`,
-  gerar o par fora do Mac e agendar a execução diária continuam pendentes.
+- Cópia externa só sai cifrada com `age` para um destinatário
+  (`recipient=secrets/backup-age-recipient.txt`). Em 21/10/2026, com autorização
+  de Jeferson: `age` instalado, par gerado, destino externo no iCloud Drive,
+  agente launchd diário instalado e testado, janela 7+4 aplicada e o pacote
+  público restaurado em laboratório. A chave privada ainda mora só no Mac; sua
+  cópia para fora é a pendência que resta nesta frente.
 
 ## Contrato da exclusão de conta
 
