@@ -4,12 +4,15 @@ import {
   autenticacao, authenticatedFetch, onEstadoSessao, onSessaoPerdida,
   renovarSessao, setAccessToken, setSessionReadOnly, setSessionUser,
 } from './client'
+import { resetRevisionRequired, revisionRequiredSnapshot } from './revisionRequired'
 import { sessionSnapshot } from './session'
 import type { paths } from './schema'
 
 // O cliente real usa baseUrl vazio: no browser a URL relativa resolve contra
 // a origem da página, mas o Request do Node não aceita. O teste monta um
-// cliente com base absoluta e o MESMO middleware.
+// cliente com base absoluta e o MESMO middleware. Fica tipado com `paths` cru
+// (não `RevisionedPaths`) de propósito: assim dá para exercitar o guard em
+// runtime com corpos que o cliente de produção nem compilaria.
 const api = createClient<paths>({
   baseUrl: 'http://localhost',
   credentials: 'same-origin',
@@ -52,6 +55,7 @@ afterEach(() => {
   onSessaoPerdida(null)
   onEstadoSessao(null)
   setAccessToken(null)
+  resetRevisionRequired()
   vi.unstubAllGlobals()
 })
 
@@ -160,7 +164,7 @@ describe('corpos realmente consumidos e transporte binário', () => {
       })
       : await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
         params: { path: { prompt_id: 31 } }, headers: { 'X-Request-Id': 'pedido-31' },
-        body: { text: 'I study English every day.' },
+        body: { text: 'I study English every day.', expected_revision: 3 },
       })
     expect(result.response.status).toBe(200)
     expect(bodies).toHaveLength(2)
@@ -354,7 +358,7 @@ describe('concorrência e conta proprietária', () => {
     expect((await api.GET('/api/lessons')).response.status).toBe(200)
     expect((fetchMock.mock.calls[0]![0] as Request).headers.has('Authorization')).toBe(false)
     const result = await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
-      params: { path: { prompt_id: 1 } }, body: { text: 'Keep my text.' },
+      params: { path: { prompt_id: 1 } }, body: { text: 'Keep my text.', expected_revision: 0 },
     })
     expect(result.response.status).toBe(503)
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -369,5 +373,66 @@ describe('concorrência e conta proprietária', () => {
     atrasada.resolve(resposta(401))
     expect((await pedido).response.status).toBe(503)
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('cutover de 13/11/2026: escritas revisionadas', () => {
+  it('fora de produção, uma escrita sem expected_revision falha antes de sair do navegador', async () => {
+    await expect(api.PUT('/api/writing/prompts/{prompt_id}/draft', {
+      params: { path: { prompt_id: 4 } }, body: { text: 'Sem revisão.' },
+    })).rejects.toThrow(/expected_revision.*PUT \/api\/writing\/prompts\/\{prompt_id\}\/draft/)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('null vale como ausente e a mensagem lista todos os campos que faltam', async () => {
+    await expect(api.POST('/api/review/{item_id}/grade', {
+      params: { path: { item_id: 9 } }, body: { quality: 4, expected_revision: null },
+    })).rejects.toThrow(/expected_revision e idempotency_key/)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('o transporte sem tipos (authenticatedFetch) também é conferido', async () => {
+    await expect(authenticatedFetch('/api/me/account', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: 'segredo', confirmation: 'EXCLUIR MINHA CONTA' }),
+    })).rejects.toThrow(/operation_key/)
+    expect(fetchMock).not.toHaveBeenCalled()
+    fetchMock.mockResolvedValueOnce(resposta(202, { state: 'completed' }))
+    const response = await authenticatedFetch('/api/me/account', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ operation_key: 'c0ffee00-0000-4000-8000-000000000001', password: 'segredo', confirmation: 'EXCLUIR MINHA CONTA' }),
+    })
+    expect(response.status).toBe(202)
+  })
+
+  it('rotas sem revisão no contrato e leituras não são tocadas pelo guard', async () => {
+    fetchMock.mockImplementation(async () => resposta(200, {}))
+    await api.PUT('/api/me/study-plan', {
+      body: { weekly_minutes: 60, preferred_days: ['mon'], goal: 'travel', timezone: 'America/Sao_Paulo' },
+    })
+    await api.POST('/api/me/notebook', { body: { course_slug: 'voa-level-1', lesson_number: 31, kind: 'note', content: 'x' } })
+    await api.GET('/api/writing/prompts/{prompt_id}/draft', { params: { path: { prompt_id: 4 } } })
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('428 liga o aviso de atualização, devolve a resposta ao chamador e não repete nem apaga nada', async () => {
+    expect(revisionRequiredSnapshot()).toBe(false)
+    fetchMock.mockResolvedValueOnce(resposta(428, { detail: { code: 'revision_required' } }))
+    const { response } = await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
+      params: { path: { prompt_id: 4 } }, body: { text: 'Keep my text.', expected_revision: 2 },
+    })
+    expect(response.status).toBe(428)
+    expect(revisionRequiredSnapshot()).toBe(true)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(sessionSnapshot().token).toBe('token-velho')
+  })
+
+  it('428 no upload binário também aciona o aviso', async () => {
+    fetchMock.mockResolvedValueOnce(resposta(428))
+    const response = await authenticatedFetch('/api/speaking/attempts/1/audio', {
+      method: 'PUT', headers: { 'Content-Type': 'audio/webm' }, body: new Uint8Array([1]),
+    })
+    expect(response.status).toBe(428)
+    expect(revisionRequiredSnapshot()).toBe(true)
   })
 })

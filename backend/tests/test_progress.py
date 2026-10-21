@@ -34,6 +34,36 @@ def tentativa(answer: str, key: int = 1) -> dict[str, str]:
     }
 
 
+async def salvar_sessao(
+    client: AsyncClient,
+    headers: dict[str, str],
+    path: str,
+    current_step: str,
+    completed_steps: list[str],
+    *,
+    revision: int | None = None,
+):
+    """PUT da jornada como o cliente atual (contrato pós-cutover de LEGACY_WRITES_UNTIL).
+
+    `path` é a rota legada (`/api/lessons/{n}/study-session`) ou a canônica por
+    curso. Sem `revision` propagada da resposta anterior, lê a corrente por GET.
+    Devolve a resposta sem afirmar status; cada teste decide o que espera.
+    """
+    if revision is None:
+        current = await client.get(path, headers=headers)
+        assert current.status_code == 200, current.text
+        revision = int(current.json()["revision"])
+    return await client.put(
+        path,
+        headers=headers,
+        json={
+            "current_step": current_step,
+            "completed_steps": completed_steps,
+            "expected_revision": revision,
+        },
+    )
+
+
 @pytest.mark.asyncio
 async def test_tentativa_exige_login(client: AsyncClient) -> None:
     ex = await primeiro_exercicio(client)
@@ -69,13 +99,13 @@ async def test_jornada_guiada_salva_e_normaliza_as_etapas(client: AsyncClient) -
         "total_seconds": 0,
     }
 
-    salvo = await client.put(
+    salvo = await salvar_sessao(
+        client,
+        h,
         "/api/lessons/31/study-session",
-        headers=h,
-        json={
-            "current_step": "praticar",
-            "completed_steps": ["estudar", "preparar", "assistir", "preparar"],
-        },
+        "praticar",
+        ["estudar", "preparar", "assistir", "preparar"],
+        revision=inicial["revision"],
     )
     assert salvo.status_code == 200
     assert salvo.json()["completed_steps"] == ["preparar", "assistir", "estudar"]
@@ -92,11 +122,7 @@ async def test_rotas_canonicas_e_progresso_contextual_por_curso(client: AsyncCli
     base = "/api/courses/voa-level-1/lessons/32"
 
     assert (await client.put(f"{base}/studied", headers=headers)).status_code == 204
-    saved = await client.put(
-        f"{base}/study-session",
-        headers=headers,
-        json={"current_step": "assistir", "completed_steps": ["preparar"]},
-    )
+    saved = await salvar_sessao(client, headers, f"{base}/study-session", "assistir", ["preparar"])
     resumed = await client.get(f"{base}/study-session", headers=headers)
     level_1 = await client.get("/api/me/progress?course=voa-level-1", headers=headers)
     level_2 = await client.get("/api/me/progress?course=voa-level-2", headers=headers)
@@ -127,20 +153,11 @@ async def test_aula_um_em_dois_cursos_mantem_sessoes_e_historico_distintos(
     level_1_path = "/api/courses/voa-level-1/lessons/1/study-session"
     level_2_path = "/api/courses/voa-level-2/lessons/1/study-session"
     assert (
-        await client.put(
-            level_1_path,
-            headers=headers,
-            json={"current_step": "assistir", "completed_steps": ["preparar"]},
-        )
+        await salvar_sessao(client, headers, level_1_path, "assistir", ["preparar"])
     ).status_code == 200
     assert (
-        await client.put(
-            level_2_path,
-            headers=headers,
-            json={
-                "current_step": "praticar",
-                "completed_steps": ["preparar", "assistir", "estudar"],
-            },
+        await salvar_sessao(
+            client, headers, level_2_path, "praticar", ["preparar", "assistir", "estudar"]
         )
     ).status_code == 200
 
@@ -301,11 +318,9 @@ async def test_progresso_ignora_curso_e_unidade_nao_publicados(
 @pytest.mark.asyncio
 async def test_jornada_e_isolada_por_conta_e_valida_etapa(client: AsyncClient) -> None:
     ana = await conta(client, "jornada-ana")
-    await client.put(
-        "/api/lessons/31/study-session",
-        headers=ana,
-        json={"current_step": "assistir", "completed_steps": ["preparar"]},
-    )
+    assert (
+        await salvar_sessao(client, ana, "/api/lessons/31/study-session", "assistir", ["preparar"])
+    ).status_code == 200
 
     async with AsyncClient(
         transport=ASGITransport(app=create_app()), base_url="http://test"

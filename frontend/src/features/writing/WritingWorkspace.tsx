@@ -168,7 +168,8 @@ export function WritingWorkspace({
         .catch(() => undefined)
         .then(async () => {
           if (generation !== epoch.current || conflictRef.current) return
-          if (revision.current === null) {
+          let expectedRevision = revision.current
+          if (expectedRevision === null) {
             const { data: remote } = await api.GET('/api/writing/prompts/{prompt_id}/draft', {
               params: { path: { prompt_id: prompt.id } },
             })
@@ -180,11 +181,12 @@ export function WritingWorkspace({
               setSaveStatus('local')
               return
             }
-            revision.current = remote.revision ?? 0
+            expectedRevision = remote.revision ?? 0
+            revision.current = expectedRevision
           }
           const { data, error, response } = await api.PUT('/api/writing/prompts/{prompt_id}/draft', {
             params: { path: { prompt_id: prompt.id } },
-            body: { text: value, expected_revision: revision.current },
+            body: { text: value, expected_revision: expectedRevision },
           })
           if (generation !== epoch.current) return
           if (response?.status === 409) {
@@ -247,6 +249,13 @@ export function WritingWorkspace({
   }
 
   async function analyze() {
+    // A análise referencia a revisão do rascunho que a conta conhece; sem ela
+    // (rascunho não carregado) o texto fica na tela e a análise espera.
+    const expectedRevision = revision.current
+    if (expectedRevision === null) {
+      setActionMessage('Confirme o rascunho na conta antes de analisar. Seu texto continua nesta tela.')
+      return
+    }
     const generation = epoch.current
     const edit = edits.current
     setAnalyzing(true)
@@ -258,7 +267,9 @@ export function WritingWorkspace({
         analysisRequest.current = { payload, key: crypto.randomUUID() }
       const { data, response } = await api.POST('/api/writing/prompts/{prompt_id}/feedback', {
         params: { path: { prompt_id: prompt.id } },
-        body: { text, assisted, operation_key: analysisRequest.current.key },
+        body: {
+          text, assisted, operation_key: analysisRequest.current.key, expected_revision: expectedRevision,
+        },
       })
       if (response?.status === 409) {
         if (generation === epoch.current && edit === edits.current)
@@ -270,13 +281,13 @@ export function WritingWorkspace({
         setFeedback(data)
         analysisRequest.current = null
       }
-      await invalidateStudy(queryClient)
+      await invalidateStudy(queryClient, 'writingFeedback')
     } catch {
       if (generation === epoch.current && edit === edits.current)
         setActionMessage('Análise indisponível; confira o estado de salvamento antes de sair.')
     } finally {
       if (generation === epoch.current) setAnalyzing(false)
-      await queryClient.invalidateQueries({ queryKey: ['assist-status', userId] })
+      await invalidateStudy(queryClient, 'assistUsage')
     }
   }
 
@@ -295,7 +306,7 @@ export function WritingWorkspace({
     }
     setFeedback(data)
     setActionMessage('Obrigado. Esta avaliação será usada antes de ampliar o experimento.')
-    await queryClient.invalidateQueries({ queryKey: ['assist-status', userId] })
+    await invalidateStudy(queryClient, 'assistUsage')
   }
 
   async function createVersion() {
@@ -305,10 +316,12 @@ export function WritingWorkspace({
     setCreatingVersion(true)
     setActionMessage('')
     const operation = saveQueue.current.catch(() => undefined).then(async () => {
-      if (generation !== epoch.current || conflictRef.current) return
+      // Lida aqui, não na chamada: o autosave anterior na fila pode ter avançado a revisão.
+      const expectedRevision = revision.current
+      if (generation !== epoch.current || conflictRef.current || expectedRevision === null) return
       const { data, error, response } = await api.POST('/api/writing/prompts/{prompt_id}/versions', {
         params: { path: { prompt_id: prompt.id } },
-        body: { text: value, expected_revision: revision.current },
+        body: { text: value, expected_revision: expectedRevision },
       })
       if (generation !== epoch.current) return
       if (response?.status === 409) {
@@ -430,7 +443,7 @@ export function WritingWorkspace({
         <button
           type="button"
           className="btn"
-          disabled={!hydrated || analyzing}
+          disabled={!hydrated || analyzing || revision.current === null}
           onClick={() => void analyze()}
         >
           {analyzing ? 'Analisando…' : 'Analisar texto'}

@@ -264,4 +264,23 @@ describe('fila offline de tentativas', () => {
     await discardBlockedAttempts(7)
     expect(await listQueuedAttempts(7)).toEqual([])
   })
+
+  it('428 do cutover não bloqueia a tentativa: ela segue pendente para depois da atualização', async () => {
+    await queueAttempt(attempt)
+    await queueAttempt({ ...attempt, exerciseId: 32, idempotencyKey: 'offline-2' })
+    vi.mocked(api.POST).mockResolvedValue({
+      data: undefined,
+      response: new Response(null, { status: 428 }),
+    } as never)
+
+    await expect(syncAttemptQueue(7)).resolves.toMatchObject({
+      synced: 0, pending: 2, blocked: 0, rejectedAttempts: [],
+    })
+    // Interrompe a rodada no primeiro 428: não adianta insistir antes da recarga.
+    expect(api.POST).toHaveBeenCalledTimes(1)
+    expect(await listQueuedAttempts(7)).toEqual([
+      attempt, { ...attempt, exerciseId: 32, idempotencyKey: 'offline-2' },
+    ])
+    expect(await getAttemptQueueStats(7)).toEqual({ pending: 2, blocked: 0, total: 2 })
+  })
 })

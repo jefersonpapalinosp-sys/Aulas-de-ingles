@@ -22,6 +22,30 @@ from app.main import create_app  # noqa: E402
 
 get_settings.cache_clear()
 
+# Quando o CI exporta LEGACY_WRITES_UNTIL (por exemplo, uma data no passado), a
+# suíte respeita esse valor em vez de empurrar a janela expand: é assim que o
+# contrato pós-cutover de 13/11/2026 é exercitado antes do dia.
+LEGACY_WINDOW_FROM_ENV = "LEGACY_WRITES_UNTIL" in os.environ
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line(
+        "markers",
+        "legacy_client: escreve sem revisão de propósito; só roda enquanto a janela "
+        "expand de LEGACY_WRITES_UNTIL estiver aberta.",
+    )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    if not LEGACY_WINDOW_FROM_ENV or datetime.now(UTC) < get_settings().legacy_writes_until:
+        return
+    expired = pytest.mark.skip(
+        reason="janela expand de LEGACY_WRITES_UNTIL expirada: cliente legado fora do contrato"
+    )
+    for item in items:
+        if "legacy_client" in item.keywords:
+            item.add_marker(expired)
+
 
 @pytest.fixture
 async def banco_por_teste(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[None]:
@@ -42,10 +66,12 @@ async def banco_por_teste(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[None
     ao obter qualquer nova conexão física (inclusive no teardown).
     """
     # Testes legados exercitam explicitamente a janela expand. Sua expiração
-    # é coberta separadamente em test_concurrency, sem depender do dia do CI.
-    monkeypatch.setattr(
-        get_settings(), "legacy_writes_until", datetime.now(UTC) + timedelta(days=30)
-    )
+    # é coberta separadamente em test_concurrency e, no CI, por uma execução
+    # com LEGACY_WRITES_UNTIL no passado (ver pytest_collection_modifyitems).
+    if not LEGACY_WINDOW_FROM_ENV:
+        monkeypatch.setattr(
+            get_settings(), "legacy_writes_until", datetime.now(UTC) + timedelta(days=30)
+        )
     try:
         async with get_sessionmaker()() as s:
             await s.connection()

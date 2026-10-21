@@ -9,6 +9,8 @@ from app.core.config import get_settings
 from app.db.models import Course, Lesson, NotebookEntry, User
 from app.performance import BYTES_HEADER, POOL_HEADER, SQL_HEADER
 from tests.test_media import position_body
+from tests.test_progress import salvar_sessao
+from tests.test_writing import criar_versao, salvar_rascunho
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -224,12 +226,12 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
         headers=headers,
         json=position_body(42.5),
     )
-    await client.put(
-        f"/api/writing/prompts/{prompt['id']}/draft", headers=headers, json={"text": text}
+    draft = await salvar_rascunho(client, headers, prompt["id"], text)
+    assert draft.status_code == 200
+    version = await criar_versao(
+        client, headers, prompt["id"], text, revision=draft.json()["revision"]
     )
-    await client.post(
-        f"/api/writing/prompts/{prompt['id']}/versions", headers=headers, json={"text": text}
-    )
+    assert version.status_code == 200
     feedback = await client.post(
         f"/api/writing/prompts/{prompt['id']}/feedback", headers=headers, json={"text": text}
     )
@@ -285,10 +287,12 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
     lesson = lesson_response.json()
 
     studied = await client.put("/api/courses/voa-level-2/lessons/1/studied", headers=headers)
-    study_session = await client.put(
+    study_session = await salvar_sessao(
+        client,
+        headers,
         "/api/courses/voa-level-2/lessons/1/study-session",
-        headers=headers,
-        json={"current_step": "assistir", "completed_steps": ["preparar"]},
+        "assistir",
+        ["preparar"],
     )
     media = await client.put(
         f"/api/media/{lesson['media'][0]['id']}/position",
@@ -303,10 +307,11 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
             "idempotency_key": "00000000-0000-4000-8000-000000001500",
         },
     )
-    writing = await client.put(
-        f"/api/writing/prompts/{lesson['writing_prompts'][0]['id']}/draft",
-        headers=headers,
-        json={"text": "This Level 2 draft belongs to its course and unit."},
+    writing = await salvar_rascunho(
+        client,
+        headers,
+        lesson["writing_prompts"][0]["id"],
+        "This Level 2 draft belongs to its course and unit.",
     )
     speaking = await client.post(
         "/api/speaking/attempts",
@@ -366,9 +371,7 @@ async def test_historico_de_escrita_e_privado(client: AsyncClient) -> None:
     prompt = lesson["writing_prompts"][0]
     ana = await conta(client, "historico-ana")
     text = "The Metro is faster than the bus. You should take it."
-    await client.post(
-        f"/api/writing/prompts/{prompt['id']}/versions", headers=ana, json={"text": text}
-    )
+    assert (await criar_versao(client, ana, prompt["id"], text)).status_code == 200
     await client.post(
         f"/api/writing/prompts/{prompt['id']}/feedback", headers=ana, json={"text": text}
     )

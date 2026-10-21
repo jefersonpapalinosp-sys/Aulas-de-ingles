@@ -402,7 +402,7 @@ describe('WritingWorkspace', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Baixa confiança')
     expect(apiMocks.POST).toHaveBeenCalledWith('/api/writing/prompts/{prompt_id}/feedback', {
       params: { path: { prompt_id: 4 } },
-      body: { text: 'The train is faster.', assisted: true, operation_key: expect.any(String) },
+      body: { text: 'The train is faster.', assisted: true, operation_key: expect.any(String), expected_revision: 0 },
     })
     await user.click(screen.getByRole('button', { name: 'Sim' }))
     expect(apiMocks.PUT).toHaveBeenCalledWith('/api/writing/feedback/{feedback_id}/rating', {

@@ -19,6 +19,7 @@ from app.db.models import (
 from tests.test_course_reviews import LEVEL_1_REVIEW_31_40_URL, attempt_body
 from tests.test_media import position_body
 from tests.test_practice import conta, create_body
+from tests.test_writing import salvar_rascunho
 
 
 @asynccontextmanager
@@ -160,7 +161,7 @@ async def test_archiving_preserves_owned_history_draft_media_export_and_copied_r
     exercise = lesson["exercises"][0]["id"]
     media = lesson["media"][0]
     draft_url = f"/api/writing/prompts/{prompt}/draft"
-    draft = await client.put(draft_url, headers=headers, json={"text": "MY PRIVATE DRAFT"})
+    draft = await salvar_rascunho(client, headers, prompt, "MY PRIVATE DRAFT")
     assert draft.status_code == 200
     position_url = f"/api/media/{media['id']}/position"
     assert (

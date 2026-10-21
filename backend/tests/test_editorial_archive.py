@@ -24,6 +24,7 @@ from app.services.editorial_plan import collect_unit_archive
 from tests.test_course_reviews import LEVEL_1_REVIEW_31_40_URL, attempt_body
 from tests.test_media import position_body
 from tests.test_practice import conta, create_body
+from tests.test_writing import salvar_rascunho
 
 
 @pytest.fixture
@@ -77,11 +78,7 @@ async def test_archive_atomic_audited_idempotent_and_private_data_preserved(
     headers = await conta(client, "archive-transaction")
     lesson = (await client.get("/api/courses/voa-level-2/lessons/26")).json()
     prompt = lesson["writing_prompts"][0]["id"]
-    assert (
-        await client.put(
-            f"/api/writing/prompts/{prompt}/draft", headers=headers, json={"text": "Private draft"}
-        )
-    ).status_code == 200
+    assert (await salvar_rascunho(client, headers, prompt, "Private draft")).status_code == 200
     attempt = await client.post(
         f"/api/exercises/{lesson['exercises'][0]['id']}/attempt",
         headers=headers,

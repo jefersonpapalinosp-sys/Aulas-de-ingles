@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { type Ref, useRef, useState } from 'react'
 import { api, type AttemptFeedback, type Exercise, type ExerciseHint } from '../api/client'
+import { invalidateStudy } from '../api/invalidateStudy'
 import { queueAttempt } from '../features/offline/attemptQueue'
 import type {
   ExerciseActivityEvent,
@@ -191,11 +192,8 @@ export function ExerciseCard({
         idempotencyKey: key,
         correct: data.correct,
       })
-      // Errar pode ter semeado o deck: trilha e recomendação de Hoje precisam saber.
-      void qc.invalidateQueries({ queryKey: ['progress'] })
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['today'] })
-      void qc.invalidateQueries({ queryKey: ['course-completion'] })
+      // Errar pode ter semeado o deck; acertar move competências e a jornada da aula.
+      void invalidateStudy(qc, 'attempt')
     },
     onError: (e: Error) => setVeredito({ tipo: 'falhou', mensagem: e.message }),
   })

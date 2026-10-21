@@ -84,7 +84,12 @@ async def test_today_baseline_does_not_query_each_checkpoint_or_full_lesson(
 @pytest.mark.parametrize(
     "settings",
     [
-        Settings(app_env="prod", jwt_secret="p" * 32, performance_probe_enabled=True),
+        Settings(
+            app_env="prod",
+            jwt_secret="p" * 32,
+            public_origin="http://localhost:5181",
+            performance_probe_enabled=True,
+        ),
         Settings(
             deployment_profile="public",
             cookie_secure=True,

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import { invalidateStudy } from './invalidateStudy'
 
 export function useAdicionarItem() {
   const qc = useQueryClient()
@@ -12,8 +13,7 @@ export function useAdicionarItem() {
       return data
     },
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
+      void invalidateStudy(qc, 'reviewItemAdded')
     },
   })
 }

@@ -10,6 +10,7 @@ import { PwaStatus } from './features/offline/PwaStatus'
 import { SessionStatus } from './components/SessionStatus'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { RouteStatus } from './components/RouteStatus'
+import { UpdateRequired } from './components/UpdateRequired'
 
 /**
  * Cada rota pesada vira um chunk próprio. Mapa e login ficam no bundle
@@ -63,6 +64,7 @@ export default function App() {
           <RouteStatus />
           <PwaStatus />
           <SessionStatus />
+          <UpdateRequired />
           <ErrorBoundary resetKey={`${usuario.id}:${location.pathname}`} home={<Link to="/inicio">Voltar ao início</Link>}>
           <Suspense fallback={<p className="muted" role="status">Carregando…</p>}>
             <Routes>

@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { invalidateStudy } from '../../api/invalidateStudy'
 import { practicePath } from '../../routing/courseRoutes'
 import {
   discardBlockedAttempts, listQueuedAttempts, subscribeAttemptQueue, syncAttemptQueue,
@@ -53,11 +54,6 @@ export function ConnectivityStatus({ userId, offlineSession }: { userId: number;
     }
   }, [userId])
 
-  const invalidateStudy = useCallback(async () => {
-    await Promise.all(['progress', 'review', 'skills', 'today', 'practice-session',
-      'practice-session-active', 'course-completion'].map((key) => qc.invalidateQueries({ queryKey: [key] })))
-  }, [qc])
-
   const sync = useCallback(async () => {
     if (!navigator.onLine || offlineSession || syncingRef.current) return
     syncingRef.current = true
@@ -93,7 +89,7 @@ export function ConnectivityStatus({ userId, offlineSession }: { userId: number;
       const detail = (event as CustomEvent<AttemptQueueSyncEventDetail>).detail
       if (detail.userId !== userId) return
       void refreshPending()
-      if (detail.synced > 0) void invalidateStudy().catch(() => {
+      if (detail.synced > 0) void invalidateStudy(qc, 'queueSync').catch(() => {
         if (alive.current) setMessage('A resposta foi sincronizada. Atualize a página para consultar o progresso.')
       })
     })
@@ -108,7 +104,7 @@ export function ConnectivityStatus({ userId, offlineSession }: { userId: number;
       window.removeEventListener('offline', handleOffline)
       window.removeEventListener('beforeinstallprompt', handleInstall)
     }
-  }, [refreshPending, invalidateStudy, userId])
+  }, [refreshPending, qc, userId])
 
   useEffect(() => {
     if (online && !offlineSession && pending > 0) void sync()

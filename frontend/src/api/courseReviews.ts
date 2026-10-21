@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { CourseReviewAttemptInput } from './client'
 import { api } from './client'
 import { ApiError } from './errors'
+import { invalidateStudy } from './invalidateStudy'
 
 function reviewError(status: number | undefined): Error {
   if (status === 404) return new Error('Este checkpoint não existe nesta unidade.')
@@ -40,16 +41,6 @@ export function useSubmitCourseReview(courseSlug: string, unitSlug: string) {
       if (!data) throw reviewError(response?.status)
       return data
     },
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ['course-review', courseSlug, unitSlug],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['course-completion', courseSlug],
-        }),
-        queryClient.invalidateQueries({ queryKey: ['today'] }),
-      ])
-    },
+    onSuccess: () => invalidateStudy(queryClient, 'courseReviewAttempt'),
   })
 }

@@ -163,7 +163,8 @@ assist-worker: ## Processa um job pendente da fila assistida
 
 # ---------- produção local ----------
 
-PROD_ROLES := $(if $(wildcard backups/recovery/roles-prod.env),--env-file backups/recovery/roles-prod.env -f infra/compose.roles.prod.yml)
+# Credenciais dos papéis moram em secrets/ (ignorado pelo Git), nunca junto dos dumps.
+PROD_ROLES := $(if $(wildcard secrets/roles-prod.env),--env-file secrets/roles-prod.env -f infra/compose.roles.prod.yml)
 PROD := docker compose --env-file .env.prod -f infra/compose.prod.yml $(PROD_ROLES)
 
 .env.prod:
@@ -216,8 +217,11 @@ upgrade-lab-down: ## Para apenas o laboratório DB-42; preserva volumes e recibo
 	$(OPS) -m ops.recovery upgrade-lab-resources
 	$(UPGRADE_COMPOSE) down
 
-backup: ## Banco + voz: make backup source=lab|dev|prod (origem precisa estar em manutenção)
-	$(OPS) -m ops.recovery backup --source "$(source)"
+backup: ## Banco + voz: make backup source=lab|dev|prod|public (local exige manutenção; public lê a VM por SSH)
+	$(if $(filter public,$(source)),$(OPS) -m ops.public_backup capture $(if $(recipient),--recipient-file "$(recipient)",) $(if $(copy_to),--copy-to "$(copy_to)",),$(OPS) -m ops.recovery backup --source "$(source)")
+
+backup-public-check: ## Pré-voo da stack pública: SSH, containers, papel de backup e revisão, sem capturar
+	$(OPS) -m ops.public_backup check
 
 backup-verify: ## Confere manifesto/checksums: make backup-verify f=backups/recovery/aulas-...
 	$(OPS) -m ops.recovery verify "$(f)"
@@ -248,3 +252,11 @@ test-roles: ## Recusas de privilégio, HTTP runtime, worker e backup limitado
 roles-lab-down: ## Encerra somente laboratório de papéis, preserva o volume
 	$(OPS) -m ops.roles resources
 	$(ROLES_COMPOSE) down
+
+backup-prune: ## Plano da janela 7 diários + 4 semanais em backups/recovery; dry-run, nada é apagado
+	$(OPS) -m ops.recovery prune --dry-run
+
+backup-prune-apply: ## Executa a poda planejada; preserva o pacote mais recente e .partial-* < 24 h
+	$(OPS) -m ops.recovery prune --apply
+
+.PHONY: backup-prune backup-prune-apply backup-public-check

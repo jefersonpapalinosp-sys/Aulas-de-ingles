@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 // defineConfig vem do vitest/config (e não do vite) para que a chave `test`
 // seja tipada — com o import do vite, tsc rejeita a configuração de teste.
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import { pwaBuild } from './scripts/pwa-build'
 
 // O browser nunca fala direto com a API: tudo passa por /api na mesma origem.
@@ -37,5 +37,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // scripts/*.test.mjs rodam com `node --test` (npm run test:scripts), sem jsdom.
+    exclude: [...configDefaults.exclude, 'scripts/**'],
   },
 })

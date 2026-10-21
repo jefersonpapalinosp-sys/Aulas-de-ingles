@@ -1,6 +1,7 @@
 """Deck de revisão: semeadura, agendamento e isolamento."""
 
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
@@ -32,6 +33,26 @@ async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
+async def avaliar(
+    client: AsyncClient, headers: dict[str, str], item: dict[str, object], quality: int
+):
+    """Avalia como o cliente atual (contrato pós-cutover de LEGACY_WRITES_UNTIL).
+
+    `item` é uma carta de `/due` ou o resultado de uma avaliação anterior: ambos
+    trazem `id` e `revision`. A chave de idempotência é nova a cada chamada.
+    Devolve a resposta sem afirmar status; cada teste decide o que espera.
+    """
+    return await client.post(
+        f"/api/review/{item['id']}/grade",
+        headers=headers,
+        json={
+            "quality": quality,
+            "expected_revision": item["revision"],
+            "idempotency_key": str(uuid4()),
+        },
+    )
+
+
 @pytest.mark.asyncio
 async def test_deck_exige_login(client: AsyncClient) -> None:
     assert (await client.get("/api/review/due")).status_code == 401
@@ -57,7 +78,7 @@ async def test_marcar_de_novo_nao_duplica_nem_reinicia(client: AsyncClient) -> N
     await client.put("/api/lessons/40/studied", headers=h)
 
     carta = (await client.get("/api/review/due?limit=1", headers=h)).json()[0]
-    await client.post(f"/api/review/{carta['id']}/grade", json={"quality": 5}, headers=h)
+    assert (await avaliar(client, h, carta, 5)).status_code == 200
 
     # Marcar de novo não pode trazer a carta avaliada de volta para hoje.
     await client.put("/api/lessons/40/studied", headers=h)
@@ -121,7 +142,7 @@ async def test_avaliar_tira_a_carta_do_deck_de_hoje(client: AsyncClient) -> None
     antes = (await client.get("/api/review/due", headers=h)).json()
     carta = antes[0]
 
-    r = await client.post(f"/api/review/{carta['id']}/grade", json={"quality": 4}, headers=h)
+    r = await avaliar(client, h, carta, 4)
     assert r.status_code == 200
     novo = r.json()
     assert novo["interval_days"] == 1
@@ -142,9 +163,7 @@ async def test_errar_na_revisao_mantem_a_carta_para_amanha(client: AsyncClient) 
     await client.post("/api/review/lessons/36", headers=h)
     carta = (await client.get("/api/review/due?limit=1", headers=h)).json()[0]
 
-    novo = (
-        await client.post(f"/api/review/{carta['id']}/grade", json={"quality": 1}, headers=h)
-    ).json()
+    novo = (await avaliar(client, h, carta, 1)).json()
     assert novo["lapses"] == 1
     assert novo["repetitions"] == 0
     assert novo["interval_days"] == 1
@@ -168,7 +187,7 @@ async def test_carta_de_outra_pessoa_e_404(client: AsyncClient, session: AsyncSe
     dela = (await client.get("/api/review/due?limit=1", headers=ana)).json()[0]
 
     bruno = await conta(client, "intruso")
-    r = await client.post(f"/api/review/{dela['id']}/grade", json={"quality": 5}, headers=bruno)
+    r = await avaliar(client, bruno, dela, 5)
     assert r.status_code == 404
 
 
@@ -202,9 +221,7 @@ async def test_due_at_e_utc_independente_do_fuso_do_processo(client: AsyncClient
     await client.post("/api/review/lessons/36", headers=h)
     carta = (await client.get("/api/review/due?limit=1", headers=h)).json()[0]
 
-    novo = (
-        await client.post(f"/api/review/{carta['id']}/grade", json={"quality": 4}, headers=h)
-    ).json()
+    novo = (await avaliar(client, h, carta, 4)).json()
     proxima = datetime.fromisoformat(novo["due_at"])
     assert proxima.tzinfo is not None, "due_at precisa chegar com fuso"
     assert proxima.utcoffset() == timedelta(0), "o banco guarda UTC"
@@ -406,9 +423,10 @@ async def test_item_pode_ser_suspenso_reativado_e_excluido(client: AsyncClient) 
     assert item["id"] not in [row["id"] for row in due_after_suspend]
     listed = (await client.get("/api/review/items?status=suspended", headers=owner)).json()
     assert [row["id"] for row in listed] == [item["id"]]
-    assert (
-        await client.post(f"/api/review/{item['id']}/grade", headers=owner, json={"quality": 4})
-    ).status_code == 409
+    # Com a revisão corrente (a suspensão incrementou), o 409 é pela suspensão em si.
+    graded = await avaliar(client, owner, suspended.json(), 4)
+    assert graded.status_code == 409
+    assert graded.json()["detail"] == "Item suspenso."
 
     intruder = await conta(client, "gerencia-intruso")
     assert (
@@ -436,11 +454,7 @@ async def test_tipo_dificil_encurta_o_intervalo_sem_mudar_sm2(client: AsyncClien
     )
     item = (await client.get("/api/review/due", headers=headers)).json()[0]
 
-    first = await client.post(
-        f"/api/review/{item['id']}/grade", headers=headers, json={"quality": 4}
-    )
-    second = await client.post(
-        f"/api/review/{item['id']}/grade", headers=headers, json={"quality": 4}
-    )
+    first = await avaliar(client, headers, item, 4)
+    second = await avaliar(client, headers, first.json(), 4)
     assert first.json()["interval_days"] == 1
     assert second.json()["interval_days"] == 5  # base SM-2 6 × fator 0,8

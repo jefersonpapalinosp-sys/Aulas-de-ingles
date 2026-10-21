@@ -38,6 +38,54 @@ async def proposta(client: AsyncClient) -> dict[str, object]:
     return (await client.get("/api/lessons/31")).json()["writing_prompts"][0]
 
 
+# Helpers do contrato pós-cutover (LEGACY_WRITES_UNTIL): toda escrita de
+# rascunho/versão envia `expected_revision`, como o cliente atual faz. Quando o
+# chamador não propaga a revisão da resposta anterior, lemos a corrente por GET.
+# Os helpers devolvem a resposta sem afirmar status: cada teste decide o que espera.
+
+
+async def revisao_do_rascunho(client: AsyncClient, headers: dict[str, str], prompt_id: int) -> int:
+    response = await client.get(f"/api/writing/prompts/{prompt_id}/draft", headers=headers)
+    assert response.status_code == 200, response.text
+    return int(response.json()["revision"])
+
+
+async def salvar_rascunho(
+    client: AsyncClient,
+    headers: dict[str, str],
+    prompt_id: int,
+    text: str,
+    *,
+    revision: int | None = None,
+):
+    """PUT do rascunho com a revisão esperada; a resposta traz a nova em `revision`."""
+    if revision is None:
+        revision = await revisao_do_rascunho(client, headers, prompt_id)
+    return await client.put(
+        f"/api/writing/prompts/{prompt_id}/draft",
+        headers=headers,
+        json={"text": text, "expected_revision": revision},
+    )
+
+
+async def criar_versao(
+    client: AsyncClient,
+    headers: dict[str, str],
+    prompt_id: int,
+    text: str,
+    *,
+    revision: int | None = None,
+):
+    """POST de versão com a revisão esperada; a resposta traz a nova em `draft_revision`."""
+    if revision is None:
+        revision = await revisao_do_rascunho(client, headers, prompt_id)
+    return await client.post(
+        f"/api/writing/prompts/{prompt_id}/versions",
+        headers=headers,
+        json={"text": text, "expected_revision": revision},
+    )
+
+
 @pytest.mark.asyncio
 async def test_workspace_exige_login(client: AsyncClient) -> None:
     prompt = await proposta(client)
@@ -63,20 +111,27 @@ async def test_rascunho_e_versoes_sobrevivem_a_nova_sessao(client: AsyncClient) 
     }
 
     first_text = "The Metro is faster than the bus. Visitors should take it."
-    salvo = await client.put(f"{base}/draft", headers=headers, json={"text": first_text})
+    salvo = await salvar_rascunho(
+        client, headers, prompt["id"], first_text, revision=inicial["revision"]
+    )
     assert salvo.status_code == 200
     assert salvo.json()["text"] == first_text
     assert salvo.json()["updated_at"] is not None
 
-    first_version = await client.post(
-        f"{base}/versions", headers=headers, json={"text": first_text}
+    # Cada escrita propaga a revisão devolvida pela anterior, como o cliente faz.
+    first_version = await criar_versao(
+        client, headers, prompt["id"], first_text, revision=salvo.json()["revision"]
     )
-    repeated_version = await client.post(
-        f"{base}/versions", headers=headers, json={"text": first_text}
+    repeated_version = await criar_versao(
+        client, headers, prompt["id"], first_text, revision=first_version.json()["draft_revision"]
     )
     second_text = f"{first_text} It is also more comfortable."
-    second_version = await client.post(
-        f"{base}/versions", headers=headers, json={"text": second_text}
+    second_version = await criar_versao(
+        client,
+        headers,
+        prompt["id"],
+        second_text,
+        revision=repeated_version.json()["draft_revision"],
     )
     assert first_version.json()["version"] == 1
     assert repeated_version.json()["id"] == first_version.json()["id"]
@@ -107,7 +162,9 @@ async def test_rascunho_e_isolado_por_conta(client: AsyncClient) -> None:
     prompt = await proposta(client)
     base = f"/api/writing/prompts/{prompt['id']}"
     ana = await conta(client, "ana")
-    await client.put(f"{base}/draft", headers=ana, json={"text": "Ana's private draft."})
+    assert (
+        await salvar_rascunho(client, ana, prompt["id"], "Ana's private draft.")
+    ).status_code == 200
 
     async with AsyncClient(
         transport=ASGITransport(app=create_app()), base_url="http://test"
@@ -128,13 +185,17 @@ async def test_paginas_de_escrita_sao_estaveis_pequenas_e_privadas(
     ana = await conta(client, "paginas-ana")
     prompt = await proposta(client)
     base = f"/api/writing/prompts/{prompt['id']}"
+    revision: int | None = None
     for number in range(1, 6):
-        response = await client.post(
-            f"{base}/versions",
-            headers=ana,
-            json={"text": f"Version {number} is intentionally distinct."},
+        response = await criar_versao(
+            client,
+            ana,
+            prompt["id"],
+            f"Version {number} is intentionally distinct.",
+            revision=revision,
         )
         assert response.status_code == 200
+        revision = response.json()["draft_revision"]
     for number in range(3):
         response = await client.post(
             f"{base}/feedback",
@@ -289,7 +350,7 @@ async def test_historico_preserva_resultado_e_rubrica_apos_mudar_proposta(
     prompt = await proposta(client)
     base = f"/api/writing/prompts/{prompt['id']}"
     text = "The bus is faster than the train. You ought to take it."
-    await client.put(f"{base}/draft", headers=headers, json={"text": text})
+    assert (await salvar_rascunho(client, headers, prompt["id"], text)).status_code == 200
     first = (await client.post(f"{base}/feedback", headers=headers, json={"text": text})).json()
     assert first["checks"][2]["passed"] is True
     user = (await session.execute(select(User))).scalar_one()

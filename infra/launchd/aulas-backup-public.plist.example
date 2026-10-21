@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Agendamento diário do backup da stack pública (INFRA-44), via launchd do macOS.
+
+Copie para ~/Library/LaunchAgents/br.com.papalino.aulas-backup-public.plist,
+troque os caminhos marcados e carregue com:
+
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/br.com.papalino.aulas-backup-public.plist
+    launchctl kickstart -k gui/$(id -u)/br.com.papalino.aulas-backup-public   # executa agora
+
+Pré-requisitos: `age` instalado (brew install age), chave pública do destinatário
+em secrets/backup-age-recipient.txt (a privada fora deste Mac), chave SSH da VM
+já em known_hosts e um diretório externo montado para copy_to. Sem copy_to o
+pacote fica só local, o que não cumpre a meta de RPO fora do Mac.
+
+O recibo de cada execução fica em backups/recovery/public-receipts/; a saída do
+comando vai para backups/logs/. `make operations-check` deve passar a cobrar um
+recibo nas últimas 24 h (pendência registrada no plano 44-49).
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>br.com.papalino.aulas-backup-public</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/make</string>
+    <string>-C</string>
+    <string>/Users/SEU_USUARIO/Aulas-de-ingles</string>
+    <string>backup</string>
+    <string>source=public</string>
+    <string>recipient=secrets/backup-age-recipient.txt</string>
+    <string>copy_to=/Volumes/SEU_DESTINO_EXTERNO/aulas-ingles</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- Homebrew (age) e uv precisam estar no PATH do agente. -->
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <!-- 03:10 todo dia; o Mac precisa estar ligado ou acordado nesse horário. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>10</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/SEU_USUARIO/Aulas-de-ingles/backups/logs/backup-public.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/SEU_USUARIO/Aulas-de-ingles/backups/logs/backup-public.err</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

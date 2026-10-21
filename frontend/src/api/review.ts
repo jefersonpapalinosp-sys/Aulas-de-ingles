@@ -88,7 +88,7 @@ export function useAvaliar() {
       if (!data) throw new ApiError('o resultado da revisão', response)
       return data
     },
-    onSuccess: () => invalidateStudy(qc),
+    onSuccess: () => invalidateStudy(qc, 'reviewGrade'),
   })
 }
 
@@ -103,10 +103,11 @@ export function useSetReviewItemStatus() {
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao alterar.`)
       return data
     },
+    // Sem devolver a promessa: o TanStack Query esperaria o refetch terminar antes
+    // de chamar o onSuccess passado no mutate(), e a página de revisão usa esse
+    // segundo callback para zerar a lista de suspensos ANTES de o refetch chegar.
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
-      void qc.invalidateQueries({ queryKey: ['today'] })
+      void invalidateStudy(qc, 'reviewItemChange')
     },
   })
 }
@@ -121,9 +122,7 @@ export function useDeleteReviewItem() {
       if (!response?.ok) throw new Error('Não foi possível excluir o item.')
     },
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['review'] })
-      void qc.invalidateQueries({ queryKey: ['progress'] })
-      void qc.invalidateQueries({ queryKey: ['today'] })
+      void invalidateStudy(qc, 'reviewItemChange')
     },
   })
 }

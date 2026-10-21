@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
+from app.api.errors import REVISION_REQUIRED_RESPONSES
 from app.api.review import adicionar_cartas, adicionar_item_revisao
 from app.db.models import (
     Course,
@@ -381,7 +382,11 @@ async def _salvar_sessao_de_estudo(
     )
 
 
-@router.put("/lessons/{number}/study-session", response_model=StudySessionOut)
+@router.put(
+    "/lessons/{number}/study-session",
+    response_model=StudySessionOut,
+    responses=REVISION_REQUIRED_RESPONSES,
+)
 async def salvar_sessao_de_estudo(
     number: int,
     usuario: UsuarioAtual,
@@ -394,6 +399,7 @@ async def salvar_sessao_de_estudo(
 @router.put(
     "/courses/{course_slug}/lessons/{number}/study-session",
     response_model=StudySessionOut,
+    responses=REVISION_REQUIRED_RESPONSES,
 )
 async def salvar_sessao_de_estudo_no_curso(
     course_slug: str,

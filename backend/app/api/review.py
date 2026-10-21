@@ -13,10 +13,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
+from app.api.errors import REVISION_REQUIRED_RESPONSES
 from app.db.models import Course, CourseUnit, Lesson, ReviewEvent, ReviewItem, User, VocabItem
 from app.db.session import get_session
 from app.domain.sm2 import Estado, revisar
-from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
+from app.pagination import (
+    PAGE_LIMIT_MAX,
+    PAGINATED_ALTERNATIVE_HEADER,
+    InvalidCursor,
+    decode_time_id_cursor,
+    encode_time_id_cursor,
+)
 from app.schemas.review import (
     CardOut,
     DeckSummaryOut,
@@ -430,10 +437,14 @@ async def vencidas(
 async def listar_itens(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
     item_status: Annotated[ReviewItemStatus, Query(alias="status")] = "suspended",
     course: Annotated[str | None, Query(max_length=100)] = None,
     unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=PAGE_LIMIT_MAX)] = PAGE_LIMIT_MAX,
 ) -> list[CardOut]:
+    """Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page."""
+    response.headers[PAGINATED_ALTERNATIVE_HEADER] = "/api/review/items/page"
     items = (
         await session.execute(
             _filtered_query(
@@ -445,7 +456,9 @@ async def listar_itens(
                 course=course,
                 unit=unit,
                 due_only=False,
-            ).order_by(ReviewItem.created_at.desc())
+            )
+            .order_by(ReviewItem.created_at.desc())
+            .limit(limit)
         )
     ).scalars()
     return [_out(item) for item in items]
@@ -511,7 +524,7 @@ async def _owned_item(session: AsyncSession, item_id: int, user_id: int) -> Revi
     return item
 
 
-@router.post("/{item_id}/grade", response_model=GradeOut)
+@router.post("/{item_id}/grade", response_model=GradeOut, responses=REVISION_REQUIRED_RESPONSES)
 async def avaliar(
     item_id: int,
     usuario: UsuarioAtual,

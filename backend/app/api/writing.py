@@ -5,7 +5,7 @@ from hashlib import sha256
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select, tuple_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,7 @@ from sqlalchemy.orm import raiseload
 
 from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
+from app.api.errors import REVISION_REQUIRED_RESPONSES
 from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
 from app.db.models import (
@@ -29,6 +30,8 @@ from app.db.session import get_session
 from app.domain.writing import analyze_writing, rubric_snapshot
 from app.domain.writing_rubric import ALGORITHM_VERSION, EVALUATION_SCOPE
 from app.pagination import (
+    PAGE_LIMIT_MAX,
+    PAGINATED_ALTERNATIVE_HEADER,
     InvalidCursor,
     TimeIdCursor,
     decode_time_id_cursor,
@@ -188,7 +191,11 @@ async def obter_rascunho(
     return _draft_out(prompt.id, draft)
 
 
-@router.put("/prompts/{prompt_id}/draft", response_model=WritingDraftOut)
+@router.put(
+    "/prompts/{prompt_id}/draft",
+    response_model=WritingDraftOut,
+    responses=REVISION_REQUIRED_RESPONSES,
+)
 async def salvar_rascunho(
     prompt_id: int,
     usuario: UsuarioAtual,
@@ -202,7 +209,11 @@ async def salvar_rascunho(
     return _draft_out(prompt.id, draft)
 
 
-@router.post("/prompts/{prompt_id}/versions", response_model=WritingRevisionOut)
+@router.post(
+    "/prompts/{prompt_id}/versions",
+    response_model=WritingRevisionOut,
+    responses=REVISION_REQUIRED_RESPONSES,
+)
 async def criar_versao(
     prompt_id: int,
     usuario: UsuarioAtual,
@@ -643,9 +654,13 @@ async def historico_de_escrita_paginado(
 async def historico_de_escrita(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
     course: Annotated[str | None, Query(max_length=100)] = None,
     unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=PAGE_LIMIT_MAX)] = PAGE_LIMIT_MAX,
 ) -> list[WritingHistoryItemOut]:
+    """Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page."""
+    response.headers[PAGINATED_ALTERNATIVE_HEADER] = "/api/writing/history/page"
     history = (
         select(WritingDraft, WritingPrompt, Lesson)
         .join(WritingPrompt, WritingDraft.prompt_id == WritingPrompt.id)
@@ -658,7 +673,9 @@ async def historico_de_escrita(
         history = history.where(Course.slug == course)
     if unit is not None:
         history = history.where(CourseUnit.slug == unit)
-    rows = (await session.execute(history.order_by(WritingDraft.updated_at.desc()))).all()
+    rows = (
+        await session.execute(history.order_by(WritingDraft.updated_at.desc()).limit(limit))
+    ).all()
     prompt_ids = [prompt.id for _, prompt, _ in rows]
     feedback_by_prompt: dict[int, list[WritingFeedbackRecord]] = {}
     if prompt_ids:

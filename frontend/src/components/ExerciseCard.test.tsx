@@ -104,7 +104,10 @@ describe('ExerciseCard', () => {
       params: { path: { exercise_id: 1 } },
       body: { answer: 'faster', idempotency_key: expect.any(String) },
     })
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['course-completion'] })
+    // FE-44: competências e a jornada da aula também ficam velhas após uma tentativa.
+    for (const key of ['progress', 'review', 'today', 'skills', 'study-session', 'course-completion']) {
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: [key] })
+    }
   })
 
   it('erro: sugere tentar de novo e não entrega o gabarito', async () => {

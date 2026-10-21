@@ -4,6 +4,7 @@ import {
   api, onEstadoSessao, onSessaoPerdida, renovarSessao, setAccessToken,
   setSessionReadOnly, setSessionUser,
 } from './client'
+import { invalidateStudy } from './invalidateStudy'
 import { estadoIndisponivel, type EstadoSessao } from './session'
 import { readLocal, removeLocal, writeLocal } from '../storage/local'
 
@@ -116,7 +117,7 @@ export function SessaoProvider({ children }: { children: React.ReactNode }) {
       guardarPerfil(data)
       setEstado('valida')
       // Não refazer queries da conta anterior antes de o React trocar a árvore.
-      if (!mudouConta) await qc.invalidateQueries()
+      if (!mudouConta) await invalidateStudy(qc, 'sessionConfirmed')
     },
     [guardarPerfil, limpar, qc],
   )

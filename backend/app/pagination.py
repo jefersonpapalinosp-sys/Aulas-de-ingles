@@ -6,6 +6,11 @@ import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+# Teto comum das listagens privadas. As rotas legadas (sem cursor) devolvem no
+# máximo uma página e apontam a alternativa paginada neste cabeçalho.
+PAGE_LIMIT_MAX = 100
+PAGINATED_ALTERNATIVE_HEADER = "X-Paginated-Alternative"
+
 
 class InvalidCursor(ValueError):
     """The cursor is malformed or belongs to an unsupported contract version."""

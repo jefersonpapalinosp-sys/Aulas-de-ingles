@@ -21,6 +21,7 @@ from ops.recovery_archive import (
     verify_bundle,
     write_json,
 )
+from ops.recovery_prune import apply_prune, plan_prune, render_plan
 
 ROOT = Path(__file__).resolve().parents[1]
 BACKUPS = ROOT / "backups" / "recovery"
@@ -852,6 +853,18 @@ def main(argv=None):
     commands.add_parser("lab-prepare")
     commands.add_parser("upgrade-lab-resources")
     commands.add_parser("upgrade-lab-prepare")
+    prune = commands.add_parser(
+        "prune", help="Janela 7 diários + 4 semanais em backups/recovery; dry-run por padrão."
+    )
+    mode = prune.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--dry-run", dest="apply", action="store_false", help="Só imprime o plano (padrão)."
+    )
+    mode.add_argument(
+        "--apply", dest="apply", action="store_true", help="Remove o que o plano lista."
+    )
+    prune.add_argument("--json", action="store_true", help="Plano em JSON em vez de texto.")
+    prune.set_defaults(apply=False)
     args = parser.parse_args(argv)
     try:
         if args.command == "backup":
@@ -880,6 +893,10 @@ def main(argv=None):
         elif args.command == "upgrade-lab-prepare":
             upgrade_lab_prepare()
             print("Origem sintética criada diretamente na revisão anterior.")
+        elif args.command == "prune":
+            plan = plan_prune(BACKUPS)
+            removed = apply_prune(plan) if args.apply else None
+            print(render_plan(plan, removed, as_json=args.json))
     except RecoveryError as exc:
         print(
             f"Operação recusada: {exc} Parciais são preservados; não use restore legado.",

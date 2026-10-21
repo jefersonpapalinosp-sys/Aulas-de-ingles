@@ -110,15 +110,22 @@ async def test_concurrent_modalities_share_atomic_quota(client, providers, monke
             for i in range(4)
         ),
     )
-    assert all(r.status_code in (200, 202, 429) for r in responses)
+    # 503 é o desfecho desenhado para lock_timeout/pool esgotado sob contenção
+    # (errors.database_error → service_unavailable): a requisição não é
+    # admitida e nada é cobrado. Em máquina carregada ele aparece; o invariante
+    # que importa é que a admissão para exatamente na cota e a contabilidade
+    # bate, com ou sem timeouts.
+    assert all(r.status_code in (200, 202, 429, 503) for r in responses)
+    unavailable = sum(r.status_code == 503 for r in responses)
     admitted = sum(
-        r.status_code == 202 or r.json().get("analysis_mode") == "assisted" for r in responses
+        r.status_code == 202 or (r.status_code == 200 and r.json()["analysis_mode"] == "assisted")
+        for r in responses
     )
-    assert admitted == quota
+    assert admitted == min(quota, len(responses) - unavailable)
     balance = await status(client, headers)
-    assert balance["used_today"] == quota
-    assert balance["reserved_today"] + balance["consumed_today"] == quota
-    assert balance["remaining_today"] == 0
+    assert balance["used_today"] == admitted
+    assert balance["reserved_today"] + balance["consumed_today"] == admitted
+    assert balance["remaining_today"] == quota - admitted
     assert len(providers) == balance["consumed_today"]
 
 

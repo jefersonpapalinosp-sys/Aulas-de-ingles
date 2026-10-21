@@ -460,7 +460,8 @@ make prod-up                  # http://localhost:5181
 ```
 
 Após a separação de papéis da Sprint 37, o ambiente local existente usa também
-infra/compose.roles.prod.yml e backups/recovery/roles-prod.env. Os comandos
+infra/compose.roles.prod.yml e secrets/roles-prod.env (credenciais moram em
+`secrets/`, fora de `backups/`, desde a Sprint 44). Os comandos
 antigos prod-up/prod-seed são bloqueados nesse perfil. Para manutenção e
 retomada, siga o [runbook local](docs/operacao_sprint_37.md); não reinicie
 código novo antes de aplicar migrations compatíveis.
@@ -537,6 +538,17 @@ make backup source=lab
 make backup-verify f=backups/recovery/aulas-IDENTIFICADOR-EXATO
 make restore f=backups/recovery/aulas-IDENTIFICADOR-EXATO confirm=aulas-ingles-recovery/target-db
 ```
+
+A stack pública do EasyPanel entra na mesma rotina desde a Sprint 44:
+`make backup-public-check` confere SSH, containers e o papel `aulas_backup`;
+`make backup source=public` lê o banco **dentro do container remoto** pelo
+papel limitado (sem senha) e exporta a voz com o mesmo `voice_transfer.py`,
+publicando um pacote v2 comum. A cópia externa só sai cifrada
+(`recipient=secrets/backup-age-recipient.txt copy_to=...`). A janela de
+retenção virou comando: `make backup-prune` planeja e `make backup-prune-apply`
+executa 7 diários + 4 semanais, sem nunca remover o pacote mais recente.
+Credenciais dos papéis moram em `secrets/`, fora de `backups/`. Detalhes no
+[runbook do EasyPanel](docs/deploy_easypanel.md#6-backup-inicial-e-rotina).
 
 `make backup source=prod` exige uma **janela de manutenção autorizada**: API,
 worker e qualquer outro escritor devem permanecer parados durante toda a

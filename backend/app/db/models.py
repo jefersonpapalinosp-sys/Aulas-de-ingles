@@ -1752,7 +1752,12 @@ class AuthRateBucket(Base):
     """Contadores por janela; identidade e origem são HMAC, nunca e-mail/IP em claro."""
 
     __tablename__ = "auth_rate_bucket"
-    __table_args__ = (CheckConstraint("count > 0", name="ck_auth_rate_count"),)
+    __table_args__ = (
+        CheckConstraint("count > 0", name="ck_auth_rate_count"),
+        # A limpeza de janelas antigas roda em todo login/registro e filtra por
+        # window_start, segunda coluna da PK: sem índice próprio é seq scan.
+        Index("ix_auth_rate_bucket_window_start", "window_start"),
+    )
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     window_start: Mapped[int] = mapped_column(Integer, primary_key=True)
     count: Mapped[int] = mapped_column(Integer)

@@ -635,7 +635,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Listar Caderno */
+        /**
+         * Listar Caderno
+         * @description Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.
+         */
         get: operations["listar_caderno_api_me_notebook_get"];
         put?: never;
         /** Criar Anotacao */
@@ -887,7 +890,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Listar Itens */
+        /**
+         * Listar Itens
+         * @description Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.
+         */
         get: operations["listar_itens_api_review_items_get"];
         put?: never;
         post?: never;
@@ -1007,7 +1013,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Listar Tentativas */
+        /**
+         * Listar Tentativas
+         * @description Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.
+         */
         get: operations["listar_tentativas_api_speaking_attempts_get"];
         put?: never;
         /** Criar Tentativa */
@@ -1182,7 +1191,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historico De Escrita */
+        /**
+         * Historico De Escrita
+         * @description Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.
+         */
         get: operations["historico_de_escrita_api_writing_history_get"];
         put?: never;
         post?: never;
@@ -4671,6 +4683,21 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "revision_required";
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
             503: {
                 headers: {
@@ -5440,6 +5467,21 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "revision_required";
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
             503: {
                 headers: {
@@ -5852,6 +5894,7 @@ export interface operations {
                 kind?: ("note" | "favorite_phrase" | "personal_example" | "recurring_error" | "teacher_question") | null;
                 course?: string | null;
                 unit?: string | null;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -6967,6 +7010,7 @@ export interface operations {
                 status?: "active" | "suspended";
                 course?: string | null;
                 unit?: string | null;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -7415,6 +7459,21 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "revision_required";
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
             503: {
                 headers: {
@@ -7432,6 +7491,7 @@ export interface operations {
                 lesson?: number | null;
                 course?: string | null;
                 unit?: string | null;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -8131,6 +8191,7 @@ export interface operations {
             query?: {
                 course?: string | null;
                 unit?: string | null;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -8353,6 +8414,21 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "revision_required";
+                            message: string;
+                        };
+                    };
                 };
             };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
@@ -8599,6 +8675,21 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "revision_required";
+                            message: string;
+                        };
+                    };
                 };
             };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
