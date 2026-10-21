@@ -43,6 +43,8 @@ jobs:
             > "$RUNNER_TEMP/frontend-npm-audit.json" || true
           npm audit --omit=dev --json --prefix e2e \
             > "$RUNNER_TEMP/e2e-npm-audit.json" || true
+      - name: imagens-base por digest, com origens equivalentes
+        run: bash ops/ci_pull_bases.sh
       - name: constrói imagens candidatas sem publicá-las
         run: |
           docker build -f backend/Dockerfile.prod -t aulas-ingles-ci-api:${{ github.sha }} .
@@ -101,6 +103,8 @@ jobs:
           make test-recovery
       - name: PostgreSQL por digest, com origens equivalentes e espera limitada
         run: bash ops/ci_pull_postgres.sh
+      - name: imagens-base por digest, com origens equivalentes
+        run: bash ops/ci_pull_bases.sh
       - name: laboratório sem portas ou volumes de estudo
         run: make recovery-lab-up
       - name: migrations, seed e WAV de silêncio sintético
@@ -236,8 +240,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+        with:
+          # O builder do daemon enxerga as imagens-base pré-carregadas; um builder
+          # em container não enxerga e voltaria a depender do registro.
+          driver: docker
       - name: PostgreSQL por digest, com origens equivalentes e espera limitada
         run: bash ops/ci_pull_postgres.sh
+      - name: imagens-base por digest, com origens equivalentes
+        run: bash ops/ci_pull_bases.sh
       - uses: actions/setup-node@v4
         with:
           node-version: 24

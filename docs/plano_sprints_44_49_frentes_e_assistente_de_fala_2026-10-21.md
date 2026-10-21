@@ -248,6 +248,15 @@ de rate limit zeram uma vez no primeiro deploy, porque a chave HMAC mudou de
 derivação; o Makefile só encontra os papéis de produção local em
 `secrets/roles-prod.env`.
 
+Primeira execução do CI do PR #25: os jobs `recovery` e `e2e` caíram em 429
+"Data limit exceeded" do espelho `public.ecr.aws` ao resolver os `FROM` dos
+Dockerfiles (fragilidade pré-existente; o Postgres já tinha fallback, os builds
+não). Correção antecipada do INFRA-45: `ops/ci_pull_bases.sh` pré-carrega as
+quatro imagens-base por digest com duas origens, no mesmo padrão de
+`ci_pull_postgres.sh`, e o job `e2e` usa o builder do daemon (`driver: docker`)
+para enxergar o cache. Conferido localmente que `docker build` resolve um `FROM`
+presente no cache sem consultar o registro.
+
 Achados da conversão dos testes, para o BE-45: `POST /writing/prompts/{id}/feedback`
 aceita `expected_revision` no corpo e está no registro do frontend, mas o backend
 não chama `require_revision` nela; e o 428 de `grade` sem `idempotency_key`
