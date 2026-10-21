@@ -24,6 +24,8 @@ services:
       DATABASE_URL: ${MIGRATOR_DATABASE_URL:?provisione os papéis primeiro}
       DATABASE_PURPOSE: migrator
       APP_ENV: prod
+      # O Alembic carrega as settings; produção local em HTTP precisa declarar a origem.
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:5181}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET obrigatório}
     command: ["alembic", "upgrade", "head"]
     depends_on:
