@@ -31,6 +31,34 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     )
 }
 
+# Rotas que exigem `expected_revision` depois de LEGACY_WRITES_UNTIL declaram o
+# 428 no contrato: o frontend deriva daí a lista de writes que precisam enviar a
+# revisão (ver frontend/src/api/revisionedWrites.ts) e o gate falha se divergir.
+REVISION_REQUIRED_RESPONSES: dict[int | str, dict[str, Any]] = {
+    428: {
+        "description": "Cliente antigo sem expected_revision após o cutover "
+        "(detail.code = revision_required). Atualize o aplicativo e reenvie.",
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "detail": {
+                            "type": "object",
+                            "properties": {
+                                "code": {"type": "string", "enum": ["revision_required"]},
+                                "message": {"type": "string"},
+                            },
+                            "required": ["code", "message"],
+                        }
+                    },
+                    "required": ["detail"],
+                }
+            }
+        },
+    }
+}
+
 
 def response(
     code: ErrorCode,
@@ -59,8 +87,12 @@ async def http_error(request: Request, exc: Exception) -> Response:
 
 async def unavailable(request: Request, exc: Exception) -> JSONResponse:
     # Não logar SQL, parâmetros, corpos nem a mensagem da exceção de transporte.
+    # O sqlstate (55P03 lock_timeout, 40P01 deadlock, 40001 serialização) é o
+    # único detalhe que distingue contenção de banco de falha de rede.
+    sqlstate = getattr(getattr(exc, "orig", None), "sqlstate", None)
     logging.getLogger(__name__).warning(
-        "dependência indisponível", extra={"error_type": type(exc).__name__}
+        "dependência indisponível",
+        extra={"error_type": type(exc).__name__, "sqlstate": sqlstate},
     )
     return response(
         "service_unavailable",

@@ -34,7 +34,13 @@ from app.db.models import (
     TranscriptionJob,
 )
 from app.db.session import get_session
-from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
+from app.pagination import (
+    PAGE_LIMIT_MAX,
+    PAGINATED_ALTERNATIVE_HEADER,
+    InvalidCursor,
+    decode_time_id_cursor,
+    encode_time_id_cursor,
+)
 from app.schemas.assist import HumanRatingIn, TranscriptionJobOut, TranscriptionWordOut
 from app.schemas.speaking import (
     SpeakingAttemptIn,
@@ -420,10 +426,14 @@ async def enviar_audio(
 async def listar_tentativas(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
     lesson: Annotated[int | None, Query(ge=1)] = None,
     course: Annotated[str | None, Query(max_length=100)] = None,
     unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=PAGE_LIMIT_MAX)] = PAGE_LIMIT_MAX,
 ) -> list[SpeakingAttemptOut]:
+    """Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page."""
+    response.headers[PAGINATED_ALTERNATIVE_HEADER] = "/api/speaking/attempts/page"
     query = _attempts_query(
         usuario.id,
         lesson=lesson,
@@ -431,7 +441,11 @@ async def listar_tentativas(
         unit=unit,
     )
     attempts = list(
-        (await session.execute(query.order_by(SpeakingAttempt.created_at.desc()))).scalars()
+        (
+            await session.execute(
+                query.order_by(SpeakingAttempt.created_at.desc()).limit(limit)
+            )
+        ).scalars()
     )
     result = await _attempt_outputs(session, attempts, usuario.id)
     await session.commit()

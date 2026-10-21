@@ -16,7 +16,13 @@ from app.db.models import (
     NotebookEntry,
 )
 from app.db.session import get_session
-from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
+from app.pagination import (
+    PAGE_LIMIT_MAX,
+    PAGINATED_ALTERNATIVE_HEADER,
+    InvalidCursor,
+    decode_time_id_cursor,
+    encode_time_id_cursor,
+)
 from app.schemas.notebook import (
     AccountDeletionIn,
     AccountDeletionOut,
@@ -65,11 +71,15 @@ async def _owned_entry(session: AsyncSession, entry_id: int, user_id: int) -> No
 async def listar_caderno(
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
     lesson: Annotated[int | None, Query(ge=1)] = None,
     kind: Annotated[NotebookKind | None, Query()] = None,
     course: Annotated[str | None, Query(max_length=100)] = None,
     unit: Annotated[str | None, Query(max_length=100)] = None,
+    limit: Annotated[int, Query(ge=1, le=PAGE_LIMIT_MAX)] = PAGE_LIMIT_MAX,
 ) -> list[NotebookEntryOut]:
+    """Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page."""
+    response.headers[PAGINATED_ALTERNATIVE_HEADER] = "/api/me/notebook/page"
     query = select(NotebookEntry).where(NotebookEntry.user_id == usuario.id)
     if course is not None:
         query = query.where(NotebookEntry.lesson.has(Lesson.course.has(Course.slug == course)))
@@ -86,7 +96,9 @@ async def listar_caderno(
         )
     if kind is not None:
         query = query.where(NotebookEntry.kind == kind)
-    entries = (await session.execute(query.order_by(NotebookEntry.updated_at.desc()))).scalars()
+    entries = (
+        await session.execute(query.order_by(NotebookEntry.updated_at.desc()).limit(limit))
+    ).scalars()
     return [_entry_out(entry) for entry in entries]
 
 

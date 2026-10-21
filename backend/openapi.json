@@ -7826,6 +7826,39 @@
                         },
                         "description": "Validation Error"
                     },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "revision_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                    },
                     "503": {
                         "content": {
                             "application/json": {
@@ -8849,6 +8882,39 @@
                         },
                         "description": "Validation Error"
                     },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "revision_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                    },
                     "503": {
                         "content": {
                             "application/json": {
@@ -9369,6 +9435,7 @@
         },
         "/api/me/notebook": {
             "get": {
+                "description": "Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.",
                 "operationId": "listar_caderno_api_me_notebook_get",
                 "parameters": [
                     {
@@ -9443,6 +9510,18 @@
                                 }
                             ],
                             "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 100,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
                         }
                     }
                 ],
@@ -11085,6 +11164,7 @@
         },
         "/api/review/items": {
             "get": {
+                "description": "Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.",
                 "operationId": "listar_itens_api_review_items_get",
                 "parameters": [
                     {
@@ -11133,6 +11213,18 @@
                                 }
                             ],
                             "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 100,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
                         }
                     }
                 ],
@@ -11743,6 +11835,39 @@
                         },
                         "description": "Validation Error"
                     },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "revision_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                    },
                     "503": {
                         "content": {
                             "application/json": {
@@ -11762,6 +11887,7 @@
         },
         "/api/speaking/attempts": {
             "get": {
+                "description": "Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.",
                 "operationId": "listar_tentativas_api_speaking_attempts_get",
                 "parameters": [
                     {
@@ -11813,6 +11939,18 @@
                                 }
                             ],
                             "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 100,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
                         }
                     }
                 ],
@@ -12747,6 +12885,7 @@
         },
         "/api/writing/history": {
             "get": {
+                "description": "Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page.",
                 "operationId": "historico_de_escrita_api_writing_history_get",
                 "parameters": [
                     {
@@ -12781,6 +12920,18 @@
                                 }
                             ],
                             "title": "Unit"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 100,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
                         }
                     }
                 ],
@@ -13106,6 +13257,39 @@
                             }
                         },
                         "description": "Validation Error"
+                    },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "revision_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
@@ -13468,6 +13652,39 @@
                             }
                         },
                         "description": "Validation Error"
+                    },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "revision_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
