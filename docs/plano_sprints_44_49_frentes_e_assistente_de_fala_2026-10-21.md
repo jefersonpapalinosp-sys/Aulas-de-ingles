@@ -296,24 +296,25 @@ campo falta.
 
 Entregas:
 
-- [ ] Job `deploy` no CI com `needs: [backend, frontend, e2e, recovery]`,
-  `if: github.ref == 'refs/heads/main'`, disparo do EasyPanel pela API com
-  o SHA aprovado e smoke pós-deploy (`/`, `/sw.js`, `/api/health`,
-  `/api/courses`, HSTS presente).
-- [ ] Decisão sobre o `seed` no gate de release: `alembic upgrade head &&
-  alembic check` continua bloqueante; o `seed` passa a rodar após a API
-  saudável, com falha visível no gate operacional e sem derrubar o site.
-- [ ] `resolver 127.0.0.11 valid=10s` e `proxy_pass` por variável em
+- [x] Job `deploy` no CI com `needs: [backend, frontend, e2e, recovery]`,
+  só em push na `main`, executando `ops/deploy_public.sh` por SSH (o painel
+  não emitiu token de API); sem a secret `PUBLIC_DEPLOY_SSH_KEY` o job avisa
+  e termina verde, desarmado. Smokes pós-deploy nas cinco rotas e schema
+  compatível.
+- [x] Decisão sobre o `seed` no gate de release: `migrate` só faz `upgrade` +
+  `check`; o `seed` virou serviço próprio depois da API saudável. Falha dele
+  sai vermelha no `up --wait` e no script de deploy, sem derrubar o site.
+- [x] `resolver 127.0.0.11 valid=10s` e `proxy_pass` por variável em
   `frontend/nginx.conf`.
-- [ ] Healthcheck do worker baseado em `worker_heartbeat` nos três Compose
-  que o executam.
-- [ ] `Cache-Control: no-cache, must-revalidate` em `/index.html`; um único
-  `Cache-Control` em `/assets/`.
-- [ ] `timeout-minutes` em todos os jobs; `recovery` passa de 15 para 35 ou
-  perde um dos builds frios.
+- [x] Healthcheck do worker (`python -m app.cli worker-health`) baseado em
+  `worker_heartbeat` nos três Compose; provado no worker de dev.
+- [x] `Cache-Control: no-cache, must-revalidate` em `/` e `/index.html`; um
+  único `Cache-Control` em `/assets/`.
+- [x] `timeout-minutes` em todos os jobs; `recovery` passou de 15 para 35.
 - [ ] Build único da imagem com cache GHA, reutilizado por `security-inventory`,
-  `recovery` e `e2e`.
-- [ ] Trivy em SARIF com `upload-sarif`; `dependabot.yml` para npm, pip e
+  `recovery` e `e2e`. Adiado: a pré-carga por digest (Sprint 44) removeu a
+  causa das falhas e o CI já fecha em cerca de 10 minutos de parede.
+- [x] Trivy em SARIF com `upload-sarif`; `dependabot.yml` para npm, `uv` e
   actions.
 
 Critérios de aceite:
@@ -445,21 +446,21 @@ browser: exibe transcrição + confiança + checks; fala o partner_text com spee
 
 Entregas:
 
-- [ ] ADR `docs/adr_assistente_de_conversa.md` com: os três modos; o que o
+- [x] ADR `docs/adr_assistente_de_conversa.md` (escrito; aprovação pendente) com: os três modos; o que o
   modelo nunca faz (nota, "score de fluência", correção fonética, juízo
   sobre o aluno); cerca de tópico; limite de turnos por diálogo; fallback
   para o modo Roteiro quando o provedor falha; entrada por texto quando não
   há microfone.
-- [ ] Contrato OpenAPI rascunhado: `POST /api/speaking/dialogues`,
+- [x] Contrato OpenAPI rascunhado (tabela no ADR): `POST /api/speaking/dialogues`,
   `GET /api/speaking/dialogues/{id}`, `PUT .../turns/{position}/audio`,
   `POST .../turns/{position}/text`, `GET .../turns/{position}`,
   `PUT .../turns/{position}/rating`, `DELETE /api/speaking/dialogues/{id}`.
-- [ ] Prompt do sistema e esquema JSON versionados em `app/services/dialogue_prompts.py`,
+- [x] Prompt do sistema e esquema JSON versionados em `app/services/dialogue_prompts.py`,
   derivados exclusivamente de `seed/lessons.json` (objetivos, frases,
   vocabulário, blocos de gramática) e nunca da conversa anterior sem filtro.
 - [ ] Spike de latência: 30 turnos sintéticos em Ollama `qwen2.5:7b` no Mac
   e 30 em um gateway HTTPS; registrar p50/p95 e custo por turno.
-- [ ] Decisão de TTS: `speechSynthesis` do navegador como padrão (zero custo,
+- [x] Decisão de TTS (registrada no ADR): `speechSynthesis` do navegador como padrão (zero custo,
   dado não sai do dispositivo, funciona offline); gateway de TTS fica para
   depois do piloto, se a qualidade da voz for reprovada.
 - [ ] Manifesto de homologação do provedor para a modalidade `conversation`
@@ -476,6 +477,21 @@ Critérios de aceite:
 Fora do escopo definitivo: feedback fonético por fonema, nota única de
 fluência, ranking, armazenar áudio no PostgreSQL, importar conteúdo novo da
 VOA.
+
+### Registro de execução — Ciclo 45, andamento em 21/10/2026
+
+Branch `sprint/45-deploy-e-fundacao`. Dois pacotes avançaram no mesmo dia do
+fechamento do ciclo 44; os demais (BE-45, FE-45, SEC-45, DB-45) não começaram.
+
+| Pacote | Entregue | Pendente |
+|---|---|---|
+| INFRA-45 | nginx resolve a API por requisição e deixa `/` e `/index.html` sem cache; `worker-health` + healthcheck nos três Compose (provado no worker de dev: ok com 60 s, reprovado com 1 s); `seed` fora do gate como serviço próprio no EasyPanel; `ops/deploy_public.sh` (13 testes simulados, dry-run sem contato com a VM) e `make deploy-public`; job `deploy` gated por secrets; SARIF do Trivy na aba Security; `timeout-minutes` em todos os jobs; `cancel-in-progress` só fora da `main`; `dependabot.yml`. 161 testes operacionais verdes | criar as secrets `PUBLIC_DEPLOY_SSH_KEY`, `PUBLIC_DEPLOY_KNOWN_HOSTS` e `PUBLIC_DEPLOY_HOST` (ação de Jeferson, com chave SSH exclusiva); provas dos critérios 1 a 3 (PR vermelho não implanta; recriar só a API sem 502; worker travado reiniciado) ficam para quando a stack E2E ou a pública rodar o código novo; build único com cache GHA adiado |
+| IA-45 | ADR `adr_assistente_de_conversa.md` com modos, pipeline, vedações, códigos de check, contrato HTTP, cota/retenção e voz do navegador; `app/services/dialogue_prompts.py` (brief do seed, roteiro por falante, prompt `dialogue-prompt-v1`, schema restrito aos códigos reprovados, saneamento) com 8 testes puros; `ops/dialogue_latency_spike.py` (mock, Ollama, gateway) com 6 testes e execução simulada 30/30 | **aprovação do ADR por Jeferson** antes de DB-45; escolha do provedor de diálogo e STT para a medição real (não há Ollama neste Mac); manifesto da modalidade `conversation` em `config/assist-provider-review.example.json` |
+
+Dois agentes que implementavam o INFRA-45 foram interrompidos por limite de
+sessão da API durante as validações; o trabalho foi revisado linha a linha,
+um teste corrigido (vazamento de variável de ambiente no cenário de host) e as
+validações concluídas antes do commit.
 
 ---
 
