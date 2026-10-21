@@ -91,8 +91,9 @@ class BasePullTests(unittest.TestCase):
         subprocess.run(["bash", "-n", str(SCRIPT)], check=True)
         script = SCRIPT.read_text()
         froms = set()
+        pattern = re.compile(r"^FROM\s+(public\.ecr\.aws/\S+)", re.M)
         for dockerfile in DOCKERFILES:
-            froms.update(re.findall(r"^FROM\s+(public\.ecr\.aws/\S+)", dockerfile.read_text(), re.M))
+            froms.update(pattern.findall(dockerfile.read_text()))
         self.assertTrue(froms)
         for reference in froms:
             self.assertIn(f'"{reference}|', script, f"{reference} sem pré-carga em {SCRIPT.name}")

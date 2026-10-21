@@ -39,6 +39,8 @@ export function useSaveStudyPlan() {
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao salvar o plano.`)
       return data
     },
-    onSuccess: () => invalidateStudy(queryClient, 'studyPlan'),
+    onSuccess: () => {
+      void invalidateStudy(queryClient, 'studyPlan')
+    },
   })
 }

@@ -257,6 +257,18 @@ quatro imagens-base por digest com duas origens, no mesmo padrão de
 para enxergar o cache. Conferido localmente que `docker build` resolve um `FROM`
 presente no cache sem consultar o registro.
 
+Segunda execução do CI: o E2E "revisão multimodal filtra e permite suspender,
+reativar e excluir" reprovou nos dois viewports. Causa: ao unificar a invalidação,
+quatro `onSuccess` de hooks passaram a **devolver** a promessa de
+`invalidateStudy`; o TanStack Query espera essa promessa (o refetch inteiro)
+antes de chamar o `onSuccess` passado no `mutate()`, e a página de revisão usa
+esse segundo callback para zerar a lista de suspensos, que antes rodava antes do
+refetch e passou a apagar a lista recém-carregada. Correção: os hooks que na
+`main` disparavam a invalidação com `void` voltam a não devolver a promessa
+(status e exclusão de item de revisão, adicionar ao deck, plano de estudo).
+Reproduzido localmente com a imagem anterior e verificado com a corrigida: 50 de
+50 cenários do fluxo completo no Chromium.
+
 Achados da conversão dos testes, para o BE-45: `POST /writing/prompts/{id}/feedback`
 aceita `expected_revision` no corpo e está no registro do frontend, mas o backend
 não chama `require_revision` nela; e o 428 de `grade` sem `idempotency_key`

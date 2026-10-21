@@ -12,6 +12,8 @@ export function useAdicionarItem() {
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao adicionar.`)
       return data
     },
-    onSuccess: () => invalidateStudy(qc, 'reviewItemAdded'),
+    onSuccess: () => {
+      void invalidateStudy(qc, 'reviewItemAdded')
+    },
   })
 }

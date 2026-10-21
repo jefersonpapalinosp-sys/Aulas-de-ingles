@@ -103,7 +103,12 @@ export function useSetReviewItemStatus() {
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao alterar.`)
       return data
     },
-    onSuccess: () => invalidateStudy(qc, 'reviewItemChange'),
+    // Sem devolver a promessa: o TanStack Query esperaria o refetch terminar antes
+    // de chamar o onSuccess passado no mutate(), e a página de revisão usa esse
+    // segundo callback para zerar a lista de suspensos ANTES de o refetch chegar.
+    onSuccess: () => {
+      void invalidateStudy(qc, 'reviewItemChange')
+    },
   })
 }
 
@@ -116,6 +121,8 @@ export function useDeleteReviewItem() {
       })
       if (!response?.ok) throw new Error('Não foi possível excluir o item.')
     },
-    onSuccess: () => invalidateStudy(qc, 'reviewItemChange'),
+    onSuccess: () => {
+      void invalidateStudy(qc, 'reviewItemChange')
+    },
   })
 }
