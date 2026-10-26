@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type StudyPlanInput } from './client'
 import { invalidateStudy } from './invalidateStudy'
+import { READ_POLICY } from './readPolicy'
 
 export function useToday(courseSlug: string) {
   return useQuery({
     queryKey: ['today', courseSlug],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/me/today', {
         params: { query: { course: courseSlug } },
@@ -19,6 +21,7 @@ export function useToday(courseSlug: string) {
 export function useSkills(courseSlug?: string, unitSlug?: string) {
   return useQuery({
     queryKey: ['skills', courseSlug ?? 'all', unitSlug ?? 'all'],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/me/skills', {
         params: { query: { course: courseSlug, unit: unitSlug } },

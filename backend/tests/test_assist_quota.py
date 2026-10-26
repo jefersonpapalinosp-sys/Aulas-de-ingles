@@ -391,7 +391,7 @@ async def test_success_without_reported_cost_still_marks_partial(client, provide
     response = await client.post(
         f"/api/writing/prompts/{prompt['id']}/feedback",
         headers=headers,
-        json={"text": "My draft.", "assisted": True},
+        json={"text": "My draft.", "assisted": True, "operation_key": str(uuid4())},
     )
     assert response.json()["analysis_mode"] == "assisted"
     balance = await status(client, headers)

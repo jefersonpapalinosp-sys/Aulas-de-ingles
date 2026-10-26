@@ -7,8 +7,28 @@ name: aulas-ingles-prod
 # As imagens vêm do espelho público da AWS, não do Docker Hub: o Hub limita
 # pull anônimo por IP, e o CI compartilha IP com o resto do GitHub Actions.
 # O Postgres está fixado em 16.15 para bater com os volumes já existentes.
+# Hardening de container, igual ao da stack pública (SEC-45): é esta stack que
+# ensaia a produção, então divergir aqui tiraria o valor do ensaio. O `db` fica
+# só com `no-new-privileges` porque o Postgres ajusta o dono do PGDATA e troca
+# de usuário no primeiro boot do volume.
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+
+x-backend-caps: &backend-caps
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  cap_add:
+    - CHOWN
+    - FOWNER
+    - SETGID
+    - SETUID
+
 services:
   db:
+    <<: *hardening
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
     container_name: aulas-prod-db
     environment:
@@ -28,6 +48,7 @@ services:
     restart: unless-stopped
 
   api:
+    <<: *backend-caps
     build:
       # Contexto na raiz: a imagem precisa levar seed/ junto.
       context: ..
@@ -92,6 +113,17 @@ services:
       context: ..
       dockerfile: backend/Dockerfile.prod
     container_name: aulas-prod-worker
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Sem CAP_CHOWN: o worker só lê o áudio, e o entrypoint tolera isso.
+    cap_add:
+      - SETGID
+      - SETUID
+    read_only: true
+    tmpfs:
+      - /tmp
     command: ["python", "-m", "app.cli", "assist-worker"]
     environment:
       DATABASE_URL: ${DATABASE_URL:?defina DATABASE_URL}
@@ -118,6 +150,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # Mesmo critério do EasyPanel: batida de worker_heartbeat com até 60 s,
+      # medida pelo relógio do banco. Funciona também com o overlay de papéis
+      # (entrypoint vazio, UID 10001): o exec do healthcheck não passa pelo
+      # entrypoint e o venv já está no PATH da imagem.
+      test: ["CMD", "python", "-m", "app.cli", "worker-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
   web:
@@ -125,6 +167,19 @@ services:
       context: ../frontend
       dockerfile: Dockerfile.prod
     container_name: aulas-prod-web
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
     ports:
       - "127.0.0.1:${WEB_HOST_PORT:-5181}:80"
     depends_on:

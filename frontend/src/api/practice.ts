@@ -5,6 +5,7 @@ import type {
   PracticeFilters,
   PracticeSession,
 } from '../features/practice/types'
+import { READ_POLICY } from './readPolicy'
 
 function queryFilters(filters: PracticeFilters) {
   return {
@@ -34,7 +35,6 @@ export function usePracticeExercises(
   enabled = true,
 ) {
   return useQuery({
-    networkMode: 'always', retry: false,
     queryKey: [
       'practice-exercises',
       courseSlug,
@@ -43,6 +43,7 @@ export function usePracticeExercises(
       filters.skill ?? 'all',
       filters.objective ?? 'all',
     ],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/lessons/{number}/exercises',
@@ -67,6 +68,7 @@ export function useActivePracticeSession(
 ) {
   return useQuery({
     queryKey: ['practice-session-active', courseSlug, lessonNumber],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/lessons/{number}/practice-sessions/active',
@@ -84,6 +86,7 @@ export function useActivePracticeSession(
 export function usePracticeSession(sessionId: number | null, enabled = true) {
   return useQuery({
     queryKey: ['practice-session', sessionId],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/practice-sessions/{session_id}', {
         params: { path: { session_id: sessionId ?? 0 } },

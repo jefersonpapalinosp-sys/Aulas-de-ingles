@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { READ_POLICY } from './readPolicy'
 
 export function useAssistStatus(userId: number) {
   return useQuery({
@@ -13,6 +14,6 @@ export function useAssistStatus(userId: number) {
     refetchInterval: (query) => query.state.data?.reserved_today
       ? 2000
       : query.state.data?.writing_enabled || query.state.data?.transcription_enabled ? 60_000 : false,
-    retry: false,
+    ...READ_POLICY,
   })
 }

@@ -16,6 +16,7 @@ from app.db.models import (
     CourseReview,
     CourseReviewAttempt,
     CourseUnit,
+    DialogueTurn,
     EvidenceContentSnapshot,
     Exercise,
     ExerciseAttempt,
@@ -32,6 +33,7 @@ from app.db.models import (
     ReviewItem,
     SkillEvidence,
     SpeakingAttempt,
+    SpeakingDialogue,
     StepProgress,
     StudyActiveInterval,
     StudyActivityEvent,
@@ -78,6 +80,8 @@ PERSONAL_MODELS = (
     AssistReservation,
     RefreshSession,
     EvidenceContentSnapshot,
+    SpeakingDialogue,
+    DialogueTurn,
 )
 CHILD_MODELS = (
     (WritingRevision, WritingDraft, "draft_id"),
@@ -230,6 +234,23 @@ async def _complete_export(
         session,
         AssistReservation,
         "id modality state reason cost_microusd cost_known created_at expires_at dispatched_at",
+        user_id,
+    )
+    # DB-45: diálogos e turnos do parceiro de conversa; o áudio de um turno é a
+    # speaking_attempt referenciada e já consta em `speaking`/`audio_manifest`.
+    data.dialogues = await _rows(
+        session,
+        SpeakingDialogue,
+        "id lesson_id operation_key mode state partner_speaker content_version "
+        "content_fingerprint provider_name rubric_version turn_limit started_at ended_at",
+        user_id,
+    )
+    data.dialogue_turns = await _rows(
+        session,
+        DialogueTurn,
+        "id dialogue_id position role input_kind speaking_attempt_id transcription_job_id "
+        "state transcript checks partner_text hints confidence fallback cost_microusd "
+        "error_code human_rating created_at completed_at expires_at",
         user_id,
     )
     data.login_sessions = await _rows(
@@ -442,7 +463,7 @@ async def _export_snapshot(
     ).all()
 
     return PersonalDataExportOut(
-        schema_version="2.0",
+        schema_version="2.1",
         activity_sessions=[
             {"id": item.id, "lesson_id": item.lesson_id, "started_at": item.started_at}
             for item in (

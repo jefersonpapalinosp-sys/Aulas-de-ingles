@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 from datetime import UTC, datetime
+from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -200,7 +201,7 @@ async def test_paginas_de_escrita_sao_estaveis_pequenas_e_privadas(
         response = await client.post(
             f"{base}/feedback",
             headers=ana,
-            json={"text": f"Feedback sample {number} is private."},
+            json={"text": f"Feedback sample {number} is private.", "operation_key": str(uuid4())},
         )
         assert response.status_code == 200
 
@@ -295,7 +296,11 @@ async def test_feedback_aponta_pendencias_e_aprova_texto_pronto(client: AsyncCli
     prompt = await proposta(client)
     url = f"/api/writing/prompts/{prompt['id']}/feedback"
 
-    incompleto = (await client.post(url, headers=headers, json={"text": "bus is fast"})).json()
+    incompleto = (
+        await client.post(
+            url, headers=headers, json={"text": "bus is fast", "operation_key": str(uuid4())}
+        )
+    ).json()
     assert incompleto["ready"] is False
     assert incompleto["word_count"] == 3
     assert any(not check["passed"] for check in incompleto["checks"])
@@ -315,7 +320,8 @@ async def test_feedback_aponta_pendencias_e_aprova_texto_pronto(client: AsyncCli
                     "It is comfortable and usually arrives on time. "
                     "A visitor should take the train to the stadium. "
                     "The bus is cheaper, but the train is my best choice."
-                )
+                ),
+                "operation_key": str(uuid4()),
             },
         )
     ).json()
@@ -351,7 +357,11 @@ async def test_historico_preserva_resultado_e_rubrica_apos_mudar_proposta(
     base = f"/api/writing/prompts/{prompt['id']}"
     text = "The bus is faster than the train. You ought to take it."
     assert (await salvar_rascunho(client, headers, prompt["id"], text)).status_code == 200
-    first = (await client.post(f"{base}/feedback", headers=headers, json={"text": text})).json()
+    first = (
+        await client.post(
+            f"{base}/feedback", headers=headers, json={"text": text, "operation_key": str(uuid4())}
+        )
+    ).json()
     assert first["checks"][2]["passed"] is True
     user = (await session.execute(select(User))).scalar_one()
     # Simula um registro legado, sem inventar a rubrica que não era guardada.
@@ -383,7 +393,11 @@ async def test_historico_preserva_resultado_e_rubrica_apos_mudar_proposta(
         stored.requirements = changed
         await session.commit()
         second = (
-            await client.post(f"{base}/feedback", headers=headers, json={"text": text})
+            await client.post(
+                f"{base}/feedback",
+                headers=headers,
+                json={"text": text, "operation_key": str(uuid4())},
+            )
         ).json()
         assert second["rubric_version"] != first["rubric_version"]
         assert second["checks"][2]["passed"] is False
@@ -429,7 +443,7 @@ async def test_feedback_assistido_e_opcional_avaliavel_e_tem_fallback(
     response = await client.post(
         f"/api/writing/prompts/{prompt['id']}/feedback",
         headers=headers,
-        json={"text": "The bus is faster.", "assisted": True},
+        json={"text": "The bus is faster.", "assisted": True, "operation_key": str(uuid4())},
     )
     assert response.status_code == 200
     feedback = response.json()
@@ -455,7 +469,11 @@ async def test_feedback_assistido_e_opcional_avaliavel_e_tem_fallback(
         await client.post(
             f"/api/writing/prompts/{prompt['id']}/feedback",
             headers=headers,
-            json={"text": "My draft remains safe.", "assisted": True},
+            json={
+                "text": "My draft remains safe.",
+                "assisted": True,
+                "operation_key": str(uuid4()),
+            },
         )
     ).json()
     assert fallback["analysis_mode"] == "fallback"
@@ -466,7 +484,11 @@ async def test_feedback_assistido_e_opcional_avaliavel_e_tem_fallback(
         await client.post(
             f"/api/writing/prompts/{prompt['id']}/feedback",
             headers=headers,
-            json={"text": "This draft also remains safe.", "assisted": True},
+            json={
+                "text": "This draft also remains safe.",
+                "assisted": True,
+                "operation_key": str(uuid4()),
+            },
         )
     ).json()
     assert quota["analysis_mode"] == "fallback"
@@ -514,7 +536,11 @@ async def test_feedback_assistido_pode_usar_ollama_local(
     response = await client.post(
         f"/api/writing/prompts/{prompt['id']}/feedback",
         headers=headers,
-        json={"text": "The Metro is faster than the bus.", "assisted": True},
+        json={
+            "text": "The Metro is faster than the bus.",
+            "assisted": True,
+            "operation_key": str(uuid4()),
+        },
     )
 
     assert response.status_code == 200

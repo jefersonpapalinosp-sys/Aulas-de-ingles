@@ -26,7 +26,7 @@ test('Sprint 40A: exportação por teclado, manifesto e download privado de áud
   const { headers } = await account(page)
   const lesson = await (await page.request.get('/api/lessons/31')).json()
   const writing = await page.request.post(`/api/writing/prompts/${lesson.writing_prompts[0].id}/feedback`, {
-    headers, data: { text: 'The train is faster than a bus. You should try it.' },
+    headers, data: { text: 'The train is faster than a bus. You should try it.', operation_key: randomUUID() },
   })
   expect(writing.status()).toBe(200)
   const created = await page.request.post('/api/speaking/attempts', { headers,
@@ -47,7 +47,7 @@ test('Sprint 40A: exportação por teclado, manifesto e download privado de áud
   const downloaded = await jsonDownload
   expect(downloaded.suggestedFilename()).toBe('aulas-ingles-dados.json')
   const data = JSON.parse((await bytes(downloaded)).toString())
-  expect(data.schema_version).toBe('2.0')
+  expect(data.schema_version).toBe('2.1')
   expect(data.writing).toEqual([])
   expect(data.writing_feedback).toHaveLength(1)
   expect(data.audio_manifest[0].attempt_id).toBe(id)

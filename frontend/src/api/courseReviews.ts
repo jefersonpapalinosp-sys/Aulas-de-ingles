@@ -3,6 +3,7 @@ import type { CourseReviewAttemptInput } from './client'
 import { api } from './client'
 import { ApiError } from './errors'
 import { invalidateStudy } from './invalidateStudy'
+import { READ_POLICY } from './readPolicy'
 
 function reviewError(status: number | undefined): Error {
   if (status === 404) return new Error('Este checkpoint não existe nesta unidade.')
@@ -14,6 +15,7 @@ function reviewError(status: number | undefined): Error {
 export function useCourseReview(courseSlug: string, unitSlug: string) {
   return useQuery({
     queryKey: ['course-review', courseSlug, unitSlug],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/units/{unit_slug}/review',

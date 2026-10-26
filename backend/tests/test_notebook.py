@@ -1,5 +1,7 @@
 """Caderno pessoal, isolamento e exportação dos dados do aluno."""
 
+from uuid import uuid4
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -233,7 +235,9 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
     )
     assert version.status_code == 200
     feedback = await client.post(
-        f"/api/writing/prompts/{prompt['id']}/feedback", headers=headers, json={"text": text}
+        f"/api/writing/prompts/{prompt['id']}/feedback",
+        headers=headers,
+        json={"text": text, "operation_key": str(uuid4())},
     )
     assert feedback.status_code == 200
     assert feedback.json()["id"] > 0
@@ -250,7 +254,7 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
         'attachment; filename="aulas-ingles-dados.json"'
     )
     data = exported.json()
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "2.1"
     assert data["profile"]["email"] == "caderno-exportacao@exemplo.com"
     for section in (
         "lesson_progress",
@@ -344,7 +348,7 @@ async def test_exportacao_identifica_toda_aula_por_curso_e_unidade(
     exported = await client.get("/api/me/export", headers=headers)
     assert exported.status_code == 200
     data = exported.json()
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "2.1"
     for section in (
         "lesson_progress",
         "study_sessions",
@@ -373,7 +377,9 @@ async def test_historico_de_escrita_e_privado(client: AsyncClient) -> None:
     text = "The Metro is faster than the bus. You should take it."
     assert (await criar_versao(client, ana, prompt["id"], text)).status_code == 200
     await client.post(
-        f"/api/writing/prompts/{prompt['id']}/feedback", headers=ana, json={"text": text}
+        f"/api/writing/prompts/{prompt['id']}/feedback",
+        headers=ana,
+        json={"text": text, "operation_key": str(uuid4())},
     )
 
     history = (await client.get("/api/writing/history", headers=ana)).json()

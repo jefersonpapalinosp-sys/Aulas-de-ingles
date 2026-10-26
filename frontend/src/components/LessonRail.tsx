@@ -355,6 +355,21 @@ export function NavigationPanel({
   )
 }
 
+function firstUnitMatching(
+  curriculum: CourseCurriculum | undefined,
+  query: string,
+): string | null {
+  const normalized = query.trim().toLocaleLowerCase('pt-BR')
+  if (!normalized || !curriculum) return null
+  return (
+    curriculum.units.find(
+      (unit) =>
+        unit.lessons.some((lesson) => matchesLessonSearch(lesson, query)) ||
+        unit.review?.title.toLocaleLowerCase('pt-BR').includes(normalized),
+    )?.slug ?? null
+  )
+}
+
 function focusableElements(container: HTMLElement): HTMLElement[] {
   return Array.from(
     container.querySelectorAll<HTMLElement>(
@@ -400,7 +415,12 @@ export function LessonRail() {
     : undefined
   const contextualUnit =
     context.unitSlug ?? search.get('unit') ?? activeLesson?.unit_slug
-  const [expandedUnit, setExpandedUnit] = useState<string | null>(null)
+  // A unidade aberta é derivada do contexto da rota, mas uma escolha do aluno
+  // vence até ele mudar de curso ou de unidade. Guardar a escolha junto do
+  // escopo é o que faz o toggle sobreviver a um refetch do currículo: antes
+  // isso era um useEffect que dependia de `curriculum.data` e, a cada
+  // revalidação, fechava a unidade que o aluno tinha aberto.
+  const [unitChoice, setUnitChoice] = useState<{ scope: string; unit: string | null } | null>(null)
   const [query, setQuery] = useState('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerRef = useRef<HTMLDialogElement>(null)
@@ -409,22 +429,19 @@ export function LessonRail() {
   const desktopActiveRef = useRef<HTMLAnchorElement>(null)
   const drawerActiveRef = useRef<HTMLAnchorElement>(null)
 
-  useEffect(() => {
-    if (!curriculum.data) return
-    const fallback = curriculum.data.units[0]?.slug ?? null
-    setExpandedUnit(contextualUnit ?? fallback)
-  }, [courseSlug, contextualUnit, curriculum.data])
-
-  useEffect(() => {
-    if (!query.trim() || !curriculum.data) return
-    const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR')
-    const firstMatchingUnit = curriculum.data.units.find(
-      (unit) =>
-        unit.lessons.some((lesson) => matchesLessonSearch(lesson, query)) ||
-        unit.review?.title.toLocaleLowerCase('pt-BR').includes(normalizedQuery),
-    )
-    if (firstMatchingUnit) setExpandedUnit(firstMatchingUnit.slug)
-  }, [query, curriculum.data])
+  const unitScope = `${courseSlug}:${contextualUnit ?? ''}`
+  const searchedUnit = useMemo(
+    () => firstUnitMatching(curriculum.data, query),
+    [curriculum.data, query],
+  )
+  // Precedência: escolha do aluno neste escopo > primeira unidade que casa com
+  // a busca > unidade do contexto da rota > primeira do currículo. Nenhum
+  // efeito escreve aqui, então revalidar o currículo não muda o que está
+  // aberto; digitar na busca limpa a escolha e devolve a precedência à busca.
+  const expandedUnit =
+    unitChoice?.scope === unitScope
+      ? unitChoice.unit
+      : (searchedUnit ?? contextualUnit ?? curriculum.data?.units[0]?.slug ?? null)
 
   useEffect(() => {
     desktopActiveRef.current?.scrollIntoView?.({ block: 'nearest' })
@@ -483,13 +500,16 @@ export function LessonRail() {
     progress: progress.data,
     query,
     expandedUnit,
-    onQueryChange: setQuery,
+    onQueryChange: (next) => {
+      setQuery(next)
+      setUnitChoice(null)
+    },
     onCourseChange: (slug) => {
       setQuery('')
       void navigate(courseSwitchPath(location.pathname, slug))
     },
     onUnitToggle: (slug) =>
-      setExpandedUnit((current) => (current === slug ? null : slug)),
+      setUnitChoice({ scope: unitScope, unit: expandedUnit === slug ? null : slug }),
     onLessonDone: (lesson, studied) =>
       markStudied.mutate({ numero: lesson.number, estudada: studied }),
     completionPending: markStudied.isPending,

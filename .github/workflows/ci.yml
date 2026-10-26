@@ -7,7 +7,9 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Em PR, um push novo cancela a execução anterior. Na main, não: cancelar a
+  # execução derrubaria também o job `deploy` no meio do `compose up`.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 # Nenhum job escreve no repositório; o GITHUB_TOKEN nasce só com leitura.
 permissions:
@@ -20,6 +22,9 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      # upload-sarif publica os achados do Trivy na aba Security; o restante do
+      # workflow continua só com leitura.
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -71,6 +76,43 @@ jobs:
           output: trivy-web.json
           severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
           exit-code: '0'
+      # SARIF para a aba Security (code scanning). Mesma política de triagem da
+      # Sprint 42 (docs/politica_triagem_seguranca_sprint_42.md): inventário,
+      # não aprovação — nenhum destes passos bloqueia o workflow.
+      - name: Trivy da imagem da API em SARIF
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: aulas-ingles-ci-api:${{ github.sha }}
+          version: v0.76.0
+          scanners: vuln
+          format: sarif
+          output: trivy-api.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: '0'
+      - name: Trivy da imagem web em SARIF
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: aulas-ingles-ci-web:${{ github.sha }}
+          version: v0.76.0
+          scanners: vuln
+          format: sarif
+          output: trivy-web.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: '0'
+      - name: publica SARIF da API na aba Security
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: trivy-api.sarif
+          category: trivy-image-api
+      - name: publica SARIF da web na aba Security
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: trivy-web.sarif
+          category: trivy-image-web
       - name: publica relatórios para triagem, sem expor lock exportado
         if: always()
         uses: actions/upload-artifact@v4
@@ -82,13 +124,48 @@ jobs:
             ${{ runner.temp }}/e2e-npm-audit.json
             trivy-api.json
             trivy-web.json
+            trivy-api.sarif
+            trivy-web.sarif
           if-no-files-found: warn
           retention-days: 14
+
+  infra-lint:
+    name: infra · shellcheck + hadolint + actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # Os três rodam em container com versão fixa: o resultado não muda
+      # porque o runner atualizou uma ferramenta durante a noite.
+      # Cada script declara o shell no shebang; o shellcheck usa o de cada um.
+      - name: shellcheck nos seis scripts versionados
+        run: >-
+          docker run --rm -v "$PWD:/repo" -w /repo
+          koalaman/shellcheck-alpine:v0.11.0
+          shellcheck --severity=style
+          backend/docker-entrypoint.prod.sh
+          infra/easypanel/apply-grants.sh
+          infra/easypanel/postgres-init.sh
+          ops/ci_pull_bases.sh
+          ops/ci_pull_postgres.sh
+          ops/deploy_public.sh
+      - name: hadolint nas imagens
+        run: >-
+          docker run --rm -v "$PWD:/repo" -w /repo
+          hadolint/hadolint:v2.14.0-alpine
+          hadolint backend/Dockerfile backend/Dockerfile.prod
+          frontend/Dockerfile frontend/Dockerfile.prod
+          infra/easypanel/Dockerfile.postgres
+      - name: actionlint nos workflows
+        run: >-
+          docker run --rm -v "$PWD:/repo" -w /repo
+          rhysd/actionlint:1.7.7 -color
 
   recovery:
     name: recovery · backup de banco e voz + restore isolado
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Três laboratórios com builds frios (recovery, upgrade DB-42, papéis).
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -136,6 +213,7 @@ jobs:
   backend:
     name: backend · ruff + mypy + pytest
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       APP_ENV: test
       DATABASE_URL: postgresql+asyncpg://aulas_test:aulas_test_only@127.0.0.1:55435/aulas_ingles_test
@@ -199,6 +277,7 @@ jobs:
   frontend:
     name: frontend · eslint + tsc + vitest
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: frontend
@@ -237,6 +316,7 @@ jobs:
   e2e:
     name: e2e · fluxo completo na stack descartável
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -281,3 +361,74 @@ jobs:
       - name: encerra somente a stack descartável
         if: always()
         run: make e2e-down
+
+  # Deploy da stack pública do EasyPanel por SSH, só quando os quatro jobs
+  # bloqueantes passaram num push à main. Executa ops/deploy_public.sh, que
+  # reproduz o procedimento registrado em docs/deploy_easypanel.md (seção
+  # "Deploy automatizado"). Um CI vermelho não chega ao EasyPanel: o job nem
+  # inicia.
+  #
+  # Três secrets (Settings → Secrets and variables → Actions, ou no environment
+  # `production`):
+  #   PUBLIC_DEPLOY_SSH_KEY      chave privada OpenSSH criada SÓ para este deploy
+  #                              (ssh-keygen -t ed25519), com a pública em
+  #                              authorized_keys do usuário de deploy na VM;
+  #   PUBLIC_DEPLOY_KNOWN_HOSTS  linha(s) de `ssh-keyscan -t ed25519 <host>`; com
+  #                              StrictHostKeyChecking=yes um host desconhecido é
+  #                              recusado, nunca aceito no primeiro acesso;
+  #   PUBLIC_DEPLOY_HOST         destino `usuario@host` (opcional; o script tem o
+  #                              padrão documentado).
+  # Sem PUBLIC_DEPLOY_SSH_KEY o job apenas avisa e termina verde: o deploy fica
+  # desarmado até o segredo existir. Alternativa ao SSH: um token da API do
+  # EasyPanel disparando o deploy do serviço (o painel passaria a registrar a
+  # ação no histórico); o painel ainda não emitiu esse token para esta conta.
+  deploy:
+    name: deploy · stack pública do EasyPanel (main verde)
+    runs-on: ubuntu-latest
+    needs: [backend, frontend, e2e, recovery]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-public
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # O script confere que o SHA é ancestral de origin/main.
+          fetch-depth: 0
+      - name: decide se o deploy está armado
+        id: gate
+        env:
+          DEPLOY_KEY: ${{ secrets.PUBLIC_DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::notice::deploy automatizado desarmado: o segredo PUBLIC_DEPLOY_SSH_KEY não existe. O SHA ${GITHUB_SHA} passou no CI mas não foi publicado; publique com 'make deploy-public sha=${GITHUB_SHA}' ou crie as secrets (docs/deploy_easypanel.md, seção Deploy automatizado)."
+            echo "armed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "armed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: instala a chave exclusiva de deploy e o known_hosts
+        if: steps.gate.outputs.armed == 'true'
+        env:
+          DEPLOY_KEY: ${{ secrets.PUBLIC_DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.PUBLIC_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "::error::PUBLIC_DEPLOY_KNOWN_HOSTS vazio: com StrictHostKeyChecking=yes a chave do host precisa vir do segredo, não de um primeiro acesso."
+            exit 1
+          fi
+          umask 077
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/id_deploy"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          printf 'IdentitiesOnly yes\nIdentityFile %s\n' "$HOME/.ssh/id_deploy" > "$HOME/.ssh/config"
+          chmod 0700 "$HOME/.ssh"
+          chmod 0600 "$HOME/.ssh/id_deploy" "$HOME/.ssh/known_hosts" "$HOME/.ssh/config"
+      - name: deploy do SHA aprovado, gate dos one-shots e smokes HTTPS
+        if: steps.gate.outputs.armed == 'true'
+        env:
+          AULAS_PUBLIC_SSH_HOST: ${{ secrets.PUBLIC_DEPLOY_HOST }}
+        run: bash ops/deploy_public.sh "$GITHUB_SHA"

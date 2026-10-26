@@ -1026,7 +1026,8 @@ commit, push ou merge. Pendências humanas/operacionais da Sprint 39 permanecem.
 ### Contrato de portabilidade
 
 `GET /api/me/export`, autenticado, `private, no-store`, arquivo
-`aulas-ingles-dados.json`, `schema_version=2.0`. Projeções anteriores preservadas;
+`aulas-ingles-dados.json`, `schema_version=2.1` (2.0 mais as seções `dialogues` e
+`dialogue_turns`, vazias até o assistente existir). Projeções anteriores preservadas;
 novas seções independentes e IDs permitem correlação. Seções repetidas por
 compatibilidade não devem ser contadas duas vezes.
 
@@ -1046,6 +1047,7 @@ compatibilidade não devem ser contadas duas vezes.
 | `practice_session`, `practice_session_item` | `practice_sessions`, `practice_items` |
 | `assist_reservation` | `assistance_usage`, sem chaves de fornecedor |
 | `refresh_session` | `login_sessions`, somente ID e datas |
+| `speaking_dialogue`, `dialogue_turn` (DB-45, exportação 2.1) | `dialogues`, `dialogue_turns`; o áudio de um turno é a `speaking_attempt` referenciada |
 
 `scope` informa corte, contagens por tabela, limites e exclusões. Exporta dados
 do proprietário, não autenticação, hashes de senha, chaves de fornecedor,

@@ -3,6 +3,7 @@ import type { ReviewItemType } from './client'
 import { api } from './client'
 import { ApiError } from './errors'
 import { invalidateStudy } from './invalidateStudy'
+import { READ_POLICY } from './readPolicy'
 
 export type ReviewGradeCommand = {
   cardId: number
@@ -22,6 +23,7 @@ export type ReviewFilters = {
 export function useDeckSummary() {
   return useQuery({
     queryKey: ['review', 'summary'],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/review/summary')
       if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar o deck.`)
@@ -33,6 +35,7 @@ export function useDeckSummary() {
 export function useDueCards(filters: ReviewFilters = {}) {
   return useQuery({
     queryKey: ['review', 'due', filters],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/review/due', {
         params: {
@@ -59,6 +62,7 @@ export function useSuspendedReviewItems(
 ) {
   return useQuery({
     queryKey: ['review', 'suspended', filters, cursor],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/review/items/page', {
         params: {

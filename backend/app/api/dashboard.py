@@ -245,6 +245,141 @@ async def _recommendation(
     )
 
 
+async def _due_reviews(session: AsyncSession, user_id: int, course_id: int, now: datetime) -> int:
+    return (
+        await session.execute(
+            select(func.count())
+            .select_from(ReviewItem)
+            .join(Lesson, ReviewItem.lesson_id == Lesson.id)
+            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+            .where(
+                ReviewItem.user_id == user_id,
+                ReviewItem.status == "active",
+                ReviewItem.due_at <= now,
+                Lesson.course_id == course_id,
+                CourseUnit.status == "published",
+            )
+        )
+    ).scalar_one()
+
+
+async def _recent_study(
+    session: AsyncSession, user_id: int, course_id: int, due_reviews: int
+) -> tuple[_RecentStudy | None, _RecentStudy | None]:
+    """Última sessão e o ponto de retomada, nessa ordem.
+
+    Uma aula com os cinco passos concluídos está terminada: retomar ali
+    devolveria o aluno ao fim. Sem revisão vencida, o painel prefere a sessão
+    anterior ainda em aberto.
+    """
+    query = (
+        select(
+            StudySessionProgress.lesson_id,
+            StudySessionProgress.current_step,
+            StudySessionProgress.completed_steps,
+            StudySessionProgress.total_seconds,
+            StudySessionProgress.updated_at,
+            Lesson.number,
+            Lesson.title,
+            Course.slug.label("course_slug"),
+        )
+        .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            StudySessionProgress.user_id == user_id,
+            Lesson.course_id == course_id,
+            CourseUnit.status == "published",
+        )
+        .order_by(StudySessionProgress.updated_at.desc())
+    )
+    latest_row = (await session.execute(query.limit(1))).one_or_none()
+    latest = _RecentStudy(*latest_row) if latest_row is not None else None
+    if due_reviews or latest is None or len(latest.completed_steps) < 5:
+        return latest, latest
+    resume_row = (
+        await session.execute(
+            query.where(func.jsonb_array_length(StudySessionProgress.completed_steps) < 5).limit(1)
+        )
+    ).one_or_none()
+    return latest, (_RecentStudy(*resume_row) if resume_row is not None else None)
+
+
+def _week_start(local_now: datetime) -> datetime:
+    """Segunda-feira 00:00 no fuso do plano, convertida para UTC."""
+    return (
+        (local_now - timedelta(days=local_now.weekday()))
+        .replace(hour=0, minute=0, second=0, microsecond=0)
+        .astimezone(UTC)
+    )
+
+
+async def _week_seconds(
+    session: AsyncSession, user_id: int, course_id: int, week_start: datetime, now: datetime
+) -> int:
+    """Segundos ativos da semana, recortando cada intervalo à janela medida."""
+    total = (
+        await session.execute(
+            select(
+                func.coalesce(
+                    func.sum(
+                        func.extract(
+                            "epoch",
+                            func.least(StudyActiveInterval.ends_at, now)
+                            - func.greatest(StudyActiveInterval.starts_at, week_start),
+                        )
+                    ),
+                    0,
+                )
+            )
+            .join(Lesson, StudyActiveInterval.lesson_id == Lesson.id)
+            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+            .where(
+                StudyActiveInterval.user_id == user_id,
+                StudyActiveInterval.ends_at > week_start,
+                StudyActiveInterval.starts_at < now,
+                Lesson.course_id == course_id,
+                CourseUnit.status == "published",
+            )
+        )
+    ).scalar_one()
+    return max(0, int(total))
+
+
+async def _recent_session_out(
+    session: AsyncSession, user_id: int, latest: _RecentStudy
+) -> RecentSessionOut:
+    """``total_minutes`` vem do tempo ativo medido; ``legacy_minutes`` é o
+    acumulado antigo da sessão, mantido para comparação."""
+    active_seconds = (
+        await session.execute(
+            select(
+                func.coalesce(
+                    func.sum(
+                        func.extract(
+                            "epoch", StudyActiveInterval.ends_at - StudyActiveInterval.starts_at
+                        )
+                    ),
+                    0,
+                )
+            ).where(
+                StudyActiveInterval.user_id == user_id,
+                StudyActiveInterval.lesson_id == latest.lesson_id,
+            )
+        )
+    ).scalar_one()
+    return RecentSessionOut(
+        course_slug=latest.course_slug,
+        lesson_number=latest.lesson_number,
+        lesson_title=latest.lesson_title,
+        current_step=latest.current_step,
+        completed_steps=len(latest.completed_steps),
+        total_minutes=max(0, int(active_seconds) // 60),
+        legacy_minutes=max(0, round(latest.total_seconds / 60)),
+        updated_at=latest.updated_at,
+    )
+
+
 @router.get("/today", response_model=TodayOut)
 async def painel_hoje(
     usuario: UsuarioAtual,
@@ -268,115 +403,11 @@ async def painel_hoje(
         )
 
     now = datetime.now(UTC)
-    due_reviews = (
-        await session.execute(
-            select(func.count())
-            .select_from(ReviewItem)
-            .join(Lesson, ReviewItem.lesson_id == Lesson.id)
-            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-            .where(
-                ReviewItem.user_id == usuario.id,
-                ReviewItem.status == "active",
-                ReviewItem.due_at <= now,
-                Lesson.course_id == selected_course.id,
-                CourseUnit.status == "published",
-            )
-        )
-    ).scalar_one()
-    recent_query = (
-        select(
-            StudySessionProgress.lesson_id,
-            StudySessionProgress.current_step,
-            StudySessionProgress.completed_steps,
-            StudySessionProgress.total_seconds,
-            StudySessionProgress.updated_at,
-            Lesson.number,
-            Lesson.title,
-            Course.slug.label("course_slug"),
-        )
-        .join(Lesson, StudySessionProgress.lesson_id == Lesson.id)
-        .join(Course, Lesson.course_id == Course.id)
-        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(
-            StudySessionProgress.user_id == usuario.id,
-            Lesson.course_id == selected_course.id,
-            CourseUnit.status == "published",
-        )
-        .order_by(StudySessionProgress.updated_at.desc())
-    )
-    latest_row = (await session.execute(recent_query.limit(1))).one_or_none()
-    latest = _RecentStudy(*latest_row) if latest_row is not None else None
-    resume = latest
-    if due_reviews == 0 and latest is not None and len(latest.completed_steps) >= 5:
-        resume_row = (
-            await session.execute(
-                recent_query.where(
-                    func.jsonb_array_length(StudySessionProgress.completed_steps) < 5
-                ).limit(1)
-            )
-        ).one_or_none()
-        resume = _RecentStudy(*resume_row) if resume_row is not None else None
+    due_reviews = await _due_reviews(session, usuario.id, selected_course.id, now)
+    latest, resume = await _recent_study(session, usuario.id, selected_course.id, due_reviews)
     plan = _plan_out(await _stored_plan(session, usuario.id))
-    local_now = now.astimezone(ZoneInfo(plan.timezone))
-    week_start = (
-        (local_now - timedelta(days=local_now.weekday()))
-        .replace(hour=0, minute=0, second=0, microsecond=0)
-        .astimezone(UTC)
-    )
-    seconds = (
-        await session.execute(
-            select(
-                func.coalesce(
-                    func.sum(
-                        func.extract(
-                            "epoch",
-                            func.least(StudyActiveInterval.ends_at, now)
-                            - func.greatest(StudyActiveInterval.starts_at, week_start),
-                        )
-                    ),
-                    0,
-                )
-            )
-            .join(Lesson, StudyActiveInterval.lesson_id == Lesson.id)
-            .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-            .where(
-                StudyActiveInterval.user_id == usuario.id,
-                StudyActiveInterval.ends_at > week_start,
-                StudyActiveInterval.starts_at < now,
-                Lesson.course_id == selected_course.id,
-                CourseUnit.status == "published",
-            )
-        )
-    ).scalar_one()
-    recent = None
-    if latest is not None:
-        active_seconds = (
-            await session.execute(
-                select(
-                    func.coalesce(
-                        func.sum(
-                            func.extract(
-                                "epoch", StudyActiveInterval.ends_at - StudyActiveInterval.starts_at
-                            )
-                        ),
-                        0,
-                    )
-                ).where(
-                    StudyActiveInterval.user_id == usuario.id,
-                    StudyActiveInterval.lesson_id == latest.lesson_id,
-                )
-            )
-        ).scalar_one()
-        recent = RecentSessionOut(
-            course_slug=latest.course_slug,
-            lesson_number=latest.lesson_number,
-            lesson_title=latest.lesson_title,
-            current_step=latest.current_step,
-            completed_steps=len(latest.completed_steps),
-            total_minutes=max(0, int(active_seconds) // 60),
-            legacy_minutes=max(0, round(latest.total_seconds / 60)),
-            updated_at=latest.updated_at,
-        )
+    week_start = _week_start(now.astimezone(ZoneInfo(plan.timezone)))
+    seconds = await _week_seconds(session, usuario.id, selected_course.id, week_start, now)
     return TodayOut(
         recommendation=await _recommendation(
             session,
@@ -386,8 +417,10 @@ async def painel_hoje(
             resume,
         ),
         plan=plan,
-        recorded_minutes_this_week=max(0, int(seconds) // 60),
-        recent_session=recent,
+        recorded_minutes_this_week=seconds // 60,
+        recent_session=(
+            await _recent_session_out(session, usuario.id, latest) if latest is not None else None
+        ),
     )
 
 

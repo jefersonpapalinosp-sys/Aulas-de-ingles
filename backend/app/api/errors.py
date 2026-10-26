@@ -31,33 +31,49 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     )
 }
 
-# Rotas que exigem `expected_revision` depois de LEGACY_WRITES_UNTIL declaram o
-# 428 no contrato: o frontend deriva daí a lista de writes que precisam enviar a
-# revisão (ver frontend/src/api/revisionedWrites.ts) e o gate falha se divergir.
-REVISION_REQUIRED_RESPONSES: dict[int | str, dict[str, Any]] = {
-    428: {
-        "description": "Cliente antigo sem expected_revision após o cutover "
-        "(detail.code = revision_required). Atualize o aplicativo e reenvie.",
-        "content": {
-            "application/json": {
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "detail": {
-                            "type": "object",
-                            "properties": {
-                                "code": {"type": "string", "enum": ["revision_required"]},
-                                "message": {"type": "string"},
-                            },
-                            "required": ["code", "message"],
-                        }
-                    },
-                    "required": ["detail"],
-                }
-            }
-        },
-    }
+# Rotas que exigem `expected_revision` ou chave de idempotência depois de
+# LEGACY_WRITES_UNTIL declaram o 428 no contrato: o frontend deriva daí a lista
+# de writes que precisam enviar o campo (ver frontend/src/api/revisionedWrites.ts)
+# e o gate falha se divergir. Cada rota declara só os códigos que pode emitir.
+RevisionCode = Literal["revision_required", "idempotency_key_required"]
+
+_CUTOVER_MESSAGES: dict[RevisionCode, str] = {
+    "revision_required": "sem expected_revision",
+    "idempotency_key_required": "sem chave de idempotência",
 }
+
+
+def cutover_responses(*codes: RevisionCode) -> dict[int | str, dict[str, Any]]:
+    faltas = " ou ".join(_CUTOVER_MESSAGES[code] for code in codes)
+    return {
+        428: {
+            "description": f"Cliente antigo {faltas} após o cutover "
+            f"(detail.code em {list(codes)}). Atualize o aplicativo e reenvie.",
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "detail": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {"type": "string", "enum": list(codes)},
+                                    "message": {"type": "string"},
+                                },
+                                "required": ["code", "message"],
+                            }
+                        },
+                        "required": ["detail"],
+                    }
+                }
+            },
+        }
+    }
+
+
+REVISION_REQUIRED_RESPONSES = cutover_responses("revision_required")
+IDEMPOTENCY_KEY_RESPONSES = cutover_responses("idempotency_key_required")
+IDEMPOTENT_WRITE_RESPONSES = cutover_responses("revision_required", "idempotency_key_required")
 
 
 def response(

@@ -28,6 +28,19 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.domain.enums import (
+    AnalysisMode,
+    DeletionJobState,
+    ExerciseObjective,
+    HumanRating,
+    IntegrityState,
+    NotebookKind,
+    PracticeMode,
+    PracticeStatus,
+    SelfRating,
+    SpeakingStatus,
+    TranscriptionStatus,
+)
 
 
 class EditorialArchiveEvent(Base):
@@ -666,16 +679,16 @@ class SpeakingAttempt(Base):
         ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True
     )
     duration_ms: Mapped[int] = mapped_column(Integer)
-    self_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    self_rating: Mapped[SelfRating | None] = mapped_column(String(20), default=None)
     consented_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    status: Mapped[str] = mapped_column(String(20), default="pending")
+    status: Mapped[SpeakingStatus] = mapped_column(String(20), default="pending")
     mime_type: Mapped[str | None] = mapped_column(String(100), default=None)
     file_size: Mapped[int | None] = mapped_column(Integer, default=None)
     storage_key: Mapped[str | None] = mapped_column(String(80), unique=True, default=None)
     audio_sha256: Mapped[str | None] = mapped_column(String(64), default=None)
-    integrity_state: Mapped[str] = mapped_column(
+    integrity_state: Mapped[IntegrityState] = mapped_column(
         String(20), default="unknown", server_default="unknown"
     )
     integrity_checked_at: Mapped[datetime | None] = mapped_column(
@@ -692,7 +705,9 @@ class AssistReservation(Base):
     __tablename__ = "assist_reservation"
     __table_args__ = (
         UniqueConstraint("user_id", "request_key", name="uq_assist_user_request"),
-        CheckConstraint("modality IN ('writing','transcription')", name="ck_assist_modality"),
+        CheckConstraint(
+            "modality IN ('writing','transcription','conversation')", name="ck_assist_modality"
+        ),
         CheckConstraint("state IN ('reserved','consumed','released')", name="ck_assist_state"),
         CheckConstraint("cost_microusd >= 0", name="ck_assist_cost"),
         CheckConstraint("expires_at > created_at", name="ck_assist_expiry"),
@@ -739,7 +754,7 @@ class AccountDeletionJob(Base):
         ),
     )
     operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
-    state: Mapped[str] = mapped_column(String(20))
+    state: Mapped[DeletionJobState] = mapped_column(String(20))
     file_count: Mapped[int] = mapped_column(Integer, default=0)
     deleted_file_count: Mapped[int] = mapped_column(Integer, default=0)
     last_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
@@ -803,7 +818,7 @@ class TranscriptionJob(Base):
     speaking_attempt_id: Mapped[int] = mapped_column(
         ForeignKey("speaking_attempt.id", ondelete="CASCADE"), unique=True, index=True
     )
-    status: Mapped[str] = mapped_column(String(20), default="queued", index=True)
+    status: Mapped[TranscriptionStatus] = mapped_column(String(20), default="queued", index=True)
     provider: Mapped[str] = mapped_column(String(80))
     idempotency_key: Mapped[str] = mapped_column(String(64), unique=True)
     attempt_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -821,10 +836,107 @@ class TranscriptionJob(Base):
     low_confidence: Mapped[bool] = mapped_column(Boolean, default=False)
     error_code: Mapped[str | None] = mapped_column(String(50), default=None)
     cost_microusd: Mapped[int] = mapped_column(Integer, default=0)
-    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    human_rating: Mapped[HumanRating | None] = mapped_column(String(20), default=None)
     requested_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class SpeakingDialogue(Base):
+    """Diálogo do parceiro de conversa, ancorado em uma aula (ADR IA-45).
+
+    Guarda metadados e o recorte da aula (versão e fingerprint). O texto dos
+    turnos fica em ``dialogue_turn`` e segue a retenção da assistência.
+    """
+
+    __tablename__ = "speaking_dialogue"
+    __table_args__ = (
+        UniqueConstraint("user_id", "operation_key", name="uq_dialogue_user_operation"),
+        CheckConstraint("mode IN ('script','guided','free_unit')", name="ck_dialogue_mode"),
+        CheckConstraint("state IN ('active','completed','abandoned')", name="ck_dialogue_state"),
+        CheckConstraint("turn_limit > 0 AND turn_limit <= 50", name="ck_dialogue_turn_limit"),
+        CheckConstraint("ended_at IS NULL OR ended_at >= started_at", name="ck_dialogue_ended"),
+        Index("ix_dialogue_user_started", "user_id", "started_at", "id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
+    mode: Mapped[str] = mapped_column(String(20))
+    state: Mapped[str] = mapped_column(String(20), default="active")
+    partner_speaker: Mapped[str | None] = mapped_column(String(80), default=None)
+    content_version: Mapped[int] = mapped_column(Integer)
+    content_fingerprint: Mapped[str] = mapped_column(String(64))
+    provider_name: Mapped[str | None] = mapped_column(String(80), default=None)
+    rubric_version: Mapped[str] = mapped_column(String(40))
+    turn_limit: Mapped[int] = mapped_column(Integer, default=12)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+
+class DialogueTurn(Base):
+    """Um turno do diálogo: fala do aluno ou resposta do parceiro.
+
+    ``checks`` guarda só códigos e booleanos; ``hints`` só códigos permitidos,
+    com uma frase cada. O áudio continua em ``speaking_attempt``. ``transcript``,
+    ``partner_text`` e ``hints`` expiram em ``expires_at``; os metadados ficam.
+    """
+
+    __tablename__ = "dialogue_turn"
+    __table_args__ = (
+        UniqueConstraint("dialogue_id", "position", name="uq_dialogue_turn_position"),
+        UniqueConstraint("speaking_attempt_id", name="uq_dialogue_turn_speaking_attempt"),
+        UniqueConstraint("transcription_job_id", name="uq_dialogue_turn_transcription_job"),
+        CheckConstraint("position > 0", name="ck_dialogue_turn_position"),
+        CheckConstraint("role IN ('student','partner')", name="ck_dialogue_turn_role"),
+        CheckConstraint(
+            "(role = 'student') = (input_kind IS NOT NULL) "
+            "AND (input_kind IS NULL OR input_kind IN ('audio','text'))",
+            name="ck_dialogue_turn_input",
+        ),
+        CheckConstraint("state IN ('pending','completed','failed')", name="ck_dialogue_turn_state"),
+        CheckConstraint(
+            "confidence IS NULL OR (confidence >= 0 AND confidence <= 1)",
+            name="ck_dialogue_turn_confidence",
+        ),
+        CheckConstraint("cost_microusd >= 0", name="ck_dialogue_turn_cost"),
+        CheckConstraint(
+            "jsonb_typeof(checks) = 'object' AND jsonb_typeof(hints) = 'array'",
+            name="ck_dialogue_turn_json",
+        ),
+        CheckConstraint("expires_at > created_at", name="ck_dialogue_turn_expiry"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dialogue_id: Mapped[int] = mapped_column(ForeignKey("speaking_dialogue.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    role: Mapped[str] = mapped_column(String(20))
+    input_kind: Mapped[str | None] = mapped_column(String(20), default=None)
+    speaking_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("speaking_attempt.id", ondelete="SET NULL"), default=None
+    )
+    transcription_job_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transcription_job.id", ondelete="SET NULL"), default=None
+    )
+    state: Mapped[str] = mapped_column(String(20), default="pending")
+    transcript: Mapped[str | None] = mapped_column(Text, default=None)
+    checks: Mapped[dict[str, bool]] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'::jsonb")
+    )
+    partner_text: Mapped[str | None] = mapped_column(Text, default=None)
+    hints: Mapped[list[dict[str, str]]] = mapped_column(
+        JSONB, default=list, server_default=text("'[]'::jsonb")
+    )
+    confidence: Mapped[float | None] = mapped_column(Float, default=None)
+    fallback: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
+    cost_microusd: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    error_code: Mapped[str | None] = mapped_column(String(50), default=None)
+    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
@@ -1180,7 +1292,7 @@ class WritingFeedbackRecord(Base):
     rubric_snapshot: Mapped[dict[str, object] | None] = mapped_column(
         JSONB(none_as_null=True), default=None
     )
-    analysis_mode: Mapped[str] = mapped_column(String(20), default="deterministic")
+    analysis_mode: Mapped[AnalysisMode] = mapped_column(String(20), default="deterministic")
     provider: Mapped[str | None] = mapped_column(String(80), default=None)
     assisted_summary: Mapped[str | None] = mapped_column(Text, default=None)
     assisted_suggestions: Mapped[list[dict[str, object]] | None] = mapped_column(
@@ -1189,7 +1301,7 @@ class WritingFeedbackRecord(Base):
     assisted_confidence: Mapped[float | None] = mapped_column(Float, default=None)
     assisted_cost_microusd: Mapped[int] = mapped_column(Integer, default=0)
     assisted_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
-    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    human_rating: Mapped[HumanRating | None] = mapped_column(String(20), default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -1209,7 +1321,7 @@ class NotebookEntry(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
-    kind: Mapped[str] = mapped_column(String(30))
+    kind: Mapped[NotebookKind] = mapped_column(String(30))
     content: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -1482,13 +1594,13 @@ class PracticeSession(Base):
         ForeignKey("practice_session.id", ondelete="CASCADE"), default=None
     )
     idempotency_key: Mapped[str] = mapped_column(String(36))
-    mode: Mapped[str] = mapped_column(String(20))
+    mode: Mapped[PracticeMode] = mapped_column(String(20))
     activity_type: Mapped[str | None] = mapped_column(String(40), default=None)
     skill: Mapped[str | None] = mapped_column(String(40), default=None)
-    objective: Mapped[str | None] = mapped_column(String(20), default=None)
+    objective: Mapped[ExerciseObjective | None] = mapped_column(String(20), default=None)
     lesson_version: Mapped[int] = mapped_column(Integer)
     content_fingerprint: Mapped[str] = mapped_column(String(64))
-    status: Mapped[str] = mapped_column(String(20), default="active")
+    status: Mapped[PracticeStatus] = mapped_column(String(20), default="active")
     current_position: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     total_items: Mapped[int] = mapped_column(Integer)
     state_revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")

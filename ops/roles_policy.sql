@@ -107,6 +107,25 @@ DO $$ BEGIN
     GRANT SELECT, UPDATE, DELETE ON account_deletion_file TO aulas_worker;
   END IF;
 END $$;
+-- DB-45: a API cria/encerra diálogos e insere turnos; só altera a avaliação
+-- humana. O worker preenche o resultado do turno e nunca apaga. Cascatas são
+-- do PostgreSQL. Espelho do bloco da migration e3a1c7d9b250.
+DO $$ BEGIN
+  IF to_regclass('public.dialogue_turn') IS NOT NULL THEN
+    GRANT INSERT, DELETE ON speaking_dialogue TO aulas_runtime;
+    GRANT UPDATE (state, ended_at, provider_name) ON speaking_dialogue TO aulas_runtime;
+    GRANT INSERT ON dialogue_turn TO aulas_runtime;
+    GRANT UPDATE (human_rating) ON dialogue_turn TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE speaking_dialogue_id_seq, dialogue_turn_id_seq TO aulas_runtime;
+    GRANT SELECT ON speaking_dialogue TO aulas_worker;
+    GRANT UPDATE (state, ended_at) ON speaking_dialogue TO aulas_worker;
+    GRANT SELECT, INSERT ON dialogue_turn TO aulas_worker;
+    GRANT UPDATE (state, transcription_job_id, transcript, checks, partner_text, hints,
+                  confidence, fallback, cost_microusd, error_code, completed_at)
+      ON dialogue_turn TO aulas_worker;
+    GRANT USAGE ON SEQUENCE dialogue_turn_id_seq TO aulas_worker;
+  END IF;
+END $$;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public
   GRANT SELECT ON TABLES TO aulas_runtime, aulas_backup;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public

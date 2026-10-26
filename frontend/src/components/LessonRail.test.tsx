@@ -315,7 +315,9 @@ vi.mock('../api/queries', () => ({
     error: null,
   }),
   useCourseCurriculum: (courseSlug: string) => ({
-    data: courseSlug === 'voa-level-2' ? level2Curriculum : curriculum,
+    // Identidade nova a cada render, como um refetch do React Query entrega:
+    // o trilho não pode perder a unidade aberta por causa disso.
+    data: { ...(courseSlug === 'voa-level-2' ? level2Curriculum : curriculum) },
     isPending: false,
     error: null,
   }),
@@ -355,13 +357,17 @@ function LocationProbe() {
   return <output aria-label="Rota atual">{`${location.pathname}${location.search}`}</output>
 }
 
-function renderRailAt(route = '/cursos/voa-level-1/aulas/14') {
-  return render(
+function railTree(route: string) {
+  return (
     <MemoryRouter initialEntries={[route]}>
       <LessonRail />
       <LocationProbe />
-    </MemoryRouter>,
+    </MemoryRouter>
   )
+}
+
+function renderRailAt(route = '/cursos/voa-level-1/aulas/14') {
+  return render(railTree(route))
 }
 
 function renderRail() {
@@ -412,6 +418,29 @@ describe('LessonRail', () => {
     expect(secondUnit).toHaveAttribute('aria-expanded', 'true')
     expect(firstUnit).toHaveAttribute('aria-expanded', 'false')
     expect(within(desktop!).getAllByRole('link', { name: /Lesson 15/ })).toHaveLength(1)
+  })
+
+  it('mantém a unidade aberta pelo aluno quando o currículo é revalidado', async () => {
+    const user = userEvent.setup()
+    const route = '/cursos/voa-level-1/aulas/14'
+    const view = render(railTree(route))
+    const desktop = view.container.querySelector<HTMLElement>('.rail')!
+    const primeira = within(desktop).getByRole('button', { name: /Unidade 1–14/ })
+    const segunda = within(desktop).getByRole('button', { name: /Unidade 15–20/ })
+
+    await user.click(segunda)
+    expect(segunda).toHaveAttribute('aria-expanded', 'true')
+    expect(primeira).toHaveAttribute('aria-expanded', 'false')
+
+    // Revalidação do currículo: o mesmo componente recebe o dado com
+    // identidade nova (foco na janela, invalidação após marcar aula). Antes
+    // isso passava por um useEffect que reabria a unidade do contexto e
+    // fechava a que o aluno tinha aberto.
+    view.rerender(railTree(route))
+
+    expect(segunda).toHaveAttribute('aria-expanded', 'true')
+    expect(primeira).toHaveAttribute('aria-expanded', 'false')
+    expect(within(desktop).getAllByRole('link', { name: /Lesson 15/ })).toHaveLength(1)
   })
 
   it('abre drawer com foco inicial, busca vazia e devolve foco ao fechar com Escape', async () => {

@@ -1,6 +1,6 @@
 """Exclusão confirmada da conta e limpeza retomável dos arquivos de voz."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -13,7 +13,10 @@ from app.core.config import get_settings
 from app.db.models import (
     AccountDeletionFile,
     AccountDeletionJob,
+    DialogueTurn,
+    Lesson,
     SpeakingAttempt,
+    SpeakingDialogue,
     User,
 )
 from app.services import account_deletion
@@ -130,6 +133,31 @@ async def test_delete_account_cascades_rows_then_worker_removes_audio(
     )
     path = tmp_path / storage_key
     assert path.is_file()
+    # DB-45: um diálogo com turno de áudio apontando para a gravação acima.
+    dialogue = SpeakingDialogue(
+        user_id=user_id,
+        lesson_id=await session.scalar(select(Lesson.id).order_by(Lesson.id).limit(1)),
+        operation_key=str(uuid4()),
+        mode="script",
+        content_version=1,
+        content_fingerprint="f" * 64,
+        rubric_version="dialogue-prompt-v1",
+    )
+    session.add(dialogue)
+    await session.flush()
+    session.add(
+        DialogueTurn(
+            dialogue_id=dialogue.id,
+            user_id=user_id,
+            position=1,
+            role="student",
+            input_kind="audio",
+            speaking_attempt_id=attempt_id,
+            transcript="Thank you.",
+            expires_at=datetime.now(UTC) + timedelta(days=30),
+        )
+    )
+    await session.commit()
     operation_key = str(uuid4())
 
     response = await client.request(
@@ -148,6 +176,8 @@ async def test_delete_account_cascades_rows_then_worker_removes_audio(
     assert response.json()["audio_files_pending"] == 1
     assert await session.get(User, user_id) is None
     assert await session.get(SpeakingAttempt, attempt_id) is None
+    assert await session.scalar(select(func.count()).select_from(SpeakingDialogue)) == 0
+    assert await session.scalar(select(func.count()).select_from(DialogueTurn)) == 0
     assert path.is_file(), "o commit do banco deve anteceder a limpeza assíncrona"
     assert await account_deletion.process_file_batch() == 1
     assert not path.exists()

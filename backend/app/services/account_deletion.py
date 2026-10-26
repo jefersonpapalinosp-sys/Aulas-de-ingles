@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.core.security import conferir_senha
 from app.db.models import AccountDeletionFile, AccountDeletionJob, SpeakingAttempt, User
 from app.db.session import get_sessionmaker
+from app.domain.enums import DeletionResultState
 from app.schemas.notebook import AccountDeletionIn, AccountDeletionOut
 from app.services.audio_storage import AudioStorage
 from app.services.auth_limits import password_work
@@ -76,7 +77,7 @@ async def delete_account(
                 .all()
             )
         )
-        state = "cleanup_pending" if storage_keys else "completed"
+        state: DeletionResultState = "cleanup_pending" if storage_keys else "completed"
         job = AccountDeletionJob(
             operation_key=operation_key,
             state=state,
@@ -98,7 +99,7 @@ async def delete_account(
 
     return AccountDeletionOut(
         operation_key=operation_key,
-        state=state,  # type: ignore[arg-type]
+        state=state,
         audio_files_pending=len(storage_keys),
     )
 

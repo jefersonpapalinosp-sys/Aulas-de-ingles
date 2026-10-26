@@ -105,7 +105,11 @@ async def test_draft_retry_and_future_revision(client):
     assert (
         await client.put(path + "/draft", headers=headers, json={**body, "expected_revision": 999})
     ).status_code == 409
-    feedback = await client.post(path + "/feedback", headers=headers, json=body)
+    feedback = await client.post(
+        path + "/feedback",
+        headers=headers,
+        json={"text": body["text"], "operation_key": str(uuid4())},
+    )
     assert feedback.json()["source_text_hash"] == sha256(body["text"].encode()).hexdigest()
 
 
@@ -251,13 +255,14 @@ async def test_legacy_contract_expires_explicitly(client, monkeypatch):
             path + "/draft", headers=headers, json={"text": "New client", "expected_revision": 0}
         )
     ).status_code == 200
-    assert (
-        await client.post(
-            f"/api/review/{item['id']}/grade",
-            headers=headers,
-            json={"quality": 4, "expected_revision": 0},
-        )
-    ).status_code == 428
+    sem_chave = await client.post(
+        f"/api/review/{item['id']}/grade",
+        headers=headers,
+        json={"quality": 4, "expected_revision": 0},
+    )
+    assert sem_chave.status_code == 428
+    # A revisão foi enviada: o que falta é a chave, e o código diz qual é a falta.
+    assert sem_chave.json()["detail"]["code"] == "idempotency_key_required"
     assert (
         await client.put(
             "/api/lessons/31/study-session",
@@ -265,6 +270,50 @@ async def test_legacy_contract_expires_explicitly(client, monkeypatch):
             json={"current_step": "assistir", "completed_steps": []},
         )
     ).status_code == 428
+
+
+async def test_cutover_distingue_revisao_de_chave_de_idempotencia(client, monkeypatch):
+    """Os dois códigos do 428 descrevem faltas diferentes.
+
+    Antes, `grade` sem chave reaproveitava `revision_required` e mandava o
+    cliente procurar uma revisão que ele já havia enviado. E `/feedback`
+    recebia `operation_key` do cliente sem exigi-la, apesar de ser ela que
+    impede uma segunda cobrança da assistência no reenvio.
+    """
+    headers = auth(await registrar(client, "cutover-codes"))
+    path = await draft_path(client)
+    item = await review_item(client, headers)
+    monkeypatch.setattr(
+        get_settings(), "legacy_writes_until", datetime.now(UTC) - timedelta(days=1)
+    )
+    sem_revisao = await client.post(
+        f"/api/review/{item['id']}/grade", headers=headers, json={"quality": 4}
+    )
+    assert sem_revisao.status_code == 428
+    assert sem_revisao.json()["detail"]["code"] == "revision_required"
+
+    feedback = await client.post(
+        path + "/feedback", headers=headers, json={"text": "The bus is late today."}
+    )
+    assert feedback.status_code == 428
+    assert feedback.json()["detail"]["code"] == "idempotency_key_required"
+    com_chave = await client.post(
+        path + "/feedback",
+        headers=headers,
+        json={"text": "The bus is late today.", "operation_key": str(uuid4())},
+    )
+    assert com_chave.status_code == 200
+    # O corpo do feedback não declara mais revisão; enviá-la não muda nada.
+    ignora_revisao = await client.post(
+        path + "/feedback",
+        headers=headers,
+        json={
+            "text": "The bus is late today.",
+            "operation_key": str(uuid4()),
+            "expected_revision": 99,
+        },
+    )
+    assert ignora_revisao.status_code == 200
 
 
 async def test_auth_limits_are_atomic_and_do_not_store_identity(client, session, monkeypatch):

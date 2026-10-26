@@ -7,13 +7,12 @@ from typing import Annotated, Any, cast
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import Select, func, select, tuple_
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import Row, Select, func, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.concurrency import conflict, require_revision
+from app.api.concurrency import conflict, require_idempotency_key, require_revision
 from app.api.deps import UsuarioAtual
-from app.api.errors import REVISION_REQUIRED_RESPONSES
+from app.api.errors import IDEMPOTENT_WRITE_RESPONSES
 from app.db.models import Course, CourseUnit, Lesson, ReviewEvent, ReviewItem, User, VocabItem
 from app.db.session import get_session
 from app.domain.sm2 import Estado, revisar
@@ -36,6 +35,7 @@ from app.schemas.review import (
 )
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
 from app.services.publication import lock_publication, published_lesson_ids
+from app.services.review import adicionar_cartas
 
 router = APIRouter(prefix="/review", tags=["review"])
 
@@ -47,134 +47,6 @@ TYPE_INTERVAL_FACTOR = {
     "writing_prompt": 1.3,
     "speaking_prompt": 1.2,
 }
-
-
-async def adicionar_item_revisao(
-    session: AsyncSession,
-    usuario: User,
-    *,
-    lesson_id: int,
-    item_type: ReviewItemType,
-    source_type: str,
-    source_id: int,
-    source_key: str,
-    skill: str,
-    prompt: str,
-    answer: str,
-    origin_reason: str,
-    estimated_seconds: int,
-    prompt_note: str | None = None,
-    context: str | None = None,
-    vocab_item_id: int | None = None,
-    media_url: str | None = None,
-    cue_start_seconds: float | None = None,
-    cue_end_seconds: float | None = None,
-) -> bool:
-    """Cria uma origem uma vez; novos erros atualizam o conteúdo sem duplicar."""
-    values = dict(
-        user_id=usuario.id,
-        lesson_id=lesson_id,
-        vocab_item_id=vocab_item_id,
-        item_type=item_type,
-        source_type=source_type,
-        source_id=source_id,
-        source_key=source_key,
-        skill=skill,
-        prompt=prompt,
-        prompt_note=prompt_note,
-        answer=answer,
-        context=context,
-        origin_reason=origin_reason,
-        media_url=media_url,
-        cue_start_seconds=cue_start_seconds,
-        cue_end_seconds=cue_end_seconds,
-        estimated_seconds=estimated_seconds,
-        due_at=datetime.now(UTC),
-    )
-    created = (
-        await session.execute(
-            insert(ReviewItem)
-            .values(**values)
-            .on_conflict_do_nothing(constraint="uq_review_item_user_source")
-            .returning(ReviewItem.id)
-        )
-    ).scalar_one_or_none()
-    if created is not None:
-        return True
-    item = (
-        await session.execute(
-            select(ReviewItem)
-            .where(
-                ReviewItem.user_id == usuario.id,
-                ReviewItem.source_key == source_key,
-            )
-            .with_for_update()
-            .execution_options(populate_existing=True)
-        )
-    ).scalar_one_or_none()
-    if item is not None:
-        content_fields = (
-            "prompt",
-            "prompt_note",
-            "answer",
-            "context",
-            "origin_reason",
-            "media_url",
-            "cue_start_seconds",
-            "cue_end_seconds",
-        )
-        if any(getattr(item, field) != values[field] for field in content_fields):
-            item.revision += 1
-        item.prompt = prompt
-        item.prompt_note = prompt_note
-        item.answer = answer
-        item.context = context
-        item.origin_reason = origin_reason
-        item.media_url = media_url
-        item.cue_start_seconds = cue_start_seconds
-        item.cue_end_seconds = cue_end_seconds
-        return False
-
-    return False
-
-
-async def remover_item_por_origem(session: AsyncSession, user_id: int, source_key: str) -> None:
-    item = (
-        await session.execute(
-            select(ReviewItem).where(
-                ReviewItem.user_id == user_id,
-                ReviewItem.source_key == source_key,
-            )
-        )
-    ).scalar_one_or_none()
-    if item is not None:
-        await session.delete(item)
-
-
-async def adicionar_cartas(session: AsyncSession, usuario: User, itens: list[VocabItem]) -> int:
-    """Compatibilidade do deck: vocabulário agora entra na fila generalizada."""
-    novas = 0
-    for item in sorted(itens, key=lambda value: value.id):
-        novas += int(
-            await adicionar_item_revisao(
-                session,
-                usuario,
-                lesson_id=item.lesson_id,
-                item_type="vocabulary",
-                source_type="vocab_item",
-                source_id=item.id,
-                source_key=f"vocab:{item.id}",
-                skill="vocabulary",
-                prompt=item.term,
-                prompt_note=item.ipa,
-                answer=item.translation_pt,
-                context=item.example_en,
-                origin_reason="Vocabulário incluído no seu deck de estudo.",
-                estimated_seconds=45,
-                vocab_item_id=item.id,
-            )
-        )
-    return novas
 
 
 def _reason_values(
@@ -280,6 +152,15 @@ async def resumo(
     return await _resumo(session, usuario)
 
 
+def _recorte[*Cols](query: Select[*Cols], *, course: str | None, unit: str | None) -> Select[*Cols]:
+    """Recorte de curso e unidade — o mesmo na lista legada e na página."""
+    if course is not None:
+        query = query.where(Course.slug == course)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    return query
+
+
 def _filtered_query(
     user_id: int,
     *,
@@ -309,11 +190,7 @@ def _filtered_query(
         query = query.where(ReviewItem.skill == skill)
     if max_minutes is not None:
         query = query.where(ReviewItem.estimated_seconds <= max_minutes * 60)
-    if course is not None:
-        query = query.where(Course.slug == course)
-    if unit is not None:
-        query = query.where(CourseUnit.slug == unit)
-    return query
+    return _recorte(query, course=course, unit=unit)
 
 
 def _item_page_query(
@@ -322,7 +199,7 @@ def _item_page_query(
     item_status: ReviewItemStatus,
     course: str | None,
     unit: str | None,
-) -> Any:
+) -> Select[*tuple[Any, ...]]:
     query = (
         select(
             ReviewItem.id,
@@ -361,14 +238,10 @@ def _item_page_query(
             ReviewItem.status == item_status,
         )
     )
-    if course is not None:
-        query = query.where(Course.slug == course)
-    if unit is not None:
-        query = query.where(CourseUnit.slug == unit)
-    return query
+    return _recorte(query, course=course, unit=unit)
 
 
-def _page_item_out(row: Any) -> CardOut:
+def _page_item_out(row: Row[*tuple[Any, ...]]) -> CardOut:
     return CardOut(
         id=row.id,
         revision=row.revision,
@@ -524,7 +397,7 @@ async def _owned_item(session: AsyncSession, item_id: int, user_id: int) -> Revi
     return item
 
 
-@router.post("/{item_id}/grade", response_model=GradeOut, responses=REVISION_REQUIRED_RESPONSES)
+@router.post("/{item_id}/grade", response_model=GradeOut, responses=IDEMPOTENT_WRITE_RESPONSES)
 async def avaliar(
     item_id: int,
     usuario: UsuarioAtual,
@@ -532,8 +405,7 @@ async def avaliar(
     corpo: Annotated[GradeIn, Body()],
 ) -> GradeOut:
     require_revision(corpo.expected_revision)
-    if corpo.idempotency_key is None:
-        require_revision(None)
+    require_idempotency_key(corpo.idempotency_key)
     key = str(corpo.idempotency_key or uuid4())
     fingerprint = sha256(
         json.dumps([item_id, corpo.quality, corpo.expected_revision]).encode()

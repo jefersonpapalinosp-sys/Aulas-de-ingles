@@ -253,6 +253,29 @@ describe('NotebookPage', () => {
     })
   })
 
+  it('mostra o identificador da requisição quando a API falha ao salvar', async () => {
+    const user = userEvent.setup()
+    mockCurriculum()
+    mockQueries()
+    // Critério de aceite FE-45: a mensagem de falha carrega o `request_id` que
+    // a API devolve, porque é por ele que a requisição é achada no log.
+    clientMocks.POST.mockResolvedValue({
+      data: undefined,
+      response: new Response(null, {
+        status: 503,
+        headers: { 'x-request-id': 'req-caderno-42' },
+      }),
+    })
+    renderNotebook()
+
+    await user.type(screen.getByRole('textbox', { name: 'Conteúdo' }), 'Uma frase nova')
+    await user.click(screen.getByRole('button', { name: 'Salvar no caderno' }))
+
+    expect(await screen.findByText(/Não foi possível salvar a anotação/)).toHaveTextContent(
+      'req-caderno-42',
+    )
+  })
+
   it('carrega a próxima página sem substituir as anotações visíveis', async () => {
     const user = userEvent.setup()
     mockCurriculum()

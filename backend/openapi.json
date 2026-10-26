@@ -3552,6 +3552,22 @@
                         "title": "Content Snapshots",
                         "type": "array"
                     },
+                    "dialogue_turns": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Dialogue Turns",
+                        "type": "array"
+                    },
+                    "dialogues": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Dialogues",
+                        "type": "array"
+                    },
                     "exercise_attempts": {
                         "items": {
                             "additionalProperties": true,
@@ -5963,23 +5979,12 @@
                 "type": "object"
             },
             "WritingFeedbackIn": {
+                "description": "O feedback não compara revisão: o texto analisado vem no corpo.\n\nA `operation_key` é que importa aqui — ela governa a reserva de cota da\nassistência e, no reenvio, devolve o registro em vez de cobrar de novo.",
                 "properties": {
                     "assisted": {
                         "default": false,
                         "title": "Assisted",
                         "type": "boolean"
-                    },
-                    "expected_revision": {
-                        "anyOf": [
-                            {
-                                "minimum": 0.0,
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Expected Revision"
                     },
                     "operation_key": {
                         "anyOf": [
@@ -7857,7 +7862,7 @@
                                 }
                             }
                         },
-                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
@@ -8913,7 +8918,7 @@
                                 }
                             }
                         },
-                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
@@ -11844,7 +11849,8 @@
                                             "properties": {
                                                 "code": {
                                                     "enum": [
-                                                        "revision_required"
+                                                        "revision_required",
+                                                        "idempotency_key_required"
                                                     ],
                                                     "type": "string"
                                                 },
@@ -11866,7 +11872,7 @@
                                 }
                             }
                         },
-                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                        "description": "Cliente antigo sem expected_revision ou sem chave de idempotência após o cutover (detail.code em ['revision_required', 'idempotency_key_required']). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
@@ -13289,7 +13295,7 @@
                                 }
                             }
                         },
-                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
@@ -13471,6 +13477,39 @@
                             }
                         },
                         "description": "Validation Error"
+                    },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "idempotency_key_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem chave de idempotência após o cutover (detail.code em ['idempotency_key_required']). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {
@@ -13684,7 +13723,7 @@
                                 }
                             }
                         },
-                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie."
+                        "description": "Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie."
                     },
                     "503": {
                         "content": {

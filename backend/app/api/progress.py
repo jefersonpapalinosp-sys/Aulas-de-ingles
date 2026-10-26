@@ -4,14 +4,13 @@ from datetime import UTC, datetime
 from typing import Annotated, cast
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import delete, func, select
+from sqlalchemy import Select, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.concurrency import conflict, require_revision
 from app.api.deps import UsuarioAtual
 from app.api.errors import REVISION_REQUIRED_RESPONSES
-from app.api.review import adicionar_cartas, adicionar_item_revisao
 from app.db.models import (
     Course,
     CourseUnit,
@@ -60,6 +59,7 @@ from app.services.practice import (
     practice_attempt_state,
 )
 from app.services.publication import lock_publication, published_lesson_ids, published_scope
+from app.services.review import adicionar_cartas, adicionar_item_revisao
 
 router = APIRouter(tags=["progress"])
 
@@ -411,6 +411,130 @@ async def salvar_sessao_de_estudo_no_curso(
     return await _salvar_sessao_de_estudo(number, course_slug, usuario, session, corpo)
 
 
+async def _laboratorio(
+    session: AsyncSession, corpo: AttemptIn, user_id: int, exercise_id: int
+) -> tuple[PracticeSession | None, PracticeSessionItem | None]:
+    """Sessão de laboratório travada e o item correspondente, quando há sessão."""
+    if corpo.practice_session_id is None:
+        return None, None
+    practice = await get_owned_practice_session(
+        session, corpo.practice_session_id, user_id, for_update=True
+    )
+    return practice, get_practice_item(practice, exercise_id)
+
+
+def _por_chave(user_id: int, key: str) -> Select[ExerciseAttempt]:
+    return select(ExerciseAttempt).where(
+        ExerciseAttempt.user_id == user_id,
+        ExerciseAttempt.idempotency_key == key,
+    )
+
+
+def _canonicalizar(exercicio: Exercise, answer: str) -> str:
+    if exercicio.activity_type != "classification":
+        return answer
+    try:
+        return validar_e_canonicalizar_classificacao(
+            answer,
+            exercicio.classification_items or [],
+            exercicio.classification_categories or [],
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+
+
+async def _conferir_idempotencia(
+    session: AsyncSession,
+    existente: ExerciseAttempt,
+    exercicio: Exercise,
+    answer: str,
+    practice: PracticeSession | None,
+    practice_item: PracticeSessionItem | None,
+) -> AttemptOut:
+    """Chave repetida só é idempotente se descreve a mesma tentativa.
+
+    Vale para os dois caminhos: a chave já gravada quando a requisição chega e
+    a corrida perdida no ``on_conflict_do_nothing``. Exercício, resposta ou
+    item de laboratório diferentes são conflito, não repetição.
+    """
+    requested_item_id = practice_item.id if practice_item is not None else None
+    if (
+        existente.exercise_id != exercicio.id
+        or existente.answer != answer
+        or existente.practice_session_item_id != requested_item_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A chave de idempotência já foi usada em outra tentativa.",
+        )
+    if practice is not None and practice_item is not None:
+        ensure_session_content_current(practice)
+        # As entidades podem ter sido carregadas antes de a aba vencedora
+        # confirmar a transação; atualize os contadores antes de responder.
+        await session.refresh(practice_item)
+        await session.refresh(practice)
+    return await _historical_attempt_out(session, existente, exercicio, practice, practice_item)
+
+
+async def _registrar_efeitos(
+    session: AsyncSession,
+    usuario: User,
+    exercicio: Exercise,
+    tentativa: ExerciseAttempt,
+    answer: str,
+    certo: bool,
+    practice: PracticeSession | None,
+    practice_item: PracticeSessionItem | None,
+) -> None:
+    """Histórico, contadores do laboratório, evidência de habilidade e revisão."""
+    await editorial_history.capture(
+        session,
+        "exercise",
+        tentativa.id,
+        usuario.id,
+        editorial_history.exercise_result(exercicio, answer, certo),
+    )
+    if practice is not None and practice_item is not None:
+        practice_item.attempt_count += 1
+        if practice_item.first_try_correct is None:
+            practice_item.first_try_correct = certo
+        if certo and practice_item.completed_at is None:
+            practice_item.completed_at = datetime.now(UTC)
+        practice.updated_at = datetime.now(UTC)
+        complete_session_if_ready(practice)
+    session.add(
+        SkillEvidence(
+            user_id=usuario.id,
+            skill=exercicio.skill,
+            source_type="exercise_attempt",
+            source_id=tentativa.id,
+            score=1.0 if certo else 0.0,
+        )
+    )
+    if certo:
+        return
+    if not await _cartas_do_erro(session, usuario, exercicio):
+        await adicionar_item_revisao(
+            session,
+            usuario,
+            lesson_id=exercicio.lesson_id,
+            item_type="listening" if exercicio.skill == "listening" else "grammar_error",
+            source_type="exercise",
+            source_id=exercicio.id,
+            source_key=f"exercise:{exercicio.id}",
+            skill=exercicio.skill,
+            prompt=exercicio.prompt,
+            prompt_note=f"Sua última resposta: {answer[:120]}",
+            answer=" / ".join(answer.value for answer in exercicio.answers),
+            context=exercicio.explanation,
+            origin_reason="Este exercício voltou porque houve uma resposta incorreta.",
+            estimated_seconds=120 if exercicio.skill == "listening" else 75,
+        )
+
+
 @router.post("/exercises/{exercise_id}/attempt", response_model=AttemptOut)
 async def tentar(
     exercise_id: int,
@@ -428,67 +552,23 @@ async def tentar(
     """
     response.headers["Cache-Control"] = "private, no-store"
     exercicio = await _exercicio_por_id(session, exercise_id)
-    answer = corpo.answer
-    if exercicio.activity_type == "classification":
-        try:
-            answer = validar_e_canonicalizar_classificacao(
-                answer,
-                exercicio.classification_items or [],
-                exercicio.classification_categories or [],
-            )
-        except ValueError as error:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail=str(error),
-            ) from error
+    answer = _canonicalizar(exercicio, corpo.answer)
     key = str(corpo.idempotency_key)
-    practice: PracticeSession | None = None
-    practice_item: PracticeSessionItem | None = None
-    if corpo.practice_session_id is not None:
-        practice = await get_owned_practice_session(
-            session,
-            corpo.practice_session_id,
-            usuario.id,
-            for_update=True,
-        )
-        practice_item = get_practice_item(practice, exercicio.id)
+    practice, practice_item = await _laboratorio(session, corpo, usuario.id, exercicio.id)
 
     # Em tentativas ligadas ao laboratório, a consulta acontece depois do
     # lock. Assim, duas requisições simultâneas com a mesma chave também são
     # idempotentes quando a primeira delas acaba de concluir a sessão.
-    existente = (
-        await session.execute(
-            select(ExerciseAttempt).where(
-                ExerciseAttempt.user_id == usuario.id,
-                ExerciseAttempt.idempotency_key == key,
-            )
-        )
-    ).scalar_one_or_none()
+    existente = (await session.execute(_por_chave(usuario.id, key))).scalar_one_or_none()
     if existente is not None:
-        requested_item_id = practice_item.id if practice_item is not None else None
-        if (
-            existente.exercise_id != exercicio.id
-            or existente.answer != answer
-            or existente.practice_session_item_id != requested_item_id
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="A chave de idempotência já foi usada em outra tentativa.",
-            )
-        if practice is not None and practice_item is not None:
-            ensure_session_content_current(practice)
-            # As entidades podem ter sido carregadas antes de a aba vencedora
-            # confirmar a transação; atualize os contadores antes de responder.
-            await session.refresh(practice_item)
-            await session.refresh(practice)
-        return await _historical_attempt_out(session, existente, exercicio, practice, practice_item)
+        return await _conferir_idempotencia(
+            session, existente, exercicio, answer, practice, practice_item
+        )
 
     if practice is not None:
         ensure_session_mutable(practice)
 
-    feedback = analisar_resposta(answer, [a.value for a in exercicio.answers])
-    certo = feedback.category == "correct"
-
+    certo = analisar_resposta(answer, [a.value for a in exercicio.answers]).category == "correct"
     attempt_id = (
         await session.execute(
             insert(ExerciseAttempt)
@@ -507,85 +587,17 @@ async def tentar(
     if attempt_id is None:
         # Outra aba ou a fila offline gravou a mesma tentativa enquanto esta
         # requisição aguardava o banco. O vencedor é a resposta idempotente.
-        existente = (
-            await session.execute(
-                select(ExerciseAttempt).where(
-                    ExerciseAttempt.user_id == usuario.id,
-                    ExerciseAttempt.idempotency_key == key,
-                )
-            )
-        ).scalar_one()
-        if corpo.practice_session_id is not None:
-            practice = await get_owned_practice_session(
-                session,
-                corpo.practice_session_id,
-                usuario.id,
-                for_update=True,
-            )
-            practice_item = get_practice_item(practice, exercicio.id)
-        requested_item_id = practice_item.id if practice_item is not None else None
-        if (
-            existente.exercise_id != exercicio.id
-            or existente.answer != answer
-            or existente.practice_session_item_id != requested_item_id
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="A chave de idempotência já foi usada em outra tentativa.",
-            )
-        if practice is not None and practice_item is not None:
-            ensure_session_content_current(practice)
-            await session.refresh(practice_item)
-            await session.refresh(practice)
-        return await _historical_attempt_out(session, existente, exercicio, practice, practice_item)
+        existente = (await session.execute(_por_chave(usuario.id, key))).scalar_one()
+        practice, practice_item = await _laboratorio(session, corpo, usuario.id, exercicio.id)
+        return await _conferir_idempotencia(
+            session, existente, exercicio, answer, practice, practice_item
+        )
     tentativa = (
         await session.execute(select(ExerciseAttempt).where(ExerciseAttempt.id == attempt_id))
     ).scalar_one()
-
-    await editorial_history.capture(
-        session,
-        "exercise",
-        tentativa.id,
-        usuario.id,
-        editorial_history.exercise_result(exercicio, answer, certo),
+    await _registrar_efeitos(
+        session, usuario, exercicio, tentativa, answer, certo, practice, practice_item
     )
-
-    if practice is not None and practice_item is not None:
-        practice_item.attempt_count += 1
-        if practice_item.first_try_correct is None:
-            practice_item.first_try_correct = certo
-        if certo and practice_item.completed_at is None:
-            practice_item.completed_at = datetime.now(UTC)
-        practice.updated_at = datetime.now(UTC)
-        complete_session_if_ready(practice)
-    session.add(
-        SkillEvidence(
-            user_id=usuario.id,
-            skill=exercicio.skill,
-            source_type="exercise_attempt",
-            source_id=tentativa.id,
-            score=1.0 if certo else 0.0,
-        )
-    )
-    if not certo:
-        matched_vocab = await _cartas_do_erro(session, usuario, exercicio)
-        if not matched_vocab:
-            await adicionar_item_revisao(
-                session,
-                usuario,
-                lesson_id=exercicio.lesson_id,
-                item_type="listening" if exercicio.skill == "listening" else "grammar_error",
-                source_type="exercise",
-                source_id=exercicio.id,
-                source_key=f"exercise:{exercicio.id}",
-                skill=exercicio.skill,
-                prompt=exercicio.prompt,
-                prompt_note=f"Sua última resposta: {answer[:120]}",
-                answer=" / ".join(answer.value for answer in exercicio.answers),
-                context=exercicio.explanation,
-                origin_reason="Este exercício voltou porque houve uma resposta incorreta.",
-                estimated_seconds=120 if exercicio.skill == "listening" else 75,
-            )
     await session.commit()
     await session.refresh(tentativa)
     return _attempt_out(tentativa, exercicio, practice, practice_item)
@@ -673,6 +685,85 @@ async def revelar_resposta(
     )
 
 
+async def _estudadas(session: AsyncSession, user_id: int) -> dict[int, datetime]:
+    return {
+        p.lesson_id: p.studied_at
+        for p in (
+            await session.execute(select(LessonProgress).where(LessonProgress.user_id == user_id))
+        ).scalars()
+    }
+
+
+async def _tentativas_por_aula(session: AsyncSession, user_id: int) -> dict[int, tuple[int, int]]:
+    """Total e acertos por aula, em uma agregação só."""
+    rows = (
+        await session.execute(
+            select(
+                Exercise.lesson_id,
+                func.count(ExerciseAttempt.id),
+                func.count(ExerciseAttempt.id).filter(ExerciseAttempt.correct),
+            )
+            .join(Exercise, ExerciseAttempt.exercise_id == Exercise.id)
+            .where(ExerciseAttempt.user_id == user_id)
+            .group_by(Exercise.lesson_id)
+        )
+    ).all()
+    return {lesson_id: (total, certos) for lesson_id, total, certos in rows}
+
+
+def _no_recorte[*Cols](stmt: Select[*Cols], course: str | None, unit: str | None) -> Select[*Cols]:
+    """Aplica o recorte opcional de curso e unidade a uma consulta publicada."""
+    if course is not None:
+        stmt = stmt.where(Course.slug == course)
+    if unit is not None:
+        stmt = stmt.where(CourseUnit.slug == unit)
+    return stmt
+
+
+async def _aulas_do_recorte(
+    session: AsyncSession, course: str | None, unit: str | None
+) -> list[Lesson]:
+    stmt = (
+        select(Lesson)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            *published_scope(),
+        )
+        .order_by(Course.position, CourseUnit.position, Lesson.position)
+    )
+    return list((await session.execute(_no_recorte(stmt, course, unit))).scalars())
+
+
+async def _cartas_do_recorte(
+    session: AsyncSession, user_id: int, course: str | None, unit: str | None
+) -> tuple[int, int]:
+    """Cartas no recorte e quantas estão vencidas agora, nessa ordem."""
+    stmt = _no_recorte(
+        select(func.count())
+        .select_from(ReviewItem)
+        .join(Lesson, ReviewItem.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(
+            ReviewItem.user_id == user_id,
+            *published_scope(),
+        ),
+        course,
+        unit,
+    )
+    total = (await session.execute(stmt)).scalar_one()
+    vencidas = (
+        await session.execute(
+            stmt.where(
+                ReviewItem.status == "active",
+                ReviewItem.due_at <= datetime.now(UTC),
+            )
+        )
+    ).scalar_one()
+    return total, vencidas
+
+
 @router.get("/me/progress", response_model=ProgressOut)
 async def meu_progresso(
     usuario: UsuarioAtual,
@@ -695,43 +786,8 @@ async def meu_progresso(
             detail="O parâmetro course é obrigatório quando unit é informado.",
         )
 
-    estudadas = {
-        p.lesson_id: p.studied_at
-        for p in (
-            await session.execute(
-                select(LessonProgress).where(LessonProgress.user_id == usuario.id)
-            )
-        ).scalars()
-    }
-
-    tentativas = (
-        await session.execute(
-            select(
-                Exercise.lesson_id,
-                func.count(ExerciseAttempt.id),
-                func.count(ExerciseAttempt.id).filter(ExerciseAttempt.correct),
-            )
-            .join(Exercise, ExerciseAttempt.exercise_id == Exercise.id)
-            .where(ExerciseAttempt.user_id == usuario.id)
-            .group_by(Exercise.lesson_id)
-        )
-    ).all()
-    por_aula = {lesson_id: (total, certos) for lesson_id, total, certos in tentativas}
-
-    lessons_stmt = (
-        select(Lesson)
-        .join(Course, Lesson.course_id == Course.id)
-        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(
-            *published_scope(),
-        )
-        .order_by(Course.position, CourseUnit.position, Lesson.position)
-    )
-    if course is not None:
-        lessons_stmt = lessons_stmt.where(Course.slug == course)
-    if unit is not None:
-        lessons_stmt = lessons_stmt.where(CourseUnit.slug == unit)
-    aulas = list((await session.execute(lessons_stmt)).scalars())
+    estudadas = await _estudadas(session, usuario.id)
+    por_aula = await _tentativas_por_aula(session, usuario.id)
     linhas = [
         LessonProgressOut(
             course_slug=a.course_slug,
@@ -742,33 +798,9 @@ async def meu_progresso(
             attempts=por_aula.get(a.id, (0, 0))[0],
             correct=por_aula.get(a.id, (0, 0))[1],
         )
-        for a in aulas
+        for a in await _aulas_do_recorte(session, course, unit)
     ]
-    cards_stmt = (
-        select(func.count())
-        .select_from(ReviewItem)
-        .join(Lesson, ReviewItem.lesson_id == Lesson.id)
-        .join(Course, Lesson.course_id == Course.id)
-        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
-        .where(
-            ReviewItem.user_id == usuario.id,
-            *published_scope(),
-        )
-    )
-    if course is not None:
-        cards_stmt = cards_stmt.where(Course.slug == course)
-    if unit is not None:
-        cards_stmt = cards_stmt.where(CourseUnit.slug == unit)
-    total_cartas = (await session.execute(cards_stmt)).scalar_one()
-    vencidas = (
-        await session.execute(
-            cards_stmt.where(
-                ReviewItem.status == "active",
-                ReviewItem.due_at <= datetime.now(UTC),
-            )
-        )
-    ).scalar_one()
-
+    total_cartas, vencidas = await _cartas_do_recorte(session, usuario.id, course, unit)
     return ProgressOut(
         review_due=vencidas,
         review_cards=total_cartas,

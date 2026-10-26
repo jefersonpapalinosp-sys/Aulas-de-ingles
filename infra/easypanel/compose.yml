@@ -2,6 +2,35 @@ x-backend-build: &backend-build
   context: ../..
   dockerfile: backend/Dockerfile.prod
 
+# Hardening de container (SEC-45). Três camadas, cada uma com um alcance:
+#
+# `no-new-privileges` impede que um binário setuid dentro do container eleve
+# privilégio depois do start. Não tem contraindicação: vale para todo serviço.
+#
+# `cap_drop: [ALL]` tira as ~14 capabilities que o Docker concede por padrão.
+# Os serviços do backend precisam de duas de volta: o entrypoint começa como
+# root para ajustar o diretório de gravações (CAP_CHOWN/CAP_FOWNER) e troca
+# para o usuário `app` da imagem (CAP_SETUID/CAP_SETGID).
+#
+# `read_only: true` no sistema de arquivos do container exige declarar por
+# onde o processo realmente escreve. Está no `web` (nginx, que só precisa de
+# cache e pid em tmpfs) e no `worker` (que só lê o áudio). A API não entra: ela
+# grava as gravações no volume e o uvicorn usa /tmp.
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+
+x-backend-caps: &backend-caps
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  cap_add:
+    - CHOWN
+    - FOWNER
+    - SETGID
+    - SETUID
+
 x-backend-common: &backend-common
   APP_ENV: prod
   LOG_LEVEL: info
@@ -45,6 +74,7 @@ x-backend-common: &backend-common
 
 services:
   db:
+    <<: *hardening
     build:
       context: ../..
       dockerfile: infra/easypanel/Dockerfile.postgres
@@ -69,15 +99,18 @@ services:
     restart: unless-stopped
 
   migrate:
+    <<: *backend-caps
     build: *backend-build
     environment:
       <<: *backend-common
       DATABASE_URL: postgresql+asyncpg://aulas_migrator:${EASYPANEL_MIGRATOR_PASSWORD}@db:5432/aulas_ingles
       DATABASE_PURPOSE: migrator
+    # Gate de release: só schema. O seed editorial roda depois, no serviço
+    # `seed`, para uma falha de conteúdo não impedir a API e o web de subir.
     command:
       - sh
       - -ec
-      - alembic upgrade head && alembic check && python -m app.cli seed
+      - alembic upgrade head && alembic check
     depends_on:
       db:
         condition: service_healthy
@@ -86,6 +119,7 @@ services:
     restart: "no"
 
   permissions:
+    <<: *hardening
     build:
       context: ../..
       dockerfile: infra/easypanel/Dockerfile.postgres
@@ -103,6 +137,7 @@ services:
     restart: "no"
 
   api:
+    <<: *backend-caps
     build: *backend-build
     environment:
       <<: *backend-common
@@ -136,8 +171,18 @@ services:
 
   worker:
     build: *backend-build
-    user: "10001:10001"
-    entrypoint: []
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # O entrypoint da imagem tolera o volume read_only e troca para `app`;
+    # sem CAP_CHOWN de propósito, porque aqui não há nada a ajustar.
+    cap_add:
+      - SETGID
+      - SETUID
+    read_only: true
+    tmpfs:
+      - /tmp
     command: ["python", "-m", "app.cli", "assist-worker"]
     environment:
       <<: *backend-common
@@ -154,14 +199,60 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      # O worker grava worker_heartbeat.seen_at a cada ~10 s. O comando usa a
+      # URL/papel deste container, lê a batida mais recente pelo relógio do
+      # banco e sai 0 (<= 60 s), 1 (parada ou sem linha) ou 2 (banco
+      # inacessível), sem DSN na saída. Roda como UID 10001 e sem entrypoint.
+      test: ["CMD", "python", "-m", "app.cli", "worker-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     mem_limit: 512m
     cpus: 0.5
     restart: unless-stopped
+
+  # Seed editorial insert-only, fora do gate de release: roda com a API já
+  # saudável, pelo mesmo papel do migrador. Se falhar, a stack continua no ar e
+  # a falha aparece na saída do `up --wait` e em `docker compose ps seed`.
+  seed:
+    <<: *backend-caps
+    build: *backend-build
+    environment:
+      <<: *backend-common
+      DATABASE_URL: postgresql+asyncpg://aulas_migrator:${EASYPANEL_MIGRATOR_PASSWORD}@db:5432/aulas_ingles
+      DATABASE_PURPOSE: migrator
+    command: ["python", "-m", "app.cli", "seed"]
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 768m
+    cpus: 1.0
+    restart: "no"
 
   web:
     build:
       context: ../../frontend
       dockerfile: Dockerfile.prod
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # O nginx oficial sobe como root para ler a config e abrir a porta 80,
+    # depois gera os workers como `nginx`. Daí CHOWN/SETGID/SETUID e
+    # NET_BIND_SERVICE; nada além disso.
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    read_only: true
+    # O que o nginx escreve: cache de proxy/fastcgi e o pid. Em tmpfs, some
+    # junto com o container.
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
     expose:
       - "80"
     depends_on:

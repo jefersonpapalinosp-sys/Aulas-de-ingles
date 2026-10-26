@@ -8,15 +8,16 @@ arquivo de homologação.
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Literal
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.db.models import TranscriptionJob, WritingFeedbackRecord
+from app.domain.enums import AssistModality
 
-Modality = Literal["transcription", "writing"]
+# Conjunto único em app/domain/enums.py; o nome local é mantido.
+Modality = AssistModality
 
 
 @dataclass(frozen=True)

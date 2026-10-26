@@ -11,7 +11,10 @@ from app.core.config import get_settings
 from app.db.models import (
     AssistReservation,
     Base,
+    DialogueTurn,
+    Lesson,
     NotebookEntry,
+    SpeakingDialogue,
     TranscriptionJob,
     User,
 )
@@ -125,12 +128,77 @@ async def test_new_modalities_orphan_feedback_and_account_isolation(client, sess
         "assistance_usage",
         "legacy_review_cards",
         "audio_manifest",
+        "dialogues",
+        "dialogue_turns",
     ):
         assert other[section] == []
     assert all(
         item["id"] not in {s["id"] for s in data["login_sessions"]}
         for item in other["login_sessions"]
     )
+
+
+async def test_dialogues_and_turns_are_exported_only_to_their_owner(client, session):
+    a = await conta(client, "dialogue-a")
+    b = await conta(client, "dialogue-b")
+    owner = await session.scalar(
+        select(User.id).where(User.email == "caderno-dialogue-a@exemplo.com")
+    )
+    lesson_id = await session.scalar(select(Lesson.id).order_by(Lesson.id).limit(1))
+    dialogue = SpeakingDialogue(
+        user_id=owner,
+        lesson_id=lesson_id,
+        operation_key=str(uuid4()),
+        mode="guided",
+        content_version=1,
+        content_fingerprint="a" * 64,
+        provider_name="cloudflare-workers-ai",
+        rubric_version="dialogue-prompt-v1",
+    )
+    session.add(dialogue)
+    await session.flush()
+    expires_at = datetime.now(UTC) + timedelta(days=30)
+    session.add_all(
+        [
+            DialogueTurn(
+                dialogue_id=dialogue.id,
+                user_id=owner,
+                position=1,
+                role="partner",
+                state="completed",
+                partner_text="Hello! What do you do every day?",
+                expires_at=expires_at,
+            ),
+            DialogueTurn(
+                dialogue_id=dialogue.id,
+                user_id=owner,
+                position=2,
+                role="student",
+                input_kind="text",
+                state="completed",
+                transcript="I am a student.",
+                checks={"target_terms_missing": True, "too_short": False},
+                cost_microusd=12,
+                expires_at=expires_at,
+            ),
+        ]
+    )
+    await session.commit()
+    exported = await client.get("/api/me/export", headers=a)
+    assert exported.status_code == 200, exported.text
+    data = exported.json()
+    assert data["schema_version"] == "2.1"
+    assert [item["mode"] for item in data["dialogues"]] == ["guided"]
+    assert data["dialogues"][0]["operation_key"] == dialogue.operation_key
+    assert [turn["position"] for turn in data["dialogue_turns"]] == [1, 2]
+    assert data["dialogue_turns"][1]["transcript"] == "I am a student."
+    assert data["dialogue_turns"][1]["checks"] == {"target_terms_missing": True, "too_short": False}
+    assert data["dialogue_turns"][0]["hints"] == []
+    assert data["scope"]["row_counts"]["speaking_dialogue"] == 1
+    assert data["scope"]["row_counts"]["dialogue_turn"] == 2
+    other = (await client.get("/api/me/export", headers=b)).json()
+    assert other["dialogues"] == [] and other["dialogue_turns"] == []
+    assert other["scope"]["row_counts"]["dialogue_turn"] == 0
 
 
 async def test_snapshot_is_read_only_and_ignores_concurrent_commits(client, monkeypatch):

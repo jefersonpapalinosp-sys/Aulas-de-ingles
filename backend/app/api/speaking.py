@@ -21,7 +21,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import UsuarioAtual
-from app.api.review import adicionar_item_revisao
 from app.core.config import get_settings
 from app.db.models import (
     Course,
@@ -32,6 +31,7 @@ from app.db.models import (
     SpeakingAttempt,
     TranscriptCue,
     TranscriptionJob,
+    User,
 )
 from app.db.session import get_session
 from app.pagination import (
@@ -58,6 +58,7 @@ from app.services.publication import (
     published_lesson_ids,
     require_published_lesson,
 )
+from app.services.review import adicionar_item_revisao
 
 router = APIRouter(prefix="/speaking", tags=["speaking"])
 logger = logging.getLogger(__name__)
@@ -69,6 +70,25 @@ def _query() -> Select[SpeakingAttempt]:
         .selectinload(TranscriptCue.media)
         .selectinload(LessonMedia.lesson)
     )
+
+
+def _recorte[*Cols](
+    query: Select[*Cols], *, lesson: int | None, course: str | None, unit: str | None
+) -> Select[*Cols]:
+    """Recorte de aula, curso e unidade — o mesmo na lista legada e na página.
+
+    Sem ``course``, um filtro por aula vale no curso padrão: o número de aula
+    só identifica uma aula dentro de um curso.
+    """
+    if lesson is not None:
+        query = query.where(Lesson.number == lesson)
+    if course is not None:
+        query = query.where(Course.slug == course)
+    elif lesson is not None:
+        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    return query
 
 
 def _attempts_query(
@@ -90,15 +110,7 @@ def _attempts_query(
             .join(Lesson.course)
             .join(Lesson.unit)
         )
-    if lesson is not None:
-        query = query.where(Lesson.number == lesson)
-    if course is not None:
-        query = query.where(Course.slug == course)
-    elif lesson is not None:
-        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
-    if unit is not None:
-        query = query.where(CourseUnit.slug == unit)
-    return query
+    return _recorte(query, lesson=lesson, course=course, unit=unit)
 
 
 def _attempt_page_query(
@@ -107,7 +119,7 @@ def _attempt_page_query(
     lesson: int | None,
     course: str | None,
     unit: str | None,
-) -> Any:
+) -> Select[*tuple[Any, ...]]:
     query = (
         select(
             SpeakingAttempt.id,
@@ -135,15 +147,7 @@ def _attempt_page_query(
             SpeakingAttempt.status == "ready",
         )
     )
-    if lesson is not None:
-        query = query.where(Lesson.number == lesson)
-    if course is not None:
-        query = query.where(Course.slug == course)
-    elif lesson is not None:
-        query = query.where(Course.slug == DEFAULT_COURSE_SLUG)
-    if unit is not None:
-        query = query.where(CourseUnit.slug == unit)
-    return query
+    return _recorte(query, lesson=lesson, course=course, unit=unit)
 
 
 async def _active_jobs(
@@ -187,7 +191,7 @@ def _transcription_out(job: TranscriptionJob, expected_text: str | None) -> Tran
     return TranscriptionJobOut(
         id=job.id,
         attempt_id=job.speaking_attempt_id,
-        status=job.status,  # type: ignore[arg-type]
+        status=job.status,
         provider=job.provider,
         attempt_count=job.attempt_count,
         max_attempts=job.max_attempts,
@@ -201,7 +205,7 @@ def _transcription_out(job: TranscriptionJob, expected_text: str | None) -> Tran
         low_confidence=job.low_confidence,
         error_code=job.error_code,
         cost_microusd=job.cost_microusd,
-        human_rating=job.human_rating,  # type: ignore[arg-type]
+        human_rating=job.human_rating,
         requested_at=job.requested_at,
         completed_at=job.completed_at,
         expires_at=job.expires_at,
@@ -223,13 +227,13 @@ def _output(
         cue_text=captured_cue_text,
         historical_content_status=("available" if captured_cue_text is not None else "unavailable"),
         duration_ms=attempt.duration_ms,
-        self_rating=attempt.self_rating,  # type: ignore[arg-type]
+        self_rating=attempt.self_rating,
         consented_at=attempt.consented_at,
-        status=attempt.status,  # type: ignore[arg-type]
+        status=attempt.status,
         mime_type=attempt.mime_type,
         file_size=attempt.file_size,
         created_at=attempt.created_at,
-        integrity_state=attempt.integrity_state,  # type: ignore[arg-type]
+        integrity_state=attempt.integrity_state,
         transcription=(
             _transcription_out(transcription, captured_cue_text) if transcription else None
         ),
@@ -328,6 +332,75 @@ async def criar_tentativa(
     )
 
 
+RATING_SCORES = {"repeat": 0.35, "almost": 0.7, "confident": 1.0}
+
+
+def _gravar_audio(
+    attempt: SpeakingAttempt, data: bytes, mime_type: str, key: str, duration_ms: int
+) -> None:
+    """Marca a tentativa como pronta, com a integridade já conferida."""
+    attempt.storage_key = key
+    attempt.mime_type = mime_type
+    attempt.file_size = len(data)
+    attempt.audio_sha256 = sha256(data).hexdigest()
+    attempt.integrity_state = "verified"
+    attempt.integrity_checked_at = datetime.now(UTC)
+    attempt.duration_ms = duration_ms
+    attempt.status = "ready"
+
+
+async def _evidencia_e_revisao(
+    session: AsyncSession, usuario: User, attempt: SpeakingAttempt
+) -> None:
+    """Evidência de speaking e, se a autoavaliação não foi ``confident``, o
+    retorno do trecho à fila de revisão."""
+    session.add(
+        SkillEvidence(
+            user_id=usuario.id,
+            skill="speaking",
+            source_type="speaking_attempt",
+            source_id=attempt.id,
+            score=RATING_SCORES.get(attempt.self_rating or "", 0.5),
+        )
+    )
+    if attempt.self_rating == "confident":
+        return
+    cue = attempt.cue
+    await adicionar_item_revisao(
+        session,
+        usuario,
+        lesson_id=cue.media.lesson_id,
+        item_type="speaking_prompt",
+        source_type="transcript_cue",
+        source_id=cue.id,
+        source_key=f"speaking-cue:{cue.id}",
+        skill="speaking",
+        prompt=cue.text_pt,
+        prompt_note=f"{cue.speaker} · pratique por shadowing",
+        answer=cue.text_en,
+        context="Ouça o trecho, repita e compare ritmo e pronúncia.",
+        origin_reason="Este trecho voltou após sua autoavaliação de speaking.",
+        estimated_seconds=3 * 60,
+        media_url=cue.media.source_url,
+        cue_start_seconds=cue.start_seconds,
+        cue_end_seconds=cue.end_seconds,
+    )
+
+
+async def _descartar_orfao(session: AsyncSession, storage: AudioStorage, key: str) -> None:
+    """Commit pode ter sido confirmado pelo banco e perdido na conexão. Nunca
+    apagar arquivo referenciado por um commit cujo resultado é desconhecido."""
+    try:
+        await session.rollback()
+        referenced = await session.scalar(
+            select(SpeakingAttempt.id).where(SpeakingAttempt.storage_key == key)
+        )
+        if referenced is None:
+            storage.delete(key)
+    except Exception:
+        pass  # Preservar candidato para reconciliação, não criar referência quebrada.
+
+
 @router.put("/attempts/{attempt_id}/audio", response_model=SpeakingAttemptOut)
 async def enviar_audio(
     attempt_id: int,
@@ -362,63 +435,16 @@ async def enviar_audio(
         raise HTTPException(409, "A tentativa já contém outro áudio. Não foi sobrescrita.")
     key = storage.save(data, mime_type)
     try:
-        attempt.storage_key = key
-        attempt.mime_type = mime_type
-        attempt.file_size = len(data)
-        attempt.audio_sha256 = sha256(data).hexdigest()
-        attempt.integrity_state = "verified"
-        attempt.integrity_checked_at = datetime.now(UTC)
-        attempt.duration_ms = duration_ms
-        attempt.status = "ready"
-        rating_scores = {"repeat": 0.35, "almost": 0.7, "confident": 1.0}
-        session.add(
-            SkillEvidence(
-                user_id=usuario.id,
-                skill="speaking",
-                source_type="speaking_attempt",
-                source_id=attempt.id,
-                score=rating_scores.get(attempt.self_rating or "", 0.5),
-            )
-        )
-        if attempt.self_rating != "confident":
-            cue = attempt.cue
-            await adicionar_item_revisao(
-                session,
-                usuario,
-                lesson_id=cue.media.lesson_id,
-                item_type="speaking_prompt",
-                source_type="transcript_cue",
-                source_id=cue.id,
-                source_key=f"speaking-cue:{cue.id}",
-                skill="speaking",
-                prompt=cue.text_pt,
-                prompt_note=f"{cue.speaker} · pratique por shadowing",
-                answer=cue.text_en,
-                context="Ouça o trecho, repita e compare ritmo e pronúncia.",
-                origin_reason="Este trecho voltou após sua autoavaliação de speaking.",
-                estimated_seconds=3 * 60,
-                media_url=cue.media.source_url,
-                cue_start_seconds=cue.start_seconds,
-                cue_end_seconds=cue.end_seconds,
-            )
+        _gravar_audio(attempt, data, mime_type, key, duration_ms)
+        await _evidencia_e_revisao(session, usuario, attempt)
         await session.commit()
     except Exception:
-        # Commit pode ter sido confirmado pelo banco e perdido na conexão. Nunca apagar
-        # arquivo referenciado por um commit cujo resultado é desconhecido.
-        try:
-            await session.rollback()
-            referenced = await session.scalar(
-                select(SpeakingAttempt.id).where(SpeakingAttempt.storage_key == key)
-            )
-            if referenced is None:
-                storage.delete(key)
-        except Exception:
-            pass  # Preservar candidato para reconciliação, não criar referência quebrada.
+        await _descartar_orfao(session, storage, key)
         raise
-    saved = await _owned_attempt(session, attempt.id, usuario.id)
+    saved = await _owned_attempt(session, attempt.id, user_id)
     return _output(
         saved,
-        captured_cue_text=await _captured_cue_text(session, saved.id, usuario.id),
+        captured_cue_text=await _captured_cue_text(session, saved.id, user_id),
     )
 
 
@@ -442,9 +468,7 @@ async def listar_tentativas(
     )
     attempts = list(
         (
-            await session.execute(
-                query.order_by(SpeakingAttempt.created_at.desc()).limit(limit)
-            )
+            await session.execute(query.order_by(SpeakingAttempt.created_at.desc()).limit(limit))
         ).scalars()
     )
     result = await _attempt_outputs(session, attempts, usuario.id)
