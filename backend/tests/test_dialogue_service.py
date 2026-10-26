@@ -109,7 +109,7 @@ async def test_roteiro_funciona_sem_provedor_e_nao_gasta_nada(
     )
     assert dialogo.mode == "script" and dialogo.provider_name is None
 
-    resultado = await dialogue.student_turn(
+    resultado = await dialogue.partner_reply(
         session, dialogo, brief, 1, "The train is faster than the bus.", idempotency_key="k1"
     )
     assert resultado.partner.partner_text
@@ -183,7 +183,7 @@ async def test_provedor_fora_do_ar_vira_roteiro_sem_perder_os_turnos_anteriores(
         raise assistance.ProviderFailure("provider_unavailable")
 
     monkeypatch.setattr(assistance, "call_dialogue_provider", cair)
-    resultado = await dialogue.student_turn(
+    resultado = await dialogue.partner_reply(
         session, dialogo, brief, 2, "The bus is cheaper.", idempotency_key="k2"
     )
     assert resultado.fallback is True
@@ -220,7 +220,9 @@ async def test_resposta_inventada_e_descartada_e_o_custo_continua_registrado(
         )
 
     monkeypatch.setattr(assistance, "call_dialogue_provider", inventar)
-    resultado = await dialogue.student_turn(session, dialogo, brief, 1, "bus", idempotency_key="k3")
+    resultado = await dialogue.partner_reply(
+        session, dialogo, brief, 1, "bus", idempotency_key="k3"
+    )
     assert resultado.fallback is True
     assert resultado.error_code == "invalid_provider_response"
     # O custo aconteceu mesmo com a resposta descartada: ignorá-lo esconderia
@@ -245,7 +247,7 @@ async def test_nenhum_texto_de_turno_entra_em_log(
 
     monkeypatch.setattr(assistance, "call_dialogue_provider", cair)
     with caplog.at_level(logging.DEBUG):
-        resultado = await dialogue.student_turn(
+        resultado = await dialogue.partner_reply(
             session, dialogo, brief, 1, segredo, idempotency_key="k4"
         )
     assert resultado.fallback is True
@@ -279,41 +281,70 @@ async def test_dialogo_guarda_a_impressao_e_o_limite_de_turnos(
 
 
 @pytest.mark.asyncio
-async def test_cota_esgotada_recusa_antes_de_qualquer_chamada_externa(
+async def test_cota_esgotada_recusa_na_admissao_antes_de_qualquer_chamada_externa(
     session: AsyncSession, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Critério 3 do BE-46: 429 antes da rede, não depois dela."""
+    """Critério 3 do BE-46: a recusa nasce na admissão, antes da rede.
+
+    O contrato devolve `202 + job_id`, então o provedor só é chamado no worker.
+    Por isso a cota é reservada aqui, com o aluno ainda na requisição: um 429
+    depois do enfileiramento seria tarde, e um fallback silencioso para o
+    Roteiro esconderia dele que a cota acabou.
+    """
     _habilitar_guiado(monkeypatch)
-    # Um diálogo completo de cota, para o próximo turno não caber.
     monkeypatch.setattr(get_settings(), "assist_dialogue_daily_turns", 12)
     usuario = await _conta(session, "cota@example.com")
-    dialogo, brief = await dialogue.create_dialogue(
+    dialogo, _ = await dialogue.create_dialogue(
         session, usuario, await _lesson(session), mode="guided", operation_key=str(uuid4())
     )
 
-    chamou = []
+    chamou: list[int] = []
 
     def registrar(*args: object, **kwargs: object) -> assistance.DialogueResult:
         chamou.append(1)
-        return assistance.DialogueResult(
-            raw={"partner_text": "Nice.", "hints": [], "confidence": 0.8},
-            cost_microusd=0,
-            cost_known=True,
-        )
+        return assistance.DialogueResult(raw={}, cost_microusd=0, cost_known=True)
 
     monkeypatch.setattr(assistance, "call_dialogue_provider", registrar)
     for turno in range(1, 13):
-        await dialogue.student_turn(
-            session, dialogo, brief, turno, "I took the train today.", idempotency_key=str(uuid4())
+        _, job = await dialogue.admit_turn(
+            session,
+            dialogo,
+            turno,
+            input_kind="text",
+            transcript="I took the train today.",
+            idempotency_key=str(uuid4()),
         )
-    assert len(chamou) == 12
+        assert job is not None and job.kind == "dialogue"
 
-    with pytest.raises(assist_quota.QuotaExceeded):
-        await dialogue.student_turn(
-            session, dialogo, brief, 13, "One more turn.", idempotency_key=str(uuid4())
+    # O limite do diálogo vem antes da cota, e é a ordem certa: se a conversa
+    # acabou, a resposta é "este diálogo terminou", não "sua cota acabou".
+    with pytest.raises(dialogue.TurnLimitReached):
+        await dialogue.admit_turn(
+            session,
+            dialogo,
+            13,
+            input_kind="text",
+            transcript="Too far.",
+            idempotency_key=str(uuid4()),
         )
-    # O provedor não foi chamado no turno recusado: a cota corta antes da rede.
-    assert len(chamou) == 12
+
+    # A cota aparece no diálogo seguinte — o cenário exato que a decisão de
+    # 26/10 tratou: com teto de um diálogo, o segundo não começa.
+    outro, _ = await dialogue.create_dialogue(
+        session, usuario, await _lesson(session), mode="guided", operation_key=str(uuid4())
+    )
+    with pytest.raises(assist_quota.QuotaExceeded):
+        await dialogue.admit_turn(
+            session,
+            outro,
+            1,
+            input_kind="text",
+            transcript="Starting again.",
+            idempotency_key=str(uuid4()),
+        )
+    # Nenhuma chamada externa aconteceu em todo o percurso: quem fala com o
+    # provedor é o worker, e a cota cortou antes de o trabalho existir.
+    assert chamou == []
 
 
 @pytest.mark.asyncio
@@ -351,31 +382,86 @@ async def test_conversa_e_escrita_tem_orcamentos_separados(
 
 
 @pytest.mark.asyncio
-async def test_reenvio_do_mesmo_turno_nao_cobra_de_novo(
+async def test_reenvio_do_mesmo_turno_devolve_o_admitido_sem_cobrar_de_novo(
     session: AsyncSession, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Idempotência por `(dialogue_id, position)`, como o contrato do IA-45 pede."""
     _habilitar_guiado(monkeypatch)
     usuario = await _conta(session, "reenvio@example.com")
-    dialogo, brief = await dialogue.create_dialogue(
+    dialogo, _ = await dialogue.create_dialogue(
         session, usuario, await _lesson(session), mode="guided", operation_key=str(uuid4())
     )
-
-    def responder(*args: object, **kwargs: object) -> assistance.DialogueResult:
-        return assistance.DialogueResult(
-            raw={"partner_text": "Good.", "hints": [], "confidence": 0.7},
-            cost_microusd=7,
-            cost_known=True,
-        )
-
-    monkeypatch.setattr(assistance, "call_dialogue_provider", responder)
-    chave = str(uuid4())
-    primeiro = await dialogue.student_turn(
-        session, dialogo, brief, 1, "I took the train.", idempotency_key=chave
+    primeiro, job = await dialogue.admit_turn(
+        session,
+        dialogo,
+        1,
+        input_kind="text",
+        transcript="I took the train.",
+        idempotency_key=str(uuid4()),
     )
-    assert primeiro.fallback is False
-    # Mesma chave: o turno já foi admitido e cobrado; quem chama devolve o que
-    # está gravado em vez de pagar outra vez.
-    with pytest.raises(dialogue.TurnAlreadyAdmitted):
-        await dialogue.student_turn(
-            session, dialogo, brief, 1, "I took the train.", idempotency_key=chave
+    repetido, job_repetido = await dialogue.admit_turn(
+        session,
+        dialogo,
+        1,
+        input_kind="text",
+        transcript="I took the train.",
+        idempotency_key=str(uuid4()),
+    )
+    assert repetido.id == primeiro.id
+    assert job is not None and job_repetido is not None and job_repetido.id == job.id
+    # Uma reserva, um job: reenviar não cobra duas vezes nem enfileira de novo.
+    consumo = await assist_quota.usage(
+        session, usuario.id, modalities=(assist_quota.DIALOGUE_MODALITY,)
+    )
+    assert consumo.used == 1
+
+
+@pytest.mark.asyncio
+async def test_roteiro_nao_enfileira_nem_reserva_cota(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """O modo que não chama ninguém não pode depender do worker.
+
+    Divergência deliberada da tabela do ADR, que previa `202 + job_id` para
+    todo turno: fazer o Roteiro passar pela fila o tiraria do ar justamente
+    quando o worker estivesse fora — e ele é o modo que deveria sobreviver a
+    isso.
+    """
+    monkeypatch.setattr(get_settings(), "assisted_features_enabled", False)
+    usuario = await _conta(session, "roteiro-fila@example.com")
+    dialogo, _ = await dialogue.create_dialogue(
+        session, usuario, await _lesson(session), mode="script", operation_key=str(uuid4())
+    )
+    turno, job = await dialogue.admit_turn(
+        session,
+        dialogo,
+        1,
+        input_kind="text",
+        transcript="Hello there.",
+        idempotency_key=str(uuid4()),
+    )
+    assert job is None and turno.transcription_job_id is None
+    consumo = await assist_quota.usage(
+        session, usuario.id, modalities=(assist_quota.DIALOGUE_MODALITY,)
+    )
+    assert consumo.used == 0
+
+
+@pytest.mark.asyncio
+async def test_turno_acima_do_limite_e_recusado(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(get_settings(), "assisted_features_enabled", False)
+    usuario = await _conta(session, "limite-turno@example.com")
+    dialogo, _ = await dialogue.create_dialogue(
+        session, usuario, await _lesson(session), mode="script", operation_key=str(uuid4())
+    )
+    with pytest.raises(dialogue.TurnLimitReached):
+        await dialogue.admit_turn(
+            session,
+            dialogo,
+            dialogo.turn_limit + 1,
+            input_kind="text",
+            transcript="Too far.",
+            idempotency_key=str(uuid4()),
         )

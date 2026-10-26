@@ -31,6 +31,7 @@ from app.db.models import (
     LessonMedia,
     SpeakingDialogue,
     TranscriptCue,
+    TranscriptionJob,
     User,
 )
 from app.domain.dialogue import (
@@ -41,7 +42,7 @@ from app.domain.dialogue import (
     evaluate,
     failed_codes,
 )
-from app.domain.enums import TurnRole
+from app.domain.enums import TurnInputKind, TurnRole
 from app.services import assist_quota, assistance, dialogue_prompts
 from app.services.dialogue_prompts import LessonBrief, Mode, PartnerTurn
 
@@ -52,12 +53,12 @@ class DialogueUnavailable(Exception):
     """Modo com IA pedido com a assistência desligada ou sem provedor."""
 
 
-class TurnAlreadyAdmitted(Exception):
-    """A mesma chave já admitiu este turno; o resultado gravado é a resposta."""
+class TurnLimitReached(Exception):
+    """O diálogo chegou ao limite de turnos acordado."""
 
-    def __init__(self, reservation_id: int) -> None:
-        super().__init__(reservation_id)
-        self.reservation_id = reservation_id
+    def __init__(self, limit: int) -> None:
+        super().__init__(limit)
+        self.limit = limit
 
 
 @dataclass(frozen=True)
@@ -240,7 +241,7 @@ def _provider_turn(
     return partner, result.cost_microusd, result.cost_known, None
 
 
-async def student_turn(
+async def partner_reply(
     session: AsyncSession,
     dialogue: SpeakingDialogue,
     brief: LessonBrief,
@@ -256,6 +257,12 @@ async def student_turn(
     avaliação não depende de rede, então o aluno sempre recebe o resultado
     determinístico — mesmo que o modelo não responda. E o provedor só recebe os
     códigos reprovados, nunca a avaliação inteira.
+
+    **Não mexe em cota.** O contrato do IA-45 devolve `202 + job_id`, então o
+    provedor é chamado no worker: a reserva acontece na admissão do turno (onde
+    o 429 da cota tem de aparecer, antes de qualquer rede) e o consumo no
+    despacho, como a fila de transcrição já faz. Reservar aqui seria cobrar na
+    hora errada e duas vezes.
     """
     settings = get_settings()
     expectation = expectation_for(brief, position)
@@ -288,30 +295,6 @@ async def student_turn(
             cost_known=True,
         )
 
-    # Cota antes da rede, e a admissão commitada antes da chamada externa: uma
-    # desconexão depois disso não prova ausência de consumo. Mesma ordem do
-    # feedback de escrita, pela mesma razão.
-    #
-    # `QuotaExceeded` sobe para quem chamou, que responde 429. Não há fallback
-    # automático para o Roteiro aqui: gastar o turno do aluno numa resposta de
-    # roteiro sem ele pedir esconderia o fim da cota. Quem decide continuar no
-    # Roteiro é ele.
-    reservation, admitida = await assist_quota.reserve(
-        session,
-        dialogue.user_id,
-        idempotency_key,
-        # Hash, não concatenação: a coluna é varchar(64) e o par
-        # (impressão do recorte, posição) é o que identifica este turno.
-        sha256(f"{dialogue.content_fingerprint}:{position}".encode()).hexdigest(),
-        assist_quota.DIALOGUE_MODALITY,
-    )
-    if not admitida:
-        # Reenvio do mesmo turno: quem chamou devolve o turno já gravado.
-        raise TurnAlreadyAdmitted(reservation.id)
-    if not await assist_quota.consume(session, reservation.id):
-        raise TurnAlreadyAdmitted(reservation.id)
-    await session.commit()
-
     partner, custo, custo_conhecido, erro = _provider_turn(
         settings,
         brief,
@@ -320,10 +303,8 @@ async def student_turn(
         codes,
         history,
         expectation.target_terms,
-        reservation.provider_key,
+        idempotency_key,
     )
-    if custo and custo_conhecido:
-        await assist_quota.record_cost(session, reservation.id, custo)
     if partner is None:
         logger.info(
             "dialogue_turn_fallback",
@@ -401,6 +382,148 @@ async def create_dialogue(
     await session.flush()
     logger.info("dialogue_created", extra={"dialogue_id": dialogue.id, "mode": mode})
     return dialogue, brief
+
+
+async def admit_turn(
+    session: AsyncSession,
+    dialogue: SpeakingDialogue,
+    position: int,
+    *,
+    input_kind: TurnInputKind,
+    idempotency_key: str,
+    transcript: str | None = None,
+    speaking_attempt_id: int | None = None,
+) -> tuple[DialogueTurn, TranscriptionJob | None]:
+    """Admite o turno do aluno: grava, reserva cota e enfileira o trabalho.
+
+    É aqui que o 429 da cota tem de aparecer — antes de qualquer rede, com o
+    aluno ainda na requisição. Não há fallback automático para o Roteiro:
+    gastar o turno numa resposta de roteiro sem ele pedir esconderia o fim da
+    cota, e quem decide continuar no Roteiro é ele.
+
+    Idempotência por `(dialogue_id, position)`: reenviar o mesmo turno devolve
+    o que já foi admitido, sem segunda cobrança nem segundo job.
+    """
+    existing = (
+        await session.execute(
+            select(DialogueTurn).where(
+                DialogueTurn.dialogue_id == dialogue.id,
+                DialogueTurn.position == position,
+            )
+        )
+    ).scalar_one_or_none()
+    if existing is not None:
+        job = (
+            (
+                await session.execute(
+                    select(TranscriptionJob).where(
+                        TranscriptionJob.id == existing.transcription_job_id
+                    )
+                )
+            ).scalar_one_or_none()
+            if existing.transcription_job_id
+            else None
+        )
+        return existing, job
+
+    if position > dialogue.turn_limit:
+        raise TurnLimitReached(dialogue.turn_limit)
+
+    turn = DialogueTurn(
+        dialogue_id=dialogue.id,
+        user_id=dialogue.user_id,
+        position=position,
+        role="student",
+        input_kind=input_kind,
+        speaking_attempt_id=speaking_attempt_id,
+        state="pending",
+        transcript=transcript,
+        expires_at=turn_expiry(),
+    )
+    session.add(turn)
+    await session.flush()
+
+    # Roteiro não tem provedor nem custo: resolve na hora. Depender do worker
+    # para um modo que não chama ninguém tiraria do ar justamente o modo que
+    # deveria funcionar quando o resto está fora.
+    if dialogue.mode == "script":
+        return turn, None
+
+    reservation, admitida = await assist_quota.reserve(
+        session,
+        dialogue.user_id,
+        idempotency_key,
+        # Hash: a coluna é varchar(64) e o par (impressão do recorte, posição)
+        # é o que identifica este turno.
+        sha256(f"{dialogue.content_fingerprint}:{position}".encode()).hexdigest(),
+        assist_quota.DIALOGUE_MODALITY,
+    )
+    settings = get_settings()
+    agora = datetime.now(UTC)
+    job = TranscriptionJob(
+        assist_reservation_id=reservation.id if admitida else None,
+        user_id=dialogue.user_id,
+        speaking_attempt_id=speaking_attempt_id,
+        kind="dialogue",
+        provider=settings.assist_provider_name,
+        status="queued",
+        idempotency_key=reservation.provider_key,
+        max_attempts=settings.assist_job_max_attempts,
+        next_attempt_at=agora,
+        expires_at=agora + timedelta(days=settings.assist_retention_days),
+    )
+    session.add(job)
+    await session.flush()
+    turn.transcription_job_id = job.id
+    await session.flush()
+    logger.info(
+        "dialogue_turn_admitted",
+        extra={"dialogue_id": dialogue.id, "position": position, "job_id": job.id},
+    )
+    return turn, job
+
+
+async def resolve_turn(
+    session: AsyncSession,
+    turn: DialogueTurn,
+    dialogue: SpeakingDialogue,
+    brief: LessonBrief,
+    transcript: str,
+) -> TurnOutcome:
+    """Fecha o turno com o resultado: checks, resposta do parceiro e estado.
+
+    Chamada pelo worker depois do despacho autorizado (cota já consumida) ou,
+    no Roteiro, pela própria rota. O turno sai de `pending` com tudo gravado —
+    é o `GET` do diálogo que o cliente consulta depois.
+    """
+    outcome = await partner_reply(
+        session,
+        dialogue,
+        brief,
+        turn.position,
+        transcript,
+        idempotency_key=f"turn-{turn.id}",
+    )
+    turn.transcript = transcript
+    turn.checks = {check.code: check.passed for check in outcome.checks}
+    turn.partner_text = outcome.partner.partner_text
+    turn.hints = [{"code": hint.code, "message": hint.message} for hint in outcome.partner.hints]
+    turn.confidence = outcome.partner.confidence
+    turn.fallback = outcome.fallback
+    turn.error_code = outcome.error_code
+    turn.cost_microusd = outcome.cost_microusd
+    turn.state = "completed"
+    turn.completed_at = datetime.now(UTC)
+    if position_is_last(dialogue, turn.position):
+        dialogue.state = "completed"
+        dialogue.ended_at = turn.completed_at
+    await session.flush()
+    return outcome
+
+
+def position_is_last(dialogue: SpeakingDialogue, position: int) -> bool:
+    """O turno que fecha o diálogo pelo limite acordado."""
+    return position >= dialogue.turn_limit
 
 
 def turn_expiry(settings: Settings | None = None) -> datetime:

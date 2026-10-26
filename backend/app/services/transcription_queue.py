@@ -16,11 +16,14 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.exc import TimeoutError as PoolTimeout
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import get_settings
-from app.db.models import SpeakingAttempt, TranscriptionJob
+from app.core.config import Settings, get_settings
+from app.db.models import DialogueTurn, Lesson, SpeakingAttempt, SpeakingDialogue, TranscriptionJob
 from app.db.session import dispose_engine, get_sessionmaker
+from app.domain.enums import JobKind
 from app.services import account_deletion, assist_quota, assistance, editorial_history, maintenance
+from app.services import dialogue as dialogue_service
 from app.services.audio_storage import AudioStorage
 
 logger = logging.getLogger(__name__)
@@ -31,6 +34,9 @@ class ClaimedJob:
     job_id: int
     attempt_number: int
     reservation_id: int | None = None
+    # A fila passou a ter dois tipos no BE-46; quem reivindica precisa saber
+    # qual, porque o despacho é outro.
+    kind: JobKind = "transcription"
 
 
 async def _recover_stale_jobs(now: datetime) -> None:
@@ -110,7 +116,7 @@ async def _claim_next_job(now: datetime) -> ClaimedJob | None:
         job.attempt_count += 1
         job.processing_started_at = now
         job.error_code = None
-        claim = ClaimedJob(job.id, job.attempt_count, job.assist_reservation_id)
+        claim = ClaimedJob(job.id, job.attempt_count, job.assist_reservation_id, job.kind)
     assert claim is not None
     logger.info(
         "transcription_claimed",
@@ -229,15 +235,134 @@ async def _record_success(
     )
 
 
+async def _dialogue_transcript(
+    session: AsyncSession, settings: Settings, turn: DialogueTurn
+) -> tuple[str | None, str | None]:
+    """Transcrição do turno: já vem pronta no texto, ou sai do áudio.
+
+    Devolve `(transcript, erro)`. O turno por texto não gasta STT — é por isso
+    que entrar por texto é alternativa de primeira classe e não um degrau
+    inferior: custa menos e falha menos.
+    """
+    if turn.input_kind == "text":
+        return (turn.transcript or ""), None
+    attempt = (
+        await session.execute(
+            select(SpeakingAttempt).where(SpeakingAttempt.id == turn.speaking_attempt_id)
+        )
+    ).scalar_one_or_none()
+    if attempt is None or not attempt.storage_key or not attempt.mime_type:
+        return None, "audio_unavailable"
+    if not settings.assist_transcription_url:
+        return None, "feature_disabled"
+    storage = AudioStorage(settings.speaking_storage_dir)
+    try:
+        audio = await asyncio.to_thread(
+            storage.read_verified,
+            attempt.storage_key,
+            attempt.audio_sha256,
+            settings.speaking_max_bytes,
+        )
+    except (OSError, ValueError):
+        return None, "audio_unavailable"
+    try:
+        result = await asyncio.to_thread(
+            assistance.call_transcription_provider,
+            settings.assist_transcription_url,
+            audio,
+            attempt.mime_type,
+            token=settings.assist_provider_token,
+            timeout=settings.assist_timeout_seconds,
+            idempotency_key=f"dialogue-stt-{turn.id}",
+        )
+    except assistance.ProviderFailure as error:
+        return None, error.code
+    except Exception:
+        return None, "internal_provider_error"
+    return result.text, None
+
+
+async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
+    """Fecha um turno de diálogo reivindicado.
+
+    A ordem repete a da transcrição: carregar o necessário, autorizar o
+    despacho (que é onde a cota é consumida), e só então falar com fora. Falha
+    de provedor não falha o job — `resolve_turn` grava o turno com o roteiro e
+    `fallback=true`, porque o aluno precisa poder continuar a conversa.
+    """
+    settings = get_settings()
+    async with get_sessionmaker()() as session:
+        turn = (
+            await session.execute(
+                select(DialogueTurn).where(DialogueTurn.transcription_job_id == claim.job_id)
+            )
+        ).scalar_one_or_none()
+        if turn is None:
+            await _record_failure(claim, "dialogue_turn_missing", retryable=False)
+            return True
+        dialogue_row = (
+            await session.execute(
+                select(SpeakingDialogue).where(SpeakingDialogue.id == turn.dialogue_id)
+            )
+        ).scalar_one()
+        lesson = (
+            await session.execute(select(Lesson).where(Lesson.id == dialogue_row.lesson_id))
+        ).scalar_one()
+        transcript, erro = await _dialogue_transcript(session, settings, turn)
+        if transcript is None:
+            await _record_failure(claim, erro or "internal_provider_error", retryable=False)
+            return True
+        if not await _authorize_dispatch(claim):
+            return True
+        brief = await dialogue_service.brief_for_lesson(session, lesson)
+        outcome = await dialogue_service.resolve_turn(
+            session, turn, dialogue_row, brief, transcript
+        )
+        await session.commit()
+    if outcome.cost_microusd and outcome.cost_known:
+        async with get_sessionmaker()() as session, session.begin():
+            await assist_quota.record_cost(session, claim.reservation_id, outcome.cost_microusd)
+    async with get_sessionmaker()() as session, session.begin():
+        job = (
+            await session.execute(
+                select(TranscriptionJob).where(TranscriptionJob.id == claim.job_id)
+            )
+        ).scalar_one_or_none()
+        if job is not None:
+            job.status = "completed"
+            job.completed_at = datetime.now(UTC)
+            job.processing_started_at = None
+            job.error_code = outcome.error_code
+    logger.info(
+        "dialogue_job_completed",
+        extra={
+            "job_id": claim.job_id,
+            "fallback": outcome.fallback,
+            "error_code": outcome.error_code,
+        },
+    )
+    return True
+
+
 async def process_next_transcription() -> bool:
     """Processa no máximo um job; retorna se algum registro foi reivindicado."""
 
     settings = get_settings()
-    if not settings.assisted_features_enabled or not settings.assist_transcription_url:
+    # O worker atende dois tipos de job com provedores diferentes: exigir a URL
+    # de transcrição para tudo deixaria o diálogo parado na fila quando só a
+    # transcrição estivesse desconfigurada.
+    if not settings.assisted_features_enabled:
+        return False
+    if not settings.assist_transcription_url and not settings.dialogue_assist_configured:
         return False
     claim = await _claim_next_job(datetime.now(UTC))
     if claim is None:
         return False
+    if claim.kind == "dialogue":
+        return await _process_dialogue_claim(claim)
+    if not settings.assist_transcription_url:
+        await _record_failure(claim, "feature_disabled", retryable=False)
+        return True
 
     async with get_sessionmaker()() as session:
         job = (
