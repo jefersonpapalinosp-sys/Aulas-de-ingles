@@ -18,12 +18,19 @@ PublicationStatus = Literal["planned", "published", "archived"]
 
 # Prática oral
 SelfRating = Literal["repeat", "almost", "confident"]
+# De onde veio o áudio: linha de transcrição (shadowing) ou turno de diálogo
+# (Guiado). O BE-46 tornou `transcript_cue_id` opcional e este conjunto é o que
+# mantém a garantia: shadowing sem cue continua impossível.
+AudioOrigin = Literal["cue", "dialogue"]
 SpeakingStatus = Literal["pending", "ready"]
 IntegrityState = Literal["unknown", "verified", "missing", "changed"]
 
 # Assistência
 HumanRating = Literal["helpful", "not_helpful"]
 TranscriptionStatus = Literal["queued", "processing", "completed", "failed"]
+# O que o worker faz com o job: transcrever áudio ou conduzir um turno de
+# diálogo (que pode ser de texto, sem áudio nenhum).
+JobKind = Literal["transcription", "dialogue"]
 WorkerState = Literal["disabled", "unknown", "active", "stale"]
 AnalysisMode = Literal["deterministic", "assisted", "fallback"]
 AssistModality = Literal["transcription", "writing"]

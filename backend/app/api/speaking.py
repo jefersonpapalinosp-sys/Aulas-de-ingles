@@ -65,10 +65,17 @@ logger = logging.getLogger(__name__)
 
 
 def _query() -> Select[SpeakingAttempt]:
-    return select(SpeakingAttempt).options(
-        selectinload(SpeakingAttempt.cue)
-        .selectinload(TranscriptCue.media)
-        .selectinload(LessonMedia.lesson)
+    """Tentativas de shadowing. Áudio de turno de diálogo (`origin='dialogue'`)
+    não aparece aqui: ele pertence à visão do diálogo, tem outro contrato e
+    outra retenção. O filtro é o que mantém `cue_id` não-nulo nesta rota."""
+    return (
+        select(SpeakingAttempt)
+        .where(SpeakingAttempt.origin == "cue")
+        .options(
+            selectinload(SpeakingAttempt.cue)
+            .selectinload(TranscriptCue.media)
+            .selectinload(LessonMedia.lesson)
+        )
     )
 
 
@@ -161,12 +168,14 @@ async def _active_jobs(
         await session.execute(
             select(TranscriptionJob).where(
                 TranscriptionJob.user_id == user_id,
+                TranscriptionJob.kind == "transcription",
                 TranscriptionJob.speaking_attempt_id.in_(attempt_ids),
                 TranscriptionJob.expires_at > datetime.now(UTC),
             )
         )
     ).scalars()
-    return {job.speaking_attempt_id: job for job in jobs}
+    # Job sem áudio é de diálogo por texto; não entra no mapa do shadowing.
+    return {job.speaking_attempt_id: job for job in jobs if job.speaking_attempt_id}
 
 
 async def _attempt_outputs(
@@ -187,10 +196,29 @@ async def _attempt_outputs(
     ]
 
 
+def _shadowing_cue(attempt: SpeakingAttempt) -> int:
+    """O cue de uma tentativa de shadowing.
+
+    As consultas destas rotas filtram `origin='cue'`, então o cue existe. Se
+    algo escapar do filtro, 404 é a resposta certa — a gravação não existe
+    *como shadowing* — e não um 500 por `None` onde o contrato pede `int`.
+    """
+    if attempt.transcript_cue_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gravação não existe.")
+    return attempt.transcript_cue_id
+
+
+def _job_attempt(job: TranscriptionJob) -> int:
+    """O áudio de um job de transcrição; job de diálogo por texto não tem."""
+    if job.speaking_attempt_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transcrição não existe.")
+    return job.speaking_attempt_id
+
+
 def _transcription_out(job: TranscriptionJob, expected_text: str | None) -> TranscriptionJobOut:
     return TranscriptionJobOut(
         id=job.id,
-        attempt_id=job.speaking_attempt_id,
+        attempt_id=_job_attempt(job),
         status=job.status,
         provider=job.provider,
         attempt_count=job.attempt_count,
@@ -223,7 +251,7 @@ def _output(
         course_title=attempt.cue.media.lesson.course.title,
         unit_slug=attempt.cue.media.lesson.unit.slug,
         lesson_number=attempt.cue.media.lesson.number,
-        cue_id=attempt.transcript_cue_id,
+        cue_id=_shadowing_cue(attempt),
         cue_text=captured_cue_text,
         historical_content_status=("available" if captured_cue_text is not None else "unavailable"),
         duration_ms=attempt.duration_ms,
@@ -648,6 +676,8 @@ async def _owned_transcription(
     query = select(TranscriptionJob).where(
         TranscriptionJob.id == job_id,
         TranscriptionJob.user_id == user_id,
+        # Job de diálogo não é transcrição de shadowing: 404 nestas rotas.
+        TranscriptionJob.kind == "transcription",
         TranscriptionJob.expires_at > datetime.now(UTC),
     )
     if lock:
@@ -666,7 +696,7 @@ async def avaliar_transcricao(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> TranscriptionJobOut:
     job = await _owned_transcription(session, job_id, usuario.id)
-    attempt = await _owned_attempt(session, job.speaking_attempt_id, usuario.id)
+    attempt = await _owned_attempt(session, _job_attempt(job), usuario.id)
     job.human_rating = corpo.rating
     await session.commit()
     return _transcription_out(

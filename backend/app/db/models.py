@@ -30,10 +30,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.domain.enums import (
     AnalysisMode,
+    AudioOrigin,
     DeletionJobState,
     ExerciseObjective,
     HumanRating,
     IntegrityState,
+    JobKind,
     NotebookKind,
     PracticeMode,
     PracticeStatus,
@@ -666,6 +668,11 @@ class SpeakingAttempt(Base):
             name="ck_speaking_integrity",
         ),
         Index("ix_speaking_status_created", "status", "created_at"),
+        CheckConstraint(
+            "(origin = 'cue') = (transcript_cue_id IS NOT NULL) "
+            "AND origin IN ('cue','dialogue')",
+            name="ck_speaking_origin",
+        ),
         CheckConstraint("duration_ms > 0", name="ck_speaking_duration_positive"),
         CheckConstraint("duration_ms <= 30000", name="ck_speaking_duration_limit"),
         CheckConstraint(
@@ -675,8 +682,13 @@ class SpeakingAttempt(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
-    transcript_cue_id: Mapped[int] = mapped_column(
-        ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True
+    # Opcional desde o BE-46: o áudio do Guiado responde uma pergunta do
+    # parceiro, não uma linha de transcrição. `origin` carrega a garantia.
+    transcript_cue_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True, default=None
+    )
+    origin: Mapped[AudioOrigin] = mapped_column(
+        String(20), default="cue", server_default="cue"
     )
     duration_ms: Mapped[int] = mapped_column(Integer)
     self_rating: Mapped[SelfRating | None] = mapped_column(String(20), default=None)
@@ -798,6 +810,12 @@ class TranscriptionJob(Base):
             name="ck_transcription_job_status",
         ),
         CheckConstraint(
+            "kind IN ('transcription','dialogue') "
+            "AND (kind <> 'transcription' OR speaking_attempt_id IS NOT NULL)",
+            name="ck_transcription_job_kind",
+        ),
+        Index("ix_transcription_job_kind_status", "kind", "status", "next_attempt_at"),
+        CheckConstraint(
             "mean_confidence IS NULL OR (mean_confidence >= 0 AND mean_confidence <= 1)",
             name="ck_transcription_confidence",
         ),
@@ -815,8 +833,16 @@ class TranscriptionJob(Base):
         ForeignKey("assist_reservation.id", ondelete="SET NULL"), unique=True, default=None
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
-    speaking_attempt_id: Mapped[int] = mapped_column(
-        ForeignKey("speaking_attempt.id", ondelete="CASCADE"), unique=True, index=True
+    # Opcional desde o BE-46: o turno por texto também vira job (a chamada ao
+    # modelo acontece no worker) e não tem áudio. `kind` diz o que fazer.
+    speaking_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("speaking_attempt.id", ondelete="CASCADE"),
+        unique=True,
+        index=True,
+        default=None,
+    )
+    kind: Mapped[JobKind] = mapped_column(
+        String(20), default="transcription", server_default="transcription"
     )
     status: Mapped[TranscriptionStatus] = mapped_column(String(20), default="queued", index=True)
     provider: Mapped[str] = mapped_column(String(80))
