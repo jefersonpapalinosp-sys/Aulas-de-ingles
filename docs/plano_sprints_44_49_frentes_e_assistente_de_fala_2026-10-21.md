@@ -580,19 +580,21 @@ continuam verdes.
 
 Bloqueia FE-47.
 
-- [ ] Modelo de ameaças do assistente: injeção via transcrição do aluno,
+- [x] Modelo de ameaças do assistente: injeção via transcrição do aluno,
   exfiltração de prompt, saída com conteúdo inadequado, abuso de cota,
   IDOR em diálogo alheio, replay de turno, áudio malicioso.
-- [ ] Corpus adversarial com no mínimo 20 transcrições (instruções ao
+- [x] Corpus adversarial com no mínimo 20 transcrições (instruções ao
   modelo, pedidos de dados pessoais, troca de idioma, conteúdo ofensivo)
   como testes `pytest` que exigem saída dentro do esquema e sem eco de
   instrução.
-- [ ] Fluxo de dados ao provedor documentado em
+- [x] Fluxo de dados ao provedor documentado em
   `guia_do_aluno_retomada_offline_privacidade.md` e na política de mídia:
   o que sai (texto do turno, códigos de check), o que não sai (nome,
   e-mail, histórico, áudio quando o provedor é só de texto).
 - [ ] Requisitos do provedor em produção: HTTPS, token, região, retenção
-  menor ou igual à do projeto, sem uso para treinamento.
+  menor ou igual à do projeto, sem uso para treinamento. **HTTPS e token
+  passaram a ser exigidos no boot; região, retenção e não-treinamento
+  dependem do gate da modalidade `conversation`, que é do IA-48.**
 
 Aceite: os 20 casos passam; a revisão do fluxo de dados está assinada no
 documento com data.
@@ -636,7 +638,9 @@ Dívida que o BE-46 pagou do BE-45: dez colunas enum-like ainda eram `Mapped[str
 
 Provas: ruff e mypy strict limpos (103 arquivos), pytest **1223**, passo pós-cutover **186** (o arquivo de rotas novas entrou na lista do CI), eslint/tsc/`check:api`/vitest 400 e orçamento de bundle verdes. O baseline do contrato mudou de propósito: 7 rotas e 6 schemas novos, com **zero** rotas ou schemas existentes alterados — conferido por comparação semântica, porque o diff por linha de JSON ordenado é ilegível por natureza.
 
-**Falta no ciclo 46:** SEC-46.
+**Falta no ciclo 46:** nada de implementação. O SEC-46 aguarda a assinatura da
+revisão do fluxo de dados, que é ato do responsável, e o INFRA-46 fica para
+depois do provedor em produção.
 
 ---
 

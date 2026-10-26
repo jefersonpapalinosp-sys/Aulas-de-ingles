@@ -231,7 +231,19 @@ class Settings(BaseSettings):
             }:
                 raise RuntimeError("Ollama precisa permanecer no host local em produção.")
         if self.app_env == "prod" and self.assisted_features_enabled:
-            urls = [url for url in [self.assist_transcription_url, self.assist_writing_url] if url]
+            # A lista é de todas as URLs de provedor, e precisa crescer junto com
+            # elas: a do diálogo entrou no BE-46 e ficou de fora daqui, o que
+            # deixaria o texto do aluno sair em HTTP puro e sem token em
+            # produção sem o boot reclamar. SEC-46 fechou.
+            urls = [
+                url
+                for url in [
+                    self.assist_transcription_url,
+                    self.assist_writing_url,
+                    self.assist_dialogue_url,
+                ]
+                if url
+            ]
             if any(not url.startswith("https://") for url in urls):
                 raise RuntimeError("Provedores assistidos precisam usar HTTPS em produção.")
             if self.assist_provider_kind == "gateway" and urls and not self.assist_provider_token:

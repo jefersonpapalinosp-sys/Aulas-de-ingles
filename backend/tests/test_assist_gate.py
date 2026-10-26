@@ -144,6 +144,46 @@ def test_configuracao_assistida_recusa_limites_invalidos(
         settings.validar()
 
 
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        # SEC-46: a URL do diálogo entrou no BE-46 e ficou fora do gate de
+        # produção. Sem estes casos, o texto do aluno poderia sair em HTTP
+        # puro, ou sem token, e o boot não reclamaria.
+        # URL sem TLS, com token presente: reprova pelo HTTPS.
+        {"assist_dialogue_url": "http://provedor.invalido/dialogo", "assist_provider_token": "x"},
+        # URL com TLS, sem token: reprova pelo token.
+        {"assist_dialogue_url": "https://provedor.invalido/dialogo"},
+    ],
+)
+def test_producao_recusa_provedor_de_dialogo_sem_https_ou_sem_token(
+    overrides: dict[str, object],
+) -> None:
+    settings = Settings(  # type: ignore[arg-type]
+        app_env="prod",
+        jwt_secret="segredo-de-producao-para-o-teste",
+        cookie_secure=True,
+        public_origin="https://aulas.exemplo.test",
+        assisted_features_enabled=True,
+        **overrides,
+    )
+    with pytest.raises(RuntimeError, match="HTTPS em produção|ASSIST_PROVIDER_TOKEN"):
+        settings.validar()
+
+
+def test_producao_aceita_provedor_de_dialogo_com_https_e_token() -> None:
+    settings = Settings(  # type: ignore[arg-type]
+        app_env="prod",
+        jwt_secret="segredo-de-producao-para-o-teste",
+        cookie_secure=True,
+        public_origin="https://aulas.exemplo.test",
+        assisted_features_enabled=True,
+        assist_dialogue_url="https://provedor.exemplo.test/dialogo",
+        assist_provider_token="segredo",
+    )
+    settings.validar()
+
+
 @pytest.mark.parametrize("turnos", [12, 24, 36])
 def test_cota_de_conversa_aceita_multiplos_do_limite_do_dialogo(turnos: int) -> None:
     """Qualquer múltiplo serve; o que a decisão fixou foi a relação, não o 24."""

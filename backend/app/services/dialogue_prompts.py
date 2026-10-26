@@ -9,10 +9,12 @@ Regras que este módulo garante por construção:
 
 - o payload ao provedor leva só conteúdo da aula, o texto do turno atual, os
   últimos turnos em texto e os códigos reprovados; não existe parâmetro para
-  nome, e-mail ou identificador do aluno;
+  nome, e-mail ou identificador do aluno, e o texto que sai é redigido de
+  e-mail e sequência longa de dígitos — o aluno pode dizer o dado dele dentro
+  da própria frase;
 - o JSON Schema restringe `hints[].code` exatamente aos códigos reprovados;
-- a saída é saneada: códigos não permitidos são descartados, URLs e e-mails
-  invalidam o turno, texto longo demais invalida o turno.
+- a saída é saneada: códigos não permitidos são descartados; URL, e-mail,
+  texto longo demais e **eco do próprio prompt** invalidam o turno.
 """
 
 from __future__ import annotations
@@ -51,6 +53,55 @@ MAX_STUDENT_WORDS = MAX_WORDS
 _URL = re.compile(r"(https?://|www\.)", re.IGNORECASE)
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _MARKDOWN = re.compile(r"[*_`~]+")
+
+# SEC-46: marcas que só existem no que **nós** mandamos ao provedor. Se voltam
+# na resposta, ela está ecoando o prompt ou a mensagem de controle, e o aluno
+# leria as instruções em vez da conversa. Um A1 falando da aula não escreve
+# nada disto, então qualquer uma invalida o turno em vez de ser limpada:
+# resposta que vazou instrução não é resposta confiável, e o roteiro da aula é
+# uma saída melhor do que uma frase remendada.
+_PROMPT_LEAK_MARKS = (
+    "dialogue-prompt-v",
+    "failed_checks",
+    "partner_text",
+    "cefr",
+    "lesson goals:",
+    "target vocabulary:",
+    "model phrases:",
+    "grammar examples:",
+    "conversation so far",
+    "target terms for this turn",
+    "learner's latest turn",
+)
+# Fronteira de papel forjada: o provedor devolvendo "System: ..." é a forma
+# mais direta de fazer o aluno acreditar que está lendo o aplicativo.
+_ROLE_PREFIX = re.compile(r"^\s*(system|assistant|user)\s*:", re.IGNORECASE | re.MULTILINE)
+
+
+# SEC-46: o aplicativo nunca manda dado do aluno ao provedor, mas o aluno pode
+# dizer o dele dentro do turno — "my email is ..." é uma frase plausível numa
+# aula de inglês. A transcrição guardada fica intacta (é o histórico de prática
+# dele, e os checks determinísticos rodam sobre o texto original, aqui no
+# servidor); o que sai para o provedor vai redigido. O limite de 8 dígitos
+# deixa passar idade, hora e número de aula, e pega telefone e documento.
+_PHONE = re.compile(r"(?<!\w)[\d][\d\s().-]{6,}[\d](?!\w)")
+
+
+def redact_personal(text: str) -> str:
+    """Tira e-mail e sequência longa de dígitos do que vai ao provedor."""
+    sem_email = _EMAIL.sub("[email removido]", text)
+    return _PHONE.sub(
+        lambda achado: (
+            "[numero removido]" if sum(c.isdigit() for c in achado.group()) >= 8 else achado.group()
+        ),
+        sem_email,
+    )
+
+
+def leaks_prompt(text: str) -> bool:
+    """A resposta traz de volta instrução nossa, ou finge ser o sistema?"""
+    lowered = text.lower()
+    return any(mark in lowered for mark in _PROMPT_LEAK_MARKS) or bool(_ROLE_PREFIX.search(text))
 
 
 @dataclass(frozen=True, slots=True)
@@ -223,11 +274,13 @@ def turn_messages(
 
     recent = list(history)[-MAX_HISTORY_TURNS:]
     lines = [
-        f"{'Learner' if role == 'student' else 'Partner'}: {_plain(text)}" for role, text in recent
+        f"{'Learner' if role == 'student' else 'Partner'}: {redact_personal(_plain(text))}"
+        for role, text in recent
     ]
     user = (
         "Conversation so far:\n" + ("\n".join(lines) if lines else "(start)") + "\n\n"
-        f"Learner's latest turn (transcribed): {_plain(transcript) or '(nothing recognised)'}\n"
+        "Learner's latest turn (transcribed): "
+        f"{redact_personal(_plain(transcript)) or '(nothing recognised)'}\n"
         f"Target terms for this turn: {', '.join(requested_terms) or '(none)'}\n"
         f"failed_checks: {list(failed_codes)}\n"
         "Reply with the partner's next turn and, only for failed_checks, one hint per code."
@@ -254,6 +307,8 @@ def sanitize_provider_output(raw: object, failed_codes: Sequence[CheckCode]) -> 
     text = " ".join(text.split())
     if not text or len(text) > MAX_PARTNER_CHARS or _URL.search(text) or _EMAIL.search(text):
         return None
+    if leaks_prompt(text):
+        return None
     hints_raw = raw.get("hints", [])
     if not isinstance(hints_raw, list):
         return None
@@ -271,6 +326,7 @@ def sanitize_provider_output(raw: object, failed_codes: Sequence[CheckCode]) -> 
             or len(message) > MAX_HINT_CHARS
             or _URL.search(message)
             or _EMAIL.search(message)
+            or leaks_prompt(message)
         ):
             return None
         if all(existing.code != code for existing in hints):
