@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import type { Exercise } from '../../api/client'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
   useActivePracticeSession,
   useCreatePracticeSession,
@@ -8,27 +6,19 @@ import {
   usePracticeSession,
   useUpdatePracticePosition,
 } from '../../api/practice'
-import { ExerciseCard } from '../../components/ExerciseCard'
+import { filtersFromSession, practiceOptions } from './filters'
+import { PracticeEmpty, PracticeIntro } from './PracticeIntro'
+import { PracticePosition } from './practicePosition'
+import { PracticeQuestion } from './PracticeQuestion'
+import { PracticeContentChanged, PracticeFailure, PracticeResume } from './PracticeResume'
+import { PracticeSummary } from './PracticeSummary'
+import { useQueuedAttempts } from './queuedAttempts'
 import {
-  listPendingAttempts,
-  subscribeAttemptQueue,
-  type AttemptQueueChangeEventDetail,
-  type AttemptQueueSyncEventDetail,
-} from '../offline/attemptQueue'
-import { lessonPath, studyPath } from '../../routing/courseRoutes'
-import { readLocal, removeLocal, writeLocal, type StorageResult } from '../../storage/local'
-import {
-  ACTIVITY_TYPE_LABELS,
   PRACTICE_MODE_LABELS,
-  PRACTICE_OBJECTIVE_LABELS,
-  SKILL_LABELS,
   type ExerciseActivityEvent,
-  type PracticeActivityType,
   type PracticeFilters,
   type PracticeMode,
-  type PracticeObjective,
   type PracticeSession as PracticeSessionData,
-  type PracticeSkill,
 } from './types'
 
 type PracticeRunnerProps = {
@@ -41,56 +31,13 @@ type PracticeRunnerProps = {
   lockFilters?: boolean
 }
 
-function localPositionKey(userId: number, sessionId: number): string {
-  return `aulas-ingles:practice-position:v1:${userId}:${sessionId}`
-}
-
-function readLocalPosition(userId: number, session: PracticeSessionData): StorageResult<number | null> {
-  const result = readLocal(localPositionKey(userId, session.id))
-  if (!result.ok) return result
-  const position = result.value === null ? null : Number(result.value)
-  return { ok: true, value: session.items.some((item) => item.position === position) ? position : null }
-}
-
-function writeLocalPosition(userId: number, sessionId: number, position: number | null) {
-  const key = localPositionKey(userId, sessionId)
-  return position === null ? removeLocal(key) : writeLocal(key, String(position))
-}
-
-function unique(values: Array<string | null | undefined>): string[] {
-  return [...new Set(values.filter((value): value is string => Boolean(value)))].sort()
-}
-
-function activityLabel(value: string): string {
-  return ACTIVITY_TYPE_LABELS[value] ?? value.replaceAll('_', ' ')
-}
-
-function objectiveOf(exercise: Exercise): PracticeObjective | null {
-  return exercise.objective
-}
-
-function filtersFromSession(session: PracticeSessionData): PracticeFilters {
-  const activityType =
-    session.activity_type && session.activity_type in ACTIVITY_TYPE_LABELS
-      ? (session.activity_type as PracticeActivityType)
-      : undefined
-  const skill =
-    session.skill && session.skill in SKILL_LABELS
-      ? (session.skill as PracticeSkill)
-      : undefined
-  return {
-    activityType,
-    skill,
-    objective: session.objective ?? undefined,
-  }
-}
-
-function modeDescription(mode: PracticeMode): string {
-  if (mode === 'quick') return 'Até cinco questões em ordem estável. Orçamento sugerido: 10 min; cerca de 2 min por item, sem cronômetro.'
-  if (mode === 'mistakes') return 'Uma nova sessão apenas com os itens frágeis desta tentativa.'
-  return 'Todos os itens do recorte, com dicas progressivas e explicação.'
-}
-
+/** Conduz uma sessão de prática: um portão por vez, uma questão por vez.
+ *
+ * A posição saiu daqui para `practicePosition.ts`, que é onde vivem o espelho
+ * local, a reconciliação com a conta e a chave de idempotência reaproveitada.
+ * Este componente decide qual tela mostrar e cuida do que é da tela: foco,
+ * anúncio para leitor de tela e a fila offline de tentativas.
+ */
 export function PracticeRunner({
   courseSlug,
   lessonNumber,
@@ -104,15 +51,10 @@ export function PracticeRunner({
   const [mode, setMode] = useState<PracticeMode>('guided')
   const [sessionId, setSessionId] = useState<number | null>(null)
   const [resumeAccepted, setResumeAccepted] = useState(false)
-  const [localPosition, setLocalPosition] = useState<number | null>(null)
-  const [queuedExercises, setQueuedExercises] = useState<Set<number>>(() => new Set())
   const [showSummary, setShowSummary] = useState(false)
   const [announcement, setAnnouncement] = useState('')
-  const [navigationError, setNavigationError] = useState('')
-  const [storageWarning, setStorageWarning] = useState('')
   const [online, setOnline] = useState(() => navigator.onLine)
   const questionRef = useRef<HTMLHeadingElement>(null)
-  const positionSyncingRef = useRef(false)
 
   const allExercises = usePracticeExercises(courseSlug, lessonNumber)
   const filteredExercises = usePracticeExercises(courseSlug, lessonNumber, filters)
@@ -123,27 +65,29 @@ export function PracticeRunner({
   const refetchPracticeSession = sessionQuery.refetch
   const updatePracticePosition = updatePosition.mutateAsync
 
-  const activeSession = activeQuery.data ?? null
+  const position = useMemo(
+    () => new PracticePosition(userId, {
+      save: updatePracticePosition,
+      reload: async () => (await refetchPracticeSession()).data ?? null,
+    }),
+    [refetchPracticeSession, updatePracticePosition, userId],
+  )
+  const local = useSyncExternalStore(position.subscribe, position.snapshot)
+
   const session = sessionId !== null ? (sessionQuery.data ?? null) : null
-  const currentPosition = session ? (localPosition ?? session.current_position) : 0
+  const attempts = useQueuedAttempts(session, userId, refetchPracticeSession)
+
+  const activeSession = activeQuery.data ?? null
+  const currentPosition = session ? (local.local ?? session.current_position) : 0
   const currentItem = session?.items.find((item) => item.position === currentPosition)
   const currentExerciseId = currentItem?.exercise.id
   const currentIndex = session?.items.findIndex((item) => item.position === currentPosition) ?? -1
-  const currentQueued = currentItem ? queuedExercises.has(currentItem.exercise.id) : false
-  const currentCompleted = currentItem
-    ? currentItem.outcome !== 'pending' || currentQueued
-    : false
+  const currentQueued = currentItem ? attempts.queued.has(currentItem.exercise.id) : false
+  const currentCompleted = currentItem ? currentItem.outcome !== 'pending' || currentQueued : false
 
-  const options = useMemo(() => {
-    const exercises = allExercises.data ?? []
-    return {
-      activityTypes: unique(
-        exercises.map((exercise) => exercise.activity_type),
-      ) as PracticeActivityType[],
-      skills: unique(exercises.map((exercise) => exercise.skill)) as PracticeSkill[],
-      objectives: unique(exercises.map(objectiveOf)) as PracticeObjective[],
-    }
-  }, [allExercises.data])
+  const options = useMemo(() => practiceOptions(allExercises.data ?? []), [allExercises.data])
+
+  useEffect(() => () => { position.dispose() }, [position])
 
   useEffect(() => {
     const handleOnline = () => setOnline(true)
@@ -157,147 +101,37 @@ export function PracticeRunner({
   }, [])
 
   useEffect(() => {
-    if (!session) return
-    const result = readLocalPosition(userId, session)
-    if (result.ok) setLocalPosition(result.value)
-    else setStorageWarning(result.error)
-  }, [session, userId])
+    if (session) position.load(session)
+  }, [position, session])
 
   useEffect(() => {
-    if (!session) return
-    let alive = true
-    let revision = 0
-    const refreshQueued = async (event?: Event) => {
-      const current = ++revision
-      const reason = (event as CustomEvent<AttemptQueueChangeEventDetail> | undefined)?.detail
-        ?.reason
-      // Durante o sync, o card continua bloqueado como "Na fila" até o GET da
-      // sessão confirmar a correção. Assim não existe uma janela para enviar
-      // uma segunda tentativa enquanto várias entradas são processadas.
-      if (reason === 'synced' || reason === 'blocked') return
-      try {
-        if (reason === 'external') await refetchPracticeSession()
-        const pending = await listPendingAttempts(userId)
-        if (!alive || current !== revision) return
-        setQueuedExercises(new Set(pending
-            .filter((attempt) => attempt.sessionId === session.id)
-            .map((attempt) => attempt.exerciseId)))
-      } catch (error) {
-        if (alive) setNavigationError(error instanceof Error ? error.message : 'Não foi possível consultar as respostas locais.')
-      }
-    }
-    void refreshQueued()
-    const unsubscribe = subscribeAttemptQueue((event) => { void refreshQueued(event) })
-    return () => { alive = false; unsubscribe() }
-  }, [session, userId, refetchPracticeSession])
+    if (session) void position.settle(session, online)
+  }, [local.local, online, position, session])
 
   useEffect(() => {
     if (currentExerciseId === undefined || !resumeAccepted) return
     questionRef.current?.focus()
   }, [currentExerciseId, resumeAccepted])
 
-  const reconcilePosition = useCallback(
-    async (position: number, baseline: PracticeSessionData): Promise<boolean> => {
-      if (positionSyncingRef.current) return false
-      positionSyncingRef.current = true
-      const idempotencyKey = crypto.randomUUID()
-      try {
-        try {
-          await updatePracticePosition({
-            sessionId: baseline.id,
-            currentPosition: position,
-            expectedRevision: baseline.state_revision,
-            idempotencyKey,
-          })
-        } catch (initialError) {
-          const { data: latest } = await refetchPracticeSession()
-          if (!latest || latest.id !== baseline.id) throw initialError
-
-          if (latest.current_position !== position) {
-            if (latest.status !== 'active' || latest.content_changed) throw initialError
-            await updatePracticePosition({
-              sessionId: latest.id,
-              currentPosition: position,
-              expectedRevision: latest.state_revision,
-              // A mesma chave cobre tanto uma revisão concorrente quanto uma
-              // resposta perdida depois de o primeiro PUT ter sido aplicado.
-              idempotencyKey,
-            })
-          }
-        }
-        const removed = writeLocalPosition(userId, baseline.id, null)
-        setStorageWarning(removed.ok ? '' : removed.error)
-        setLocalPosition(null)
-        setNavigationError('')
-        return true
-      } catch {
-        setNavigationError(
-          'Posição não sincronizada. Confira o salvamento local antes de sair e tente novamente.',
-        )
-        return false
-      } finally {
-        positionSyncingRef.current = false
-      }
-    },
-    [refetchPracticeSession, updatePracticePosition, userId],
-  )
-
-  useEffect(() => {
-    if (!online || !session || localPosition === null) return
-    if (session.current_position === localPosition) {
-      const removed = writeLocalPosition(userId, session.id, null)
-      setStorageWarning(removed.ok ? '' : removed.error)
-      setLocalPosition(null)
-      setNavigationError('')
-      return
-    }
-    void reconcilePosition(localPosition, session)
-  }, [localPosition, online, reconcilePosition, session, userId])
-
-  useEffect(() => {
-    function handleSync(event: Event) {
-      const detail = (event as CustomEvent<AttemptQueueSyncEventDetail>).detail
-      if (!session || detail.userId !== userId) return
-      const synced = detail.syncedAttempts.filter((attempt) => attempt.sessionId === session.id)
-      const rejected = detail.rejectedAttempts.filter(
-        (attempt) => attempt.sessionId === session.id,
-      )
-      if (synced.length === 0 && rejected.length === 0) return
-
-      void refetchPracticeSession().then(() => {
-        setQueuedExercises((current) => {
-          const next = new Set(current)
-          synced.forEach((attempt) => next.delete(attempt.exerciseId))
-          rejected.forEach((attempt) => next.delete(attempt.exerciseId))
-          return next
-        })
-      }).catch(() => setNavigationError('Não foi possível confirmar o resultado sincronizado. Tente retomar a sessão.'))
-    }
-
-    return subscribeAttemptQueue(() => undefined, handleSync)
-  }, [refetchPracticeSession, session, userId])
-
   async function begin(
     selectedMode: PracticeMode = mode,
     sourceSessionId?: number,
     selectedFilters: PracticeFilters = filters,
   ) {
-    setNavigationError('')
+    attempts.clearError()
     try {
       const created = await createSession.mutateAsync({
         idempotency_key: crypto.randomUUID(),
         mode: selectedMode,
-        ...(selectedFilters.activityType
-          ? { activity_type: selectedFilters.activityType }
-          : {}),
+        ...(selectedFilters.activityType ? { activity_type: selectedFilters.activityType } : {}),
         ...(selectedFilters.skill ? { skill: selectedFilters.skill } : {}),
         ...(selectedFilters.objective ? { objective: selectedFilters.objective } : {}),
         ...(sourceSessionId ? { source_session_id: sourceSessionId } : {}),
       })
       setSessionId(created.id)
       setResumeAccepted(true)
-      setLocalPosition(null)
-      setQueuedExercises(new Set())
+      position.reset()
+      attempts.forget()
       setShowSummary(created.status === 'completed')
       setAnnouncement(`${PRACTICE_MODE_LABELS[created.mode]} iniciada.`)
     } catch {
@@ -314,26 +148,18 @@ export function PracticeRunner({
 
   async function refreshAfterActivity(event: ExerciseActivityEvent) {
     if (event.type === 'attempt' && event.status === 'queued') {
-      setQueuedExercises((current) => new Set(current).add(event.exerciseId))
+      attempts.mark(event.exerciseId)
       return
     }
-
-    if (event.type === 'hint') {
-      setAnnouncement(`Dica ${event.level} aberta.`)
-    }
+    if (event.type === 'hint') setAnnouncement(`Dica ${event.level} aberta.`)
     await sessionQuery.refetch()
   }
 
-  async function moveTo(position: number) {
-    if (!session || !session.items.some((item) => item.position === position)) return
-    setNavigationError('')
-    setLocalPosition(position)
-    const saved = writeLocalPosition(userId, session.id, position)
-    setStorageWarning(saved.ok ? '' : `${saved.error} Posição apenas nesta tela até sincronizar.`)
-    setAnnouncement(`Questão ${position + 1} de ${session.summary.total}.`)
-
-    if (!online) return
-    await reconcilePosition(position, session)
+  async function moveTo(target: number) {
+    if (!session || !session.items.some((item) => item.position === target)) return
+    attempts.clearError()
+    setAnnouncement(`Questão ${target + 1} de ${session.summary.total}.`)
+    await position.moveTo(session, target, online)
   }
 
   if (activeQuery.isPending || allExercises.isPending) {
@@ -341,425 +167,125 @@ export function PracticeRunner({
   }
 
   if (activeQuery.error || allExercises.error) {
-    const error = activeQuery.error ?? allExercises.error
     return (
-      <div className="practice-state error" role="alert">
-        <h2>Não foi possível abrir os exercícios</h2>
-        <p>{error?.message}</p>
-        <button
-          type="button"
-          className="btn ghost"
-          onClick={() => {
-            void activeQuery.refetch()
-            void allExercises.refetch()
-          }}
-        >
-          Tentar novamente
-        </button>
-      </div>
+      <PracticeFailure
+        title="Não foi possível abrir os exercícios"
+        message={(activeQuery.error ?? allExercises.error)?.message}
+        action="Tentar novamente"
+        onRetry={() => { void activeQuery.refetch(); void allExercises.refetch() }}
+      />
     )
   }
 
   if (!resumeAccepted && activeSession?.content_changed) {
-    const staleFilters = filtersFromSession(activeSession)
     return (
-      <div className="practice-state warning" role="status">
-        <p className="study-kicker">Conteúdo atualizado</p>
-        <h2>Os exercícios mudaram desde o início desta sessão</h2>
-        <p>
-          Seu histórico anterior continuará registrado. Comece uma sessão nova para não misturar
-          versões do conteúdo.
-        </p>
-        <button
-          type="button"
-          className="btn"
-          disabled={createSession.isPending || !online}
-          onClick={() => void begin('guided', undefined, staleFilters)}
-        >
-          Recomeçar com conteúdo atualizado
-        </button>
-      </div>
+      <PracticeContentChanged
+        title="Os exercícios mudaram desde o início desta sessão"
+        note="Seu histórico anterior continuará registrado. Comece uma sessão nova para não misturar versões do conteúdo."
+        disabled={createSession.isPending || !online}
+        onRestart={() => void begin('guided', undefined, filtersFromSession(activeSession))}
+      />
     )
   }
 
   if (!resumeAccepted && activeSession) {
-    return (
-      <div className="practice-resume">
-        <p className="study-kicker">Sessão em andamento</p>
-        <h2>Continue de onde parou</h2>
-        <p>
-          {PRACTICE_MODE_LABELS[activeSession.mode]} · questão{' '}
-          {activeSession.current_position + 1} de {activeSession.summary.total}
-        </p>
-        <div className="practice-resume-progress">
-          <span>{activeSession.summary.completed} concluídas</span>
-          <span>{activeSession.summary.pending} pendentes</span>
-        </div>
-        <button type="button" className="btn" onClick={() => acceptResume(activeSession)}>
-          Retomar sessão
-        </button>
-      </div>
-    )
+    return <PracticeResume session={activeSession} onResume={() => acceptResume(activeSession)} />
   }
 
   if (sessionId !== null && (sessionQuery.isPending || !session)) {
     if (sessionQuery.error) {
       return (
-        <div className="practice-state error" role="alert">
-          <h2>Não foi possível retomar esta sessão</h2>
-          <p>{sessionQuery.error.message}</p>
-          <button type="button" className="btn ghost" onClick={() => void sessionQuery.refetch()}>
-            Tentar novamente
-          </button>
-        </div>
+        <PracticeFailure
+          title="Não foi possível retomar esta sessão"
+          message={sessionQuery.error.message}
+          action="Tentar novamente"
+          onRetry={() => void sessionQuery.refetch()}
+        />
       )
     }
     return <p role="status">Retomando sua sessão…</p>
   }
 
   if (session?.content_changed) {
-    const staleFilters = filtersFromSession(session)
     return (
-      <div className="practice-state warning" role="status">
-        <p className="study-kicker">Conteúdo atualizado</p>
-        <h2>Esta sessão usa uma versão anterior dos exercícios</h2>
-        <p>O histórico foi preservado, mas as respostas novas precisam usar a versão atual.</p>
-        <button
-          type="button"
-          className="btn"
-          disabled={createSession.isPending || !online}
-          onClick={() => void begin('guided', undefined, staleFilters)}
-        >
-          Recomeçar com conteúdo atualizado
-        </button>
-      </div>
+      <PracticeContentChanged
+        title="Esta sessão usa uma versão anterior dos exercícios"
+        note="O histórico foi preservado, mas as respostas novas precisam usar a versão atual."
+        disabled={createSession.isPending || !online}
+        onRestart={() => void begin('guided', undefined, filtersFromSession(session))}
+      />
     )
   }
 
   if (session && session.status === 'completed' && showSummary) {
-    const fragile = session.summary.corrected + session.summary.revealed
     return (
-      <section className="practice-summary" aria-labelledby="practice-summary-title">
-        <p className="study-kicker">Sessão concluída</p>
-        <h2 id="practice-summary-title">Resumo da sua prática</h2>
-        <dl>
-          <div>
-            <dt>Primeira tentativa</dt>
-            <dd>{session.summary.first_try_correct}</dd>
-          </div>
-          <div>
-            <dt>Após correção</dt>
-            <dd>{session.summary.corrected}</dd>
-          </div>
-          <div>
-            <dt>Respostas reveladas</dt>
-            <dd>{session.summary.revealed}</dd>
-          </div>
-          <div>
-            <dt>Total</dt>
-            <dd>{session.summary.total}</dd>
-          </div>
-        </dl>
-        <p className="practice-summary-note">
-          Respostas reveladas ajudam a aprender, mas não são contadas como domínio na primeira
-          tentativa.
-        </p>
-        <div className="practice-summary-actions">
-          <button
-            type="button"
-            className="btn"
-            disabled={fragile === 0 || createSession.isPending}
-            onClick={() => void begin('mistakes', session.id, filtersFromSession(session))}
-          >
-            Repetir somente erros
-          </button>
-          <Link className="btn ghost" to="/revisar">
-            Ir para revisão
-          </Link>
-          <Link className="btn ghost" to={studyPath(courseSlug, lessonNumber, 'revisar')}>
-            Praticar escrita e fala
-          </Link>
-        </div>
-        {fragile === 0 && <p className="muted">Nenhum item frágil nesta sessão. Muito bem!</p>}
-      </section>
+      <PracticeSummary
+        session={session}
+        courseSlug={courseSlug}
+        lessonNumber={lessonNumber}
+        starting={createSession.isPending}
+        onRepeatMistakes={() => void begin('mistakes', session.id, filtersFromSession(session))}
+      />
     )
   }
 
   if (!session) {
     const total = allExercises.data?.length ?? 0
-    const filteredTotal = filteredExercises.data?.length ?? 0
-
-    if (total === 0) {
-      return (
-        <div className="practice-state empty">
-          <p className="study-kicker">Em preparação</p>
-          <h2>Esta aula ainda não possui exercícios</h2>
-          <p>Você pode estudar a teoria agora e voltar quando o pack autoral for publicado.</p>
-          <Link className="btn ghost" to={lessonPath(courseSlug, lessonNumber)}>
-            Voltar à aula
-          </Link>
-        </div>
-      )
-    }
-
+    if (total === 0) return <PracticeEmpty courseSlug={courseSlug} lessonNumber={lessonNumber} />
     return (
-      <section className={`practice-intro ${variant}`} aria-labelledby="practice-intro-title">
-        <p className="study-kicker">Laboratório da Aula {lessonNumber}</p>
-        <h2 id="practice-intro-title">Escolha como praticar</h2>
-        <p className="study-copy">
-          Uma questão por vez. A correção objetiva compara sua resposta com o gabarito
-          autoral deste exercício; não é uma avaliação geral do seu inglês. Não há ranking
-          nem tempo obrigatório.
-        </p>
-
-        <fieldset className="practice-modes">
-          <legend>Modo da sessão</legend>
-          {(['guided', 'quick', 'mistakes'] as const).map((itemMode) => (
-            <label key={itemMode}>
-              <input
-                type="radio"
-                name={`practice-mode-${lessonNumber}`}
-                value={itemMode}
-                checked={mode === itemMode}
-                disabled={itemMode === 'mistakes'}
-                onChange={() => setMode(itemMode)}
-              />
-              <span>
-                <strong>{PRACTICE_MODE_LABELS[itemMode]}</strong>
-                <small>{modeDescription(itemMode)}</small>
-              </span>
-            </label>
-          ))}
-        </fieldset>
-
-        {!lockFilters && (
-          <div className="practice-filters" aria-label="Filtros de exercícios">
-            <label>
-              Modalidade
-              <select
-                value={filters.activityType ?? ''}
-                onChange={(event) =>
-                  setFilters((current) => ({
-                    ...current,
-                    activityType: (event.target.value || undefined) as
-                      | PracticeActivityType
-                      | undefined,
-                  }))
-                }
-              >
-                <option value="">Todas</option>
-                {options.activityTypes.map((value) => (
-                  <option value={value} key={value}>
-                    {activityLabel(value)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Competência
-              <select
-                value={filters.skill ?? ''}
-                onChange={(event) =>
-                  setFilters((current) => ({
-                    ...current,
-                    skill: (event.target.value || undefined) as PracticeSkill | undefined,
-                  }))
-                }
-              >
-                <option value="">Todas</option>
-                {options.skills.map((value) => (
-                  <option value={value} key={value}>
-                    {SKILL_LABELS[value] ?? value}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Objetivo
-              <select
-                value={filters.objective ?? ''}
-                onChange={(event) =>
-                  setFilters((current) => ({
-                    ...current,
-                    objective: (event.target.value || undefined) as
-                      | PracticeObjective
-                      | undefined,
-                  }))
-                }
-              >
-                <option value="">Todos</option>
-                {options.objectives.map((value) => (
-                  <option value={value} key={value}>
-                    {PRACTICE_OBJECTIVE_LABELS[value]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        <p className="practice-count" role="status" aria-live="polite">
-          {filteredExercises.isPending
-            ? 'Atualizando o recorte…'
-            : `${filteredTotal} de ${total} atividades disponíveis neste recorte.`}
-        </p>
-        {filteredExercises.error && (
-          <p className="erro" role="alert">
-            Não foi possível aplicar os filtros. Tente novamente.
-          </p>
-        )}
-        {!filteredExercises.isPending && !filteredExercises.error && filteredTotal === 0 && (
-          <p className="practice-filter-empty">
-            Nenhuma atividade combina com estes filtros. Escolha outro recorte.
-          </p>
-        )}
-        {!online && (
-          <p className="practice-offline-note" role="status">
-            Conecte-se para iniciar uma sessão. Tentativas de uma sessão já aberta continuam
-            disponíveis offline.
-          </p>
-        )}
-        <button
-          type="button"
-          className="btn practice-start"
-          disabled={
-            createSession.isPending ||
-            filteredExercises.isPending ||
-            filteredTotal === 0 ||
-            !online
-          }
-          onClick={() => void begin()}
-        >
-          {createSession.isPending ? 'Iniciando…' : `Começar ${PRACTICE_MODE_LABELS[mode]}`}
-        </button>
-        {createSession.isError && (
-          <p className="erro" role="alert">
-            {createSession.error.message}
-          </p>
-        )}
-      </section>
+      <PracticeIntro
+        lessonNumber={lessonNumber}
+        variant={variant}
+        lockFilters={lockFilters}
+        mode={mode}
+        onMode={setMode}
+        filters={filters}
+        onFilters={setFilters}
+        options={options}
+        total={total}
+        filteredTotal={filteredExercises.data?.length ?? 0}
+        filtering={filteredExercises.isPending}
+        filterError={Boolean(filteredExercises.error)}
+        online={online}
+        starting={createSession.isPending}
+        startError={createSession.isError ? createSession.error.message : ''}
+        onStart={() => void begin()}
+      />
     )
   }
 
   if (!currentItem || currentIndex < 0) {
     return (
-      <div className="practice-state error" role="alert">
-        <h2>A posição salva não existe neste pack</h2>
-        <p>Recarregue a sessão para voltar a uma questão válida.</p>
-        <button type="button" className="btn ghost" onClick={() => void sessionQuery.refetch()}>
-          Recarregar sessão
-        </button>
-      </div>
+      <PracticeFailure
+        title="A posição salva não existe neste pack"
+        message="Recarregue a sessão para voltar a uma questão válida."
+        action="Recarregar sessão"
+        onRetry={() => void sessionQuery.refetch()}
+      />
     )
   }
 
-  const confirmedCompleted = session.summary.completed
-  const nextItem = session.items[currentIndex + 1]
-  const previousItem = session.items[currentIndex - 1]
-  // Dicas e tentativas já atualizam o estado do próprio ExerciseCard. Usar
-  // esses contadores na key remontava o formulário durante o refetch e podia
-  // apagar uma resposta digitada logo após a dica ou "Tentar novamente".
-  // A fila offline é externa ao card e ainda exige reidratação ao sincronizar.
-  const cardKey = `${currentItem.exercise.id}:${currentQueued ? 'queued' : 'ready'}`
-
   return (
-    <section className={`practice-runner ${variant}`} aria-labelledby="practice-runner-title">
-      <div className="practice-runner-head">
-        <div>
-          <p className="study-kicker">{PRACTICE_MODE_LABELS[session.mode]}</p>
-          <h2 id="practice-runner-title">{lessonTitle}</h2>
-        </div>
-        <span>
-          Questão {currentIndex + 1} de {session.summary.total}
-        </span>
-      </div>
-      <p className="practice-time-budget">
-        Referência de ritmo: cerca de 2 min por item · orçamento sugerido desta sessão:{' '}
-        {session.summary.total * 2} min. Não há cronômetro nem penalidade por levar mais tempo.
-      </p>
-
-      <div
-        className="practice-progress"
-        role="progressbar"
-        aria-label="Progresso da sessão de exercícios"
-        aria-valuemin={0}
-        aria-valuemax={session.summary.total}
-        aria-valuenow={confirmedCompleted}
-        aria-valuetext={`${confirmedCompleted} de ${session.summary.total} atividades concluídas; ${queuedExercises.size} aguardando correção`}
-      >
-        <span style={{ width: `${(confirmedCompleted / session.summary.total) * 100}%` }} />
-      </div>
-
-      <p className="sr-only" aria-live="polite" aria-atomic="true">
-        {announcement}
-      </p>
-
-      <div className="practice-question">
-        <ExerciseCard
-          key={cardKey}
-          exercicio={currentItem.exercise}
-          numero={currentIndex + 1}
-          userId={userId}
-          practiceSessionId={session.id}
-          courseSlug={courseSlug}
-          lessonNumber={lessonNumber}
-          initialSessionItem={currentItem}
-          initialQueued={currentQueued}
-          onActivity={(event) => void refreshAfterActivity(event)}
-          promptRef={questionRef}
-        />
-      </div>
-
-      {storageWarning && <p role="alert" className="erro">{storageWarning}</p>}
-      {navigationError && (
-        <p className="practice-navigation-error" role="status">
-          {navigationError}
-        </p>
-      )}
-      <nav className="practice-navigation" aria-label="Questões da sessão">
-        <button
-          type="button"
-          className="btn ghost"
-          disabled={!previousItem || updatePosition.isPending}
-          onClick={() => previousItem && void moveTo(previousItem.position)}
-        >
-          ← Anterior
-        </button>
-        <span>
-          {confirmedCompleted} concluídas
-          {queuedExercises.size > 0
-            ? ` · ${queuedExercises.size} aguardando correção`
-            : ''}
-        </span>
-        {nextItem ? (
-          <button
-            type="button"
-            className="btn"
-            disabled={!currentCompleted || updatePosition.isPending}
-            onClick={() => void moveTo(nextItem.position)}
-          >
-            Próxima →
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn"
-            disabled={session.status !== 'completed' || !currentCompleted || currentQueued}
-            onClick={() => setShowSummary(true)}
-          >
-            {currentQueued ? 'Aguardando correção' : 'Ver resumo'}
-          </button>
-        )}
-      </nav>
-      {!nextItem && currentQueued && (
-        <p className="practice-offline-note" role="status">
-          Esta é a última questão. O resumo será fechado quando a tentativa pendente sincronizar.
-        </p>
-      )}
-      <div className="practice-context-links">
-        <Link to={lessonPath(courseSlug, lessonNumber)}>Rever teoria</Link>
-        <Link to={studyPath(courseSlug, lessonNumber, 'revisar')}>Escrita e speaking</Link>
-      </div>
-    </section>
+    <PracticeQuestion
+      session={session}
+      index={currentIndex}
+      item={currentItem}
+      lessonTitle={lessonTitle}
+      courseSlug={courseSlug}
+      lessonNumber={lessonNumber}
+      userId={userId}
+      variant={variant}
+      queued={currentQueued}
+      queuedCount={attempts.queued.size}
+      completed={currentCompleted}
+      announcement={announcement}
+      storageWarning={local.storageWarning}
+      navigationError={local.error || attempts.error}
+      navigating={updatePosition.isPending}
+      questionRef={questionRef}
+      onMove={(target) => void moveTo(target)}
+      onSummary={() => setShowSummary(true)}
+      onActivity={(event) => void refreshAfterActivity(event)}
+    />
   )
 }
