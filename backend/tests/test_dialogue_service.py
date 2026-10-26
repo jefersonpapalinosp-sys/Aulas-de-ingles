@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.models import DialogueTurn, Lesson, SpeakingDialogue, User
-from app.services import assistance, dialogue, dialogue_prompts
+from app.services import assist_quota, assistance, dialogue, dialogue_prompts
 
 
 async def _lesson(session: AsyncSession, number: int = 31) -> Lesson:
@@ -276,3 +276,106 @@ async def test_dialogo_guarda_a_impressao_e_o_limite_de_turnos(
         ).scalar_one(),
         SpeakingDialogue,
     )
+
+
+@pytest.mark.asyncio
+async def test_cota_esgotada_recusa_antes_de_qualquer_chamada_externa(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Critério 3 do BE-46: 429 antes da rede, não depois dela."""
+    _habilitar_guiado(monkeypatch)
+    # Um diálogo completo de cota, para o próximo turno não caber.
+    monkeypatch.setattr(get_settings(), "assist_dialogue_daily_turns", 12)
+    usuario = await _conta(session, "cota@example.com")
+    dialogo, brief = await dialogue.create_dialogue(
+        session, usuario, await _lesson(session), mode="guided", operation_key=str(uuid4())
+    )
+
+    chamou = []
+
+    def registrar(*args: object, **kwargs: object) -> assistance.DialogueResult:
+        chamou.append(1)
+        return assistance.DialogueResult(
+            raw={"partner_text": "Nice.", "hints": [], "confidence": 0.8},
+            cost_microusd=0,
+            cost_known=True,
+        )
+
+    monkeypatch.setattr(assistance, "call_dialogue_provider", registrar)
+    for turno in range(1, 13):
+        await dialogue.student_turn(
+            session, dialogo, brief, turno, "I took the train today.", idempotency_key=str(uuid4())
+        )
+    assert len(chamou) == 12
+
+    with pytest.raises(assist_quota.QuotaExceeded):
+        await dialogue.student_turn(
+            session, dialogo, brief, 13, "One more turn.", idempotency_key=str(uuid4())
+        )
+    # O provedor não foi chamado no turno recusado: a cota corta antes da rede.
+    assert len(chamou) == 12
+
+
+@pytest.mark.asyncio
+async def test_conversa_e_escrita_tem_orcamentos_separados(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Uma conversa de 12 turnos não pode consumir a cota de escrita do dia."""
+    _habilitar_guiado(monkeypatch)
+    settings = get_settings()
+    monkeypatch.setattr(settings, "assist_daily_quota", 5)
+    monkeypatch.setattr(settings, "assist_dialogue_daily_turns", 24)
+    usuario = await _conta(session, "orcamento@example.com")
+
+    for indice in range(6):
+        await assist_quota.reserve(
+            session,
+            usuario.id,
+            str(uuid4()),
+            f"conversa-{indice}",
+            assist_quota.DIALOGUE_MODALITY,
+        )
+    await session.flush()
+
+    conversa = await assist_quota.usage(
+        session, usuario.id, modalities=(assist_quota.DIALOGUE_MODALITY,)
+    )
+    escrita = await assist_quota.usage(
+        session, usuario.id, modalities=assist_quota.LEGACY_MODALITIES
+    )
+    assert conversa.used == 6
+    # Seis turnos de conversa, e a escrita segue com os cinco do dia intactos.
+    assert escrita.used == 0
+    # E a escrita ainda é admitida, o que não aconteceria com teto compartilhado.
+    await assist_quota.reserve(session, usuario.id, str(uuid4()), "escrita-1", "writing")
+
+
+@pytest.mark.asyncio
+async def test_reenvio_do_mesmo_turno_nao_cobra_de_novo(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _habilitar_guiado(monkeypatch)
+    usuario = await _conta(session, "reenvio@example.com")
+    dialogo, brief = await dialogue.create_dialogue(
+        session, usuario, await _lesson(session), mode="guided", operation_key=str(uuid4())
+    )
+
+    def responder(*args: object, **kwargs: object) -> assistance.DialogueResult:
+        return assistance.DialogueResult(
+            raw={"partner_text": "Good.", "hints": [], "confidence": 0.7},
+            cost_microusd=7,
+            cost_known=True,
+        )
+
+    monkeypatch.setattr(assistance, "call_dialogue_provider", responder)
+    chave = str(uuid4())
+    primeiro = await dialogue.student_turn(
+        session, dialogo, brief, 1, "I took the train.", idempotency_key=chave
+    )
+    assert primeiro.fallback is False
+    # Mesma chave: o turno já foi admitido e cobrado; quem chama devolve o que
+    # está gravado em vez de pagar outra vez.
+    with pytest.raises(dialogue.TurnAlreadyAdmitted):
+        await dialogue.student_turn(
+            session, dialogo, brief, 1, "I took the train.", idempotency_key=chave
+        )

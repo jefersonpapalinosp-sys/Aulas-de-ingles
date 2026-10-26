@@ -14,7 +14,7 @@ from app.db.session import get_session
 from app.domain.enums import WorkerState
 from app.schemas.assist import AssistStatusOut
 from app.services import editorial_history
-from app.services.assist_quota import usage
+from app.services.assist_quota import LEGACY_MODALITIES, usage
 
 router = APIRouter(prefix="/assist", tags=["assist"])
 
@@ -25,7 +25,10 @@ async def status_assistencia(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> AssistStatusOut:
     settings = get_settings()
-    balance = await usage(session, usuario.id)
+    # Escopado ao grupo legado de propósito: este contrato relata o orçamento de
+    # escrita e transcrição. Turnos de conversa têm teto próprio e, somados
+    # aqui, falsificariam `used_today` e `remaining_today` da escrita.
+    balance = await usage(session, usuario.id, modalities=LEGACY_MODALITIES)
     enabled = settings.assisted_features_enabled
     transcription_enabled = (
         enabled

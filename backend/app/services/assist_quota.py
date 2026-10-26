@@ -1,5 +1,6 @@
 """Admissão atômica por usuário; nunca manter o lock durante o provedor."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -10,6 +11,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.models import AssistReservation, User
+
+# As modalidades do assistente **não compartilham teto**. Uma conversa de 12
+# turnos esgotaria num gesto a cota de 5 análises de escrita do dia, e o aluno
+# perderia a escrita por ter conversado. São dois orçamentos: `daily_limit` diz
+# qual é o de cada modalidade e `_group` diz quem conta junto com quem.
+DIALOGUE_MODALITY = "conversation"
+LEGACY_MODALITIES = ("writing", "transcription")
+
+
+def daily_limit(modality: str) -> int:
+    settings = get_settings()
+    if modality == DIALOGUE_MODALITY:
+        return settings.assist_dialogue_daily_turns
+    return settings.assist_daily_quota
+
+
+def _group(modality: str) -> tuple[str, ...]:
+    """Modalidades que dividem o mesmo teto diário."""
+    if modality == DIALOGUE_MODALITY:
+        return (DIALOGUE_MODALITY,)
+    return LEGACY_MODALITIES
 
 
 class QuotaExceeded(Exception):
@@ -29,7 +51,15 @@ class Usage:
         return self.reserved + self.consumed
 
 
-async def usage(session: AsyncSession, user_id: int, now: datetime | None = None) -> Usage:
+async def usage(
+    session: AsyncSession,
+    user_id: int,
+    now: datetime | None = None,
+    *,
+    modalities: Sequence[str] | None = None,
+) -> Usage:
+    """Consumo do dia. Sem `modalities`, soma todas — útil para manutenção e
+    relatório; um teto sempre pergunta pelo seu próprio grupo."""
     now = now or datetime.now(UTC)
     start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     reserved = (AssistReservation.state == "reserved") & (AssistReservation.expires_at > now)
@@ -45,6 +75,11 @@ async def usage(session: AsyncSession, user_id: int, now: datetime | None = None
                 AssistReservation.user_id == user_id,
                 AssistReservation.created_at >= start,
                 AssistReservation.created_at < start + timedelta(days=1),
+                *(
+                    [AssistReservation.modality.in_(tuple(modalities))]
+                    if modalities is not None
+                    else []
+                ),
             )
         )
     ).one()
@@ -76,6 +111,7 @@ async def reserve(
     # Sem este lock, MVCC poderia mostrar uma reserva já vencida enquanto um
     # worker ainda confirma consumed, admitindo uma unidade extra nesse intervalo.
     start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    grupo = _group(modality)
     await session.execute(
         select(AssistReservation.id)
         .where(
@@ -83,11 +119,12 @@ async def reserve(
             AssistReservation.state == "reserved",
             AssistReservation.created_at >= start,
             AssistReservation.created_at < start + timedelta(days=1),
+            AssistReservation.modality.in_(grupo),
         )
         .order_by(AssistReservation.id)
         .with_for_update()
     )
-    if (await usage(session, user_id, now)).used >= get_settings().assist_daily_quota:
+    if (await usage(session, user_id, now, modalities=grupo)).used >= daily_limit(modality):
         raise QuotaExceeded
     reservation = AssistReservation(
         user_id=user_id,

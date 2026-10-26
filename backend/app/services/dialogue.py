@@ -42,7 +42,7 @@ from app.domain.dialogue import (
     failed_codes,
 )
 from app.domain.enums import TurnRole
-from app.services import assistance, dialogue_prompts
+from app.services import assist_quota, assistance, dialogue_prompts
 from app.services.dialogue_prompts import LessonBrief, Mode, PartnerTurn
 
 logger = logging.getLogger("app.dialogue")
@@ -50,6 +50,14 @@ logger = logging.getLogger("app.dialogue")
 
 class DialogueUnavailable(Exception):
     """Modo com IA pedido com a assistência desligada ou sem provedor."""
+
+
+class TurnAlreadyAdmitted(Exception):
+    """A mesma chave já admitiu este turno; o resultado gravado é a resposta."""
+
+    def __init__(self, reservation_id: int) -> None:
+        super().__init__(reservation_id)
+        self.reservation_id = reservation_id
 
 
 @dataclass(frozen=True)
@@ -280,6 +288,30 @@ async def student_turn(
             cost_known=True,
         )
 
+    # Cota antes da rede, e a admissão commitada antes da chamada externa: uma
+    # desconexão depois disso não prova ausência de consumo. Mesma ordem do
+    # feedback de escrita, pela mesma razão.
+    #
+    # `QuotaExceeded` sobe para quem chamou, que responde 429. Não há fallback
+    # automático para o Roteiro aqui: gastar o turno do aluno numa resposta de
+    # roteiro sem ele pedir esconderia o fim da cota. Quem decide continuar no
+    # Roteiro é ele.
+    reservation, admitida = await assist_quota.reserve(
+        session,
+        dialogue.user_id,
+        idempotency_key,
+        # Hash, não concatenação: a coluna é varchar(64) e o par
+        # (impressão do recorte, posição) é o que identifica este turno.
+        sha256(f"{dialogue.content_fingerprint}:{position}".encode()).hexdigest(),
+        assist_quota.DIALOGUE_MODALITY,
+    )
+    if not admitida:
+        # Reenvio do mesmo turno: quem chamou devolve o turno já gravado.
+        raise TurnAlreadyAdmitted(reservation.id)
+    if not await assist_quota.consume(session, reservation.id):
+        raise TurnAlreadyAdmitted(reservation.id)
+    await session.commit()
+
     partner, custo, custo_conhecido, erro = _provider_turn(
         settings,
         brief,
@@ -288,8 +320,10 @@ async def student_turn(
         codes,
         history,
         expectation.target_terms,
-        idempotency_key,
+        reservation.provider_key,
     )
+    if custo and custo_conhecido:
+        await assist_quota.record_cost(session, reservation.id, custo)
     if partner is None:
         logger.info(
             "dialogue_turn_fallback",
