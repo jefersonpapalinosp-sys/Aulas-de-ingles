@@ -20,8 +20,8 @@ export default defineConfig({
       manualChunks(id) {
         // Ferramentas pessoais/históricos usam os mesmos contratos e padrões de UI.
         // Compartilham um chunk tardio; login/Hoje e aulas não o antecipam.
-        if (/\/src\/(pages\/(NotebookPage|PersonalDataPage|ReviewPage|TestPage|CourseReviewPage|CourseCompletionPage|usePagedItems)\.|api\/(completion|courseReviews|review)\.|features\/privacy\/deviceInventory\.)/.test(id)) return 'study-tools'
-        if (/\/src\/(pages\/(StudyPage|LessonPage|PracticePage)|api\/(media|practice|assist|addReviewItem)\.|features\/(assist|media|speaking|study-session|writing|practice)\/|components\/(LessonSections|ExerciseCard|WritingFeedbackProvenance|GrammarBlockView|Markdown))/.test(id)) return 'lesson-study'
+        if (/\/src\/(pages\/(NotebookPage|PersonalDataPage|ReviewPage|TestPage|CourseReviewPage|CourseCompletionPage|usePagedItems)\.|api\/(completion|courseReviews|review)\.|features\/(privacy\/deviceInventory\.|(review|completion|checkpoint)\/))/.test(id)) return 'study-tools'
+        if (/\/src\/(pages\/(StudyPage|LessonPage|PracticePage)|api\/(media|practice|assist|addReviewItem)\.|features\/(assist|exercise|media|speaking|study-session|writing|practice)\/|components\/(LessonSections|ExerciseCard|WritingFeedbackProvenance|GrammarBlockView|Markdown))/.test(id)) return 'lesson-study'
       },
     } },
   },
