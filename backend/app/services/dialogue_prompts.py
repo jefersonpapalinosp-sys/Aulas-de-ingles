@@ -22,15 +22,13 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from app.domain.dialogue import CHECK_CODES, CheckCode
+
 PROMPT_VERSION = "dialogue-prompt-v1"
 Mode = Literal["script", "guided", "free_unit"]
-CheckCode = Literal["target_terms_missing", "grammar_pattern_missing", "too_short", "too_long"]
-CHECK_CODES: tuple[CheckCode, ...] = (
-    "target_terms_missing",
-    "grammar_pattern_missing",
-    "too_short",
-    "too_long",
-)
+# Os códigos vêm do domínio, que é quem os produz: duas listas iguais em
+# arquivos diferentes divergem na primeira vez que uma regra muda.
+__all__ = ["CHECK_CODES", "CheckCode"]
 
 MAX_PARTNER_CHARS = 280
 MAX_HINT_CHARS = 200
