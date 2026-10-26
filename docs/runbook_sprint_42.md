@@ -227,3 +227,41 @@ persistente de 32+ bytes em `.env.prod`, sem copiá-lo para documentação ou Gi
 
 Esses itens devem aparecer individualmente na matriz final. O pacote inteiro não
 recebe “aprovado” enquanto algum aceite obrigatório estiver aberto.
+
+## Ensaio da migration `e3a1c7d9b250` antes do deploy — 26/10/2026
+
+Sequência da Sprint 44 repetida para a migration do DB-45, na ordem: backup da
+pública, restore em destino isolado, ensaio, e só então deploy.
+
+| Passo | Resultado |
+|---|---|
+| Pré-voo (`make backup-public-check`) | SSH ok, revisão `d2b7e4c9a150`, três containers, `age` disponível |
+| Backup (`make backup source=public`) | pacote `aulas-20261026T141656511207Z-1e11176f8ab74954a81657b4cd5a2534`, verificado, cifrado e copiado para o iCloud |
+| `alembic upgrade head` no clone | `d2b7e4c9a150 → e3a1c7d9b250` aplicada |
+| `alembic check` | "No new upgrade operations detected" — schema bate com os modelos |
+| Segunda passada | no-op: idempotente |
+| Dados | 82 aulas, 687 exercícios, 1 conta — inalterados |
+| Schema | 52 → 54 tabelas (`speaking_dialogue`, `dialogue_turn`), ambas vazias |
+
+### Três coisas que o ensaio revelou, e que valem para um desastre real
+
+**O pacote de backup não carrega os papéis do cluster.** `pg_dump` de um banco
+não os inclui, e o restore remapeia a posse para `aulas_restore` de propósito —
+isolamento correto. Consequência operacional: uma recuperação de desastre
+precisa recriar `aulas_owner`, `aulas_migrator`, `aulas_runtime`, `aulas_worker`
+e `aulas_backup` (`ops/roles.py`) **antes** de rodar migration ou subir o app.
+Sem isso, o migrador falha no `connect` com `role "aulas_owner" does not exist`.
+
+**O guard de identidade recusa ensaio com atalho.** `app/db/role_safety.py`
+exige `session_user = aulas_migrator`, `current_user = aulas_owner` (via SET
+ROLE) e nenhum privilégio administrativo global. Tentar ensaiar como o
+superusuário do laboratório é recusado — o que é o comportamento certo: um
+ensaio com privilégio que produção não tem não prova nada. O ensaio acima
+reproduziu a topologia real de papéis no clone.
+
+**Imagem antiga faz o ensaio parecer verde sem fazer nada.** A primeira tentativa
+usou `aulas-ingles-prod-api:latest`, de cinco dias antes: o `head` daquela
+imagem era `d2b7e4c9a150`, então `upgrade head` terminou com sucesso e sem
+aplicar nada. Só o `alembic current` revelou. **Conferir `alembic heads` da
+imagem antes de confiar num ensaio** — foi a imagem do E2E, reconstruída do
+código da branch, que serviu.

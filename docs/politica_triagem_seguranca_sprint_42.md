@@ -113,5 +113,19 @@ atualidade sem o digest dizer o que mudou — e o hadolint do job `infra-lint`
 reprova (DL3017). A re-âncora do digest deve ser reconferida junto das imagens-base
 na revisão mensal que esta política já prevê; é ela que encerra os dois achados.
 
-Quem decide aceitar, e por quanto tempo, é o release manager — este registro
-traz os itens 1 e 2 da política e uma proposta para o item 3.
+### Decisão (item 3 da política)
+
+**Aceite temporário dos dois achados, por Jeferson Papalino, em 26/10/2026.**
+
+| Campo exigido pela política | Registro |
+|---|---|
+| Decisão | aceitar temporariamente CVE-2026-111497 (`brotli-libs`) e CVE-2026-92392 (`curl`/`libcurl`) na imagem web |
+| Responsável | Jeferson Papalino, acumulando release manager e responsável técnico |
+| Justificativa | nenhum dos dois tem caminho de execução no runtime: a borda comprime com `gzip` e não carrega o módulo brotli; o nginx não invoca `curl`, que entra como dependência da imagem-base. Some-se o container web com `cap_drop: [ALL]`, FS read-only e `no-new-privileges` (SEC-45) |
+| Condição de encerramento | publicação de imagem `nginx:*-alpine3.24` com `brotli-libs ≥ 1.2.1-r0` e `curl ≥ 8.23.0-r0`. Em 26/10/2026 **nenhuma existe**: a mais recente ainda traz 1.2.0-r1 e 8.22.0-r0 |
+| Prazo | reconferir na revisão mensal que esta política já prevê, junto das imagens-base e dos locks; a próxima re-âncora de digest em `ops/ci_pull_bases.sh` é o gatilho natural |
+| Evidência de reteste | Trivy v0.76.0 local, imagem web construída do SEC-45: 5 altas antes da re-âncora do digest, 3 depois; imagem da API em zero críticas e zero altas |
+
+Não é aceite permanente nem silencioso: a condição de encerramento é objetiva e
+não depende de alguém lembrar — ela aparece na primeira reconferência de digest
+que encontrar os pacotes corrigidos.
