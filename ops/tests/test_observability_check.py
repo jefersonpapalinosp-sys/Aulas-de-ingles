@@ -19,6 +19,14 @@ def metrics():
         "account_deletions": {"failed": 0},
         "legacy_review": {"unlinked_cards": 0, "mismatched_links": 0},
         "media": {"filesystem_available": True, "filesystem_free_bytes": 2_000_000_000},
+        "dialogue": {
+            "turns": 12,
+            "provider_failures": 0,
+            "cost_microusd": 400,
+            "quota_limit": 24,
+            "quota_used": 12,
+            "quota_exhausted_accounts": 0,
+        },
     }
 
 
@@ -68,6 +76,18 @@ class ObservabilityGateTests(unittest.TestCase):
                 "storage",
                 lambda ready, data: data["media"].update(filesystem_free_bytes=1),
             ),
+            (
+                "dialogue-cost",
+                lambda ready, data: data["dialogue"].update(cost_microusd=50_001),
+            ),
+            (
+                "dialogue-failures",
+                lambda ready, data: data["dialogue"].update(provider_failures=4),
+            ),
+            # API anterior ao INFRA-46: a seção não existe, e o gate precisa
+            # dizer que é diferença de versão em vez de passar como se a
+            # conversa estivesse saudável.
+            ("dialogue-absent", lambda ready, data: data.pop("dialogue")),
         ]
         for name, mutate in mutations:
             with self.subTest(name=name):
@@ -94,3 +114,40 @@ class ObservabilityGateTests(unittest.TestCase):
             _url("https://example.test/", "/api/health"),
             "https://example.test/api/health",
         )
+
+
+class DialogueGateTests(unittest.TestCase):
+    """INFRA-46: o aceite pede alerta de worker parado e custo no painel."""
+
+    def test_worker_parado_por_dois_minutos_gera_alerta(self):
+        data = metrics()
+        data["transcription_queue"].update(worker_age_seconds=120)
+        report = evaluate(readiness(), data, Thresholds())
+        self.assertEqual(report["status"], "critical")
+        parado = next(
+            item for item in report["checks"] if item["name"] == "worker_age_seconds"
+        )
+        self.assertEqual(parado["state"], "critical")
+        self.assertEqual(parado["observed"], 120)
+
+    def test_falha_de_provedor_espera_amostra_minima(self):
+        data = metrics()
+        # Uma falha em duas tentativas é 50%, mas duas tentativas não dizem nada.
+        data["dialogue"].update(turns=2, provider_failures=1)
+        self.assertEqual(evaluate(readiness(), data, Thresholds())["status"], "ok")
+        data["dialogue"].update(turns=10, provider_failures=5)
+        self.assertEqual(evaluate(readiness(), data, Thresholds())["status"], "critical")
+
+    def test_custo_do_dia_aparece_no_relatorio_sem_texto_de_aluno(self):
+        data = metrics()
+        data["dialogue"].update(cost_microusd=1_234)
+        report = evaluate(readiness(), data, Thresholds())
+        custo = next(
+            item
+            for item in report["checks"]
+            if item["name"] == "dialogue_cost_microusd_today"
+        )
+        self.assertEqual(custo["observed"], 1_234)
+        self.assertEqual(custo["state"], "ok")
+        # O relatório inteiro é número, nome de check, responsável e ação.
+        self.assertNotIn("transcript", repr(report))

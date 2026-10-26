@@ -16,7 +16,7 @@ ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -
         recovery-lab-up recovery-lab-prepare recovery-lab-down upgrade-lab-up upgrade-lab-prepare upgrade-lab-down backup-verify test-recovery \
         test-recovery-integration test-upgrade-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down \
         notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark \
-        operations-check cue-audit test-failure-rehearsal easypanel-env easypanel-check
+        operations-check operations-alert public-probe cue-audit test-failure-rehearsal easypanel-env easypanel-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-z0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -51,6 +51,14 @@ health: ## Bate no /api/health e mostra a resposta
 
 operations-check: ## Avalia readiness/alertas; lê OPERATIONS_TOKEN sem imprimi-lo
 	$(OPS) -m ops.observability_check --base-url "$${OPERATIONS_BASE_URL:-http://127.0.0.1:8011}"
+
+operations-alert: ## Para o cron da VM: silencioso quando está bom, falante quando não
+	@$(OPS) -m ops.observability_check --base-url "$${OPERATIONS_BASE_URL:-http://127.0.0.1:8011}" > /tmp/aulas-gate.json 2>/tmp/aulas-gate.err \
+		|| { echo "ALERTA operacional em $$(date -Is)"; cat /tmp/aulas-gate.json /tmp/aulas-gate.err 2>/dev/null; rm -f /tmp/aulas-gate.json /tmp/aulas-gate.err; exit 1; }
+	@rm -f /tmp/aulas-gate.json /tmp/aulas-gate.err
+
+public-probe: ## Probe externo do domínio público; não usa credencial
+	$(OPS) -m ops.public_probe --base-url "$${PUBLIC_PROBE_ORIGIN:?defina PUBLIC_PROBE_ORIGIN}"
 
 cue-audit: ## Inventaria cada cue/aula/versão e seu aceite auditivo humano
 	$(OPS) -m ops.cue_audit_inventory --summary

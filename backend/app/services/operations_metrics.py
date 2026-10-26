@@ -20,6 +20,7 @@ from app.observability import request_metrics
 from app.schemas.operations import (
     DatabaseMetricsOut,
     DeletionMetricsOut,
+    DialogueMetricsOut,
     LegacyReviewMetricsOut,
     MediaMetricsOut,
     OperationsMetricsOut,
@@ -27,6 +28,7 @@ from app.schemas.operations import (
     RelationMetricsOut,
     RequestMetricsOut,
 )
+from app.services.assist_quota import DIALOGUE_MODALITY, daily_limit
 
 
 class QueueRow(NamedTuple):
@@ -139,6 +141,92 @@ async def _heartbeat(session: AsyncSession) -> Heartbeat | None:
     )
 
 
+class DialogueRow(NamedTuple):
+    turns: int
+    completed: int
+    failed: int
+    fallback: int
+    provider_failures: int
+    latency_p95_ms: int | None
+    cost_microusd: int
+
+
+async def _dialogue(session: AsyncSession) -> DialogueRow:
+    """Turnos do aluno no dia UTC corrente.
+
+    Só turnos do aluno entram em `turns`: a resposta do parceiro vive na mesma
+    linha, e contar as duas pontas dobraria o número que o painel compara com a
+    cota. O p95 é da latência do turno — do que o aluno enviou até o resultado
+    ficar pronto —, que é a medida que o ADR fixou em 8 segundos.
+    """
+    row = (
+        await session.execute(
+            text(
+                """
+                WITH hoje AS (
+                    SELECT * FROM public.dialogue_turn
+                    WHERE role = 'student'
+                      AND created_at >= date_trunc('day', now() AT TIME ZONE 'UTC')
+                )
+                SELECT count(*),
+                       count(*) FILTER (WHERE state = 'completed'),
+                       count(*) FILTER (WHERE state = 'failed'),
+                       count(*) FILTER (WHERE fallback),
+                       count(*) FILTER (WHERE error_code IS NOT NULL),
+                       percentile_cont(0.95) WITHIN GROUP (
+                           ORDER BY extract(epoch FROM completed_at - created_at)
+                       ) FILTER (WHERE completed_at IS NOT NULL),
+                       coalesce(sum(cost_microusd), 0)
+                FROM hoje
+                """
+            )
+        )
+    ).one()
+    p95 = row[5]
+    return DialogueRow(
+        turns=int(row[0]),
+        completed=int(row[1]),
+        failed=int(row[2]),
+        fallback=int(row[3]),
+        provider_failures=int(row[4]),
+        latency_p95_ms=max(0, round(float(p95) * 1000)) if p95 is not None else None,
+        cost_microusd=int(row[6]),
+    )
+
+
+async def _dialogue_quota(session: AsyncSession, limit: int) -> tuple[int, int]:
+    """Consumo da cota de conversa e quantas contas bateram no teto.
+
+    A definição de "usado" é a mesma de `assist_quota.usage` — reservado ainda
+    válido mais consumido, no dia UTC. Duas definições de consumo divergiriam
+    na primeira mudança de regra, e o painel passaria a discordar do 429 que o
+    aluno recebeu.
+    """
+    row = (
+        await session.execute(
+            text(
+                """
+                WITH por_conta AS (
+                    SELECT user_id,
+                           count(*) FILTER (
+                               WHERE state = 'reserved' AND expires_at > now()
+                           ) + count(*) FILTER (WHERE state = 'consumed') AS usado
+                    FROM public.assist_reservation
+                    WHERE modality = :modality
+                      AND created_at >= date_trunc('day', now() AT TIME ZONE 'UTC')
+                    GROUP BY user_id
+                )
+                SELECT coalesce(sum(usado), 0),
+                       count(*) FILTER (WHERE usado >= :limit)
+                FROM por_conta
+                """
+            ),
+            {"modality": DIALOGUE_MODALITY, "limit": limit},
+        )
+    ).one()
+    return int(row[0]), int(row[1])
+
+
 async def _deletions(session: AsyncSession) -> tuple[int, int]:
     row = (
         await session.execute(
@@ -214,6 +302,9 @@ async def snapshot(session: AsyncSession, settings: Settings) -> OperationsMetri
     largest_relations = await _largest_relations(session)
     queue = await _queue(session)
     heartbeat = await _heartbeat(session)
+    dialogue = await _dialogue(session)
+    quota_limit = daily_limit(DIALOGUE_MODALITY)
+    quota_used, quota_exhausted = await _dialogue_quota(session, quota_limit)
     deletions = await _deletions(session)
     legacy_review = await _legacy_review(session)
     media = await _media(session)
@@ -242,6 +333,18 @@ async def snapshot(session: AsyncSession, settings: Settings) -> OperationsMetri
             largest_relations=largest_relations,
         ),
         transcription_queue=_queue_out(queue, heartbeat, now),
+        dialogue=DialogueMetricsOut(
+            turns=dialogue.turns,
+            completed=dialogue.completed,
+            failed=dialogue.failed,
+            fallback=dialogue.fallback,
+            provider_failures=dialogue.provider_failures,
+            latency_p95_ms=dialogue.latency_p95_ms,
+            cost_microusd=dialogue.cost_microusd,
+            quota_limit=quota_limit,
+            quota_used=quota_used,
+            quota_exhausted_accounts=quota_exhausted,
+        ),
         account_deletions=DeletionMetricsOut(pending=deletions[0], failed=deletions[1]),
         legacy_review=LegacyReviewMetricsOut(
             cards=legacy_review[0],

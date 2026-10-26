@@ -443,6 +443,81 @@ o script por SSH continua valendo como contingência.
   continuam sendo passos humanos da sequência da Sprint 43; o job não os faz.
   Antes de mergear uma migration na `main`, ensaie-a no clone primeiro.
 
+## Vigilância agendada — probe externo e gate operacional (INFRA-46)
+
+Duas coisas rodam fora da aplicação e precisam rodar em algum relógio: o
+**probe externo**, que diz se o domínio público responde, e o **gate
+operacional**, que compara worker, fila e custo do diálogo com limiares.
+
+### Dois relógios, de propósito
+
+| Onde | Comando | Resolução | Para que serve |
+|---|---|---|---|
+| Cron da VM | `make operations-alert` | o que você agendar (1–2 min é viável) | é o caminho principal; o aceite do INFRA-46 pede alerta para worker parado por 2 minutos, e só um cron curto vê isso |
+| GitHub Actions | workflow `operações · vigilância da stack pública` | `*/30`, **melhor-esforço** | rede de segurança de fora: um probe no mesmo host não distingue "a aplicação caiu" de "o host caiu" |
+
+O cron do GitHub para repositórios atrasa com frequência e pode pular
+execuções em períodos de carga. Ele não substitui o cron da VM para a
+resolução de minutos; serve para o caso em que a VM inteira está fora e,
+portanto, nenhum cron dela vai reclamar.
+
+### Alerta por e-mail, sem segredo de SMTP
+
+- **GitHub**: o job **falha** (exit 1) quando um limiar estoura, e o GitHub
+  envia a notificação nativa de falha de workflow agendado para quem mexeu no
+  cron por último. Confira em Settings → Notifications que "Actions" está
+  marcado para e-mail. Não há SMTP nem segredo de e-mail no repositório.
+- **VM**: `make operations-alert` é silencioso quando está tudo bem e escreve
+  o relatório em stdout quando não está, que é exatamente o contrato que o
+  `cron` espera para mandar e-mail. Depende de um MTA funcionando na VM
+  (`mailutils` ou equivalente); sem ele, o cron registra em
+  `/var/log/syslog` e o e-mail não sai — confira antes de confiar.
+
+Linha de crontab sugerida, de dois em dois minutos:
+
+```cron
+MAILTO=voce@exemplo.com
+OPERATIONS_BASE_URL=http://127.0.0.1:8011
+OPERATIONS_TOKEN=...
+*/2 * * * * cd /caminho/para/aulas-ingles && make operations-alert
+```
+
+O token fica no crontab do usuário, com `chmod 600`; ele dá leitura de
+`/api/operations/metrics`, que é agregado e não carrega texto de aluno — mas
+continua sendo credencial.
+
+### Secrets do workflow
+
+| Secret | Conteúdo | Sem ela |
+|---|---|---|
+| `PUBLIC_PROBE_ORIGIN` | `https://dominio-publico` | o workflow avisa que está desarmado e passa sem fazer nada |
+| `OPERATIONS_TOKEN` | o mesmo `OPERATIONS_TOKEN` da aplicação | só o probe roda; o gate de métricas fica de fora |
+
+O probe não usa credencial nenhuma: `/api/health` é público. É por isso que ele
+roda primeiro e sozinho — disponibilidade é a pergunta que não deve depender de
+um segredo estar configurado.
+
+### O que cada limiar do diálogo significa
+
+| Check | Limiar | Responsável | Ação |
+|---|---|---|---|
+| `dialogue_cost_microusd_today` | ≤ 50.000 microusd | release manager | desligar a modalidade e conferir a fatura antes de religar |
+| `dialogue_provider_failure_rate` | ≤ 0,2 com amostra ≥ 5 turnos | release manager | conferir o provedor; o Roteiro continua atendendo |
+| `dialogue_quota_accounting` | seção `dialogue` presente | release manager | a API em uso é mais antiga que o gate: implantar antes de confiar no relatório |
+
+O teto de custo é folga de uma ordem de grandeza sobre o uso esperado: a cota
+são 24 turnos por dia, e o turno fica na casa de centenas de microusd. Passar
+de 50.000 não é aluno conversando.
+
+### O que isto não faz
+
+- Não alerta por SMS, Telegram ou webhook. E-mail é o canal, e é o que existe
+  sem segredo novo.
+- Não mede latência de dentro da VM: o probe externo inclui a rede do runner
+  até lá, e por isso o limiar dele é generoso (5 s).
+- Não vigia o provedor de IA diretamente. O que ele vê é o efeito —
+  `provider_failures` e `fallback` nas métricas do dia.
+
 ## Referências do painel
 
 - [Compose Service — documentação oficial do EasyPanel](https://easypanel.io/docs/services/compose)

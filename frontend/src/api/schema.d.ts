@@ -2090,6 +2090,37 @@ export interface components {
             /** Message */
             message: string;
         };
+        /**
+         * DialogueMetricsOut
+         * @description Conversa do dia em números (INFRA-46).
+         *
+         *     Nenhum campo carrega texto: o painel precisa saber quanto rodou, quanto
+         *     demorou, quanto falhou e quanto custou — nunca o que o aluno disse. O
+         *     recorte é o dia UTC, o mesmo da cota, para que `quota_used` e `turns`
+         *     possam ser comparados sem ajuste de relógio.
+         */
+        DialogueMetricsOut: {
+            /** Completed */
+            completed: number;
+            /** Cost Microusd */
+            cost_microusd: number;
+            /** Failed */
+            failed: number;
+            /** Fallback */
+            fallback: number;
+            /** Latency P95 Ms */
+            latency_p95_ms: number | null;
+            /** Provider Failures */
+            provider_failures: number;
+            /** Quota Exhausted Accounts */
+            quota_exhausted_accounts: number;
+            /** Quota Limit */
+            quota_limit: number;
+            /** Quota Used */
+            quota_used: number;
+            /** Turns */
+            turns: number;
+        };
         /** DialogueOut */
         DialogueOut: {
             /** Ended At */
@@ -2816,6 +2847,7 @@ export interface components {
         OperationsMetricsOut: {
             account_deletions: components["schemas"]["DeletionMetricsOut"];
             database: components["schemas"]["DatabaseMetricsOut"];
+            dialogue: components["schemas"]["DialogueMetricsOut"];
             legacy_review: components["schemas"]["LegacyReviewMetricsOut"];
             media: components["schemas"]["MediaMetricsOut"];
             requests: components["schemas"]["RequestMetricsOut"];

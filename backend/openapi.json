@@ -1779,6 +1779,72 @@
                 "title": "DialogueHintOut",
                 "type": "object"
             },
+            "DialogueMetricsOut": {
+                "description": "Conversa do dia em números (INFRA-46).\n\nNenhum campo carrega texto: o painel precisa saber quanto rodou, quanto\ndemorou, quanto falhou e quanto custou — nunca o que o aluno disse. O\nrecorte é o dia UTC, o mesmo da cota, para que `quota_used` e `turns`\npossam ser comparados sem ajuste de relógio.",
+                "properties": {
+                    "completed": {
+                        "title": "Completed",
+                        "type": "integer"
+                    },
+                    "cost_microusd": {
+                        "title": "Cost Microusd",
+                        "type": "integer"
+                    },
+                    "failed": {
+                        "title": "Failed",
+                        "type": "integer"
+                    },
+                    "fallback": {
+                        "title": "Fallback",
+                        "type": "integer"
+                    },
+                    "latency_p95_ms": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Latency P95 Ms"
+                    },
+                    "provider_failures": {
+                        "title": "Provider Failures",
+                        "type": "integer"
+                    },
+                    "quota_exhausted_accounts": {
+                        "title": "Quota Exhausted Accounts",
+                        "type": "integer"
+                    },
+                    "quota_limit": {
+                        "title": "Quota Limit",
+                        "type": "integer"
+                    },
+                    "quota_used": {
+                        "title": "Quota Used",
+                        "type": "integer"
+                    },
+                    "turns": {
+                        "title": "Turns",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "turns",
+                    "completed",
+                    "failed",
+                    "fallback",
+                    "provider_failures",
+                    "latency_p95_ms",
+                    "cost_microusd",
+                    "quota_limit",
+                    "quota_used",
+                    "quota_exhausted_accounts"
+                ],
+                "title": "DialogueMetricsOut",
+                "type": "object"
+            },
             "DialogueOut": {
                 "properties": {
                     "ended_at": {
@@ -3817,6 +3883,9 @@
                     "database": {
                         "$ref": "#/components/schemas/DatabaseMetricsOut"
                     },
+                    "dialogue": {
+                        "$ref": "#/components/schemas/DialogueMetricsOut"
+                    },
                     "legacy_review": {
                         "$ref": "#/components/schemas/LegacyReviewMetricsOut"
                     },
@@ -3840,6 +3909,7 @@
                     "requests",
                     "database",
                     "transcription_queue",
+                    "dialogue",
                     "account_deletions",
                     "legacy_review",
                     "media"

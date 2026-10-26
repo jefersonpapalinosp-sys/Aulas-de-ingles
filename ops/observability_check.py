@@ -22,6 +22,15 @@ class Thresholds:
     maximum_maintenance_age_seconds: int = 7200
     maximum_waiting_locks: int = 0
     minimum_media_free_bytes: int = 1_073_741_824
+    # Teto diário de custo da conversa (INFRA-46). A cota são 24 turnos/dia; com
+    # o provedor escolhido no IA-45 o turno fica na casa de centenas de microusd,
+    # então o dia inteiro cabe em alguns milhares. 50_000 é folga de uma ordem de
+    # grandeza: passar disso não é aluno conversando, é algo errado.
+    maximum_dialogue_cost_microusd: int = 50_000
+    # Falha de provedor acima disto, com amostra mínima, aparece aqui antes de o
+    # aluno reclamar. O fallback atende, mas o diálogo deixou de ser diálogo.
+    maximum_dialogue_failure_rate: float = 0.2
+    minimum_dialogue_turns: int = 5
 
 
 @dataclass(frozen=True)
@@ -57,6 +66,14 @@ def evaluate(
     total = int(requests["requests_total"])
     failures = int(requests["responses_5xx_total"])
     error_rate = failures / total if total else 0.0
+    # A seção do diálogo é nova (INFRA-46). Uma API anterior a ela não traz a
+    # chave, e indexar daria "gate falhou" sem dizer por quê; o check
+    # `dialogue_quota_accounting` abaixo é que explica a diferença de versão.
+    dialogue_section = metrics.get("dialogue")
+    dialogue = dialogue_section or {}
+    dialogue_turns = int(dialogue.get("turns") or 0)
+    dialogue_failures = int(dialogue.get("provider_failures") or 0)
+    dialogue_cost = int(dialogue.get("cost_microusd") or 0)
     checks = [
         _check(
             "readiness_schema",
@@ -69,8 +86,7 @@ def evaluate(
         ),
         _check(
             "request_error_rate",
-            total < thresholds.minimum_requests
-            or error_rate <= thresholds.maximum_error_rate,
+            total < thresholds.minimum_requests or error_rate <= thresholds.maximum_error_rate,
             round(error_rate, 6),
             f"<= {thresholds.maximum_error_rate} após {thresholds.minimum_requests} requests",
             "backend on-call",
@@ -80,8 +96,7 @@ def evaluate(
         _check(
             "queue_age_seconds",
             queue["oldest_queued_seconds"] is None
-            or int(queue["oldest_queued_seconds"])
-            <= thresholds.maximum_queue_age_seconds,
+            or int(queue["oldest_queued_seconds"]) <= thresholds.maximum_queue_age_seconds,
             queue["oldest_queued_seconds"],
             f"<= {thresholds.maximum_queue_age_seconds}",
             "worker on-call",
@@ -91,8 +106,7 @@ def evaluate(
         _check(
             "worker_age_seconds",
             queue["worker_age_seconds"] is not None
-            and int(queue["worker_age_seconds"])
-            <= thresholds.maximum_worker_age_seconds,
+            and int(queue["worker_age_seconds"]) <= thresholds.maximum_worker_age_seconds,
             queue["worker_age_seconds"],
             f"<= {thresholds.maximum_worker_age_seconds}",
             "worker on-call",
@@ -101,8 +115,7 @@ def evaluate(
         _check(
             "maintenance_age_seconds",
             queue.get("maintenance_age_seconds") is not None
-            and int(queue["maintenance_age_seconds"])
-            <= thresholds.maximum_maintenance_age_seconds,
+            and int(queue["maintenance_age_seconds"]) <= thresholds.maximum_maintenance_age_seconds,
             queue.get("maintenance_age_seconds"),
             f"<= {thresholds.maximum_maintenance_age_seconds}",
             "worker on-call",
@@ -129,18 +142,45 @@ def evaluate(
             "legacy_review_reconciliation",
             int(legacy_review["unlinked_cards"]) == 0
             and int(legacy_review["mismatched_links"]) == 0,
-            int(legacy_review["unlinked_cards"])
-            + int(legacy_review["mismatched_links"]),
+            int(legacy_review["unlinked_cards"]) + int(legacy_review["mismatched_links"]),
             "= 0",
             "database operator",
             "Manter review_card e o tráfego bloqueados; reconciliar no clone a ligação "
             "com review_item sem excluir histórico.",
         ),
         _check(
+            "dialogue_cost_microusd_today",
+            dialogue_cost <= thresholds.maximum_dialogue_cost_microusd,
+            dialogue_cost,
+            f"<= {thresholds.maximum_dialogue_cost_microusd}",
+            "release manager",
+            "Desligar a modalidade conversation (ASSISTED_FEATURES_ENABLED ou a URL "
+            "do provedor) e conferir a fatura antes de religar.",
+        ),
+        _check(
+            "dialogue_provider_failure_rate",
+            dialogue_turns < thresholds.minimum_dialogue_turns
+            or dialogue_failures / dialogue_turns <= thresholds.maximum_dialogue_failure_rate,
+            round(dialogue_failures / dialogue_turns, 3) if dialogue_turns else None,
+            f"<= {thresholds.maximum_dialogue_failure_rate} "
+            f"(amostra >= {thresholds.minimum_dialogue_turns})",
+            "release manager",
+            "Conferir o provedor de diálogo; o Roteiro continua atendendo e nenhum "
+            "turno anterior se perde.",
+        ),
+        _check(
+            "dialogue_quota_accounting",
+            dialogue_section is not None,
+            "presente" if dialogue_section is not None else "ausente",
+            "presente",
+            "release manager",
+            "A API em uso é mais antiga que este gate: implantar a imagem com a seção "
+            "`dialogue` em /api/operations/metrics antes de confiar no relatório.",
+        ),
+        _check(
             "media_free_bytes",
             bool(media["filesystem_available"])
-            and int(media["filesystem_free_bytes"] or 0)
-            >= thresholds.minimum_media_free_bytes,
+            and int(media["filesystem_free_bytes"] or 0) >= thresholds.minimum_media_free_bytes,
             media["filesystem_free_bytes"],
             f">= {thresholds.minimum_media_free_bytes}",
             "storage operator",
