@@ -249,10 +249,11 @@ export function WritingWorkspace({
   }
 
   async function analyze() {
-    // A análise referencia a revisão do rascunho que a conta conhece; sem ela
-    // (rascunho não carregado) o texto fica na tela e a análise espera.
-    const expectedRevision = revision.current
-    if (expectedRevision === null) {
+    // A análise é sobre um rascunho que a conta já conhece. Enquanto ele não
+    // foi confirmado, o texto fica na tela e a análise espera — o corpo do
+    // feedback não carrega revisão, mas analisar um rascunho inexistente
+    // produziria histórico sem origem.
+    if (revision.current === null) {
       setActionMessage('Confirme o rascunho na conta antes de analisar. Seu texto continua nesta tela.')
       return
     }
@@ -267,9 +268,9 @@ export function WritingWorkspace({
         analysisRequest.current = { payload, key: crypto.randomUUID() }
       const { data, response } = await api.POST('/api/writing/prompts/{prompt_id}/feedback', {
         params: { path: { prompt_id: prompt.id } },
-        body: {
-          text, assisted, operation_key: analysisRequest.current.key, expected_revision: expectedRevision,
-        },
+        // O feedback não compara revisão: o texto analisado vai no corpo. A
+        // `operation_key` é que evita uma segunda cobrança no reenvio.
+        body: { text, assisted, operation_key: analysisRequest.current.key },
       })
       if (response?.status === 409) {
         if (generation === epoch.current && edit === edits.current)

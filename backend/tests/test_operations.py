@@ -1,8 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
-from app.api import operations
 from app.core.config import get_settings
+from app.services import operations_metrics
 
 TOKEN = "operations-test-token-with-at-least-32-bytes"
 
@@ -35,7 +35,7 @@ async def test_metrics_agregadas_tem_cardinalidade_fixa_e_nenhum_conteudo(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(get_settings(), "operations_token", TOKEN)
-    monkeypatch.setattr(operations, "_disk_metrics", lambda path: (True, 10_000, 4_000))
+    monkeypatch.setattr(operations_metrics, "_disk_metrics", lambda path: (True, 10_000, 4_000))
     response = await client.get(
         "/api/operations/metrics",
         headers={"Authorization": f"Bearer {TOKEN}"},

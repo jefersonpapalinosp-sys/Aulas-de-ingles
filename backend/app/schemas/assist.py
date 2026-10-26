@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-HumanRating = Literal["helpful", "not_helpful"]
+from app.domain.enums import HumanRating, TranscriptionStatus, WorkerState
 
 
 class HumanRatingIn(BaseModel):
@@ -22,7 +22,7 @@ class TranscriptionWordOut(BaseModel):
 class TranscriptionJobOut(BaseModel):
     id: int
     attempt_id: int
-    status: Literal["queued", "processing", "completed", "failed"]
+    status: TranscriptionStatus
     provider: str
     attempt_count: int
     max_attempts: int
@@ -58,7 +58,7 @@ class AssistStatusOut(BaseModel):
     retention_days: int
     cost_microusd_today: int
     cost_incomplete: bool
-    worker_state: Literal["disabled", "unknown", "active", "stale"] = "unknown"
+    worker_state: WorkerState = "unknown"
     worker_seen_at: datetime | None = None
     queued_jobs: int = 0
     oldest_queued_seconds: int | None = None

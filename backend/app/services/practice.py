@@ -19,6 +19,7 @@ from app.db.models import (
     PracticeSessionItem,
 )
 from app.domain.answers import analisar_resposta
+from app.domain.enums import PracticeOutcome
 from app.schemas.lesson import ExerciseOut, exercise_public_payload
 from app.schemas.practice import (
     PracticeSessionItemOut,
@@ -148,7 +149,7 @@ def get_practice_item(practice: PracticeSession, exercise_id: int) -> PracticeSe
     return item
 
 
-def item_outcome(item: PracticeSessionItem) -> str:
+def item_outcome(item: PracticeSessionItem) -> PracticeOutcome:
     if item.answer_revealed_at is not None:
         return "revealed"
     if item.completed_at is None:
@@ -182,9 +183,7 @@ def practice_item_out(
     return PracticeSessionItemOut(
         id=item.id,
         position=item.position,
-        historical_content_status=(
-            "available" if historical_content_available else "unavailable"
-        ),
+        historical_content_status=("available" if historical_content_available else "unavailable"),
         exercise=ExerciseOut.model_validate(exercise_public_payload(item.exercise)),
         attempt_count=item.attempt_count,
         first_try_correct=item.first_try_correct,
@@ -192,7 +191,7 @@ def practice_item_out(
         opened_hints=[ExerciseHintOut(level=hint.level, content=hint.content) for hint in hints],
         answer_revealed=revealed,
         completed_at=item.completed_at,
-        outcome=item_outcome(item),  # type: ignore[arg-type]
+        outcome=item_outcome(item),
         last_feedback=None if content_changed else _feedback(item),
         answers=(
             [answer.value for answer in item.exercise.answers]
@@ -231,11 +230,11 @@ def practice_session_out(
         lesson_number=practice.lesson.number,
         lesson_title=practice.lesson.title,
         content_version=practice.lesson_version,
-        mode=practice.mode,  # type: ignore[arg-type]
-        status=practice.status,  # type: ignore[arg-type]
+        mode=practice.mode,
+        status=practice.status,
         activity_type=practice.activity_type,
         skill=practice.skill,
-        objective=practice.objective,  # type: ignore[arg-type]
+        objective=practice.objective,
         content_changed=changed,
         current_position=practice.current_position,
         state_revision=practice.state_revision,
@@ -262,9 +261,9 @@ def practice_attempt_state(
         item_position=item.position,
         attempt_count=item.attempt_count,
         first_try_correct=item.first_try_correct,
-        outcome=item_outcome(item),  # type: ignore[arg-type]
+        outcome=item_outcome(item),
         completed_at=item.completed_at,
-        session_status=practice.status,  # type: ignore[arg-type]
+        session_status=practice.status,
     )
 
 

@@ -20,6 +20,7 @@ from sqlalchemy import func, select, text
 from app.core.config import get_settings
 from app.db.models import SpeakingAttempt
 from app.db.session import dispose_engine, get_sessionmaker
+from app.domain.enums import IntegrityState
 from app.services.audio_inspection import inspect_audio
 from app.services.audio_storage import AudioStorage
 
@@ -89,7 +90,7 @@ async def execute(
             # nunca excluir um arquivo potencialmente referenciado.
             attempt.storage_key = storage.save(data, attempt.mime_type)
             attempt.audio_sha256 = sha256
-            observed = "verified"
+            observed: IntegrityState = "verified"
         else:
             try:
                 data = storage.read_verified(

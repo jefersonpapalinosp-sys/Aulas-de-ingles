@@ -28,6 +28,19 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.domain.enums import (
+    AnalysisMode,
+    DeletionJobState,
+    ExerciseObjective,
+    HumanRating,
+    IntegrityState,
+    NotebookKind,
+    PracticeMode,
+    PracticeStatus,
+    SelfRating,
+    SpeakingStatus,
+    TranscriptionStatus,
+)
 
 
 class EditorialArchiveEvent(Base):
@@ -666,16 +679,16 @@ class SpeakingAttempt(Base):
         ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True
     )
     duration_ms: Mapped[int] = mapped_column(Integer)
-    self_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    self_rating: Mapped[SelfRating | None] = mapped_column(String(20), default=None)
     consented_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    status: Mapped[str] = mapped_column(String(20), default="pending")
+    status: Mapped[SpeakingStatus] = mapped_column(String(20), default="pending")
     mime_type: Mapped[str | None] = mapped_column(String(100), default=None)
     file_size: Mapped[int | None] = mapped_column(Integer, default=None)
     storage_key: Mapped[str | None] = mapped_column(String(80), unique=True, default=None)
     audio_sha256: Mapped[str | None] = mapped_column(String(64), default=None)
-    integrity_state: Mapped[str] = mapped_column(
+    integrity_state: Mapped[IntegrityState] = mapped_column(
         String(20), default="unknown", server_default="unknown"
     )
     integrity_checked_at: Mapped[datetime | None] = mapped_column(
@@ -741,7 +754,7 @@ class AccountDeletionJob(Base):
         ),
     )
     operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True)
-    state: Mapped[str] = mapped_column(String(20))
+    state: Mapped[DeletionJobState] = mapped_column(String(20))
     file_count: Mapped[int] = mapped_column(Integer, default=0)
     deleted_file_count: Mapped[int] = mapped_column(Integer, default=0)
     last_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
@@ -805,7 +818,7 @@ class TranscriptionJob(Base):
     speaking_attempt_id: Mapped[int] = mapped_column(
         ForeignKey("speaking_attempt.id", ondelete="CASCADE"), unique=True, index=True
     )
-    status: Mapped[str] = mapped_column(String(20), default="queued", index=True)
+    status: Mapped[TranscriptionStatus] = mapped_column(String(20), default="queued", index=True)
     provider: Mapped[str] = mapped_column(String(80))
     idempotency_key: Mapped[str] = mapped_column(String(64), unique=True)
     attempt_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -823,7 +836,7 @@ class TranscriptionJob(Base):
     low_confidence: Mapped[bool] = mapped_column(Boolean, default=False)
     error_code: Mapped[str | None] = mapped_column(String(50), default=None)
     cost_microusd: Mapped[int] = mapped_column(Integer, default=0)
-    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    human_rating: Mapped[HumanRating | None] = mapped_column(String(20), default=None)
     requested_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -1279,7 +1292,7 @@ class WritingFeedbackRecord(Base):
     rubric_snapshot: Mapped[dict[str, object] | None] = mapped_column(
         JSONB(none_as_null=True), default=None
     )
-    analysis_mode: Mapped[str] = mapped_column(String(20), default="deterministic")
+    analysis_mode: Mapped[AnalysisMode] = mapped_column(String(20), default="deterministic")
     provider: Mapped[str | None] = mapped_column(String(80), default=None)
     assisted_summary: Mapped[str | None] = mapped_column(Text, default=None)
     assisted_suggestions: Mapped[list[dict[str, object]] | None] = mapped_column(
@@ -1288,7 +1301,7 @@ class WritingFeedbackRecord(Base):
     assisted_confidence: Mapped[float | None] = mapped_column(Float, default=None)
     assisted_cost_microusd: Mapped[int] = mapped_column(Integer, default=0)
     assisted_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
-    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    human_rating: Mapped[HumanRating | None] = mapped_column(String(20), default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -1308,7 +1321,7 @@ class NotebookEntry(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
-    kind: Mapped[str] = mapped_column(String(30))
+    kind: Mapped[NotebookKind] = mapped_column(String(30))
     content: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -1581,13 +1594,13 @@ class PracticeSession(Base):
         ForeignKey("practice_session.id", ondelete="CASCADE"), default=None
     )
     idempotency_key: Mapped[str] = mapped_column(String(36))
-    mode: Mapped[str] = mapped_column(String(20))
+    mode: Mapped[PracticeMode] = mapped_column(String(20))
     activity_type: Mapped[str | None] = mapped_column(String(40), default=None)
     skill: Mapped[str | None] = mapped_column(String(40), default=None)
-    objective: Mapped[str | None] = mapped_column(String(20), default=None)
+    objective: Mapped[ExerciseObjective | None] = mapped_column(String(20), default=None)
     lesson_version: Mapped[int] = mapped_column(Integer)
     content_fingerprint: Mapped[str] = mapped_column(String(64))
-    status: Mapped[str] = mapped_column(String(20), default="active")
+    status: Mapped[PracticeStatus] = mapped_column(String(20), default="active")
     current_position: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     total_items: Mapped[int] = mapped_column(Integer)
     state_revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")

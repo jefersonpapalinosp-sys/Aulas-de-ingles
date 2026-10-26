@@ -11,6 +11,7 @@ from app.api.deps import UsuarioAtual
 from app.core.config import get_settings
 from app.db.models import TranscriptionJob, WorkerHeartbeat
 from app.db.session import get_session
+from app.domain.enums import WorkerState
 from app.schemas.assist import AssistStatusOut
 from app.services import editorial_history
 from app.services.assist_quota import usage
@@ -36,7 +37,7 @@ async def status_assistencia(
     seen_at = await session.scalar(
         select(WorkerHeartbeat.seen_at).where(WorkerHeartbeat.name == "transcription")
     )
-    worker_state = (
+    worker_state: WorkerState = (
         "disabled"
         if not (enabled and settings.assist_transcription_url)
         else (
@@ -68,7 +69,7 @@ async def status_assistencia(
         retention_days=settings.assist_retention_days,
         cost_microusd_today=balance.cost,
         cost_incomplete=balance.incomplete,
-        worker_state=worker_state,  # type: ignore[arg-type]
+        worker_state=worker_state,
         worker_seen_at=seen_at,
         queued_jobs=queue[0],
         oldest_queued_seconds=max(0, int((now - queue[1]).total_seconds())) if queue[1] else None,

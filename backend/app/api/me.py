@@ -4,11 +4,10 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
-from sqlalchemy import and_, select, tuple_
+from sqlalchemy import Select, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
-from app.api.review import adicionar_item_revisao, remover_item_por_origem
 from app.db.models import (
     Course,
     CourseUnit,
@@ -16,6 +15,7 @@ from app.db.models import (
     NotebookEntry,
 )
 from app.db.session import get_session
+from app.domain.enums import NotebookKind
 from app.pagination import (
     PAGE_LIMIT_MAX,
     PAGINATED_ALTERNATIVE_HEADER,
@@ -29,13 +29,41 @@ from app.schemas.notebook import (
     NotebookEntryIn,
     NotebookEntryOut,
     NotebookEntryUpdate,
-    NotebookKind,
     NotebookPageOut,
     PersonalDataExportOut,
 )
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
+from app.services.review import adicionar_item_revisao, remover_item_por_origem
 
 router = APIRouter(prefix="/me", tags=["me"])
+
+
+def _recorte[*Cols](
+    query: Select[*Cols],
+    *,
+    lesson: int | None,
+    kind: NotebookKind | None,
+    course: str | None,
+    unit: str | None,
+) -> Select[*Cols]:
+    """Recorte do caderno — o mesmo na lista legada e na página.
+
+    Depende dos joins de ``Lesson``, ``Course`` e ``CourseUnit``: as duas
+    consultas os declaram. Sem ``course``, um filtro por aula vale no curso
+    padrão, porque o número de aula só identifica uma aula dentro de um curso.
+    """
+    if course is not None:
+        query = query.where(Course.slug == course)
+    if unit is not None:
+        query = query.where(CourseUnit.slug == unit)
+    if lesson is not None:
+        query = query.where(
+            Lesson.number == lesson,
+            Course.slug == (course or DEFAULT_COURSE_SLUG),
+        )
+    if kind is not None:
+        query = query.where(NotebookEntry.kind == kind)
+    return query
 
 
 def _entry_out(entry: NotebookEntry) -> NotebookEntryOut:
@@ -46,7 +74,7 @@ def _entry_out(entry: NotebookEntry) -> NotebookEntryOut:
         unit_slug=entry.lesson.unit.slug,
         lesson_number=entry.lesson.number,
         lesson_title=entry.lesson.title,
-        kind=entry.kind,  # type: ignore[arg-type]
+        kind=entry.kind,
         content=entry.content,
         created_at=entry.created_at,
         updated_at=entry.updated_at,
@@ -80,22 +108,17 @@ async def listar_caderno(
 ) -> list[NotebookEntryOut]:
     """Lista legada com teto: devolve só a primeira página; o histórico completo vive em /page."""
     response.headers[PAGINATED_ALTERNATIVE_HEADER] = "/api/me/notebook/page"
-    query = select(NotebookEntry).where(NotebookEntry.user_id == usuario.id)
-    if course is not None:
-        query = query.where(NotebookEntry.lesson.has(Lesson.course.has(Course.slug == course)))
-    if unit is not None:
-        query = query.where(NotebookEntry.lesson.has(Lesson.unit.has(CourseUnit.slug == unit)))
-    if lesson is not None:
-        query = query.where(
-            NotebookEntry.lesson.has(
-                and_(
-                    Lesson.number == lesson,
-                    Lesson.course.has(slug=course or DEFAULT_COURSE_SLUG),
-                )
-            )
-        )
-    if kind is not None:
-        query = query.where(NotebookEntry.kind == kind)
+    query = _recorte(
+        select(NotebookEntry)
+        .join(Lesson, NotebookEntry.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+        .where(NotebookEntry.user_id == usuario.id),
+        lesson=lesson,
+        kind=kind,
+        course=course,
+        unit=unit,
+    )
     entries = (
         await session.execute(query.order_by(NotebookEntry.updated_at.desc()).limit(limit))
     ).scalars()
@@ -132,17 +155,7 @@ async def listar_caderno_paginado(
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
         .where(NotebookEntry.user_id == usuario.id)
     )
-    if course is not None:
-        query = query.where(Course.slug == course)
-    if unit is not None:
-        query = query.where(CourseUnit.slug == unit)
-    if lesson is not None:
-        query = query.where(
-            Lesson.number == lesson,
-            Course.slug == (course or DEFAULT_COURSE_SLUG),
-        )
-    if kind is not None:
-        query = query.where(NotebookEntry.kind == kind)
+    query = _recorte(query, lesson=lesson, kind=kind, course=course, unit=unit)
     if cursor is not None:
         try:
             boundary = decode_time_id_cursor(cursor)

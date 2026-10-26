@@ -274,11 +274,17 @@ def main_com_argumentos(argumentos: list[str]) -> None:
                 file=sys.stderr,
             )
             raise SystemExit(2) from None
-        if modality not in {"transcription", "writing"}:
+        # O mapa valida e tipa de uma vez: um nome fora do conjunto não compila.
+        modalidades: dict[str, Modality] = {
+            "transcription": "transcription",
+            "writing": "writing",
+        }
+        escolhida = modalidades.get(modality)
+        if escolhida is None:
             print("modalidade inválida: use transcription ou writing", file=sys.stderr)
             raise SystemExit(2)
         try:
-            approved = asyncio.run(_assist_gate(modality, review_path))  # type: ignore[arg-type]
+            approved = asyncio.run(_assist_gate(escolhida, review_path))
         except (OSError, ValueError) as error:
             print(f"manifesto inválido: {error}", file=sys.stderr)
             raise SystemExit(2) from None

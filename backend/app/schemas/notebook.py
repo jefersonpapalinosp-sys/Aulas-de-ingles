@@ -6,13 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, SecretStr, field_validator
 
-NotebookKind = Literal[
-    "note",
-    "favorite_phrase",
-    "personal_example",
-    "recurring_error",
-    "teacher_question",
-]
+from app.domain.enums import DeletionResultState, NotebookKind
 
 
 class NotebookEntryIn(BaseModel):
@@ -125,6 +119,6 @@ class AccountDeletionIn(BaseModel):
 
 class AccountDeletionOut(BaseModel):
     operation_key: str
-    state: Literal["cleanup_pending", "completed"]
+    state: DeletionResultState
     database_deleted: Literal[True] = True
     audio_files_pending: int = Field(ge=0)

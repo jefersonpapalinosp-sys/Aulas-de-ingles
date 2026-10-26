@@ -6,15 +6,24 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.schemas.assist import HumanRating
+from app.domain.enums import AnalysisMode, HumanRating
 
 
-class WritingDraftIn(BaseModel):
+class _WritingTextIn(BaseModel):
     text: str = Field(max_length=5000)
+
+
+class WritingDraftIn(_WritingTextIn):
     expected_revision: int | None = Field(default=None, ge=0)
 
 
-class WritingFeedbackIn(WritingDraftIn):
+class WritingFeedbackIn(_WritingTextIn):
+    """O feedback não compara revisão: o texto analisado vem no corpo.
+
+    A `operation_key` é que importa aqui — ela governa a reserva de cota da
+    assistência e, no reenvio, devolve o registro em vez de cobrar de novo.
+    """
+
     assisted: bool = False
     operation_key: UUID | None = None
 
@@ -53,7 +62,7 @@ class WritingFeedbackOut(BaseModel):
     rubric_snapshot: dict[str, object] | None
     historical_content_status: Literal["available", "unavailable"]
     evaluation_scope: str
-    analysis_mode: Literal["deterministic", "assisted", "fallback"]
+    analysis_mode: AnalysisMode
     automated: Literal[True] = True
     evaluation_only: bool
     provider: str | None

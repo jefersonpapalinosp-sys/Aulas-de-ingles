@@ -6,11 +6,15 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.domain.enums import (
+    ExerciseObjective,
+    PracticeMode,
+    PracticeOutcome,
+    PracticeStatus,
+)
 from app.schemas.lesson import ExerciseOut
 from app.schemas.progress import AttemptFeedbackOut, ExerciseHintOut
 
-PracticeMode = Literal["guided", "quick", "mistakes"]
-PracticeStatus = Literal["active", "completed", "abandoned"]
 ExerciseActivityType = Literal[
     "gap_fill",
     "multiple_choice",
@@ -20,8 +24,6 @@ ExerciseActivityType = Literal[
     "classification",
 ]
 ExerciseSkill = Literal["grammar", "listening"]
-ExerciseObjective = Literal["recognize", "apply", "correct", "produce", "listen"]
-PracticeOutcome = Literal["pending", "first_try_correct", "corrected", "revealed"]
 
 
 class PracticeSessionCreateIn(BaseModel):

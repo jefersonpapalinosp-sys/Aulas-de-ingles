@@ -207,6 +207,52 @@ def _request_hash(body: CourseReviewAttemptIn) -> str:
     return hashlib.sha256(canonical.encode()).hexdigest()
 
 
+async def _tentativa_por_chave(
+    session: AsyncSession, user_id: int, key: str
+) -> CourseReviewAttempt | None:
+    return (
+        await session.execute(
+            select(CourseReviewAttempt).where(
+                CourseReviewAttempt.user_id == user_id,
+                CourseReviewAttempt.idempotency_key == key,
+            )
+        )
+    ).scalar_one_or_none()
+
+
+def _mesma_tentativa(tentativa: CourseReviewAttempt, review_id: int, fingerprint: str) -> bool:
+    """Chave repetida só é repetição se descreve o mesmo checkpoint e conteúdo."""
+    return tentativa.review_id == review_id and tentativa.request_hash == fingerprint
+
+
+def _corrigir(
+    review: CourseReview, submitted: dict[int, str]
+) -> tuple[list[dict[str, object]], int]:
+    """Correção no servidor, questão por questão, na ordem publicada.
+
+    A resposta aceita não trafega antes da correção: mandá-la ao navegador
+    para o JavaScript comparar seria publicar o gabarito do checkpoint.
+    """
+    result: list[dict[str, object]] = []
+    score = 0
+    for question in review.questions:
+        answer = submitted[question.id]
+        correct = acertou(answer, question.accepted_answers)
+        score += int(correct)
+        result.append(
+            {
+                "question_id": question.id,
+                "position": question.position,
+                "correct": correct,
+                "answer": answer,
+                "accepted_answers": question.accepted_answers,
+                "explanation": question.explanation,
+                "lesson_numbers": question.lesson_numbers,
+            }
+        )
+    return result, score
+
+
 @router.post(
     "/{course_slug}/units/{unit_slug}/review/attempts",
     response_model=CourseReviewAttemptOut,
@@ -231,16 +277,9 @@ async def submit_course_review(
     review = await _review_or_404(session, course_slug, unit_slug)
     fingerprint = _request_hash(body)
     key = str(body.idempotency_key)
-    existing = (
-        await session.execute(
-            select(CourseReviewAttempt).where(
-                CourseReviewAttempt.user_id == usuario.id,
-                CourseReviewAttempt.idempotency_key == key,
-            )
-        )
-    ).scalar_one_or_none()
+    existing = await _tentativa_por_chave(session, usuario.id, key)
     if existing is not None:
-        if existing.review_id != review.id or existing.request_hash != fingerprint:
+        if not _mesma_tentativa(existing, review.id, fingerprint):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="A chave de idempotência já foi usada com outro conteúdo.",
@@ -265,24 +304,7 @@ async def submit_course_review(
             detail="Envie exatamente uma resposta para cada questão do checkpoint.",
         )
 
-    result: list[dict[str, object]] = []
-    score = 0
-    for question in review.questions:
-        answer = submitted[question.id]
-        correct = acertou(answer, question.accepted_answers)
-        score += int(correct)
-        result.append(
-            {
-                "question_id": question.id,
-                "position": question.position,
-                "correct": correct,
-                "answer": answer,
-                "accepted_answers": question.accepted_answers,
-                "explanation": question.explanation,
-                "lesson_numbers": question.lesson_numbers,
-            }
-        )
-
+    result, score = _corrigir(review, submitted)
     attempt = CourseReviewAttempt(
         user_id=usuario.id,
         review_id=review.id,
@@ -312,19 +334,8 @@ async def submit_course_review(
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        concurrent = (
-            await session.execute(
-                select(CourseReviewAttempt).where(
-                    CourseReviewAttempt.user_id == usuario.id,
-                    CourseReviewAttempt.idempotency_key == key,
-                )
-            )
-        ).scalar_one_or_none()
-        if (
-            concurrent is None
-            or concurrent.review_id != review.id
-            or concurrent.request_hash != fingerprint
-        ):
+        concurrent = await _tentativa_por_chave(session, usuario.id, key)
+        if concurrent is None or not _mesma_tentativa(concurrent, review.id, fingerprint):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Não foi possível registrar a tentativa idempotente.",

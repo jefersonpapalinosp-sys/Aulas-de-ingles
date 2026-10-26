@@ -3504,15 +3504,19 @@ export interface components {
             /** Suggestion */
             suggestion: string;
         };
-        /** WritingFeedbackIn */
+        /**
+         * WritingFeedbackIn
+         * @description O feedback não compara revisão: o texto analisado vem no corpo.
+         *
+         *     A `operation_key` é que importa aqui — ela governa a reserva de cota da
+         *     assistência e, no reenvio, devolve o registro em vez de cobrar de novo.
+         */
         WritingFeedbackIn: {
             /**
              * Assisted
              * @default false
              */
             assisted: boolean;
-            /** Expected Revision */
-            expected_revision?: number | null;
             /** Operation Key */
             operation_key?: string | null;
             /** Text */
@@ -4691,7 +4695,7 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie. */
             428: {
                 headers: {
                     [name: string]: unknown;
@@ -5475,7 +5479,7 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie. */
             428: {
                 headers: {
                     [name: string]: unknown;
@@ -7467,7 +7471,7 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            /** @description Cliente antigo sem expected_revision ou sem chave de idempotência após o cutover (detail.code em ['revision_required', 'idempotency_key_required']). Atualize o aplicativo e reenvie. */
             428: {
                 headers: {
                     [name: string]: unknown;
@@ -7476,7 +7480,7 @@ export interface operations {
                     "application/json": {
                         detail: {
                             /** @enum {string} */
-                            code: "revision_required";
+                            code: "revision_required" | "idempotency_key_required";
                             message: string;
                         };
                     };
@@ -8424,7 +8428,7 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie. */
             428: {
                 headers: {
                     [name: string]: unknown;
@@ -8562,6 +8566,21 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Cliente antigo sem chave de idempotência após o cutover (detail.code em ['idempotency_key_required']). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "idempotency_key_required";
+                            message: string;
+                        };
+                    };
+                };
+            };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
             503: {
                 headers: {
@@ -8685,7 +8704,7 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Cliente antigo sem expected_revision após o cutover (detail.code = revision_required). Atualize o aplicativo e reenvie. */
+            /** @description Cliente antigo sem expected_revision após o cutover (detail.code em ['revision_required']). Atualize o aplicativo e reenvie. */
             428: {
                 headers: {
                     [name: string]: unknown;

@@ -11,10 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import UsuarioAtual
 from app.db.models import Exercise, Lesson, PracticeSession, PracticeSessionItem
 from app.db.session import get_session
+from app.domain.enums import ExerciseObjective
 from app.schemas.lesson import ExerciseOut, exercise_public_payload
 from app.schemas.practice import (
     ExerciseActivityType,
-    ExerciseObjective,
     ExerciseSkill,
     PracticeHintOut,
     PracticePositionIn,
@@ -56,12 +56,8 @@ async def _practice_out(
 async def _practice_item_out(
     session: AsyncSession, item: PracticeSessionItem, user_id: int
 ) -> PracticeSessionItemOut:
-    snapshot = await editorial_history.stored_snapshot(
-        session, "practice", item.id, user_id
-    )
-    return practice_item_out(
-        item, historical_content_available=snapshot is not None
-    )
+    snapshot = await editorial_history.stored_snapshot(session, "practice", item.id, user_id)
+    return practice_item_out(item, historical_content_available=snapshot is not None)
 
 
 async def _lesson_or_404(session: AsyncSession, course_slug: str, number: int) -> Lesson:
@@ -187,6 +183,90 @@ async def get_active_practice_session(
     return await _practice_out(session, practice, usuario.id)
 
 
+async def _sessao_por_chave(
+    session: AsyncSession, user_id: int, key: str
+) -> PracticeSession | None:
+    return (
+        await session.execute(
+            select(PracticeSession).where(
+                PracticeSession.user_id == user_id,
+                PracticeSession.idempotency_key == key,
+            )
+        )
+    ).scalar_one_or_none()
+
+
+async def _sessao_ativa(
+    session: AsyncSession, user_id: int, lesson_id: int
+) -> PracticeSession | None:
+    return (
+        await session.execute(
+            select(PracticeSession).where(
+                PracticeSession.user_id == user_id,
+                PracticeSession.lesson_id == lesson_id,
+                PracticeSession.status == "active",
+            )
+        )
+    ).scalar_one_or_none()
+
+
+def _nova_sessao(
+    user_id: int,
+    lesson_id: int,
+    body: PracticeSessionCreateIn,
+    key: str,
+    lesson_version: int,
+    exercises: list[Exercise],
+) -> PracticeSession:
+    """Sessão com os itens já posicionados e a impressão do conteúdo gravada.
+
+    O ``content_fingerprint`` é o que permite detectar, depois, que a aula
+    mudou debaixo de uma sessão aberta.
+    """
+    practice = PracticeSession(
+        user_id=user_id,
+        lesson_id=lesson_id,
+        source_session_id=body.source_session_id,
+        idempotency_key=key,
+        mode=body.mode,
+        activity_type=body.activity_type,
+        skill=body.skill,
+        objective=body.objective,
+        lesson_version=lesson_version,
+        content_fingerprint=exercise_fingerprint(exercises),
+        total_items=len(exercises),
+    )
+    practice.items = [
+        PracticeSessionItem(
+            exercise_id=exercise.id,
+            exercise=exercise,
+            position=position,
+            attempts=[],
+        )
+        for position, exercise in enumerate(exercises)
+    ]
+    return practice
+
+
+async def _capturar_conteudo(
+    session: AsyncSession, practice: PracticeSession, user_id: int
+) -> None:
+    """Congela o enunciado de cada item: o histórico do aluno não muda quando a
+    aula é reeditada."""
+    for item in practice.items:
+        await editorial_history.capture(
+            session,
+            "practice",
+            item.id,
+            user_id,
+            {
+                **editorial_history.exercise_content(item.exercise),
+                "lesson_version": practice.lesson_version,
+                "practice_position": item.position,
+            },
+        )
+
+
 @router.post(
     "/courses/{course_slug}/lessons/{number}/practice-sessions",
     response_model=PracticeSessionOut,
@@ -209,14 +289,7 @@ async def create_practice_session(
     _private(response)
     lesson = await _lesson_or_404(session, course_slug, number)
     key = str(body.idempotency_key)
-    existing_key = (
-        await session.execute(
-            select(PracticeSession).where(
-                PracticeSession.user_id == usuario.id,
-                PracticeSession.idempotency_key == key,
-            )
-        )
-    ).scalar_one_or_none()
+    existing_key = await _sessao_por_chave(session, usuario.id, key)
     if existing_key is not None:
         if existing_key.lesson_id != lesson.id or not _same_request(existing_key, body):
             raise HTTPException(
@@ -226,15 +299,7 @@ async def create_practice_session(
         response.status_code = status.HTTP_200_OK
         return await _practice_out(session, existing_key, usuario.id)
 
-    active = (
-        await session.execute(
-            select(PracticeSession).where(
-                PracticeSession.user_id == usuario.id,
-                PracticeSession.lesson_id == lesson.id,
-                PracticeSession.status == "active",
-            )
-        )
-    ).scalar_one_or_none()
+    active = await _sessao_ativa(session, usuario.id, lesson.id)
     if active is not None:
         if session_content_changed(active):
             active.status = "abandoned"
@@ -255,56 +320,23 @@ async def create_practice_session(
             status_code=status.HTTP_409_CONFLICT,
             detail="Nenhum exercício corresponde a esta sessão.",
         )
-    practice = PracticeSession(
-        user_id=usuario.id,
-        lesson_id=lesson.id,
-        source_session_id=body.source_session_id,
-        idempotency_key=key,
-        mode=body.mode,
-        activity_type=body.activity_type,
-        skill=body.skill,
-        objective=body.objective,
-        lesson_version=await current_lesson_version(session, lesson.id),
-        content_fingerprint=exercise_fingerprint(exercises),
-        total_items=len(exercises),
+    practice = _nova_sessao(
+        usuario.id,
+        lesson.id,
+        body,
+        key,
+        await current_lesson_version(session, lesson.id),
+        exercises,
     )
-    practice.items = [
-        PracticeSessionItem(
-            exercise_id=exercise.id,
-            exercise=exercise,
-            position=position,
-            attempts=[],
-        )
-        for position, exercise in enumerate(exercises)
-    ]
     session.add(practice)
     try:
         await session.flush()
-        for item in practice.items:
-            await editorial_history.capture(
-                session,
-                "practice",
-                item.id,
-                usuario.id,
-                {
-                    **editorial_history.exercise_content(item.exercise),
-                    "lesson_version": practice.lesson_version,
-                    "practice_position": item.position,
-                },
-            )
+        await _capturar_conteudo(session, practice, usuario.id)
         await session.commit()
     except IntegrityError:
         await session.rollback()
         # Corrida de duas abas: a unicidade escolheu uma sessão; devolvemos-a.
-        winner = (
-            await session.execute(
-                select(PracticeSession).where(
-                    PracticeSession.user_id == usuario.id,
-                    PracticeSession.lesson_id == lesson.id,
-                    PracticeSession.status == "active",
-                )
-            )
-        ).scalar_one_or_none()
+        winner = await _sessao_ativa(session, usuario.id, lesson.id)
         if winner is None or not _same_request(winner, body):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,

@@ -26,7 +26,7 @@ test('Sprint 40A: exportação por teclado, manifesto e download privado de áud
   const { headers } = await account(page)
   const lesson = await (await page.request.get('/api/lessons/31')).json()
   const writing = await page.request.post(`/api/writing/prompts/${lesson.writing_prompts[0].id}/feedback`, {
-    headers, data: { text: 'The train is faster than a bus. You should try it.' },
+    headers, data: { text: 'The train is faster than a bus. You should try it.', operation_key: randomUUID() },
   })
   expect(writing.status()).toBe(200)
   const created = await page.request.post('/api/speaking/attempts', { headers,

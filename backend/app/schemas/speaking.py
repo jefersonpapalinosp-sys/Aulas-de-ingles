@@ -5,10 +5,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.domain.enums import IntegrityState, SelfRating, SpeakingStatus
 from app.schemas.assist import TranscriptionJobOut
 from app.services.audio_upload import MAX_DURATION_MS
-
-SelfRating = Literal["repeat", "almost", "confident"]
 
 
 class SpeakingAttemptIn(BaseModel):
@@ -30,11 +29,11 @@ class SpeakingAttemptOut(BaseModel):
     duration_ms: int
     self_rating: SelfRating | None
     consented_at: datetime
-    status: Literal["pending", "ready"]
+    status: SpeakingStatus
     mime_type: str | None
     file_size: int | None
     created_at: datetime
-    integrity_state: Literal["unknown", "verified", "missing", "changed"] = "unknown"
+    integrity_state: IntegrityState = "unknown"
     transcription: TranscriptionJobOut | None = None
 
 

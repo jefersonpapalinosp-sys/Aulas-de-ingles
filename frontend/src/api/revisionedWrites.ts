@@ -34,7 +34,7 @@ export const REVISIONED_WRITES = {
   'PUT /api/practice-sessions/{session_id}/position': ['expected_revision', 'idempotency_key'],
   'POST /api/review/{item_id}/grade': ['expected_revision', 'idempotency_key'],
   'PUT /api/writing/prompts/{prompt_id}/draft': ['expected_revision'],
-  'POST /api/writing/prompts/{prompt_id}/feedback': ['expected_revision', 'operation_key'],
+  'POST /api/writing/prompts/{prompt_id}/feedback': ['operation_key'],
   'POST /api/writing/prompts/{prompt_id}/versions': ['expected_revision'],
 } as const satisfies Record<string, readonly RevisionField[]>
 

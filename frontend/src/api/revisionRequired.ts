@@ -1,6 +1,7 @@
 /**
  * Sinal único de "esta versão do cliente ficou para trás": a API respondeu 428
- * `revision_required` a alguma escrita. Fica em memória, sem token nem corpo
+ * a alguma escrita — `revision_required` ou `idempotency_key_required`, que
+ * pedem a mesma coisa do aluno. Fica em memória, sem token nem corpo
  * de resposta, e só é limpo ao recarregar a aplicação.
  */
 let required = false
