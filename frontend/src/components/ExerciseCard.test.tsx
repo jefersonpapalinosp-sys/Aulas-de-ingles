@@ -125,6 +125,25 @@ describe('ExerciseCard', () => {
     expect(screen.getByText(/palavra ou estrutura a mais/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument()
     expect(screen.queryByText('faster')).toBeNull()
+    // Veredito que pede ação do aluno é anunciado na hora, não quando sobrar
+    // silêncio: quem usa leitor de tela precisa saber que há o que refazer.
+    expect(screen.getByRole('alert')).toHaveTextContent('Ainda não')
+  })
+
+  it('acerto é anúncio educado, não alerta', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.POST).mockResolvedValue({
+      data: feedback(true),
+      response: new Response(),
+    } as never)
+
+    montar()
+    await user.type(screen.getByRole('textbox'), 'faster')
+    await user.click(screen.getByRole('button', { name: 'Verificar' }))
+
+    await waitFor(() => expect(screen.getByText('Correto')).toBeInTheDocument())
+    expect(screen.getByRole('status')).toHaveTextContent('Correto')
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 
   it('Resposta busca o gabarito num endpoint separado', async () => {
