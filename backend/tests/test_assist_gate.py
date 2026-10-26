@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from app.core.config import Settings
+from app.domain.dialogue import MAX_TURNS_PER_DIALOGUE
 from app.services.assist_gate import (
     GateMetrics,
     ProviderReview,
@@ -128,6 +129,11 @@ def test_manifesto_rejeita_campos_de_privacidade_ambiguos(tmp_path: Path) -> Non
             {"assist_provider_kind": "ollama", "assist_ollama_model": ""},
             "ASSIST_OLLAMA_MODEL",
         ),
+        # A cota de conversa é "dois diálogos completos", não um número: 20
+        # turnos com limite de 12 por diálogo daria 429 no turno 8 do segundo,
+        # no meio da conversa. O boot recusa em vez de deixar isso acontecer.
+        ({"assist_dialogue_daily_turns": 20}, "múltiplo de 12"),
+        ({"assist_dialogue_daily_turns": 6}, "múltiplo de 12"),
     ],
 )
 def test_configuracao_assistida_recusa_limites_invalidos(
@@ -136,3 +142,11 @@ def test_configuracao_assistida_recusa_limites_invalidos(
     settings = Settings(**overrides)  # type: ignore[arg-type]
     with pytest.raises(RuntimeError, match=message):
         settings.validar()
+
+
+@pytest.mark.parametrize("turnos", [12, 24, 36])
+def test_cota_de_conversa_aceita_multiplos_do_limite_do_dialogo(turnos: int) -> None:
+    """Qualquer múltiplo serve; o que a decisão fixou foi a relação, não o 24."""
+    settings = Settings(assist_dialogue_daily_turns=turnos)  # type: ignore[arg-type]
+    settings.validar()
+    assert settings.assist_dialogue_daily_turns % MAX_TURNS_PER_DIALOGUE == 0

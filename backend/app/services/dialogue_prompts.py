@@ -22,21 +22,29 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from app.domain.dialogue import CHECK_CODES, CheckCode
+from app.domain.dialogue import (
+    CHECK_CODES,
+    MAX_TURNS_PER_DIALOGUE,
+    MAX_WORDS,
+    MIN_WORDS,
+    CheckCode,
+)
 
 PROMPT_VERSION = "dialogue-prompt-v1"
 Mode = Literal["script", "guided", "free_unit"]
 # Os códigos vêm do domínio, que é quem os produz: duas listas iguais em
 # arquivos diferentes divergem na primeira vez que uma regra muda.
-__all__ = ["CHECK_CODES", "CheckCode"]
+__all__ = ["CHECK_CODES", "MAX_TURNS_PER_DIALOGUE", "CheckCode"]
 
 MAX_PARTNER_CHARS = 280
 MAX_HINT_CHARS = 200
 MAX_HINTS = 3
 MAX_HISTORY_TURNS = 6
-MAX_TURNS_PER_DIALOGUE = 12
-MIN_STUDENT_WORDS = 3
-MAX_STUDENT_WORDS = 60
+# Os três limites vêm do domínio: eram repetidos aqui e divergiriam na
+# primeira vez que uma regra mudasse. Os nomes locais ficam como apelido para
+# o texto do prompt, que fala de "student".
+MIN_STUDENT_WORDS = MIN_WORDS
+MAX_STUDENT_WORDS = MAX_WORDS
 
 _URL = re.compile(r"(https?://|www\.)", re.IGNORECASE)
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")

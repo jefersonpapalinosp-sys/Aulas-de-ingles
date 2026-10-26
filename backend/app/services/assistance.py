@@ -304,6 +304,114 @@ def call_ollama_writing_provider(
     )
 
 
+@dataclass(frozen=True)
+class DialogueResult:
+    """Resposta crua do provedor de diálogo, antes do saneamento.
+
+    `raw` vai inteiro para `dialogue_prompts.sanitize_provider_output`, que é
+    quem decide se a resposta é utilizável: aqui só se garante que houve uma
+    resposta JSON e se mede o custo. A separação é de propósito — este módulo
+    fala HTTP, o outro conhece o contrato do turno.
+    """
+
+    raw: object
+    cost_microusd: int
+    cost_known: bool
+
+
+def _cloudflare_chat(payload: dict[str, Any]) -> object:
+    """`result.response` vem como objeto (json_schema) ou string JSON."""
+    result = payload.get("result")
+    if not isinstance(result, dict):
+        return payload
+    response = result.get("response")
+    if isinstance(response, str):
+        try:
+            return json.loads(response)
+        except json.JSONDecodeError:
+            raise ProviderFailure("invalid_provider_response") from None
+    return response
+
+
+def call_dialogue_provider(
+    url: str,
+    messages: list[dict[str, str]],
+    schema: dict[str, Any],
+    *,
+    token: str | None,
+    timeout: int,
+    idempotency_key: str | None = None,
+) -> DialogueResult:
+    """Um turno do parceiro, com a resposta restrita pelo JSON Schema.
+
+    O corpo é o mesmo medido no spike do IA-45 contra o Workers AI
+    (`messages` + `response_format` json_schema + `temperature: 0`), e
+    `temperature` zero é o que torna o turno reproduzível para o gate humano.
+    Um gateway próprio que aceite o mesmo corpo serve sem mudança aqui.
+    """
+    body = json.dumps(
+        {
+            "messages": messages,
+            "response_format": {"type": "json_schema", "json_schema": schema},
+            "temperature": 0,
+            "max_tokens": 200,
+        },
+        ensure_ascii=False,
+    ).encode()
+    payload = _post_json(
+        url,
+        body,
+        content_type="application/json",
+        token=token,
+        timeout=timeout,
+        extra_headers={"Idempotency-Key": idempotency_key} if idempotency_key else None,
+    )
+    cost, cost_known = _reported_cost(payload)
+    return DialogueResult(raw=_cloudflare_chat(payload), cost_microusd=cost, cost_known=cost_known)
+
+
+def call_ollama_dialogue_provider(
+    base_url: str,
+    model: str,
+    messages: list[dict[str, str]],
+    schema: dict[str, Any],
+    *,
+    timeout: int,
+) -> DialogueResult:
+    """Mesmo turno, por Ollama local. Só desenvolvimento.
+
+    A VM pública é compartilhada e sem GPU (ADR), então este caminho existe
+    para iterar no prompt sem gastar cota — e nunca reporta custo, porque não
+    há nenhum a reportar.
+    """
+    body = json.dumps(
+        {
+            "model": model,
+            "messages": messages,
+            "stream": False,
+            "format": schema,
+            "options": {"temperature": 0},
+        },
+        ensure_ascii=False,
+    ).encode()
+    payload = _post_json(
+        f"{base_url.rstrip('/')}/api/chat",
+        body,
+        content_type="application/json",
+        token=None,
+        timeout=timeout,
+    )
+    message = payload.get("message")
+    content = message.get("content") if isinstance(message, dict) else None
+    if not isinstance(content, str):
+        raise ProviderFailure("invalid_provider_response")
+    try:
+        raw: object = json.loads(content)
+    except json.JSONDecodeError:
+        raise ProviderFailure("invalid_provider_response") from None
+    return DialogueResult(raw=raw, cost_microusd=0, cost_known=True)
+
+
 def compare_transcript(expected: str, actual: str) -> float:
     def normalized(value: str) -> str:
         return " ".join(re.findall(r"[a-z0-9]+(?:'[a-z]+)?", value.lower().replace("’", "'")))

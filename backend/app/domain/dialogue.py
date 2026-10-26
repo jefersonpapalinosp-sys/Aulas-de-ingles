@@ -37,6 +37,11 @@ CHECK_CODES: tuple[CheckCode, ...] = (
 
 MIN_WORDS = 3
 MAX_WORDS = 60
+# Limite de turnos do aluno por diálogo no Guiado, decidido em 26/10/2026: com
+# o STT p95 de 3,6 s mais ~2 s do modelo, doze turnos dão uma conversa de 6 a
+# 10 minutos contando a fala do aluno — um bloco de estudo inteiro. A cota
+# diária é múltiplo deste número (ver `Settings.assist_dialogue_daily_turns`).
+MAX_TURNS_PER_DIALOGUE = 12
 
 # Fronteira de palavra sobre o texto já normalizado. `\b` não serve: o termo
 # pode conter apóstrofo ("don't") e, em alguns motores, `\b` quebra ali.
