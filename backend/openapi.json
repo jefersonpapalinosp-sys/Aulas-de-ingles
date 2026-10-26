@@ -1708,6 +1708,386 @@
                 "title": "DeletionMetricsOut",
                 "type": "object"
             },
+            "DialogueCreateIn": {
+                "properties": {
+                    "lesson_id": {
+                        "title": "Lesson Id",
+                        "type": "integer"
+                    },
+                    "mode": {
+                        "default": "script",
+                        "enum": [
+                            "script",
+                            "guided",
+                            "free_unit"
+                        ],
+                        "title": "Mode",
+                        "type": "string"
+                    },
+                    "operation_key": {
+                        "anyOf": [
+                            {
+                                "format": "uuid",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Operation Key"
+                    },
+                    "partner_speaker": {
+                        "anyOf": [
+                            {
+                                "maxLength": 80,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Partner Speaker"
+                    }
+                },
+                "required": [
+                    "lesson_id"
+                ],
+                "title": "DialogueCreateIn",
+                "type": "object"
+            },
+            "DialogueHintOut": {
+                "properties": {
+                    "code": {
+                        "enum": [
+                            "target_terms_missing",
+                            "grammar_pattern_missing",
+                            "too_short",
+                            "too_long"
+                        ],
+                        "title": "Code",
+                        "type": "string"
+                    },
+                    "message": {
+                        "title": "Message",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "message"
+                ],
+                "title": "DialogueHintOut",
+                "type": "object"
+            },
+            "DialogueOut": {
+                "properties": {
+                    "ended_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Ended At"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "lesson_id": {
+                        "title": "Lesson Id",
+                        "type": "integer"
+                    },
+                    "mode": {
+                        "enum": [
+                            "script",
+                            "guided",
+                            "free_unit"
+                        ],
+                        "title": "Mode",
+                        "type": "string"
+                    },
+                    "partner_speaker": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Partner Speaker"
+                    },
+                    "provider_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Provider Name"
+                    },
+                    "rubric_version": {
+                        "title": "Rubric Version",
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "format": "date-time",
+                        "title": "Started At",
+                        "type": "string"
+                    },
+                    "state": {
+                        "enum": [
+                            "active",
+                            "completed",
+                            "abandoned"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    },
+                    "turn_limit": {
+                        "title": "Turn Limit",
+                        "type": "integer"
+                    },
+                    "turns": {
+                        "items": {
+                            "$ref": "#/components/schemas/DialogueTurnOut"
+                        },
+                        "title": "Turns",
+                        "type": "array"
+                    },
+                    "turns_remaining": {
+                        "title": "Turns Remaining",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "lesson_id",
+                    "mode",
+                    "state",
+                    "partner_speaker",
+                    "turn_limit",
+                    "turns_remaining",
+                    "provider_name",
+                    "rubric_version",
+                    "started_at",
+                    "ended_at",
+                    "turns"
+                ],
+                "title": "DialogueOut",
+                "type": "object"
+            },
+            "DialogueTurnAcceptedOut": {
+                "description": "Resposta do turno admitido.\n\n`job_id` é nulo no Roteiro, que não passa pela fila — ele não chama\nprovedor nenhum e não pode depender do worker estar de pé.",
+                "properties": {
+                    "job_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Job Id"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "state": {
+                        "enum": [
+                            "pending",
+                            "completed",
+                            "failed"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    },
+                    "turns_remaining": {
+                        "title": "Turns Remaining",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "position",
+                    "state",
+                    "job_id",
+                    "turns_remaining"
+                ],
+                "title": "DialogueTurnAcceptedOut",
+                "type": "object"
+            },
+            "DialogueTurnOut": {
+                "properties": {
+                    "checks": {
+                        "additionalProperties": {
+                            "type": "boolean"
+                        },
+                        "title": "Checks",
+                        "type": "object"
+                    },
+                    "completed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Completed At"
+                    },
+                    "confidence": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Confidence"
+                    },
+                    "created_at": {
+                        "format": "date-time",
+                        "title": "Created At",
+                        "type": "string"
+                    },
+                    "error_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Error Code"
+                    },
+                    "fallback": {
+                        "title": "Fallback",
+                        "type": "boolean"
+                    },
+                    "hints": {
+                        "items": {
+                            "$ref": "#/components/schemas/DialogueHintOut"
+                        },
+                        "title": "Hints",
+                        "type": "array"
+                    },
+                    "human_rating": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "helpful",
+                                    "not_helpful"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Human Rating"
+                    },
+                    "input_kind": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "audio",
+                                    "text"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Input Kind"
+                    },
+                    "job_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Job Id"
+                    },
+                    "partner_text": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Partner Text"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "role": {
+                        "enum": [
+                            "student",
+                            "partner"
+                        ],
+                        "title": "Role",
+                        "type": "string"
+                    },
+                    "state": {
+                        "enum": [
+                            "pending",
+                            "completed",
+                            "failed"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    },
+                    "transcript": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Transcript"
+                    }
+                },
+                "required": [
+                    "position",
+                    "role",
+                    "input_kind",
+                    "state",
+                    "transcript",
+                    "checks",
+                    "partner_text",
+                    "hints",
+                    "confidence",
+                    "fallback",
+                    "error_code",
+                    "human_rating",
+                    "job_id",
+                    "created_at",
+                    "completed_at"
+                ],
+                "title": "DialogueTurnOut",
+                "type": "object"
+            },
             "ExerciseHintOut": {
                 "properties": {
                     "content": {
@@ -5752,6 +6132,32 @@
                     "confidence"
                 ],
                 "title": "TranscriptionWordOut",
+                "type": "object"
+            },
+            "TurnTextIn": {
+                "properties": {
+                    "idempotency_key": {
+                        "anyOf": [
+                            {
+                                "format": "uuid",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Idempotency Key"
+                    },
+                    "text": {
+                        "maxLength": 2000,
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "title": "TurnTextIn",
                 "type": "object"
             },
             "UsuarioOut": {
@@ -12506,6 +12912,591 @@
                     }
                 },
                 "summary": "Solicitar Transcricao",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues": {
+            "post": {
+                "operationId": "criar_dialogo_api_speaking_dialogues_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DialogueCreateIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Criar Dialogo",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues/{dialogue_id}": {
+            "delete": {
+                "description": "Apaga o diálogo e, por cascata do PostgreSQL, seus turnos.\n\nO áudio segue a política de speaking: o arquivo sai pelo caminho de\nexclusão de gravação, não daqui, para não criar um segundo lugar que\nremove bytes do aluno.",
+                "operationId": "excluir_dialogo_api_speaking_dialogues__dialogue_id__delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dialogue_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Dialogue Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Excluir Dialogo",
+                "tags": [
+                    "speaking"
+                ]
+            },
+            "get": {
+                "operationId": "obter_dialogo_api_speaking_dialogues__dialogue_id__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dialogue_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Dialogue Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Obter Dialogo",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues/{dialogue_id}/turns/{position}": {
+            "get": {
+                "operationId": "obter_turno_api_speaking_dialogues__dialogue_id__turns__position__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dialogue_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Dialogue Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "position",
+                        "required": true,
+                        "schema": {
+                            "title": "Position",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueTurnOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Obter Turno",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues/{dialogue_id}/turns/{position}/audio": {
+            "put": {
+                "operationId": "turno_por_audio_api_speaking_dialogues__dialogue_id__turns__position__audio_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dialogue_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Dialogue Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "position",
+                        "required": true,
+                        "schema": {
+                            "title": "Position",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueTurnAcceptedOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Turno Por Audio",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues/{dialogue_id}/turns/{position}/rating": {
+            "put": {
+                "description": "A avaliação humana é o único campo do turno que a API altera.\n\nÉ a matéria-prima do gate do IA-48, e os grants por coluna do DB-45\ngarantem isso no banco, não só aqui.",
+                "operationId": "avaliar_turno_api_speaking_dialogues__dialogue_id__turns__position__rating_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dialogue_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Dialogue Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "position",
+                        "required": true,
+                        "schema": {
+                            "title": "Position",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HumanRatingIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueTurnOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Avaliar Turno",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues/{dialogue_id}/turns/{position}/text": {
+            "post": {
+                "operationId": "turno_por_texto_api_speaking_dialogues__dialogue_id__turns__position__text_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dialogue_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Dialogue Id",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "position",
+                        "required": true,
+                        "schema": {
+                            "title": "Position",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TurnTextIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueTurnAcceptedOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "428": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "detail": {
+                                            "properties": {
+                                                "code": {
+                                                    "enum": [
+                                                        "idempotency_key_required"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "code",
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "detail"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Cliente antigo sem chave de idempotência após o cutover (detail.code em ['idempotency_key_required']). Atualize o aplicativo e reenvie."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Turno Por Texto",
                 "tags": [
                     "speaking"
                 ]

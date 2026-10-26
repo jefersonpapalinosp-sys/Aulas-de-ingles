@@ -270,6 +270,7 @@ jobs:
           tests/test_dashboard.py tests/test_practice.py tests/test_media.py
           tests/test_activity.py tests/test_course_reviews.py tests/test_account_deletion.py
           tests/test_editorial_archive.py tests/test_publication.py tests/test_assist_quota.py
+          tests/test_dialogue_routes.py
       - name: encerra apenas a base descartável do job
         if: always()
         run: docker compose -f ../infra/compose.test.yml down

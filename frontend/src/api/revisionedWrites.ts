@@ -33,6 +33,10 @@ export const REVISIONED_WRITES = {
   'PUT /api/media/{media_id}/position': ['expected_revision', 'operation_key'],
   'PUT /api/practice-sessions/{session_id}/position': ['expected_revision', 'idempotency_key'],
   'POST /api/review/{item_id}/grade': ['expected_revision', 'idempotency_key'],
+  // Parceiro de conversa (BE-46). O turno por áudio não entra: o corpo dele é
+  // o áudio cru, e a idempotência vem do par (dialogue_id, position) na rota.
+  'POST /api/speaking/dialogues': ['operation_key'],
+  'POST /api/speaking/dialogues/{dialogue_id}/turns/{position}/text': ['idempotency_key'],
   'PUT /api/writing/prompts/{prompt_id}/draft': ['expected_revision'],
   'POST /api/writing/prompts/{prompt_id}/feedback': ['operation_key'],
   'POST /api/writing/prompts/{prompt_id}/versions': ['expected_revision'],

@@ -602,6 +602,33 @@ no painel operacional sem nenhum texto de aluno.
 
 ---
 
+### Registro de execução — Ciclo 46, BE-46 em 26/10/2026
+
+Branch `sprint/46-assistente-backend`, sete commits locais.
+
+| Entrega | Estado |
+|---|---|
+| `domain/dialogue.py` | pronto: quatro códigos estáveis, cobertura de termo por sequência de palavras (não substring) e tolerante a apóstrofo, limites de tamanho nas fronteiras exatas |
+| `services/dialogue.py` | pronto: `brief_for_lesson` do banco, `content_fingerprint` só do que o parceiro enxerga, `expectation_for` girando os termos, `admit_turn`/`resolve_turn`/`partner_reply`, fallback para o roteiro |
+| Turno na fila durável | pronto: `kind` no job, despacho por tipo reaproveitando `FOR UPDATE SKIP LOCKED`, retomada e backoff; turno por texto não gasta STT |
+| Modalidade `conversation` na cota | pronto: orçamento próprio (24/dia), `daily_limit`/`_group`, `/api/assist/status` escopado ao grupo legado |
+| Rotas do contrato IA-45 | pronto: 7 endpoints, posse no `WHERE`, idempotência por `operation_key` e por `(dialogue_id, position)` |
+| Nenhum texto em log | pronto, com teste que varre o log capturado |
+
+**Critérios de aceite, todos provados.** (1) Com a assistência desligada o Roteiro é completo e o provedor lança se for chamado. (2) Provedor fora do ar devolve `fallback=true` sem perder turno anterior, com os checks idênticos. (3) Cota esgotada recusa na **admissão**, antes de qualquer rede — e o 429 aparece no diálogo seguinte, não no turno 13 do atual, porque o limite do diálogo vem primeiro. (4) Resposta com código inventado ou URL é descartada como `invalid_provider_response`, com o custo já incorrido registrado.
+
+**Correção de costura, registrada por honestidade:** o primeiro desenho da cota ficou dentro da função que fala com o provedor — costura de fluxo síncrono, que cobraria na hora errada num contrato `202 + job_id`. Corrigido para reserva na admissão e consumo no despacho, como a fila de transcrição já fazia.
+
+**Divergência deliberada do ADR:** a tabela previa `202 + job_id` para todo turno. O Roteiro resolve na própria requisição e não enfileira — fazê-lo passar pela fila o tiraria do ar justamente quando o worker estivesse fora, e ele é o modo que precisa sobreviver a isso. Reversível, se a uniformidade do contrato pesar mais.
+
+Dívida que o BE-46 pagou do BE-45: dez colunas enum-like ainda eram `Mapped[str]` com `CheckConstraint` no banco (`mode`, `state`, `role`, `input_kind`, `human_rating` do turno, entre outras). Agora seguem a regra, com os conjuntos em `domain/enums.py`. `app/` continua com zero `type: ignore`.
+
+Provas: ruff e mypy strict limpos (103 arquivos), pytest **1223**, passo pós-cutover **186** (o arquivo de rotas novas entrou na lista do CI), eslint/tsc/`check:api`/vitest 400 e orçamento de bundle verdes. O baseline do contrato mudou de propósito: 7 rotas e 6 schemas novos, com **zero** rotas ou schemas existentes alterados — conferido por comparação semântica, porque o diff por linha de JSON ordenado é ilegível por natureza.
+
+**Falta no ciclo 46:** DB-46 (retenção de `transcript`/`partner_text` pelo job de manutenção), FE-46 e SEC-46.
+
+---
+
 ## Ciclo 47 — Assistente no browser e endurecimento das rotas novas
 
 ### FE-47 Experiência do parceiro de conversa
