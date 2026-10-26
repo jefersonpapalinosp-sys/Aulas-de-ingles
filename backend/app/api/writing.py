@@ -314,10 +314,13 @@ async def analisar_texto(
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[WritingFeedbackIn, Body()],
 ) -> WritingFeedbackOut:
+    # A existência da proposta vem primeiro: uma aula não publicada responde 404
+    # a qualquer cliente, novo ou antigo. Exigir a chave antes disso trocaria o
+    # 404 por 428 e faria o cliente procurar culpa na própria versão.
+    prompt = await _prompt(session, prompt_id)
     # A `operation_key` é o que impede uma segunda cobrança da assistência no
     # reenvio; antes o servidor a ignorava enquanto o cliente já a mandava.
     require_idempotency_key(corpo.operation_key)
-    prompt = await _prompt(session, prompt_id)
     result = await gerar_feedback(session, usuario, prompt, corpo)
     return _feedback_out(
         result.record, historical_content_available=result.historical_content_available
