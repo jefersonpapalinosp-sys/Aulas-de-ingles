@@ -517,21 +517,22 @@ release manager, com a triagem registrada em
 
 Entregas:
 
-- [ ] `domain/dialogue.py` puro: cobertura de termos-alvo com a normalização
+- [x] `domain/dialogue.py` puro: cobertura de termos-alvo com a normalização
   de `domain/answers.py`, verificação de padrões gramaticais declarados no
   bloco da aula, limites de comprimento, códigos de check estáveis.
-- [ ] `services/dialogue.py`: criação de diálogo com fingerprint do recorte
+- [x] `services/dialogue.py`: criação de diálogo com fingerprint do recorte
   da aula, roteiro a partir dos `transcript_cue`, montagem do prompt,
   chamada a `call_dialogue_provider` (gateway/ollama) com JSON Schema e
   filtro de saída, persistência, fallback para o Roteiro.
-- [ ] Turno de áudio reaproveita `audio_upload`, `audio_inspection`,
+- [x] Turno de áudio reaproveita `audio_upload`, `audio_inspection`,
   `audio_storage` e a fila durável de transcrição; o job de diálogo é um
   tipo novo na mesma fila, com `FOR UPDATE SKIP LOCKED`, retomada e backoff.
-- [ ] Modalidade `conversation` em `assist_quota` com cota diária própria
-  (`ASSIST_DIALOGUE_DAILY_TURNS`, padrão 20) e custo somado de STT + modelo.
-- [ ] Rotas do contrato IA-45 com ownership no `WHERE`, 404 para recurso
+- [x] Modalidade `conversation` em `assist_quota` com cota diária própria
+  (`ASSIST_DIALOGUE_DAILY_TURNS`, padrão **24** pela decisão de 26/10/2026 —
+  dois diálogos completos) e custo somado de STT + modelo.
+- [x] Rotas do contrato IA-45 com ownership no `WHERE`, 404 para recurso
   alheio, idempotência por `(dialogue_id, position)`.
-- [ ] Nenhum texto de turno, transcrição ou resposta do provedor em log;
+- [x] Nenhum texto de turno, transcrição ou resposta do provedor em log;
   teste que inspeciona o log capturado.
 
 Critérios de aceite:
