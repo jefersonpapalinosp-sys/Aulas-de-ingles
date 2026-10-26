@@ -562,14 +562,14 @@ Prepara o terreno do assistente: a UI do diálogo precisará de uma máquina de
 estados de turno fora do React, e o padrão já existe em
 `features/media/positionSync.ts` com `useSyncExternalStore`.
 
-- [ ] `features/writing/draftSync.ts` extraído de `WritingWorkspace.tsx`
+- [x] `features/writing/draftSync.ts` extraído de `WritingWorkspace.tsx`
   (fila serial, geração, conflito de revisão, espelho local).
-- [ ] `features/practice/practicePosition.ts` extraído de `PracticeRunner.tsx`;
+- [x] `features/practice/practicePosition.ts` extraído de `PracticeRunner.tsx`;
   telas internas viram `PracticeIntro`, `PracticeResume`, `PracticeSummary`.
-- [ ] `features/speaking/speakingUpload.ts` extraído de `ShadowingPractice.tsx`.
-- [ ] `ExerciseCard`: um componente por `activity_type`; `role="alert"` no
+- [x] `features/speaking/speakingUpload.ts` extraído de `ShadowingPractice.tsx`.
+- [x] `ExerciseCard`: um componente por `activity_type`; `role="alert"` no
   veredito de erro.
-- [ ] Casts de corpo de erro em `WritingWorkspace` substituídos por type
+- [x] Casts de corpo de erro em `WritingWorkspace` substituídos por type
   guard sobre `ApiError`.
 
 Aceite: os três motores têm testes sem DOM cobrindo perda de rascunho,
@@ -636,7 +636,66 @@ Dívida que o BE-46 pagou do BE-45: dez colunas enum-like ainda eram `Mapped[str
 
 Provas: ruff e mypy strict limpos (103 arquivos), pytest **1223**, passo pós-cutover **186** (o arquivo de rotas novas entrou na lista do CI), eslint/tsc/`check:api`/vitest 400 e orçamento de bundle verdes. O baseline do contrato mudou de propósito: 7 rotas e 6 schemas novos, com **zero** rotas ou schemas existentes alterados — conferido por comparação semântica, porque o diff por linha de JSON ordenado é ilegível por natureza.
 
-**Falta no ciclo 46:** FE-46 e SEC-46.
+**Falta no ciclo 46:** SEC-46.
+
+---
+
+### Registro de execução — Ciclo 46, FE-46 em 26/10/2026
+
+| Entrega | Estado |
+|---|---|
+| `features/writing/draftSync.ts` | pronto: fila serial, revisão imutável, espelho local e conflito, com 9 testes sem DOM |
+| `features/practice/practicePosition.ts` | pronto: espelho da posição, reconciliação e a chave de idempotência reaproveitada, com 10 testes sem DOM |
+| `features/speaking/speakingUpload.ts` | pronto: envio em dois passos, aborto e travessia de sessão, com 11 testes sem DOM |
+| `ExerciseCard` por `activity_type` | pronto: 4 componentes de campo, `useExerciseActions`, `ExerciseVerdict` com `role="alert"` no erro |
+| Type guard no lugar do cast | pronto: `conflictingDraft` valida o corpo do 409 |
+| Nenhum componente acima de 300 linhas | pronto: 11 componentes desceram da linha, o maior agora tem 293 |
+
+**Os três motores seguem o padrão do `positionSync`**: classe sem React,
+transporte injetado, `useSyncExternalStore` no hook. Não é simetria por gosto —
+é o que permite provar sem DOM os casos em que o aluno perde trabalho, e é a
+máquina de estados que a tela do diálogo (IA-47) vai reusar.
+
+**Quatro defeitos apareceram ao traduzir componente em motor.** Dois eram meus,
+introduzidos na tradução, e dois vinham do código original:
+
+1. *Meu.* No `speakingUpload`, a identidade do envio virou o `AbortController`,
+   que o `finally` anula antes da checagem: todo envio bem-sucedido parecia
+   obsoleto, `saving` nunca voltava a falso e o reenvio era recusado. Virou uma
+   geração.
+2. *Meu.* No `draftSync`, `createVersion` não esperava a fila: a versão corria
+   com o autosave do mesmo texto e a ordem era o acaso do temporizador. Agora
+   ela dá `flush` antes.
+3. *Do original.* Em `practicePosition`, uma confirmação em voo apagava o
+   espelho local mesmo quando o aluno já tinha avançado para outra posição —
+   perdendo a navegação mais nova, a única que existia fora da tela. O espelho
+   só é esquecido se ainda for a posição que a conta confirmou.
+4. *Do original.* Em `speakingUpload`, o id da tentativa era anotado **depois**
+   de olhar a sessão: uma troca de sessão entre a criação e o áudio esquecia
+   uma tentativa que já existia na conta, e o reenvio criava outra. O id passa
+   a ser anotado antes.
+
+**O veredito do exercício passou a alertar.** "Ainda não" e "Erro" pedem ação do
+aluno e eram anunciados com `role="status"`, que espera o silêncio. Agora são
+`role="alert"`; acerto, gabarito e fila seguem `status`. Dois testes afirmam os
+dois lados, senão a distinção se perde no próximo edit.
+
+**O orçamento de bundle precisou de atenção, e o teto não foi tocado.** As
+pastas novas caíam fora dos padrões por caminho do `manualChunks` e viravam um
+chunk avulso de 10 KiB duplicando código compartilhado; `features/{review,
+completion,checkpoint}/` foram para `study-tools` e `features/exercise/` para
+`lesson-study`. Mesmo corrigido, o total subiu de 179,7 para **182,6 de 184,0
+KiB** — custo por módulo da divisão —, e a margem caiu de 4,3 para 1,4 KiB.
+Levantar o teto é decisão a ser tomada de frente, não efeito colateral de uma
+refatoração; fica registrado para quem decidir.
+
+Provas em 26/10/2026: eslint, tsc e `check:api` limpos; vitest **431 passando**
+(eram 400 no fim do FE-45; 30 dos novos são dos três motores e 1 do veredito);
+orçamento verde; e — o que mais importa num pacote de refatoração — dos **141
+testes dos 11 componentes tocados, 139 passam sem uma linha alterada** (os
+outros 2 são os novos do veredito), incluindo os arquivos de teste de 413
+linhas do `WritingWorkspace`, 530 do `PracticeRunner` e 562 do
+`ShadowingPractice`.
 
 ---
 
