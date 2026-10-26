@@ -100,8 +100,14 @@ como `fallback`.
 ### Cota, custo, retenção e privacidade
 
 - Modalidade nova `conversation` em `assist_reservation`; cota diária própria
-  `ASSIST_DIALOGUE_DAILY_TURNS` (padrão 20); cada turno Guiado custa STT + modelo
-  e o custo é somado em microdólares como hoje.
+  `ASSIST_DIALOGUE_DAILY_TURNS` (padrão **24**); cada turno Guiado custa STT +
+  modelo e o custo é somado em microdólares como hoje.
+- A cota é **dois diálogos completos**, não um número redondo: com o limite de
+  12 turnos, uma cota de 20 faria o segundo diálogo receber 429 no turno 8 — no
+  meio da conversa, que é o pior momento para o aluno levar um limite. Toda
+  mudança no limite por diálogo move a cota junto. Em custo o teto é folgado:
+  24 turnos são ~130 neurons, cerca de 1,3% da cota gratuita diária medida no
+  spike (10.000 neurons ≈ 1.850 turnos).
 - `transcript` e `partner_text` seguem `ASSIST_RETENTION_DAYS`; metadados
   agregados (checks, custo, avaliação) permanecem.
 - Áudio só com o consentimento já exigido em speaking; excluir o diálogo apaga
@@ -118,10 +124,20 @@ repetir, legenda sempre visível. Zero custo, nenhum dado sai do dispositivo,
 funciona offline no modo Roteiro. Um gateway de TTS só entra se a voz for
 reprovada no piloto (IA-48).
 
+**Quando o dispositivo não tem voz `en-US`, o app não tenta falar**: mostra
+apenas a legenda e avisa que a voz não está disponível ali. A qualidade do
+`speechSynthesis` varia muito entre sistema e navegador, e alguns não trazem
+voz en-US nenhuma — deixar um sintetizador de outro idioma ler inglês entregaria
+pronúncia errada ao aluno e, pior, faria uma voz ruim passar por aprovada no
+gate humano. A conferência é por `speechSynthesis.getVoices()` filtrando `lang`
+en-US/en-GB; sem resultado, o modo segue utilizável por legenda e texto.
+
 ### Limites de produto
 
-- Limite de 12 turnos do aluno por diálogo no Guiado; o parceiro encerra com
-  uma frase de fechamento.
+- Limite de 12 turnos do aluno por diálogo no Guiado, **decidido em
+  26/10/2026**; o parceiro encerra com uma frase de fechamento. Com os números
+  do spike (STT p95 3,6 s + modelo ~2 s por turno), 12 turnos dão uma conversa
+  de 6 a 10 minutos contando a fala do aluno: um bloco de estudo inteiro.
 - Modo Roteiro usa o diálogo da aula como está; aulas com um só falante caem em
   "repita depois de mim" e são marcadas assim.
 - Dicas em português, uma frase, sem repetir o texto completo do aluno.
@@ -187,10 +203,18 @@ mostrada antes da resposta do parceiro), não um modelo maior.
 
 - ~~Provedor de diálogo e de STT em produção.~~ Decidido em 21/10/2026: Cloudflare
   Workers AI, `llama-3.1-8b-instruct` + `whisper-tiny-en` (resultado do spike acima).
-- Confirmar o limite de 12 turnos e a cota diária de 20.
-- Confirmar a voz do navegador como padrão do piloto.
+- ~~Confirmar o limite de 12 turnos e a cota diária.~~ Decidido em 26/10/2026:
+  12 turnos por diálogo e cota diária de 24, mantida como dois diálogos
+  completos (ver "Cota, custo, retenção e privacidade").
+- ~~Confirmar a voz do navegador como padrão do piloto.~~ Decidido em
+  26/10/2026: `speechSynthesis` do navegador, com legenda como único caminho
+  quando o dispositivo não tem voz en-US (ver "Voz do parceiro").
+
+Nenhuma decisão de produto resta em aberto para o BE-46 começar.
 
 Aprovado por: Jeferson Papalino, em 21/10/2026, em conversa com o agente que
 redigiu o documento. Provedor de diálogo/STT decidido no mesmo dia (Cloudflare
-Workers AI); limite de turnos e voz do navegador seguem como decisões em aberto,
-a confirmar antes do piloto (IA-48).
+Workers AI). Limite de turnos, cota diária e voz do navegador decididos em
+26/10/2026, também por Jeferson, em conversa com o agente — as três respostas
+estão registradas nas seções correspondentes acima, cada uma com a consequência
+que a motivou.
