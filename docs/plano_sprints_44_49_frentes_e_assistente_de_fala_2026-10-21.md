@@ -644,6 +644,63 @@ depois do provedor em produção.
 
 ---
 
+### Registro de execução — Ciclo 46, SEC-46 em 26/10/2026
+
+| Entrega | Estado |
+|---|---|
+| Modelo de ameaças | pronto: `docs/modelo_ameacas_assistente_2026-10-26.md`, sete ameaças com defesa, prova e risco residual |
+| Corpus adversarial | pronto: 23 casos em cinco categorias, 54 testes em `tests/test_dialogue_adversarial.py` |
+| Fluxo de dados documentado | pronto: seção nova no guia do aluno e na política de mídia, mais a tabela no modelo de ameaças |
+| Requisitos do provedor | HTTPS e token exigidos no boot; região, retenção e não-treinamento **sem verificação** (ver bloqueio) |
+| Revisão assinada | **pendente**: é ato do responsável, e o FE-47 segue bloqueado até ela |
+
+**O corpus não prova que o modelo se comporta** — ele não roda nos testes.
+Prova as três coisas que não dependem disso: a transcrição entra achatada em uma
+linha e na posição de dado, o `system_prompt` sai **idêntico byte a byte**
+qualquer que seja a transcrição, e a resposta é recusada ou sai dentro do
+contrato. Treze dos 23 casos esperam recusa (`invalid_provider_response`), e o
+aluno recebe o roteiro da aula.
+
+**Três defeitos reais foram fechados, dois deles meus:**
+
+1. *Meu, do BE-46.* O gate de produção que exige HTTPS e token listava só
+   `assist_transcription_url` e `assist_writing_url`. A URL do diálogo, que eu
+   adicionei, ficou de fora: em produção o texto do aluno poderia sair em HTTP
+   puro e sem token **sem o boot reclamar**. Dois testes novos cobrem os dois
+   lados da recusa e um o caminho válido.
+2. *Meu, do IA-45.* A saída que ecoa o prompt passava pelo saneador se fosse
+   curta e sem URL — o aluno leria as instruções, que é a ameaça 2 do próprio
+   modelo. `leaks_prompt` recusa a resposta que traz de volta marca nossa.
+3. *Descoberto pelo teste, não previsto.* O aplicativo nunca manda dado do
+   aluno, mas o aluno pode dizer o dele dentro da frase — "my email is…" é
+   plausível numa aula de inglês, e o item 3 do pacote promete que e-mail não
+   sai. O que sai passou a ser redigido; a transcrição **guardada** fica
+   intacta, porque é o histórico de prática dele e os checks rodam aqui sobre o
+   texto original. Idade, hora e número de aula passam (limite de 8 dígitos).
+
+**Risco residual aceito e escrito:** não há moderação de conteúdo na saída. Uma
+resposta grosseira dentro de 280 caracteres, sem URL e sem eco de prompt, chega
+ao aluno. A mitigação é processual — recurso experimental, instalação de um
+aluno que é o próprio responsável, e o gate humano do IA-48 antes de qualquer
+liberação. Um filtro de palavras meia-boca daria falsa garantia e foi
+deliberadamente **não** implementado; o caso `pede_nota` está no corpus com
+`esperado="saneada"` para que esse limite fique visível no teste, e não só no
+documento.
+
+**Bloqueio aberto para o IA-48:** o gate de liberação cobre `transcription` e
+`writing`; a modalidade `conversation` não existe nele — `AssistModality` é
+`Literal["transcription", "writing"]` e `evaluate_gate` decide
+`provider_configured` como "transcrição, senão escrita", de modo que uma
+conversa seria julgada pela configuração do provedor **de escrita**. O banco já
+aceita `conversation` (DB-45) e a cota já a trata (BE-46). Enquanto o gate não
+a conhecer, região, retenção e não-treinamento do provedor de diálogo são
+promessa escrita sem verificação.
+
+Provas em 26/10/2026: ruff e mypy strict limpos (103 arquivos); pytest
+**1285 passando** (eram 1228 no fim do DB-46); passo pós-cutover **186**.
+
+---
+
 ### Registro de execução — Ciclo 46, FE-46 em 26/10/2026
 
 | Entrega | Estado |
