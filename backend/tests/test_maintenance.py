@@ -192,7 +192,12 @@ async def test_additional_cleanup_is_opt_in(monkeypatch, session):
     monkeypatch.setattr(maintenance, "retention_batch", batch)
     monkeypatch.setattr(get_settings(), "maintenance_cleanup_enabled", False)
     deletion_metrics = {"account_deletions_pending", "account_deletions_failed"}
-    assert set(await maintenance.sweep()) == {"transcriptions", "reservations"} | deletion_metrics
+    # `dialogues` entra mesmo com a limpeza desligada: ele só anonimiza texto
+    # de turno já vencido, sem apagar linha nem tocar arquivo. Deixá-lo atrás
+    # da flag faria uma instalação que não a ligou guardar transcrição de aluno
+    # além do prazo — e o prazo é promessa, não preferência de instalação.
+    sempre = {"transcriptions", "reservations", "dialogues"}
+    assert set(await maintenance.sweep()) == sempre | deletion_metrics
     monkeypatch.setattr(get_settings(), "maintenance_cleanup_enabled", True)
     assert set(await maintenance.sweep()) == set(maintenance.SCOPES) | deletion_metrics
 

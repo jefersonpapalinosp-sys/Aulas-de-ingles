@@ -491,12 +491,23 @@ os seis pacotes do ciclo estão implementados.
 | DB-45 | Migration `e3a1c7d9b250`, aditiva: `speaking_dialogue` e `dialogue_turn` com `ondelete` em todas as FKs, `timestamptz`, unicidade/keyset `(dialogue_id, position)`, checks de forma (`jsonb_typeof` em `checks`/`hints`), estados, limites e `expires_at` para a retenção dos textos; `ck_assist_modality` aceita `conversation`; a auditoria de origens aceita `dialogue_turn` em `review_item` (motivo `dialogue_missed_term`) e em `skill_evidence`; grants por coluna na migration e em `ops/roles_policy.sql` (API só altera `human_rating` do turno; worker preenche o resultado e nunca apaga; cascatas são do PostgreSQL); exclusão de conta por cascata e exportação 2.1 com `dialogues`/`dialogue_turns`; prévia editorial conta as duas tabelas. Provas em 21/10/2026: `alembic upgrade head` duas vezes e `alembic check` limpos na base de teste; laboratório de papéis reprovisionado do zero e `make test-roles` verde com as sondas novas; downgrade não destrutivo (reverte só com tabelas vazias, senão bloqueia com motivo); teste da migration em schema sintético, testes de exportação e de exclusão | Aplicar no clone do estudo e na produção pela sequência de release (DB-46). Retenção de `transcript`/`partner_text` entra com o job em BE-46 (`expires_at` já existe). Decisões registradas: `dialogue_turn.user_id` desnormalizado para as regras de posse e a exportação; `state`, `error_code`, `fallback` e `completed_at` no turno para o contrato GET. Dois pontos exigem migration própria em BE-46: áudio do Guiado sem `transcript_cue` (`speaking_attempt.transcript_cue_id` é obrigatório hoje) e o job de diálogo na fila (`transcription_job.speaking_attempt_id` é obrigatório); o worker também precisará de SELECT nas tabelas de conteúdo que montam o brief |
 | BE-45 | `services/completion.py` (rota 296 → 28 linhas), `services/writing_feedback.py` (205 → 11, com rubrica, reserva, provedor, persistência, evidência e revisão como funções nomeadas), `services/review.py` com as três origens da fila e os quatro imports repontados, `services/operations_metrics.py` + `schemas/operations.py` (metrics 153 → 9); `_conferir_idempotencia` único nos dois caminhos de `tentar` (177 → 65) e helpers nomeados em `painel_hoje` (143 → 31), `create_practice_session` (115 → 66), `submit_course_review` (115 → 80), `meu_progresso` (104 → 44) e `enviar_audio` (91 → 41); `app/domain/enums.py` como fonte única dos conjuntos fechados, colunas enum-like em `Mapped[Literal[...]]` e **zero `type: ignore` em `app/`** (eram 17, todos da mesma causa); recorte de curso/unidade compartilhado pelas listas legadas e paginadas em `review`, `speaking`, `writing` e `me`, com `Select[*tuple[Any, ...]]`/`Row[*tuple[Any, ...]]` no lugar de `Any`; `/feedback` deixa de declarar `expected_revision` (herdado por acidente e ignorado) e passa a exigir `operation_key` com 428 `idempotency_key_required`; `grade` ganha o mesmo código em vez de reaproveitar `revision_required`. Provas em 25/10/2026: nenhuma rota de `api/` acima de 80 linhas (medido por AST), ruff e mypy strict limpos em 99 arquivos, pytest **1183 passaram** com cobertura **94%**, passo pós-cutover (`LEGACY_WRITES_UNTIL` no passado) **135 passaram**, 166 testes de `ops/` e vitest 397 | O baseline do contrato mudou **de propósito** nas duas últimas entregas (o gate existe para o diff aparecer no PR): `openapi.json` e `schema.d.ts` regerados. O registro `REVISIONED_WRITES` do frontend passou a `['operation_key']` no feedback e o `WritingWorkspace` parou de enviar a revisão que o servidor ignorava |
 | FE-45 | `api/notebook.ts` com as 4 listas em `useInfiniteQuery` (+ a das análises salvas) e 4 mutações, todas lançando `ApiError`: os 8 `throw Error()` vazios do Caderno viraram zero e as mensagens mostram o `request_id` quando a API devolve um (`failureMessage`). `usePagedItems` sai do Caderno — as páginas acumulam no cache, não num `useState` da página — e o `setSpeakingEntries` manual da exclusão vira uma edição precisa do cache (`setQueriesData`) somada ao evento `speakingDelete` do mapa único; o mapa ganhou `notebookEntry` porque a regra do FE-44 vale (nenhum outro módulo de produção invalida cache por conta própria, e o teste pega até menção em comentário). `NotebookPage` 712 → 124 linhas, dividida em `NotebookCompose`, `NotebookList`, `WritingHistorySection`, `SpeakingHistorySection` e `HistoricalEvidenceSection` em `features/notebook/`, com `labels.ts` e o `useAnnouncedPaging` que preserva o foco no total anunciado. `LessonRail`: a unidade aberta passou a ser **estado derivado** (escolha do aluno no escopo > unidade da busca > unidade da rota > primeira do currículo) e o `useEffect` que dependia de `curriculum.data` saiu — era ele que fechava a unidade a cada revalidação. `READ_POLICY` (networkMode/retry) documentada em `api/readPolicy.ts` e aplicada aos 8 módulos de consulta. Provas em 25/10/2026: eslint, tsc e `check:api` limpos; vitest **400 passaram** (3 novos: regressão do toggle sob revalidação — reprova se o efeito antigo volta —, `request_id` na falha do Caderno e a linha 2.x da exportação); orçamento de bundle verde (127,6 de 132 KiB iniciais, 178,6 de 184 totais) com `WritingHistorySection` virando chunk lazy próprio | A política ficou em `api/readPolicy.ts`, não em `queries.ts`: nove testes substituem `queries.ts` por mock e a constante desapareceria junto com os hooks. **O critério "nenhum arquivo de página acima de 300 linhas" vale hoje para o Caderno, não para o resto**: `CourseCompletionPage` (529), `StudyPage` (507), `ReviewPage` (443), `MapPage` (443) e `CourseReviewPage` (374) seguem acima da linha. Nenhuma delas aparece nas entregas do FE-45, e o próprio FE-46 repete o critério de forma mais ampla ("nenhum componente acima de 300 linhas") junto das extrações de `WritingWorkspace`, `PracticeRunner` e `ShadowingPractice` — é lá que essas páginas caem sem retrabalho. Decidir antecipar isso para o FE-45 é do Jeferson. `usePagedItems` continua em uso na `ReviewPage` |
-| SEC-45 | **Hardening**: `security_opt: [no-new-privileges:true]` nos 7 serviços da stack pública; `cap_drop: [ALL]` com apenas as capabilities que o entrypoint usa (`CHOWN`/`FOWNER` para ajustar o diretório das gravações, `SETUID`/`SETGID` para sair de root) nos serviços do backend, só `SETUID`/`SETGID` no worker e `CHOWN`/`SETGID`/`SETUID`/`NET_BIND_SERVICE` no nginx; `read_only: true` + `tmpfs` no `web` e no `worker`. O mesmo foi aplicado à `compose.prod.yml` — é ela que ensaia a produção, divergir tiraria o valor do ensaio. O `db` fica só com `no-new-privileges` porque o Postgres ajusta o dono do PGDATA e troca de usuário no primeiro boot do volume. **Borda**: `server_tokens off`, `gzip_vary on` e `limit_req_zone`/`limit_req` (600 r/m, rajada 120, **429**) em `/api/auth/`, com as diretivas de proxy extraídas para `frontend/api-proxy.conf` para `/api/` e `/api/auth/` não divergirem. **Entrypoint**: `docker-entrypoint.prod.sh` tolera volume e FS read-only, o que removeu o `entrypoint: []` + `user: "10001:10001"` dos dois Compose — o UID volta a existir num lugar só (o Dockerfile). **CI**: job `infra-lint` com shellcheck 0.11.0, hadolint 2.14.0 e actionlint 1.7.7 em container de versão fixa. **Pins**: `node:24.22.0-alpine3.24`, `uv:0.11.33`, `su-exec=0.3-r0`. Provas em 26/10/2026, na stack pública subida num projeto descartável local (`aulas-sec45-lab`, volumes próprios, derrubada depois): gate `migrate → permissions` ok, `api`/`web`/`worker` **healthy**, seed concluído, schema `e3a1c7d9b250`; `/api/health` 200 atravessando o nginx endurecido; `Server: nginx` sem versão e `Vary: Accept-Encoding` confirmados no ar; registro 201 pela rota com limite; `/app/data/speaking` com `drwx------ app app` (o chown funcionou sob `cap_drop: ALL`); uvicorn como `app` no PID 1; worker como `app` **sem `user:` nem `entrypoint: []`**, com `/app/teste` recusado por FS read-only, `/tmp` gravável e `worker-health` exit 0; `/api/operations/metrics` com as 7 seções. shellcheck, hadolint e actionlint passam nos 6 scripts, 5 Dockerfiles e nos workflows. 17 testes em `ops/tests/test_easypanel_deploy.py` verdes, 6 deles novos | O gate de hardening virou teste (`ContainerHardeningTests`), senão um edit futuro desfaz as três camadas em silêncio. A extração do `api-proxy.conf` quebrou 2 testes de contrato do nginx, atualizados para ler os dois arquivos e exigir que as duas rotas incluam o mesmo proxy. **Critério "Trivy mantém zero críticas/altas": a API está em 0; a web saiu de 5 para 3 altas e não chegou a zero.** As 5 originais também estão na imagem da `main` — drift do base fixado por digest contra o banco de CVEs, não regressão deste pacote. O upstream republicou o tag `nginx:1.30.6-alpine3.24` sobre o alpine 3.24.3: re-ancorar o digest em `ci_pull_bases.sh` (`sha256:970364…` → `sha256:47928b…`, idêntico nas duas origens) encerrou CVE-2026-77214 (`libexpat`) e CVE-2026-88806 (`libx11`). As 3 restantes (`brotli-libs`, `curl`, `libcurl`) **não têm correção em nenhuma imagem nginx alpine3.24 publicada hoje** e nenhuma tem caminho de execução no runtime (comprimimos com gzip, não brotli; o nginx não invoca curl) — triagem registrada em `docs/politica_triagem_seguranca_sprint_42.md` no formato que a política exige, com a decisão de aceite reservada ao release manager. Lição: **o gate `test_ci_pull_bases` pegou meu pin do node**, porque o pré-carregamento é por digest e o alias tem de bater com o `FROM`; o digest do node não mudou (o tag novo aponta para a mesma imagem), só o nome. **A prova na VM pública não foi feita**: deployar é ação do Jeferson |
+| SEC-45 | **Hardening**: `security_opt: [no-new-privileges:true]` nos 7 serviços da stack pública; `cap_drop: [ALL]` com apenas as capabilities que o entrypoint usa (`CHOWN`/`FOWNER` para ajustar o diretório das gravações, `SETUID`/`SETGID` para sair de root) nos serviços do backend, só `SETUID`/`SETGID` no worker e `CHOWN`/`SETGID`/`SETUID`/`NET_BIND_SERVICE` no nginx; `read_only: true` + `tmpfs` no `web` e no `worker`. O mesmo foi aplicado à `compose.prod.yml` — é ela que ensaia a produção, divergir tiraria o valor do ensaio. O `db` fica só com `no-new-privileges` porque o Postgres ajusta o dono do PGDATA e troca de usuário no primeiro boot do volume. **Borda**: `server_tokens off`, `gzip_vary on` e `limit_req_zone`/`limit_req` (600 r/m, rajada 120, **429**) em `/api/auth/`, com as diretivas de proxy extraídas para `frontend/api-proxy.conf` para `/api/` e `/api/auth/` não divergirem. **Entrypoint**: `docker-entrypoint.prod.sh` tolera volume e FS read-only, o que removeu o `entrypoint: []` + `user: "10001:10001"` dos dois Compose — o UID volta a existir num lugar só (o Dockerfile). **CI**: job `infra-lint` com shellcheck 0.11.0, hadolint 2.14.0 e actionlint 1.7.7 em container de versão fixa. **Pins**: `node:24.22.0-alpine3.24`, `uv:0.11.33`, `su-exec=0.3-r0`. Provas em 26/10/2026, na stack pública subida num projeto descartável local (`aulas-sec45-lab`, volumes próprios, derrubada depois): gate `migrate → permissions` ok, `api`/`web`/`worker` **healthy**, seed concluído, schema `e3a1c7d9b250`; `/api/health` 200 atravessando o nginx endurecido; `Server: nginx` sem versão e `Vary: Accept-Encoding` confirmados no ar; registro 201 pela rota com limite; `/app/data/speaking` com `drwx------ app app` (o chown funcionou sob `cap_drop: ALL`); uvicorn como `app` no PID 1; worker como `app` **sem `user:` nem `entrypoint: []`**, com `/app/teste` recusado por FS read-only, `/tmp` gravável e `worker-health` exit 0; `/api/operations/metrics` com as 7 seções. shellcheck, hadolint e actionlint passam nos 6 scripts, 5 Dockerfiles e nos workflows. 17 testes em `ops/tests/test_easypanel_deploy.py` verdes, 6 deles novos | O gate de hardening virou teste (`ContainerHardeningTests`), senão um edit futuro desfaz as três camadas em silêncio. A extração do `api-proxy.conf` quebrou 2 testes de contrato do nginx, atualizados para ler os dois arquivos e exigir que as duas rotas incluam o mesmo proxy. **Critério "Trivy mantém zero críticas/altas": a API está em 0; a web saiu de 5 para 3 altas e não chegou a zero.** As 5 originais também estão na imagem da `main` — drift do base fixado por digest contra o banco de CVEs, não regressão deste pacote. O upstream republicou o tag `nginx:1.30.6-alpine3.24` sobre o alpine 3.24.3: re-ancorar o digest em `ci_pull_bases.sh` (`sha256:970364…` → `sha256:47928b…`, idêntico nas duas origens) encerrou CVE-2026-77214 (`libexpat`) e CVE-2026-88806 (`libx11`). As 3 restantes (`brotli-libs`, `curl`, `libcurl`) **não têm correção em nenhuma imagem nginx alpine3.24 publicada hoje** e nenhuma tem caminho de execução no runtime (comprimimos com gzip, não brotli; o nginx não invoca curl) — triagem registrada em `docs/politica_triagem_seguranca_sprint_42.md` no formato que a política exige, com a decisão de aceite reservada ao release manager. Lição: **o gate `test_ci_pull_bases` pegou meu pin do node**, porque o pré-carregamento é por digest e o alias tem de bater com o `FROM`; o digest do node não mudou (o tag novo aponta para a mesma imagem), só o nome. A prova na VM pública **foi feita depois, no release do ciclo**, nos containers reais: ver "Fechamento e release" adiante |
 
 Dois agentes que implementavam o INFRA-45 foram interrompidos por limite de
 sessão da API durante as validações; o trabalho foi revisado linha a linha,
 um teste corrigido (vazamento de variável de ambiente no cenário de host) e as
 validações concluídas antes do commit.
+
+**Fechamento e release, 26/10/2026.** PR #26 publicado e integrado por merge
+(`37d28b6`). A `main` disparou o **primeiro deploy automático** do projeto:
+3m39s até a stack pública de pé, sem passo manual. Produção no schema
+`e3a1c7d9b250`. O endurecimento do SEC-45 foi conferido nos containers reais
+por SSH, e não apenas no laboratório descartável: `web` e `worker` com
+`read_only=true` e o `worker` com somente `SETGID`/`SETUID` entre as
+capabilities. A sequência de release fechou com backup cifrado antes e depois,
+guardados fora da VM. As 3 altas restantes da imagem `web` foram aceitas pelo
+release manager, com a triagem registrada em
+`docs/politica_triagem_seguranca_sprint_42.md` no formato que a política exige.
 
 ---
 
@@ -539,7 +550,7 @@ Critérios de aceite:
 - [ ] Aplicar a migration de DB-45 no laboratório e no clone do estudo;
   `alembic check` limpo; grants mínimos; `account_deletion` cobre as duas
   tabelas; exportação pessoal 1.7 com diálogos e turnos.
-- [ ] Retenção: `transcript` e `partner_text` seguem `ASSIST_RETENTION_DAYS`
+- [x] Retenção: `transcript` e `partner_text` seguem `ASSIST_RETENTION_DAYS`
   pelo job de manutenção; metadados agregados permanecem.
 
 Aceite: contagens antes/depois iguais nas 39 tabelas históricas; exclusão de
@@ -625,7 +636,66 @@ Dívida que o BE-46 pagou do BE-45: dez colunas enum-like ainda eram `Mapped[str
 
 Provas: ruff e mypy strict limpos (103 arquivos), pytest **1223**, passo pós-cutover **186** (o arquivo de rotas novas entrou na lista do CI), eslint/tsc/`check:api`/vitest 400 e orçamento de bundle verdes. O baseline do contrato mudou de propósito: 7 rotas e 6 schemas novos, com **zero** rotas ou schemas existentes alterados — conferido por comparação semântica, porque o diff por linha de JSON ordenado é ilegível por natureza.
 
-**Falta no ciclo 46:** DB-46 (retenção de `transcript`/`partner_text` pelo job de manutenção), FE-46 e SEC-46.
+**Falta no ciclo 46:** FE-46 e SEC-46.
+
+---
+
+### Registro de execução — Ciclo 46, DB-46 em 26/10/2026
+
+| Entrega | Estado |
+|---|---|
+| Migration `b7e5f1c38a42` | pronta: `aulas_retention_batch` ganha o escopo `dialogues`, o único dos cinco que **anonimiza** em vez de apagar linha; índice de varredura por `expires_at`; downgrade recusa quando há turno de diálogo |
+| Escopo no job de manutenção | pronto: `dialogues` entra na varredura **mesmo com `MAINTENANCE_CLEANUP_ENABLED` desligada** |
+| Item 1 do pacote (migration do DB-45 em produção) | aplicado no release do ciclo 45 (`e3a1c7d9b250`), com `alembic check` limpo, grants mínimos, exclusão por cascata e exportação 2.1 provados em DB-45 — **sem** as duas medições de aceite (ver abaixo) |
+
+**O turno vence; a prova de que o aluno praticou fica.** É a diferença deste
+escopo. Apagar a linha levaria junto `checks`, custo, `confidence`, `position` e
+`human_rating` — exatamente a evidência que o gate humano do IA-48 vai usar e o
+histórico que o aluno vê. Então o lote zera `transcript`, `partner_text` e
+`hints` e deixa a linha de pé. A idempotência vem do próprio filtro: a segunda
+passada não encontra mais nada para anonimizar e conta 0, senão o lote giraria
+para sempre sobre as mesmas linhas.
+
+**Por que não fica atrás da flag.** Os escopos que apagam linha ou tocam arquivo
+são opt-in por `MAINTENANCE_CLEANUP_ENABLED`; este não pode ser. Uma instalação
+que não ligou a flag guardaria transcrição de aluno além do prazo prometido — e
+o prazo de retenção é promessa, não preferência de instalação.
+
+**Defeito meu, encontrado pela suíte completa.** O teste que roda o `sweep` sem
+a flag não pedia `session` nem `client`, logo não passava por `banco_por_teste`
+— a fixture que faz `dispose_engine()` no teardown. O pool ficava com conexões
+presas no event loop daquele teste e o teste seguinte que abria conexão morria
+com `attached to a different loop`, aparecendo como ERROR em
+`test_dialogue_routes.py`. **Primeiro atribuí isso a cascata do teste vizinho
+que falhava; estava errado** — o vizinho foi corrigido e o ERROR continuou.
+Quem abre conexão depende da fixture, sem exceção.
+
+**Achado operacional que vale para quem algum dia rodar `downgrade`.** Um
+`alembic downgrade` abortado no meio pode deixar o banco **estampado no head e
+fisicamente sem um índice**: o `CREATE/DROP INDEX CONCURRENTLY` de
+`c82f4a9d117e` vive num `autocommit_block()`, então o `DROP` commita por fora e
+o rollback da transação do Alembic não o desfaz. Reproduzido aqui na base de
+teste; só o `alembic check` revelou. A migration se recupera sozinha quando é
+reaplicada (o preflight dela cria o índice ausente e recusa artefato inválido),
+mas a recuperação não é automática — precisa de alguém rodando `check`. Em
+produção o risco é remoto, porque desde a Sprint 38 o downgrade destrutivo é
+recusado, mas o `alembic check` depois de qualquer downgrade deixa de ser
+opcional.
+
+**Falta para fechar o aceite do pacote**, e não é trabalho de código: a
+comparação de contagens antes/depois nas 39 tabelas históricas e a exclusão de
+conta sintética, ambas contra a produção. `ops/study_rollout.py` faz a prova de
+preservação, mas tem `HEAD` fixado em `c95f3d8ba042` e precisa ser re-ancorado
+antes de servir para este release.
+
+Provas em 26/10/2026: `tests/test_dialogue_retention.py` **5 passando** (texto
+vencido sai e a evidência permanece; turno no prazo intacto; segunda passada
+conta 0; escopo roda sem a flag; escopo inválido recusado antes do banco);
+ciclo da migration reversível com `alembic check` limpo; ruff e mypy strict
+limpos (103 arquivos); suíte completa **1228 passando, zero erro**; passo
+pós-cutover **186**, com a lista de arquivos extraída do `ci.yml` pelo parser de
+YAML em vez de transcrita — foi transcrição errada que produziu um falso verde
+no SEC-45.
 
 ---
 
