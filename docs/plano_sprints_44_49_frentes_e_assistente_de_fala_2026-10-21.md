@@ -604,12 +604,15 @@ documento com data.
 
 - [ ] Provedor de diálogo configurado na stack EasyPanel por gateway HTTPS
   com token; Ollama permanece restrito a dev (a VM é compartilhada com três
-  outros projetos e não tem GPU).
-- [ ] Métricas agregadas de diálogo em `/api/operations/metrics`: turnos/dia,
+  outros projetos e não tem GPU). **`ASSIST_DIALOGUE_URL` e
+  `ASSIST_DIALOGUE_DAILY_TURNS` já são declaradas nas duas Compose; falta só
+  o valor no painel, que é ação de Jeferson.** A restrição do Ollama ao host
+  local em produção já é recusada no boot desde o BE-45.
+- [x] Métricas agregadas de diálogo em `/api/operations/metrics`: turnos/dia,
   p95 de latência, falhas de provedor, custo do dia, cota atingida.
-- [ ] `make operations-check` agendado (cron na VM ou `schedule:` no GitHub)
+- [x] `make operations-check` agendado (cron na VM ou `schedule:` no GitHub)
   com alerta por e-mail quando o worker, a fila ou o custo saem do limiar.
-- [ ] Probe externo de disponibilidade do domínio público.
+- [x] Probe externo de disponibilidade do domínio público.
 
 Aceite: um worker parado por 2 minutos gera alerta; o custo do dia aparece
 no painel operacional sem nenhum texto de aluno.
@@ -639,9 +642,67 @@ Dívida que o BE-46 pagou do BE-45: dez colunas enum-like ainda eram `Mapped[str
 
 Provas: ruff e mypy strict limpos (103 arquivos), pytest **1223**, passo pós-cutover **186** (o arquivo de rotas novas entrou na lista do CI), eslint/tsc/`check:api`/vitest 400 e orçamento de bundle verdes. O baseline do contrato mudou de propósito: 7 rotas e 6 schemas novos, com **zero** rotas ou schemas existentes alterados — conferido por comparação semântica, porque o diff por linha de JSON ordenado é ilegível por natureza.
 
-**Falta no ciclo 46:** nada de implementação. O SEC-46 aguarda a assinatura da
-revisão do fluxo de dados, que é ato do responsável, e o INFRA-46 fica para
-depois do provedor em produção.
+**Falta no ciclo 46:** nada de implementação. O que resta é ação de Jeferson:
+assinar a revisão do fluxo de dados (SEC-46), pôr a URL e o token do provedor
+no painel e instalar o cron da VM (INFRA-46), e coletar as duas medições de
+aceite do DB-46 contra a produção.
+
+---
+
+### Registro de execução — Ciclo 46, INFRA-46 em 26/10/2026
+
+| Entrega | Estado |
+|---|---|
+| Métricas de diálogo | pronto: seção `dialogue` em `/api/operations/metrics` com turnos, concluídos, falhos, fallback, falhas de provedor, p95 do turno, custo e a cota |
+| Gate com custo | pronto: teto de custo, taxa de falha do provedor com amostra mínima, e um check que acusa API mais antiga que o gate |
+| Vigilância agendada | pronto nos dois relógios: `operations.yml` em `*/30` como rede externa e `make operations-alert` para o cron da VM |
+| Probe externo | pronto: `ops/public_probe.py`, sem credencial, com 5 testes |
+| Provedor no painel | **pendente de Jeferson**: as variáveis já são declaradas nas duas Compose; falta o valor |
+
+**Só turnos do aluno entram em `turns`.** A resposta do parceiro vive na mesma
+linha do turno, e contar as duas pontas dobraria justamente o número que o
+painel compara com a cota.
+
+**A conta da cota no painel é a mesma do 429.** `quota_used` reusa a definição
+de `assist_quota.usage` — reservado ainda válido mais consumido, no dia UTC.
+Duas definições de consumo divergiriam na primeira mudança de regra, e o painel
+passaria a discordar do erro que o aluno recebeu.
+
+**Defeito encontrado ao preparar o item 1:** `ASSIST_DIALOGUE_URL` não existia
+em nenhuma das duas Compose de produção. Preencher a URL no painel não chegaria
+ao container, e o Guiado ficaria desligado em silêncio — `409 assist_disabled`,
+que é indistinguível de "desligado de propósito". As duas variáveis entraram na
+`easypanel/compose.yml` e na `compose.prod.yml`, porque divergir tiraria o
+valor do ensaio (lição do SEC-45).
+
+**O fixture saudável do gate precisou da seção nova, e foi o teste existente
+que pegou isso** — ele reprovou porque a seção ausente passou a ser crítica. O
+check `dialogue_quota_accounting` existe por causa disso: uma API anterior ao
+INFRA-46 não traz a chave, e indexar direto daria "gate falhou" sem dizer que a
+causa é diferença de versão.
+
+**Dois relógios, e a razão de cada um.** O cron do GitHub é melhor-esforço e
+atrasa; ele não entrega a resolução de 2 minutos que o aceite pede. O caminho
+principal é o cron da VM (`make operations-alert`, silencioso quando está bom,
+falante quando não — o contrato que o `cron` espera para mandar e-mail); o
+workflow é a rede de segurança para quando a VM inteira estiver fora e nenhum
+cron dela for reclamar. O alerta por e-mail não usa segredo de SMTP: no GitHub
+é a notificação nativa de falha de workflow agendado, e na VM é o `MAILTO` do
+crontab — **que depende de um MTA funcionando lá**, e isso está escrito no
+runbook em vez de assumido.
+
+**O aceite, ponto a ponto.** "Worker parado por 2 minutos gera alerta": provado
+em `test_worker_parado_por_dois_minutos_gera_alerta`, com o limiar de 60 s que
+já existia. "O custo do dia aparece no painel sem nenhum texto de aluno":
+provado nos dois lados — `test_custo_do_dia_aparece_no_relatorio_sem_texto_de_aluno`
+no gate e `test_metrica_de_dialogo_conta_o_dia_sem_dizer_o_que_foi_falado` na
+API, que varre a resposta procurando a transcrição, a fala do parceiro e o
+e-mail da conta.
+
+Provas em 26/10/2026: ruff e mypy strict limpos; pytest **1287**; pós-cutover
+**186**; **180 testes operacionais**; actionlint limpo no workflow novo;
+`make easypanel-check` aprovado; baseline do contrato regravado com 1 schema
+novo e **zero rotas alteradas**; frontend 431 com `check:api` alinhado.
 
 ---
 
