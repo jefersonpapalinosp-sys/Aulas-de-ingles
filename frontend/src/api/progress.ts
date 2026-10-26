@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type StudySession, type StudySessionInput } from './client'
 import { invalidateStudy } from './invalidateStudy'
 import { ApiError } from './errors'
+import { READ_POLICY } from './readPolicy'
 
 export function useProgress(courseSlug?: string, unitSlug?: string) {
   return useQuery({
     queryKey: ['progress', courseSlug ?? 'all', unitSlug ?? 'all'],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/me/progress', {
         params: { query: { course: courseSlug, unit: unitSlug } },
@@ -36,7 +38,7 @@ export function useStudySession(courseSlug: string, numero: number, enabled = tr
   return useQuery({
     queryKey: ['study-session', courseSlug, numero],
     // Permite falhar offline e hidratar o progresso local, sem ficar pausado para sempre.
-    networkMode: 'always', retry: false,
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/lessons/{number}/study-session',

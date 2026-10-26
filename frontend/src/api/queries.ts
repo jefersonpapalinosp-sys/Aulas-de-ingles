@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { ApiError } from './errors'
+// A política de leitura (networkMode/retry) é única e vive em readPolicy.ts,
+// documentada lá; todos os módulos de consulta a aplicam.
+import { READ_POLICY } from './readPolicy'
+
 
 /** Mensagem de erro que o usuário consegue agir em cima. */
 const falhou = (response: Response | undefined, oque: string): Error => new ApiError(oque, response)
@@ -8,7 +12,7 @@ const falhou = (response: Response | undefined, oque: string): Error => new ApiE
 export function useLessons() {
   return useQuery({
     queryKey: ['lessons'],
-    networkMode: 'always', retry: false,
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/lessons')
       if (!data) throw falhou(response, 'a lista de aulas')
@@ -20,7 +24,7 @@ export function useLessons() {
 export function useCourses() {
   return useQuery({
     queryKey: ['courses'],
-    networkMode: 'always', retry: false,
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/courses')
       if (!data) throw falhou(response, 'o catálogo de cursos')
@@ -32,7 +36,7 @@ export function useCourses() {
 export function useCourseCurriculum(courseSlug: string, enabled = true) {
   return useQuery({
     queryKey: ['course-curriculum', courseSlug],
-    networkMode: 'always', retry: false,
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/courses/{course_slug}/curriculum', {
         params: { path: { course_slug: courseSlug } },
@@ -47,7 +51,7 @@ export function useCourseCurriculum(courseSlug: string, enabled = true) {
 export function useLesson(courseSlug: string, number: number) {
   return useQuery({
     queryKey: ['lesson', courseSlug, number],
-    networkMode: 'always', retry: false,
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/lessons/{number}',
@@ -65,7 +69,7 @@ export function useLesson(courseSlug: string, number: number) {
 export function useAllExercises(courseSlug?: string, unitSlug?: string) {
   return useQuery({
     queryKey: ['exercises', courseSlug ?? 'all', unitSlug ?? 'all'],
-    networkMode: 'always', retry: false,
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET('/api/exercises', {
         params: {

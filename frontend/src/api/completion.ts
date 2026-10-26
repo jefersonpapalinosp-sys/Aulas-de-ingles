@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { ApiError } from './errors'
+import { READ_POLICY } from './readPolicy'
 
 export function useCourseCompletion(courseSlug: string) {
   return useQuery({
     queryKey: ['course-completion', courseSlug],
+    ...READ_POLICY,
     queryFn: async () => {
       const { data, response } = await api.GET(
         '/api/courses/{course_slug}/completion',
