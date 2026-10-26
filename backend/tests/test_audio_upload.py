@@ -73,8 +73,24 @@ async def test_slow_or_disconnected_upload_does_not_produce_body(monkeypatch):
 
 
 def test_api_configuration_cannot_exceed_proxy_cap():
-    config = (Path(__file__).resolve().parents[2] / "frontend/nginx.conf").read_text()
-    assert f"client_max_body_size {audio_upload.MAX_AUDIO_BYTES};" in config
+    # O teto da borda vive em `api-proxy.conf` desde o SEC-45, compartilhado por
+    # /api/ e /api/auth/. A conferência varre os dois arquivos: o que importa é
+    # que o limite exista em algum lugar que as rotas da API incluam, e que ele
+    # seja exatamente o do contrato — nem o nome do arquivo nem a ordem.
+    raiz = Path(__file__).resolve().parents[2] / "frontend"
+    borda = "\n".join(
+        (raiz / nome).read_text() for nome in ("nginx.conf", "api-proxy.conf")
+    )
+    assert f"client_max_body_size {audio_upload.MAX_AUDIO_BYTES};" in borda
+    # E as duas rotas da API precisam incluir o arquivo que carrega o teto.
+    diretivas = "\n".join(
+        linha
+        for linha in (raiz / "nginx.conf").read_text().splitlines()
+        if not linha.strip().startswith("#")
+    )
+    for rota in ("location /api/ {", "location /api/auth/ {"):
+        bloco = diretivas.split(rota, 1)[1].split("\n    }\n", 1)[0]
+        assert "include /etc/nginx/api-proxy.conf;" in bloco
     assert Settings().speaking_max_bytes == audio_upload.MAX_AUDIO_BYTES
     for limit in (0, audio_upload.MAX_AUDIO_BYTES + 1):
         with pytest.raises(ValidationError):
