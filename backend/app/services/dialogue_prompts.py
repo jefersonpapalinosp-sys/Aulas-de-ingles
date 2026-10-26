@@ -29,9 +29,11 @@ from app.domain.dialogue import (
     MIN_WORDS,
     CheckCode,
 )
+from app.domain.enums import DialogueMode
 
 PROMPT_VERSION = "dialogue-prompt-v1"
-Mode = Literal["script", "guided", "free_unit"]
+# Mesmo conjunto do banco; o nome local fica como apelido.
+Mode = DialogueMode
 # Os códigos vêm do domínio, que é quem os produz: duas listas iguais em
 # arquivos diferentes divergem na primeira vez que uma regra muda.
 __all__ = ["CHECK_CODES", "MAX_TURNS_PER_DIALOGUE", "CheckCode"]

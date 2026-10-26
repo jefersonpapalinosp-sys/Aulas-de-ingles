@@ -35,6 +35,13 @@ WorkerState = Literal["disabled", "unknown", "active", "stale"]
 AnalysisMode = Literal["deterministic", "assisted", "fallback"]
 AssistModality = Literal["transcription", "writing"]
 
+# Parceiro de conversa (DB-45/BE-46). Todos têm `CheckConstraint` equivalente.
+DialogueMode = Literal["script", "guided", "free_unit"]
+DialogueState = Literal["active", "completed", "abandoned"]
+TurnRole = Literal["student", "partner"]
+TurnInputKind = Literal["audio", "text"]
+TurnState = Literal["pending", "completed", "failed"]
+
 # Laboratório de exercícios
 PracticeMode = Literal["guided", "quick", "mistakes"]
 PracticeStatus = Literal["active", "completed", "abandoned"]

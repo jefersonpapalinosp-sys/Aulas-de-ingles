@@ -32,6 +32,8 @@ from app.domain.enums import (
     AnalysisMode,
     AudioOrigin,
     DeletionJobState,
+    DialogueMode,
+    DialogueState,
     ExerciseObjective,
     HumanRating,
     IntegrityState,
@@ -42,6 +44,9 @@ from app.domain.enums import (
     SelfRating,
     SpeakingStatus,
     TranscriptionStatus,
+    TurnInputKind,
+    TurnRole,
+    TurnState,
 )
 
 
@@ -891,8 +896,8 @@ class SpeakingDialogue(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
     operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
-    mode: Mapped[str] = mapped_column(String(20))
-    state: Mapped[str] = mapped_column(String(20), default="active")
+    mode: Mapped[DialogueMode] = mapped_column(String(20))
+    state: Mapped[DialogueState] = mapped_column(String(20), default="active")
     partner_speaker: Mapped[str | None] = mapped_column(String(80), default=None)
     content_version: Mapped[int] = mapped_column(Integer)
     content_fingerprint: Mapped[str] = mapped_column(String(64))
@@ -940,15 +945,15 @@ class DialogueTurn(Base):
     dialogue_id: Mapped[int] = mapped_column(ForeignKey("speaking_dialogue.id", ondelete="CASCADE"))
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     position: Mapped[int] = mapped_column(Integer)
-    role: Mapped[str] = mapped_column(String(20))
-    input_kind: Mapped[str | None] = mapped_column(String(20), default=None)
+    role: Mapped[TurnRole] = mapped_column(String(20))
+    input_kind: Mapped[TurnInputKind | None] = mapped_column(String(20), default=None)
     speaking_attempt_id: Mapped[int | None] = mapped_column(
         ForeignKey("speaking_attempt.id", ondelete="SET NULL"), default=None
     )
     transcription_job_id: Mapped[int | None] = mapped_column(
         ForeignKey("transcription_job.id", ondelete="SET NULL"), default=None
     )
-    state: Mapped[str] = mapped_column(String(20), default="pending")
+    state: Mapped[TurnState] = mapped_column(String(20), default="pending")
     transcript: Mapped[str | None] = mapped_column(Text, default=None)
     checks: Mapped[dict[str, bool]] = mapped_column(
         JSONB, default=dict, server_default=text("'{}'::jsonb")
