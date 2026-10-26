@@ -94,7 +94,10 @@ export function PersonalDataPage() {
         const raw = await response.text()
         const data = JSON.parse(raw) as Export
         controller.signal.throwIfAborted()
-        if (data.schema_version !== '2.0' || !Array.isArray(data.audio_manifest) || !data.scope) throw new Error('Formato de exportação incompatível. Atualize a aplicação e tente novamente.')
+        // A linha de exportação 2.x é aditiva: aqui só são lidos `audio_manifest` e
+        // `scope`, presentes em toda ela. Uma linha futura (3.0) tem de ser recusada.
+        const major = String(data.schema_version ?? '').split('.')[0]
+        if (major !== '2' || !Array.isArray(data.audio_manifest) || !data.scope) throw new Error('Formato de exportação incompatível. Atualize a aplicação e tente novamente.')
         save(new Blob([raw], { type: 'application/json' }), 'aulas-ingles-dados.json')
         setManifest(data.audio_manifest)
         setExportedAt(data.scope.snapshot_at)

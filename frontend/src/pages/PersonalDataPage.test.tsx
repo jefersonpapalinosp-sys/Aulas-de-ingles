@@ -22,7 +22,7 @@ vi.mock('../features/offline/attemptQueue', () => ({
 }))
 
 const exported = {
-  schema_version: '2.0', scope: { snapshot_at: '2026-10-15T10:00:00Z' },
+  schema_version: '2.1', scope: { snapshot_at: '2026-10-15T10:00:00Z' },
   audio_manifest: [{ attempt_id: 7, mime_type: 'audio/webm', file_size: 1000, sha256: 'a'.repeat(64),
     integrity_state: 'verified', download_path: '/api/speaking/attempts/7/audio' }],
 }
@@ -66,6 +66,19 @@ describe('Meus dados', () => {
     expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
     expect(await screen.findByText(/Nenhuma gravação registrada/)).toBeVisible()
+  })
+
+  it('aceita minor novo da linha 2.x e recusa linha futura sem salvar arquivo', async () => {
+    mocks.fetch.mockResolvedValueOnce(new Response(JSON.stringify({ ...exported, schema_version: '2.9' })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ...exported, schema_version: '3.0' })))
+    setup()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
+    await screen.findByRole('button', { name: 'Baixar gravação 7' })
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Atualize a aplicação')
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
   })
 
   it('informa sessão offline e não tenta exportar', () => {
