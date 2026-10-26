@@ -129,6 +129,38 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  infra-lint:
+    name: infra · shellcheck + hadolint + actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # Os três rodam em container com versão fixa: o resultado não muda
+      # porque o runner atualizou uma ferramenta durante a noite.
+      # Cada script declara o shell no shebang; o shellcheck usa o de cada um.
+      - name: shellcheck nos seis scripts versionados
+        run: >-
+          docker run --rm -v "$PWD:/repo" -w /repo
+          koalaman/shellcheck-alpine:v0.11.0
+          shellcheck --severity=style
+          backend/docker-entrypoint.prod.sh
+          infra/easypanel/apply-grants.sh
+          infra/easypanel/postgres-init.sh
+          ops/ci_pull_bases.sh
+          ops/ci_pull_postgres.sh
+          ops/deploy_public.sh
+      - name: hadolint nas imagens
+        run: >-
+          docker run --rm -v "$PWD:/repo" -w /repo
+          hadolint/hadolint:v2.14.0-alpine
+          hadolint backend/Dockerfile backend/Dockerfile.prod
+          frontend/Dockerfile frontend/Dockerfile.prod
+          infra/easypanel/Dockerfile.postgres
+      - name: actionlint nos workflows
+        run: >-
+          docker run --rm -v "$PWD:/repo" -w /repo
+          rhysd/actionlint:1.7.7 -color
+
   recovery:
     name: recovery · backup de banco e voz + restore isolado
     runs-on: ubuntu-latest

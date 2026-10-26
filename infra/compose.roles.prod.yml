@@ -5,8 +5,9 @@ services:
       DATABASE_URL: ${RUNTIME_DATABASE_URL:?provisione os papéis primeiro}
       DATABASE_PURPOSE: runtime
   worker:
-    user: "10001:10001"
-    entrypoint: []
+    # Sem `user:` nem `entrypoint: []`: o entrypoint da imagem tolera o volume
+    # read_only e já troca para o usuário `app`, com o UID declarado num lugar
+    # só (o Dockerfile).
     environment:
       DATABASE_URL: ${WORKER_DATABASE_URL:?provisione os papéis primeiro}
       DATABASE_PURPOSE: worker

@@ -145,9 +145,12 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
 
     def test_proxy_preserves_external_https_and_only_then_emits_hsts(self) -> None:
         nginx = (ROOT / "frontend/nginx.conf").read_text(encoding="utf-8")
+        proxy = (ROOT / "frontend/api-proxy.conf").read_text(encoding="utf-8")
         headers = (ROOT / "frontend/security-headers.conf").read_text(encoding="utf-8")
         self.assertIn("$http_x_forwarded_proto $aulas_forwarded_proto", nginx)
-        self.assertIn("proxy_set_header X-Forwarded-Proto $aulas_forwarded_proto", nginx)
+        # As diretivas de proxy vivem no arquivo compartilhado desde o SEC-45,
+        # para /api/ e /api/auth/ não divergirem.
+        self.assertIn("proxy_set_header X-Forwarded-Proto $aulas_forwarded_proto", proxy)
         self.assertIn("$aulas_forwarded_proto $aulas_hsts", nginx)
         self.assertIn("Strict-Transport-Security $aulas_hsts", headers)
 
@@ -156,12 +159,24 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
         directives = "\n".join(
             line for line in nginx.splitlines() if not line.strip().startswith("#")
         )
-        api = directives.split("location /api/ {", 1)[1].split("\n    }\n", 1)[0]
-        self.assertIn("resolver 127.0.0.11 valid=10s ipv6=off;", api)
-        self.assertIn("set $api_upstream http://api:8000;", api)
-        self.assertIn("proxy_pass $api_upstream;", api)
+        proxy = "\n".join(
+            line
+            for line in (ROOT / "frontend/api-proxy.conf")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if not line.strip().startswith("#")
+        )
+        self.assertIn("resolver 127.0.0.11 valid=10s ipv6=off;", proxy)
+        self.assertIn("set $api_upstream http://api:8000;", proxy)
+        self.assertIn("proxy_pass $api_upstream;", proxy)
         # Um upstream literal seria resolvido uma só vez no boot do nginx.
         self.assertNotIn("proxy_pass http://", directives)
+        self.assertNotIn("proxy_pass http://", proxy)
+        # As duas rotas da API precisam incluir o mesmo proxy: sem isso, a de
+        # autenticação perderia os cabeçalhos encaminhados sem ninguém notar.
+        for rota in ("location /api/ {", "location /api/auth/ {"):
+            bloco = directives.split(rota, 1)[1].split("\n    }\n", 1)[0]
+            self.assertIn("include /etc/nginx/api-proxy.conf;", bloco)
         for exact in ("location = /index.html {", "location = / {", "location = /sw.js {"):
             block = nginx.split(exact, 1)[1].split("\n    }\n", 1)[0]
             self.assertIn('add_header Cache-Control "no-cache, must-revalidate" always;', block)
@@ -175,3 +190,76 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class ContainerHardeningTests(unittest.TestCase):
+    """SEC-45: as camadas de hardening não podem sair em silêncio.
+
+    O teste é textual de propósito — `docker compose config` resolveria as
+    âncoras, mas exigiria Docker e o arquivo privado de segredos, e estes
+    testes rodam sem nenhum dos dois.
+    """
+
+    SERVICES = ("db", "migrate", "permissions", "api", "worker", "seed", "web")
+
+    def setUp(self) -> None:
+        self.compose = (ROOT / "infra/easypanel/compose.yml").read_text(encoding="utf-8")
+
+    def test_every_service_refuses_new_privileges(self) -> None:
+        for name in self.SERVICES:
+            section = _service(self.compose, name)
+            declared = "no-new-privileges:true" in section
+            inherited = "<<: *hardening" in section or "<<: *backend-caps" in section
+            self.assertTrue(declared or inherited, f"{name} sem no-new-privileges")
+
+    def test_backend_keeps_only_the_capabilities_the_entrypoint_needs(self) -> None:
+        anchor = self.compose.split("x-backend-caps: &backend-caps", 1)[1].split(
+            "\nservices:", 1
+        )[0]
+        self.assertIn("- ALL", anchor)
+        # O entrypoint começa root para ajustar o diretório das gravações
+        # (CHOWN/FOWNER) e troca para `app` (SETUID/SETGID). Nada além.
+        self.assertEqual(
+            sorted(re.findall(r"    - ([A-Z_]+)\n", anchor.split("cap_add:", 1)[1])),
+            ["CHOWN", "FOWNER", "SETGID", "SETUID"],
+        )
+
+    def test_web_and_worker_run_with_a_read_only_filesystem(self) -> None:
+        for name in ("web", "worker"):
+            section = _service(self.compose, name)
+            # Indentação de 4 espaços: o `read_only` do serviço, não o do
+            # volume do worker, que fica a 8 e já existia antes.
+            self.assertIn("\n    read_only: true", section, name)
+            self.assertIn("\n    cap_drop:\n      - ALL", section, name)
+            self.assertIn("\n    tmpfs:", section, name)
+
+    def test_worker_cannot_change_ownership_of_the_audio_it_only_reads(self) -> None:
+        worker = _service(self.compose, "worker")
+        granted = re.findall(r"    - ([A-Z_]+)\n", worker.split("cap_add:", 1)[1])
+        self.assertEqual(sorted(granted), ["SETGID", "SETUID"])
+
+    def test_no_compose_duplicates_the_image_user_or_drops_the_entrypoint(self) -> None:
+        # O UID 10001 vive no Dockerfile, num lugar só, e o entrypoint tolera
+        # volume read_only — nenhum Compose precisa contorná-lo.
+        paths = sorted((ROOT / "infra").rglob("compose*.yml"))
+        self.assertTrue(paths)
+        for path in paths:
+            text = path.read_text(encoding="utf-8")
+            directives = "\n".join(
+                line for line in text.splitlines() if not line.strip().startswith("#")
+            )
+            self.assertNotIn("entrypoint: []", directives, path.name)
+            self.assertNotIn('user: "10001', directives, path.name)
+
+    def test_edge_rate_limit_protects_auth_without_trusting_client_headers(self) -> None:
+        nginx = (ROOT / "frontend/nginx.conf").read_text(encoding="utf-8")
+        directives = "\n".join(
+            line for line in nginx.splitlines() if not line.strip().startswith("#")
+        )
+        self.assertIn("limit_req_zone $binary_remote_addr zone=aulas_auth", directives)
+        # Chave vinda de cabeçalho seria escolhida pelo cliente.
+        self.assertNotIn("limit_req_zone $http_", directives)
+        auth = directives.split("location /api/auth/ {", 1)[1].split("\n    }\n", 1)[0]
+        self.assertIn("limit_req zone=aulas_auth", auth)
+        self.assertIn("limit_req_status 429", auth)
+        self.assertIn("server_tokens off;", directives)
+        self.assertIn("gzip_vary on;", directives)

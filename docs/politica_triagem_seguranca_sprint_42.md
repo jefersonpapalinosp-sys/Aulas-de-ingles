@@ -73,3 +73,45 @@ Em 16 de outubro de 2026:
 Falha do scanner, base desatualizada ou relatório ausente aparece como pendência
 na matriz de release. Isso não vira aprovação silenciosa nem tentativa de usar
 outro serviço externo sem autorização.
+
+## Reteste de 26 de outubro de 2026 (SEC-45)
+
+O aceite de 16/10 registrou **zero críticas e zero altas nas duas imagens**. O
+reteste com o mesmo Trivy `v0.76.0`, dez dias depois, encontra três altas na
+imagem web — nenhuma delas introduzida por mudança nossa: as mesmas três
+aparecem na imagem construída a partir da `main`. É o efeito esperado de base
+fixada por digest contra um banco de CVEs que avança.
+
+Imagem da API (`python:3.12.15-alpine3.24`): **zero críticas e zero altas**,
+sem mudança.
+
+Primeiro a correção que estava disponível: o upstream republicou o tag
+`nginx:1.30.6-alpine3.24` sobre o Alpine 3.24.3, com digest novo. Como
+`ops/ci_pull_bases.sh` pré-carrega as bases **por digest**, o tag sozinho não
+traria os pacotes corrigidos; re-ancorar o digest (`sha256:970364…` →
+`sha256:47928b…`, idêntico nas duas origens) baixou as altas de cinco para
+três, encerrando:
+
+| Identificador | Pacote | Instalada | Corrigida | Estado |
+|---|---|---|---|---|
+| CVE-2026-77214 | `libexpat` | 2.8.5-r0 | 2.9.0-r0 | corrigida pela re-âncora |
+| CVE-2026-88806 | `libx11` | 1.8.13-r0 | 1.8.14-r0 | corrigida pela re-âncora |
+
+### Achados em aberto, para decisão humana
+
+| Identificador | Pacote/camada | Instalada | Corrigida | Alcance no runtime real | Controles compensatórios | Decisão proposta |
+|---|---|---|---|---|---|---|
+| CVE-2026-111497 | `brotli-libs` (SO da imagem web) | 1.2.0-r1 | 1.2.1-r0 | **nenhum caminho de execução**: `frontend/nginx.conf` comprime com `gzip`; o módulo brotli não é carregado nem referenciado | borda sem upload para o nginx (o corpo vai à API); `cap_drop: [ALL]` e FS read-only no container web | aceitar temporariamente até o upstream publicar imagem com 1.2.1-r0 |
+| CVE-2026-92392 | `curl` e `libcurl` (SO da imagem web) | 8.22.0-r0 | 8.23.0-r0 | o nginx não invoca `curl`; o binário vem como dependência da imagem e nenhuma rota o executa | idem; nada no container parte de entrada do usuário para um processo externo | aceitar temporariamente até o upstream publicar imagem com 8.23.0-r0 |
+
+Condição de encerramento, não prazo em aberto: **nenhuma imagem nginx alpine3.24
+publicada hoje contém essas correções** — a mais recente (`1.30-alpine3.24`,
+mesmo digest que a re-ancorada) ainda traz `brotli-libs-1.2.0-r1` e
+`curl-8.22.0-r0`, conferido em 26/10/2026. A alternativa seria `apk upgrade` no
+estágio de runtime, recusada aqui porque trocaria reprodutibilidade por
+atualidade sem o digest dizer o que mudou — e o hadolint do job `infra-lint`
+reprova (DL3017). A re-âncora do digest deve ser reconferida junto das imagens-base
+na revisão mensal que esta política já prevê; é ela que encerra os dois achados.
+
+Quem decide aceitar, e por quanto tempo, é o release manager — este registro
+traz os itens 1 e 2 da política e uma proposta para o item 3.

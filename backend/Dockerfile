@@ -2,7 +2,7 @@
 # A de produção entra na S5, junto com o compose.prod.yml.
 FROM public.ecr.aws/docker/library/python:3.12-slim
 
-COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.33 /uv /usr/local/bin/uv
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \

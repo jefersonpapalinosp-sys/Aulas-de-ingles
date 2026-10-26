@@ -96,6 +96,8 @@ show() {
 remote() {
   show "ssh ${deploy_host} -- $1"
   [ "$deploy_dry_run" = 0 ] || return 0
+  # shellcheck disable=SC2029  # a expansão é local de propósito: o comando
+  # remoto é montado aqui, com SHA e caminhos já resolvidos.
   ssh "${deploy_ssh_options[@]}" "$deploy_host" "$1" < /dev/null
 }
 
@@ -103,6 +105,7 @@ remote() {
 remote_capture() {
   show "ssh ${deploy_host} -- $1"
   [ "$deploy_dry_run" = 0 ] || return 0
+  # shellcheck disable=SC2029  # idem: comando montado localmente.
   ssh "${deploy_ssh_options[@]}" "$deploy_host" "$1" < /dev/null > "$2"
 }
 
@@ -118,6 +121,7 @@ deploy_stage="/tmp/aulas-deploy-${deploy_full_sha}"
 deploy_extract="rm -rf ${deploy_stage} && mkdir -p ${deploy_stage} && tar -x -C ${deploy_stage}"
 show "git archive --format=tar ${deploy_full_sha} | ssh ${deploy_host} -- ${deploy_extract}"
 if [ "$deploy_dry_run" = 0 ]; then
+  # shellcheck disable=SC2029  # $deploy_extract traz o stage já resolvido.
   git archive --format=tar "$deploy_full_sha" \
     | ssh "${deploy_ssh_options[@]}" "$deploy_host" "$deploy_extract"
 fi

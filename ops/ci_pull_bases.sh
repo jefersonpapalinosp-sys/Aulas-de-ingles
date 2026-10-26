@@ -7,12 +7,17 @@
 set -euo pipefail
 
 # alias usado nos FROM | repositório | digest do índice OCI, idêntico nas duas
-# origens (conferido em 2026-10-21 com `docker buildx imagetools inspect`).
+# origens (reconferido em 2026-10-26 com `docker buildx imagetools inspect`).
 # Ao mudar um FROM, atualizar a linha correspondente e reconferir o digest.
+#
+# O digest do nginx mudou sem o tag mudar: o upstream republicou
+# `1.30.6-alpine3.24` sobre o alpine 3.24.3, que corrige CVE-2026-77214
+# (libexpat) e CVE-2026-88806 (libx11). Re-ancorar aqui é o que faz o CI
+# construir com os pacotes corrigidos — o tag sozinho não garante isso.
 ci_base_images=(
   "public.ecr.aws/docker/library/python:3.12.15-alpine3.24|library/python|sha256:1b668429b3511ab407d8e00648891631b0b1a4d7e15e3ca70f38ab5b91ad4ab4"
-  "public.ecr.aws/docker/library/node:24-alpine|library/node|sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f"
-  "public.ecr.aws/docker/library/nginx:1.30.6-alpine3.24|library/nginx|sha256:970364228b1e4f932abc22d321932816782cca8a20b85a77552a7cfe9acfb3b5"
+  "public.ecr.aws/docker/library/node:24.22.0-alpine3.24|library/node|sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f"
+  "public.ecr.aws/docker/library/nginx:1.30.6-alpine3.24|library/nginx|sha256:47928bf67eb62a1863cb08d9ecb52d3e704304ba614eaee17884204677702951"
   # ops/rollback_image.py constrói o commit fixo d0b1f8c, cuja base ainda é 3.12-slim.
   "public.ecr.aws/docker/library/python:3.12-slim|library/python|sha256:2259debdc6af85626058a15a7bf44ad6a68b8c98c9ae82a02cf5cdb92f096d47"
 )

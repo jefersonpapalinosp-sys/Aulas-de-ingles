@@ -5,7 +5,7 @@
 # depender de um arquivo montado do host.
 FROM public.ecr.aws/docker/library/python:3.12.15-alpine3.24 AS build
 
-COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.33 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 WORKDIR /app
 
@@ -24,7 +24,9 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 
-RUN apk add --no-cache su-exec \
+# Versão fixa junto com a base alpine3.24: um rebuild não troca o su-exec
+# sem o commit dizer. É ele que faz o entrypoint sair de root.
+RUN apk add --no-cache su-exec=0.3-r0 \
     && addgroup -g 10001 -S app \
     && adduser -u 10001 -S -G app -h /home/app app
 WORKDIR /app
