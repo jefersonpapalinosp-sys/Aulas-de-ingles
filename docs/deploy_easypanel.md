@@ -446,6 +446,19 @@ o script por SSH continua valendo como contingência.
 
 ## Vigilância agendada — probe externo e gate operacional (INFRA-46)
 
+Atualização de 29/10/2026: `PUBLIC_PROBE_ORIGIN` configurada e probe público
+aprovado no [run 40932540081](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/actions/runs/40932540081).
+A etapa autenticada ficou ignorada por falta de `OPERATIONS_TOKEN` no GitHub;
+o token existente na VM não foi transferido. Cron root/sistema sem entrada
+reconhecida do monitor e `sendmail` ausente. A publicação do workflow não
+equivale à comprovação de alerta; ver [matriz do piloto](matriz_aceite_sprint_48.md).
+
+O monitor atualizado aceita limites `0` para operação sem gasto autorizado:
+custo confirmado zero passa; valor positivo ou desconhecido é crítico.
+Campos ausentes continuam gerando aviso. Isso é avaliação/alerta, não bloqueio
+de chamadas nem comprovação da franquia disponível na conta. Publicar essa
+versão antes de configurar zero; o release `9cc14fe` ainda exige valor positivo.
+
 Duas coisas rodam fora da aplicação e precisam rodar em algum relógio: o
 **probe externo**, que diz se o domínio público responde, e o **gate
 operacional**, que compara worker, fila e custo do diálogo com limiares.
@@ -530,13 +543,14 @@ microusd. O custo pode ser parcial enquanto houver valores desconhecidos.
 
 Configure no ambiente do cron e nas **variables** do repositório do GitHub:
 
-- `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD`: orçamento diário aprovado, inteiro positivo.
-- `OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`: orçamento mensal aprovado, inteiro positivo.
+- `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD`: orçamento diário aprovado, inteiro não negativo.
+- `OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`: orçamento mensal aprovado, inteiro não negativo.
 
 Não há valor presumido para esses dois orçamentos. Ausência gera `warning`;
 valor inválido encerra o comando com código 2 antes de qualquer requisição.
-Com orçamento definido, consumo >= 80% gera `warning` e >= 100% gera
-`critical`. Custo desconhecido ou métrica ausente/inválida gera `critical`.
+Com orçamento positivo, consumo >= 80% gera `warning` e >= 100% gera
+`critical`. Com teto zero, somente custo confirmado zero passa; custo positivo
+gera `critical`. Custo desconhecido ou métrica ausente/inválida gera `critical`.
 Tanto `warning` quanto `critical` retornam código 1, permitindo que cron e
 workflow sinalizem o problema. O resumo do workflow conserva o relatório
 também quando há alerta. Nenhum envio foi disparado pela validação local.

@@ -76,11 +76,7 @@ def _assist_cost_checks(metrics: dict[str, Any], thresholds: Thresholds) -> list
     ):
         window = section.get(period)
         cost = window.get("cost_microusd") if isinstance(window, dict) else None
-        unknown = (
-            window.get("unknown_cost_reservations")
-            if isinstance(window, dict)
-            else None
-        )
+        unknown = window.get("unknown_cost_reservations") if isinstance(window, dict) else None
         valid = all(type(value) is int and value >= 0 for value in (cost, unknown))
         checks.append(
             _check(
@@ -95,21 +91,31 @@ def _assist_cost_checks(metrics: dict[str, Any], thresholds: Thresholds) -> list
         )
         if budget is None:
             state: State = "warning"
-            threshold = "orçamento positivo definido"
+            threshold = "orçamento não negativo definido"
             action = (
                 f"Definir OPERATIONS_ASSIST_{period.upper()}_BUDGET_MICROUSD "
                 "após aprovar o orçamento."
             )
         else:
-            if type(budget) is not int or budget <= 0:
-                raise ValueError("Orçamento deve ser inteiro positivo em microusd.")
-            if type(cost) is not int or not valid or cost >= budget:
+            if type(budget) is not int or budget < 0:
+                raise ValueError("Orçamento deve ser inteiro não negativo em microusd.")
+            if type(cost) is not int or not valid:
+                state = "critical"
+            elif budget == 0:
+                # Plano gratuito: zero explícito não equivale a orçamento ausente.
+                # Custo desconhecido continua crítico no check de conciliação.
+                state = "ok" if cost == 0 else "critical"
+            elif cost >= budget:
                 state = "critical"
             elif cost * 5 >= budget * 4:
                 state = "warning"
             else:
                 state = "ok"
-            threshold = f"alerta >= 80% de {budget}; crítico >= 100% (microusd)"
+            threshold = (
+                "sem gasto autorizado; crítico > 0 (microusd)"
+                if budget == 0
+                else f"alerta >= 80% de {budget}; crítico >= 100% (microusd)"
+            )
             action = (
                 "Conferir consumo e fatura; ao atingir o teto, "
                 "suspender assistência antes de religar."
@@ -321,8 +327,8 @@ def main(argv: list[str] | None = None) -> int:
             if value is None or not value.strip():
                 return None
             parsed = int(value)
-            if parsed <= 0:
-                raise ValueError("Orçamento deve ser positivo.")
+            if parsed < 0:
+                raise ValueError("Orçamento deve ser não negativo.")
             return parsed
 
         thresholds = Thresholds(

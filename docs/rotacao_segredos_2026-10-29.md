@@ -2,7 +2,9 @@
 
 Registro de 29/10/2026. Ensaio aprovado em laboratório exclusivo, com API real,
 PostgreSQL e gateway HTTP sintético. Nenhum segredo de estudo ou produção foi
-alterado. Publicação e execução do CI remoto permanecem pendentes.
+alterado. Publicado pelo [PR #41](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/pull/41),
+com ensaio aprovado no [CI remoto](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/actions/runs/40926233714)
+e deploy concluído em `9cc14fe`.
 
 ## Resultado observado
 

@@ -191,6 +191,51 @@ class AssistBudgetTests(unittest.TestCase):
             all(c["state"] == "warning" for c in report["checks"] if c["name"].endswith("_budget"))
         )
 
+    def test_zero_budget_requires_confirmed_zero_cost_in_both_periods(self):
+        for period in ("daily", "monthly"):
+            for cost, unknown, expected in (
+                (0, 0, "ok"),
+                (1, 0, "critical"),
+                (0, 1, "critical"),
+                (None, 0, "critical"),
+                (True, 0, "critical"),
+            ):
+                with self.subTest(period=period, cost=cost, unknown=unknown):
+                    data = metrics()
+                    for window in data["assist_costs"].values():
+                        window["cost_microusd"] = 0
+                    data["assist_costs"][period].update(
+                        cost_microusd=cost, unknown_cost_reservations=unknown
+                    )
+                    report = evaluate(
+                        readiness(),
+                        data,
+                        Thresholds(
+                            assist_daily_budget_microusd=0,
+                            assist_monthly_budget_microusd=0,
+                        ),
+                    )
+                    self.assertEqual(report["status"], expected)
+
+    def test_cli_accepts_explicit_zero_budgets_without_authorizing_paid_usage(self):
+        data = metrics()
+        for window in data["assist_costs"].values():
+            window["cost_microusd"] = 0
+        env = {
+            "OPERATIONS_TOKEN": "private-token",
+            "OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD": "0",
+            "OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD": "0",
+        }
+        output = io.StringIO()
+        with (
+            patch.dict(os.environ, env, clear=True),
+            patch("ops.observability_check.fetch", side_effect=[readiness(), data]),
+            contextlib.redirect_stdout(output),
+        ):
+            self.assertEqual(main([]), 0)
+        self.assertIn('"status": "ok"', output.getvalue())
+        self.assertNotIn("private-token", output.getvalue())
+
     def test_missing_unknown_or_invalid_cost_does_not_pass(self):
         for change in (
             lambda d: d.pop("assist_costs"),
@@ -226,7 +271,7 @@ class AssistBudgetTests(unittest.TestCase):
         self.assertNotIn("private-token", output.getvalue())
 
     def test_invalid_budget_fails_before_network(self):
-        for value in ("-1", "0", "1.5", "invalid"):
+        for value in ("-1", "1.5", "invalid"):
             with (
                 patch.dict(
                     os.environ,

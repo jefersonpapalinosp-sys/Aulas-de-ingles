@@ -44,12 +44,26 @@ foram reconciliadas com esses registros. Implementação não encerra aceite hum
 | 47 | Interface e E2E implementados; CI remoto verde | Liberação da interface condicionada à revisão SEC-46; assistência continua desligada |
 | 48 | Gate, métricas de custo, runbook e ensaios sintéticos prontos | Manifesto real, piloto na conta autorizada, avaliações/pedagogia/VoiceOver, orçamento e alertas reais, aceites operacionais |
 | BE-49 | Concluído, incluindo os cinco smokes | Nenhuma entrega de código pendente neste pacote |
-| FE-49 | Implementada e validada localmente | Publicação desta entrega e aceite manual de acessibilidade, sem encerrar o piloto |
-| DB-49 | Implementada e validada localmente | Publicação e CI remoto da política de downgrade/isolamento de testes |
-| INFRA-49 | Implementada e validada localmente | Publicação e CI remoto, incluindo o ensaio integrado de upgrade |
-| SEC-49 | Implementada e ensaiada localmente | Publicação e CI remoto do ensaio de rotação; sem alteração de segredos reais |
+| FE-49 | Publicada no PR #41; CI e deploy aprovados | Aceite manual de acessibilidade, sem encerrar o piloto |
+| DB-49 | Publicada no PR #41; CI remoto aprovado | Nenhuma entrega de código pendente neste pacote |
+| INFRA-49 | Publicada no PR #41; upgrade aprovado no CI | Nenhuma entrega de código pendente neste pacote |
+| SEC-49 | Publicada no PR #41; rotação aprovada no CI | Nenhuma entrega de código pendente; ensaio não altera segredos reais |
 
-**Publicação comprovada:** PR #39 integrada em `41aa3f7`; PR #40 em
+**Publicação mais recente:** [PR #41](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/pull/41)
+integrada em `9cc14fe74caf6180ca8dd63f6d2176e6f9562719` em 29/10/2026.
+[CI e deploy da main](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/actions/runs/40926233714)
+aprovados. Os **677 arquivos versionados** da VM coincidiram com o release;
+web, API, worker e banco saudáveis. Backups anterior e posterior verificados
+na própria VM. O primeiro deploy falhou por readiness transitório do worker;
+o probe oficial voltou a passar, e a repetição somente do deploy foi aprovada.
+Não houve mudança de schema neste pacote nem rotação de segredos de produção.
+
+As referências a publicação/CI pendentes nos registros locais abaixo são
+históricas e ficam superadas por esta comprovação. A próxima frente é o
+fechamento operacional da 46 e a preparação do piloto da 48, acompanhados na
+[matriz de aceite](matriz_aceite_sprint_48.md).
+
+**Publicações anteriores:** PR #39 integrada em `41aa3f7`; PR #40 em
 `ef47515`, corrigindo os chunks antigos que retornavam 404 no Caderno após
 um deploy. CI e deploy da `main` aprovados no run `40880779035`; os 636
 arquivos versionados da VM foram comparados com o código local, sem divergência.
@@ -647,8 +661,10 @@ documento com data.
   local em produção já é recusada no boot desde o BE-45.
 - [x] Métricas agregadas de diálogo em `/api/operations/metrics`: turnos/dia,
   p95 de latência, falhas de provedor, custo do dia, cota atingida.
-- [x] `make operations-check` agendado (cron na VM ou `schedule:` no GitHub)
-  com alerta por e-mail quando o worker, a fila ou o custo saem do limiar.
+- [ ] Ativar o gate de métricas agendado e comprovar o alerta de worker,
+  fila e custo. Código e workflow existem; em 29/10 a secret operacional
+  do GitHub está ausente, e não há entrada reconhecida no cron root/sistema
+  da VM nem comando `sendmail`. Ver inventário abaixo.
 - [x] Probe externo de disponibilidade do domínio público.
 
 Aceite: um worker parado por 2 minutos gera alerta; o custo do dia aparece
@@ -742,6 +758,44 @@ Provas em 26/10/2026: ruff e mypy strict limpos; pytest **1287**; pós-cutover
 novo e **zero rotas alteradas**; frontend 431 com `check:api` alinhado.
 
 ---
+
+### Inventário operacional e ativação do probe — 29/10/2026, após PR #41
+
+Antes desta intervenção, o repositório tinha somente as três secrets de deploy;
+não havia `PUBLIC_PROBE_ORIGIN`, `OPERATIONS_TOKEN` nem variáveis de orçamento.
+O estado verde do workflow, sozinho, não comprovava vigilância ativa.
+
+`PUBLIC_PROBE_ORIGIN` foi configurada com o domínio público existente, e o
+[run 40932540081](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/actions/runs/40932540081)
+executou o **probe público com sucesso**. A etapa autenticada ficou `skipped`,
+como esperado enquanto faltar a secret operacional. O agendamento existente
+é a cada 30 minutos, sujeito aos atrasos do GitHub; não comprova alerta em 2 minutos.
+
+Inventário somente leitura, retornando apenas booleanos: API e worker com
+`ASSISTED_FEATURES_ENABLED=false`, `DIALOGUE_PRACTICE_ENABLED=false`, URL de
+diálogo e token do provedor ausentes; token operacional presente nos dois
+containers. Não foi exportado nenhum segredo. Crontab de root, `/etc/crontab`
+e `/etc/cron.d` não continham referências a `operations-alert`,
+`operations-check` ou `observability_check`; `sendmail` não estava disponível.
+Isso não inventaria agendadores de outros usuários ou serviços personalizados.
+
+O avaliador `ops.observability_check` foi executado uma vez dentro da API,
+usando o token existente sem copiá-lo para fora da VM: **14 checks `ok` e
+dois `warning`**, somente para orçamento diário/mensal ainda indefinidos.
+Não houve teste de entrega de e-mail nem parada deliberada de worker.
+
+A decisão histórica de provedor já existe: Cloudflare Workers AI, conforme
+o ADR. Faltam endpoint de gateway, credencial em armazenamento privado e
+revisão SEC-46. A matriz da 48 foi criada sem presumir assinatura ou consentimento.
+O responsável informou uso do plano gratuito nesta continuação: limite de gasto
+adotado de **USD 0/dia, USD 0/mês e USD 0 no piloto**, sem habilitar cobrança.
+O monitor local foi ajustado para aceitar zero explícito; custo positivo ou
+desconhecido continua crítico. A modalidade efetiva da conta e a conciliação
+da franquia ainda precisam de comprovação. Ruff, mypy e **345 testes
+operacionais** passaram; o novo suporte a orçamento zero ainda não foi publicado.
+Também é necessário preparar a restrição do piloto a uma conta: o status
+e a admissão de diálogos usam configuração global, sem allowlist por conta
+nesses caminhos. Não ligar a flag global como se ela restringisse o piloto.
 
 ### Registro de execução — Ciclo 46, SEC-46 em 26/10/2026
 
@@ -2167,10 +2221,12 @@ Validação: **343 testes operacionais** (sete novos), Ruff, mypy estrito em
 os scripts finais. Etapas adicionadas ao CI, incluindo encerramento obrigatório.
 Jobs longos, provedor externo e rascunhos/áudio no navegador não foram ensaiados.
 
-**Próxima entrega:** publicar FE/DB/INFRA/SEC-49 e comprovar o CI remoto,
-incluindo upgrade e rotação. Permanecem os aceites humanos e operacionais de
-SEC-46/ciclo 48, a acessibilidade manual e as pendências de backup do quadro
-consolidado; este ensaio não encerra esses itens.
+**Publicação concluída:** FE/DB/INFRA/SEC-49 integradas no PR #41, com CI e
+deploy aprovados, incluindo upgrade e rotação; ver quadro consolidado.
+**Próxima frente:** fechar os requisitos operacionais e a revisão SEC-46,
+preparar a restrição do piloto à conta autorizada e preencher a
+[matriz da Sprint 48](matriz_aceite_sprint_48.md). Acessibilidade manual e
+pendências de backup continuam abertas; este ensaio não encerra esses itens.
 
 ---
 
