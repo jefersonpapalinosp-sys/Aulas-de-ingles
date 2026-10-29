@@ -257,6 +257,34 @@ class ArchiveTests(unittest.TestCase):
 
 
 class OperationalGuardsTests(unittest.TestCase):
+    def test_upgrade_fixture_uses_previous_models_but_migrates_with_current_image(self):
+        from ops.rollback_image import IMAGE as previous_image
+
+        for empty in (True, False):
+            intermediate = {"revision": [recovery.UPGRADE_FROM], "users": 0, "lessons": 0}
+            with (
+                self.subTest(empty=empty),
+                patch.object(recovery, "check_target") as guard,
+                patch.object(recovery, "lease", return_value=nullcontext()),
+                patch.object(recovery, "quiet"),
+                patch.object(recovery, "query", side_effect=[0] if empty else [1, intermediate]),
+                patch.object(recovery, "voice"),
+                patch.object(recovery, "audio_inventory", return_value={}),
+                patch.object(recovery, "docker") as docker,
+            ):
+                recovery.upgrade_lab_prepare()
+            guard.assert_called_once_with(recovery.UPGRADE_LAB)
+            self.assertIn(recovery.HELPER, docker.call_args_list[0].args)
+            if empty:
+                self.assertEqual(docker.call_args_list[1].args[-4:],
+                                 (recovery.HELPER, "alembic", "upgrade", recovery.UPGRADE_FROM))
+            else:
+                self.assertFalse(any("alembic" in c.args for c in docker.call_args_list))
+            fixture = docker.call_args_list[-1].args
+            self.assertEqual(fixture[-3:], (previous_image, "python", "/tools/recovery_fixture.py"))
+            self.assertIn(f"{recovery.UPGRADE_PROJECT}_default", fixture)
+            self.assertNotIn(recovery.HELPER, fixture)
+
     def test_malformed_container_inspection_is_refused(self):
         for value in (None, [], "private-value"):
             with (

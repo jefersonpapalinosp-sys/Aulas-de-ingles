@@ -826,6 +826,8 @@ def _prepare_empty_lab(target: Target = LAB) -> None:
 
 
 def upgrade_lab_prepare() -> None:
+    from ops.rollback_image import IMAGE as previous_image
+
     check_target(UPGRADE_LAB)
     with lease("upgrade42-source"):
         quiet(UPGRADE_LAB)
@@ -874,7 +876,11 @@ def upgrade_lab_prepare() -> None:
                 not audio_inventory(current_voice),
                 "Origem de voz já contém dados; preparação recusada.",
             )
-        docker(*args, "python", "/tools/recovery_fixture.py", timeout=60)
+        # O schema anterior deve receber dados dos modelos anteriores. Os
+        # modelos atuais já incluem colunas aditivas (origin/kind, por exemplo)
+        # que só existirão depois da migration ensaiada no clone restaurado.
+        fixture_args = [*args[:-1], previous_image]
+        docker(*fixture_args, "python", "/tools/recovery_fixture.py", timeout=60)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

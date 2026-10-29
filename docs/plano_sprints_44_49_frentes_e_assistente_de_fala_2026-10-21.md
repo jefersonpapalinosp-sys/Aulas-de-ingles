@@ -1934,6 +1934,15 @@ orçamento de bundle e **11 testes de scripts** aprovados. A atualização foi
 solicitada para Git/produção; este registro descreve a validação local e não
 constitui confirmação de deploy.
 
+O CI integrado revelou incompatibilidade na preparação do upgrade: os modelos
+atuais inseriam `speaking_attempt.origin` na revisão anterior, onde a coluna
+não existe. A fixture passou a usar a imagem anterior fixa; a migration e a
+verificação continuam com a imagem atual. Um teste verifica tanto a criação
+quanto a retomada da origem antiga. Dois testes adicionais cobrem o diagnóstico
+do smoke sem exposição de payload de exceções externas: **341 testes
+operacionais** após esses ajustes. A suíte local completa do backend passou
+com **1.376 testes e 94,30% de cobertura**; 65 guardas E2E também passaram.
+
 ### FE-49 Lint type-aware, a11y de formulário e CSS por domínio
 
 - [ ] `tseslint.configs.recommendedTypeChecked` (ativa
