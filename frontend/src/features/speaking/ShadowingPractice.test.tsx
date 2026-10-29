@@ -420,7 +420,7 @@ describe('ShadowingPractice', () => {
     expect(screen.queryByRole('button', { name: 'Transcrever (experimental)' })).not.toBeInTheDocument()
   })
 
-  it('marca automação e baixa confiança na transcrição experimental', async () => {
+  it.each([0.42, null])('marca automação e confiança incerta (%s) na transcrição experimental', async (confidence) => {
     const user = userEvent.setup()
     const transcription = {
       id: 55,
@@ -437,9 +437,9 @@ describe('ShadowingPractice', () => {
       transcript_text: "Don't take the boss",
       words: [
         { text: "Don't", start_ms: 0, end_ms: 100, confidence: 0.96 },
-        { text: 'boss', start_ms: 101, end_ms: 200, confidence: 0.42 },
+        { text: 'boss', start_ms: 101, end_ms: 200, confidence },
       ],
-      mean_confidence: 0.69,
+      mean_confidence: confidence === null ? null : 0.69,
       similarity_score: 0.78,
       low_confidence: true,
       error_code: null,
@@ -487,8 +487,12 @@ describe('ShadowingPractice', () => {
     renderPractice()
 
     expect(await screen.findByText('Automatizado · somente avaliação')).toBeInTheDocument()
-    expect(screen.getByText(/Baixa confiança: ouça sua gravação/)).toBeInTheDocument()
+    expect(screen.getByText(/Transcrição incerta: ouça sua gravação/)).toBeInTheDocument()
     expect(screen.getByText('boss')).toHaveClass('low-confidence')
+    if (confidence === null) {
+      expect(screen.getByText(/Confiança não informada/)).toBeInTheDocument()
+      expect(screen.queryByText(/Confiança média 0%/)).not.toBeInTheDocument()
+    }
     await user.click(screen.getByRole('button', { name: 'Sim' }))
     expect(clientMocks.PUT).toHaveBeenCalledWith(
       '/api/speaking/transcriptions/{job_id}/rating',

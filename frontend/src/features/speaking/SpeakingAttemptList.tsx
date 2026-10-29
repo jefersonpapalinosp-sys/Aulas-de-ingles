@@ -31,18 +31,16 @@ function TranscriptionResult({
       )}
       {transcription.status === 'failed' && (
         <p role="alert">
-          A transcrição falhou após {transcription.attempt_count}{' '}
-          {transcription.attempt_count === 1 ? 'tentativa' : 'tentativas'}.
-          A gravação e sua autoavaliação não foram perdidas.
+          Não foi possível transcrever. A gravação e sua autoavaliação foram preservadas.
         </p>
       )}
       {transcription.status === 'completed' && (
         <>
           <p className="transcription-copy" lang="en">
-            {transcription.words.map((word, index) => (
+            {transcription.words.length === 0 ? transcription.transcript_text : transcription.words.map((word, index) => (
               <span
-                className={word.confidence < 0.75 ? 'low-confidence' : ''}
-                title={`${Math.round(word.confidence * 100)}% de confiança`}
+                className={(word.confidence === null || word.confidence < 0.75) ? 'low-confidence' : ''}
+                title={word.confidence === null ? undefined : `${Math.round(word.confidence * 100)}% de confiança`}
                 key={`${word.text}-${index}`}
               >
                 {word.text}{' '}
@@ -50,13 +48,12 @@ function TranscriptionResult({
             ))}
           </p>
           <p className="transcription-metrics">
-            Confiança média {Math.round((transcription.mean_confidence ?? 0) * 100)}% ·
+            {transcription.mean_confidence === null ? 'Confiança não informada' : `Confiança média ${Math.round(transcription.mean_confidence * 100)}%`} ·
             semelhança com a frase {Math.round((transcription.similarity_score ?? 0) * 100)}%
           </p>
           {transcription.low_confidence && (
             <p className="assist-warning" role="alert">
-              Baixa confiança: ouça sua gravação e não trate esta transcrição como
-              correção definitiva.
+              Transcrição incerta: ouça sua gravação e confira o texto.
             </p>
           )}
           <div className="assist-rating" aria-label="Avaliar transcrição automática">

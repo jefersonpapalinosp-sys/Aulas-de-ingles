@@ -2253,6 +2253,34 @@ também a STT compartilhada, que atende uma modalidade fora da conversa. Um
 piloto somente texto mantém URLs de STT/escrita ausentes. Orçamento permanece USD 0.
 Detalhes e limites operacionais na [matriz](matriz_aceite_sprint_48.md).
 
+## Registro de execução — gateway e áudio do piloto (29/10/2026)
+
+A lista do piloto passou a proteger também STT compartilhada e escrita, na
+admissão/status e no worker antes de consumo/rede. Roteiro, histórico, áudio
+salvo, exportação e exclusão permanecem disponíveis. Produção/public com lista
+vazia bloqueiam todas as modalidades assistidas.
+
+Gateway HTTPS direto Workers AI implementado, com origem/modelos fixos, sem
+redirects nem retries automáticos. O modelo Llama 3.3 70B fp8 fast passou no
+schema/saneamento reais; Whisper Tiny EN passou com voz sintetizada. O candidato
+3.1 fp8 da conta não aceita JSON Schema (erro 5025), por isso foi substituído.
+Confiança STT ausente agora é `null` no contrato e “não informada” na interface.
+Nenhum dado do aluno foi enviado no ensaio; a qualidade exige o piloto real.
+
+Revisão técnica SEC-46 concluída, com correção da promessa de anonimização e
+explicitação do áudio bruto enviado à STT. Aceite informado solicitado ao
+responsável; não foi presumido da autorização para transferir a credencial.
+Credencial e lista de uma conta preparadas em arquivo privado 0600 na VM, após
+autorização expressa. Ambiente ativo/flags não modificados nesta preparação.
+Workers Free declarado pelo usuário; leitura de faturamento devolveu 403, sem
+upgrade ou compra de créditos. Orçamento permanece USD 0.
+
+Validação: regressão **1.420 testes backend / 94,22%**, **457 testes frontend**,
+**345 testes operacionais**, lint/types e build/budget aprovados. Um caso adicional
+cobre o marcador vazio observado na STT real; rodada final de 45 testes
+aprovada, cobertura consolidada **94,26%**. OpenAPI e tipos frontend atualizados.
+Publicação e aplicação do ambiente serão registradas na [matriz](matriz_aceite_sprint_48.md).
+
 ## Definição de pronto comum
 
 Um pacote só fecha com: ruff, mypy strict, eslint e tsc limpos; baseline

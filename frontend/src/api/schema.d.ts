@@ -3849,7 +3849,7 @@ export interface components {
         /** TranscriptionWordOut */
         TranscriptionWordOut: {
             /** Confidence */
-            confidence: number;
+            confidence: number | null;
             /** End Ms */
             end_ms: number;
             /** Start Ms */

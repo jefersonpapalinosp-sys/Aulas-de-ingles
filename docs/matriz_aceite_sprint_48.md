@@ -10,14 +10,14 @@ nem constitui autorização de envio de dados ao provedor.
 | Item | Estado e evidência | Próxima ação |
 |---|---|---|
 | Código e ensaios | PR #41 integrado; CI/deploy aprovados; upgrade e SEC-49 aprovados | Preservar vínculo entre release e evidências |
-| Provedor/modelos | Decisão de 21/10 no [ADR](adr_assistente_de_conversa.md): Cloudflare Workers AI, `llama-3.1-8b-instruct` e `whisper-tiny-en` | Configurar o gateway real; o spike não é homologação do serviço |
-| Gateway e credencial | Ausentes na API e worker em 29/10 | Preparar endpoint HTTPS e token em configuração privada; não colar segredo em documento, Git ou conversa |
-| Revisão SEC-46 | Pendente no [modelo de ameaças](modelo_ameacas_assistente_2026-10-26.md#revisão-do-fluxo-de-dados) | Responsável revisar fluxo, limites e riscos e registrar decisão/data |
+| Provedor/modelos | Decisão de 21/10 no [ADR](adr_assistente_de_conversa.md): Cloudflare Workers AI, `llama-3.1-8b-instruct` e `whisper-tiny-en`; atualização 29/10 para Llama 3.3 70B fp8 fast, compatível com schema | Modelos atuais verificados em ensaio sintético; aceite pedagógico depende de turnos reais |
+| Gateway e credencial | Adaptador HTTPS Workers AI implementado; conversa e STT sintéticas passaram; credencial preparada na VM em arquivo privado 0600 após autorização expressa | Publicar código, aplicar configuração com flags desligadas, validar e só então ativar após aceite |
+| Revisão SEC-46 | Revisão técnica concluída no [modelo de ameaças](modelo_ameacas_assistente_2026-10-26.md); fluxo corrigido para explicitar áudio bruto | Aceite informado do responsável solicitado em conversa |
 | Contrato e privacidade | Sem manifesto real validado | Registrar contrato, base legal, região/subprocessadores, retenção e não treinamento com evidências do provedor escolhido |
 | Orçamento | Responsável informou uso do plano gratuito em 29/10; limite adotado de gasto autorizado: USD 0/dia, USD 0/mês e USD 0 no piloto | Confirmar modalidade Workers AI da conta e monitorar franquia; não habilitar cobrança |
-| Participante | Plano prevê somente a conta de Jeferson; identificação privada ainda não vinculada ao piloto | Confirmar a conta e compreensão do aviso de automação, sem publicar seus identificadores |
-| Restrição por conta | Implementada localmente: lista de IDs aplicada no status, criação/admissão e worker, antes de STT/LLM | Publicar e configurar a mesma lista privada na API e worker; ainda não aplicada à VM |
-| Isolamento de STT compartilhada | URL de STT também atende transcrição fora da conversa; lista desta entrega cobre conversa | Antes de habilitar áudio, restringir transcrição compartilhada; piloto somente texto exige STT/escrita sem URL |
+| Participante | Uma única conta correspondente ao responsável identificada na VM; ID somente na configuração privada | Aplicar lista à API e worker após publicação |
+| Restrição por conta | Lista cobre conversa, STT compartilhada e escrita; despacho revalida antes de consumo/rede | Publicar e configurar a mesma lista privada na API e worker |
+| Isolamento de STT compartilhada | Implementado e testado: admissão/status/fila/dispatch respeitam a lista | Manter escrita sem URL e uma tentativa por job no piloto Cloudflare |
 | Vigilância pública | Probe executado com sucesso no run 40932540081; schedule existente a cada 30 minutos | Acompanhar execuções agendadas; não inferir entrega de notificação |
 | Métricas e alerta | Leitura pontual antes da definição gratuita: 14 checks `ok`, dois avisos de orçamento; gate GitHub ignorado sem secret | Publicar suporte a teto zero, preparar agendamento autenticado/canal de alerta e provar detecção do worker em 2 minutos |
 
@@ -42,12 +42,10 @@ Identificadores reais ficam somente na configuração privada.
 Contas excluídas não podem criar Guiado/Livre nem enviar novos turnos de
 texto/áudio em conversas existentes. Áudio é recusado antes de armazenamento.
 Roteiro, consulta, exportação e exclusão continuam disponíveis ao titular.
-A lista limita **conversa assistida**; não habilita nem restringe por si só
-as outras modalidades. `ASSIST_TRANSCRIPTION_URL` também habilita transcrição
-fora da conversa quando a flag global está ligada. Antes de um piloto com
-áudio, aplicar controle equivalente à transcrição compartilhada; alternativamente,
-iniciar somente texto, mantendo URLs de transcrição e escrita ausentes. Não
-tratar a lista de conversa como proteção global de todos os recursos assistidos.
+A lista agora protege **todas as modalidades assistidas**, incluindo STT
+compartilhada e escrita. Escrita não é suportada pelo adaptador Cloudflare deste
+piloto e sua URL permanece vazia. A lista não impede salvar/baixar áudio próprio
+sem transcrição nem usar o feedback determinístico de escrita.
 
 Jobs de contas excluídas permanecem na fila sem consumir tentativas ou cota,
 até expiração/limpeza normal; não impedem o processamento de contas permitidas.
@@ -58,9 +56,10 @@ A chamada de diálogo também verifica a lista antes de usar o provedor.
 Configuração é carregada por processo: aplicar/revogar exige atualizar e
 reiniciar API e worker, mantendo assistência desligada durante a transição.
 Uma requisição externa já enviada não pode ser desfeita pela lista.
-Esta entrega não seleciona a conta real, não inicia piloto e não modifica a VM.
+A conta real já foi vinculada ao arquivo candidato privado na VM. O ambiente
+ativo não foi alterado; publicação e aceite ainda antecedem a ativação.
 
-Validação local: **1.399 testes backend aprovados**, incluindo 18 novos casos,
+Validação da etapa anterior (`1c9ea6a`): **1.399 testes backend aprovados**, incluindo 18 novos casos,
 com **94,31% de cobertura**; **345 testes operacionais** aprovados. Ruff,
 mypy (106 módulos backend e 40 operacionais), ESLint e TypeScript sem erros.
 Composes de produção/EasyPanel conferidos com lista vazia e lista explícita
@@ -82,9 +81,11 @@ falham, e os limites reiniciam às 00:00 UTC. Alguns modelos exigem modalidade
 paga/créditos: a compatibilidade do modelo com a conta faz parte da preparação.
 Não comprar créditos nem migrar de plano como tratamento automático de falha.
 
-Franquia usada não equivale a cobrança. O gateway deve conciliar consumo e
-custo confirmado; custo ausente continua desconhecido, nunca deve virar zero
-apenas porque a conta foi declarada gratuita. O consumo da conta pode incluir
+Franquia usada não equivale a cobrança. No gateway genérico, custo ausente permanece desconhecido. No adaptador
+Workers AI, zero é conhecido somente com a confirmação operacional explícita
+`ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED`; sem ela, o boot assistido é recusado.
+Essa confirmação depende do responsável pela conta e deve ser revogada se
+houver mudança de plano; não equivale a conciliação automática de fatura. O consumo da conta pode incluir
 outros aplicativos, portanto a cota de 24 turnos não substitui a franquia.
 
 O monitor local agora aceita teto `0`: custo confirmado zero fica `ok`, custo

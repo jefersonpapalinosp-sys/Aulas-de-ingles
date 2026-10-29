@@ -624,8 +624,8 @@ troca e verifica bytes, MIME, cache, shell atual e 404. Este último roda no CI.
 
 Antes de ativar o piloto, configurar `EASYPANEL_DIALOGUE_PILOT_USER_IDS`
 como lista JSON de IDs internos positivos na configuração privada. O Compose
-repassa o mesmo valor à API e ao worker. O padrão `[]` bloqueia conversa
-assistida em produção/public, mesmo com gateway e flags configurados.
+repassa o mesmo valor à API e ao worker. O padrão `[]` bloqueia todas as modalidades
+assistidas em produção/public, mesmo com gateway e flags configurados.
 Não publicar IDs reais em Git, logs de deploy ou documentação.
 
 Para alterar/revogar participantes, desligar a assistência, atualizar a lista
@@ -635,3 +635,36 @@ em execução. Chamadas já enviadas não podem ser canceladas retroativamente.
 Histórico/exportação/exclusão e modo Roteiro permanecem disponíveis.
 Os pré-requisitos e o estado de publicação estão na
 [matriz da Sprint 48](matriz_aceite_sprint_48.md).
+
+
+### Workers AI — configuração do piloto de áudio (29/10/2026)
+
+O gateway é a API HTTPS oficial da Cloudflare, consumida pelo adaptador
+`cloudflare_provider.py`. Não há novo Worker, proxy, storage, AI Gateway com
+logs/cache, créditos pagos ou serviço extra na VM.
+
+Na configuração privada do EasyPanel, usar `EASYPANEL_ASSIST_PROVIDER_KIND=cloudflare`,
+`EASYPANEL_ASSIST_PROVIDER_NAME=cloudflare-workers-ai` e
+`EASYPANEL_ASSIST_JOB_MAX_ATTEMPTS=1`. As URLs de diálogo/STT seguem o formato
+`https://api.cloudflare.com/client/v4/accounts/<conta>/ai/run/<modelo>` com
+modelos fixos `@cf/meta/llama-3.3-70b-instruct-fp8-fast` e
+`@cf/openai/whisper-tiny-en`. Escrita permanece sem URL. Token somente em
+`EASYPANEL_ASSIST_PROVIDER_TOKEN`, nunca em argumento de shell ou Git.
+
+`EASYPANEL_ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED=true` exige confirmação
+operacional de Workers Free; não verifica faturamento automaticamente. As
+consultas de faturamento retornaram 403 com a credencial disponível. Mudança de
+plano deve desligar assistência e invalidar essa confirmação. O adaptador só
+registra custo conhecido zero sob essa condição; não estima cobrança por tokens.
+
+A lista `EASYPANEL_DIALOGUE_PILOT_USER_IDS` também protege STT compartilhada e
+escrita assistida. Manter lista idêntica na API e worker. A troca/revogação só é
+efetiva após recriar ambos. Chamadas já enviadas não são recolhidas. Uma tentativa
+por job evita retries de inferência que poderiam repetir consumo; jobs antigos
+com limites maiores devem ser avaliados antes de ativar o piloto.
+
+Preparação privada recebida na VM após autorização expressa do responsável:
+`/root/aulas-release/sprint48/assist-config-candidate.json` (0600), com lista de
+uma conta e flags desligadas. Aplicar somente junto do código que conhece o
+adaptador; preservar cópia 0600 do ambiente anterior. Não anunciar áudio liberado
+até os gates de publicação, revisão informada e saúde operacional passarem.

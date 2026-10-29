@@ -582,7 +582,11 @@ async def solicitar_transcricao(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> TranscriptionJobOut:
     settings = get_settings()
-    if not settings.assisted_features_enabled or not settings.assist_transcription_url:
+    if (
+        not settings.assisted_features_enabled
+        or not settings.assist_transcription_url
+        or not settings.assist_account_allowed(usuario.id)
+    ):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Transcrição assistida não está habilitada.",
