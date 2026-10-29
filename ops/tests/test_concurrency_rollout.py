@@ -1,13 +1,73 @@
+import io
+import json
+import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
 from ops import concurrency_rollout as rollout
 from ops import recovery
-from ops.recovery_archive import RecoveryError
+from ops.recovery_archive import RecoveryError, write_json
 
 
 class ConcurrencyRolloutTests(unittest.TestCase):
+    def test_invalid_audit_result_is_never_printed_or_accepted(self):
+        for value in (None, False, -1, 0.0, "private-value", {"private": "value"}):
+            output = io.StringIO()
+            with (
+                patch.object(recovery, "query", return_value=value),
+                redirect_stdout(output),
+                self.assertRaises(RecoveryError),
+            ):
+                rollout.audit(recovery.CONCURRENCY_CHECK, preserve_legacy=True)
+            self.assertEqual(output.getvalue(), "")
+
+    def test_invalid_expected_audit_is_refused_before_queries(self):
+        good = dict.fromkeys(rollout.RULES, 0)
+        for expected in ([], {}, {**good, "unknown": 0}, {**good, next(iter(good)): False}):
+            with (
+                patch.object(recovery, "query") as query,
+                self.assertRaises(RecoveryError),
+            ):
+                rollout.audit(recovery.CONCURRENCY_CHECK, expected=expected)
+            query.assert_not_called()
+
+    def test_private_json_requires_private_regular_object(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            proof = root / "proof.json"
+            good = {"verified": True, "extension": {"count": 1}}
+            write_json(proof, good)
+            self.assertEqual(rollout.private_json(proof), good)
+            for value in (None, [], 1, "private-value"):
+                proof.write_text(json.dumps(value))
+                with self.assertRaises(RecoveryError):
+                    rollout.private_json(proof)
+            proof.write_text("invalid-private-json")
+            with self.assertRaises(RecoveryError) as raised:
+                rollout.private_json(proof)
+            self.assertNotIn("invalid-private-json", str(raised.exception))
+            proof.write_text(json.dumps(good))
+            proof.chmod(0o644)
+            with self.assertRaises(RecoveryError):
+                rollout.private_json(proof)
+            proof.chmod(0o600)
+            link = root / "linked.json"
+            link.symlink_to(proof)
+            with self.assertRaises(RecoveryError):
+                rollout.private_json(link)
+            with self.assertRaises(RecoveryError):
+                rollout.private_json(root / "absent.json")
+
+    def test_initial_state_requires_integer_zero(self):
+        for value in (False, 0.0, None, "0", -1):
+            with (
+                patch.object(recovery, "query", return_value=value),
+                self.assertRaises(RecoveryError),
+            ):
+                rollout.verify_new_state(recovery.CONCURRENCY_CHECK)
+
     def test_new_clone_is_fixed_and_distinct(self):
         target = recovery.CONCURRENCY_CHECK
         self.assertEqual(recovery.DESTINATIONS[recovery.CONFIRM_CONCURRENCY_CHECK], target)

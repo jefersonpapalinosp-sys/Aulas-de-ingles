@@ -6,6 +6,7 @@ import sys
 import tarfile
 import tempfile
 from pathlib import Path
+from typing import IO
 
 from ops.recovery import ROOT
 from ops.recovery_archive import RecoveryError, require
@@ -14,7 +15,7 @@ REVISION = "d0b1f8c"
 IMAGE = "aulas-ingles-rollback42:local"
 
 
-def git(*args: str, stdout=None) -> bytes:
+def git(*args: str, stdout: IO[bytes] | int | None = None) -> bytes:
     try:
         result = subprocess.run(
             ["git", *args],

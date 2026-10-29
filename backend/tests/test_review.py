@@ -134,6 +134,7 @@ async def test_adicionar_item_avulso_e_idempotente(client: AsyncClient) -> None:
     }
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_avaliar_tira_a_carta_do_deck_de_hoje(client: AsyncClient) -> None:
     h = await conta(client, "avalia")
@@ -157,6 +158,7 @@ async def test_avaliar_tira_a_carta_do_deck_de_hoje(client: AsyncClient) -> None
     assert timedelta(hours=23) < proxima - datetime.now(UTC) < timedelta(hours=25)
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_errar_na_revisao_mantem_a_carta_para_amanha(client: AsyncClient) -> None:
     h = await conta(client, "lapso")
@@ -191,6 +193,7 @@ async def test_carta_de_outra_pessoa_e_404(client: AsyncClient, session: AsyncSe
     assert r.status_code == 404
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_deck_so_traz_carta_vencida(client: AsyncClient, session: AsyncSession) -> None:
     h = await conta(client, "vencida")
@@ -211,6 +214,7 @@ async def test_deck_so_traz_carta_vencida(client: AsyncClient, session: AsyncSes
     assert len((await client.get("/api/review/due", headers=h)).json()) == 1
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_due_at_e_utc_independente_do_fuso_do_processo(client: AsyncClient) -> None:
     """O fuso do processo não pode vazar para o banco.
@@ -338,6 +342,7 @@ async def test_due_e_items_filtram_curso_unidade_e_expoem_identidade(
     assert suspended_second[0]["unit_slug"] == "40-44"
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_itens_paginados_sao_estaveis_limitados_e_isolados(
     client: AsyncClient,
@@ -443,6 +448,7 @@ async def test_item_pode_ser_suspenso_reativado_e_excluido(client: AsyncClient) 
     ).status_code == 404
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_tipo_dificil_encurta_o_intervalo_sem_mudar_sm2(client: AsyncClient) -> None:
     headers = await conta(client, "intervalo-tipo")

@@ -7,10 +7,11 @@ import secrets
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any, TypedDict
 from urllib.parse import quote
 
 from ops import recovery
-from ops.recovery_archive import file_info, require, verify_bundle, write_json
+from ops.recovery_archive import RecoveryError, file_info, require, verify_bundle, write_json
 
 PROJECT = "aulas-ingles-roles"
 NAMES = ("aulas_owner", "aulas_migrator", "aulas_runtime", "aulas_worker", "aulas_backup")
@@ -19,8 +20,16 @@ MARKER = "aulas-ingles:role-v1"
 # ignorado pelo Git, que nunca viaja junto dos dumps que essas senhas protegem.
 SECRETS = recovery.ROOT / "secrets"
 
+# Docker inspect contém estruturas heterogêneas; banco e administrador são explícitos.
+TargetInfo = tuple[dict[str, Any], str, str]
 
-def secrets_dir():
+
+class MarkedRole(TypedDict):
+    name: str
+    marker: str
+
+
+def secrets_dir() -> Path:
     root = SECRETS
     require(not root.is_symlink() and not root.parent.is_symlink(), "Diretório redirecionado.")
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -28,7 +37,7 @@ def secrets_dir():
     return root
 
 
-def resources():
+def resources() -> None:
     recovery.local_daemon()
     names = recovery.docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
     name = f"{PROJECT}_pgdata"
@@ -41,7 +50,8 @@ def resources():
         )
 
 
-def target(scope):
+def target(scope: str) -> TargetInfo:
+    require(scope in {"lab", "prod"}, "Origem inválida.")
     recovery.local_daemon()
     if scope == "prod":
         selected = recovery.source_target("prod")
@@ -99,7 +109,7 @@ def target(scope):
     return result
 
 
-def sql(target_info, statement, role=None):
+def sql(target_info: TargetInfo, statement: str, role: str | None = None) -> bytes:
     info, database, admin = target_info
     # SQL/senhas por stdin, não em argv/process list, stdout ou mensagens de erro.
     with tempfile.TemporaryFile() as stream:
@@ -123,36 +133,44 @@ def sql(target_info, statement, role=None):
         )
 
 
-def private_credentials(scope):
+def private_credentials(scope: str) -> dict[str, str]:
+    require(scope in {"lab", "prod"}, "Origem inválida.")
     path = secrets_dir() / f"roles-{scope}.json"
     if path.exists():
         require(
             not path.is_symlink() and path.stat().st_mode & 0o077 == 0,
             "Arquivo de credenciais precisa ser privado, sem links.",
         )
-        data = json.loads(path.read_text())
-        require(
-            set(data) == set(NAMES[1:])
-            and all(
-                isinstance(v, str)
-                and len(v) >= 32
-                and v.isascii()
-                and all(c.isalnum() or c in "-_" for c in v)
-                for v in data.values()
-            ),
-            "Credenciais inválidas.",
-        )
-        return data
+        data: object = json.loads(path.read_text())
+        if not isinstance(data, dict) or set(data) != set(NAMES[1:]):
+            raise RecoveryError("Credenciais inválidas.")
+        credentials: dict[str, str] = {}
+        for name in NAMES[1:]:
+            password = data[name]
+            if not isinstance(password, str):
+                raise RecoveryError("Credenciais inválidas.")
+            require(
+                len(password) >= 32
+                and password.isascii()
+                and all(c.isalnum() or c in "-_" for c in password),
+                "Credenciais inválidas.",
+            )
+            credentials[name] = password
+        return credentials
     data = {name: secrets.token_urlsafe(36) for name in NAMES[1:]}
     write_json(path, data)
     return data
 
 
-def backup_gate(info, backup_path):
-    require(backup_path is not None, "Produção exige backup real já restaurado no ensaio.")
+def backup_gate(info: TargetInfo, backup_path: Path | None) -> None:
+    if backup_path is None:
+        raise RecoveryError("Produção exige backup real já restaurado no ensaio.")
     manifest = verify_bundle(backup_path)
+    source = manifest["source"]
+    if not isinstance(source, dict):
+        raise RecoveryError("Origem do backup inválida.")
     require(
-        manifest["source"]["kind"] == "prod" and manifest["source"]["database"] == info[1],
+        source.get("kind") == "prod" and source.get("database") == info[1],
         "Backup não pertence à origem.",
     )
     receipt = recovery.BACKUPS / "restore-receipts" / f"{manifest['bundle_id']}.json"
@@ -163,7 +181,9 @@ def backup_gate(info, backup_path):
         and receipt.stat().st_mode & 0o077 == 0,
         "Recibo privado de restore ausente.",
     )
-    result = json.loads(receipt.read_text())
+    result: object = json.loads(receipt.read_text())
+    if not isinstance(result, dict):
+        raise RecoveryError("Recibo de restore inválido.")
     require(
         result.get("verified") is True
         and result.get("bundle_id") == manifest["bundle_id"]
@@ -177,8 +197,8 @@ def backup_gate(info, backup_path):
     )
 
 
-def marked_roles(info):
-    current = json.loads(
+def marked_roles(info: TargetInfo) -> list[MarkedRole]:
+    current: object = json.loads(
         sql(
             info,
             """
@@ -189,11 +209,22 @@ def marked_roles(info):
     """,
         )
     )
-    require(all(r["marker"] == MARKER for r in current), "Papel homônimo sem marcador; recusa.")
-    return current
+    if not isinstance(current, list):
+        raise RecoveryError("Inventário de papéis inválido.")
+    result: list[MarkedRole] = []
+    for row in current:
+        if not isinstance(row, dict):
+            raise RecoveryError("Inventário de papéis inválido.")
+        name, marker = row.get("name"), row.get("marker")
+        if not isinstance(name, str) or name not in NAMES or not isinstance(marker, str):
+            raise RecoveryError("Inventário de papéis inválido.")
+        require(marker == MARKER, "Papel homônimo sem marcador; recusa.")
+        require(name not in {r["name"] for r in result}, "Inventário de papéis duplicado.")
+        result.append({"name": name, "marker": marker})
+    return result
 
 
-def provision(scope, backup_path=None):
+def provision(scope: str, backup_path: Path | None = None) -> None:
     info = target(scope)
     if scope == "prod":
         backup_gate(info, backup_path)
@@ -244,7 +275,7 @@ def provision(scope, backup_path=None):
             os.fsync(stream.fileno())
 
 
-def grants(scope, backup_path=None):
+def grants(scope: str, backup_path: Path | None = None) -> None:
     info = target(scope)
     if scope == "prod":
         backup_gate(info, backup_path)
@@ -252,7 +283,8 @@ def grants(scope, backup_path=None):
     sql(info, "BEGIN;\n" + (recovery.ROOT / "ops/roles_policy.sql").read_text() + "\nCOMMIT;")
 
 
-def lab_run(purpose, *command):
+def lab_run(purpose: str, *command: str) -> bytes:
+    require(f"aulas_{purpose}" in NAMES[1:], "Papel de laboratório inválido.")
     target("lab")  # Validação independente antes de qualquer processo mutável.
     credentials = private_credentials("lab")
     url = f"postgresql+asyncpg://aulas_{purpose}:{credentials[f'aulas_{purpose}']}@db:5432/aulas_roles_lab"
@@ -275,7 +307,7 @@ def lab_run(purpose, *command):
         )
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["resources", "provision", "grants", "prepare"])

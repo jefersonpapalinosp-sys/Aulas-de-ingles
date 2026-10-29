@@ -3,6 +3,8 @@
 import json
 import os
 import sys
+import traceback
+from pathlib import Path
 
 from ops.recovery import (
     CONFIRM_TARGET,
@@ -17,7 +19,7 @@ from ops.recovery import (
 from ops.recovery_archive import RecoveryError, require, verify_bundle
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     check_target(LAB)
     check_target(RESTORE)
@@ -30,11 +32,14 @@ def main():
     require(first != second, "Pacotes colidiram.")
     for bundle in (first, second):
         manifest = verify_bundle(bundle)
+        source, audio = manifest["source"], manifest["audio_files"]
+        if not isinstance(source, dict) or not isinstance(audio, dict):
+            raise RecoveryError("Origem/inventário do manifesto inválidos.")
         require(
-            manifest["source"]["kind"] == "lab" and manifest["snapshot"] == snapshot,
+            source["kind"] == "lab" and manifest["snapshot"] == snapshot,
             "Origem/snapshot não são os esperados.",
         )
-        require(len(manifest["audio_files"]) == 1, "Áudio sintético ausente.")
+        require(len(audio) == 1, "Áudio sintético ausente.")
     receipt = restore(first, CONFIRM_TARGET)
     try:
         restore(second, CONFIRM_TARGET)
@@ -58,9 +63,23 @@ def main():
     )
 
 
-if __name__ == "__main__":
+def cli() -> int:
     try:
         main()
-    except Exception:
+    except Exception as error:
+        # Somente localização no código: nunca SQL, argumentos de subprocessos,
+        # valores locais ou a mensagem original de uma biblioteca externa.
+        frames = traceback.extract_tb(error.__traceback__)
+        locations = " -> ".join(
+            f"{Path(frame.filename).name}:{frame.lineno}:{frame.name}" for frame in frames
+        )
+        print(f"{type(error).__name__}: {locations}", file=sys.stderr)
+        if isinstance(error, RecoveryError):
+            print(str(error), file=sys.stderr)
         print("Ensaio falhou; preserve laboratório/pacotes para diagnóstico.", file=sys.stderr)
-        raise SystemExit(1) from None
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(cli())

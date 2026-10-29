@@ -57,6 +57,9 @@ disallow_untyped_defs = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "timezone: datas, calendário, expiração ou serialização temporal; repetir sob TZ alternativo",
+]
 
 [tool.coverage.run]
 source = ["app"]

@@ -32,6 +32,7 @@ def prepare(storage):
     return storage.prepare(KEY, SHA, OP, future())
 
 
+@pytest.mark.timezone
 def test_round_trip_and_idempotent_resume_preserve_bytes_permissions_and_journal(tmp_path):
     audio(tmp_path)
     with Quarantine(tmp_path, DATABASE) as storage:
@@ -95,6 +96,7 @@ with Quarantine(Path(root), database) as storage:
     assert (tmp_path / KEY).read_bytes() == DATA
 
 
+@pytest.mark.timezone
 @pytest.mark.parametrize(
     "case",
     [
@@ -155,6 +157,7 @@ def test_unsafe_roots_and_concurrent_operator_are_refused(tmp_path):
         pass
 
 
+@pytest.mark.timezone
 @pytest.mark.parametrize(
     "case",
     ["changed", "other_destination", "journal", "database", "missing", "external_link", "budget"],
@@ -185,6 +188,7 @@ def test_recovery_refuses_conflicts_without_overwrite(tmp_path, case):
         assert (tmp_path / ".quarantine" / OP / "audio").read_bytes() == DATA
 
 
+@pytest.mark.timezone
 def test_changed_after_prepare_and_during_move_preserves_source(tmp_path, monkeypatch):
     audio(tmp_path)
     with Quarantine(tmp_path, DATABASE) as storage:
@@ -211,6 +215,7 @@ def test_changed_after_prepare_and_during_move_preserves_source(tmp_path, monkey
     assert (other / KEY).exists()  # Não remove origem cujo conteúdo mudou.
 
 
+@pytest.mark.timezone
 def test_journal_or_destination_link_cannot_redirect_storage(tmp_path):
     file = audio(tmp_path)
     (tmp_path / ".quarantine").symlink_to(tmp_path, target_is_directory=True)
@@ -219,6 +224,7 @@ def test_journal_or_destination_link_cannot_redirect_storage(tmp_path):
     assert file.read_bytes() == DATA
 
 
+@pytest.mark.timezone
 async def test_cli_checks_fresh_references_and_preserves_database(client, tmp_path, monkeypatch):
     from sqlalchemy import event, update
 
@@ -301,6 +307,7 @@ async def test_sql_lock_refuses_active_upload_before_filesystem_access(
     assert not (tmp_path / ".quarantine").exists()
 
 
+@pytest.mark.timezone
 async def test_command_quarantine_uses_server_time_and_explicit_confirmation(
     client, tmp_path, monkeypatch
 ):

@@ -30,16 +30,23 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.domain.enums import (
     AnalysisMode,
+    AudioOrigin,
     DeletionJobState,
+    DialogueMode,
+    DialogueState,
     ExerciseObjective,
     HumanRating,
     IntegrityState,
+    JobKind,
     NotebookKind,
     PracticeMode,
     PracticeStatus,
     SelfRating,
     SpeakingStatus,
     TranscriptionStatus,
+    TurnInputKind,
+    TurnRole,
+    TurnState,
 )
 
 
@@ -666,6 +673,11 @@ class SpeakingAttempt(Base):
             name="ck_speaking_integrity",
         ),
         Index("ix_speaking_status_created", "status", "created_at"),
+        CheckConstraint(
+            "(origin = 'cue') = (transcript_cue_id IS NOT NULL) "
+            "AND origin IN ('cue','dialogue')",
+            name="ck_speaking_origin",
+        ),
         CheckConstraint("duration_ms > 0", name="ck_speaking_duration_positive"),
         CheckConstraint("duration_ms <= 30000", name="ck_speaking_duration_limit"),
         CheckConstraint(
@@ -675,8 +687,13 @@ class SpeakingAttempt(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
-    transcript_cue_id: Mapped[int] = mapped_column(
-        ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True
+    # Opcional desde o BE-46: o áudio do Guiado responde uma pergunta do
+    # parceiro, não uma linha de transcrição. `origin` carrega a garantia.
+    transcript_cue_id: Mapped[int | None] = mapped_column(
+        ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True, default=None
+    )
+    origin: Mapped[AudioOrigin] = mapped_column(
+        String(20), default="cue", server_default="cue"
     )
     duration_ms: Mapped[int] = mapped_column(Integer)
     self_rating: Mapped[SelfRating | None] = mapped_column(String(20), default=None)
@@ -798,6 +815,12 @@ class TranscriptionJob(Base):
             name="ck_transcription_job_status",
         ),
         CheckConstraint(
+            "kind IN ('transcription','dialogue') "
+            "AND (kind <> 'transcription' OR speaking_attempt_id IS NOT NULL)",
+            name="ck_transcription_job_kind",
+        ),
+        Index("ix_transcription_job_kind_status", "kind", "status", "next_attempt_at"),
+        CheckConstraint(
             "mean_confidence IS NULL OR (mean_confidence >= 0 AND mean_confidence <= 1)",
             name="ck_transcription_confidence",
         ),
@@ -815,8 +838,16 @@ class TranscriptionJob(Base):
         ForeignKey("assist_reservation.id", ondelete="SET NULL"), unique=True, default=None
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
-    speaking_attempt_id: Mapped[int] = mapped_column(
-        ForeignKey("speaking_attempt.id", ondelete="CASCADE"), unique=True, index=True
+    # Opcional desde o BE-46: o turno por texto também vira job (a chamada ao
+    # modelo acontece no worker) e não tem áudio. `kind` diz o que fazer.
+    speaking_attempt_id: Mapped[int | None] = mapped_column(
+        ForeignKey("speaking_attempt.id", ondelete="CASCADE"),
+        unique=True,
+        index=True,
+        default=None,
+    )
+    kind: Mapped[JobKind] = mapped_column(
+        String(20), default="transcription", server_default="transcription"
     )
     status: Mapped[TranscriptionStatus] = mapped_column(String(20), default="queued", index=True)
     provider: Mapped[str] = mapped_column(String(80))
@@ -865,8 +896,8 @@ class SpeakingDialogue(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
     operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
-    mode: Mapped[str] = mapped_column(String(20))
-    state: Mapped[str] = mapped_column(String(20), default="active")
+    mode: Mapped[DialogueMode] = mapped_column(String(20))
+    state: Mapped[DialogueState] = mapped_column(String(20), default="active")
     partner_speaker: Mapped[str | None] = mapped_column(String(80), default=None)
     content_version: Mapped[int] = mapped_column(Integer)
     content_fingerprint: Mapped[str] = mapped_column(String(64))
@@ -914,18 +945,21 @@ class DialogueTurn(Base):
     dialogue_id: Mapped[int] = mapped_column(ForeignKey("speaking_dialogue.id", ondelete="CASCADE"))
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     position: Mapped[int] = mapped_column(Integer)
-    role: Mapped[str] = mapped_column(String(20))
-    input_kind: Mapped[str | None] = mapped_column(String(20), default=None)
+    role: Mapped[TurnRole] = mapped_column(String(20))
+    input_kind: Mapped[TurnInputKind | None] = mapped_column(String(20), default=None)
     speaking_attempt_id: Mapped[int | None] = mapped_column(
         ForeignKey("speaking_attempt.id", ondelete="SET NULL"), default=None
     )
     transcription_job_id: Mapped[int | None] = mapped_column(
         ForeignKey("transcription_job.id", ondelete="SET NULL"), default=None
     )
-    state: Mapped[str] = mapped_column(String(20), default="pending")
+    state: Mapped[TurnState] = mapped_column(String(20), default="pending")
     transcript: Mapped[str | None] = mapped_column(Text, default=None)
     checks: Mapped[dict[str, bool]] = mapped_column(
         JSONB, default=dict, server_default=text("'{}'::jsonb")
+    )
+    check_details: Mapped[dict[str, list[dict[str, str | bool]]] | None] = mapped_column(
+        JSONB(none_as_null=True), default=None
     )
     partner_text: Mapped[str | None] = mapped_column(Text, default=None)
     hints: Mapped[list[dict[str, str]]] = mapped_column(
@@ -935,7 +969,7 @@ class DialogueTurn(Base):
     fallback: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
     cost_microusd: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     error_code: Mapped[str | None] = mapped_column(String(50), default=None)
-    human_rating: Mapped[str | None] = mapped_column(String(20), default=None)
+    human_rating: Mapped[HumanRating | None] = mapped_column(String(20), default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)

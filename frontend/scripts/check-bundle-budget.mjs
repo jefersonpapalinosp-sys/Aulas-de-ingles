@@ -4,9 +4,11 @@
  * - INICIAL ≤ 132 KiB: o que o navegador baixa antes da primeira tela — o chunk
  *   de entrada, qualquer `modulepreload` e o CSS referenciados por
  *   dist/index.html. FE-44 mediu ~126,6 KiB.
- * - TOTAL ≤ 184 KiB: soma de todo JS/CSS em dist/assets, incluindo os chunks
+ * - BASE ≤ 184 KiB: JS/CSS anteriores ao FE-47, incluindo os chunks
  *   lazy (lesson-study, study-tools, …). FE-44 mediu ~176,5 KiB.
  *
+ * DIÁLOGO ≤ 8 KiB: JS/CSS do DialogueWorkspace, sempre lazy (FE-47).
+ * O conjunto base + diálogo fica limitado a 192 KiB.
  * Um chunk lazy novo conta só no total; o teto inicial não o penaliza. Os
  * limites por arquivo (JS 140 KiB, CSS 15 KiB) seguem iguais aos de FE-40.
  *
@@ -22,6 +24,7 @@ import { gzipSync } from 'node:zlib'
 export const LIMITS = Object.freeze({
   initial: 132 * 1024,
   total: 184 * 1024,
+  dialogue: 8 * 1024,
   file: Object.freeze({ '.js': 140 * 1024, '.css': 15 * 1024 }),
 })
 
@@ -42,6 +45,7 @@ export function checkBundleBudget(distDir, limits = LIMITS) {
   const initialNames = initialAssets(readFileSync(join(distDir, 'index.html'), 'utf8'))
   let initial = 0
   let total = 0
+  let dialogue = 0
   let failed = false
 
   for (const name of readdirSync(join(distDir, 'assets')).sort()) {
@@ -50,6 +54,10 @@ export function checkBundleBudget(distDir, limits = LIMITS) {
     const bytes = gzipSync(readFileSync(join(distDir, 'assets', name))).byteLength
     const isInitial = initialNames.has(name)
     total += bytes
+    if (/^DialogueWorkspace-[\w-]+\.(js|css)$/.test(name)) {
+      dialogue += bytes
+      if (isInitial) { failed = true; lines.push('ERRO diálogo precisa ser lazy.') }
+    }
     if (isInitial) initial += bytes
     const ok = bytes <= limits.file[extension]
     if (!ok) failed = true
@@ -61,11 +69,14 @@ export function checkBundleBudget(distDir, limits = LIMITS) {
     lines.push('ERRO index.html não referencia nenhum asset de entrada.')
   }
   const initialOk = initial <= limits.initial
-  const totalOk = total <= limits.total
+  const totalOk = total - dialogue <= limits.total
+  const dialogueOk = dialogue <= limits.dialogue
   lines.push(`${initialOk ? 'OK' : 'ERRO'} inicial (entrada + CSS do index.html): ${kib(initial)} de ${kib(limits.initial)}`)
-  lines.push(`${totalOk ? 'OK' : 'ERRO'} total JS/CSS em assets: ${kib(total)} de ${kib(limits.total)}`)
+  lines.push(`${totalOk ? 'OK' : 'ERRO'} total JS/CSS base: ${kib(total - dialogue)} de ${kib(limits.total)}`)
 
-  return { ok: !failed && initialOk && totalOk, initial, total, lines }
+  lines.push(`${dialogueOk ? 'OK' : 'ERRO'} diálogo lazy: ${kib(dialogue)} de ${kib(limits.dialogue)}`)
+  lines.push(`Base sem diálogo: ${kib(total - dialogue)}; conjunto: ${kib(total)} de ${kib(limits.total + limits.dialogue)}`)
+  return { ok: !failed && initialOk && totalOk && dialogueOk, initial, total, dialogue, lines }
 }
 
 const invokedDirectly = Boolean(process.argv[1])

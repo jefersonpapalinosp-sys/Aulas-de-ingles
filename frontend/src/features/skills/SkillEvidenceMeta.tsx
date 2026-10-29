@@ -4,6 +4,7 @@ const SOURCE_LABELS: Record<string, string> = {
   exercise_attempt: 'correção objetiva de exercício',
   writing_feedback: 'rubrica automática de escrita',
   speaking_attempt: 'autoavaliação oral',
+  dialogue_turn: 'checks objetivos da conversa (não avaliam fluência ou pronúncia)',
 }
 
 function dateLabel(value: string): string {

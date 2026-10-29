@@ -28,9 +28,6 @@ HEALTH = {
     "status": "ok",
     "db": "up",
     "schema": "compatible",
-    "schema_current": ["d2b7e4c9a150"],
-    "schema_required": ["d2b7e4c9a150"],
-    "env": "prod",
 }
 # Cada mock registra a chamada no arquivo de rastro e responde conforme o
 # conteúdo do comando remoto, como a VM responderia.
@@ -214,9 +211,7 @@ class DeployPublicTests(unittest.TestCase):
         self.assertIn("migrate: saída 0", result.stdout)
         self.assertIn("permissions: saída 0", result.stdout)
         self.assertIn("seed: sem serviço próprio", result.stdout)
-        self.assertIn(
-            "schema_current=['d2b7e4c9a150'] schema_required=['d2b7e4c9a150']", result.stdout
-        )
+        self.assertIn("schema=compatible", result.stdout)
         self.assertIn(f"Deploy público concluído: {FULL_SHA}", result.stdout)
         # O .env remoto nunca é lido nem impresso; só referenciado por --env-file.
         self.assertFalse(any("cat " in call for call in ssh_calls))
@@ -252,9 +247,9 @@ class DeployPublicTests(unittest.TestCase):
         self.assertNotIn("Deploy público concluído", result.stdout)
 
     def test_schema_mismatch_in_health_fails(self):
-        result = self.run_script(SHA, health={**HEALTH, "schema_current": ["a42c7d1e9f20"]})
+        result = self.run_script(SHA, health={**HEALTH, "schema": "incompatible"})
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("::error::schema_current difere de schema_required", result.stdout)
+        self.assertIn("::error::readiness pública incompatível", result.stdout)
         self.assertNotIn("Deploy público concluído", result.stdout)
 
     def test_skip_smoke_runs_no_curl(self):

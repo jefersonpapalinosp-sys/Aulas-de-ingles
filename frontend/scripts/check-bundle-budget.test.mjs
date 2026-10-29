@@ -97,3 +97,37 @@ describe('orçamento do bundle com dois tetos', () => {
     assert.deepEqual([...initialAssets(html)].sort(), ['index-a.js', 'index-c.css', 'vendor-b.js'])
   })
 })
+
+describe('reserva explícita FE-47 sem ampliar o orçamento da base', () => {
+  it('aceita até 8 KiB de diálogo lazy além dos 184 KiB da base', () => {
+    const result = checkBundleBudget(syntheticDist({
+      'index-abc123.js': 115, 'index-abc123.css': 10, 'lesson-study-x.js': 55,
+      'DialogueWorkspace-test.js': 6, 'DialogueWorkspace-test.css': 1,
+    }, entry))
+    assert.equal(result.ok, true, result.lines.join('\n'))
+    assert.ok(result.total > LIMITS.total)
+    assert.ok(result.total - result.dialogue <= LIMITS.total)
+  })
+  it('reprova diálogo acima da reserva mesmo quando sobra orçamento na base', () => {
+    const result = checkBundleBudget(syntheticDist({
+      'index-abc123.js': 100, 'index-abc123.css': 10, 'DialogueWorkspace-test.js': 9,
+    }, entry))
+    assert.equal(result.ok, false)
+    assert.match(line(result, 'diálogo lazy'), /^ERRO /)
+  })
+  it('a reserva do diálogo não pode pagar crescimento dos outros módulos', () => {
+    const result = checkBundleBudget(syntheticDist({
+      'index-abc123.js': 115, 'index-abc123.css': 10, 'lesson-study-x.js': 60,
+      'DialogueWorkspace-test.js': 1,
+    }, entry))
+    assert.equal(result.ok, false)
+    assert.match(line(result, 'total JS/CSS base'), /^ERRO /)
+  })
+  it('reprova se o diálogo entrar no carregamento inicial', () => {
+    const result = checkBundleBudget(syntheticDist({
+      'index-abc123.js': 100, 'index-abc123.css': 10, 'DialogueWorkspace-test.js': 1,
+    }, [...entry, 'DialogueWorkspace-test.js']))
+    assert.equal(result.ok, false)
+    assert.ok(result.lines.includes('ERRO diálogo precisa ser lazy.'))
+  })
+})

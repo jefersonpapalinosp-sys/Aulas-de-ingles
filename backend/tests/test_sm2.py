@@ -6,6 +6,8 @@ import pytest
 
 from app.domain.sm2 import EASE_INICIAL, EASE_MINIMO, Estado, revisar
 
+pytestmark = pytest.mark.timezone
+
 AGORA = datetime(2026, 10, 7, 12, 0, tzinfo=UTC)
 
 

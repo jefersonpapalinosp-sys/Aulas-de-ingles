@@ -7,6 +7,7 @@ import pytest
 from app.pagination import InvalidCursor, decode_time_id_cursor, encode_time_id_cursor
 
 
+@pytest.mark.timezone
 def test_time_id_cursor_round_trip_is_opaque_and_normalized() -> None:
     timestamp = datetime(2026, 10, 15, 20, 45, 12, 123456, tzinfo=UTC)
 

@@ -9,6 +9,7 @@ KEY = "a" * 32 + ".wav"
 OTHER = "b" * 32 + ".webm"
 
 
+@pytest.mark.timezone
 def test_inventory_is_read_only_protects_references_recent_temp_and_links(tmp_path):
     now = datetime.now(UTC)
     (tmp_path / KEY).write_bytes(b"voice")
@@ -45,6 +46,7 @@ def test_inventory_is_read_only_protects_references_recent_temp_and_links(tmp_pa
     assert "orphan_candidate" not in recent["counts"]
 
 
+@pytest.mark.timezone
 def test_incomplete_snapshot_and_scan_budget_never_authorize_orphan_cleanup(tmp_path):
     now = datetime.now(UTC) + timedelta(days=2)
     (tmp_path / KEY).write_bytes(b"voice")
@@ -59,6 +61,7 @@ def test_incomplete_snapshot_and_scan_budget_never_authorize_orphan_cleanup(tmp_
     assert not report["complete"] and report["files_scanned"] == 0
 
 
+@pytest.mark.timezone
 def test_missing_or_symlinked_root_is_not_created_or_followed(tmp_path):
     absent = tmp_path / "absent"
     report = inventory(absent, [], datetime.now(UTC))
@@ -70,6 +73,7 @@ def test_missing_or_symlinked_root_is_not_created_or_followed(tmp_path):
         inventory(tmp_path, [], datetime.now(UTC), min_age=1)
 
 
+@pytest.mark.timezone
 def test_file_changing_during_hash_is_not_an_orphan_candidate(tmp_path, monkeypatch):
     import os
 

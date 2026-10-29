@@ -1,359 +1,24 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useSessao } from '../api/auth'
-import type { CourseCurriculum, CourseSummary, LessonSummary, Progress } from '../api/client'
+import type { CourseCurriculum } from '../api/client'
 import { useCourseCurriculum, useCourses } from '../api/queries'
 import { useMarcarEstudada, useProgress } from '../api/progress'
+import { curriculumLessons, matchesLessonSearch } from '../features/curriculum/curriculum'
+
+import { NavigationPanel, type NavigationPanelProps } from './trail/NavigationPanel'
+import { TrailDrawer } from './trail/TrailDrawer'
+import { trailLabel } from './trail/trailLabel'
+import { useTrailDrawer } from './trail/useTrailDrawer'
 import {
-  curriculumLessons,
-  lessonProgressKey,
-  matchesLessonSearch,
-} from '../features/curriculum/curriculum'
-import {
-  assessmentPath,
   courseLevelLabel,
   coursePath,
-  courseReviewPath,
   courseSlugFromPath,
   DEFAULT_COURSE_SLUG,
-  lessonPath,
   notebookPath,
   reviewPath,
   todayPath,
-  unitPath,
 } from '../routing/courseRoutes'
-
-const MAX_VISIBLE_LESSONS = 12
-
-type NavigationPanelProps = {
-  idPrefix: string
-  courses: CourseSummary[]
-  curriculum?: CourseCurriculum
-  courseSlug: string
-  activeUnitSlug?: string
-  activeLessonNumber?: number
-  progress?: Progress
-  query: string
-  expandedUnit: string | null
-  onQueryChange: (query: string) => void
-  onCourseChange: (courseSlug: string) => void
-  onUnitToggle: (unitSlug: string) => void
-  onLessonDone: (lesson: LessonSummary, studied: boolean) => void
-  completionPending: boolean
-  searchInputRef?: React.RefObject<HTMLInputElement | null>
-  activeLessonRef?: React.RefObject<HTMLAnchorElement | null>
-  onNavigate?: () => void
-}
-
-function progressKeys(progress: Progress | undefined): Set<string> {
-  return new Set(
-    progress?.lessons
-      .filter((lesson) => lesson.studied)
-      .map((lesson) => lessonProgressKey(lesson.course_slug, lesson.lesson_number)) ?? [],
-  )
-}
-
-function visibleWindow(lessons: LessonSummary[], activeLessonNumber?: number): LessonSummary[] {
-  if (lessons.length <= MAX_VISIBLE_LESSONS) return lessons
-  const activeIndex = lessons.findIndex((lesson) => lesson.number === activeLessonNumber)
-  if (activeIndex < 0) return lessons.slice(0, MAX_VISIBLE_LESSONS)
-  const start = Math.max(
-    0,
-    Math.min(
-      activeIndex - Math.floor(MAX_VISIBLE_LESSONS / 2),
-      lessons.length - MAX_VISIBLE_LESSONS,
-    ),
-  )
-  return lessons.slice(start, start + MAX_VISIBLE_LESSONS)
-}
-
-export function NavigationPanel({
-  idPrefix,
-  courses,
-  curriculum,
-  courseSlug,
-  activeUnitSlug,
-  activeLessonNumber,
-  progress,
-  query,
-  expandedUnit,
-  onQueryChange,
-  onCourseChange,
-  onUnitToggle,
-  onLessonDone,
-  completionPending,
-  searchInputRef,
-  activeLessonRef,
-  onNavigate,
-}: NavigationPanelProps) {
-  const studied = useMemo(() => progressKeys(progress), [progress])
-  const courseLessons = curriculumLessons(curriculum)
-  const studiedInCourse = courseLessons.filter((lesson) =>
-    studied.has(lessonProgressKey(courseSlug, lesson.number)),
-  ).length
-  const expanded = curriculum?.units.find((unit) => unit.slug === expandedUnit)
-  const studiedInUnit =
-    expanded?.lessons.filter((lesson) =>
-      studied.has(lessonProgressKey(courseSlug, lesson.number)),
-    ).length ?? 0
-  const courseTitle =
-    curriculum?.course.title ?? courses.find((course) => course.slug === courseSlug)?.title
-  const courseLevel = courseLevelLabel(courseSlug)
-  const requestedScopeUnit = activeUnitSlug ?? expandedUnit ?? undefined
-  const scopedUnit = curriculum?.units.find((unit) => unit.slug === requestedScopeUnit)
-  const scopeUnitSlug =
-    scopedUnit?.status === 'published' && scopedUnit.published_lessons > 0
-      ? scopedUnit.slug
-      : undefined
-
-  return (
-    <div className="trail-panel">
-      <header className="trail-head">
-        <label className="trail-course-select">
-          <span>Curso</span>
-          <select value={courseSlug} onChange={(event) => onCourseChange(event.target.value)}>
-            {courses.map((course) => (
-              <option key={course.id} value={course.slug}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p className="brand">{curriculum?.course.provider ?? 'Cursos de inglês'}</p>
-        <h2>{courseTitle ?? 'Carregando curso…'}</h2>
-        <div className="trail-progress-grid">
-          <div className="prog">
-            <div className="prog-top">
-              <span>Aulas do curso</span>
-              <span>
-                {studiedInCourse}/{courseLessons.length}
-              </span>
-            </div>
-            <div
-              className="prog-bar"
-              role="progressbar"
-              aria-label="Progresso das aulas do curso"
-              aria-valuemin={0}
-              aria-valuemax={courseLessons.length}
-              aria-valuenow={studiedInCourse}
-            >
-              <span
-                className="prog-fill"
-                style={{
-                  width: courseLessons.length
-                    ? `${(studiedInCourse / courseLessons.length) * 100}%`
-                    : '0%',
-                }}
-              />
-            </div>
-          </div>
-          <div className="prog">
-            <div className="prog-top">
-              <span>Aulas da unidade</span>
-              <span>
-                {studiedInUnit}/{expanded?.lessons.length ?? 0}
-              </span>
-            </div>
-            <div
-              className="prog-bar"
-              role="progressbar"
-              aria-label="Progresso das aulas da unidade"
-              aria-valuemin={0}
-              aria-valuemax={expanded?.lessons.length ?? 0}
-              aria-valuenow={studiedInUnit}
-            >
-              <span
-                className="prog-fill"
-                style={{
-                  width: expanded?.lessons.length
-                    ? `${(studiedInUnit / expanded.lessons.length) * 100}%`
-                    : '0%',
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav className="trail-utilities" aria-label="Atalhos">
-        <NavLink to={todayPath(courseSlug)} onClick={onNavigate}>
-          Hoje
-        </NavLink>
-        <NavLink to="/cursos" onClick={onNavigate}>
-          Cursos
-        </NavLink>
-        <NavLink to={reviewPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
-          Revisar
-          {Boolean(progress?.review_due) && (
-            <span className="badge">{progress?.review_due}</span>
-          )}
-        </NavLink>
-        <NavLink to={notebookPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
-          Caderno
-        </NavLink>
-        <NavLink to="/meus-dados" onClick={onNavigate}>
-          Meus dados
-        </NavLink>
-        {scopeUnitSlug && (
-          <NavLink to={assessmentPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
-            Avaliação
-          </NavLink>
-        )}
-        {scopeUnitSlug && (
-          <NavLink to={unitPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
-            Mapa da unidade
-          </NavLink>
-        )}
-      </nav>
-
-      <label className="trail-search">
-        <span>Buscar aula ou checkpoint</span>
-        <input
-          ref={searchInputRef}
-          type="search"
-          value={query}
-          placeholder="Número, título, tópico ou checkpoint"
-          onChange={(event) => onQueryChange(event.target.value)}
-        />
-      </label>
-
-      <div className="trail-scroll">
-        <div className="trail-units">
-          {curriculum?.units.map((unit) => {
-            const matches = unit.lessons.filter((lesson) => matchesLessonSearch(lesson, query))
-            const reviewMatches = Boolean(
-              unit.review &&
-                (!query.trim() ||
-                  unit.review.title.toLocaleLowerCase('pt-BR').includes(
-                    query.trim().toLocaleLowerCase('pt-BR'),
-                  )),
-            )
-            const unavailable = unit.status !== 'published' || unit.published_lessons === 0
-            const isExpanded = !unavailable && expandedUnit === unit.slug
-            const visible = visibleWindow(matches, activeLessonNumber)
-            return (
-              <section className="trail-unit" key={unit.id}>
-                {unavailable ? (
-                  <div
-                    className="trail-unit-toggle"
-                    aria-disabled="true"
-                    aria-label={`${unit.title}: Em preparação`}
-                  >
-                    <span aria-hidden="true">·</span>
-                    <span>
-                      <strong>{unit.title}</strong>
-                      <small>
-                        Em preparação · {unit.total_lessons}{' '}
-                        {unit.total_lessons === 1 ? 'aula' : 'aulas'}
-                      </small>
-                    </span>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="trail-unit-toggle"
-                    aria-expanded={isExpanded}
-                    aria-controls={`${idPrefix}-trail-unit-${unit.id}`}
-                    onClick={() => onUnitToggle(unit.slug)}
-                  >
-                  <span aria-hidden="true">{isExpanded ? '−' : '+'}</span>
-                  <span>
-                    <strong>{unit.title}</strong>
-                    <small>
-                      {unit.published_lessons}{' '}
-                      {unit.published_lessons === 1 ? 'aula' : 'aulas'}
-                    </small>
-                  </span>
-                  {unit.slug === activeUnitSlug && <em>Atual</em>}
-                  </button>
-                )}
-                {isExpanded && (
-                  <ul
-                    id={`${idPrefix}-trail-unit-${unit.id}`}
-                    className="trail-lessons"
-                    aria-label={`Itens de ${unit.title}`}
-                  >
-                    {visible.map((lesson) => {
-                      const isActive = lesson.number === activeLessonNumber
-                      const isStudied = studied.has(
-                        lessonProgressKey(courseSlug, lesson.number),
-                      )
-                      return (
-                        <li className="trail-lesson-row" key={lesson.id}>
-                          <NavLink
-                            ref={isActive ? activeLessonRef : undefined}
-                            to={lessonPath(courseSlug, lesson.number)}
-                            className="trail-lesson-link"
-                            onClick={onNavigate}
-                          >
-                            <span>{lesson.number}</span>
-                            <span>
-                              <strong>{lesson.title}</strong>
-                              <small>{lesson.grammar_tag}</small>
-                            </span>
-                          </NavLink>
-                          <button
-                            type="button"
-                            className="trail-done"
-                            aria-pressed={isStudied}
-                            aria-label={`${isStudied ? 'Desmarcar' : 'Marcar'} ${courseLevel} · Aula ${lesson.number} como estudada`}
-                            title={isStudied ? 'Estudada' : 'Marcar como estudada'}
-                            disabled={completionPending}
-                            onClick={() => onLessonDone(lesson, !isStudied)}
-                          >
-                            <span aria-hidden="true">{isStudied ? '✓' : '○'}</span>
-                          </button>
-                        </li>
-                      )
-                    })}
-                    {matches.length > MAX_VISIBLE_LESSONS && (
-                      <li className="trail-limit" role="status">
-                        Mostrando {visible.length} de {matches.length}. Refine a busca para
-                        encontrar outra aula.
-                      </li>
-                    )}
-                    {reviewMatches && unit.review && (
-                      <li className="trail-review-row">
-                        <NavLink
-                          to={courseReviewPath(courseSlug, unit.slug)}
-                          onClick={onNavigate}
-                        >
-                          <span aria-hidden="true">CP</span>
-                          <span>
-                            <strong>{unit.review.title}</strong>
-                            <small>
-                              {unit.review.question_count} questões ·{' '}
-                              {unit.review.estimated_minutes} min
-                            </small>
-                          </span>
-                        </NavLink>
-                      </li>
-                    )}
-                    {matches.length === 0 && !reviewMatches && (
-                      <li className="trail-empty">Nenhum item encontrado nesta unidade.</li>
-                    )}
-                  </ul>
-                )}
-              </section>
-            )
-          })}
-        </div>
-        {curriculum &&
-          curriculum.units.every((unit) =>
-            unit.lessons.every((lesson) => !matchesLessonSearch(lesson, query)) &&
-            !unit.review?.title
-              .toLocaleLowerCase('pt-BR')
-              .includes(query.trim().toLocaleLowerCase('pt-BR')),
-          ) && (
-            <p className="trail-empty trail-empty-course">
-              Nenhuma aula ou checkpoint encontrado neste curso.
-            </p>
-          )}
-      </div>
-
-    </div>
-  )
-}
 
 function firstUnitMatching(
   curriculum: CourseCurriculum | undefined,
@@ -368,14 +33,6 @@ function firstUnitMatching(
         unit.review?.title.toLocaleLowerCase('pt-BR').includes(normalized),
     )?.slug ?? null
   )
-}
-
-function focusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    ),
-  ).filter((element) => !element.hasAttribute('hidden'))
 }
 
 function activeContext(pathname: string): { unitSlug?: string; lessonNumber?: number } {
@@ -422,10 +79,7 @@ export function LessonRail() {
   // revalidação, fechava a unidade que o aluno tinha aberto.
   const [unitChoice, setUnitChoice] = useState<{ scope: string; unit: string | null } | null>(null)
   const [query, setQuery] = useState('')
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const drawerRef = useRef<HTMLDialogElement>(null)
-  const openButtonRef = useRef<HTMLButtonElement>(null)
-  const drawerSearchRef = useRef<HTMLInputElement>(null)
+  const drawer = useTrailDrawer()
   const desktopActiveRef = useRef<HTMLAnchorElement>(null)
   const drawerActiveRef = useRef<HTMLAnchorElement>(null)
 
@@ -446,47 +100,6 @@ export function LessonRail() {
   useEffect(() => {
     desktopActiveRef.current?.scrollIntoView?.({ block: 'nearest' })
   }, [location.pathname, expandedUnit])
-
-  useEffect(() => {
-    if (!drawerOpen) return
-    const dialog = drawerRef.current
-    if (dialog && !dialog.open) {
-      if (typeof dialog.showModal === 'function') dialog.showModal()
-      else dialog.setAttribute('open', '')
-    }
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    requestAnimationFrame(() => drawerSearchRef.current?.focus())
-    return () => {
-      document.body.style.overflow = previousOverflow
-    }
-  }, [drawerOpen])
-
-  function closeDrawer(returnFocus = true) {
-    setDrawerOpen(false)
-    if (returnFocus) requestAnimationFrame(() => openButtonRef.current?.focus())
-  }
-
-  function handleDrawerKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
-    if (event.key === 'Escape') {
-      event.preventDefault()
-      closeDrawer()
-      return
-    }
-    if (event.key !== 'Tab' || !drawerRef.current) return
-    const focusable = focusableElements(drawerRef.current)
-    if (focusable.length === 0) return
-    const first = focusable[0]
-    const last = focusable[focusable.length - 1]
-    if (!first || !last) return
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault()
-      first.focus()
-    }
-  }
 
   const panelProps: Omit<
     NavigationPanelProps,
@@ -521,14 +134,13 @@ export function LessonRail() {
   const activeCheckpoint = /\/checkpoint\/?$/.test(location.pathname)
     ? contextualUnitData?.review
     : undefined
-  const levelLabel = courseLevelLabel(courseSlug)
-  const mobileLabel = activeLesson
-    ? `${levelLabel} · Aula ${activeLesson.number} · ${activeLesson.title}`
-    : activeCheckpoint
-      ? `${levelLabel} · ${activeCheckpoint.title}`
-      : contextualUnitData
-        ? `${levelLabel} · ${contextualUnitData.title}${contextualUnitData.published_lessons === 0 ? ' · Em preparação' : ''}`
-        : curriculum.data?.course.title ?? 'Escolher aula'
+  const mobileLabel = trailLabel({
+    levelLabel: courseLevelLabel(courseSlug),
+    lesson: activeLesson,
+    checkpoint: activeCheckpoint,
+    unit: contextualUnitData,
+    courseTitle: curriculum.data?.course.title,
+  })
 
   return (
     <aside className="navigation-shell" aria-label="Navegação do curso">
@@ -548,53 +160,23 @@ export function LessonRail() {
         )}
       </div>
 
-      <div className="mobile-trail-bar">
-        <button
-          ref={openButtonRef}
-          type="button"
-          aria-haspopup="dialog"
-          aria-expanded={drawerOpen}
-          onClick={() => setDrawerOpen(true)}
-        >
-          <span>
-            <small>Trilha atual</small>
-            <strong>{mobileLabel}</strong>
-          </span>
-          <span aria-hidden="true">☰</span>
-          <span className="sr-only">Abrir trilha de aulas</span>
-        </button>
-      </div>
-
-      {drawerOpen && (
-        <dialog
-          ref={drawerRef}
-          className="trail-drawer-backdrop"
-          aria-labelledby="trail-drawer-title"
-          onClose={() => closeDrawer()}
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeDrawer()
-          }}
-          onKeyDown={handleDrawerKeyDown}
-        >
-          <div
-            className="trail-drawer"
-          >
-            <div className="trail-drawer-titlebar">
-              <h2 id="trail-drawer-title">Trilha de estudo</h2>
-              <button type="button" onClick={() => closeDrawer()} aria-label="Fechar trilha">
-                ×
-              </button>
-            </div>
-            <NavigationPanel
-              {...panelProps}
-              idPrefix="drawer"
-              searchInputRef={drawerSearchRef}
-              activeLessonRef={drawerActiveRef}
-              onNavigate={() => closeDrawer(false)}
-            />
-          </div>
-        </dialog>
-      )}
+      <TrailDrawer
+        label={mobileLabel}
+        open={drawer.open}
+        drawerRef={drawer.drawerRef}
+        openButtonRef={drawer.openButtonRef}
+        onOpen={drawer.openDrawer}
+        onClose={drawer.close}
+        onKeyDown={drawer.onKeyDown}
+      >
+        <NavigationPanel
+          {...panelProps}
+          idPrefix="drawer"
+          searchInputRef={drawer.searchRef}
+          activeLessonRef={drawerActiveRef}
+          onNavigate={() => drawer.close(false)}
+        />
+      </TrailDrawer>
     </aside>
   )
 }

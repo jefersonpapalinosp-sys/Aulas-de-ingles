@@ -24,12 +24,15 @@ class HealthOut(BaseModel):
 
     status: str
     db: str
-    version: str | None = None
     schema_status: Literal["compatible", "incompatible", "unknown"] = Field(alias="schema")
+    code: Literal["service_unavailable", "schema_incompatible"] | None = None
+
+
+class ReadinessOut(HealthOut):
+    version: str | None = None
     schema_current: list[str]
     schema_required: list[str]
     env: str
-    code: Literal["service_unavailable", "schema_incompatible"] | None = None
 
 
 @lru_cache(maxsize=1)
@@ -56,23 +59,34 @@ async def health(
     session: Annotated[AsyncSession, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> HealthOut:
+    """Disponibilidade pública, sem versão do banco, ambiente ou revisões."""
+    result = await readiness_snapshot(response, session, settings)
+    return HealthOut(
+        status=result.status, db=result.db, schema=result.schema_status, code=result.code
+    )
+
+
+async def readiness_snapshot(
+    response: Response, session: AsyncSession, settings: Settings, *, details: bool = False
+) -> ReadinessOut:
     """Readiness.
 
     Abre uma conexão de verdade e exige que a revisão aplicada seja exatamente
     o conjunto de heads embarcado. Banco acessível com código/schema divergentes
     continua indisponível para tráfego.
     """
+    response.headers["Cache-Control"] = "no-store"
     try:
-        result = await session.execute(text("select version()"))
+        result = await session.execute(text("select version()" if details else "SELECT 1"))
         raw = result.scalar_one()
         # "PostgreSQL 16.4 (Debian ...) on aarch64..." -> "PostgreSQL 16.4"
-        version = " ".join(str(raw).split()[:2])
+        version = " ".join(str(raw).split()[:2]) if details else None
     except Exception:
         log.warning("health: banco indisponível")
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         response.headers["X-Error-Code"] = "service_unavailable"
         response.headers["Cache-Control"] = "no-store"
-        return HealthOut(
+        return ReadinessOut(
             status="degraded",
             db="down",
             version=None,
@@ -98,7 +112,7 @@ async def health(
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         response.headers["X-Error-Code"] = "schema_incompatible"
         response.headers["Cache-Control"] = "no-store"
-        return HealthOut(
+        return ReadinessOut(
             status="degraded",
             db="up",
             version=version,
@@ -109,7 +123,7 @@ async def health(
             code="schema_incompatible",
         )
 
-    return HealthOut(
+    return ReadinessOut(
         status="ok",
         db="up",
         version=version,

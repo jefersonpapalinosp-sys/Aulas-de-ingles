@@ -271,6 +271,7 @@ async def test_today_recomenda_fechamento_31_40_e_depois_a_aula_41(
     assert after_attempt["href"] == "/cursos/voa-level-1/aulas/41/estudar"
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_today_isolates_reviews_sessions_and_time_by_course(
     client: AsyncClient, session: AsyncSession
@@ -520,6 +521,7 @@ async def test_today_isolates_reviews_sessions_and_time_by_course(
         await session.commit()
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_today_ignora_retomada_de_unidade_nao_publicada(
     client: AsyncClient, session: AsyncSession
@@ -769,6 +771,7 @@ async def test_skills_sao_isoladas_por_curso_e_unidade(
         await session.commit()
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_session_records_steps_without_crediting_abandoned_wall_time(
     client: AsyncClient, session: AsyncSession

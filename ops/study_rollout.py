@@ -7,23 +7,74 @@ import os
 import re
 import sys
 import tempfile
+from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import TypedDict
 
 from ops import recovery, roles
-from ops.recovery_archive import audio_inventory, file_info, require, verify_bundle, write_json
+from ops.recovery_archive import (
+    RecoveryError,
+    audio_inventory,
+    file_info,
+    require,
+    verify_bundle,
+    write_json,
+)
 
 HEAD = "c95f3d8ba042"
 
 
-def fingerprints(target, *, excluded_columns=None, excluded_tables=()):
-    tables = recovery.query(
+class Fingerprint(TypedDict):
+    count: int
+    sha256: str
+
+
+def json_object(value: object) -> dict[str, object]:
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
+        raise RecoveryError("Metadados devem ser um objeto JSON.")
+    return dict(value)
+
+
+def checked_count(value: object) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise RecoveryError("Contagem inválida; esperado inteiro não negativo.")
+    return value
+
+
+def query_count(target: recovery.Target, sql: str) -> int:
+    return checked_count(recovery.query(target, sql))
+
+
+def checked_fingerprints(value: object) -> dict[str, Fingerprint]:
+    result: dict[str, Fingerprint] = {}
+    for name, item in json_object(value).items():
+        require(re.fullmatch("[a-z_]+", name) is not None, "Tabela não prevista.")
+        row = json_object(item)
+        require(set(row) == {"count", "sha256"}, "Prova de tabela incompleta ou inesperada.")
+        digest = row["sha256"]
+        if not isinstance(digest, str) or re.fullmatch("[a-f0-9]{64}", digest) is None:
+            raise RecoveryError("Hash de tabela inválido.")
+        result[name] = {"count": checked_count(row["count"]), "sha256": digest}
+    return result
+
+
+def fingerprints(
+    target: recovery.Target,
+    *,
+    excluded_columns: Mapping[str, Sequence[str]] | None = None,
+    excluded_tables: Sequence[str] = (),
+) -> dict[str, Fingerprint]:
+    tables: object = recovery.query(
         target,
         """
         SELECT json_agg(tablename ORDER BY tablename)
         FROM pg_tables WHERE schemaname='public' AND tablename != 'alembic_version'
     """,
     )
-    result = {}
+    if not isinstance(tables, list) or not all(isinstance(name, str) for name in tables):
+        raise RecoveryError("Inventário de tabelas inválido.")
+    require(len(tables) == len(set(tables)), "Inventário de tabelas duplicado.")
+    result: dict[str, Fingerprint] = {}
     if excluded_columns is None:
         excluded_columns = {
             "writing_prompt": ["requirements"],
@@ -35,14 +86,19 @@ def fingerprints(target, *, excluded_columns=None, excluded_tables=()):
             continue
         excluded = excluded_columns.get(name, [])
         require(
-            all(re.fullmatch("[a-z_][a-z0-9_]*", column) for column in excluded),
+            all(
+                isinstance(column, str) and re.fullmatch("[a-z_][a-z0-9_]*", column)
+                for column in excluded
+            ),
             "Coluna inválida.",
         )
         expression = "to_jsonb(t)" + "".join(f" - '{column}'" for column in excluded)
         # Nada do resultado bruto é impresso/persistido; somente hashes e contagens.
-        rows = recovery.query(
+        rows: object = recovery.query(
             target, f"SELECT coalesce(json_agg({expression}), '[]') FROM public.{name} t"
         )
+        if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+            raise RecoveryError("Conteúdo de tabela inválido para prova de preservação.")
         canonical = sorted(
             json.dumps(row, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
             for row in rows
@@ -54,7 +110,7 @@ def fingerprints(target, *, excluded_columns=None, excluded_tables=()):
     return result
 
 
-def clone_run(*command):
+def clone_run(*command: str) -> bytes:
     target = recovery.STUDY_CHECK
     recovery.check_target(target)
     recovery.quiet(target)
@@ -77,11 +133,14 @@ def clone_run(*command):
         )
 
 
-def run(action, backup):
+def run(action: str, backup: Path) -> None:
+    require(action in {"capture", "rehearse", "verify"}, "Ação inválida.")
     manifest = verify_bundle(backup)
-    require(manifest["source"]["kind"] == "prod", "Exige pacote da base de estudo.")
+    origin = json_object(manifest.get("source"))
+    audio_files = json_object(manifest.get("audio_files"))
+    require(origin.get("kind") == "prod", "Exige pacote da base de estudo.")
     source = recovery.source_target("prod")
-    require(manifest["source"]["database"] == source.database, "Origem divergente.")
+    require(origin.get("database") == source.database, "Origem divergente.")
     recovery.check_target(source)
     recovery.quiet(source)
     proof_path = recovery.BACKUPS / f"rollout-{manifest['bundle_id']}.json"
@@ -100,10 +159,12 @@ def run(action, backup):
     require(
         proof_path.is_file()
         and not proof_path.is_symlink()
+        and not proof_path.parent.is_symlink()
         and proof_path.stat().st_mode & 0o077 == 0,
         "Prova privada ausente.",
     )
-    proof = json.loads(proof_path.read_text())
+    proof = json_object(json.loads(proof_path.read_text()))
+    tables = checked_fingerprints(proof.get("tables"))
     require(proof["manifest"] == file_info(backup / "manifest.json"), "Prova de outro pacote.")
     target = recovery.STUDY_CHECK if action == "rehearse" else source
     recovery.check_target(target)
@@ -113,15 +174,15 @@ def run(action, backup):
             recovery.query(target, recovery.SNAPSHOT_SQL) == manifest["snapshot"],
             "Clone diverge do backup.",
         )
-        require(fingerprints(target) == proof["tables"], "Conteúdo restaurado diverge.")
+        require(fingerprints(target) == tables, "Conteúdo restaurado diverge.")
         clone_run("alembic", "upgrade", HEAD)
         clone_run("python", "-m", "app.cli", "writing-rubrics")
         clone_run("python", "-m", "app.cli", "writing-rubrics")  # idempotência real
     require(
-        fingerprints(target) == proof["tables"], "Dados históricos divergiram; não liberar tráfego."
+        fingerprints(target) == tables, "Dados históricos divergiram; não liberar tráfego."
     )
     require(
-        recovery.query(target, recovery.SNAPSHOT_SQL)["revision"] == [HEAD],
+        json_object(recovery.query(target, recovery.SNAPSHOT_SQL)).get("revision") == [HEAD],
         "Schema não atualizado.",
     )
     with tempfile.TemporaryDirectory(prefix="aulas-voice-proof-") as directory:
@@ -134,18 +195,18 @@ def run(action, backup):
         receipt,
         {
             "verified": True,
-            "tables": len(proof["tables"]),
+            "tables": len(tables),
             "revision": HEAD,
             "manifest": proof["manifest"],
-            "audio_count": len(manifest["audio_files"]),
+            "audio_count": len(audio_files),
         },
     )
     print(
-        f"{action}: {len(proof['tables'])} tabelas preservadas; rubricas e voz conferidas."
+        f"{action}: {len(tables)} tabelas preservadas; rubricas e voz conferidas."
     )
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["capture", "rehearse", "verify"])

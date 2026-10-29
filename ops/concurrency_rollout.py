@@ -5,12 +5,20 @@ import json
 import os
 import sys
 import tempfile
+from collections.abc import Mapping
 from pathlib import Path
 
 from app.db.concurrency_audit import RULES
 
 from ops import recovery, study_rollout
-from ops.recovery_archive import audio_inventory, file_info, require, verify_bundle, write_json
+from ops.recovery_archive import (
+    RecoveryError,
+    audio_inventory,
+    file_info,
+    require,
+    verify_bundle,
+    write_json,
+)
 
 BASE = "c95f3d8ba042"
 HEAD = "d06a4e9cb153"
@@ -24,14 +32,24 @@ NEW_COLUMNS = {
 }
 
 
-def fingerprints(target):
+def fingerprints(target: recovery.Target) -> dict[str, study_rollout.Fingerprint]:
     return study_rollout.fingerprints(
         target, excluded_columns=NEW_COLUMNS, excluded_tables=NEW_TABLES
     )
 
 
-def audit(target, *, preserve_legacy=False, expected=None):
-    report = {name: recovery.query(target, sql) for name, sql in RULES.items()}
+def checked_audit(value: object) -> dict[str, int]:
+    report = study_rollout.json_object(value)
+    require(set(report) == set(RULES), "Regras da auditoria divergem.")
+    return {rule: study_rollout.checked_count(count) for rule, count in report.items()}
+
+
+def audit(
+    target: recovery.Target, *, preserve_legacy: bool = False, expected: object = None
+) -> dict[str, int]:
+    if expected is not None:
+        expected = checked_audit(expected)
+    report = {name: study_rollout.query_count(target, sql) for name, sql in RULES.items()}
     # Apenas regra/contagem, sem textos, IDs pessoais ou credenciais.
     print(json.dumps({"audit": report}, sort_keys=True))
     allowed = LEGACY_JOURNEY_RULES if preserve_legacy else set()
@@ -44,7 +62,7 @@ def audit(target, *, preserve_legacy=False, expected=None):
     return report
 
 
-def clone_run(*command):
+def clone_run(*command: str) -> bytes:
     target = recovery.CONCURRENCY_CHECK
     recovery.check_target(target)
     recovery.quiet(target)
@@ -68,7 +86,7 @@ def clone_run(*command):
         )
 
 
-def private_json(path):
+def private_json(path: Path) -> dict[str, object]:
     require(
         path.is_file()
         and not path.is_symlink()
@@ -76,10 +94,13 @@ def private_json(path):
         and path.stat().st_mode & 0o077 == 0,
         "Prova privada ausente ou inválida.",
     )
-    return json.loads(path.read_text())
+    try:
+        return study_rollout.json_object(json.loads(path.read_text()))
+    except (ValueError, OSError) as exc:
+        raise RecoveryError("Prova privada ilegível ou inválida.") from exc
 
 
-def validate_restore(backup, manifest):
+def validate_restore(backup: Path, manifest: Mapping[str, object]) -> None:
     result = private_json(recovery.BACKUPS / "restore-receipts" / f"{manifest['bundle_id']}.json")
     require(
         result.get("verified") is True
@@ -90,19 +111,20 @@ def validate_restore(backup, manifest):
     )
 
 
-def verify_new_state(target):
+def verify_new_state(target: recovery.Target) -> None:
     for table in NEW_TABLES:
         require(
-            recovery.query(target, f"SELECT count(*) FROM {table}") == 0,
+            study_rollout.query_count(target, f"SELECT count(*) FROM {table}") == 0,
             "Eventos novos antes da reabertura; recuse histórico inventado.",
         )
     for table in ("writing_draft", "study_session_progress", "review_item"):
         require(
-            recovery.query(target, f"SELECT count(*) FROM {table} WHERE revision != 0") == 0,
+            study_rollout.query_count(target, f"SELECT count(*) FROM {table} WHERE revision != 0")
+            == 0,
             "Revisão inicial inesperada.",
         )
     require(
-        recovery.query(
+        study_rollout.query_count(
             target,
             "SELECT count(*) FROM refresh_session WHERE "
             "family_id != jti OR successor_jti IS NOT NULL",
@@ -112,13 +134,16 @@ def verify_new_state(target):
     )
 
 
-def run(action, backup, *, preserve_legacy=False):
+def run(action: str, backup: Path, *, preserve_legacy: bool = False) -> None:
     require(action in {"capture", "rehearse", "verify"}, "Ação inválida.")
     manifest = verify_bundle(backup)
-    require(manifest["source"]["kind"] == "prod", "Exige backup do ambiente de estudo.")
-    require(manifest["snapshot"]["revision"] == [BASE], "Backup não está no schema esperado.")
+    origin = study_rollout.json_object(manifest.get("source"))
+    snapshot = study_rollout.json_object(manifest.get("snapshot"))
+    require(origin.get("kind") == "prod", "Exige backup do ambiente de estudo.")
+    require(snapshot.get("revision") == [BASE], "Backup não está no schema esperado.")
+    audio_files = study_rollout.json_object(manifest.get("audio_files"))
     source = recovery.source_target("prod")
-    require(manifest["source"]["database"] == source.database, "Origem divergente.")
+    require(origin.get("database") == source.database, "Origem divergente.")
     recovery.check_target(source)
     recovery.quiet(source)
     validate_restore(backup, manifest)
@@ -143,8 +168,10 @@ def run(action, backup, *, preserve_legacy=False):
         print("Prova pré-migration capturada sem conteúdo pessoal.")
         return
     proof = private_json(proof_path)
+    tables = study_rollout.checked_fingerprints(proof.get("tables"))
+    expected_audit = checked_audit(proof.get("audit"))
     require(proof["manifest"] == manifest_hash, "Prova de outro backup.")
-    require(proof["preserve_legacy"] == preserve_legacy, "Política de legado diverge da captura.")
+    require(proof["preserve_legacy"] is preserve_legacy, "Política de legado diverge da captura.")
     target = recovery.CONCURRENCY_CHECK if action == "rehearse" else source
     recovery.check_target(target)
     recovery.quiet(target)
@@ -153,8 +180,8 @@ def run(action, backup, *, preserve_legacy=False):
             recovery.query(target, recovery.SNAPSHOT_SQL) == manifest["snapshot"],
             "Clone não corresponde ao backup.",
         )
-        require(fingerprints(target) == proof["tables"], "Conteúdo restaurado diverge.")
-        audit(target, preserve_legacy=preserve_legacy, expected=proof["audit"])
+        require(fingerprints(target) == tables, "Conteúdo restaurado diverge.")
+        audit(target, preserve_legacy=preserve_legacy, expected=expected_audit)
         clone_run("alembic", "upgrade", HEAD)
         clone_run("alembic", "upgrade", HEAD)
     else:
@@ -165,13 +192,14 @@ def run(action, backup, *, preserve_legacy=False):
             and receipt.get("manifest") == manifest_hash,
             "Ensaio da migration não comprovado.",
         )
-    require(fingerprints(target) == proof["tables"], "Dados históricos divergiram; não reabrir.")
+    require(fingerprints(target) == tables, "Dados históricos divergiram; não reabrir.")
     require(
-        recovery.query(target, recovery.SNAPSHOT_SQL)["revision"] == [HEAD],
+        study_rollout.json_object(recovery.query(target, recovery.SNAPSHOT_SQL)).get("revision")
+        == [HEAD],
         "Schema não atualizado.",
     )
     verify_new_state(target)
-    audit(target, preserve_legacy=preserve_legacy, expected=proof["audit"])
+    audit(target, preserve_legacy=preserve_legacy, expected=expected_audit)
     with tempfile.TemporaryDirectory(prefix="aulas-concurrency-voice-") as directory:
         path = Path(directory) / "voice.tar"
         with path.open("xb") as stream:
@@ -181,18 +209,18 @@ def run(action, backup, *, preserve_legacy=False):
         recovery.BACKUPS / f"sprint38-{action}-{manifest['bundle_id']}.json",
         {
             "verified": True,
-            "tables": len(proof["tables"]),
+            "tables": len(tables),
             "revision": HEAD,
             "manifest": manifest_hash,
-            "audio_count": len(manifest["audio_files"]),
+            "audio_count": len(audio_files),
             "audit": proof["audit"],
             "preserve_legacy": preserve_legacy,
         },
     )
-    print(f"{action}: {len(proof['tables'])} tabelas históricas e voz preservadas; schema {HEAD}.")
+    print(f"{action}: {len(tables)} tabelas históricas e voz preservadas; schema {HEAD}.")
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["capture", "rehearse", "verify"])

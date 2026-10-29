@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -7,6 +8,26 @@ from ops.recovery_archive import RecoveryError
 
 
 class DevAlignmentTests(unittest.TestCase):
+    def test_image_inspection_requires_one_identity(self):
+        for images in (None, {}, [], [{}, {}], [None], [{}], [{"Id": None}], [{"Id": ""}]):
+            with (
+                patch.object(recovery, "docker", return_value=json.dumps(images).encode()),
+                self.assertRaises(RecoveryError),
+            ):
+                dev_alignment.image_id()
+        with patch.object(recovery, "docker", return_value=b'[{"Id":"sha256:synthetic"}]'):
+            self.assertEqual(dev_alignment.image_id(), "sha256:synthetic")
+
+    def test_malformed_manifest_is_refused_before_target(self):
+        for manifest in ({}, {"source": []}, {"source": {}, "snapshot": []}):
+            with (
+                patch.object(dev_alignment, "verify_bundle", return_value=manifest),
+                patch.object(recovery, "source_target") as target,
+                self.assertRaises(RecoveryError),
+            ):
+                dev_alignment.run("apply", Path("unused"))
+            target.assert_not_called()
+
     def test_refuses_other_sources_and_revisions_before_docker(self):
         for kind, project, revision in (
             ("prod", "aulas-ingles-prod", dev_alignment.BASE),

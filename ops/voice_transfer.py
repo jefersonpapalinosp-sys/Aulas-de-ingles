@@ -4,27 +4,38 @@ import os
 import sys
 import tarfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from recovery_archive import (
-    MAX_AUDIO,
-    MAX_FILES,
-    MAX_TOTAL,
-    require,
-    safe_storage_member,
-)
+if TYPE_CHECKING:
+    from ops.recovery_archive import (
+        MAX_AUDIO,
+        MAX_FILES,
+        MAX_TOTAL,
+        require,
+        safe_storage_member,
+    )
+else:
+    # O helper roda como /tools/voice_transfer.py com apenas estes dois arquivos montados.
+    from recovery_archive import (
+        MAX_AUDIO,
+        MAX_FILES,
+        MAX_TOTAL,
+        require,
+        safe_storage_member,
+    )
 
 ROOT = Path("/voice")
 
 
-def bounded_entries(directory, limit=MAX_FILES):
-    entries = []
+def bounded_entries(directory: Path, limit: int = MAX_FILES) -> list[Path]:
+    entries: list[Path] = []
     for entry in directory.iterdir():
         require(len(entries) < limit, "Muitas entradas no diretório de voz/quarentena.")
         entries.append(entry)
     return sorted(entries)
 
 
-def export_voice():
+def export_voice() -> None:
     # Valida toda a árvore antes de emitir o tar. Não segue symlinks.
     files = []
     for path in bounded_entries(ROOT):
@@ -72,9 +83,9 @@ def export_voice():
             )
 
 
-def import_voice():
+def import_voice() -> None:
     require(not any(ROOT.iterdir()), "Destino de voz não está vazio.")
-    seen = set()
+    seen: set[str] = set()
     total = 0
     with tarfile.open(fileobj=sys.stdin.buffer, mode="r|") as archive:
         for member in archive:
@@ -100,8 +111,11 @@ def import_voice():
                         "Diretório inseguro.",
                     )
                     os.chown(parent, 10001, 10001)
+            source = archive.extractfile(member)
+            if source is None:
+                raise RuntimeError("Entrada de voz sem conteúdo regular.")
             with (
-                archive.extractfile(member) as source,
+                source,
                 destination.open("xb") as target,
             ):
                 os.chmod(target.name, 0o600)

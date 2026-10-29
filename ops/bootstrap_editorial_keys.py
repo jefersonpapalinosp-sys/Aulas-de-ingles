@@ -9,8 +9,10 @@ import hashlib
 import json
 import sys
 from collections import Counter
+from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path
+from typing import cast
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
@@ -18,43 +20,71 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.db.editorial_identity import bootstrap_key  # noqa: E402
 
 
-def records(courses, lessons):
-    for course in courses:
-        for unit in course["units"]:
-            for item in (unit.get("review") or {}).get("questions", []):
+def record(value: object) -> dict[str, object]:
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
+        raise ValueError("Seed record must be a JSON object.")
+    # Preserve the original object: the bootstrap adds keys to this exact record.
+    return cast(dict[str, object], value)
+
+
+def record_list(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        raise ValueError("Seed collection must be a JSON list.")
+    return [record(item) for item in value]
+
+
+def coordinate(value: object) -> str | int:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (str, int))
+        or (isinstance(value, str) and not value)
+    ):
+        raise ValueError("Invalid baseline coordinate.")
+    return value
+
+
+def records(
+    courses: object, lessons: object
+) -> Iterator[tuple[str, dict[str, object], tuple[str | int, ...]]]:
+    for course in record_list(courses):
+        for unit in record_list(course["units"]):
+            for item in record_list(record(unit.get("review") or {}).get("questions", [])):
                 yield (
                     "course_review_question",
                     item,
-                    (course["slug"], unit["slug"], item["position"]),
+                    tuple(coordinate(v) for v in (course["slug"], unit["slug"], item["position"])),
                 )
-    for lesson in lessons:
-        parent = (lesson["course_slug"], lesson["number"])
+    for lesson in record_list(lessons):
+        parent = (coordinate(lesson["course_slug"]), coordinate(lesson["number"]))
         for field, table in (
             ("exercises", "exercise"),
             ("writing_prompts", "writing_prompt"),
             ("vocab", "vocab_item"),
             ("media", "lesson_media"),
         ):
-            for item in lesson.get(field, []):
-                coordinate = (*parent, item["term" if field == "vocab" else "position"])
-                yield table, item, coordinate
+            for item in record_list(lesson.get(field, [])):
+                location = (*parent, coordinate(item["term" if field == "vocab" else "position"]))
+                yield table, item, location
                 if field == "media":
-                    for cue in item.get("cues", []):
-                        yield "transcript_cue", cue, (*coordinate, cue["position"])
+                    for cue in record_list(item.get("cues", [])):
+                        yield "transcript_cue", cue, (*location, coordinate(cue["position"]))
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     paths = [ROOT / "seed/courses.json", ROOT / "seed/lessons.json"]
-    documents = [json.loads(path.read_text(encoding="utf-8")) for path in paths]
+    documents: tuple[object, object] = (
+        json.loads(paths[0].read_text(encoding="utf-8")),
+        json.loads(paths[1].read_text(encoding="utf-8")),
+    )
     original = deepcopy(documents)
     entries = list(records(*documents))
     if any("editorial_key" in item for _, item, _ in entries):
         raise SystemExit("Baseline already contains keys; preserve them, do not bootstrap again.")
-    counts = Counter()
-    seen = set()
+    counts: Counter[str] = Counter()
+    seen: set[str] = set()
     for table, item, coordinate in entries:
         key = bootstrap_key(table, *coordinate)
         if key in seen:

@@ -48,11 +48,20 @@ export function assertVolume(volume) {
   assert.equal(volume.Labels?.['org.aulas.environment'], 'disposable-e2e', 'Volume sem marcador descartável')
 }
 
+export function assertGatewayNetwork(network) {
+  assert.equal(network.Name, `${PROJECT}_gateway`, 'Rede do gateway inesperada')
+  assert.equal(network.Driver, 'bridge', 'Rede do gateway deve ser local')
+  assert.equal(network.Internal, true, 'Gateway exige rede interna')
+  assert.equal(network.Labels?.['com.docker.compose.project'], PROJECT, 'Rede de outro projeto')
+}
+
 export function assertContainer(container, service) {
   assert.equal(container.Config.Labels?.['com.docker.compose.project'], PROJECT, 'Container de outro projeto')
   assert.equal(container.Config.Labels?.['com.docker.compose.service'], service, 'Serviço inesperado')
   assert.equal(container.State.Running, true, 'Serviço E2E parado')
-  assert.deepEqual(Object.keys(container.NetworkSettings.Networks), [`${PROJECT}_default`], 'Rede não isolada')
+  const networks = service === 'gateway' ? ['gateway']
+    : ['api', 'worker'].includes(service) ? ['default', 'gateway'] : ['default']
+  assert.deepEqual(Object.keys(container.NetworkSettings.Networks).sort(), networks.map(name => `${PROJECT}_${name}`).sort(), 'Rede não isolada')
   assert.equal(container.HostConfig.Privileged, false, 'Container privilegiado não permitido')
   const mounts = container.Mounts ?? []
   const env = Object.fromEntries(container.Config.Env.map((entry) => {
@@ -64,6 +73,13 @@ export function assertContainer(container, service) {
     assert.deepEqual(container.HostConfig.PortBindings, {
       '80/tcp': [{ HostIp: '127.0.0.1', HostPort: '5198' }],
     }, 'Porta web inesperada')
+  } else if (service === 'gateway') {
+    assert.equal(mounts.length, 0, 'Gateway não pode montar dados do host')
+    assert.equal(Object.keys(container.HostConfig.PortBindings ?? {}).length, 0, 'Gateway não pode publicar portas')
+    assert.equal(container.Config.Image, 'aulas-ingles-e2e-gateway:local', 'Imagem inesperada')
+    assert.equal(container.Config.User, '65534:65534', 'Gateway não pode executar como root')
+    assert.equal(container.HostConfig.ReadonlyRootfs, true, 'Gateway deve ser somente leitura')
+    assert.equal(env.E2E_GATEWAY_ONLY, 'disposable-e2e', 'Gateway sem marcador de teste')
   } else {
     assert.equal(Object.keys(container.HostConfig.PortBindings ?? {}).length, 0, 'API/banco não devem publicar portas')
     const data = mounts.find((mount) => mount.Type === 'volume')
@@ -78,14 +94,21 @@ export function assertContainer(container, service) {
       assert.equal(env.POSTGRES_USER, 'aulas_test_admin', 'Administrador inesperado')
       assert.equal(env.POSTGRES_DB, 'postgres', 'Base inicial inesperada')
     } else {
-      assert.equal(service, 'api', 'Serviço não permitido')
+      assert.ok(['api', 'worker'].includes(service), 'Serviço não permitido')
       assert.equal(mounts.length, 1, 'API com mounts inesperados')
       assert.equal(env.APP_ENV, 'test', 'API precisa ativar as guardas de teste')
       // Não usar assert.equal aqui: o erro não pode mostrar uma URL com senha.
       assert.ok(env.DATABASE_URL === DATABASE_URL, 'API com conexão diferente da base descartável')
       assert.ok(!env.TEST_DATABASE_URL || env.TEST_DATABASE_URL === DATABASE_URL, 'Override de conexão inesperado')
       assert.equal(env.SPEAKING_STORAGE_DIR, '/app/data/speaking', 'Storage inesperado')
-      assert.equal(env.ASSISTED_FEATURES_ENABLED, 'false', 'Provedor externo deve estar desativado')
+      assert.equal(env.ASSISTED_FEATURES_ENABLED, 'true', 'E2E exige assistência sintética')
+      assert.equal(env.DIALOGUE_PRACTICE_ENABLED, 'true', 'E2E exige interface de conversa')
+      assert.equal(env.ASSIST_PROVIDER_KIND, 'gateway', 'E2E só aceita gateway sintético')
+      assert.equal(env.ASSIST_PROVIDER_NAME, 'synthetic-e2e', 'Provedor inesperado')
+      // Não mostrar valores recebidos: uma configuração incorreta pode conter segredos.
+      assert.ok(env.ASSIST_TRANSCRIPTION_URL === 'http://gateway:8080/stt', 'URL STT externa recusada')
+      assert.ok(env.ASSIST_DIALOGUE_URL === 'http://gateway:8080/dialogue', 'URL de diálogo externa recusada')
+      assert.ok(!env.ASSIST_WRITING_URL && !env.ASSIST_PROVIDER_TOKEN, 'Credenciais/URL externa recusadas')
       assert.equal(env.ASSIST_WRITING_ENABLED, 'false', 'Assistência externa deve estar desativada')
       assert.equal(env.ASSIST_TRANSCRIPTION_ENABLED, 'false', 'Transcrição externa deve estar desativada')
     }
@@ -102,6 +125,10 @@ export function checkResources(requireExisting = false) {
     if (existing.has(name)) assertVolume(JSON.parse(docker(['volume', 'inspect', name]))[0])
     else assert.ok(!requireExisting, 'Volume E2E ausente; execute make e2e-up')
   }
+  const networks = docker(['network', 'ls', '--format', '{{.Name}}']).split('\n')
+  if (networks.includes(`${PROJECT}_gateway`)) {
+    assertGatewayNetwork(JSON.parse(docker(['network', 'inspect', `${PROJECT}_gateway`]))[0])
+  } else assert.ok(!requireExisting, 'Rede interna do gateway ausente')
 }
 
 export function readSentinel() {
@@ -115,7 +142,7 @@ export function readSentinel() {
 export async function checkStack(baseURL = BASE_URL) {
   assertTarget(baseURL)
   checkResources(true)
-  for (const service of ['db', 'api', 'web']) {
+  for (const service of ['db', 'api', 'web', 'worker', 'gateway']) {
     const id = docker([...compose, 'ps', '-q', service])
     assert.match(id, /^[a-f0-9]+$/, 'Serviço E2E ausente ou ambíguo')
     assertContainer(JSON.parse(docker(['inspect', id]))[0], service)
@@ -127,7 +154,16 @@ export async function checkStack(baseURL = BASE_URL) {
   })
   assert.equal(response.status, 200, 'Readiness E2E falhou')
   const health = await response.json()
-  assert.ok(health.env === 'test' && health.db === 'up' && health.status === 'ok', 'HTTP não aponta para API de teste pronta')
+  // Identidade test já foi comprovada nos containers e no banco acima.
+  // A resposta pública não divulga ambiente ou revisões (BE-49).
+  assertPublicReadiness(health)
+}
+
+export function assertPublicReadiness(health) {
+  assert.ok(health?.db === 'up' && health.status === 'ok' && health.schema === 'compatible', 'Readiness pública incompatível')
+  for (const field of ['env', 'version', 'schema_current', 'schema_required']) {
+    assert.ok(!(field in health), 'Readiness pública expõe detalhes internos')
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

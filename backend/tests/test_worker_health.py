@@ -15,6 +15,8 @@ from app.db.models import WorkerHeartbeat
 from app.db.session import dispose_engine, get_sessionmaker
 from app.services import maintenance
 
+pytestmark = pytest.mark.timezone
+
 SEGREDOS = ("postgresql", "asyncpg", "@", "aulas_test_only")
 
 

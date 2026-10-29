@@ -164,7 +164,7 @@ jobs:
   recovery:
     name: recovery · backup de banco e voz + restore isolado
     runs-on: ubuntu-latest
-    # Três laboratórios com builds frios (recovery, upgrade DB-42, papéis).
+    # Recovery, upgrade DB-42, conversa INFRA-48 e papéis; builds compartilham cache.
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -177,6 +177,7 @@ jobs:
       - name: lint e guardas operacionais sem banco
         run: |
           uv run --project backend ruff check --config backend/pyproject.toml ops
+          uv run --project backend mypy --config-file mypy-ops.ini
           make test-recovery
       - name: PostgreSQL por digest, com origens equivalentes e espera limitada
         run: bash ops/ci_pull_postgres.sh
@@ -197,6 +198,14 @@ jobs:
       - name: encerra laboratório DB-42 sem remover volumes
         if: always()
         run: make upgrade-lab-down
+      - name: backup de conversa, restauração e leitura pela aplicação (INFRA-48)
+        run: |
+          uv run --project backend python -m ops.dialogue_recovery up
+          uv run --project backend python -m ops.dialogue_recovery prepare
+          uv run --project backend python -m ops.dialogue_recovery check
+      - name: encerra somente o laboratório INFRA-48; preserva volumes
+        if: always()
+        run: uv run --project backend python -m ops.dialogue_recovery down
       - name: ensaio sintético de papéis separados
         run: |
           make roles-lab-up
@@ -253,10 +262,10 @@ jobs:
       - name: falhas controladas de banco, provedor e retomada do worker
         working-directory: .
         run: make test-failure-rehearsal
-      - name: a suíte roda igual em outro fuso
+      - name: cenários temporais rodam igual em outro fuso
         env:
           TZ: Pacific/Kiritimati
-        run: uv run pytest -q
+        run: uv run pytest -q --strict-markers -m timezone
       - name: o contrato continua válido depois do cutover de 13/11/2026
         # conftest respeita LEGACY_WRITES_UNTIL do ambiente: writes sem revisão
         # recebem 428 e testes marcados legacy_client são pulados. Roda os
@@ -270,6 +279,9 @@ jobs:
           tests/test_dashboard.py tests/test_practice.py tests/test_media.py
           tests/test_activity.py tests/test_course_reviews.py tests/test_account_deletion.py
           tests/test_editorial_archive.py tests/test_publication.py tests/test_assist_quota.py
+          tests/test_dialogue_routes.py tests/test_dialogue_learning.py tests/test_dialogue_security.py
+          tests/test_dialogue_frontend_contract.py
+          tests/test_dialogue_check_details.py
       - name: encerra apenas a base descartável do job
         if: always()
         run: docker compose -f ../infra/compose.test.yml down
@@ -301,12 +313,14 @@ jobs:
         run: npm run build
       - name: orçamento de performance
         run: npm run check:budget
+      - name: regressão dos limites de bundle
+        run: npm run test:scripts
       - name: dependências dos testes de navegador isolados
         run: npm ci --prefix ../e2e
       - name: Chromium para validar a fila entre abas (sem API ou banco)
         working-directory: e2e
         run: npx playwright install --with-deps chromium
-      - name: fila entre abas e recuperação de telas (isoladas)
+      - name: fila, recuperação e conversa desktop/mobile (isoladas)
         working-directory: e2e
         run: npm run test:queue
       - name: atualização PWA entre abas e instalação interrompida (sem API ou banco)
@@ -343,12 +357,12 @@ jobs:
         run: npm run test:safety
       - name: sobe somente a stack descartável (migration e seed sob guarda)
         run: make e2e-up
-      - name: roda o E2E
+      - name: roda o E2E desktop/mobile, incluindo diálogo com worker e gateway sintético
         working-directory: e2e
         run: npm test
       - name: logs da API quando falha
         if: failure()
-        run: docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml logs api prepare
+        run: docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml logs api prepare worker gateway
       - name: guarda o trace quando falha
         if: failure()
         uses: actions/upload-artifact@v4

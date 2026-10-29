@@ -137,7 +137,7 @@ def migrate_with_lock_sampling() -> tuple[float, int]:
         exit_code = docker("wait", container_id).decode().strip()
         require(exit_code == "0", "Migration falhou; destino parcial foi preservado.")
     finally:
-        docker("rm", container_id)
+        docker("rm", "-f", container_id)
     return round(time.monotonic() - started, 3), maximum_waiting
 
 

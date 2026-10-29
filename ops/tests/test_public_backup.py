@@ -5,6 +5,7 @@ import json
 import tarfile
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -208,6 +209,57 @@ class PublicBackupTests(unittest.TestCase):
                 "papalino_aulas-ingles-worker-1",
             },
         )
+
+    def test_invalid_snapshot_never_starts_dump_or_publishes_bundle(self):
+        for bad in (
+            None, [], {"revision": ["v"]},
+            {**SNAPSHOT, "revision": "private"},
+            {**SNAPSHOT, "revision": [1]},
+            {**SNAPSHOT, "counts": {"users": True}},
+            {**SNAPSHOT, "counts": {"users": -1}},
+            {**SNAPSHOT, "audio": ["private"]},
+        ):
+            with self.subTest(bad=bad):
+                self.remote.snapshots = [bad]
+                self.remote.commands.clear()
+                with self.assertRaises(RecoveryError) as error:
+                    public_backup.capture("root@vm.test")
+                self.assertNotIn("private", str(error.exception))
+                self.assertFalse(any("pg_dump" in command for command in self.remote.commands))
+                self.assertEqual(list(self.root.glob("aulas-*")), [])
+
+    def test_snapshot_extensions_are_preserved_in_drift_comparison(self):
+        self.remote.snapshots = [
+            {**SNAPSHOT, "extension": {"value": 1}},
+            {**SNAPSHOT, "extension": {"value": 2}},
+        ]
+        with self.assertRaisesRegex(RecoveryError, public_backup.DRIFT):
+            public_backup.capture("root@vm.test", attempts=1)
+        self.assertEqual(list(self.root.glob("aulas-*")), [])
+
+    def test_invalid_receipt_metadata_does_not_create_receipt_directory(self):
+        for manifest in ({}, {"snapshot": SNAPSHOT, "audio_files": [], "application": {}}):
+            with self.assertRaises(RecoveryError):
+                public_backup.write_receipt(manifest)
+        self.assertFalse(public_backup.receipts_dir().exists())
+
+    def test_cli_local_capture_and_preflight_render_typed_reports(self):
+        for arguments in (["check"], ["check", "--json"], ["capture"], ["capture", "--json"]):
+            output = io.StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(public_backup.main(arguments), 0)
+            self.assertNotIn("DATABASE_URL", output.getvalue())
+            if "--json" in arguments:
+                report = json.loads(output.getvalue())
+                self.assertEqual(report["revision"], SNAPSHOT["revision"])
+
+    def test_cli_capture_failure_does_not_announce_success(self):
+        self.remote.snapshots = [{"revision": "private"}]
+        output, errors = io.StringIO(), io.StringIO()
+        with redirect_stdout(output), redirect_stderr(errors):
+            self.assertEqual(public_backup.main(["capture", "--json"]), 1)
+        self.assertEqual(output.getvalue(), "")
+        self.assertNotIn("private", errors.getvalue())
 
 
 if __name__ == "__main__":

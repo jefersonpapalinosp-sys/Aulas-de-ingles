@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 Weekday = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 RecommendationKind = Literal[
-    "review", "continue_lesson", "start_lesson", "course_review", "practice"
+    "review", "continue_lesson", "start_lesson", "course_review", "practice", "conversation"
 ]
 
 

@@ -10,7 +10,9 @@ from app.core.config import get_settings
 from app.db.models import WorkerHeartbeat
 from app.db.session import get_sessionmaker
 
-SCOPES = ("transcriptions", "reservations", "refresh", "pending")
+# `dialogues` anonimiza texto de turno vencido; os outros apagam ou liberam
+# linha. A ordem importa no `sweep`: ver `scopes` lá.
+SCOPES = ("transcriptions", "reservations", "refresh", "pending", "dialogues")
 
 
 async def retention_batch(kind: str, *, apply: bool = False, limit: int = 100) -> int:
@@ -30,7 +32,11 @@ async def sweep() -> dict[str, int]:
     from app.services.account_deletion import status_counts
 
     settings = get_settings()
-    scopes = SCOPES if settings.maintenance_cleanup_enabled else SCOPES[:2]
+    # `dialogues` roda sempre, junto dos dois primeiros: ele não apaga linha
+    # nem toca em arquivo — só anonimiza texto já vencido. Deixá-lo atrás da
+    # flag de limpeza manteria transcrição de aluno além do prazo em qualquer
+    # instalação que não a ligou, e o prazo é promessa, não preferência.
+    scopes = SCOPES if settings.maintenance_cleanup_enabled else (*SCOPES[:2], "dialogues")
     counts = {
         scope: await retention_batch(scope, apply=True, limit=settings.maintenance_batch_size)
         for scope in scopes

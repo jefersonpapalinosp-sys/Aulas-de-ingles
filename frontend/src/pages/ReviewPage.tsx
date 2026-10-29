@@ -11,38 +11,13 @@ import {
   useSuspendedReviewItems,
 } from '../api/review'
 import { useCourseCurriculum, useCourses } from '../api/queries'
-import { Markdown } from '../components/Markdown'
 import { Carregando, Erro } from '../components/States'
+import { ReviewCard } from '../features/review/ReviewCard'
+import { ReviewFilters } from '../features/review/ReviewFilters'
+import { inHowLong, NOTES } from '../features/review/reviewLabels'
+import { SuspendedItems } from '../features/review/SuspendedItems'
 import { DEFAULT_COURSE_SLUG, todayPath } from '../routing/courseRoutes'
 import { usePagedItems } from './usePagedItems'
-
-const NOTES = [
-  { key: '1', label: 'Errei', quality: 1, className: 'errei' },
-  { key: '2', label: 'Difícil', quality: 3, className: 'dificil' },
-  { key: '3', label: 'Bom', quality: 4, className: 'bom' },
-  { key: '4', label: 'Fácil', quality: 5, className: 'facil' },
-] as const
-
-const TYPE_LABELS: Record<ReviewItemType, string> = {
-  vocabulary: 'Vocabulário',
-  grammar_error: 'Erro gramatical',
-  phrase: 'Frase',
-  listening: 'Listening',
-  writing_prompt: 'Escrita',
-  speaking_prompt: 'Speaking',
-}
-
-function inHowLong(days: number): string {
-  if (days === 1) return 'amanhã'
-  if (days < 30) return `em ${days} dias`
-  if (days < 365) return `em ${Math.round(days / 30)} meses`
-  return `em ${(days / 365).toFixed(1)} anos`
-}
-
-function durationLabel(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`
-  return `${Math.ceil(seconds / 60)} min`
-}
 
 export function ReviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -208,97 +183,21 @@ export function ReviewPage() {
               : 'Marque uma aula como estudada ou pratique: vocabulário e erros relevantes entram aqui.'}
       </p>
 
-      <div className="review-filters" aria-label="Escopo da revisão">
-        <label>
-          Curso
-          <select
-            value={courseSlug}
-            onChange={(event) => setScope(event.target.value)}
-          >
-            {(courses.data ?? []).map((course) => (
-              <option key={course.slug} value={course.slug}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Unidade
-          <select
-            value={unitSlug}
-            onChange={(event) => setScope(courseSlug, event.target.value)}
-          >
-            <option value="">Todas as unidades</option>
-            {(curriculum.data?.units ?? []).map((unit) => (
-              <option key={unit.slug} value={unit.slug}>
-                {unit.title}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="review-filters" aria-label="Filtros da revisão">
-        <label>
-          Tipo
-          <select
-            value={itemType}
-            onChange={(event) => {
-              setItemType(event.target.value as ReviewItemType | '')
-              setFlipped(false)
-            }}
-          >
-            <option value="">Todos</option>
-            {Object.entries(TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Competência
-          <select
-            value={skill}
-            onChange={(event) => {
-              setSkill(event.target.value)
-              setFlipped(false)
-            }}
-          >
-            <option value="">Todas</option>
-            <option value="vocabulary">Vocabulário</option>
-            <option value="grammar">Gramática</option>
-            <option value="listening">Listening</option>
-            <option value="writing">Escrita</option>
-            <option value="speaking">Fala</option>
-          </select>
-        </label>
-        <label>
-          Duração
-          <select
-            value={maxMinutes}
-            onChange={(event) => {
-              setMaxMinutes(event.target.value ? Number(event.target.value) : '')
-              setFlipped(false)
-            }}
-          >
-            <option value="">Qualquer</option>
-            <option value="2">Até 2 min</option>
-            <option value="5">Até 5 min</option>
-            <option value="10">Até 10 min</option>
-          </select>
-        </label>
-        {hasActivityFilters && (
-          <button
-            type="button"
-            onClick={() => {
-              setItemType('')
-              setSkill('')
-              setMaxMinutes('')
-            }}
-          >
-            Limpar filtros
-          </button>
-        )}
-      </div>
+      <ReviewFilters
+        courseSlug={courseSlug}
+        unitSlug={unitSlug}
+        courses={courses.data ?? []}
+        units={curriculum.data?.units ?? []}
+        itemType={itemType}
+        skill={skill}
+        maxMinutes={maxMinutes}
+        hasActivityFilters={hasActivityFilters}
+        onScope={setScope}
+        onItemType={(value) => { setItemType(value); setFlipped(false) }}
+        onSkill={(value) => { setSkill(value); setFlipped(false) }}
+        onMaxMinutes={(value) => { setMaxMinutes(value); setFlipped(false) }}
+        onClear={() => { setItemType(''); setSkill(''); setMaxMinutes('') }}
+      />
 
       {lastMessage && <p className="ultima" role="status">{lastMessage}</p>}
       {pendingGrade && <p role="status">{gradeFailure ? 'Resultado não confirmado. Sua resposta foi preservada.' : 'Confirmando revisão…'}</p>}
@@ -312,126 +211,34 @@ export function ReviewPage() {
       )}
 
       {item && (
-        <>
-          <div className="review-card-meta">
-            <span>{TYPE_LABELS[item.item_type]}</span>
-            <span>{item.skill}</span>
-            <span>{durationLabel(item.estimated_seconds)}</span>
-            <span>{item.course_title} · Aula {item.lesson_number}</span>
-          </div>
-          <aside className="review-reason">
-            <strong>Por que voltou?</strong>
-            <span>{item.reason}</span>
-          </aside>
-
-          <div className={`carta review-${item.item_type}`}>
-            <p className="carta-origem">
-              {item.course_title} · Aula {item.lesson_number} · {TYPE_LABELS[item.item_type]}
-            </p>
-            <div className="carta-termo"><Markdown>{item.prompt}</Markdown></div>
-            {item.prompt_note && <p className="carta-ipa">{item.prompt_note}</p>}
-            {item.media_url && (
-              <audio className="review-audio" controls preload="metadata" src={item.media_url}>
-                Seu navegador não suporta áudio.
-              </audio>
-            )}
-
-            {flipped ? (
-              <div className="carta-verso">
-                <div className="carta-traducao"><Markdown>{item.answer}</Markdown></div>
-                {item.context && <div className="carta-exemplo"><Markdown>{item.context}</Markdown></div>}
-              </div>
-            ) : (
-              <button className="btn virar" onClick={() => setFlipped(true)}>
-                Mostrar resposta
-              </button>
-            )}
-          </div>
-
-          {flipped && (
-            <div className="notas">
-              {NOTES.map((note) => (
-                <button
-                  key={note.quality}
-                  className={`nota ${note.className}`}
-                  onClick={() => answer(note.quality)}
-                  disabled={grade.isPending || Boolean(pendingGrade)}
-                >
-                  <span className="nota-rotulo">{note.label}</span>
-                  <span className="nota-tecla">{note.key}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="review-item-actions">
-            <span>
-              {flipped ? '1–4 para avaliar' : 'espaço ou enter para revelar'} ·{' '}
-              {item.repetitions === 0
-                ? 'primeira vez'
-                : `${item.repetitions} acertos, ${item.lapses} tropeços`}
-            </span>
-            <button type="button" onClick={suspendCurrent} disabled={setStatus.isPending || Boolean(pendingGrade)}>
-              Suspender item
-            </button>
-            <button type="button" onClick={() => remove(item.id)} disabled={deleteItem.isPending || Boolean(pendingGrade)}>
-              Excluir item
-            </button>
-          </div>
-        </>
+        <ReviewCard
+          item={item}
+          flipped={flipped}
+          grading={grade.isPending}
+          blocked={Boolean(pendingGrade)}
+          suspending={setStatus.isPending}
+          removing={deleteItem.isPending}
+          onFlip={() => setFlipped(true)}
+          onAnswer={answer}
+          onSuspend={suspendCurrent}
+          onRemove={() => remove(item.id)}
+        />
       )}
 
-      {(suspended.error || suspendedItems.length > 0) && (
-        <section className="review-suspended">
-          <div className="sec-h">
-            <span className="num">PAUSA</span>
-            <h2>Itens suspensos</h2>
-          </div>
-          {suspended.error && <p role="alert">Falha ao carregar.</p>}
-          <ul>
-            {suspendedItems.map((suspendedItem) => (
-              <li key={suspendedItem.id}>
-                <div>
-                  <span>
-                    {suspendedItem.course_title} · Aula {suspendedItem.lesson_number} ·{' '}
-                    {TYPE_LABELS[suspendedItem.item_type]}
-                  </span>
-                  <strong>{suspendedItem.prompt}</strong>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setStatus.mutate(
-                    { itemId: suspendedItem.id, status: 'active' },
-                    { onSuccess: () => setSuspendedItems((current) =>
-                      current.filter((entry) => entry.id !== suspendedItem.id)) },
-                  )}
-                >
-                  Reativar
-                </button>
-                <button type="button" onClick={() => remove(suspendedItem.id)}>Excluir</button>
-              </li>
-            ))}
-          </ul>
-          {nextSuspendedCursor && (
-            <button
-              type="button"
-              className="btn ghost"
-              disabled={suspended.isFetching}
-              onClick={() => {
-                suspendedLoadingMore.current = true
-                setSuspendedCursor(nextSuspendedCursor)
-              }}
-            >
-              {suspended.isFetching ? 'Carregando mais…' : 'Carregar mais'}
-            </button>
-          )}
-          {suspendedItems.length > 0 && (
-            <p ref={suspendedStatusRef} tabIndex={-1} role="status">
-              {suspendedItems.length} suspensos carregados.
-            </p>
-          )}
-        </section>
-      )}
+      <SuspendedItems
+        items={suspendedItems}
+        failed={Boolean(suspended.error)}
+        fetching={suspended.isFetching}
+        nextCursor={nextSuspendedCursor ?? undefined}
+        statusRef={suspendedStatusRef}
+        onReactivate={(itemId) => setStatus.mutate(
+          { itemId, status: 'active' },
+          { onSuccess: () => setSuspendedItems((current) =>
+            current.filter((entry) => entry.id !== itemId)) },
+        )}
+        onRemove={remove}
+        onLoadMore={(cursor) => { suspendedLoadingMore.current = true; setSuspendedCursor(cursor) }}
+      />
 
       {!item && (
         <p className="navbtns">

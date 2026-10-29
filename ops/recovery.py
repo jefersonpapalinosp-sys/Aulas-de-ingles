@@ -7,9 +7,11 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import IO, Any
 from urllib.parse import urlsplit
 
 from ops.recovery_archive import (
@@ -27,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BACKUPS = ROOT / "backups" / "recovery"
 PROJECT = "aulas-ingles-recovery"
 UPGRADE_PROJECT = "aulas-ingles-upgrade42"
+DIALOGUE_PROJECT = "aulas-ingles-recovery48"
 HELPER = "aulas-ingles-recovery-tools:local"
 POSTGRES = "public.ecr.aws/docker/library/postgres:16.15-alpine"
 UPGRADE_FROM = "e41f6c2a8d90"
@@ -38,6 +41,7 @@ CONFIRM_ASSIST_CHECK = "aulas-ingles-recovery/assist-check-db"
 CONFIRM_DEV39_CHECK = "aulas-ingles-recovery/dev39-check-db"
 CONFIRM_STUDY39_CHECK = "aulas-ingles-recovery/study39-check-db"
 CONFIRM_UPGRADE42 = "aulas-ingles-upgrade42/target-db"
+CONFIRM_DIALOGUE = "aulas-ingles-recovery48/target-db"
 
 
 @dataclass(frozen=True)
@@ -67,6 +71,16 @@ RESTORE = Target(
     "aulas_restore",
     f"{PROJECT}_target_db",
     f"{PROJECT}_target_voice",
+    "aulas-ingles:recovery-target:v1",
+)
+DIALOGUE_LAB = Target(
+    DIALOGUE_PROJECT, "source-db", "aulas_ingles_test", "aulas_test",
+    f"{DIALOGUE_PROJECT}_source_db", f"{DIALOGUE_PROJECT}_source_voice",
+    "aulas-ingles:disposable-test:v1",
+)
+DIALOGUE_RESTORE = Target(
+    DIALOGUE_PROJECT, "target-db", "aulas_ingles_restore", "aulas_restore",
+    f"{DIALOGUE_PROJECT}_target_db", f"{DIALOGUE_PROJECT}_target_voice",
     "aulas-ingles:recovery-target:v1",
 )
 UPGRADE_LAB = Target(
@@ -153,9 +167,13 @@ DESTINATIONS = {
     CONFIRM_STUDY39_CHECK: STUDY39_CHECK,
 }
 UPGRADE_DESTINATIONS = {CONFIRM_UPGRADE42: UPGRADE_RESTORE}
+DIALOGUE_DESTINATIONS = {CONFIRM_DIALOGUE: DIALOGUE_RESTORE}
 
 
-def run(args, *, stdin=None, stdout=None, timeout=120, reject_stderr=False):
+def run(
+    args: Sequence[str], *, stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None, timeout: float = 120, reject_stderr: bool = False,
+) -> bytes:
     try:
         result = subprocess.run(
             args,
@@ -178,11 +196,15 @@ def run(args, *, stdin=None, stdout=None, timeout=120, reject_stderr=False):
         ) from exc
 
 
-def docker(*args, **kwargs):
-    return run(["docker", *args], **kwargs)
+def docker(
+    *args: str, stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None, timeout: float = 120, reject_stderr: bool = False,
+) -> bytes:
+    return run(["docker", *args], stdin=stdin, stdout=stdout, timeout=timeout,
+               reject_stderr=reject_stderr)
 
 
-def local_daemon():
+def local_daemon() -> None:
     if os.environ.get("DOCKER_HOST"):
         require(
             os.environ["DOCKER_HOST"].startswith("unix:///"), "Docker remoto recusado."
@@ -198,7 +220,9 @@ def local_daemon():
     )
 
 
-def validate_volume(value, project, name, disposable):
+def validate_volume(
+    value: dict[str, Any], project: str, name: str, disposable: bool
+) -> None:
     require(
         value["Name"] == name
         and value["Driver"] == "local"
@@ -217,12 +241,12 @@ def validate_volume(value, project, name, disposable):
         )
 
 
-def volume(name, project, disposable=True):
+def volume(name: str, project: str, disposable: bool = True) -> None:
     value = json.loads(docker("volume", "inspect", name))[0]
     validate_volume(value, project, name, disposable)
 
 
-def lab_resources():
+def lab_resources() -> None:
     local_daemon()
     existing = set(
         docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
@@ -249,7 +273,7 @@ def lab_resources():
             volume(name, PROJECT)
 
 
-def upgrade_lab_resources():
+def upgrade_lab_resources() -> None:
     local_daemon()
     existing = set(
         docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
@@ -264,7 +288,7 @@ def upgrade_lab_resources():
             volume(name, UPGRADE_PROJECT)
 
 
-def container(project, service):
+def container(project: str, service: str) -> dict[str, Any]:
     ids = (
         docker(
             "ps",
@@ -279,6 +303,8 @@ def container(project, service):
     )
     require(len(ids) == 1, "Container ausente ou ambíguo; alvo não confirmado.")
     value = json.loads(docker("inspect", ids[0]))[0]
+    if not isinstance(value, dict):
+        raise RecoveryError("Resposta de inspeção do container inválida.")
     labels = value["Config"].get("Labels") or {}
     require(
         labels.get("com.docker.compose.project") == project
@@ -288,12 +314,17 @@ def container(project, service):
     return value
 
 
-def env_of(info):
+def env_of(info: dict[str, Any]) -> dict[str, str]:
     return dict(item.split("=", 1) for item in info["Config"]["Env"] if "=" in item)
 
 
-def source_target(source):
-    require(source in {"lab", "upgrade-lab", "dev", "prod"}, "Origem não permitida.")
+def source_target(source: str) -> Target:
+    require(
+        source in {"lab", "dialogue-lab", "upgrade-lab", "dev", "prod"},
+        "Origem não permitida.",
+    )
+    if source == "dialogue-lab":
+        return DIALOGUE_LAB
     if source == "lab":
         return LAB
     if source == "upgrade-lab":
@@ -327,7 +358,7 @@ def source_target(source):
     )
 
 
-def db_args(target, command):
+def db_args(target: Target, command: str) -> list[str]:
     info = container(target.project, target.service)
     return [
         "exec",
@@ -345,12 +376,13 @@ def db_args(target, command):
     ]
 
 
-def query(target, sql):
+def query(target: Target, sql: str) -> Any:
+    # Fronteira JSON do psql: o SQL define se retorna escalar, lista ou objeto.
     raw = docker(*db_args(target, "psql"), "-XAt", "-v", "ON_ERROR_STOP=1", "-c", sql)
     return json.loads(raw)
 
 
-def expected_bind_source(actual, expected):
+def expected_bind_source(actual: object, expected: Path) -> bool:
     # Docker Desktop pode expor o caminho da VM; não aceitar prefixos arbitrários.
     allowed = {str(expected)}
     if sys.platform == "darwin":
@@ -358,7 +390,7 @@ def expected_bind_source(actual, expected):
     return actual in allowed
 
 
-def check_target(target):
+def check_target(target: Target) -> dict[str, Any]:
     local_daemon()
     info = container(target.project, target.service)
     require(info["State"]["Running"], "Banco não está ativo.")
@@ -377,16 +409,16 @@ def check_target(target):
         set(info["NetworkSettings"]["Networks"]) == {f"{target.project}_default"},
         "Banco conectado a rede inesperada.",
     )
-    if target.project in {PROJECT, UPGRADE_PROJECT}:
+    if target.project in {PROJECT, UPGRADE_PROJECT, DIALOGUE_PROJECT}:
         require(
             not info["HostConfig"].get("PortBindings"),
             "Laboratório não pode publicar portas.",
         )
         require(len(info["Mounts"]) == 2, "Mount adicional no laboratório.")
-        init = next((m for m in info["Mounts"] if m["Type"] == "bind"), {})
+        init: dict[str, Any] = next((m for m in info["Mounts"] if m["Type"] == "bind"), {})
         filename = (
             "test-db-init.sql"
-            if target in {LAB, UPGRADE_LAB}
+            if target in {LAB, UPGRADE_LAB, DIALOGUE_LAB}
             else "restore-db-init.sql"
         )
         require(
@@ -404,7 +436,7 @@ def check_target(target):
                 "Banco de desenvolvimento deve estar somente em 127.0.0.1:5433.",
             )
     for name in (target.db_volume, target.voice_volume):
-        volume(name, target.project, target.project == PROJECT)
+        volume(name, target.project, target.project in {PROJECT, DIALOGUE_PROJECT})
     identity = query(
         target,
         """
@@ -442,7 +474,7 @@ def check_target(target):
     return info
 
 
-def quiet(target):
+def quiet(target: Target) -> None:
     # Não para containers nem encerra sessões; o operador deve abrir janela de manutenção.
     if target.project in {"aulas-ingles", "aulas-ingles-prod"}:
         for service in ("api", "worker"):
@@ -511,12 +543,16 @@ SELECT json_build_object(
 """
 
 
-def voice(target, action, *, stdin=None, stdout=None):
+def voice(
+    target: Target, action: str, *, stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None,
+) -> None:
     require(action in {"export", "import"}, "Ação de voz inválida.")
     require(
         action != "import"
         or target in DESTINATIONS.values()
-        or target in UPGRADE_DESTINATIONS.values(),
+        or target in UPGRADE_DESTINATIONS.values()
+        or target in DIALOGUE_DESTINATIONS.values(),
         "Escrita de voz só no destino descartável.",
     )
     args = [
@@ -569,7 +605,7 @@ def voice(target, action, *, stdin=None, stdout=None):
 
 
 @contextmanager
-def lease(name):
+def lease(name: str) -> Iterator[None]:
     # Nome global no daemon impede duas cópias do repo restaurarem o mesmo alvo juntas.
     lock = (
         docker(
@@ -593,7 +629,7 @@ def lease(name):
         docker("rm", lock)
 
 
-def application_info(target):
+def application_info(target: Target) -> dict[str, object]:
     deployed = []
     if target.project in {"aulas-ingles", "aulas-ingles-prod"}:
         for service in ("api", "worker"):
@@ -615,14 +651,14 @@ def application_info(target):
     }
 
 
-def backup(source):
+def backup(source: str) -> Path:
     local_daemon()
     target = source_target(source)
     info = check_target(target)
     quiet(target)
     with lease(f"backup-{source}"):
 
-        def capture(staging):
+        def capture(staging: Path) -> dict[str, object]:
             quiet(target)
             snapshot = query(target, SNAPSHOT_SQL)
             with (staging / "database.dump").open("xb") as stream:
@@ -672,13 +708,18 @@ SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamesp
 """
 
 
-def restore(path, confirm):
+def restore(path: str | Path, confirm: str) -> Path:
     require(
-        confirm in DESTINATIONS or confirm in UPGRADE_DESTINATIONS,
+        confirm in DESTINATIONS
+        or confirm in UPGRADE_DESTINATIONS
+        or confirm in DIALOGUE_DESTINATIONS,
         "Confirme explicitamente um destino isolado permitido.",
     )
-    destination = (DESTINATIONS | UPGRADE_DESTINATIONS)[confirm]
+    destination = (DESTINATIONS | UPGRADE_DESTINATIONS | DIALOGUE_DESTINATIONS)[confirm]
     manifest = verify_bundle(path)  # Antes de qualquer comando Docker ou mutação.
+    audio_files = manifest["audio_files"]
+    if not isinstance(audio_files, dict):
+        raise RecoveryError("Inventário de voz inválido.")
     check_target(destination)
     started = time.monotonic()
     with lease("restore"):
@@ -739,7 +780,7 @@ def restore(path, confirm):
                 "bundle_id": manifest["bundle_id"],
                 "target": confirm,
                 "manifest": file_info(Path(path) / "manifest.json"),
-                "audio_count": len(manifest["audio_files"]),
+                "audio_count": len(audio_files),
                 "seconds": round(time.monotonic() - started, 3),
                 "verified": True,
             },
@@ -747,23 +788,24 @@ def restore(path, confirm):
         return receipt
 
 
-def lab_prepare():
+def lab_prepare() -> None:
     check_target(LAB)
     with lease("backup-lab"):
         _prepare_empty_lab()
 
 
-def _prepare_empty_lab():
-    quiet(LAB)
+def _prepare_empty_lab(target: Target = LAB) -> None:
+    require(target in {LAB, DIALOGUE_LAB}, "Origem sintética não autorizada.")
+    quiet(target)
     require(
-        query(LAB, EMPTY_SQL) == 0,
+        query(target, EMPTY_SQL) == 0,
         "Origem de ensaio já preparada; não sobrescrever dados.",
     )
     args = [
         "run",
         "--rm",
         "--network",
-        f"{PROJECT}_default",
+        f"{target.project}_default",
         "-e",
         "APP_ENV=test",
         "-e",
@@ -771,16 +813,21 @@ def _prepare_empty_lab():
         "-e",
         "SPEAKING_STORAGE_DIR=/app/data/speaking",
         "--mount",
-        f"type=volume,src={LAB.voice_volume},dst=/app/data/speaking",
+        f"type=volume,src={target.voice_volume},dst=/app/data/speaking",
         "--mount",
         f"type=bind,src={ROOT / 'ops'},dst=/tools,readonly",
         HELPER,
     ]
     docker(*args, "python", "-m", "app.testing", "prepare", timeout=180)
     docker(*args, "python", "/tools/recovery_fixture.py", timeout=60)
+    if target == DIALOGUE_LAB:
+        args[-1:-1] = ["-e", "DIALOGUE_RECOVERY_ONLY=disposable-recovery48"]
+        docker(*args, "python", "/tools/dialogue_recovery_data.py", "prepare", timeout=60)
 
 
-def upgrade_lab_prepare():
+def upgrade_lab_prepare() -> None:
+    from ops.rollback_image import IMAGE as previous_image
+
     check_target(UPGRADE_LAB)
     with lease("upgrade42-source"):
         quiet(UPGRADE_LAB)
@@ -829,16 +876,20 @@ def upgrade_lab_prepare():
                 not audio_inventory(current_voice),
                 "Origem de voz já contém dados; preparação recusada.",
             )
-        docker(*args, "python", "/tools/recovery_fixture.py", timeout=60)
+        # O schema anterior deve receber dados dos modelos anteriores. Os
+        # modelos atuais já incluem colunas aditivas (origin/kind, por exemplo)
+        # que só existirão depois da migration ensaiada no clone restaurado.
+        fixture_args = [*args[:-1], previous_image]
+        docker(*fixture_args, "python", "/tools/recovery_fixture.py", timeout=60)
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> int:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     capture = commands.add_parser("backup")
     capture.add_argument(
-        "--source", choices=("lab", "upgrade-lab", "dev", "prod"), required=True
+        "--source", choices=("lab", "dialogue-lab", "upgrade-lab", "dev", "prod"), required=True
     )
     verify = commands.add_parser("verify")
     verify.add_argument("bundle", type=Path)
@@ -847,7 +898,7 @@ def main(argv=None):
     load.add_argument(
         "--confirm",
         required=True,
-        choices=tuple(DESTINATIONS | UPGRADE_DESTINATIONS),
+        choices=tuple(DESTINATIONS | UPGRADE_DESTINATIONS | DIALOGUE_DESTINATIONS),
     )
     commands.add_parser("lab-resources")
     commands.add_parser("lab-prepare")

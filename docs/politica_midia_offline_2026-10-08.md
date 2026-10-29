@@ -92,6 +92,30 @@ Reavaliar a decisão quando ocorrer pelo menos uma destas condições:
 - necessidade de regressão visual automatizada por componente;
 - duplicação comprovada de estados de loading, vazio, erro ou acessibilidade.
 
+## Texto do turno de conversa no provedor externo (SEC-46)
+
+Esta política trata de mídia; o parceiro de conversa acrescenta um fluxo de
+**texto** que precisa ficar registrado no mesmo lugar, porque ele nasce de uma
+gravação.
+
+- O áudio de um turno falado é transcrito e **não** é enviado ao provedor de
+  conversa, que é só de texto. Os dois provedores são declarados e revisados
+  separadamente.
+- O que sai para o provedor de conversa é conteúdo da aula, o texto do turno,
+  até seis turnos anteriores e os códigos reprovados pela verificação
+  determinística. Nome, e-mail, identificador e histórico não saem, e o texto
+  que sai é redigido de e-mail e de sequência com 8 dígitos ou mais.
+- O texto do turno vence em `ASSIST_RETENTION_DAYS` e é **anonimizado**, não
+  apagado: a linha fica com os códigos, o custo e a avaliação humana. É o único
+  escopo de retenção que anonimiza, e roda mesmo com `MAINTENANCE_CLEANUP_ENABLED`
+  desligada, porque o prazo é promessa e não preferência de instalação.
+- O modo Roteiro não fala com provedor nenhum. Ele é a saída quando o provedor
+  está fora, e é o que a interface deve oferecer quando a assistência está
+  desligada nesta instalação.
+
+A tabela completa do fluxo, as sete ameaças consideradas e os riscos residuais
+aceitos estão em `docs/modelo_ameacas_assistente_2026-10-26.md`.
+
 ## Evidência de fechamento
 
 - migration com constraints de licença e política offline;

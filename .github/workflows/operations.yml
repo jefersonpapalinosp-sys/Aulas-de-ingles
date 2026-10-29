@@ -1,0 +1,83 @@
+# Vigilância externa da stack pública (INFRA-46).
+#
+# Roda fora da VM de propósito: um probe no mesmo host não distingue "a
+# aplicação caiu" de "o host caiu". O alerta por e-mail é a notificação nativa
+# do GitHub para falha de workflow agendado — ela chega sem segredo de SMTP, e
+# é por isso que o job **falha** em vez de só registrar.
+#
+# O cron do GitHub é melhor-esforço e pode atrasar vários minutos. Para a
+# resolução que o aceite pede (worker parado por 2 minutos), o cron da VM é o
+# caminho principal: ver `docs/deploy_easypanel.md`, seção "Vigilância
+# agendada". Este workflow é a rede de segurança de fora.
+name: operações · vigilância da stack pública
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: operations-watch
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    name: probe externo + gate operacional
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: decide o que está armado
+        id: gate
+        env:
+          PUBLIC_ORIGIN: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
+          OPERATIONS_TOKEN: ${{ secrets.OPERATIONS_TOKEN }}
+        run: |
+          if [ -z "$PUBLIC_ORIGIN" ]; then
+            echo "::notice::vigilância desarmada: crie a secret PUBLIC_PROBE_ORIGIN com https://dominio-publico (docs/deploy_easypanel.md)."
+            echo "probe=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "probe=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -z "$OPERATIONS_TOKEN" ]; then
+            echo "::notice::gate operacional desarmado: crie a secret OPERATIONS_TOKEN."
+            echo "metrics=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "metrics=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: probe externo de disponibilidade
+        if: steps.gate.outputs.probe == 'true'
+        env:
+          PUBLIC_ORIGIN: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
+        run: |
+          # O relatório não carrega URL, corpo nem cabeçalho: o log é público.
+          python3 -m ops.public_probe --base-url "$PUBLIC_ORIGIN" | tee probe.json
+          {
+            echo '### Probe externo'
+            echo '```json'
+            cat probe.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: gate operacional (worker, fila, custo diário e mensal da assistência)
+        if: steps.gate.outputs.probe == 'true' && steps.gate.outputs.metrics == 'true'
+        env:
+          PUBLIC_ORIGIN: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
+          OPERATIONS_TOKEN: ${{ secrets.OPERATIONS_TOKEN }}
+          OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD: ${{ vars.OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD }}
+          OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD: ${{ vars.OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD }}
+        run: |
+          gate_status=0
+          python3 -m ops.observability_check --base-url "$PUBLIC_ORIGIN" | tee gate.json || gate_status=$?
+          {
+            echo '### Gate operacional'
+            echo '```json'
+            cat gate.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$gate_status"

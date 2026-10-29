@@ -218,22 +218,18 @@ import sys
 
 with open(sys.argv[1], encoding="utf-8") as handle:
     health = json.load(handle)
-current = health.get("schema_current")
-required = health.get("schema_required")
 print(
     "health:",
     "status=%s" % health.get("status"),
     "db=%s" % health.get("db"),
-    "env=%s" % health.get("env"),
-    "schema_current=%s" % current,
-    "schema_required=%s" % required,
+    "schema=%s" % health.get("schema"),
 )
-if not current or current != required:
-    print("::error::schema_current difere de schema_required em /api/health")
+if health.get("status") != "ok" or health.get("db") != "up" or health.get("schema") != "compatible":
+    print("::error::readiness pública incompatível em /api/health")
     sys.exit(1)
 PY
   else
-    show "python3: confere schema_current == schema_required no JSON de /api/health"
+    show "python3: confere status=ok, db=up e schema=compatible no JSON público de /api/health"
   fi
 fi
 

@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { LessonMedia } from '../../api/client'
 import { useMediaPositionSync } from '../../api/media'
+import { CueTranscript, FullTranscript } from './AudioTranscripts'
+import { formatAudioTime } from './formatAudioTime'
 
-export function formatAudioTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
-  const whole = Math.floor(seconds)
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`
-}
+// A barra do shadowing e a página de estudo já importavam o formatador daqui.
+export { formatAudioTime } from './formatAudioTime'
 
 type LessonAudioPlayerProps = {
   media: LessonMedia
@@ -254,98 +253,23 @@ function LessonAudioPlayerContent({
         </p>
       )}
 
-      {media.cues.length > 0 && (
-        <div className="audio-transcript">
-          <div className="audio-transcript-head">
-            <div>
-              <p className="study-kicker">Trechos selecionados</p>
-              <h3>Transcrição de estudo</h3>
-            </div>
-            <button
-              type="button"
-              className="transcript-toggle"
-              aria-expanded={transcriptOpen}
-              onClick={() => setTranscriptOpen((open) => !open)}
-            >
-              {transcriptOpen ? 'Ocultar transcrição' : 'Mostrar transcrição'}
-            </button>
-          </div>
+      <CueTranscript
+        cues={media.cues}
+        open={transcriptOpen}
+        translated={translationOpen}
+        activeCueId={activeCue?.id}
+        onToggle={() => setTranscriptOpen((open) => !open)}
+        onTranslate={setTranslationOpen}
+        onSeek={seekToCue}
+      />
 
-          {transcriptOpen && (
-            <>
-              <label className="translation-toggle">
-                <input
-                  type="checkbox"
-                  checked={translationOpen}
-                  onChange={(event) => setTranslationOpen(event.target.checked)}
-                />
-                Mostrar apoio em português
-              </label>
-              <ol className="transcript-cues">
-                {media.cues.map((cue) => {
-                  const active = activeCue?.id === cue.id
-                  return (
-                    <li key={cue.id} className={active ? 'active' : ''}>
-                      <button
-                        type="button"
-                        aria-current={active ? 'true' : undefined}
-                        aria-label={`Ir para ${formatAudioTime(cue.start_seconds)} — ${cue.speaker}`}
-                        onClick={() => seekToCue(cue.start_seconds)}
-                      >
-                        <span className="cue-time">{formatAudioTime(cue.start_seconds)}</span>
-                        <span className="cue-copy">
-                          <strong>{cue.speaker}</strong>
-                          <span lang="en">{cue.text_en}</span>
-                          {translationOpen && <small lang="pt-BR">{cue.text_pt}</small>}
-                        </span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ol>
-            </>
-          )}
-        </div>
-      )}
+      <FullTranscript
+        lines={media.transcript}
+        open={fullTranscriptOpen}
+        sourcePageUrl={sourcePageUrl}
+        onToggle={() => setFullTranscriptOpen((open) => !open)}
+      />
 
-      {media.transcript.length > 0 && (
-        <div className="audio-transcript full-transcript">
-          <div className="audio-transcript-head">
-            <div>
-              <p className="study-kicker">Conversa completa</p>
-              <h3>Transcrição integral em inglês</h3>
-            </div>
-            <button
-              type="button"
-              className="transcript-toggle"
-              aria-expanded={fullTranscriptOpen}
-              onClick={() => setFullTranscriptOpen((open) => !open)}
-            >
-              {fullTranscriptOpen ? 'Ocultar texto integral' : 'Mostrar texto integral'}
-            </button>
-          </div>
-
-          {fullTranscriptOpen && (
-            <>
-              <p className="transcript-credit">
-                Fonte: conteúdo em domínio público da{' '}
-                <a href={sourcePageUrl} target="_blank" rel="noopener noreferrer">
-                  VOA Learning English
-                </a>
-                .
-              </p>
-              <ol className="full-transcript-lines" lang="en">
-                {media.transcript.map((line) => (
-                  <li key={line.position}>
-                    <strong>{line.speaker}</strong>
-                    <span>{line.text_en}</span>
-                  </li>
-                ))}
-              </ol>
-            </>
-          )}
-        </div>
-      )}
     </section>
   )
 }

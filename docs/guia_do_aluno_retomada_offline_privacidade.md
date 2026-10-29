@@ -1,7 +1,8 @@
 # Guia do aluno — retomada, offline, privacidade e recuperação
 
-Atualizado em 16 de outubro de 2026. Este guia descreve o comportamento atual
-da aplicação; “salvo neste dispositivo” e “salvo na conta” não são sinônimos.
+Atualizado em 26 de outubro de 2026 (SEC-46: a seção do parceiro de conversa).
+Este guia descreve o comportamento atual da aplicação; “salvo neste
+dispositivo” e “salvo na conta” não são sinônimos.
 
 ## Como retomar o estudo
 
@@ -77,6 +78,42 @@ ser excluída sem apagar a gravação.
 **Limpar este dispositivo** remove cópias locais e pendências, mas não apaga a
 conta. **Excluir minha conta** remove dados do servidor e agenda a limpeza dos
 arquivos pessoais; use somente depois de conferir ou baixar o que deseja guardar.
+
+## O parceiro de conversa e o que sai desta aplicação
+
+O parceiro de conversa tem três modos. O **Roteiro** não usa inteligência
+artificial: ele segue o diálogo da aula, e nada do que você escreve nele sai
+desta aplicação. O **Guiado** e o **Livre da unidade** mandam o texto do seu
+turno a um provedor externo para que ele escreva a resposta do parceiro.
+
+O que sai, quando você usa Guiado ou Livre:
+
+- o conteúdo da aula (título, objetivos, vocabulário, frases e o roteiro);
+- o texto do seu turno atual e até seis turnos anteriores da mesma conversa;
+- a lista de códigos que a verificação automática reprovou neste turno.
+
+O que **não** sai, em nenhum modo:
+
+- seu nome, e-mail, identificador de conta ou token de sessão;
+- seu histórico de estudo, progresso ou qualquer outra aula;
+- o áudio da sua voz — o provedor de conversa é só de texto. Se você gravar um
+  turno falando, o áudio é transcrito e o que segue para o provedor de conversa
+  é o texto.
+
+Se você escrever o seu e-mail, telefone ou documento dentro da própria frase, a
+aplicação o substitui por `[email removido]` ou `[numero removido]` **antes** de
+mandar o texto ao provedor. O que você escreveu continua inteiro na sua
+conversa e no seu histórico: a troca é só no que sai. Números curtos — idade,
+hora, número da aula — não são trocados.
+
+O resultado que você vê — o que cumpriu e o que faltou — é calculado nesta
+aplicação, por regra fixa, e nunca vem do provedor. Quando a resposta dele não
+chega ou vem fora do formato esperado, a conversa continua pelo roteiro da aula
+e a tela diz que foi o roteiro que respondeu.
+
+O texto dos turnos de conversa é apagado no prazo de retenção exibido na tela.
+O que fica depois disso é a evidência de que você praticou: quando praticou, o
+que a verificação automática apontou e a sua própria avaliação do turno.
 
 ## Antes de trocar de navegador ou apagar dados
 

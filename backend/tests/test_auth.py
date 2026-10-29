@@ -33,6 +33,7 @@ def auth(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_registro_devolve_access_e_grava_cookie(client: AsyncClient) -> None:
     r = await client.post("/api/auth/register", json=credenciais("novo"))
@@ -105,6 +106,7 @@ async def test_me_exige_token(client: AsyncClient) -> None:
     assert "password_hash" not in r.text
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_token_expirado_devolve_401_e_refresh_renova(client: AsyncClient) -> None:
     await registrar(client, "exp")
@@ -132,6 +134,7 @@ async def test_token_expirado_devolve_401_e_refresh_renova(client: AsyncClient) 
     ).status_code == 200
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_refresh_usado_nao_serve_fora_da_janela(
     client: AsyncClient, session: AsyncSession
@@ -170,6 +173,7 @@ async def test_refresh_nao_vale_como_access(client: AsyncClient) -> None:
     assert (await client.get("/api/auth/me", headers=auth(refresh))).status_code == 401
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_token_assinado_com_outra_chave_e_rejeitado(client: AsyncClient) -> None:
     payload: dict[str, Any] = {

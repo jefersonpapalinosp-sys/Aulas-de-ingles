@@ -3,6 +3,7 @@
 import importlib.util
 import io
 import os
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -29,6 +30,16 @@ class VoiceTransferTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
+
+    def test_standalone_helper_refuses_unknown_action_without_traceback(self):
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).parents[1] / "voice_transfer.py"), "invalid"],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("Transferência de voz recusada", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
 
     def test_roundtrip_keeps_quarantine_and_interrupted_hardlink_as_regular_bytes(self):
         source = self.root / "source"

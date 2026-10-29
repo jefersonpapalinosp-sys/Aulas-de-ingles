@@ -10,13 +10,15 @@ import asyncio
 import json
 import os
 import sys
+from collections.abc import Mapping
+from email.message import Message
 from urllib.error import HTTPError
 from urllib.parse import urlsplit
-from urllib.request import ProxyHandler, Request, build_opener
+from urllib.request import OpenerDirector, ProxyHandler, Request, build_opener
 from uuid import uuid4
 
 
-def validate_environment(env, live, study=False):
+def validate_environment(env: Mapping[str, str], live: bool, study: bool = False) -> None:
     parsed = urlsplit(env.get("DATABASE_URL", ""))
     allowed_hosts = {"db"} if live else {"assist-check-db", "dev39-check-db", "study39-check-db"}
     if (
@@ -34,7 +36,40 @@ def validate_environment(env, live, study=False):
         raise ValueError("Ambiente não autorizado para smoke.")
 
 
-async def smoke(live=False, study=False):
+def request(
+    opener: OpenerDirector,
+    path: str,
+    headers: Mapping[str, str] | None = None,
+    body: object = None,
+    method: str | None = None,
+) -> tuple[int, Message, object]:
+    req = Request(
+        "http://127.0.0.1:8000" + path,
+        headers={"Content-Type": "application/json", **(headers or {})},
+        data=json.dumps(body).encode() if body is not None else None,
+        method=method,
+    )
+    try:
+        response = opener.open(req, timeout=30)
+    except HTTPError as error:
+        response = error
+    with response:
+        return response.status, response.headers, json.loads(response.read())
+
+
+def json_object(value: object) -> dict[str, object]:
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
+        raise ValueError("Resposta deve ser um objeto JSON.")
+    return dict(value)
+
+
+def object_list(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        raise ValueError("Resposta deve ser uma lista JSON.")
+    return [json_object(item) for item in value]
+
+
+async def smoke(live: bool = False, study: bool = False) -> None:
     validate_environment(os.environ, live, study)
     # Imports tardios: nenhum engine ou configuração de app antes da guarda.
     from app.core.security import criar_token
@@ -47,118 +82,112 @@ async def smoke(live=False, study=False):
     checks = 0
     opener = build_opener(ProxyHandler({}))
 
-    def request(path, headers=None, body=None, method=None):
-        req = Request(
-            "http://127.0.0.1:8000" + path,
-            headers={"Content-Type": "application/json", **(headers or {})},
-            data=json.dumps(body).encode() if body is not None else None,
-            method=method,
-        )
-        try:
-            response = opener.open(req, timeout=30)
-        except HTTPError as error:
-            response = error
-        with response:
-            return response.status, response.headers, json.loads(response.read())
-
     email = f"align39f-{uuid4().hex}@example.invalid"
     user_id = None
     engine = get_engine()
-    async with engine.connect() as connection:
-        try:
-            async with AsyncSession(
-                bind=connection,
-                expire_on_commit=False,
-                join_transaction_mode="create_savepoint",
-            ) as session:
-                user = User(
-                    email=email,
-                    password_hash="!no-password-login",
-                    display_name="Smoke 39F",
-                )
-                session.add(user)
-                await session.flush()
-                user_id = user.id
-                await session.commit()
-            token, _ = criar_token(user_id, "access")
-            headers = {"Authorization": f"Bearer {token}"}
-            code, _, _ = request("/api/assist/status")
-            assert code == 401
-            checks += 1
-            for path in (
-                "/api/assist/status",
-                "/api/writing/history",
-                "/api/speaking/attempts",
-            ):
-                code, response_headers, _ = request(path, headers)
-                assert code == 200 and "no-store" in response_headers["cache-control"]
-                checks += 1
-            code, _, body = request("/api/lessons/31")
-            assert code == 200
-            prompt = body["writing_prompts"][0]["id"]
-            checks += 1
-            code, _, body = request(
-                f"/api/writing/prompts/{prompt}/draft",
-                headers,
-                {
-                    "text": "The train is faster than the bus. We should take it.",
-                    "expected_revision": 0,
-                },
-                method="PUT",
-            )
-            assert code == 200 and body["revision"] == 1
-            checks += 1
-            code, _, body = request(
-                f"/api/writing/prompts/{prompt}/feedback",
-                headers,
-                {
-                    "text": "The train is faster than the bus. We should take it.",
-                    "assisted": False,
-                },
-            )
-            assert code == 200 and body["analysis_mode"] == "deterministic"
-            checks += 1
-            code, _, body = request("/api/writing/history", headers)
-            assert code == 200 and len(body) == 1
-            checks += 1
-            code, _, body = request("/api/assist/status", headers)
-            assert code == 200 and body["used_today"] == 0
-            checks += 1
-            # Exercita o ledger diretamente, sem despachar a nenhum provedor.
-            async with AsyncSession(bind=connection, expire_on_commit=False) as session:
-                reservation, fresh = await assist_quota.reserve(
-                    session, user_id, str(uuid4()), "0" * 64, "writing"
-                )
-                assert fresh
-                reservation_id = reservation.id
-                await session.commit()
-            code, _, balance = request("/api/assist/status", headers)
-            assert code == 200 and balance["reserved_today"] == 1
-            checks += 1
-            async with AsyncSession(bind=connection, expire_on_commit=False) as session:
-                assert await assist_quota.consume(session, reservation_id)
-                await assist_quota.record_cost(session, reservation_id, 0)
-                await session.commit()
-            code, _, balance = request("/api/assist/status", headers)
-            assert code == 200 and balance["consumed_today"] == 1
-            assert balance["reserved_today"] == 0 and not balance["cost_incomplete"]
-            checks += 1
-        finally:
-            if user_id is not None:
-                # Somente esta conta, nunca DELETE amplo nem limpeza por prefixo.
-                async with AsyncSession(bind=connection) as session:
-                    removed = await session.execute(
-                        delete(User)
-                        .where(User.id == user_id, User.email == email)
-                        .returning(User.id)
+    try:
+        async with engine.connect() as connection:
+            try:
+                async with AsyncSession(
+                    bind=connection,
+                    expire_on_commit=False,
+                    join_transaction_mode="create_savepoint",
+                ) as session:
+                    user = User(
+                        email=email,
+                        password_hash="!no-password-login",
+                        display_name="Smoke 39F",
                     )
-                    assert removed.scalar_one() == user_id
+                    session.add(user)
+                    await session.flush()
+                    user_id = user.id
                     await session.commit()
-            async with AsyncSession(bind=connection) as session:
+                token, _ = criar_token(user_id, "access")
+                headers = {"Authorization": f"Bearer {token}"}
+                code, _, _ = request(opener, "/api/assist/status")
+                assert code == 401
+                checks += 1
+                for path in (
+                    "/api/assist/status",
+                    "/api/writing/history",
+                    "/api/speaking/attempts",
+                ):
+                    code, response_headers, _ = request(opener, path, headers)
+                    assert code == 200 and "no-store" in response_headers["cache-control"]
+                    checks += 1
+                code, _, body = request(opener, "/api/lessons/31")
+                assert code == 200
+                prompt = object_list(json_object(body)["writing_prompts"])[0]["id"]
+                assert isinstance(prompt, int) and not isinstance(prompt, bool) and prompt > 0
+                checks += 1
+                code, _, body = request(
+                    opener,
+                    f"/api/writing/prompts/{prompt}/draft",
+                    headers,
+                    {
+                        "text": "The train is faster than the bus. We should take it.",
+                        "expected_revision": 0,
+                    },
+                    method="PUT",
+                )
+                assert code == 200 and json_object(body)["revision"] == 1
+                checks += 1
+                code, _, body = request(
+                    opener,
+                    f"/api/writing/prompts/{prompt}/feedback",
+                    headers,
+                    {
+                        "text": "The train is faster than the bus. We should take it.",
+                        "assisted": False,
+                    },
+                )
+                assert code == 200 and json_object(body)["analysis_mode"] == "deterministic"
+                checks += 1
+                code, _, body = request(opener, "/api/writing/history", headers)
+                assert code == 200 and len(object_list(body)) == 1
+                checks += 1
+                code, _, body = request(opener, "/api/assist/status", headers)
+                assert code == 200 and json_object(body)["used_today"] == 0
+                checks += 1
+                # Exercita o ledger diretamente, sem despachar a nenhum provedor.
+                async with AsyncSession(bind=connection, expire_on_commit=False) as session:
+                    reservation, fresh = await assist_quota.reserve(
+                        session, user_id, str(uuid4()), "0" * 64, "writing"
+                    )
+                    assert fresh
+                    reservation_id = reservation.id
+                    await session.commit()
+                code, _, balance = request(opener, "/api/assist/status", headers)
+                assert code == 200 and json_object(balance)["reserved_today"] == 1
+                checks += 1
+                async with AsyncSession(bind=connection, expire_on_commit=False) as session:
+                    assert await assist_quota.consume(session, reservation_id)
+                    await assist_quota.record_cost(session, reservation_id, 0)
+                    await session.commit()
+                code, _, balance = request(opener, "/api/assist/status", headers)
+                assert code == 200 and json_object(balance)["consumed_today"] == 1
                 assert (
-                    await session.execute(select(User.id).where(User.email == email))
-                ).first() is None
-    await dispose_engine()
+                    json_object(balance)["reserved_today"] == 0
+                    and not json_object(balance)["cost_incomplete"]
+                )
+                checks += 1
+            finally:
+                if user_id is not None:
+                    # Somente esta conta, nunca DELETE amplo nem limpeza por prefixo.
+                    async with AsyncSession(bind=connection) as session:
+                        removed = await session.execute(
+                            delete(User)
+                            .where(User.id == user_id, User.email == email)
+                            .returning(User.id)
+                        )
+                        assert removed.scalar_one() == user_id
+                        await session.commit()
+                async with AsyncSession(bind=connection) as session:
+                    assert (
+                        await session.execute(select(User.id).where(User.email == email))
+                    ).first() is None
+    finally:
+        await dispose_engine()
     print(
         json.dumps(
             {

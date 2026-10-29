@@ -22,6 +22,17 @@ class Thresholds:
     maximum_maintenance_age_seconds: int = 7200
     maximum_waiting_locks: int = 0
     minimum_media_free_bytes: int = 1_073_741_824
+    # Teto diário de custo da conversa (INFRA-46). A cota são 24 turnos/dia; com
+    # o provedor escolhido no IA-45 o turno fica na casa de centenas de microusd,
+    # então o dia inteiro cabe em alguns milhares. 50_000 é folga de uma ordem de
+    # grandeza: passar disso não é aluno conversando, é algo errado.
+    maximum_dialogue_cost_microusd: int = 50_000
+    # Falha de provedor acima disto, com amostra mínima, aparece aqui antes de o
+    # aluno reclamar. O fallback atende, mas o diálogo deixou de ser diálogo.
+    maximum_dialogue_failure_rate: float = 0.2
+    minimum_dialogue_turns: int = 5
+    assist_daily_budget_microusd: int | None = None
+    assist_monthly_budget_microusd: int | None = None
 
 
 @dataclass(frozen=True)
@@ -45,6 +56,77 @@ def _check(
     return Check(name, "ok" if good else "critical", observed, threshold, owner, action)
 
 
+def _assist_cost_checks(metrics: dict[str, Any], thresholds: Thresholds) -> list[Check]:
+    section = metrics.get("assist_costs")
+    if not isinstance(section, dict):
+        return [
+            _check(
+                "assist_cost_accounting",
+                False,
+                "ausente",
+                "presente",
+                "release manager",
+                "Implantar a API com assist_costs antes de confiar no orçamento.",
+            )
+        ]
+    checks = []
+    for period, budget in (
+        ("daily", thresholds.assist_daily_budget_microusd),
+        ("monthly", thresholds.assist_monthly_budget_microusd),
+    ):
+        window = section.get(period)
+        cost = window.get("cost_microusd") if isinstance(window, dict) else None
+        unknown = (
+            window.get("unknown_cost_reservations")
+            if isinstance(window, dict)
+            else None
+        )
+        valid = all(type(value) is int and value >= 0 for value in (cost, unknown))
+        checks.append(
+            _check(
+                f"assist_{period}_cost_known",
+                valid and unknown == 0,
+                unknown if valid else "métrica inválida",
+                "= 0",
+                "release manager",
+                "Conciliar custos desconhecidos com o provedor; "
+                "zero não significa custo confirmado.",
+            )
+        )
+        if budget is None:
+            state: State = "warning"
+            threshold = "orçamento positivo definido"
+            action = (
+                f"Definir OPERATIONS_ASSIST_{period.upper()}_BUDGET_MICROUSD "
+                "após aprovar o orçamento."
+            )
+        else:
+            if type(budget) is not int or budget <= 0:
+                raise ValueError("Orçamento deve ser inteiro positivo em microusd.")
+            if type(cost) is not int or not valid or cost >= budget:
+                state = "critical"
+            elif cost * 5 >= budget * 4:
+                state = "warning"
+            else:
+                state = "ok"
+            threshold = f"alerta >= 80% de {budget}; crítico >= 100% (microusd)"
+            action = (
+                "Conferir consumo e fatura; ao atingir o teto, "
+                "suspender assistência antes de religar."
+            )
+        checks.append(
+            Check(
+                f"assist_{period}_budget",
+                state,
+                cost if valid else None,
+                threshold,
+                "release manager",
+                action,
+            )
+        )
+    return checks
+
+
 def evaluate(
     readiness: dict[str, Any], metrics: dict[str, Any], thresholds: Thresholds
 ) -> dict[str, Any]:
@@ -57,6 +139,14 @@ def evaluate(
     total = int(requests["requests_total"])
     failures = int(requests["responses_5xx_total"])
     error_rate = failures / total if total else 0.0
+    # A seção do diálogo é nova (INFRA-46). Uma API anterior a ela não traz a
+    # chave, e indexar daria "gate falhou" sem dizer por quê; o check
+    # `dialogue_quota_accounting` abaixo é que explica a diferença de versão.
+    dialogue_section = metrics.get("dialogue")
+    dialogue = dialogue_section or {}
+    dialogue_turns = int(dialogue.get("turns") or 0)
+    dialogue_failures = int(dialogue.get("provider_failures") or 0)
+    dialogue_cost = int(dialogue.get("cost_microusd") or 0)
     checks = [
         _check(
             "readiness_schema",
@@ -137,6 +227,36 @@ def evaluate(
             "com review_item sem excluir histórico.",
         ),
         _check(
+            "dialogue_cost_microusd_today",
+            dialogue_cost <= thresholds.maximum_dialogue_cost_microusd,
+            dialogue_cost,
+            f"<= {thresholds.maximum_dialogue_cost_microusd}",
+            "release manager",
+            "Desligar a modalidade conversation (ASSISTED_FEATURES_ENABLED ou a URL "
+            "do provedor) e conferir a fatura antes de religar.",
+        ),
+        _check(
+            "dialogue_provider_failure_rate",
+            dialogue_turns < thresholds.minimum_dialogue_turns
+            or dialogue_failures / dialogue_turns
+            <= thresholds.maximum_dialogue_failure_rate,
+            round(dialogue_failures / dialogue_turns, 3) if dialogue_turns else None,
+            f"<= {thresholds.maximum_dialogue_failure_rate} "
+            f"(amostra >= {thresholds.minimum_dialogue_turns})",
+            "release manager",
+            "Conferir o provedor de diálogo; o Roteiro continua atendendo e nenhum "
+            "turno anterior se perde.",
+        ),
+        _check(
+            "dialogue_quota_accounting",
+            dialogue_section is not None,
+            "presente" if dialogue_section is not None else "ausente",
+            "presente",
+            "release manager",
+            "A API em uso é mais antiga que este gate: implantar a imagem com a seção "
+            "`dialogue` em /api/operations/metrics antes de confiar no relatório.",
+        ),
+        _check(
             "media_free_bytes",
             bool(media["filesystem_available"])
             and int(media["filesystem_free_bytes"] or 0)
@@ -148,7 +268,14 @@ def evaluate(
             "ampliar/limpar apenas pela política de retenção.",
         ),
     ]
-    overall = "critical" if any(item.state == "critical" for item in checks) else "ok"
+    checks.extend(_assist_cost_checks(metrics, thresholds))
+    overall = (
+        "critical"
+        if any(item.state == "critical" for item in checks)
+        else "warning"
+        if any(item.state == "warning" for item in checks)
+        else "ok"
+    )
     return {"status": overall, "checks": [asdict(item) for item in checks]}
 
 
@@ -188,10 +315,24 @@ def main(argv: list[str] | None = None) -> int:
         print("OPERATIONS_TOKEN ausente; gate não executado.", file=sys.stderr)
         return 2
     try:
+
+        def budget(period: str) -> int | None:
+            value = os.environ.get(f"OPERATIONS_ASSIST_{period}_BUDGET_MICROUSD")
+            if value is None or not value.strip():
+                return None
+            parsed = int(value)
+            if parsed <= 0:
+                raise ValueError("Orçamento deve ser positivo.")
+            return parsed
+
+        thresholds = Thresholds(
+            assist_daily_budget_microusd=budget("DAILY"),
+            assist_monthly_budget_microusd=budget("MONTHLY"),
+        )
         report = evaluate(
-            fetch(args.base_url, "/api/health"),
+            fetch(args.base_url, "/api/operations/readiness", token=token),
             fetch(args.base_url, "/api/operations/metrics", token=token),
-            Thresholds(),
+            thresholds,
         )
     except Exception:
         print(

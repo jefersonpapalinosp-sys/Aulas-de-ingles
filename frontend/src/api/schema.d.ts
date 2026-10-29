@@ -415,11 +415,7 @@ export interface paths {
         };
         /**
          * Health
-         * @description Readiness.
-         *
-         *     Abre uma conexão de verdade e exige que a revisão aplicada seja exatamente
-         *     o conjunto de heads embarcado. Banco acessível com código/schema divergentes
-         *     continua indisponível para tráfego.
+         * @description Disponibilidade pública, sem versão do banco, ambiente ou revisões.
          */
         get: operations["health_api_health_get"];
         put?: never;
@@ -798,6 +794,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/operations/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Readiness
+         * @description Diagnóstico detalhado somente após autenticação operacional.
+         */
+        get: operations["readiness_api_operations_readiness_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/practice-sessions/{session_id}": {
         parameters: {
             query?: never;
@@ -1096,6 +1112,140 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/speaking/dialogues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar Dialogos */
+        get: operations["listar_dialogos_api_speaking_dialogues_get"];
+        put?: never;
+        /** Criar Dialogo */
+        post: operations["criar_dialogo_api_speaking_dialogues_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/dialogues/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status Dialogos */
+        get: operations["status_dialogos_api_speaking_dialogues_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/dialogues/{dialogue_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Dialogo */
+        get: operations["obter_dialogo_api_speaking_dialogues__dialogue_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Excluir Dialogo
+         * @description Apaga o diálogo e, por cascata do PostgreSQL, seus turnos.
+         *
+         *     O áudio segue a política de speaking: o arquivo sai pelo caminho de
+         *     exclusão de gravação, não daqui, para não criar um segundo lugar que
+         *     remove bytes do aluno.
+         */
+        delete: operations["excluir_dialogo_api_speaking_dialogues__dialogue_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/dialogues/{dialogue_id}/turns/{position}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter Turno */
+        get: operations["obter_turno_api_speaking_dialogues__dialogue_id__turns__position__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/dialogues/{dialogue_id}/turns/{position}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Turno Por Audio */
+        put: operations["turno_por_audio_api_speaking_dialogues__dialogue_id__turns__position__audio_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/dialogues/{dialogue_id}/turns/{position}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Avaliar Turno
+         * @description A avaliação humana é o único campo do turno que a API altera.
+         *
+         *     É a matéria-prima do gate do IA-48, e os grants por coluna do DB-45
+         *     garantem isso no banco, não só aqui.
+         */
+        put: operations["avaliar_turno_api_speaking_dialogues__dialogue_id__turns__position__rating_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/speaking/dialogues/{dialogue_id}/turns/{position}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turno Por Texto */
+        post: operations["turno_por_texto_api_speaking_dialogues__dialogue_id__turns__position__text_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/speaking/policy": {
         parameters: {
             query?: never;
@@ -1387,6 +1537,33 @@ export interface components {
             };
             /** Request Id */
             request_id: string;
+        };
+        /** AssistCostWindowOut */
+        AssistCostWindowOut: {
+            /** Consumed */
+            consumed: number;
+            /** Cost Microusd */
+            cost_microusd: number;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** Unknown Cost Reservations */
+            unknown_cost_reservations: number;
+        };
+        /**
+         * AssistCostsOut
+         * @description Ledger existente das três modalidades, por despacho e calendário UTC.
+         */
+        AssistCostsOut: {
+            daily: components["schemas"]["AssistCostWindowOut"];
+            monthly: components["schemas"]["AssistCostWindowOut"];
         };
         /** AssistStatusOut */
         AssistStatusOut: {
@@ -1949,6 +2126,248 @@ export interface components {
             /** Pending */
             pending: number;
         };
+        /** DialogueCheckDetails */
+        DialogueCheckDetails: {
+            /** Grammar Patterns */
+            grammar_patterns: components["schemas"]["DialogueTermCheck"][];
+            /** Target Terms */
+            target_terms: components["schemas"]["DialogueTermCheck"][];
+        };
+        /** DialogueCreateIn */
+        DialogueCreateIn: {
+            /** Lesson Id */
+            lesson_id: number;
+            /**
+             * Mode
+             * @default script
+             * @enum {string}
+             */
+            mode: "script" | "guided" | "free_unit";
+            /** Operation Key */
+            operation_key?: string | null;
+            /** Partner Speaker */
+            partner_speaker?: string | null;
+        };
+        /** DialogueHintOut */
+        DialogueHintOut: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "target_terms_missing" | "grammar_pattern_missing" | "too_short" | "too_long";
+            /** Message */
+            message: string;
+        };
+        /**
+         * DialogueMetricsOut
+         * @description Conversa do dia em números (INFRA-46).
+         *
+         *     Nenhum campo carrega texto: o painel precisa saber quanto rodou, quanto
+         *     demorou, quanto falhou e quanto custou — nunca o que o aluno disse. O
+         *     recorte é o dia UTC, o mesmo da cota, para que `quota_used` e `turns`
+         *     possam ser comparados sem ajuste de relógio.
+         */
+        DialogueMetricsOut: {
+            /** Completed */
+            completed: number;
+            /** Cost Microusd */
+            cost_microusd: number;
+            /** Failed */
+            failed: number;
+            /** Fallback */
+            fallback: number;
+            /** Latency P95 Ms */
+            latency_p95_ms: number | null;
+            /** Provider Failures */
+            provider_failures: number;
+            /** Quota Exhausted Accounts */
+            quota_exhausted_accounts: number;
+            /** Quota Limit */
+            quota_limit: number;
+            /** Quota Used */
+            quota_used: number;
+            /** Turns */
+            turns: number;
+        };
+        /** DialogueOut */
+        DialogueOut: {
+            /** Ended At */
+            ended_at: string | null;
+            /** Id */
+            id: number;
+            /** Lesson Id */
+            lesson_id: number;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "script" | "guided" | "free_unit";
+            /** Partner Speaker */
+            partner_speaker: string | null;
+            /** Provider Name */
+            provider_name: string | null;
+            /** Rubric Version */
+            rubric_version: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "completed" | "abandoned";
+            /** Turn Limit */
+            turn_limit: number;
+            /** Turns */
+            turns: components["schemas"]["DialogueTurnOut"][];
+            /** Turns Remaining */
+            turns_remaining: number;
+        };
+        /** DialoguePageOut */
+        DialoguePageOut: {
+            /** Items */
+            items: components["schemas"]["DialogueSummaryOut"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** DialogueStatusOut */
+        DialogueStatusOut: {
+            /** Audio Enabled */
+            audio_enabled: boolean;
+            /** Consumed Today */
+            consumed_today: number;
+            /** Cost Incomplete */
+            cost_incomplete: boolean;
+            /** Cost Microusd Today */
+            cost_microusd_today: number;
+            /** Daily Quota */
+            daily_quota: number;
+            /** Enabled */
+            enabled: boolean;
+            /** Guided Enabled */
+            guided_enabled: boolean;
+            /**
+             * Quota Resets At
+             * Format: date-time
+             */
+            quota_resets_at: string;
+            /** Remaining Today */
+            remaining_today: number;
+            /** Reserved Today */
+            reserved_today: number;
+            /** Retention Days */
+            retention_days: number;
+        };
+        /** DialogueSummaryOut */
+        DialogueSummaryOut: {
+            /** Ended At */
+            ended_at: string | null;
+            /** Id */
+            id: number;
+            /** Lesson Id */
+            lesson_id: number;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "script" | "guided" | "free_unit";
+            /** Partner Speaker */
+            partner_speaker: string | null;
+            /** Provider Name */
+            provider_name: string | null;
+            /** Rubric Version */
+            rubric_version: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "completed" | "abandoned";
+            /** Turn Limit */
+            turn_limit: number;
+            /** Turns Remaining */
+            turns_remaining: number;
+        };
+        /** DialogueTermCheck */
+        DialogueTermCheck: {
+            /** Covered */
+            covered: boolean;
+            /** Text */
+            text: string;
+        };
+        /**
+         * DialogueTurnAcceptedOut
+         * @description Resposta do turno admitido.
+         *
+         *     `job_id` é nulo no Roteiro, que não passa pela fila — ele não chama
+         *     provedor nenhum e não pode depender do worker estar de pé.
+         */
+        DialogueTurnAcceptedOut: {
+            /** Job Id */
+            job_id: number | null;
+            /** Position */
+            position: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "completed" | "failed";
+            /** Turns Remaining */
+            turns_remaining: number;
+        };
+        /** DialogueTurnOut */
+        DialogueTurnOut: {
+            check_details?: components["schemas"]["DialogueCheckDetails"] | null;
+            /** Checks */
+            checks: {
+                [key: string]: boolean;
+            };
+            /** Completed At */
+            completed_at: string | null;
+            /** Confidence */
+            confidence: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error Code */
+            error_code: string | null;
+            /** Fallback */
+            fallback: boolean;
+            /** Hints */
+            hints: components["schemas"]["DialogueHintOut"][];
+            /** Human Rating */
+            human_rating: ("helpful" | "not_helpful") | null;
+            /** Input Kind */
+            input_kind: ("audio" | "text") | null;
+            /** Job Id */
+            job_id: number | null;
+            /** Partner Text */
+            partner_text: string | null;
+            /** Position */
+            position: number;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "student" | "partner";
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "pending" | "completed" | "failed";
+            /** Transcript */
+            transcript: string | null;
+            /** Words */
+            words?: components["schemas"]["TranscriptionWordOut"][];
+        };
         /** ExerciseHintOut */
         ExerciseHintOut: {
             /** Content */
@@ -2152,21 +2571,13 @@ export interface components {
             code?: ("service_unavailable" | "schema_incompatible") | null;
             /** Db */
             db: string;
-            /** Env */
-            env: string;
             /**
              * Schema
              * @enum {string}
              */
             schema: "compatible" | "incompatible" | "unknown";
-            /** Schema Current */
-            schema_current: string[];
-            /** Schema Required */
-            schema_required: string[];
             /** Status */
             status: string;
-            /** Version */
-            version?: string | null;
         };
         /** HistoricalContentOut */
         HistoricalContentOut: {
@@ -2574,7 +2985,9 @@ export interface components {
         /** OperationsMetricsOut */
         OperationsMetricsOut: {
             account_deletions: components["schemas"]["DeletionMetricsOut"];
+            assist_costs: components["schemas"]["AssistCostsOut"];
             database: components["schemas"]["DatabaseMetricsOut"];
+            dialogue: components["schemas"]["DialogueMetricsOut"];
             legacy_review: components["schemas"]["LegacyReviewMetricsOut"];
             media: components["schemas"]["MediaMetricsOut"];
             requests: components["schemas"]["RequestMetricsOut"];
@@ -2956,6 +3369,28 @@ export interface components {
             /** Worker Seen At */
             worker_seen_at: string | null;
         };
+        /** ReadinessOut */
+        ReadinessOut: {
+            /** Code */
+            code?: ("service_unavailable" | "schema_incompatible") | null;
+            /** Db */
+            db: string;
+            /** Env */
+            env: string;
+            /**
+             * Schema
+             * @enum {string}
+             */
+            schema: "compatible" | "incompatible" | "unknown";
+            /** Schema Current */
+            schema_current: string[];
+            /** Schema Required */
+            schema_required: string[];
+            /** Status */
+            status: string;
+            /** Version */
+            version?: string | null;
+        };
         /** RecentSessionOut */
         RecentSessionOut: {
             /** Completed Steps */
@@ -2993,7 +3428,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "review" | "continue_lesson" | "start_lesson" | "course_review" | "practice";
+            kind: "review" | "continue_lesson" | "start_lesson" | "course_review" | "practice" | "conversation";
             /** Lesson Number */
             lesson_number?: number | null;
             /** Reason */
@@ -3419,6 +3854,13 @@ export interface components {
             end_ms: number;
             /** Start Ms */
             start_ms: number;
+            /** Text */
+            text: string;
+        };
+        /** TurnTextIn */
+        TurnTextIn: {
+            /** Idempotency Key */
+            idempotency_key?: string | null;
             /** Text */
             text: string;
         };
@@ -6714,6 +7156,53 @@ export interface operations {
             };
         };
     };
+    readiness_api_operations_readiness_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessOut"];
+                };
+            };
+        };
+    };
     get_practice_session_api_practice_sessions__session_id__get: {
         parameters: {
             query?: never;
@@ -7897,6 +8386,547 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    listar_dialogos_api_speaking_dialogues_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialoguePageOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    criar_dialogo_api_speaking_dialogues_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DialogueCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    status_dialogos_api_speaking_dialogues_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueStatusOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    obter_dialogo_api_speaking_dialogues__dialogue_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogue_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    excluir_dialogo_api_speaking_dialogues__dialogue_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogue_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    obter_turno_api_speaking_dialogues__dialogue_id__turns__position__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogue_id: number;
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueTurnOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    turno_por_audio_api_speaking_dialogues__dialogue_id__turns__position__audio_put: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Audio-Consent": "true";
+            };
+            path: {
+                dialogue_id: number;
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueTurnAcceptedOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    avaliar_turno_api_speaking_dialogues__dialogue_id__turns__position__rating_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogue_id: number;
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HumanRatingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueTurnOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    turno_por_texto_api_speaking_dialogues__dialogue_id__turns__position__text_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogue_id: number;
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnTextIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DialogueTurnAcceptedOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Cliente antigo sem chave de idempotência após o cutover (detail.code em ['idempotency_key_required']). Atualize o aplicativo e reenvie. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        detail: {
+                            /** @enum {string} */
+                            code: "idempotency_key_required";
+                            message: string;
+                        };
+                    };
                 };
             };
             /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */

@@ -1,42 +1,22 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { type Ref, useRef, useState } from 'react'
-import { api, type AttemptFeedback, type Exercise, type ExerciseHint } from '../api/client'
-import { invalidateStudy } from '../api/invalidateStudy'
-import { queueAttempt } from '../features/offline/attemptQueue'
-import type {
-  ExerciseActivityEvent,
-  PracticeSessionItem,
-} from '../features/practice/types'
+import type { Exercise, ExerciseHint } from '../api/client'
+import {
+  classificationAnswer,
+  SUPPORTED_ACTIVITY_TYPES,
+} from '../features/exercise/classification'
+import { useExerciseActions } from '../features/exercise/exerciseActions'
+import {
+  ChoiceInput,
+  ClassificationInput,
+  ReorderInput,
+  TextAnswerInput,
+} from '../features/exercise/ExerciseInputs'
+import { ExerciseVerdict, type Veredito } from '../features/exercise/ExerciseVerdict'
+import type { ExerciseActivityEvent, PracticeSessionItem } from '../features/practice/types'
 import { Markdown } from './Markdown'
 
-type Veredito =
-  | { tipo: 'nada' }
-  | { tipo: 'certo'; explicacao: string | null }
-  | { tipo: 'errado'; feedback: AttemptFeedback }
-  | { tipo: 'revelado'; respostas: string[]; explicacao: string }
-  | { tipo: 'fila' }
-  | { tipo: 'falhou'; mensagem: string }
-
-function classificationAnswer(items: string[], assignments: Record<string, string>): string {
-  if (items.some((item) => !assignments[item])) return ''
-  return JSON.stringify(
-    Object.fromEntries([...items].sort().map((item) => [item, assignments[item]])),
-  )
-}
-
-function classificationEntries(answer: string): Array<[string, string]> | null {
-  try {
-    const value: unknown = JSON.parse(answer)
-    if (!value || Array.isArray(value) || typeof value !== 'object') return null
-    const entries = Object.entries(value)
-    return entries.every((entry) => typeof entry[1] === 'string')
-      ? (entries as Array<[string, string]>)
-      : null
-  } catch {
-    return null
-  }
-}
-
+/** Estado inicial vindo da sessão: quem volta a um item já respondido vê o que
+ * respondeu, e não um formulário em branco. */
 function initialVerdict(item: PracticeSessionItem | undefined, queued: boolean): Veredito {
   if (queued) return { tipo: 'fila' }
   if (!item) return { tipo: 'nada' }
@@ -57,15 +37,13 @@ function initialVerdict(item: PracticeSessionItem | undefined, queued: boolean):
 }
 
 /**
- * Motor único das atividades objetivas: lacuna, escolha, transformação,
- * ordenação por botões, classificação por selects e ditado textual.
+ * Compõe uma atividade objetiva: lacuna, escolha, transformação, ordenação por
+ * botões, classificação por selects e ditado textual.
  *
- * A correção é do servidor: a resposta certa não faz parte do contrato de
- * leitura, então mandá-la ao navegador para o JavaScript comparar seria
- * publicar o gabarito. O botão "Resposta" pede o gabarito explicitamente.
- *
- * Cada tentativa é gravada com idempotência e alimenta o deck de revisão
- * quando o erro corresponde a um item de vocabulário.
+ * As ações estão em `features/exercise/exerciseActions.ts`, o campo de cada
+ * tipo em `ExerciseInputs.tsx` e o veredito em `ExerciseVerdict.tsx`. Aqui
+ * ficam a resposta em digitação, as dicas abertas e o foco depois de "Tentar
+ * novamente" — que precisa voltar para o campo certo de cada tipo.
  */
 export function ExerciseCard({
   exercicio,
@@ -106,187 +84,32 @@ export function ExerciseCard({
   const firstChoiceRef = useRef<HTMLInputElement>(null)
   const firstReorderRef = useRef<HTMLButtonElement>(null)
   const firstClassificationRef = useRef<HTMLSelectElement>(null)
-  const qc = useQueryClient()
   const pendingSubmission = useRef<{ answer: string; key: string } | null>(null)
 
-  function saveForLater(answer: string, key: string) {
-    return queueAttempt({
-      userId,
-      exerciseId: exercicio.id,
-      answer,
-      idempotencyKey: key,
-      createdAt: new Date().toISOString(),
-      sessionId: practiceSessionId,
-      courseSlug,
-      lessonNumber,
-    })
-  }
-
-  const conferir = useMutation({
-    // A própria mutationFn decide entre API e fila local. Sem `always`, o
-    // TanStack pausa a mutation ao receber o evento offline e esse fallback
-    // nunca é executado.
-    networkMode: 'always',
-    mutationFn: async ({ answer, key }: { answer: string; key: string }) => {
-      if (!navigator.onLine) {
-        await saveForLater(answer, key)
-        return { data: null, key }
-      }
-      let result
-      try {
-        result = await api.POST('/api/exercises/{exercise_id}/attempt', {
-          params: { path: { exercise_id: exercicio.id } },
-          body: {
-            answer,
-            idempotency_key: key,
-            ...(practiceSessionId === undefined
-              ? {}
-              : { practice_session_id: practiceSessionId }),
-          },
-        })
-      } catch (error) {
-        // fetch rejeita com TypeError quando a conexão cai entre o precheck e
-        // a resposta. Erros HTTP chegam normalmente em `response` abaixo e
-        // não devem entrar na fila offline.
-        if (
-          error instanceof TypeError ||
-          (error instanceof DOMException && error.name === 'NetworkError')
-        ) {
-          await saveForLater(answer, key)
-          return { data: null, key }
-        }
-        throw error
-      }
-      const { data, response } = result
-      if (!data && !response) {
-        await saveForLater(answer, key)
-        return { data: null, key }
-      }
-      if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao conferir.`)
-      return { data, key }
-    },
-    onSuccess: ({ data, key }) => {
-      if (!data) {
-        setVeredito({ tipo: 'fila' })
-        onActivity?.({
-          type: 'attempt',
-          exerciseId: exercicio.id,
-          status: 'queued',
-          idempotencyKey: key,
-          correct: null,
-        })
-        return
-      }
-      pendingSubmission.current = null
-      setVeredito(
-        data.correct
-          ? { tipo: 'certo', explicacao: data.explanation }
-          : { tipo: 'errado', feedback: data.feedback },
-      )
-      if (!data.correct) setErrouAntes(true)
-      aoResponder?.(data.correct)
-      onActivity?.({
-        type: 'attempt',
-        exerciseId: exercicio.id,
-        status: data.correct ? 'correct' : 'incorrect',
-        idempotencyKey: key,
-        correct: data.correct,
-      })
-      // Errar pode ter semeado o deck; acertar move competências e a jornada da aula.
-      void invalidateStudy(qc, 'attempt')
-    },
-    onError: (e: Error) => setVeredito({ tipo: 'falhou', mensagem: e.message }),
+  const { conferir, pedirDica, revelar, ocupado } = useExerciseActions({
+    exercicio,
+    userId,
+    practiceSessionId,
+    courseSlug,
+    lessonNumber,
+    onVerdict: setVeredito,
+    onHint: (hint) => setDicas((current) => [...current.filter((item) => item.level !== hint.level), hint]),
+    onWrong: () => setErrouAntes(true),
+    onAnswered: aoResponder,
+    onActivity,
   })
 
-  const pedirDica = useMutation({
-    mutationFn: async (level: number) => {
-      if (practiceSessionId !== undefined) {
-        const { data, response } = await api.POST(
-          '/api/practice-sessions/{session_id}/items/{exercise_id}/hints/{level}',
-          {
-            params: {
-              path: {
-                session_id: practiceSessionId,
-                exercise_id: exercicio.id,
-                level,
-              },
-            },
-          },
-        )
-        if (!data) {
-          const message =
-            response?.status === 409
-              ? 'Faça uma tentativa antes de abrir a próxima dica.'
-              : `A API respondeu ${response?.status ?? 'nada'} ao buscar a dica.`
-          throw new Error(message)
-        }
-        return { hint: { level: data.level, content: data.content }, level }
-      }
-      const { data, response } = await api.GET('/api/exercises/{exercise_id}/hints/{level}', {
-        params: { path: { exercise_id: exercicio.id, level } },
-      })
-      if (!data) {
-        const message =
-          response?.status === 409
-            ? 'Faça uma tentativa antes de abrir a próxima dica.'
-            : `A API respondeu ${response?.status ?? 'nada'} ao buscar a dica.`
-        throw new Error(message)
-      }
-      return { hint: data, level }
-    },
-    onSuccess: ({ hint, level }) => {
-      setDicas((current) => [...current.filter((item) => item.level !== hint.level), hint])
-      onActivity?.({ type: 'hint', exerciseId: exercicio.id, level })
-    },
-  })
-
-  const revelar = useMutation({
-    mutationFn: async () => {
-      if (practiceSessionId !== undefined) {
-        const { data, response } = await api.POST(
-          '/api/practice-sessions/{session_id}/items/{exercise_id}/reveal',
-          {
-            params: {
-              path: { session_id: practiceSessionId, exercise_id: exercicio.id },
-            },
-          },
-        )
-        if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar.`)
-        return data
-      }
-      const { data, response } = await api.GET('/api/exercises/{exercise_id}/answer', {
-        params: { path: { exercise_id: exercicio.id } },
-      })
-      if (!data) throw new Error(`A API respondeu ${response?.status ?? 'nada'} ao buscar.`)
-      return data
-    },
-    onSuccess: (d) => {
-      setVeredito({ tipo: 'revelado', respostas: d.answers, explicacao: d.explanation })
-      onActivity?.({ type: 'reveal', exerciseId: exercicio.id })
-    },
-    onError: (e: Error) => setVeredito({ tipo: 'falhou', mensagem: e.message }),
-  })
-
-  const estado =
-    veredito.tipo === 'certo' ? 'bom' : veredito.tipo === 'errado' ? 'ruim' : ''
-  const ocupado = conferir.isPending || revelar.isPending || pedirDica.isPending
+  const estado = veredito.tipo === 'certo' ? 'bom' : veredito.tipo === 'errado' ? 'ruim' : ''
   const finalizado =
     veredito.tipo === 'certo' || veredito.tipo === 'revelado' || veredito.tipo === 'fila'
   const nextHintLevel = dicas.length + 1
-  const supportedTypes = new Set([
-    'gap_fill',
-    'multiple_choice',
-    'transformation',
-    'reorder',
-    'dictation',
-    'classification',
-  ])
   const classificationItems = exercicio.classification_items ?? []
   const classificationCategories = exercicio.classification_categories ?? []
   const classificationReady =
     exercicio.activity_type !== 'classification' ||
     (classificationItems.length > 0 && classificationCategories.length >= 2)
-  const supported = supportedTypes.has(exercicio.activity_type) && classificationReady
+  const supported = SUPPORTED_ACTIVITY_TYPES.has(exercicio.activity_type) && classificationReady
+  const bloqueado = finalizado || ocupado
 
   function tentarNovamente() {
     setVeredito({ tipo: 'nada' })
@@ -326,7 +149,7 @@ export function ExerciseCard({
           className="ex-row"
           onSubmit={(e) => {
             e.preventDefault()
-            if (texto.trim() && !finalizado && !ocupado) {
+            if (texto.trim() && !bloqueado) {
               if (pendingSubmission.current?.answer !== texto) {
                 pendingSubmission.current = { answer: texto, key: crypto.randomUUID() }
               }
@@ -334,121 +157,56 @@ export function ExerciseCard({
             }
           }}
         >
-        {exercicio.activity_type === 'classification' ? (
-          <fieldset className="classification-activity">
-            <legend>Classifique cada item</legend>
-            <div className="classification-grid">
-              {classificationItems.map((item, index) => {
-                const selectId = `classification-${exercicio.id}-${index}`
-                return (
-                  <label htmlFor={selectId} key={item}>
-                    <span>{item}</span>
-                    <select
-                      id={selectId}
-                      ref={index === 0 ? firstClassificationRef : undefined}
-                      value={classificacoes[item] ?? ''}
-                      disabled={finalizado || ocupado}
-                      onChange={(event) => atualizarClassificacao(item, event.target.value)}
-                    >
-                      <option value="">Selecione uma categoria</option>
-                      {classificationCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
-        ) : exercicio.activity_type === 'reorder' && exercicio.options ? (
-          <fieldset className="reorder-activity">
-            <legend>Monte a frase</legend>
-            <div className="reorder-answer" aria-label="Frase montada">
-              {ordem.length === 0 ? (
-                <span>Escolha as palavras na ordem correta</span>
-              ) : (
-                ordem.map((word, index) => (
-                  <button
-                    type="button"
-                    key={`${word}-${index}`}
-                    aria-label={`Remover ${word}`}
-                    disabled={finalizado || ocupado}
-                    onClick={() => atualizarOrdem(ordem.filter((_, itemIndex) => itemIndex !== index))}
-                  >
-                    {word}
-                  </button>
-                ))
-              )}
-            </div>
-            <div className="reorder-options" aria-label="Palavras disponíveis">
-              {exercicio.options.map((word, index) => (
-                <button
-                  type="button"
-                  key={`${word}-${index}`}
-                  ref={index === 0 ? firstReorderRef : undefined}
-                  disabled={finalizado || ocupado || ordem.includes(word)}
-                  aria-label={`Adicionar ${word}`}
-                  onClick={() => atualizarOrdem([...ordem, word])}
-                >
-                  {word}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        ) : exercicio.activity_type === 'multiple_choice' && exercicio.options ? (
-          <fieldset className="choice-options">
-            <legend>Escolha uma resposta</legend>
-            {exercicio.options.map((option, index) => (
-              <label key={option}>
-                <input
-                  ref={index === 0 ? firstChoiceRef : undefined}
-                  type="radio"
-                  name={`exercise-${exercicio.id}`}
-                  value={option}
-                  checked={texto === option}
-                  disabled={finalizado || ocupado}
-                  onChange={(event) => setTexto(event.target.value)}
-                />
-                <span>{option}</span>
-              </label>
-            ))}
-          </fieldset>
-        ) : (
-          <input
-            ref={inputRef}
-            type="text"
-            value={texto}
-            disabled={finalizado || ocupado}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="sua resposta"
-            aria-label={`Resposta do exercício ${numero}`}
-            autoComplete="off"
-            spellCheck={false}
-          />
-        )}
-        <button type="submit" disabled={ocupado || finalizado || !texto.trim()}>
-          Verificar
-        </button>
-        {exercicio.hint_count > 0 && nextHintLevel <= exercicio.hint_count && (
-          <button
-            type="button"
-            className="ghost"
-            disabled={ocupado || finalizado || (nextHintLevel > 1 && !errouAntes)}
-            onClick={() => pedirDica.mutate(nextHintLevel)}
-          >
-            Dica {nextHintLevel}
+          {exercicio.activity_type === 'classification' ? (
+            <ClassificationInput
+              exercicio={exercicio}
+              items={classificationItems}
+              categories={classificationCategories}
+              assignments={classificacoes}
+              disabled={bloqueado}
+              firstRef={firstClassificationRef}
+              onAssign={atualizarClassificacao}
+            />
+          ) : exercicio.activity_type === 'reorder' && exercicio.options ? (
+            <ReorderInput
+              options={exercicio.options}
+              ordem={ordem}
+              disabled={bloqueado}
+              firstRef={firstReorderRef}
+              onChange={atualizarOrdem}
+            />
+          ) : exercicio.activity_type === 'multiple_choice' && exercicio.options ? (
+            <ChoiceInput
+              exercicio={exercicio}
+              options={exercicio.options}
+              value={texto}
+              disabled={bloqueado}
+              firstRef={firstChoiceRef}
+              onChange={setTexto}
+            />
+          ) : (
+            <TextAnswerInput
+              numero={numero}
+              value={texto}
+              disabled={bloqueado}
+              inputRef={inputRef}
+              onChange={setTexto}
+            />
+          )}
+          <button type="submit" disabled={bloqueado || !texto.trim()}>Verificar</button>
+          {exercicio.hint_count > 0 && nextHintLevel <= exercicio.hint_count && (
+            <button
+              type="button"
+              className="ghost"
+              disabled={bloqueado || (nextHintLevel > 1 && !errouAntes)}
+              onClick={() => pedirDica.mutate(nextHintLevel)}
+            >
+              Dica {nextHintLevel}
+            </button>
+          )}
+          <button type="button" className="ghost" onClick={() => revelar.mutate()} disabled={bloqueado}>
+            Resposta
           </button>
-        )}
-        <button
-          type="button"
-          className="ghost"
-          onClick={() => revelar.mutate()}
-          disabled={ocupado || finalizado}
-        >
-          Resposta
-        </button>
         </form>
       )}
 
@@ -463,79 +221,7 @@ export function ExerciseCard({
       )}
       {pedirDica.isError && <p className="exercise-hint-error" role="alert">{pedirDica.error.message}</p>}
 
-      {veredito.tipo !== 'nada' && (
-        <div className={`fb ${veredito.tipo}`} role="status">
-          {veredito.tipo === 'certo' && (
-            <>
-              <span className="tag">Correto</span>
-              {veredito.explicacao && (
-                <span className="why">
-                  <Markdown>{veredito.explicacao}</Markdown>
-                </span>
-              )}
-            </>
-          )}
-          {veredito.tipo === 'errado' && (
-            <>
-              <span className="tag">Ainda não</span>
-              <span className="answer-diff" aria-label="Trechos da sua resposta">
-                {veredito.feedback.tokens.map((token, index) => (
-                  <mark className={token.status} key={`${token.text}-${index}`}>
-                    {token.text}
-                  </mark>
-                ))}
-              </span>
-              <span className="why">{veredito.feedback.message}</span>
-              <button type="button" className="feedback-retry" onClick={tentarNovamente}>
-                Tentar novamente
-              </button>
-            </>
-          )}
-          {veredito.tipo === 'revelado' && (
-            <>
-              <span className="tag">Resposta</span>
-              {exercicio.activity_type === 'classification' ? (
-                <div className="classification-solutions">
-                  {veredito.respostas.map((answer, answerIndex) => {
-                    const entries = classificationEntries(answer)
-                    return entries ? (
-                      <dl key={answer} aria-label={`Gabarito ${answerIndex + 1}`}>
-                        {entries.map(([item, category]) => (
-                          <div key={item}>
-                            <dt>{item}</dt>
-                            <dd>{category}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    ) : (
-                      <strong className="gabarito" key={answer}>{answer}</strong>
-                    )
-                  })}
-                </div>
-              ) : (
-                <strong className="gabarito">{veredito.respostas.join('  ·  ')}</strong>
-              )}
-              <span className="why">
-                <Markdown>{veredito.explicacao}</Markdown>
-              </span>
-            </>
-          )}
-          {veredito.tipo === 'falhou' && (
-            <>
-              <span className="tag">Erro</span>
-              <span className="why">{veredito.mensagem}</span>
-            </>
-          )}
-          {veredito.tipo === 'fila' && (
-            <>
-              <span className="tag">Na fila</span>
-              <span className="why">
-                Sua tentativa foi salva neste dispositivo e será corrigida quando a conexão voltar.
-              </span>
-            </>
-          )}
-        </div>
-      )}
+      <ExerciseVerdict veredito={veredito} exercicio={exercicio} onRetry={tentarNovamente} />
     </div>
   )
 }

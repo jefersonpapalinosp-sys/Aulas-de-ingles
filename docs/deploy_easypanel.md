@@ -381,7 +381,8 @@ nesta ordem, parando no primeiro erro:
    editorial não passar despercebida;
 7. smokes HTTPS em `AULAS_PUBLIC_URL` (padrão: domínio gerado pelo painel):
    `/`, `/sw.js`, `/api/live`, `/api/health` e `/api/courses` em 200 (até três
-   tentativas cada) e `schema_current == schema_required` no JSON do health.
+   tentativas cada) e `status=ok`, `db=up`, `schema=compatible` no JSON do health.
+   A API compara as revisões internamente; o smoke público não recebe os seus nomes.
 
 SSH sempre com `-o BatchMode=yes -o StrictHostKeyChecking=yes`: sem senha
 interativa e sem aceitar host desconhecido. O script nunca lê nem imprime o
@@ -442,6 +443,129 @@ o script por SSH continua valendo como contingência.
 - O backup anterior/posterior e o ensaio da migration no clone restaurado
   continuam sendo passos humanos da sequência da Sprint 43; o job não os faz.
   Antes de mergear uma migration na `main`, ensaie-a no clone primeiro.
+
+## Vigilância agendada — probe externo e gate operacional (INFRA-46)
+
+Duas coisas rodam fora da aplicação e precisam rodar em algum relógio: o
+**probe externo**, que diz se o domínio público responde, e o **gate
+operacional**, que compara worker, fila e custo do diálogo com limiares.
+
+### Dois relógios, de propósito
+
+| Onde | Comando | Resolução | Para que serve |
+|---|---|---|---|
+| Cron da VM | `make operations-alert` | o que você agendar (1–2 min é viável) | é o caminho principal; o aceite do INFRA-46 pede alerta para worker parado por 2 minutos, e só um cron curto vê isso |
+| GitHub Actions | workflow `operações · vigilância da stack pública` | `*/30`, **melhor-esforço** | rede de segurança de fora: um probe no mesmo host não distingue "a aplicação caiu" de "o host caiu" |
+
+O cron do GitHub para repositórios atrasa com frequência e pode pular
+execuções em períodos de carga. Ele não substitui o cron da VM para a
+resolução de minutos; serve para o caso em que a VM inteira está fora e,
+portanto, nenhum cron dela vai reclamar.
+
+### Alerta por e-mail, sem segredo de SMTP
+
+- **GitHub**: o job **falha** (exit 1) quando um limiar estoura, e o GitHub
+  envia a notificação nativa de falha de workflow agendado para quem mexeu no
+  cron por último. Confira em Settings → Notifications que "Actions" está
+  marcado para e-mail. Não há SMTP nem segredo de e-mail no repositório.
+- **VM**: `make operations-alert` é silencioso quando está tudo bem e escreve
+  o relatório em stdout quando não está, que é exatamente o contrato que o
+  `cron` espera para mandar e-mail. Depende de um MTA funcionando na VM
+  (`mailutils` ou equivalente); sem ele, o cron registra em
+  `/var/log/syslog` e o e-mail não sai — confira antes de confiar.
+
+Linha de crontab sugerida, de dois em dois minutos:
+
+```cron
+MAILTO=voce@exemplo.com
+OPERATIONS_BASE_URL=http://127.0.0.1:8011
+OPERATIONS_TOKEN=...
+*/2 * * * * cd /caminho/para/aulas-ingles && make operations-alert
+```
+
+O token fica no crontab do usuário, com `chmod 600`; ele dá leitura de
+`/api/operations/metrics` e `/api/operations/readiness`. As métricas são
+agregadas; o diagnóstico inclui versão do banco, ambiente e revisões de schema.
+Nenhuma dessas respostas carrega texto de aluno, mas o token continua sendo credencial.
+
+### Saúde pública e diagnóstico autenticado (BE-49)
+
+| Rota | Acesso | Verificação |
+|---|---|---|
+| `/api/live` | público | processo responde; não consulta banco |
+| `/api/health` | público | banco acessível e revisões aplicadas iguais às da imagem; retorna apenas `status`, `db`, `schema` e `code` |
+| `/api/operations/readiness` | `Authorization: Bearer <OPERATIONS_TOKEN>` | mesma verificação, com `version`, `env`, `schema_current` e `schema_required` |
+
+Banco indisponível ou schema incompatível mantêm HTTP 503 nas duas rotas de
+prontidão. Os diagnósticos têm `Cache-Control: private, no-store`. Sem token
+operacional configurado, a rota privada retorna 404; credencial ausente ou
+incorreta retorna 401 quando ele está configurado, antes de consultar o banco.
+Enviar token ao health público não acrescenta detalhes à resposta.
+
+`make operations-check` consulta a readiness privada e as métricas com o mesmo
+token. O probe externo continua sem credencial e também reprova exposição de
+versão, ambiente ou revisões no health público. Publique API e consumidores
+operacionais juntos: a versão anterior da API não oferece a rota privada.
+
+### Secrets do workflow
+
+| Secret | Conteúdo | Sem ela |
+|---|---|---|
+| `PUBLIC_PROBE_ORIGIN` | `https://dominio-publico` | o workflow avisa que está desarmado e passa sem fazer nada |
+| `OPERATIONS_TOKEN` | o mesmo `OPERATIONS_TOKEN` da aplicação | só o probe roda; o gate de métricas fica de fora |
+
+O probe não usa credencial nenhuma: `/api/health` é público. É por isso que ele
+roda primeiro e sozinho — disponibilidade é a pergunta que não deve depender de
+um segredo estar configurado.
+
+### O que cada limiar do diálogo significa
+
+O INFRA-48 acrescenta `assist_costs.daily` e `assist_costs.monthly` ao endpoint
+privado de métricas. Os totais abrangem escrita, transcrição e conversa,
+contados uma vez por reserva consumida, pelo instante de despacho em UTC
+(`created_at` nos registros legados sem despacho). São dia e mês de calendário,
+até `sampled_at`; cada janela traz início, fim, quantidade consumida, custo em
+microusd e quantidade de custos desconhecidos. Um USD corresponde a 1.000.000
+microusd. O custo pode ser parcial enquanto houver valores desconhecidos.
+
+Configure no ambiente do cron e nas **variables** do repositório do GitHub:
+
+- `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD`: orçamento diário aprovado, inteiro positivo.
+- `OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`: orçamento mensal aprovado, inteiro positivo.
+
+Não há valor presumido para esses dois orçamentos. Ausência gera `warning`;
+valor inválido encerra o comando com código 2 antes de qualquer requisição.
+Com orçamento definido, consumo >= 80% gera `warning` e >= 100% gera
+`critical`. Custo desconhecido ou métrica ausente/inválida gera `critical`.
+Tanto `warning` quanto `critical` retornam código 1, permitindo que cron e
+workflow sinalizem o problema. O resumo do workflow conserva o relatório
+também quando há alerta. Nenhum envio foi disparado pela validação local.
+
+O ledger permanece após excluir uma conversa ou expirar seu texto, evitando
+que a exclusão reduza o custo observado. A exclusão da **conta** remove suas
+reservas; por isso estes totais representam o ledger existente e precisam
+ser conciliados com a fatura do provedor. Não são um livro contábil permanente.
+O alerta não desliga flags automaticamente. Os checks legados abaixo continuam
+ativos, inclusive o teto diário adicional de conversa.
+
+| Check | Limiar | Responsável | Ação |
+|---|---|---|---|
+| `dialogue_cost_microusd_today` | ≤ 50.000 microusd | release manager | desligar a modalidade e conferir a fatura antes de religar |
+| `dialogue_provider_failure_rate` | ≤ 0,2 com amostra ≥ 5 turnos | release manager | conferir o provedor; o Roteiro continua atendendo |
+| `dialogue_quota_accounting` | seção `dialogue` presente | release manager | a API em uso é mais antiga que o gate: implantar antes de confiar no relatório |
+
+O teto de custo é folga de uma ordem de grandeza sobre o uso esperado: a cota
+são 24 turnos por dia, e o turno fica na casa de centenas de microusd. Passar
+de 50.000 não é aluno conversando.
+
+### O que isto não faz
+
+- Não alerta por SMS, Telegram ou webhook. E-mail é o canal, e é o que existe
+  sem segredo novo.
+- Não mede latência de dentro da VM: o probe externo inclui a rede do runner
+  até lá, e por isso o limiar dele é generoso (5 s).
+- Não vigia o provedor de IA diretamente. O que ele vê é o efeito —
+  `provider_failures` e `fallback` nas métricas do dia.
 
 ## Referências do painel
 

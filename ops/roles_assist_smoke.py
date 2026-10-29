@@ -9,10 +9,10 @@ from app.db.session import dispose_engine, get_sessionmaker
 from app.services import assist_quota
 from sqlalchemy import select
 
-assert os.environ["DATABASE_URL"].endswith("@db:5432/aulas_roles_lab")
 
-
-async def main():
+async def main() -> None:
+    assert os.environ["DATABASE_URL"].endswith("@db:5432/aulas_roles_lab")
+    assert os.environ["DATABASE_PURPOSE"] in {"runtime", "worker"}
     try:
         async with get_sessionmaker()() as session, session.begin():
             if os.environ["DATABASE_PURPOSE"] == "runtime":
@@ -52,4 +52,5 @@ async def main():
         await dispose_engine()
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

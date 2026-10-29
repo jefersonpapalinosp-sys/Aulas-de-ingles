@@ -257,30 +257,92 @@ class ArchiveTests(unittest.TestCase):
 
 
 class OperationalGuardsTests(unittest.TestCase):
+    def test_upgrade_fixture_uses_previous_models_but_migrates_with_current_image(self):
+        from ops.rollback_image import IMAGE as previous_image
+
+        for empty in (True, False):
+            intermediate = {"revision": [recovery.UPGRADE_FROM], "users": 0, "lessons": 0}
+            with (
+                self.subTest(empty=empty),
+                patch.object(recovery, "check_target") as guard,
+                patch.object(recovery, "lease", return_value=nullcontext()),
+                patch.object(recovery, "quiet"),
+                patch.object(recovery, "query", side_effect=[0] if empty else [1, intermediate]),
+                patch.object(recovery, "voice"),
+                patch.object(recovery, "audio_inventory", return_value={}),
+                patch.object(recovery, "docker") as docker,
+            ):
+                recovery.upgrade_lab_prepare()
+            guard.assert_called_once_with(recovery.UPGRADE_LAB)
+            self.assertIn(recovery.HELPER, docker.call_args_list[0].args)
+            if empty:
+                self.assertEqual(docker.call_args_list[1].args[-4:],
+                                 (recovery.HELPER, "alembic", "upgrade", recovery.UPGRADE_FROM))
+            else:
+                self.assertFalse(any("alembic" in c.args for c in docker.call_args_list))
+            fixture = docker.call_args_list[-1].args
+            self.assertEqual(fixture[-3:], (previous_image, "python", "/tools/recovery_fixture.py"))
+            self.assertIn(f"{recovery.UPGRADE_PROJECT}_default", fixture)
+            self.assertNotIn(recovery.HELPER, fixture)
+
+    def test_malformed_container_inspection_is_refused(self):
+        for value in (None, [], "private-value"):
+            with (
+                self.subTest(value=value),
+                patch.object(
+                    recovery, "docker", side_effect=[b"container-id", json.dumps([value]).encode()]
+                ),
+                self.assertRaises(RecoveryError) as error,
+            ):
+                recovery.container(recovery.PROJECT, "target-db")
+            self.assertNotIn("private-value", str(error.exception))
+
+    def test_invalid_voice_inventory_is_refused_before_accessing_destination(self):
+        with (
+            patch.object(recovery, "verify_bundle", return_value={"audio_files": None}),
+            patch.object(recovery, "check_target") as target,
+            self.assertRaises(RecoveryError),
+        ):
+            recovery.restore(Path("unused"), recovery.CONFIRM_TARGET)
+        target.assert_not_called()
+
     def test_database_identity_and_mount_guards(self):
+        for target in (recovery.RESTORE, recovery.DIALOGUE_LAB, recovery.DIALOGUE_RESTORE):
+            with self.subTest(target=target):
+                self._database_identity_and_mount_guards(target)
+
+    def _database_identity_and_mount_guards(self, target):
         info = {
             "State": {"Running": True},
             "HostConfig": {"Privileged": False, "PortBindings": {}},
             "Config": {"Image": recovery.POSTGRES},
-            "NetworkSettings": {"Networks": {f"{recovery.PROJECT}_default": {}}},
+            "NetworkSettings": {"Networks": {f"{target.project}_default": {}}},
             "Mounts": [
                 {
                     "Type": "volume",
-                    "Name": recovery.RESTORE.db_volume,
+                    "Name": target.db_volume,
                     "Destination": "/var/lib/postgresql/data",
                 },
                 {
                     "Type": "bind",
-                    "Source": str(recovery.ROOT / "infra/restore-db-init.sql"),
+                    "Source": str(
+                        recovery.ROOT
+                        / "infra"
+                        / (
+                            "test-db-init.sql"
+                            if target == recovery.DIALOGUE_LAB
+                            else "restore-db-init.sql"
+                        )
+                    ),
                     "Destination": "/docker-entrypoint-initdb.d/01-test.sql",
                     "RW": False,
                 },
             ],
         }
         identity = {
-            "database": recovery.RESTORE.database,
-            "role": recovery.RESTORE.role,
-            "marker": recovery.RESTORE.marker,
+            "database": target.database,
+            "role": target.role,
+            "marker": target.marker,
             "version": 160015,
             "super": False,
             "createdb": False,
@@ -301,13 +363,13 @@ class OperationalGuardsTests(unittest.TestCase):
             patch.object(recovery, "container", return_value=info) as read,
             patch.object(recovery, "query", return_value=identity) as sql,
         ):
-            self.assertEqual(recovery.check_target(recovery.RESTORE), info)
+            self.assertEqual(recovery.check_target(target), info)
             for section, key, value in changes:
                 changed = copy.deepcopy(info)
                 changed[section][key] = value
                 read.return_value = changed
                 with self.subTest(section=section, key=key), self.assertRaises(RecoveryError):
-                    recovery.check_target(recovery.RESTORE)
+                    recovery.check_target(target)
             for index, key, value in [
                 (0, "Name", "aulas-ingles-pgdata-prod"),
                 (1, "RW", True),
@@ -318,7 +380,7 @@ class OperationalGuardsTests(unittest.TestCase):
                 changed["Mounts"][index][key] = value
                 read.return_value = changed
                 with self.subTest(mount=key), self.assertRaises(RecoveryError):
-                    recovery.check_target(recovery.RESTORE)
+                    recovery.check_target(target)
             read.return_value = info
             for key, value in {
                 "marker": "production",
@@ -333,7 +395,7 @@ class OperationalGuardsTests(unittest.TestCase):
             }.items():
                 sql.return_value = {**identity, key: value}
                 with self.subTest(identity=key), self.assertRaises(RecoveryError):
-                    recovery.check_target(recovery.RESTORE)
+                    recovery.check_target(target)
 
     def test_desktop_mount_alias_is_exact_and_only_on_macos(self):
         expected = Path("/Users/example/repo/infra/test-db-init.sql")
@@ -387,7 +449,7 @@ class OperationalGuardsTests(unittest.TestCase):
             write_tar(Path(stdout.name))
 
         with (
-            patch.object(recovery, "verify_bundle", return_value={}),
+            patch.object(recovery, "verify_bundle", return_value={"audio_files": {}}),
             patch.object(recovery, "check_target"),
             patch.object(recovery, "quiet"),
             patch.object(recovery, "lease", return_value=nullcontext()),
@@ -500,24 +562,45 @@ class OperationalGuardsTests(unittest.TestCase):
 
     def test_nonempty_database_blocks_restore_without_cleanup(self):
         with (
-            patch.object(recovery, "verify_bundle", return_value={}),
+            patch.object(recovery, "verify_bundle", return_value={"audio_files": {}}),
             patch.object(recovery, "check_target"),
             patch.object(recovery, "quiet"),
             patch.object(recovery, "lease", return_value=nullcontext()),
             patch.object(recovery, "query", return_value=1),
             patch.object(recovery, "docker") as command,
-            self.assertRaises(RecoveryError),
+            self.assertRaisesRegex(RecoveryError, "PostgreSQL não está vazio"),
         ):
             recovery.restore(Path("unused"), recovery.CONFIRM_TARGET)
         command.assert_not_called()
 
     def test_voice_import_never_targets_source(self):
-        with (
-            patch.object(recovery, "docker") as command,
-            self.assertRaises(RecoveryError),
+        from dataclasses import replace
+
+        for target in (
+            recovery.LAB, recovery.UPGRADE_LAB, recovery.DIALOGUE_LAB,
+            replace(recovery.DIALOGUE_RESTORE, voice_volume="other-volume"),
+            replace(recovery.DIALOGUE_RESTORE, project="aulas-ingles-prod"),
         ):
-            recovery.voice(recovery.LAB, "import")
-        command.assert_not_called()
+            with (
+                self.subTest(target=target),
+                patch.object(recovery, "docker") as command,
+                self.assertRaises(RecoveryError),
+            ):
+                recovery.voice(target, "import")
+            command.assert_not_called()
+
+    def test_voice_import_accepts_only_registered_disposable_destinations(self):
+        targets = (
+            recovery.DESTINATIONS | recovery.UPGRADE_DESTINATIONS | recovery.DIALOGUE_DESTINATIONS
+        )
+        for target in targets.values():
+            with self.subTest(target=target), patch.object(recovery, "docker") as command:
+                recovery.voice(target, "import")
+            args = command.call_args.args
+            self.assertEqual(args[-1], "import")
+            self.assertIn(f"type=volume,src={target.voice_volume},dst=/voice", args)
+            self.assertEqual(args[args.index("--network") + 1], "none")
+            self.assertIn("--read-only", args)
 
     def test_subprocess_error_does_not_leak_credentials(self):
         import subprocess

@@ -251,7 +251,7 @@ async def run(samples: int, concurrency: int) -> dict[str, object]:
                 ) -> Response:
                     if kind == "versions":
                         path = f"/api/writing/prompts/{prompt_id}/versions"
-                        params: dict[str, object] = {"limit": PAGE_SIZE}
+                        params: dict[str, str | int] = {"limit": PAGE_SIZE}
                     elif kind == "feedback":
                         path = f"/api/writing/prompts/{prompt_id}/feedback"
                         params = {"limit": PAGE_SIZE}

@@ -54,9 +54,16 @@ x-backend-common: &backend-common
   SPEAKING_STORAGE_DIR: /app/data/speaking
   SPEAKING_MAX_BYTES: "2000000"
   EDITORIAL_SNAPSHOTS_ENABLED: "false"
+  DIALOGUE_PRACTICE_ENABLED: ${EASYPANEL_DIALOGUE_PRACTICE_ENABLED:-false}
   ASSISTED_FEATURES_ENABLED: ${EASYPANEL_ASSISTED_FEATURES_ENABLED:-false}
   ASSIST_TRANSCRIPTION_URL: ${EASYPANEL_ASSIST_TRANSCRIPTION_URL:-}
   ASSIST_WRITING_URL: ${EASYPANEL_ASSIST_WRITING_URL:-}
+  # INFRA-46: sem esta variável declarada aqui, preencher a URL no painel não
+  # chegaria ao container e o Guiado ficaria desligado em silêncio (409
+  # assist_disabled). Vazia por padrão: ligar a conversa é ato deliberado.
+  ASSIST_DIALOGUE_URL: ${EASYPANEL_ASSIST_DIALOGUE_URL:-}
+  # Múltiplo de 12 por decisão de 26/10/2026; o boot recusa outro valor.
+  ASSIST_DIALOGUE_DAILY_TURNS: "24"
   ASSIST_PROVIDER_KIND: gateway
   ASSIST_PROVIDER_NAME: external
   ASSIST_PROVIDER_TOKEN: ${EASYPANEL_ASSIST_PROVIDER_TOKEN:-}

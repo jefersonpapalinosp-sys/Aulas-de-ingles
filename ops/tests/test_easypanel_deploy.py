@@ -263,3 +263,22 @@ class ContainerHardeningTests(unittest.TestCase):
         self.assertIn("limit_req_status 429", auth)
         self.assertIn("server_tokens off;", directives)
         self.assertIn("gzip_vary on;", directives)
+
+    def test_dialogue_edge_limits_writes_but_allows_polling(self) -> None:
+        nginx = (ROOT / "frontend/nginx.conf").read_text(encoding="utf-8")
+        mapping = nginx.split("map $request_method $aulas_dialogue_write_key {", 1)[
+            1
+        ].split("}", 1)[0]
+        self.assertIn('default "";', mapping)
+        self.assertNotIn("GET ", mapping)
+        for method in ("POST", "PUT", "DELETE"):
+            self.assertIn(f"{method} $binary_remote_addr;", mapping)
+        block = nginx.split("location ~ ^/api/speaking/dialogues(?:/|$) {", 1)[1].split(
+            "}", 1
+        )[0]
+        self.assertIn("limit_req zone=aulas_dialogue burst=24 nodelay;", block)
+        self.assertIn("limit_req_status 429;", block)
+        self.assertIn("include /etc/nginx/api-proxy.conf;", block)
+        proxy = (ROOT / "frontend/api-proxy.conf").read_text(encoding="utf-8")
+        self.assertIn("client_max_body_size 2000000;", proxy)
+        self.assertIn("client_body_timeout 30s;", proxy)

@@ -925,6 +925,7 @@ async def test_ids_de_midia_e_trechos_sobrevivem_ao_reseed(session: AsyncSession
     assert cues_after == cues_before
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_midia_persiste_licenca_e_politica_offline(session: AsyncSession) -> None:
     media = list((await session.execute(select(LessonMedia))).scalars())

@@ -19,6 +19,7 @@ from app.api import (
     course_reviews,
     courses,
     dashboard,
+    dialogues,
     health,
     history,
     lessons,
@@ -153,6 +154,9 @@ def create_app() -> FastAPI:
     app.include_router(review.router, prefix="/api")
     app.include_router(writing.router, prefix="/api")
     app.include_router(speaking.router, prefix="/api")
+    # Depois de `speaking`: as rotas do diálogo têm prefixo próprio
+    # (/speaking/dialogues) e não disputam caminho com as de shadowing.
+    app.include_router(dialogues.router, prefix="/api")
     app.include_router(me.router, prefix="/api")
     app.include_router(dashboard.router, prefix="/api")
     app.include_router(assist.router, prefix="/api")

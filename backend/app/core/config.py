@@ -10,6 +10,9 @@ from urllib.parse import urlparse
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# `domain/` não importa nada do projeto, então esta dependência não cria ciclo:
+# o limite de turnos é constante de produto, não configuração de ambiente.
+from app.domain.dialogue import MAX_TURNS_PER_DIALOGUE
 from app.services.audio_upload import MAX_AUDIO_BYTES
 
 
@@ -71,6 +74,8 @@ class Settings(BaseSettings):
     # Recursos assistidos são experimentais, opt-in e ficam desligados sem
     # um gateway explicitamente configurado. O gateway recebe áudio bruto ou
     # texto/rubrica e devolve JSON no contrato documentado pelo serviço.
+    # Só habilitar junto da interface FE-47 e da revisão SEC-46 assinada.
+    dialogue_practice_enabled: bool = False
     assisted_features_enabled: bool = False
     assist_transcription_url: str | None = None
     assist_writing_url: str | None = None
@@ -79,7 +84,14 @@ class Settings(BaseSettings):
     assist_provider_token: str | None = None
     assist_ollama_base_url: str = "http://host.docker.internal:11434"
     assist_ollama_model: str = "qwen2.5:7b"
+    assist_dialogue_url: str | None = None
+    assist_ollama_dialogue_model: str = "llama3.1:8b"
     assist_daily_quota: int = 5
+    # Decisão de 26/10/2026: a cota é **dois diálogos completos**, não um número
+    # redondo. Com o limite de 12 turnos por diálogo, uma cota de 20 faria o
+    # segundo diálogo receber 429 no turno 8 — no meio da conversa. Mudar o
+    # limite por diálogo move este número junto (ver `validar`).
+    assist_dialogue_daily_turns: int = 24
     assist_reservation_seconds: int = 900
     assist_retention_days: int = 30
     assist_timeout_seconds: int = 20
@@ -117,6 +129,14 @@ class Settings(BaseSettings):
         if self.assist_provider_kind == "ollama":
             return bool(self.assist_ollama_base_url.strip() and self.assist_ollama_model.strip())
         return bool(self.assist_writing_url)
+
+    @property
+    def dialogue_assist_configured(self) -> bool:
+        if self.assist_provider_kind == "ollama":
+            return bool(
+                self.assist_ollama_base_url.strip() and self.assist_ollama_dialogue_model.strip()
+            )
+        return bool(self.assist_dialogue_url)
 
     def validar(self) -> None:
         """Erros de configuração que só podem estourar no boot, nunca em produção silenciosa."""
@@ -169,6 +189,19 @@ class Settings(BaseSettings):
             )
         if self.assist_daily_quota < 1:
             raise RuntimeError("ASSIST_DAILY_QUOTA precisa ser positivo.")
+        # A cota de conversa é múltiplo do limite por diálogo, e o boot recusa
+        # um valor que deixaria um diálogo morrer pela metade — foi essa a
+        # decisão, não o número 24 em si.
+        if self.assist_dialogue_daily_turns % MAX_TURNS_PER_DIALOGUE:
+            raise RuntimeError(
+                "ASSIST_DIALOGUE_DAILY_TURNS precisa ser múltiplo de "
+                f"{MAX_TURNS_PER_DIALOGUE}, o limite de turnos por diálogo; "
+                "um valor intermediário daria 429 no meio de uma conversa."
+            )
+        if self.assist_dialogue_daily_turns < MAX_TURNS_PER_DIALOGUE:
+            raise RuntimeError(
+                "ASSIST_DIALOGUE_DAILY_TURNS precisa permitir ao menos um diálogo completo."
+            )
         if not 60 <= self.assist_reservation_seconds <= 3600:
             raise RuntimeError("ASSIST_RESERVATION_SECONDS deve ficar entre 60 e 3600 segundos.")
         if self.assist_retention_days < 1:
@@ -200,7 +233,19 @@ class Settings(BaseSettings):
             }:
                 raise RuntimeError("Ollama precisa permanecer no host local em produção.")
         if self.app_env == "prod" and self.assisted_features_enabled:
-            urls = [url for url in [self.assist_transcription_url, self.assist_writing_url] if url]
+            # A lista é de todas as URLs de provedor, e precisa crescer junto com
+            # elas: a do diálogo entrou no BE-46 e ficou de fora daqui, o que
+            # deixaria o texto do aluno sair em HTTP puro e sem token em
+            # produção sem o boot reclamar. SEC-46 fechou.
+            urls = [
+                url
+                for url in [
+                    self.assist_transcription_url,
+                    self.assist_writing_url,
+                    self.assist_dialogue_url,
+                ]
+                if url
+            ]
             if any(not url.startswith("https://") for url in urls):
                 raise RuntimeError("Provedores assistidos precisam usar HTTPS em produção.")
             if self.assist_provider_kind == "gateway" and urls and not self.assist_provider_token:

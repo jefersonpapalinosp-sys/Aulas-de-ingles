@@ -249,8 +249,8 @@ async def _complete_export(
         session,
         DialogueTurn,
         "id dialogue_id position role input_kind speaking_attempt_id transcription_job_id "
-        "state transcript checks partner_text hints confidence fallback cost_microusd "
-        "error_code human_rating created_at completed_at expires_at",
+        "state transcript checks check_details partner_text hints confidence fallback "
+        "cost_microusd error_code human_rating created_at completed_at expires_at",
         user_id,
     )
     data.login_sessions = await _rows(
@@ -335,12 +335,12 @@ async def export_personal_data(session: AsyncSession, user_id: int) -> PersonalD
         raise
 
 
-def _lesson_reference(lesson: Lesson) -> dict[str, str | int]:
+def _lesson_reference(lesson: Lesson | None) -> dict[str, str | int | None]:
     return {
-        "lesson_id": lesson.id,
-        "course_slug": lesson.course.slug,
-        "unit_slug": lesson.unit.slug,
-        "lesson_number": lesson.number,
+        "lesson_id": lesson.id if lesson else None,
+        "course_slug": lesson.course.slug if lesson else None,
+        "unit_slug": lesson.unit.slug if lesson else None,
+        "lesson_number": lesson.number if lesson else None,
     }
 
 
@@ -413,6 +413,28 @@ async def _export_snapshot(
                 .order_by(SpeakingAttempt.created_at)
             )
         ).scalars()
+    )
+    # Áudio de diálogo não tem cue. Após excluir a conversa ele pode continuar
+    # guardado até a retenção; nesse caso a referência editorial fica nula.
+    dialogue_audio_ids = [attempt.id for attempt in speaking if attempt.origin == "dialogue"]
+    dialogue_lessons = (
+        {
+            attempt_id: lesson
+            for attempt_id, lesson in (
+                await session.execute(
+                    select(DialogueTurn.speaking_attempt_id, Lesson)
+                    .join(SpeakingDialogue, DialogueTurn.dialogue_id == SpeakingDialogue.id)
+                    .join(Lesson, SpeakingDialogue.lesson_id == Lesson.id)
+                    .where(
+                        DialogueTurn.user_id == usuario.id,
+                        SpeakingDialogue.user_id == usuario.id,
+                        DialogueTurn.speaking_attempt_id.in_(dialogue_audio_ids),
+                    )
+                )
+            ).all()
+        }
+        if dialogue_audio_ids
+        else {}
     )
     transcription_jobs = (
         await session.execute(
@@ -675,12 +697,17 @@ async def _export_snapshot(
         speaking=[
             {
                 "id": attempt.id,
+                "origin": attempt.origin,
                 "cue_id": attempt.transcript_cue_id,
                 "audio_sha256": attempt.audio_sha256,
                 "integrity_state": attempt.integrity_state,
                 "integrity_checked_at": attempt.integrity_checked_at,
-                **_lesson_reference(attempt.cue.media.lesson),
-                "cue_text": attempt.cue.text_en,
+                **_lesson_reference(
+                    attempt.cue.media.lesson
+                    if attempt.cue is not None
+                    else dialogue_lessons.get(attempt.id)
+                ),
+                "cue_text": attempt.cue.text_en if attempt.cue is not None else None,
                 "duration_ms": attempt.duration_ms,
                 "self_rating": attempt.self_rating,
                 "status": attempt.status,

@@ -33,6 +33,7 @@ async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_posicao_de_midia_persiste_e_e_isolada(client: AsyncClient) -> None:
     media_id = (await client.get("/api/lessons/31")).json()["media"][0]["id"]
@@ -81,6 +82,7 @@ async def test_posicao_de_midia_persiste_e_e_isolada(client: AsyncClient) -> Non
     ] == 0
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_posicao_valida_midia_e_duracao(client: AsyncClient) -> None:
     headers = await conta(client, "limites")
@@ -103,6 +105,7 @@ async def test_posicao_valida_midia_e_duracao(client: AsyncClient) -> None:
     assert ausente.status_code == 404
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_midia_da_aula_14_level_2_respeita_duracao_oficial(
     client: AsyncClient,
@@ -129,6 +132,7 @@ async def test_midia_da_aula_14_level_2_respeita_duracao_oficial(
     assert outside.status_code == 422
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_media_concurrent_writes_tombstone_and_replay(client):
     headers = await conta(client, "race")
@@ -154,6 +158,7 @@ async def test_media_concurrent_writes_tombstone_and_replay(client):
     assert current["position_seconds"] == 0 and current["completed"] is True
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_media_end_before_delayed_put_and_required_revision(client):
     headers = await conta(client, "end-first")

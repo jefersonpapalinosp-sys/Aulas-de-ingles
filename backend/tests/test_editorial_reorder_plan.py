@@ -37,6 +37,7 @@ def exercise_reorder():
     return stored, seed_graph(courses, lessons)
 
 
+@pytest.mark.timezone
 def test_lesson_reorder_requires_stable_identity_and_new_reviewed_version():
     stored, wanted = exercise_reorder()
     report = compare_reorder_graphs(wanted, stored)
@@ -65,6 +66,7 @@ def test_reorder_without_version_bump_is_blocked():
     assert "lesson_version_bump_required" in {blocker["code"] for blocker in report["blockers"]}
 
 
+@pytest.mark.timezone
 @pytest.mark.parametrize("mutation", ["semantic", "parent", "unsupported", "mixed"])
 def test_reorder_preview_rejects_mixed_or_unsupported_changes(mutation):
     stored, wanted = exercise_reorder()
@@ -120,6 +122,7 @@ def test_identical_catalog_is_not_mistaken_for_a_reorder():
     ]
 
 
+@pytest.mark.timezone
 async def test_database_preview_is_consistent_read_only_and_exposes_no_personal_values(session):
     _, wanted = exercise_reorder()
     before = await editorial_rows(session)
@@ -147,6 +150,7 @@ async def test_database_preview_is_consistent_read_only_and_exposes_no_personal_
     assert "password_hash" not in serialized and "answer" not in serialized
 
 
+@pytest.mark.timezone
 async def test_database_preview_rejects_dirty_session(session):
     _, wanted = exercise_reorder()
     await session.connection()
