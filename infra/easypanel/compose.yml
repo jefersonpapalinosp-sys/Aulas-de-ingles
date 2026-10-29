@@ -242,6 +242,10 @@ services:
     build:
       context: ../../frontend
       dockerfile: Dockerfile.prod
+    environment:
+      AULAS_ASSET_ARCHIVE: /var/lib/aulas-web
+    volumes:
+      - web_assets:/var/lib/aulas-web
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -280,3 +284,4 @@ services:
 volumes:
   pgdata:
   speaking_data:
+  web_assets:
