@@ -148,7 +148,11 @@ async def _assist(
     """Caminho assistido completo. ``Replay`` quando a operação já foi admitida."""
     settings = get_settings()
     result = Assistance(mode="fallback")
-    if not settings.assisted_features_enabled or not settings.writing_assist_configured:
+    if (
+        not settings.assisted_features_enabled
+        or not settings.writing_assist_configured
+        or not settings.assist_account_allowed(usuario.id)
+    ):
         result.error = "feature_disabled"
         return result
 

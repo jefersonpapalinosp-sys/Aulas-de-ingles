@@ -4,7 +4,7 @@ import hashlib
 import hmac
 from datetime import UTC, datetime
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 from urllib.parse import urlparse
 
 from pydantic import Field
@@ -75,11 +75,19 @@ class Settings(BaseSettings):
     # um gateway explicitamente configurado. O gateway recebe áudio bruto ou
     # texto/rubrica e devolve JSON no contrato documentado pelo serviço.
     # Só habilitar junto da interface FE-47 e da revisão SEC-46 assinada.
+    # A lista do piloto protege TODAS as modalidades, inclusive STT compartilhada.
+    # JSON de IDs internos. Vazio bloqueia produção/public; dev/test locais
+    # continuam livres para ensaios. Nunca usar email/token nesta configuração.
+    dialogue_pilot_user_ids: list[Annotated[int, Field(strict=True, gt=0)]] = Field(
+        default_factory=list
+    )
     dialogue_practice_enabled: bool = False
     assisted_features_enabled: bool = False
     assist_transcription_url: str | None = None
     assist_writing_url: str | None = None
-    assist_provider_kind: Literal["gateway", "ollama"] = "gateway"
+    assist_provider_kind: Literal["gateway", "ollama", "cloudflare"] = "gateway"
+    # Confirmação operacional do plano Workers Free; não é detecção automática.
+    assist_cloudflare_free_plan_confirmed: bool = False
     assist_provider_name: str = "external"
     assist_provider_token: str | None = None
     assist_ollama_base_url: str = "http://host.docker.internal:11434"
@@ -128,7 +136,7 @@ class Settings(BaseSettings):
     def writing_assist_configured(self) -> bool:
         if self.assist_provider_kind == "ollama":
             return bool(self.assist_ollama_base_url.strip() and self.assist_ollama_model.strip())
-        return bool(self.assist_writing_url)
+        return self.assist_provider_kind != "cloudflare" and bool(self.assist_writing_url)
 
     @property
     def dialogue_assist_configured(self) -> bool:
@@ -137,6 +145,17 @@ class Settings(BaseSettings):
                 self.assist_ollama_base_url.strip() and self.assist_ollama_dialogue_model.strip()
             )
         return bool(self.assist_dialogue_url)
+
+    @property
+    def assist_accounts_restricted(self) -> bool:
+        return bool(
+            self.dialogue_pilot_user_ids
+            or self.app_env == "prod"
+            or self.deployment_profile == "public"
+        )
+
+    def assist_account_allowed(self, user_id: int) -> bool:
+        return not self.assist_accounts_restricted or user_id in self.dialogue_pilot_user_ids
 
     def validar(self) -> None:
         """Erros de configuração que só podem estourar no boot, nunca em produção silenciosa."""
@@ -220,6 +239,21 @@ class Settings(BaseSettings):
             raise RuntimeError("ASSIST_WORKER_POLL_SECONDS precisa ser positivo.")
         if not self.assist_provider_name.strip() or len(self.assist_provider_name) > 80:
             raise RuntimeError("ASSIST_PROVIDER_NAME precisa ter entre 1 e 80 caracteres.")
+        if self.assist_provider_kind == "cloudflare":
+            from app.services.cloudflare_provider import validate_url
+
+            for url, modality in (
+                (self.assist_dialogue_url, "dialogue"),
+                (self.assist_transcription_url, "transcription"),
+            ):
+                if url:
+                    validate_url(url, modality)
+            if self.assist_writing_url:
+                raise RuntimeError("Cloudflare neste piloto não habilita escrita assistida.")
+            if self.assisted_features_enabled and (
+                not self.assist_cloudflare_free_plan_confirmed or self.assist_job_max_attempts != 1
+            ):
+                raise RuntimeError("Piloto Cloudflare exige plano Free confirmado e uma tentativa.")
         if self.assist_provider_kind == "ollama":
             parsed = urlparse(self.assist_ollama_base_url)
             if parsed.scheme not in {"http", "https"} or not parsed.hostname:
@@ -248,7 +282,11 @@ class Settings(BaseSettings):
             ]
             if any(not url.startswith("https://") for url in urls):
                 raise RuntimeError("Provedores assistidos precisam usar HTTPS em produção.")
-            if self.assist_provider_kind == "gateway" and urls and not self.assist_provider_token:
+            if (
+                self.assist_provider_kind in {"gateway", "cloudflare"}
+                and urls
+                and not self.assist_provider_token
+            ):
                 raise RuntimeError("ASSIST_PROVIDER_TOKEN é obrigatório em produção.")
 
 

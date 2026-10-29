@@ -92,13 +92,24 @@ O que sai, quando você usa Guiado ou Livre:
 - o texto do seu turno atual e até seis turnos anteriores da mesma conversa;
 - a lista de códigos que a verificação automática reprovou neste turno.
 
-O que **não** sai, em nenhum modo:
+O que a aplicação **não acrescenta** ao envio:
 
 - seu nome, e-mail, identificador de conta ou token de sessão;
 - seu histórico de estudo, progresso ou qualquer outra aula;
-- o áudio da sua voz — o provedor de conversa é só de texto. Se você gravar um
-  turno falando, o áudio é transcrito e o que segue para o provedor de conversa
-  é o texto.
+
+**Se você autorizar uma transcrição, o áudio bruto vai para o Workers AI da
+Cloudflare.** Isso vale tanto para a conversa quanto para a prática oral.
+Depois, o modelo de conversa recebe somente o texto. A voz e o que você disser
+podem identificar você; não há anonimização de áudio. Evite dados pessoais,
+conteúdo sensível e gravações de terceiros. Sem confiança informada pelo
+provedor, a tela avisa que a confiança é desconhecida; não é uma nota de pronúncia.
+
+O piloto é restrito à conta autorizada. A Cloudflare declara não usar o conteúdo
+para treinamento e não reter conteúdo de inferência comum após processamento,
+com exceções legais/de segurança e retenção de metadados operacionais. Não há
+garantia de processamento exclusivamente no Brasil. Consulte a
+[política Workers AI](https://developers.cloudflare.com/workers-ai/platform/data-usage/).
+Respostas podem conter erros ou conteúdo inadequado: não há moderação de saída.
 
 Se você escrever o seu e-mail, telefone ou documento dentro da própria frase, a
 aplicação o substitui por `[email removido]` ou `[numero removido]` **antes** de

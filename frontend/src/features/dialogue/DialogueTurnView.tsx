@@ -28,8 +28,8 @@ export function DialogueTurnView({ turn, guided, disabled, onRate, onSpeak }: {
       ? <p role="alert">Não foi possível processar este turno. Você pode continuar por texto no próximo.</p> : <>
         <p>{turn.input_kind === 'audio' ? 'Transcrição automatizada da sua fala' : 'Você escreveu'}</p>
         <p lang="en" className="transcription-copy">{turn.words?.length ? turn.words.map((word, i) =>
-          <span key={i} className={word.confidence < 0.75 ? 'low-confidence' : ''}>
-            {word.text}{word.confidence < 0.75 && <small> (transcrição incerta)</small>}{' '}
+          <span key={i} className={(word.confidence === null || word.confidence < 0.75) ? 'low-confidence' : ''}>
+            {word.text}{(word.confidence === null || word.confidence < 0.75) && <small> (transcrição incerta)</small>}{' '}
           </span>) : turn.transcript ?? 'Texto removido conforme a retenção.'}</p>
         <ul>{Object.entries(turn.checks).map(([code, passed]) =>
           <li key={code}>{LABELS[code] ?? 'Critério da aula'}: {passed ? 'atendido' : 'a revisar'}.</li>)}</ul>

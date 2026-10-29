@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import select, update
+from sqlalchemy import select, true, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.exc import TimeoutError as PoolTimeout
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,7 +22,14 @@ from app.core.config import Settings, get_settings
 from app.db.models import DialogueTurn, SpeakingAttempt, SpeakingDialogue, TranscriptionJob
 from app.db.session import dispose_engine, get_sessionmaker
 from app.domain.enums import JobKind
-from app.services import account_deletion, assist_quota, assistance, editorial_history, maintenance
+from app.services import (
+    account_deletion,
+    assist_quota,
+    assistance,
+    cloudflare_provider,
+    editorial_history,
+    maintenance,
+)
 from app.services import dialogue as dialogue_service
 from app.services.audio_storage import AudioStorage
 
@@ -94,12 +101,19 @@ async def _recover_stale_jobs(now: datetime) -> None:
 
 async def _claim_next_job(now: datetime) -> ClaimedJob | None:
     await _recover_stale_jobs(now)
+    settings = get_settings()
+    account_filter = (
+        TranscriptionJob.user_id.in_(settings.dialogue_pilot_user_ids)
+        if settings.assist_accounts_restricted
+        else true()
+    )
     claim: ClaimedJob | None = None
     async with get_sessionmaker()() as session, session.begin():
         job = (
             await session.execute(
                 select(TranscriptionJob)
                 .where(
+                    account_filter,
                     TranscriptionJob.status == "queued",
                     TranscriptionJob.next_attempt_at <= now,
                     TranscriptionJob.attempt_count < TranscriptionJob.max_attempts,
@@ -140,13 +154,18 @@ async def _authorize_dispatch(claim: ClaimedJob) -> bool:
         ).scalar_one_or_none()
         if job is None:
             return False
-        if job.expires_at <= datetime.now(UTC):
+        error_code = "reservation_unavailable"
+        if not get_settings().assist_account_allowed(job.user_id):
+            error_code = "assist_disabled"
+            await assist_quota.release(session, job.assist_reservation_id, error_code)
+            allowed = False
+        elif job.expires_at <= datetime.now(UTC):
             await assist_quota.release(session, job.assist_reservation_id, "job_expired")
             allowed = False
         else:
             allowed = await assist_quota.consume(session, job.assist_reservation_id)
         if not allowed:
-            job.status, job.error_code = "failed", "reservation_unavailable"
+            job.status, job.error_code = "failed", error_code
             job.processing_started_at = None
             job.completed_at = datetime.now(UTC)
         return allowed
@@ -224,7 +243,7 @@ async def _record_success(
         job.words = result.words
         job.mean_confidence = result.mean_confidence
         job.similarity_score = assistance.compare_transcript(expected_text, result.text)
-        job.low_confidence = result.mean_confidence < 0.75
+        job.low_confidence = result.mean_confidence is None or result.mean_confidence < 0.75
         job.cost_microusd = result.cost_microusd
         job.error_code = None
         job.processing_started_at = None
@@ -267,7 +286,9 @@ async def _dialogue_transcript(
         return None, "audio_unavailable", None
     try:
         result = await asyncio.to_thread(
-            assistance.call_transcription_provider,
+            cloudflare_provider.transcribe
+            if settings.assist_provider_kind == "cloudflare"
+            else assistance.call_transcription_provider,
             settings.assist_transcription_url,
             audio,
             attempt.mime_type,
@@ -417,7 +438,9 @@ async def process_next_transcription() -> bool:
         return True
     try:
         result = await asyncio.to_thread(
-            assistance.call_transcription_provider,
+            cloudflare_provider.transcribe
+            if settings.assist_provider_kind == "cloudflare"
+            else assistance.call_transcription_provider,
             settings.assist_transcription_url,
             audio,
             mime_type,

@@ -6522,10 +6522,17 @@
             "TranscriptionWordOut": {
                 "properties": {
                     "confidence": {
-                        "maximum": 1.0,
-                        "minimum": 0.0,
-                        "title": "Confidence",
-                        "type": "number"
+                        "anyOf": [
+                            {
+                                "maximum": 1.0,
+                                "minimum": 0.0,
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Confidence"
                     },
                     "end_ms": {
                         "minimum": 0.0,

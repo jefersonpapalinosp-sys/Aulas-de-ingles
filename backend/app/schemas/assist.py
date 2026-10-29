@@ -16,7 +16,7 @@ class TranscriptionWordOut(BaseModel):
     text: str
     start_ms: int = Field(ge=0)
     end_ms: int = Field(ge=0)
-    confidence: float = Field(ge=0, le=1)
+    confidence: float | None = Field(ge=0, le=1)
 
 
 class TranscriptionJobOut(BaseModel):

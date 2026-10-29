@@ -24,7 +24,7 @@ class ProviderFailure(Exception):
 class TranscriptionResult:
     text: str
     words: list[dict[str, object]]
-    mean_confidence: float
+    mean_confidence: float | None
     cost_microusd: int
     cost_known: bool = True
 

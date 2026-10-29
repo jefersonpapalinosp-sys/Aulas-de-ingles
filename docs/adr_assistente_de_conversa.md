@@ -218,3 +218,19 @@ Workers AI). Limite de turnos, cota diária e voz do navegador decididos em
 26/10/2026, também por Jeferson, em conversa com o agente — as três respostas
 estão registradas nas seções correspondentes acima, cada uma com a consequência
 que a motivou.
+
+
+## Atualização operacional de 29/10/2026 — gateway Cloudflare
+
+O adaptador usa a API HTTPS oficial do Workers AI diretamente, sem proxy/Worker
+adicional. Modelos fixos: `@cf/meta/llama-3.3-70b-instruct-fp8-fast` para conversa
+e `@cf/openai/whisper-tiny-en` para STT. O primeiro substitui o candidato 3.1:
+a variante fp8 disponível na conta retornou erro 5025 para JSON Schema; o 3.3
+passou em chamada sintética com o schema e saneamento reais da aplicação.
+Não há fallback automático para modelo pago nem compra de créditos.
+
+STT aceita marcador inicial vazio do Whisper e preserva confiança ausente como
+`null`. Gateway e worker não repetem inferências automaticamente no piloto;
+limite de uma tentativa evita alegar idempotência que o fornecedor não garante.
+A lista de contas protege também STT compartilhada e escrita assistida.
+A revisão técnica e o aceite do responsável são registrados na [SEC-46](modelo_ameacas_assistente_2026-10-26.md).

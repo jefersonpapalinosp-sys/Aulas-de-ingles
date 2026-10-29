@@ -16,7 +16,9 @@ restore (`docs/politica_exclusao_e_backups_dev_2026-10-16.md`).
 
 ## O que o sistema promete
 
-1. Nenhum dado identificador do aluno chega ao provedor.
+1. A aplicação não acrescenta identificadores de conta ao payload. Conteúdo
+   digitado/falado e a própria voz podem identificar a pessoa; não há anonimização
+   completa. O áudio bruto sai para STT somente após consentimento por gravação.
 2. O que o aluno vê como resultado — `checks` — é calculado aqui, por regra
    determinística, e nunca vem do modelo.
 3. Uma resposta do provedor fora do contrato não chega ao aluno: ele recebe o
@@ -101,8 +103,12 @@ faz o reenvio não consumir um segundo turno.
 admissão; o 429 aparece no diálogo seguinte, não no turno 13 do atual) e
 `tests/test_assist_quota.py`.
 
-**Risco residual.** A cota é por dia e por conta; não há teto mensal. Com um
-aluno, o teto diário já limita o custo.
+**Risco residual.** A cota por conta não é um teto financeiro nem cobre outros
+aplicativos da conta Cloudflare. O piloto exige Workers Free, sem upgrade ou
+créditos pagos, e uma tentativa por job: a API não promete deduplicar inferências
+no fornecedor. Mudança de plano exige pausa e nova revisão; orçamento autorizado
+continua USD 0. A leitura de faturamento retornou 403; a confirmação do plano
+baseia-se na declaração do responsável, não em verificação automática.
 
 ### 5. IDOR — diálogo de outra conta
 
@@ -144,21 +150,26 @@ falha do decodificador fica contida.
 **Risco residual.** O decodificador é do provedor, fora do nosso controle. O
 limite de bytes e o de duração são a redução de superfície disponível.
 
-## Fluxo de dados ao provedor
+## Fluxo de dados ao provedor — revisão de 29/10/2026
 
-| Sai | Não sai |
-|---|---|
-| Conteúdo da aula: título, número, objetivos, termos-alvo, frases modelo, exemplos de gramática, roteiro | Nome, e-mail, identificador e token do aluno |
-| Texto do turno atual, **redigido** de e-mail e de sequência com 8 dígitos ou mais | Histórico de estudo, progresso, outras aulas |
-| Até 6 turnos anteriores em texto, com a mesma redação | Áudio, em qualquer modo (o provedor de diálogo é só de texto) |
-| A lista de códigos reprovados pela camada determinística | Qualquer nota, percentual ou avaliação |
+| Destino | Dados enviados | Dados não acrescentados pela aplicação |
+|---|---|---|
+| Workers AI / Whisper Tiny EN | Áudio bruto consentido, até 30 s/2 MB; necessário para STT | ID/e-mail/nome da conta, JWT, progresso e rubrica |
+| Workers AI / Llama 3.3 | Conteúdo da aula, turno atual e até seis turnos da conversa, códigos determinísticos reprovados, schema JSON | Perfil, JWT, ID de conta/turno, histórico de outras aulas |
+| Ambos | Token técnico Cloudflare no header HTTPS; IP de saída da VM e metadados operacionais necessários | Credencial de login do aluno |
 
-A redação existe porque o aplicativo nunca manda dado do aluno, mas o aluno pode
-dizer o dele dentro da frase — "my email is…" é frase plausível numa aula de
-inglês. A transcrição **guardada** fica intacta: é o histórico de prática dele,
-os checks rodam no servidor sobre o texto original, e o prazo do DB-46 é que a
-retira. Idade, hora e número de aula não são redigidos; o limite de 8 dígitos
-foi escolhido para isso.
+A redação de e-mails e sequências longas de dígitos protege o **texto destinado
+ao modelo de conversa**. Ela não remove voz, nomes, endereços ou qualquer dado
+pessoal pronunciado no áudio enviado à STT. O texto original permanece no
+histórico local pelo prazo da modalidade. Não prometer anonimização de voz.
+Transcrição da prática oral usa o mesmo provedor e a mesma lista de contas.
+
+O adaptador usa diretamente `api.cloudflare.com`, sem Worker próprio, storage
+Cloudflare, AI Gateway com logs/cache ou outro fornecedor. Recusa redirects e
+URLs/modelos fora da lista fixa. O token fica em configuração privada; as
+rotas do aluno não o recebem. Confiança ausente na STT é `null`, não 0% nem
+um percentual inventado. O áudio sintético de validação não é evidência de
+qualidade pedagógica ou acurácia.
 
 ## Requisitos do provedor em produção
 
@@ -167,8 +178,8 @@ foi escolhido para isso.
 | HTTPS | `Settings.validar()` recusa o boot com URL de provedor sem `https://` quando `APP_ENV=prod` — incluindo a do diálogo, que ficou de fora até o SEC-46 |
 | Token | `ASSIST_PROVIDER_TOKEN` obrigatório em produção para o tipo `gateway` |
 | Ollama restrito a dev | em produção, só host local; a VM é compartilhada e não tem GPU |
-| Região e retenção do provedor | **ainda não garantido** — ver o bloqueio abaixo |
-| Sem uso para treinamento | **ainda não garantido** — ver o bloqueio abaixo |
+| Região e retenção do provedor | Sem residência exclusiva no Brasil confirmada; retenção normal de inferência e exceções documentadas abaixo; aceite do responsável pendente |
+| Sem uso para treinamento | Compromisso publicado pelo Workers AI, com fonte e escopo abaixo |
 
 Os dois últimos são declaração contratual, não checagem automática: nenhum
 código pode verificar o que o provedor faz com o texto depois de recebê-lo. O
@@ -296,18 +307,70 @@ teste; ela **não prova** que o EasyPanel recriou containers ou que um token
 real foi revogado. Esses passos e a amostragem de produção precisam de recibo
 operacional separado.
 
-## Revisão do fluxo de dados
+## Revisão técnica SEC-46 — 29/10/2026
 
-O aceite do SEC-46 pede esta revisão assinada e datada. A assinatura é do
-release manager, que neste projeto é também o responsável técnico.
+**Revisor técnico:** Codex, a pedido de Jeferson. **Resultado:** controles de
+acesso e integração preparados; piloto restrito depende do aceite informado do
+responsável e da publicação/validação da configuração. Não equivale a liberar
+outras contas nem ao gate pedagógico IA-48.
+
+- Lista única aplicada ao status, admissão de conversa/STT/escrita e despacho
+  do worker. Produção/public com lista vazia bloqueiam todas as modalidades.
+- Escrita permanece sem URL; no adaptador Cloudflare não é modalidade disponível.
+- HTTPS com origem/modelo fixos, token fora do código, sem redirects, retries
+  automáticos, conteúdo de aluno em logs ou resposta bruta em erros.
+- Roteiro, áudio já salvo, histórico, exportação e exclusão sobrevivem à revogação.
+- JSON inválido vira fallback; transcrição sem confiança mantém `null` e aviso.
+- Teste real com frase e voz sintetizadas: diálogo passou no saneamento local;
+  STT retornou texto e timestamps. Nenhum dado do aluno foi usado.
+
+**Modelos verificados na conta:** `@cf/meta/llama-3.3-70b-instruct-fp8-fast`
+e `@cf/openai/whisper-tiny-en`. A variante `llama-3.1-8b-instruct-fp8`
+retornou erro 5025 com JSON Schema, embora respondesse a texto simples.
+O modelo 3.3 substitui o candidato histórico; não há troca automática de modelo
+em falhas. O plano gratuito foi declarado pelo usuário; endpoints de faturamento
+e configurações da conta retornaram 403 com a credencial disponível.
+
+### Evidência contratual consultada
+
+A [política Workers AI](https://developers.cloudflare.com/workers-ai/platform/data-usage/),
+consultada em 29/10, declara não treinamento e ausência de retenção de conteúdo
+após inferência sem recursos persistentes, com exceções legais/de segurança.
+Metadados operacionais podem ser retidos. Não interpretar isso como prazo zero
+irrestrito para todo dado ou auditoria independente da infraestrutura.
+
+Os [termos self-service](https://www.cloudflare.com/terms/) e o
+[DPA](https://www.cloudflare.com/cloudflare-customer-dpa/) são as referências
+contratuais para revisão do titular da conta. Consulta pública não comprova o
+aceite contratual específico dessa conta nem define automaticamente uma base
+legal para conteúdo de terceiros. O piloto proposto limita-se ao uso próprio do
+responsável; não enviar gravações de terceiros ou conteúdo sensível.
+
+Não há residência exclusiva no Brasil configurada/verificada. Aceitar o piloto
+inclui aceitar processamento fora do Brasil; isso não autoriza contratar produto
+pago de localização. Sem moderação de saída, respostas inadequadas continuam
+possíveis. O participante deve tratar a ajuda como experimental, sem nota de
+pronúncia, corrigir/avaliar resultados e interromper o uso em incidente.
+
+A [franquia publicada](https://developers.cloudflare.com/workers-ai/platform/pricing/)
+é 10.000 Neurons/dia no Workers Free; excedentes falham sem habilitar plano pago.
+O custo zero registrado pelo adaptador depende da confirmação operacional Free,
+não de cálculo a partir de tokens. Se a conta migrar, desligar a assistência.
+
+## Revisão do fluxo de dados — aceite do responsável
+
+“Assinar é ato do responsável, não do agente que escreveu o documento.” A
+solicitação para realizar a revisão autoriza o trabalho técnico; a aceitação
+informada das condições acima deve ser registrada como manifestação do titular.
 
 | Campo | Valor |
 |---|---|
-| Documento revisado | a tabela "Fluxo de dados ao provedor" acima e a seção correspondente do guia do aluno |
-| Responsável | Jeferson Papalino, acumulando release manager e responsável técnico |
-| Data da revisão | _(a preencher na assinatura)_ |
-| Decisão | _(a preencher: aprovado para o FE-47 / aprovado com condição / recusado)_ |
+| Documento revisado | Fluxo de dados, revisão técnica e guia do aluno atualizados em 29/10/2026 |
+| Responsável | Jeferson Papalino, release manager e responsável técnico |
+| Revisão técnica | Concluída por Codex em 29/10/2026; evidências locais e sintéticas |
+| Data do aceite informado | Pendente |
+| Decisão do responsável | Pendente: piloto apenas na própria conta, com áudio consentido, Workers Free, USD 0, sem ampliação de público |
 
-**Esta linha está em branco de propósito.** Assinar é ato do responsável, não do
-agente que escreveu o documento. Enquanto ela não for preenchida, o FE-47
-continua bloqueado — que é exatamente o que o plano determina.
+A autorização expressa para copiar a credencial à VM foi recebida em conversa
+em 29/10. Ela não é tomada como aceite do fluxo de dados ou assinatura de DPA.
+O manifesto privado mantém decisões humanas pendentes até a resposta específica.

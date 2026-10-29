@@ -47,7 +47,13 @@ from app.domain.dialogue import (
     failed_codes,
 )
 from app.domain.enums import TurnInputKind, TurnRole
-from app.services import assist_quota, assistance, dialogue_learning, dialogue_prompts
+from app.services import (
+    assist_quota,
+    assistance,
+    cloudflare_provider,
+    dialogue_learning,
+    dialogue_prompts,
+)
 from app.services.dialogue_prompts import LessonBrief, Mode, PartnerTurn
 
 logger = logging.getLogger("app.dialogue")
@@ -242,7 +248,12 @@ def _provider_turn(
             url = settings.assist_dialogue_url
             if not url:
                 raise assistance.ProviderFailure("provider_unavailable")
-            result = assistance.call_dialogue_provider(
+            call = (
+                cloudflare_provider.dialogue
+                if settings.assist_provider_kind == "cloudflare"
+                else assistance.call_dialogue_provider
+            )
+            result = call(
                 url,
                 messages,
                 schema,
@@ -306,6 +317,7 @@ async def partner_reply(
         and dialogue.mode != "script"
         and settings.assisted_features_enabled
         and settings.dialogue_assist_configured
+        and settings.assist_account_allowed(dialogue.user_id)
     )
     if not usar_modelo:
         motivo = None if dialogue.mode == "script" else "assist_disabled"
@@ -372,7 +384,9 @@ async def create_dialogue(
     await assist_quota.lock_user(session, usuario.id)
     settings = get_settings()
     if mode != "script" and not (
-        settings.assisted_features_enabled and settings.dialogue_assist_configured
+        settings.assisted_features_enabled
+        and settings.dialogue_assist_configured
+        and settings.assist_account_allowed(usuario.id)
     ):
         raise DialogueUnavailable(mode)
 
@@ -433,6 +447,8 @@ async def admit_turn(
     Idempotência por `(dialogue_id, position)`: reenviar o mesmo turno devolve
     o que já foi admitido, sem segunda cobrança nem segundo job.
     """
+    if dialogue.mode != "script" and not get_settings().assist_account_allowed(dialogue.user_id):
+        raise DialogueUnavailable(dialogue.mode)
     existing = (
         await session.execute(
             select(DialogueTurn).where(

@@ -271,6 +271,7 @@ async def status_dialogos(
         settings.dialogue_practice_enabled
         and settings.assisted_features_enabled
         and settings.dialogue_assist_configured
+        and settings.assist_account_allowed(usuario.id)
     )
     return DialogueStatusOut(
         enabled=settings.dialogue_practice_enabled,
@@ -324,6 +325,10 @@ async def _admit(
             transcript=transcript,
             speaking_attempt_id=speaking_attempt_id,
         )
+    except dialogue_service.DialogueUnavailable as error:
+        raise HTTPException(
+            409, detail={"code": "assist_disabled", "mode": dialogue.mode}
+        ) from error
     except dialogue_service.TurnLimitReached as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -406,6 +411,8 @@ async def turno_por_audio(
     dialogue = await _owned_dialogue(session, dialogue_id, usuario.id)
     if dialogue.mode == "script":
         raise HTTPException(409, "No Roteiro, use texto. Áudio exige transcrição no modo Guiado.")
+    if not settings.assist_account_allowed(usuario.id):
+        raise HTTPException(409, detail={"code": "assist_disabled", "mode": dialogue.mode})
     # Não retém conexão nem lock durante recepção lenta — mesma regra do
     # shadowing. Só leituras até aqui.
     await session.commit()

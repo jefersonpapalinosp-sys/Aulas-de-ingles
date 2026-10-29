@@ -446,6 +446,19 @@ o script por SSH continua valendo como contingência.
 
 ## Vigilância agendada — probe externo e gate operacional (INFRA-46)
 
+Atualização de 29/10/2026: `PUBLIC_PROBE_ORIGIN` configurada e probe público
+aprovado no [run 40932540081](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/actions/runs/40932540081).
+A etapa autenticada ficou ignorada por falta de `OPERATIONS_TOKEN` no GitHub;
+o token existente na VM não foi transferido. Cron root/sistema sem entrada
+reconhecida do monitor e `sendmail` ausente. A publicação do workflow não
+equivale à comprovação de alerta; ver [matriz do piloto](matriz_aceite_sprint_48.md).
+
+O monitor atualizado aceita limites `0` para operação sem gasto autorizado:
+custo confirmado zero passa; valor positivo ou desconhecido é crítico.
+Campos ausentes continuam gerando aviso. Isso é avaliação/alerta, não bloqueio
+de chamadas nem comprovação da franquia disponível na conta. Publicar essa
+versão antes de configurar zero; o release `9cc14fe` ainda exige valor positivo.
+
 Duas coisas rodam fora da aplicação e precisam rodar em algum relógio: o
 **probe externo**, que diz se o domínio público responde, e o **gate
 operacional**, que compara worker, fila e custo do diálogo com limiares.
@@ -530,13 +543,14 @@ microusd. O custo pode ser parcial enquanto houver valores desconhecidos.
 
 Configure no ambiente do cron e nas **variables** do repositório do GitHub:
 
-- `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD`: orçamento diário aprovado, inteiro positivo.
-- `OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`: orçamento mensal aprovado, inteiro positivo.
+- `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD`: orçamento diário aprovado, inteiro não negativo.
+- `OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`: orçamento mensal aprovado, inteiro não negativo.
 
 Não há valor presumido para esses dois orçamentos. Ausência gera `warning`;
 valor inválido encerra o comando com código 2 antes de qualquer requisição.
-Com orçamento definido, consumo >= 80% gera `warning` e >= 100% gera
-`critical`. Custo desconhecido ou métrica ausente/inválida gera `critical`.
+Com orçamento positivo, consumo >= 80% gera `warning` e >= 100% gera
+`critical`. Com teto zero, somente custo confirmado zero passa; custo positivo
+gera `critical`. Custo desconhecido ou métrica ausente/inválida gera `critical`.
 Tanto `warning` quanto `critical` retornam código 1, permitindo que cron e
 workflow sinalizem o problema. O resumo do workflow conserva o relatório
 também quando há alerta. Nenhum envio foi disparado pela validação local.
@@ -604,3 +618,53 @@ troca e verifica bytes, MIME, cache, shell atual e 404. Este último roda no CI.
 - [Compose Service — documentação oficial do EasyPanel](https://easypanel.io/docs/services/compose)
 - [API do EasyPanel](https://easypanel.io/docs/api)
 - [CLI do EasyPanel](https://easypanel.io/docs/cli)
+
+
+### Restrição do piloto de conversa por conta
+
+Antes de ativar o piloto, configurar `EASYPANEL_DIALOGUE_PILOT_USER_IDS`
+como lista JSON de IDs internos positivos na configuração privada. O Compose
+repassa o mesmo valor à API e ao worker. O padrão `[]` bloqueia todas as modalidades
+assistidas em produção/public, mesmo com gateway e flags configurados.
+Não publicar IDs reais em Git, logs de deploy ou documentação.
+
+Para alterar/revogar participantes, desligar a assistência, atualizar a lista
+nos dois processos e reiniciá-los antes de eventual reativação. Configuração
+é lida no início do processo; editar somente o arquivo não revoga workers já
+em execução. Chamadas já enviadas não podem ser canceladas retroativamente.
+Histórico/exportação/exclusão e modo Roteiro permanecem disponíveis.
+Os pré-requisitos e o estado de publicação estão na
+[matriz da Sprint 48](matriz_aceite_sprint_48.md).
+
+
+### Workers AI — configuração do piloto de áudio (29/10/2026)
+
+O gateway é a API HTTPS oficial da Cloudflare, consumida pelo adaptador
+`cloudflare_provider.py`. Não há novo Worker, proxy, storage, AI Gateway com
+logs/cache, créditos pagos ou serviço extra na VM.
+
+Na configuração privada do EasyPanel, usar `EASYPANEL_ASSIST_PROVIDER_KIND=cloudflare`,
+`EASYPANEL_ASSIST_PROVIDER_NAME=cloudflare-workers-ai` e
+`EASYPANEL_ASSIST_JOB_MAX_ATTEMPTS=1`. As URLs de diálogo/STT seguem o formato
+`https://api.cloudflare.com/client/v4/accounts/<conta>/ai/run/<modelo>` com
+modelos fixos `@cf/meta/llama-3.3-70b-instruct-fp8-fast` e
+`@cf/openai/whisper-tiny-en`. Escrita permanece sem URL. Token somente em
+`EASYPANEL_ASSIST_PROVIDER_TOKEN`, nunca em argumento de shell ou Git.
+
+`EASYPANEL_ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED=true` exige confirmação
+operacional de Workers Free; não verifica faturamento automaticamente. As
+consultas de faturamento retornaram 403 com a credencial disponível. Mudança de
+plano deve desligar assistência e invalidar essa confirmação. O adaptador só
+registra custo conhecido zero sob essa condição; não estima cobrança por tokens.
+
+A lista `EASYPANEL_DIALOGUE_PILOT_USER_IDS` também protege STT compartilhada e
+escrita assistida. Manter lista idêntica na API e worker. A troca/revogação só é
+efetiva após recriar ambos. Chamadas já enviadas não são recolhidas. Uma tentativa
+por job evita retries de inferência que poderiam repetir consumo; jobs antigos
+com limites maiores devem ser avaliados antes de ativar o piloto.
+
+Preparação privada recebida na VM após autorização expressa do responsável:
+`/root/aulas-release/sprint48/assist-config-candidate.json` (0600), com lista de
+uma conta e flags desligadas. Aplicar somente junto do código que conhece o
+adaptador; preservar cópia 0600 do ambiente anterior. Não anunciar áudio liberado
+até os gates de publicação, revisão informada e saúde operacional passarem.

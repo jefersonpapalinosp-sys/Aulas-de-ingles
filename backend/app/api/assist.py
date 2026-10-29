@@ -29,7 +29,7 @@ async def status_assistencia(
     # escrita e transcrição. Turnos de conversa têm teto próprio e, somados
     # aqui, falsificariam `used_today` e `remaining_today` da escrita.
     balance = await usage(session, usuario.id, modalities=LEGACY_MODALITIES)
-    enabled = settings.assisted_features_enabled
+    enabled = settings.assisted_features_enabled and settings.assist_account_allowed(usuario.id)
     transcription_enabled = (
         enabled
         and bool(settings.assist_transcription_url)

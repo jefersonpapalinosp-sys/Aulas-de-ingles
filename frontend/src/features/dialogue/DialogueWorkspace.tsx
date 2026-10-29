@@ -128,7 +128,7 @@ export default function DialogueWorkspace({ lesson, userId, transport = dialogue
         {voices.map((name) => <option key={name} value={name}>{name}</option>)}
       </select></label>
       <p>{mode === 'script' ? 'As respostas vêm do roteiro. Nenhum provedor é necessário.'
-        : `O texto e, se você autorizar, o áudio serão processados automaticamente. Retenção de ${status.data?.retention_days ?? 30} dias. Evite informações pessoais.`}</p>
+        : `O texto e, se você autorizar, o áudio serão enviados ao provedor externo. Retenção de ${status.data?.retention_days ?? 30} dias. Evite informações pessoais.`}</p>
       <button className="btn" disabled={mode === 'guided' && !status.data?.guided_enabled} onClick={() => void engine.open(lesson.id, mode, speaker || null)}>Iniciar conversa</button>
     </fieldset> : <>
       {guided && !status.data?.guided_enabled && <p role="alert">O modo Guiado está indisponível. Inicie uma nova conversa no Roteiro para continuar por texto.</p>}
@@ -157,7 +157,7 @@ export default function DialogueWorkspace({ lesson, userId, transport = dialogue
             <audio controls src={recordingUrl} aria-label="Ouvir gravação local" />
             <a href={recordingUrl} download="minha-resposta">Baixar gravação</a>
             <label><input type="checkbox" checked={consent} disabled={blocked}
-              onChange={(event) => setConsent(event.target.checked)} />Concordo em salvar e transcrever esta gravação para responder à conversa.</label>
+              onChange={(event) => setConsent(event.target.checked)} />Concordo em salvar e enviar esta gravação ao provedor externo para transcrição.</label>
             {recordingInvalid && <p role="alert">Gravação fora dos limites. Baixe o áudio ou grave um trecho menor.</p>}
             <button disabled={blocked || !consent || recordingInvalid} onClick={() => void engine.sendAudio(recording.blob, recording.duration, consent, policy.data)}>Enviar áudio</button>
             <button disabled={blocked} onClick={clearRecording}>Descartar gravação local</button>

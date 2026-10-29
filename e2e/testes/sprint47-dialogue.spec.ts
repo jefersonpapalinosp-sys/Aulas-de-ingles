@@ -63,7 +63,7 @@ async function sendAudio(page: Page, workspace: Locator, id: number, position: n
   await workspace.getByRole('button', { name: 'Parar gravação' }).click()
   const send = workspace.getByRole('button', { name: 'Enviar áudio' })
   await expect(send).toBeDisabled()
-  await workspace.getByRole('checkbox', { name: /Concordo em salvar e transcrever/ }).check()
+  await workspace.getByRole('checkbox', { name: /Concordo em salvar e enviar esta gravação ao provedor externo/ }).check()
   const response = page.waitForResponse(r => r.request().method() === 'PUT' && r.url().endsWith(`/dialogues/${id}/turns/${position}/audio`))
   await send.click()
   const accepted = await response
