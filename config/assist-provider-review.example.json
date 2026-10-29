@@ -1,4 +1,5 @@
 {
+  "modality": "conversation",
   "provider_name": "external",
   "data_processing_agreement": false,
   "legal_basis_approved": false,

@@ -659,8 +659,9 @@ Na raiz, `uv run --project backend mypy --config-file mypy-ops.ini` verifica
 estritamente toda a pasta `ops/` (39 módulos atualmente). A configuração inclui
 novos scripts automaticamente e é executada por `make lint` e pelo job `recovery`
 do CI. Somente `ops/tests/` fica fora do mypy; os testes continuam verificados pela
-execução da suíte e Ruff. A tipagem completa não implica cobertura completa:
-permanecem smokes de integração sem testes unitários, registrados no plano BE-49.
+execução da suíte e Ruff. São 338 testes operacionais; os cinco smokes restantes
+receberam 34 testes, com cobertura local entre 88% e 98%. A tipagem e os testes
+simulados não substituem os ensaios integrados de banco, papéis e restauração.
 
 ### Stack exclusiva para E2E (Sprint 37)
 
