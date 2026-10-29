@@ -37,9 +37,12 @@ from app.db.models import (
 from app.db.session import dispose_engine, get_sessionmaker
 from app.services.audio_storage import AudioStorage
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def ensure_minimal_editorial(session):
+async def ensure_minimal_editorial(
+    session: AsyncSession,
+) -> tuple[TranscriptCue, Exercise, WritingPrompt, LessonMedia]:
     """Cria somente o grafo editorial necessário ao fixture de upgrade.
 
     O catálogo completo corrente não pode ser semeado numa revisão anterior:
@@ -197,7 +200,7 @@ async def ensure_minimal_editorial(session):
     return cue, exercise, prompt, media
 
 
-async def main():
+async def main() -> None:
     try:
         settings = get_settings()
         if (

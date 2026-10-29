@@ -17,7 +17,7 @@ from ops.recovery import (
 from ops.recovery_archive import RecoveryError, require, verify_bundle
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     check_target(LAB)
     check_target(RESTORE)
@@ -30,11 +30,14 @@ def main():
     require(first != second, "Pacotes colidiram.")
     for bundle in (first, second):
         manifest = verify_bundle(bundle)
+        source, audio = manifest["source"], manifest["audio_files"]
+        if not isinstance(source, dict) or not isinstance(audio, dict):
+            raise RecoveryError("Origem/inventário do manifesto inválidos.")
         require(
-            manifest["source"]["kind"] == "lab" and manifest["snapshot"] == snapshot,
+            source["kind"] == "lab" and manifest["snapshot"] == snapshot,
             "Origem/snapshot não são os esperados.",
         )
-        require(len(manifest["audio_files"]) == 1, "Áudio sintético ausente.")
+        require(len(audio) == 1, "Áudio sintético ausente.")
     receipt = restore(first, CONFIRM_TARGET)
     try:
         restore(second, CONFIRM_TARGET)

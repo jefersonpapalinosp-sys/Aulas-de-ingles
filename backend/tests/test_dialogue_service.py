@@ -258,6 +258,7 @@ async def test_nenhum_texto_de_turno_entra_em_log(
     assert "dialogue_turn_fallback" in registrado
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_dialogo_guarda_a_impressao_e_o_limite_de_turnos(
     session: AsyncSession, monkeypatch: pytest.MonkeyPatch

@@ -313,16 +313,27 @@ privacidade, fallback e gate de avaliação humana estão em
 
 O gate é executável e falha fechado. Copie
 `config/assist-provider-review.example.json` para o arquivo local ignorado
-`config/assist-provider-review.json`, preencha a homologação e rode uma modalidade por vez:
+`config/assist-provider-review.json`, preencha a homologação e rode uma modalidade por vez.
+O exemplo identifica `"modality": "conversation"`; ajuste esse campo para a modalidade
+avaliada antes de executar os comandos de escrita ou transcrição:
 
 ```bash
 make assist-gate modality=writing review=../config/assist-provider-review.json
 make assist-gate modality=transcription review=../config/assist-provider-review.json
+make assist-gate modality=conversation review=../config/assist-provider-review.json
 ```
 
 O comando só produz métricas agregadas e retorna código `0` quando todos os critérios passam,
 `1` quando a liberação continua bloqueada e `2` para configuração inválida. Ele não altera a
 feature flag.
+
+Para conversa, o gate considera os turnos do aluno no modo Guiado, vinculados ao
+`provider_name` do manifesto, e exige 30 avaliações válidas em pelo menos cinco aulas.
+Roteiro, modo Livre e outros provedores não entram na amostra. Fallback e falha terminal
+contam como falha técnica; só respostas concluídas sem fallback/erro entram na avaliação
+de utilidade. Custo desconhecido bloqueia a aprovação; áudio e diálogo são somados uma
+única vez pelo custo do turno. O exemplo permanece sem aprovações de privacidade ou
+segurança preenchidas: executar o comando não substitui a revisão humana.
 
 As transcrições usam uma fila durável no PostgreSQL. A API responde `202` depois de persistir o
 job, e o serviço `worker` do Compose faz o processamento. Jobs interrompidos voltam para a fila,
@@ -620,9 +631,36 @@ cd backend
 uv run pytest -q tests/test_sm2.py tests/test_writing_domain.py
 ```
 
+O CI executa a suíte completa com cobertura e repete os cenários temporais sob
+`TZ=Pacific/Kiritimati` com `uv run pytest -q --strict-markers -m timezone`.
+Marque novos testes de calendário, expiração, retenção ou serialização de datas
+com `@pytest.mark.timezone`; use `pytestmark = pytest.mark.timezone` somente
+quando o módulo inteiro tratar dessas regras. A seleção é explícita e inclui
+cenários de quota, custos por dia/mês, revisão, sessão, áudio e histórico.
+Para comparar localmente, execute o mesmo comando com `TZ=UTC` e depois com
+`TZ=Pacific/Kiritimati`, sem rodar processos de pytest simultâneos nessa base.
+
+Os testes de concorrência de autenticação usam eventos para verificar que
+`/api/live` responde enquanto hashes estão pendentes e que o trabalho respeita
+o limite configurado de threads. Os timeouts desses eventos apenas impedem
+deadlock nos testes; não representam uma meta de latência de produção.
+
 `make test-db-down` para apenas o ambiente de testes, preservando seu volume.
 Uma base separada, `aulas_test_sentinel`, contém um registro sintético para
 verificar isolamento; o papel da suíte não tem permissão de conexão nela.
+
+### Testes e tipagem dos scripts operacionais (BE-49)
+
+`make test-recovery` executa os testes puros de `ops/`, com arquivos sintéticos
+temporários e transporte simulado. Não exige Docker nem banco. Os ensaios
+integrados de restauração continuam separados em `make test-recovery-integration`.
+
+Na raiz, `uv run --project backend mypy --config-file mypy-ops.ini` verifica
+estritamente toda a pasta `ops/` (39 módulos atualmente). A configuração inclui
+novos scripts automaticamente e é executada por `make lint` e pelo job `recovery`
+do CI. Somente `ops/tests/` fica fora do mypy; os testes continuam verificados pela
+execução da suíte e Ruff. A tipagem completa não implica cobertura completa:
+permanecem smokes de integração sem testes unitários, registrados no plano BE-49.
 
 ### Stack exclusiva para E2E (Sprint 37)
 

@@ -49,6 +49,7 @@ from app.schemas.speaking import (
     SpeakingPolicyOut,
 )
 from app.services import assist_quota, editorial_history
+from app.services.audio_cleanup import discard_unreferenced_audio as _descartar_orfao
 from app.services.audio_inspection import inspect_audio
 from app.services.audio_storage import MIME_EXTENSIONS, AudioStorage, normalized_mime_type
 from app.services.audio_upload import MAX_DURATION_MS, UPLOAD_TIMEOUT_SECONDS, read_audio
@@ -413,20 +414,6 @@ async def _evidencia_e_revisao(
         cue_start_seconds=cue.start_seconds,
         cue_end_seconds=cue.end_seconds,
     )
-
-
-async def _descartar_orfao(session: AsyncSession, storage: AudioStorage, key: str) -> None:
-    """Commit pode ter sido confirmado pelo banco e perdido na conexão. Nunca
-    apagar arquivo referenciado por um commit cujo resultado é desconhecido."""
-    try:
-        await session.rollback()
-        referenced = await session.scalar(
-            select(SpeakingAttempt.id).where(SpeakingAttempt.storage_key == key)
-        )
-        if referenced is None:
-            storage.delete(key)
-    except Exception:
-        pass  # Preservar candidato para reconciliação, não criar referência quebrada.
 
 
 @router.put("/attempts/{attempt_id}/audio", response_model=SpeakingAttemptOut)

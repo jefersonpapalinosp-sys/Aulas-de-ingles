@@ -120,6 +120,7 @@ def test_verified_reader_rejects_symlink_oversize_and_hash_mismatch(tmp_path):
         storage.read_verified("..", None, 100)
 
 
+@pytest.mark.timezone
 async def test_expired_transcription_hidden_in_history_export_and_rating(
     client, session, monkeypatch, tmp_path
 ):

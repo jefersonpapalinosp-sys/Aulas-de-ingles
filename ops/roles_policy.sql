@@ -109,7 +109,7 @@ DO $$ BEGIN
 END $$;
 -- DB-45: a API cria/encerra diálogos e insere turnos; só altera a avaliação
 -- humana. O worker preenche o resultado do turno e nunca apaga. Cascatas são
--- do PostgreSQL. Espelho do bloco da migration e3a1c7d9b250.
+-- do PostgreSQL. Espelho de e3a1c7d9b250, com check_details de c92f4a8d710e.
 DO $$ BEGIN
   IF to_regclass('public.dialogue_turn') IS NOT NULL THEN
     GRANT INSERT, DELETE ON speaking_dialogue TO aulas_runtime;
@@ -120,10 +120,22 @@ DO $$ BEGIN
     GRANT SELECT ON speaking_dialogue TO aulas_worker;
     GRANT UPDATE (state, ended_at) ON speaking_dialogue TO aulas_worker;
     GRANT SELECT, INSERT ON dialogue_turn TO aulas_worker;
-    GRANT UPDATE (state, transcription_job_id, transcript, checks, partner_text, hints,
+    GRANT UPDATE (state, transcription_job_id, transcript, checks, check_details, partner_text, hints,
                   confidence, fallback, cost_microusd, error_code, completed_at)
       ON dialogue_turn TO aulas_worker;
     GRANT USAGE ON SEQUENCE dialogue_turn_id_seq TO aulas_worker;
+  END IF;
+END $$;
+-- BE-47: recorte editorial sem gabaritos e registros derivados append-only.
+-- Espelho da migration a18d7e4c2b91; nenhuma leitura de contas pelo worker.
+DO $$ BEGIN
+  IF to_regclass('public.dialogue_turn') IS NOT NULL THEN
+    GRANT SELECT ON course, lesson, lesson_goal, grammar_block, grammar_row,
+      phrase, vocab_item, lesson_media TO aulas_worker;
+    GRANT INSERT ON skill_evidence, review_item TO aulas_worker;
+    GRANT SELECT (id, user_id, source_type, source_id) ON skill_evidence TO aulas_worker;
+    GRANT SELECT (id, user_id, source_key, origin_reason) ON review_item TO aulas_worker;
+    GRANT USAGE ON SEQUENCE skill_evidence_id_seq, review_item_id_seq TO aulas_worker;
   END IF;
 END $$;
 ALTER DEFAULT PRIVILEGES FOR ROLE aulas_owner IN SCHEMA public

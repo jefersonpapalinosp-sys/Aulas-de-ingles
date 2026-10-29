@@ -3,10 +3,11 @@
 import hmac
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.health import ReadinessOut, readiness_snapshot
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
 from app.schemas.operations import OperationsMetricsOut
@@ -43,3 +44,17 @@ async def metrics(
     """Snapshot de cardinalidade fixa; nunca retorna texto, e-mail, token ou áudio."""
     _authorized(credentials, settings)
     return await operations_metrics.snapshot(session, settings)
+
+
+@router.get("/readiness", response_model=ReadinessOut, responses={503: {"model": ReadinessOut}})
+async def readiness(
+    response: Response,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> ReadinessOut:
+    """Diagnóstico detalhado somente após autenticação operacional."""
+    _authorized(credentials, settings)
+    result = await readiness_snapshot(response, session, settings, details=True)
+    response.headers["Cache-Control"] = "private, no-store"
+    return result

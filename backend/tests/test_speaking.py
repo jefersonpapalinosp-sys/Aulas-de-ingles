@@ -279,6 +279,7 @@ async def test_gravacoes_exigem_login_e_consentimento(client: AsyncClient) -> No
     assert longa.status_code == 422
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_listagem_paginada_e_estavel_com_datas_empatadas(
     client: AsyncClient,
@@ -942,6 +943,7 @@ async def test_workers_concorrentes_reivindicam_job_uma_unica_vez(
     assert calls == 1
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_worker_retoma_job_interrompido_apos_timeout(
     client: AsyncClient,

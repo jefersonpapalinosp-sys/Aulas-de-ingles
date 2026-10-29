@@ -49,3 +49,10 @@ class PublicProbeTests(unittest.TestCase):
         texto = repr(report)
         self.assertNotIn("segredo", texto)
         self.assertNotIn("aulas.exemplo.test", texto)
+
+    def test_detalhes_internos_no_health_publico_reprovam_sem_refletir_valores(self):
+        for field in ("version", "env", "schema_current", "schema_required"):
+            with self.subTest(field=field):
+                report = evaluate(200, {**corpo(), field: "private-value"}, "nginx", 10)
+                self.assertEqual(report["status"], "critical")
+                self.assertNotIn("private-value", repr(report))

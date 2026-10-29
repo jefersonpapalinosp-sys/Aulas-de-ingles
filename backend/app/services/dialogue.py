@@ -20,13 +20,15 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, raiseload, selectinload
 
 from app.core.config import Settings, get_settings
 from app.db.models import (
     DialogueTurn,
+    GrammarBlock,
     Lesson,
     LessonMedia,
     SpeakingDialogue,
@@ -37,13 +39,15 @@ from app.db.models import (
 from app.domain.dialogue import (
     MAX_TURNS_PER_DIALOGUE,
     CheckCode,
+    CheckDetails,
     TurnCheck,
     TurnExpectation,
     evaluate,
+    evaluation_details,
     failed_codes,
 )
 from app.domain.enums import TurnInputKind, TurnRole
-from app.services import assist_quota, assistance, dialogue_prompts
+from app.services import assist_quota, assistance, dialogue_learning, dialogue_prompts
 from app.services.dialogue_prompts import LessonBrief, Mode, PartnerTurn
 
 logger = logging.getLogger("app.dialogue")
@@ -75,6 +79,25 @@ class TurnOutcome:
     error_code: str | None
     cost_microusd: int
     cost_known: bool
+    check_details: CheckDetails | None = None
+
+
+async def lesson_for_dialogue(session: AsyncSession, lesson_id: int) -> Lesson:
+    """Carrega só o recorte editorial permitido ao worker, sem gabaritos."""
+    return (
+        await session.execute(
+            select(Lesson)
+            .where(Lesson.id == lesson_id)
+            .options(
+                raiseload("*"),
+                joinedload(Lesson.course),
+                selectinload(Lesson.goals),
+                selectinload(Lesson.phrases),
+                selectinload(Lesson.vocab),
+                selectinload(Lesson.grammar_blocks).selectinload(GrammarBlock.rows),
+            )
+        )
+    ).scalar_one()
 
 
 async def brief_for_lesson(session: AsyncSession, lesson: Lesson) -> LessonBrief:
@@ -86,13 +109,12 @@ async def brief_for_lesson(session: AsyncSession, lesson: Lesson) -> LessonBrief
     """
     cues = (
         await session.execute(
-            select(TranscriptCue)
+            select(TranscriptCue.speaker, TranscriptCue.text_en)
             .join(TranscriptCue.media)
             .where(LessonMedia.lesson_id == lesson.id)
             .order_by(LessonMedia.position, TranscriptCue.position)
-            .options(selectinload(TranscriptCue.media))
         )
-    ).scalars()
+    ).all()
     script = tuple(
         (cue.speaker.strip(), cue.text_en.strip())
         for cue in cues
@@ -267,6 +289,7 @@ async def partner_reply(
     settings = get_settings()
     expectation = expectation_for(brief, position)
     checks = evaluate(transcript, expectation)
+    details = evaluation_details(transcript, expectation)
     codes = failed_codes(checks)
 
     turns = list(
@@ -288,6 +311,7 @@ async def partner_reply(
         motivo = None if dialogue.mode == "script" else "assist_disabled"
         return TurnOutcome(
             checks=checks,
+            check_details=details,
             partner=script_fallback(brief, dialogue, position),
             fallback=dialogue.mode != "script",
             error_code=motivo,
@@ -312,6 +336,7 @@ async def partner_reply(
         )
         return TurnOutcome(
             checks=checks,
+            check_details=details,
             partner=script_fallback(brief, dialogue, position),
             fallback=True,
             error_code=erro,
@@ -320,6 +345,7 @@ async def partner_reply(
         )
     return TurnOutcome(
         checks=checks,
+        check_details=details,
         partner=partner,
         fallback=False,
         error_code=None,
@@ -343,6 +369,7 @@ async def create_dialogue(
     recebe `DialogueUnavailable` e a interface oferece o Roteiro, que funciona
     sem provedor nenhum.
     """
+    await assist_quota.lock_user(session, usuario.id)
     settings = get_settings()
     if mode != "script" and not (
         settings.assisted_features_enabled and settings.dialogue_assist_configured
@@ -359,6 +386,8 @@ async def create_dialogue(
         )
     ).scalar_one_or_none()
     if existing is not None:
+        if existing.lesson_id != lesson.id or existing.mode != mode:
+            raise HTTPException(409, "Chave de diálogo já utilizada com outra aula ou modo.")
         return existing, brief
 
     falantes = tuple(dict.fromkeys(speaker for speaker, _ in brief.script))
@@ -426,6 +455,8 @@ async def admit_turn(
         )
         return existing, job
 
+    if position < 1:
+        raise HTTPException(422, "Posição de turno inválida.")
     if position > dialogue.turn_limit:
         raise TurnLimitReached(dialogue.turn_limit)
 
@@ -440,28 +471,39 @@ async def admit_turn(
         transcript=transcript,
         expires_at=turn_expiry(),
     )
-    session.add(turn)
-    await session.flush()
-
     # Roteiro não tem provedor nem custo: resolve na hora. Depender do worker
     # para um modo que não chama ninguém tiraria do ar justamente o modo que
     # deveria funcionar quando o resto está fora.
     if dialogue.mode == "script":
+        lesson = (
+            await session.execute(select(Lesson).where(Lesson.id == dialogue.lesson_id))
+        ).scalar_one()
+        brief = await brief_for_lesson(session, lesson)
+        outcome = await partner_reply(
+            session, dialogue, brief, position, transcript or "", idempotency_key=idempotency_key
+        )
+        # O runtime pode INSERT, mas não UPDATE de resultado: o Roteiro nasce
+        # concluído. O Guiado continua sendo preenchido somente pelo worker.
+        _apply_outcome(turn, dialogue, outcome, transcript or "")
+        session.add(turn)
+        await session.flush()
+        await dialogue_learning.record_learning(session, dialogue, turn)
         return turn, None
 
     reservation, admitida = await assist_quota.reserve(
         session,
         dialogue.user_id,
         idempotency_key,
-        # Hash: a coluna é varchar(64) e o par (impressão do recorte, posição)
-        # é o que identifica este turno.
-        sha256(f"{dialogue.content_fingerprint}:{position}".encode()).hexdigest(),
+        # Vincula a chave ao diálogo e à posição, mesmo em aulas idênticas.
+        sha256(f"{dialogue.id}:{dialogue.content_fingerprint}:{position}".encode()).hexdigest(),
         assist_quota.DIALOGUE_MODALITY,
     )
+    if not admitida:
+        raise HTTPException(409, "Chave de turno já utilizada. Reenvie a entrada original.")
     settings = get_settings()
     agora = datetime.now(UTC)
     job = TranscriptionJob(
-        assist_reservation_id=reservation.id if admitida else None,
+        assist_reservation_id=reservation.id,
         user_id=dialogue.user_id,
         speaking_attempt_id=speaking_attempt_id,
         kind="dialogue",
@@ -475,6 +517,7 @@ async def admit_turn(
     session.add(job)
     await session.flush()
     turn.transcription_job_id = job.id
+    session.add(turn)
     await session.flush()
     logger.info(
         "dialogue_turn_admitted",
@@ -496,6 +539,37 @@ async def resolve_turn(
     no Roteiro, pela própria rota. O turno sai de `pending` com tudo gravado —
     é o `GET` do diálogo que o cliente consulta depois.
     """
+    # Ordem única também para o worker: dois turnos do mesmo diálogo não
+    # podem observar contagens diferentes ao criar a revisão recorrente.
+    await session.execute(
+        select(SpeakingDialogue.id).where(SpeakingDialogue.id == dialogue.id).with_for_update()
+    )
+    await session.refresh(turn)
+    if turn.state == "completed":
+        # Reentrega do job não chama o provedor nem cobra novamente. Checks
+        # persistidos bastam para devolver o resultado anterior.
+        return TurnOutcome(
+            check_details=turn.check_details,
+            checks=tuple(
+                TurnCheck(code, bool(turn.checks[code]), "")
+                for code in dialogue_prompts.CHECK_CODES
+                if code in turn.checks
+            ),
+            partner=PartnerTurn(
+                partner_text=turn.partner_text or "",
+                hints=tuple(
+                    dialogue_prompts.Hint(code=code, message=hint["message"])
+                    for hint in turn.hints
+                    for code in dialogue_prompts.CHECK_CODES
+                    if code == hint["code"]
+                ),
+                confidence=turn.confidence or 0.0,
+            ),
+            fallback=turn.fallback,
+            error_code=turn.error_code,
+            cost_microusd=0,
+            cost_known=True,
+        )
     outcome = await partner_reply(
         session,
         dialogue,
@@ -504,8 +578,18 @@ async def resolve_turn(
         transcript,
         idempotency_key=f"turn-{turn.id}",
     )
+    _apply_outcome(turn, dialogue, outcome, transcript)
+    await session.flush()
+    await dialogue_learning.record_learning(session, dialogue, turn)
+    return outcome
+
+
+def _apply_outcome(
+    turn: DialogueTurn, dialogue: SpeakingDialogue, outcome: TurnOutcome, transcript: str
+) -> None:
     turn.transcript = transcript
     turn.checks = {check.code: check.passed for check in outcome.checks}
+    turn.check_details = outcome.check_details
     turn.partner_text = outcome.partner.partner_text
     turn.hints = [{"code": hint.code, "message": hint.message} for hint in outcome.partner.hints]
     turn.confidence = outcome.partner.confidence
@@ -517,8 +601,6 @@ async def resolve_turn(
     if position_is_last(dialogue, turn.position):
         dialogue.state = "completed"
         dialogue.ended_at = turn.completed_at
-    await session.flush()
-    return outcome
 
 
 def position_is_last(dialogue: SpeakingDialogue, position: int) -> bool:

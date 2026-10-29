@@ -64,16 +64,20 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: gate operacional (worker, fila, custo do diálogo)
+      - name: gate operacional (worker, fila, custo diário e mensal da assistência)
         if: steps.gate.outputs.probe == 'true' && steps.gate.outputs.metrics == 'true'
         env:
           PUBLIC_ORIGIN: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
           OPERATIONS_TOKEN: ${{ secrets.OPERATIONS_TOKEN }}
+          OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD: ${{ vars.OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD }}
+          OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD: ${{ vars.OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD }}
         run: |
-          python3 -m ops.observability_check --base-url "$PUBLIC_ORIGIN" | tee gate.json
+          gate_status=0
+          python3 -m ops.observability_check --base-url "$PUBLIC_ORIGIN" | tee gate.json || gate_status=$?
           {
             echo '### Gate operacional'
             echo '```json'
             cat gate.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+          exit "$gate_status"

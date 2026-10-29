@@ -1,6 +1,7 @@
 """Sprint 38: transações reais em conexões distintas da base descartável."""
 
 import asyncio
+import threading
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from uuid import uuid4
@@ -240,6 +241,7 @@ async def test_mark_lesson_concurrently_keeps_single_origins(client):
     assert len({i["id"] for i in items}) == len(items) > 0
 
 
+@pytest.mark.timezone
 async def test_legacy_contract_expires_explicitly(client, monkeypatch):
     headers = auth(await registrar(client, "legacy-expiry"))
     path = await draft_path(client)
@@ -272,6 +274,7 @@ async def test_legacy_contract_expires_explicitly(client, monkeypatch):
     ).status_code == 428
 
 
+@pytest.mark.timezone
 async def test_cutover_distingue_revisao_de_chave_de_idempotencia(client, monkeypatch):
     """Os dois códigos do 428 descrevem faltas diferentes.
 
@@ -406,73 +409,72 @@ async def test_public_transport_and_private_headers(client, monkeypatch):
         assert "max-age=" in response.headers["strict-transport-security"]
 
 
-async def test_hash_pool_bounded_and_event_loop_responsive():
-    import threading
-    import time
+class HashWorkProbe:
+    """Mantém hashes pendentes até o próprio event loop liberar o trabalho."""
 
-    active = 0
-    peak = 0
-    ticks = 0
-    mutex = threading.Lock()
+    def __init__(self):
+        self.loop = asyncio.get_running_loop()
+        self.loop_thread = threading.get_ident()
+        self.started = asyncio.Event()
+        self.release = threading.Event()
+        self.mutex = threading.Lock()
+        self.active = 0
+        self.peak = 0
 
-    def slow_hash():
-        nonlocal active, peak
-        with mutex:
-            active += 1
-            peak = max(peak, active)
-        time.sleep(0.08)
-        with mutex:
-            active -= 1
-        return True
-
-    async def probe():
-        nonlocal ticks
-        for _ in range(10):
-            await asyncio.sleep(0.005)
-            ticks += 1
-
-    result = await asyncio.gather(*(password_work(slow_hash) for _ in range(6)), probe())
-    assert result[:6] == [True] * 6 and ticks == 10 and peak == 2
+    def run(self, fn, *args):
+        assert threading.get_ident() != self.loop_thread, "Hash executou no event loop"
+        with self.mutex:
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+        self.loop.call_soon_threadsafe(self.started.set)
+        try:
+            # Apenas proteção contra deadlock de um teste quebrado, não limite de latência.
+            assert self.release.wait(timeout=5), "Event loop não liberou o trabalho"
+            return fn(*args)
+        finally:
+            with self.mutex:
+                self.active -= 1
 
 
-async def test_real_auth_load_keeps_live_responsive(client):
-    import json
-    import resource
-    import sys
-    import time
+@pytest.mark.parametrize("limit", [1, 2, 4])
+async def test_hash_pool_bounded_and_event_loop_responsive(monkeypatch, limit):
+    monkeypatch.setattr(get_settings(), "auth_hash_concurrency", limit)
+    probe = HashWorkProbe()
+    tasks = [asyncio.create_task(password_work(probe.run, lambda: True)) for _ in range(6)]
+    try:
+        await asyncio.wait_for(probe.started.wait(), timeout=5)
+        # Este trecho só progride se o hash estiver fora do event loop.
+        assert not any(task.done() for task in tasks)
+        with probe.mutex:
+            assert 0 < probe.active <= limit
+    finally:
+        probe.release.set()
+        results = await asyncio.gather(*tasks)
+    assert results == [True] * 6
+    assert probe.active == 0 and 0 < probe.peak <= limit
 
-    from argon2 import PasswordHasher
+
+async def test_real_auth_load_keeps_live_responsive(client, monkeypatch):
+    from app.api import auth as auth_api
 
     await registrar(client, "load-probe")
     credentials = credenciais("load-probe")
-    before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    latency = []
-
-    async def probe():
-        for _ in range(12):
-            started = time.perf_counter()
-            assert (await client.get("/api/live")).status_code == 200
-            latency.append((time.perf_counter() - started) * 1000)
-            await asyncio.sleep(0.01)
-
-    responses = await asyncio.gather(
-        *(client.post("/api/auth/login", json=credentials) for _ in range(8)), probe()
-    )
-    assert all(result.status_code == 200 for result in responses[:-1])
-    assert max(latency) < 1000  # teto de regressão, não SLA de produção
-    unit = 1 if sys.platform == "darwin" else 1024
-    print(
-        "SPRINT38_LOAD="
-        + json.dumps(
-            {
-                "requests": 8,
-                "hash_concurrency": get_settings().auth_hash_concurrency,
-                "argon_memory_kib_per_hash": PasswordHasher().memory_cost,
-                "live_max_ms": round(max(latency), 2),
-                "process_maxrss_before_mib": round(before * unit / 1024**2, 2),
-                "process_maxrss_after_mib": round(
-                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit / 1024**2, 2
-                ),
-            }
-        )
-    )
+    probe = HashWorkProbe()
+    original = auth_api.conferir_senha
+    monkeypatch.setattr(auth_api, "conferir_senha", lambda *args: probe.run(original, *args))
+    tasks = [
+        asyncio.create_task(client.post("/api/auth/login", json=credentials)) for _ in range(8)
+    ]
+    try:
+        await asyncio.wait_for(probe.started.wait(), timeout=5)
+        response = await asyncio.wait_for(client.get("/api/live"), timeout=5)
+        assert response.status_code == 200
+        assert not any(task.done() for task in tasks)
+        with probe.mutex:
+            assert probe.active > 0
+    finally:
+        probe.release.set()
+        responses = await asyncio.gather(*tasks)
+    # A barreira só controla a ordem: os oito logins ainda verificam Argon2 de verdade.
+    assert all(response.status_code == 200 for response in responses)
+    assert probe.active == 0 and 0 < probe.peak <= get_settings().auth_hash_concurrency

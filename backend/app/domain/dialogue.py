@@ -43,6 +43,9 @@ MAX_WORDS = 60
 # diária é múltiplo deste número (ver `Settings.assist_dialogue_daily_turns`).
 MAX_TURNS_PER_DIALOGUE = 12
 
+# Apenas conteúdo editorial e cobertura; nunca uma cópia da fala do aluno.
+CheckDetails = dict[str, list[dict[str, str | bool]]]
+
 # Fronteira de palavra sobre o texto já normalizado. `\b` não serve: o termo
 # pode conter apóstrofo ("don't") e, em alguns motores, `\b` quebra ali.
 _WORD = re.compile(r"[^\W_]+(?:'[^\W_]+)*", re.UNICODE)
@@ -106,6 +109,18 @@ def _contains_phrase(haystack: list[str], needle: str) -> bool:
 def _covered(text: str, expected: tuple[str, ...]) -> tuple[str, ...]:
     dobrado = _fold(text)
     return tuple(termo for termo in expected if _contains_phrase(dobrado, termo))
+
+
+def evaluation_details(text: str, expectation: TurnExpectation) -> CheckDetails:
+    """Recorte histórico usando a mesma regra de cobertura dos checks."""
+    details: CheckDetails = {}
+    for name, expected in (
+        ("target_terms", expectation.target_terms),
+        ("grammar_patterns", expectation.grammar_patterns),
+    ):
+        covered = _covered(text, expected)
+        details[name] = [{"text": term, "covered": term in covered} for term in expected]
+    return details
 
 
 def evaluate(text: str, expectation: TurnExpectation) -> tuple[TurnCheck, ...]:

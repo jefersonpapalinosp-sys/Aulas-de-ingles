@@ -33,7 +33,7 @@ TranscriptionStatus = Literal["queued", "processing", "completed", "failed"]
 JobKind = Literal["transcription", "dialogue"]
 WorkerState = Literal["disabled", "unknown", "active", "stale"]
 AnalysisMode = Literal["deterministic", "assisted", "fallback"]
-AssistModality = Literal["transcription", "writing"]
+AssistModality = Literal["transcription", "writing", "conversation"]
 
 # Parceiro de conversa (DB-45/BE-46). Todos têm `CheckConstraint` equivalente.
 DialogueMode = Literal["script", "guided", "free_unit"]

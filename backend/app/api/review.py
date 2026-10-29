@@ -55,6 +55,8 @@ def _reason_values(
     lapses: int,
     interval_days: int,
 ) -> str:
+    if origin_reason == "dialogue_missed_term":
+        origin_reason = "Este termo faltou em dois turnos da mesma conversa."
     if last_reviewed_at is None:
         return f"{origin_reason} É a primeira revisão deste item."
     if lapses:

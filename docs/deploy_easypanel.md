@@ -381,7 +381,8 @@ nesta ordem, parando no primeiro erro:
    editorial não passar despercebida;
 7. smokes HTTPS em `AULAS_PUBLIC_URL` (padrão: domínio gerado pelo painel):
    `/`, `/sw.js`, `/api/live`, `/api/health` e `/api/courses` em 200 (até três
-   tentativas cada) e `schema_current == schema_required` no JSON do health.
+   tentativas cada) e `status=ok`, `db=up`, `schema=compatible` no JSON do health.
+   A API compara as revisões internamente; o smoke público não recebe os seus nomes.
 
 SSH sempre com `-o BatchMode=yes -o StrictHostKeyChecking=yes`: sem senha
 interativa e sem aceitar host desconhecido. O script nunca lê nem imprime o
@@ -483,8 +484,28 @@ OPERATIONS_TOKEN=...
 ```
 
 O token fica no crontab do usuário, com `chmod 600`; ele dá leitura de
-`/api/operations/metrics`, que é agregado e não carrega texto de aluno — mas
-continua sendo credencial.
+`/api/operations/metrics` e `/api/operations/readiness`. As métricas são
+agregadas; o diagnóstico inclui versão do banco, ambiente e revisões de schema.
+Nenhuma dessas respostas carrega texto de aluno, mas o token continua sendo credencial.
+
+### Saúde pública e diagnóstico autenticado (BE-49)
+
+| Rota | Acesso | Verificação |
+|---|---|---|
+| `/api/live` | público | processo responde; não consulta banco |
+| `/api/health` | público | banco acessível e revisões aplicadas iguais às da imagem; retorna apenas `status`, `db`, `schema` e `code` |
+| `/api/operations/readiness` | `Authorization: Bearer <OPERATIONS_TOKEN>` | mesma verificação, com `version`, `env`, `schema_current` e `schema_required` |
+
+Banco indisponível ou schema incompatível mantêm HTTP 503 nas duas rotas de
+prontidão. Os diagnósticos têm `Cache-Control: private, no-store`. Sem token
+operacional configurado, a rota privada retorna 404; credencial ausente ou
+incorreta retorna 401 quando ele está configurado, antes de consultar o banco.
+Enviar token ao health público não acrescenta detalhes à resposta.
+
+`make operations-check` consulta a readiness privada e as métricas com o mesmo
+token. O probe externo continua sem credencial e também reprova exposição de
+versão, ambiente ou revisões no health público. Publique API e consumidores
+operacionais juntos: a versão anterior da API não oferece a rota privada.
 
 ### Secrets do workflow
 
@@ -498,6 +519,34 @@ roda primeiro e sozinho — disponibilidade é a pergunta que não deve depender
 um segredo estar configurado.
 
 ### O que cada limiar do diálogo significa
+
+O INFRA-48 acrescenta `assist_costs.daily` e `assist_costs.monthly` ao endpoint
+privado de métricas. Os totais abrangem escrita, transcrição e conversa,
+contados uma vez por reserva consumida, pelo instante de despacho em UTC
+(`created_at` nos registros legados sem despacho). São dia e mês de calendário,
+até `sampled_at`; cada janela traz início, fim, quantidade consumida, custo em
+microusd e quantidade de custos desconhecidos. Um USD corresponde a 1.000.000
+microusd. O custo pode ser parcial enquanto houver valores desconhecidos.
+
+Configure no ambiente do cron e nas **variables** do repositório do GitHub:
+
+- `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD`: orçamento diário aprovado, inteiro positivo.
+- `OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`: orçamento mensal aprovado, inteiro positivo.
+
+Não há valor presumido para esses dois orçamentos. Ausência gera `warning`;
+valor inválido encerra o comando com código 2 antes de qualquer requisição.
+Com orçamento definido, consumo >= 80% gera `warning` e >= 100% gera
+`critical`. Custo desconhecido ou métrica ausente/inválida gera `critical`.
+Tanto `warning` quanto `critical` retornam código 1, permitindo que cron e
+workflow sinalizem o problema. O resumo do workflow conserva o relatório
+também quando há alerta. Nenhum envio foi disparado pela validação local.
+
+O ledger permanece após excluir uma conversa ou expirar seu texto, evitando
+que a exclusão reduza o custo observado. A exclusão da **conta** remove suas
+reservas; por isso estes totais representam o ledger existente e precisam
+ser conciliados com a fatura do provedor. Não são um livro contábil permanente.
+O alerta não desliga flags automaticamente. Os checks legados abaixo continuam
+ativos, inclusive o teto diário adicional de conversa.
 
 | Check | Limiar | Responsável | Ação |
 |---|---|---|---|

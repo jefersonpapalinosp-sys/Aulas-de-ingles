@@ -208,6 +208,58 @@
                 "title": "ApiErrorOut",
                 "type": "object"
             },
+            "AssistCostWindowOut": {
+                "properties": {
+                    "consumed": {
+                        "title": "Consumed",
+                        "type": "integer"
+                    },
+                    "cost_microusd": {
+                        "title": "Cost Microusd",
+                        "type": "integer"
+                    },
+                    "ends_at": {
+                        "format": "date-time",
+                        "title": "Ends At",
+                        "type": "string"
+                    },
+                    "starts_at": {
+                        "format": "date-time",
+                        "title": "Starts At",
+                        "type": "string"
+                    },
+                    "unknown_cost_reservations": {
+                        "title": "Unknown Cost Reservations",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "starts_at",
+                    "ends_at",
+                    "consumed",
+                    "cost_microusd",
+                    "unknown_cost_reservations"
+                ],
+                "title": "AssistCostWindowOut",
+                "type": "object"
+            },
+            "AssistCostsOut": {
+                "description": "Ledger existente das três modalidades, por despacho e calendário UTC.",
+                "properties": {
+                    "daily": {
+                        "$ref": "#/components/schemas/AssistCostWindowOut"
+                    },
+                    "monthly": {
+                        "$ref": "#/components/schemas/AssistCostWindowOut"
+                    }
+                },
+                "required": [
+                    "daily",
+                    "monthly"
+                ],
+                "title": "AssistCostsOut",
+                "type": "object"
+            },
             "AssistStatusOut": {
                 "properties": {
                     "consumed_today": {
@@ -1708,6 +1760,30 @@
                 "title": "DeletionMetricsOut",
                 "type": "object"
             },
+            "DialogueCheckDetails": {
+                "properties": {
+                    "grammar_patterns": {
+                        "items": {
+                            "$ref": "#/components/schemas/DialogueTermCheck"
+                        },
+                        "title": "Grammar Patterns",
+                        "type": "array"
+                    },
+                    "target_terms": {
+                        "items": {
+                            "$ref": "#/components/schemas/DialogueTermCheck"
+                        },
+                        "title": "Target Terms",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "target_terms",
+                    "grammar_patterns"
+                ],
+                "title": "DialogueCheckDetails",
+                "type": "object"
+            },
             "DialogueCreateIn": {
                 "properties": {
                     "lesson_id": {
@@ -1949,6 +2025,212 @@
                 "title": "DialogueOut",
                 "type": "object"
             },
+            "DialoguePageOut": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/DialogueSummaryOut"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "next_cursor": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Cursor"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_cursor"
+                ],
+                "title": "DialoguePageOut",
+                "type": "object"
+            },
+            "DialogueStatusOut": {
+                "properties": {
+                    "audio_enabled": {
+                        "title": "Audio Enabled",
+                        "type": "boolean"
+                    },
+                    "consumed_today": {
+                        "title": "Consumed Today",
+                        "type": "integer"
+                    },
+                    "cost_incomplete": {
+                        "title": "Cost Incomplete",
+                        "type": "boolean"
+                    },
+                    "cost_microusd_today": {
+                        "title": "Cost Microusd Today",
+                        "type": "integer"
+                    },
+                    "daily_quota": {
+                        "title": "Daily Quota",
+                        "type": "integer"
+                    },
+                    "enabled": {
+                        "title": "Enabled",
+                        "type": "boolean"
+                    },
+                    "guided_enabled": {
+                        "title": "Guided Enabled",
+                        "type": "boolean"
+                    },
+                    "quota_resets_at": {
+                        "format": "date-time",
+                        "title": "Quota Resets At",
+                        "type": "string"
+                    },
+                    "remaining_today": {
+                        "title": "Remaining Today",
+                        "type": "integer"
+                    },
+                    "reserved_today": {
+                        "title": "Reserved Today",
+                        "type": "integer"
+                    },
+                    "retention_days": {
+                        "title": "Retention Days",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "guided_enabled",
+                    "audio_enabled",
+                    "daily_quota",
+                    "remaining_today",
+                    "reserved_today",
+                    "consumed_today",
+                    "quota_resets_at",
+                    "retention_days",
+                    "cost_microusd_today",
+                    "cost_incomplete"
+                ],
+                "title": "DialogueStatusOut",
+                "type": "object"
+            },
+            "DialogueSummaryOut": {
+                "properties": {
+                    "ended_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Ended At"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "lesson_id": {
+                        "title": "Lesson Id",
+                        "type": "integer"
+                    },
+                    "mode": {
+                        "enum": [
+                            "script",
+                            "guided",
+                            "free_unit"
+                        ],
+                        "title": "Mode",
+                        "type": "string"
+                    },
+                    "partner_speaker": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Partner Speaker"
+                    },
+                    "provider_name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Provider Name"
+                    },
+                    "rubric_version": {
+                        "title": "Rubric Version",
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "format": "date-time",
+                        "title": "Started At",
+                        "type": "string"
+                    },
+                    "state": {
+                        "enum": [
+                            "active",
+                            "completed",
+                            "abandoned"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    },
+                    "turn_limit": {
+                        "title": "Turn Limit",
+                        "type": "integer"
+                    },
+                    "turns_remaining": {
+                        "title": "Turns Remaining",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "lesson_id",
+                    "mode",
+                    "state",
+                    "partner_speaker",
+                    "turn_limit",
+                    "turns_remaining",
+                    "provider_name",
+                    "rubric_version",
+                    "started_at",
+                    "ended_at"
+                ],
+                "title": "DialogueSummaryOut",
+                "type": "object"
+            },
+            "DialogueTermCheck": {
+                "properties": {
+                    "covered": {
+                        "title": "Covered",
+                        "type": "boolean"
+                    },
+                    "text": {
+                        "title": "Text",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text",
+                    "covered"
+                ],
+                "title": "DialogueTermCheck",
+                "type": "object"
+            },
             "DialogueTurnAcceptedOut": {
                 "description": "Resposta do turno admitido.\n\n`job_id` é nulo no Roteiro, que não passa pela fila — ele não chama\nprovedor nenhum e não pode depender do worker estar de pé.",
                 "properties": {
@@ -1992,6 +2274,16 @@
             },
             "DialogueTurnOut": {
                 "properties": {
+                    "check_details": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/DialogueCheckDetails"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "checks": {
                         "additionalProperties": {
                             "type": "boolean"
@@ -2132,6 +2424,13 @@
                             }
                         ],
                         "title": "Transcript"
+                    },
+                    "words": {
+                        "items": {
+                            "$ref": "#/components/schemas/TranscriptionWordOut"
+                        },
+                        "title": "Words",
+                        "type": "array"
                     }
                 },
                 "required": [
@@ -2706,10 +3005,6 @@
                         "title": "Db",
                         "type": "string"
                     },
-                    "env": {
-                        "title": "Env",
-                        "type": "string"
-                    },
                     "schema": {
                         "enum": [
                             "compatible",
@@ -2719,43 +3014,15 @@
                         "title": "Schema",
                         "type": "string"
                     },
-                    "schema_current": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "title": "Schema Current",
-                        "type": "array"
-                    },
-                    "schema_required": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "title": "Schema Required",
-                        "type": "array"
-                    },
                     "status": {
                         "title": "Status",
                         "type": "string"
-                    },
-                    "version": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Version"
                     }
                 },
                 "required": [
                     "status",
                     "db",
-                    "schema",
-                    "schema_current",
-                    "schema_required",
-                    "env"
+                    "schema"
                 ],
                 "title": "HealthOut",
                 "type": "object"
@@ -3880,6 +4147,9 @@
                     "account_deletions": {
                         "$ref": "#/components/schemas/DeletionMetricsOut"
                     },
+                    "assist_costs": {
+                        "$ref": "#/components/schemas/AssistCostsOut"
+                    },
                     "database": {
                         "$ref": "#/components/schemas/DatabaseMetricsOut"
                     },
@@ -3910,6 +4180,7 @@
                     "database",
                     "transcription_queue",
                     "dialogue",
+                    "assist_costs",
                     "account_deletions",
                     "legacy_review",
                     "media"
@@ -4953,6 +5224,81 @@
                 "title": "QueueMetricsOut",
                 "type": "object"
             },
+            "ReadinessOut": {
+                "properties": {
+                    "code": {
+                        "anyOf": [
+                            {
+                                "enum": [
+                                    "service_unavailable",
+                                    "schema_incompatible"
+                                ],
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Code"
+                    },
+                    "db": {
+                        "title": "Db",
+                        "type": "string"
+                    },
+                    "env": {
+                        "title": "Env",
+                        "type": "string"
+                    },
+                    "schema": {
+                        "enum": [
+                            "compatible",
+                            "incompatible",
+                            "unknown"
+                        ],
+                        "title": "Schema",
+                        "type": "string"
+                    },
+                    "schema_current": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Schema Current",
+                        "type": "array"
+                    },
+                    "schema_required": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Schema Required",
+                        "type": "array"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "string"
+                    },
+                    "version": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Version"
+                    }
+                },
+                "required": [
+                    "status",
+                    "db",
+                    "schema",
+                    "schema_current",
+                    "schema_required",
+                    "env"
+                ],
+                "title": "ReadinessOut",
+                "type": "object"
+            },
             "RecentSessionOut": {
                 "properties": {
                     "completed_steps": {
@@ -5029,7 +5375,8 @@
                             "continue_lesson",
                             "start_lesson",
                             "course_review",
-                            "practice"
+                            "practice",
+                            "conversation"
                         ],
                         "title": "Kind",
                         "type": "string"
@@ -8897,7 +9244,7 @@
         },
         "/api/health": {
             "get": {
-                "description": "Readiness.\n\nAbre uma conexão de verdade e exige que a revisão aplicada seja exatamente\no conjunto de heads embarcado. Banco acessível com código/schema divergentes\ncontinua indisponível para tráfego.",
+                "description": "Disponibilidade pública, sem versão do banco, ambiente ou revisões.",
                 "operationId": "health_api_health_get",
                 "responses": {
                     "200": {
@@ -11146,6 +11493,63 @@
                 ]
             }
         },
+        "/api/operations/readiness": {
+            "get": {
+                "description": "Diagnóstico detalhado somente após autenticação operacional.",
+                "operationId": "readiness_api_operations_readiness_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReadinessOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReadinessOut"
+                                }
+                            }
+                        },
+                        "description": "Service Unavailable"
+                    }
+                },
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "summary": "Readiness",
+                "tags": [
+                    "operations"
+                ]
+            }
+        },
         "/api/practice-sessions/{session_id}": {
             "get": {
                 "operationId": "get_practice_session_api_practice_sessions__session_id__get",
@@ -12988,6 +13392,96 @@
             }
         },
         "/api/speaking/dialogues": {
+            "get": {
+                "operationId": "listar_dialogos_api_speaking_dialogues_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 256,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialoguePageOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Listar Dialogos",
+                "tags": [
+                    "speaking"
+                ]
+            },
             "post": {
                 "operationId": "criar_dialogo_api_speaking_dialogues_post",
                 "requestBody": {
@@ -13053,6 +13547,57 @@
                     }
                 },
                 "summary": "Criar Dialogo",
+                "tags": [
+                    "speaking"
+                ]
+            }
+        },
+        "/api/speaking/dialogues/status": {
+            "get": {
+                "operationId": "status_dialogos_api_speaking_dialogues_status_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DialogueStatusOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Status Dialogos",
                 "tags": [
                     "speaking"
                 ]
@@ -13212,6 +13757,8 @@
                         "name": "position",
                         "required": true,
                         "schema": {
+                            "maximum": 50,
+                            "minimum": 1,
                             "title": "Position",
                             "type": "integer"
                         }
@@ -13293,8 +13840,20 @@
                         "name": "position",
                         "required": true,
                         "schema": {
+                            "maximum": 50,
+                            "minimum": 1,
                             "title": "Position",
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "header",
+                        "name": "X-Audio-Consent",
+                        "required": true,
+                        "schema": {
+                            "const": "true",
+                            "title": "X-Audio-Consent",
+                            "type": "string"
                         }
                     }
                 ],
@@ -13375,6 +13934,8 @@
                         "name": "position",
                         "required": true,
                         "schema": {
+                            "maximum": 50,
+                            "minimum": 1,
                             "title": "Position",
                             "type": "integer"
                         }
@@ -13466,6 +14027,8 @@
                         "name": "position",
                         "required": true,
                         "schema": {
+                            "maximum": 50,
+                            "minimum": 1,
                             "title": "Position",
                             "type": "integer"
                         }

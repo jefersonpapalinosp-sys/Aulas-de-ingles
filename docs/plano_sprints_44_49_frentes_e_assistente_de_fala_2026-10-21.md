@@ -749,7 +749,8 @@ deliberadamente **não** implementado; o caso `pede_nota` está no corpus com
 `esperado="saneada"` para que esse limite fique visível no teste, e não só no
 documento.
 
-**Bloqueio aberto para o IA-48:** o gate de liberação cobre `transcription` e
+**Bloqueio identificado em 26/10, corrigido localmente em 29/10 no registro IA-48 abaixo:**
+naquela execução, o gate de liberação cobria `transcription` e
 `writing`; a modalidade `conversation` não existe nele — `AssistModality` é
 `Literal["transcription", "writing"]` e `evaluate_gate` decide
 `provider_configured` como "transcrição, senão escrita", de modo que uma
@@ -885,77 +886,464 @@ no SEC-45.
 
 ### FE-47 Experiência do parceiro de conversa
 
-- [ ] `features/dialogue/dialogueSession.ts`: máquina de estados fora do
+- [x] `features/dialogue/dialogueSession.ts`: máquina de estados fora do
   React (`idle → listening → uploading → waiting → partner_speaking →
   idle`), polling do job, fallback, limite de turnos.
-- [ ] Tela do diálogo dentro da etapa "Revisar" da jornada guiada: escolha
+- [x] Tela do diálogo dentro da etapa "Revisar" da jornada guiada: escolha
   do modo, personagem, fala do parceiro **sempre em texto** mais voz
   sintetizada (`speechSynthesis`, voz `en-US`, velocidade ajustável,
   botão de repetir), botão falar/parar reaproveitando `VoiceRecorder`,
   entrada por texto como alternativa.
-- [ ] Após o turno: transcrição com confiança por palavra (padrão atual,
-  abaixo de 75% destacado), termos-alvo usados e faltantes, dica do padrão
-  gramatical, explicação do modelo rotulada "automatizado, em avaliação",
-  botões "foi útil"/"não foi útil", excluir turno ou diálogo.
-- [ ] Cota e custo visíveis com `AssistQuota`; estados offline, cota
+- [x] Após o turno: transcrição com confiança por palavra (abaixo de 75%
+  identificada também em texto), critérios determinísticos de vocabulário,
+  gramática e tamanho, dicas rotuladas "automatizado, em avaliação",
+  avaliação útil/não útil e exclusão do diálogo com confirmação.
+- [x] Detalhar os termos-alvo usados/faltantes pelo nome e os padrões
+  gramaticais identificados/ausentes, com vínculo ao recorte avaliado no
+  turno. Legados sem detalhes são apresentados explicitamente, sem
+  reconstrução a partir do vocabulário atual.
+- [ ] Liberar a interface após a revisão assinada SEC-46. O código local
+  está preparado, mas `DIALOGUE_PRACTICE_ENABLED` permanece `false`.
+- [x] Cota e custo visíveis com `AssistQuota`; estados offline, cota
   esgotada e provedor indisponível com mensagens próprias e caminho para o
   Roteiro.
-- [ ] Acessibilidade: `aria-live` para a fala do parceiro, foco previsível
+- [x] Acessibilidade: `aria-live` para a fala do parceiro, foco previsível
   entre turnos, legenda sempre visível, `prefers-reduced-motion`, operação
   completa por teclado, nenhuma dependência de cor.
-- [ ] CSP inalterada: `speechSynthesis` é API do navegador; nenhum domínio
+- [x] CSP inalterada: `speechSynthesis` é API do navegador; nenhum domínio
   novo em `connect-src`.
 
 Aceite: fluxo completo testado em Vitest com API simulada; teste Playwright
 isolado com `speechSynthesis` substituído; sem microfone, o diálogo continua
 por texto; o orçamento de bundle inicial não cresce (a feature é chunk lazy).
 
+### Registro de execução — preparação local do FE-47 em 28/10/2026
+
+O parceiro está integrado à etapa Revisar via `DialogueEntry`. A entrada
+consulta `GET /api/speaking/dialogues/status` privado e só aparece se a
+flag de prática estiver habilitada. O workspace é carregado por import
+lazy após abrir a conversa. Nenhuma configuração de ambiente foi ativada
+nesta entrega; a assinatura SEC-46 e o gate do fornecedor IA-48 continuam
+pendentes. A preparação foi validada com respostas sintéticas.
+
+`DialogueSession` concentra criação, envio, consulta e cancelamento fora
+do React. Uma perda de resposta preserva a chave, a posição e os bytes do
+pedido; outra entrada fica bloqueada até esclarecer o resultado. Após o
+aceite confirmado, uma falha de GET repete apenas a consulta. A troca de
+conta invalida respostas tardias, e o desmonte encerra requisições, polling,
+microfone e reprodução. O polling para após 40 consultas e permite retomada
+manual. Texto e gravação ficam em memória, sem fila offline ou persistência
+local de dados privados.
+
+O Roteiro trabalha por texto, sem transcritor. Guiado oferece áudio somente
+com STT configurado e política de limites disponível: o consentimento começa
+desmarcado em cada gravação, e tamanho, duração e MIME são verificados antes
+do upload. A tela permite ouvir e baixar a gravação local. A resposta do
+parceiro permanece em texto; a leitura opcional aceita somente voz local
+`en-US` do navegador, com três velocidades, repetição e parada. Falta de
+microfone ou de voz local mantém o fluxo por texto. A mudança para uma nova
+conversa no Roteiro preserva a conversa anterior no banco.
+
+**Ajustes de contrato necessários à interface:** status e cota exclusivos de
+conversa; `words` no turno com a confiança real do STT; job com falha é
+apresentado como turno falho, encerrando a espera da UI. O worker autoriza a
+reserva antes de chamar o STT (antes a autorização vinha depois), e registra
+a soma de STT + diálogo, mantendo custo parcial quando algum valor não é
+confirmado. Áudio no Roteiro agora recebe 409 em vez de gerar avaliação de
+texto vazio. Excluir a conversa também remove seus jobs e as cópias de texto
+neles, liberando só reservas ainda não consumidas; áudio segue a retenção já
+existente, explicitada na confirmação. Tipos e OpenAPI foram regenerados.
+
+A invalidação usa o evento `dialogueChange` no mapa único de cache para
+atualizar cota, revisão, Hoje e competências. O histórico continua com
+posse no SQL; esta entrega não altera publicação ou dados reais de estudo.
+
+**Bundle:** inicial **128,1/132 KiB gzip**, base sem diálogo **183,2/184 KiB**,
+workspace lazy (JS + CSS) **6,7 KiB**. O teto antigo de 184 KiB não comportava
+a nova feature: foi adicionada uma reserva explícita de **8 KiB somente
+para `DialogueWorkspace`**, total máximo **192 KiB**. Os limites da entrada,
+da base e por arquivo permanecem; a reserva não pode pagar crescimento de
+outros módulos, e carregar o workspace na entrada reprova o check. Os 11
+testes do script cobrem esses limites e passaram a rodar também no CI.
+
+**Frontend:** 451 testes Vitest passando, incluindo 19 novos do motor,
+componente e voz e um novo evento no mapa de invalidação. ESLint, tsc,
+`check:api`, build e orçamento passaram. Playwright isolado passou em
+1280px e 390px: envio por teclado, polling, fallback, foco após resposta,
+voz substituída, avaliação e confirmação de exclusão; axe sem violações e
+sem overflow horizontal, também com movimento reduzido. O harness bloqueia
+API real e não usa banco ou fornecedor; isso não substitui o gateway
+simulado e o fluxo com worker do INFRA-47. Imagens locais de revisão em
+`e2e/test-results/dialogue-1280.png` e `dialogue-390.png`. O job isolado
+completo do CI (fila, recuperação e diálogo) passou com seis testes.
+
+**Backend:** suíte completa com **1.335 testes passando**, cobertura de
+**93,90%**; ruff e mypy strict limpos. Os quatro testes novos de contrato
+cobrem status/cota, rejeição de áudio no Roteiro, confiança/custo/exclusão
+e autorização da reserva antes de qualquer STT. O job pós-cutover foi
+extraído do YAML do CI e passou com **234 testes**, incluindo esse arquivo.
+
+### Complemento FE-47 — critérios históricos, concluído em 29/10/2026
+
+`dialogue_turn.check_details` guarda os termos e padrões do recorte usado
+na avaliação, com a cobertura de cada um. A mesma regra determinística de
+palavras e expressões inteiras usada nos booleanos produz os detalhes;
+nenhum texto livre do aluno ou do provedor entra nesse campo. Roteiro e
+Guiado persistem os dados junto ao resultado, e reentregas preservam o
+resultado original mesmo se o recorte editorial tiver mudado.
+
+A API privada e a exportação pessoal incluem o campo. A tela mostra os
+nomes dos termos usados/não identificados e dos padrões identificados/não
+identificados; ausência de detalhes legados tem mensagem própria. Os dados
+editoriais e seus indicadores de cobertura permanecem junto aos checks
+após a retenção apagar transcrição, resposta e dicas. A revisão recorrente
+também usa os recortes persistidos, ignorando faltas antigas sem recorte;
+assim uma edição de vocabulário não cria retroativamente uma segunda falta.
+
+Migration `c92f4a8d710e`: coluna JSONB opcional, sem backfill; atualização
+permitida ao worker, sem ampliar as escritas do runtime. O downgrade recusa
+apagar a coluna enquanto houver detalhes históricos. Teste em schema
+sintético cobre legado nulo, bloqueio do downgrade e reaplicação sem perda
+do texto anterior.
+
+**Validação local:** 53 testes direcionados do backend, seguidos pela suíte
+completa com **1.344 testes passando e 93,91% de cobertura**; **454 testes**
+do frontend passaram. Os nove testes novos de backend cobrem cobertura de
+expressões, replay, mudança editorial, ausência de recorte legado e
+migração; exportação e retenção ganharam verificações do campo. Os três
+testes novos de apresentação cobrem nomes, legado e critérios não exigidos.
+ESLint, TypeScript, contrato OpenAPI, ruff e mypy strict ficaram limpos.
+O Playwright isolado passou nos seis cenários, incluindo nomes dos termos
+em 1280px e 390px, axe sem violações e sem overflow horizontal. Bundle:
+inicial **128,1/132 KiB**, base **183,2/184 KiB**, diálogo lazy **6,9/8 KiB**,
+conjunto **190,1/192 KiB**. Os 181 testes operacionais passaram.
+
+`make test-roles` passou com runtime e worker reais; o worker persistiu e
+releu os detalhes, e a tentativa de atualizá-los pelo runtime foi recusada.
+`alembic check` não encontrou diferenças entre modelos e banco. O laboratório
+de papéis foi encerrado, preservando seu volume sintético. O contrato novo
+também foi incluído no passo pós-cutover do CI; a execução local desse
+passo, extraído diretamente do YAML, passou com **243 testes** e
+`LEGACY_WRITES_UNTIL=2000-01-01T00:00:00Z`.
+
+Na validação deste complemento, o INFRA-47 ainda estava pendente: a stack
+E2E não possuía gateway nem worker. O ensaio de navegador usava API simulada;
+o ensaio de permissões usava
+PostgreSQL e papéis reais com provedor substituído. Nenhum deles representa
+o fluxo integrado com gateway, implementado posteriormente na seção INFRA-47
+abaixo. A flag de prática fora do laboratório segue desligada; revisão
+assinada SEC-46 e gate IA-48 não foram liberados.
+
 ### BE-47 Evidência, revisão e painel
 
-- [ ] Cada turno do aluno gera `skill_evidence` de speaking com origem
+- [x] Cada turno do aluno gera `skill_evidence` de speaking com origem
   `dialogue_turn`; termos-alvo faltantes em dois turnos do mesmo diálogo
   entram na revisão SM-2 como `dialogue_missed_term`, idempotente.
-- [ ] O painel Hoje sugere "praticar a conversa da Aula N" quando a aula foi
+- [x] O painel Hoje sugere "praticar a conversa da Aula N" quando a aula foi
   estudada e não tem diálogo nos últimos 7 dias; a sugestão explica o motivo.
-- [ ] Exportação pessoal 1.7 inclui diálogos, turnos, avaliações humanas,
+- [x] Exportação pessoal (schema atual 2.1) inclui diálogos, turnos, avaliações humanas,
   custo e fornecedor.
 
 Aceite: um diálogo sintético de 6 turnos produz exatamente 6 evidências e
 no máximo os itens de revisão esperados; repetir o processamento não
 duplica nada.
 
+### Registro de execução — Ciclo 47, BE-47 em 28/10/2026
+
+Implementação local na branch `sprint/46-assistente-backend`. Não houve deploy,
+ativação de assistência nem assinatura em nome do responsável. O FE-47 mantém
+as dependências de SEC-46 e IA-48 registradas acima.
+
+- `services/dialogue_learning.py` registra uma evidência de fala por turno
+  concluído, com origem `dialogue_turn` e unicidade no banco. O valor interno é
+  a proporção de checks determinísticos satisfeitos; não usa confiança,
+  avaliação humana ou texto do provedor como nota. A origem exibida no painel
+  esclarece que esses checks não avaliam fluência ou pronúncia.
+- Um termo solicitado e ausente em dois turnos da mesma conversa cria uma
+  carta `speaking_prompt`, com motivo `dialogue_missed_term`. A carta usa o
+  vocabulário editorial, sem copiar a transcrição. Há uma carta por termo e
+  diálogo; reentregas preservam prazo SM-2, suspensão e revisões feitas.
+- O resumo de competências inclui a nova origem respeitando curso, unidade e
+  publicação. A exclusão autenticada do diálogo remove suas evidências e
+  cartas na mesma transação, sem apagar outras origens.
+- O painel prioriza revisão vencida, retomada e checkpoint antes da conversa.
+  A sugestão exige aula estudada e ausência de diálogo iniciado nos últimos
+  sete dias. Está atrás de `DIALOGUE_PRACTICE_ENABLED=false`: só deve ser
+  habilitada junto do FE-47, após a revisão assinada, para não oferecer um
+  destino ainda incompleto. A variável está declarada nas Compose de dev e
+  produção local; no EasyPanel usa `EASYPANEL_DIALOGUE_PRACTICE_ENABLED`,
+  também falsa por padrão. O contrato OpenAPI e os tipos foram regerados;
+  a única alteração pública é o novo tipo de recomendação `conversation`.
+- A exportação 2.1 já cobria diálogos e turnos desde DB-45. O teste agora
+  verifica também fornecedor, custo e avaliação humana, além do isolamento
+  entre contas; não houve mudança desnecessária de versão.
+
+**Correções encontradas na integração com os papéis reais.** O Roteiro antes
+inseria o turno pendente e tentava atualizá-lo, embora o runtime só possa
+alterar `human_rating`. Agora insere o resultado completo. O Guiado insere o
+turno já associado ao job, eliminando outro UPDATE proibido. O worker carrega
+apenas o recorte editorial necessário, sem buscar gabaritos; a migration
+`a18d7e4c2b91` concede essa leitura e INSERT nas tabelas derivadas, com SELECT
+restrito às colunas de identificação. Não concede UPDATE/DELETE de evidências,
+leitura de senhas, gabaritos ou textos das cartas.
+
+**Retomada e concorrência.** A resolução serializa por diálogo; um turno já
+concluído não chama o provedor outra vez. Resultado, evidência, revisão, custo
+e confirmação do job são gravados na mesma transação. O teste injeta falha
+antes de persistir o custo e prova que a retomada conclui sem resultado parcial.
+Dois turnos concorrentes geram duas evidências e uma única carta recorrente.
+
+**Validação:** o cenário sintético de seis turnos gera seis evidências e duas
+cartas, preservadas no replay; testes cobrem limite de sete dias, isolamento,
+publicação, exclusão, fallback, concorrência e falha transacional. O ensaio
+`make test-roles` passou com criação de 12 turnos no Roteiro pelo runtime e
+resolução de 12 turnos Guiados pelo worker, sem provedor externo. Vitest:
+431 testes; testes operacionais: 180; eslint, TypeScript, contrato, ruff e
+mypy strict (104 arquivos) limpos. Build e orçamento: 128,1/132 KiB iniciais e
+182,6/184 KiB totais. Suíte completa do backend: **1.297 testes passaram**.
+Passo pós-cutover extraído diretamente do `ci.yml`: **196 passaram**, com
+`LEGACY_WRITES_UNTIL=2000-01-01T00:00:00Z` e o novo arquivo incluído no CI.
+A migration foi revertida e reaplicada no laboratório com dados sintéticos:
+contagens de turnos, evidências e revisões preservadas, privilégios conferidos
+nas duas direções e `alembic check` limpo. O laboratório de papéis foi encerrado
+após o ensaio, mantendo o volume sintético.
+
+**Ajuste da suíte:** duas expectativas do head Alembic foram atualizadas para
+a nova migration. O teste de job expirado usava o instante atual do host,
+enquanto a retenção compara com o relógio do PostgreSQL; falhou na suíte e
+passou isolado. Agora cria um prazo anterior aos dois relógios, mantendo a
+mesma exigência de retenção, sem espera artificial.
+
 ### DB-47 Laboratório 1k/10k de turnos
 
-- [ ] Carga sintética de 1k e 10k turnos por aluno no laboratório; medição
+- [x] Carga sintética de 1k e 10k turnos por aluno no laboratório; medição
   das consultas de histórico e do Caderno com o índice keyset; ajuste de
   índice se o p95 passar de 100 ms.
 
 ### SEC-47 Revisão das rotas novas
 
-- [ ] Testes de IDOR em cada rota de diálogo; replay de turno com a mesma
+- [x] Testes de IDOR em cada rota de diálogo; replay de turno com a mesma
   posição; tentativa de furar a cota em paralelo (reaproveitar o padrão de
-  `test_assist_quota`); limites de tamanho de áudio alinhados entre UI, API
-  e nginx para o turno; `limit_req` em `/api/speaking/dialogues`.
+  `test_assist_quota`).
+- [x] Limites de áudio na API e nginx para o turno; consentimento explícito;
+  `limit_req` em `/api/speaking/dialogues` sem limitar GET de polling.
+- [x] Validar os limites e o consentimento na UI preparada do diálogo
+  (FE-47), consumindo `/api/speaking/policy` e enviando
+  `X-Audio-Consent: true` somente após a confirmação do aluno.
+  Prova local com transporte simulado; ativação depende da revisão SEC-46.
+
+### Registro de execução — DB-47 e segurança da API em 28/10/2026
+
+**Histórico:** `GET /api/speaking/dialogues` retorna metadados privados, sem
+transcrições, com `limit` de 1 a 100 (padrão 20) e cursor opaco ordenado por
+`started_at DESC, id DESC`. A contagem dos turnos usa uma subconsulta
+correlacionada; não há uma consulta adicional por conversa. A listagem
+preserva o acesso ao histórico próprio independentemente da publicação
+atual da aula. Posse, datas empatadas, cursor inválido e ausência de cache
+estão cobertos nos testes. OpenAPI e tipos do frontend foram regenerados.
+
+**Desempenho:** ensaio no PostgreSQL 16.15 descartável, com 1.000 e 10.000
+turnos por conta, distribuídos em 84 e 834 diálogos, além de 1.000 e 10.000
+notas sintéticas no Caderno. Foram 30 amostras por rota depois de duas de
+aquecimento, página de 50 itens e cursor profundo após 90% dos registros.
+Medição HTTP local via ASGI, incluindo autenticação e serialização; não
+representa latência da rede ou capacidade da produção.
+
+| Carga | Histórico inicial p95 | Histórico profundo p95 | Caderno inicial p95 | Caderno profundo p95 |
+| --- | --- | --- | --- | --- |
+| 1.000 turnos | 7,27 ms | 4,17 ms | 5,38 ms | 7,14 ms |
+| 10.000 turnos | 5,36 ms | 12,79 ms | 12,24 ms | 20,31 ms |
+
+Todas as páginas fizeram duas consultas SQL (autenticação + listagem) e
+no máximo uma aquisição de conexão. O percurso completo conferiu a ordem
+e a ausência de perdas/duplicatas, inclusive nas datas empatadas. No caso
+10k, `EXPLAIN ANALYZE` usou `ix_dialogue_user_started` e
+`uq_dialogue_turn_position` no histórico (0,386 ms), e
+`ix_notebook_entry_user_updated_id` no Caderno (0,645 ms). Na carga menor,
+o otimizador preferiu varredura sequencial dos 84 diálogos (0,108 ms).
+Não foi necessário adicionar índice ou migration.
+
+Reprodução: `make dialogue-benchmark`; aceita `DIALOGUE_BENCHMARK_ARGS`
+com `--samples` e `--output`. A guarda recusa banco/papel não descartáveis,
+o ensaio usa advisory lock e remove somente suas contas sintéticas no
+`finally`. Não executar simultaneamente com pytest, cujo teardown limpa
+as contas de teste. As duas contas do ensaio foram removidas. Relatório
+agregado: [db47_dialogue_performance_2026-10-28.json](db47_dialogue_performance_2026-10-28.json).
+
+**Segurança:** o upload agora exige o header `X-Audio-Consent: true` e
+registra a data do consentimento e SHA-256 dos bytes inspecionados.
+Reenvio do mesmo áudio mantém um único arquivo, tentativa, job e reserva;
+outros bytes na mesma posição recebem 409. A rejeição por cota desfaz a
+tentativa SQL e remove o arquivo somente depois de confirmar que ele não
+está referenciado no banco. A compensação é compartilhada com shadowing,
+preservando o arquivo quando o resultado do commit é desconhecido.
+
+A criação é serializada por conta para quatro pedidos simultâneos com
+a mesma `operation_key` devolverem o mesmo diálogo. A reserva de turno
+inclui o identificador do diálogo no fingerprint: reutilizar a chave em
+outra conversa recebe 409, em vez de tentar reutilizar o job. Dezesseis
+admissões simultâneas em duas conversas respeitaram exatamente a cota de
+12, com quatro respostas 429. Posições fora dos limites são rejeitadas
+antes das constraints SQL.
+
+O nginx aplica 120 escritas/minuto, rajada de 24, com resposta 429 em
+`/api/speaking/dialogues` e suas subrotas. Atrás do Traefik é um teto global
+de borda, sem confiar em cabeçalhos de IP fornecidos pelo cliente; a cota
+por aluno continua transacional no banco. GET não consome essa zona.
+API e proxy compartilham o teto de 2.000.000 bytes decimais; a API também
+inspeciona o limite real de 30 segundos. `nginx -t` passou na imagem
+1.30.6-alpine3.24, em container descartável sem rede.
+
+**Validação local:** backend completo com **1.331 testes passando** e
+**93,50% de cobertura** (piso de 90%); **431 testes do frontend** e
+**181 testes operacionais** passando. Ruff do backend e de `ops` com a
+configuração do CI, mypy strict (106 arquivos), ESLint, TypeScript e
+conferência do schema gerado passaram. Os 34 casos novos de segurança
+estão em `backend/tests/test_dialogue_security.py` e também integram o
+job de compatibilidade pós-cutover. Esse job foi extraído do `ci.yml` com
+parser YAML e executado localmente com `LEGACY_WRITES_UNTIL` no passado:
+**230 testes passando**.
+
+O teste de limites e consentimento da UI foi concluído na preparação local
+do FE-47, registrada acima. A revisão assinada do SEC-46 continua pendente.
+Não houve deploy ou ativação do provedor.
 
 ### INFRA-47 Gateway simulado no E2E
 
-- [ ] Container de gateway simulado (STT + diálogo) em `infra/compose.e2e.yml`,
+- [x] Container de gateway simulado (STT + diálogo) em `infra/compose.e2e.yml`,
   determinístico, com cenários de sucesso, lentidão, falha e resposta
-  inválida; job de CI roda o fluxo completo do diálogo em desktop e mobile.
+  inválida; worker real e fluxo completo do diálogo em desktop e mobile
+  incluídos no job E2E do CI.
+- [ ] Confirmar execução remota verde do job após publicar as alterações.
+  A evidência deste registro é local; nenhum resultado de CI foi presumido.
 
 Aceite: E2E do diálogo verde no CI; o gateway simulado nunca é alcançável
 fora da rede da stack E2E.
+
+### Registro de execução — INFRA-47 em 29/10/2026
+
+`infra/e2e-gateway` contém um servidor Python sem dependências adicionais,
+com respostas fixas de STT e diálogo. Cada modalidade pode responder com
+sucesso, atraso de três segundos, HTTP 503 ou JSON incompatível. O controle
+dos cenários ocorre por `docker compose exec`; não há porta do gateway
+publicada no host nem proxy no frontend. O container roda sem root, sem
+mounts, com filesystem somente leitura e apenas na rede `gateway`, marcada
+como interna. API e worker acessam essa rede além da rede do banco; o web
+não participa dela. As métricas de teste guardam somente chave idempotente,
+quantidade de bytes e tipo de conteúdo, sem áudio ou texto enviado.
+
+As guardas de E2E passaram a verificar worker, gateway, rede interna e URLs
+exatas `http://gateway:8080/stt` e `/dialogue`, recusando URLs externas,
+tokens e provedores alternativos. As flags de assistência e conversa são
+habilitadas **somente na stack descartável**; configurações de dev/produção
+e os gates SEC-46/IA-48 não foram liberados por esta entrega. O STT do
+diálogo fica disponível; shadowing continua sujeito à flag de snapshots
+editoriais, ainda desligada nessa stack. Escrita assistida continua desativada.
+
+`sprint47-dialogue.spec.ts` acrescenta sete cenários em cada projeto Chromium
+desktop/mobile: fluxo completo, lentidão separada em STT e diálogo, falha
+e resposta inválida de cada modalidade. Usa a entrada sintética de áudio
+do Chromium e o `MediaRecorder` nativo, observando seu evento de início;
+nenhuma resposta HTTP da aplicação é substituída. O service worker fica
+bloqueado nesse arquivo, pois PWA tem suíte própria. O fluxo verifica
+consentimento, upload validado, job real, polling, confiança por palavra,
+critérios históricos, custo sintético de 7 + 3 + 7 = 17 microunidades de USD,
+avaliação humana, exportação e exclusão. Reenviar a mesma posição mantém o
+job e não aumenta chamadas ao gateway ou consumo. Falha de diálogo usa o
+roteiro; falha de STT encerra a espera e permite o próximo turno por texto.
+
+**Correções encontradas pelo fluxo integrado:** após áudio, o foco agora
+aguarda o textarea ser reabilitado pela remoção da gravação local. A
+exportação pessoal deixou de pressupor cue em toda gravação: áudios de
+diálogo usam a aula associada ao turno; se a conversa já foi excluída, o
+áudio continua exportável com referências editoriais nulas até a retenção.
+O campo `origin` identifica a procedência da gravação. Testes do componente
+e de contrato cobrem as duas regressões, incluindo exportação após excluir
+a conversa.
+
+**Validações auxiliares:** 64 testes das guardas, 181 testes operacionais,
+454 testes frontend e 12 testes backend de contrato/exportação passaram.
+ESLint, TypeScript (inclusive os novos arquivos E2E), contrato OpenAPI,
+ruff e mypy strict limpos. Build dentro dos limites: inicial 128,1/132 KiB,
+base 183,2/184 KiB, conversa lazy 6,9/8 KiB, conjunto 190,1/192 KiB.
+
+**E2E integrado local:** os 14 novos casos de conversa passaram (sete em
+desktop e sete em mobile), com revisão das capturas nas duas dimensões.
+A execução completa terminou em 9,7 minutos com 154 casos aprovados,
+dois ignorados pela configuração e duas falhas no teste legado de
+consentimento: a expectativa havia sido alterada para STT habilitado,
+embora shadowing ainda dependa dos snapshots editoriais. Restaurada a
+expectativa original, ambos passaram em reexecução isolada (3,8 segundos).
+Assim, os 156 casos executáveis foram verificados entre a execução completa
+e essa reexecução; não se trata de uma única execução integral verde.
+Os casos de navegação/acessibilidade em Firefox e WebKit também passaram;
+o baseline duplicado desses projetos permanece ignorado pela configuração.
+A stack descartável foi encerrada com `make e2e-down`, preservando volumes.
+
+O job existente do CI já inclui os cenários pelo diretório `e2e/testes` e
+agora coleta também logs de worker/gateway quando falha. Reprodução:
+`make e2e-up`; `cd e2e && npm test -- testes/sprint47-dialogue.spec.ts`;
+`make e2e-down` na raiz. Para a regressão completa, `make test-e2e`.
 
 ---
 
 ## Ciclo 48 — Piloto controlado e gate humano
 
+### Registro de preparação — gate de conversa em 29/10/2026
+
+O CLI aceita `--modality conversation` e usa `dialogue_assist_configured`,
+sem herdar a configuração da escrita. O manifesto exemplo identifica a
+modalidade explicitamente, mas continua com aprovações falsas e dados
+desconhecidos como `null`. Conversa exige `modality=conversation`; manifestos
+antigos sem esse campo continuam válidos apenas para escrita/transcrição.
+Uma modalidade declarada diferente da solicitada bloqueia qualquer gate.
+
+A coleta usa somente agregados SQL dos turnos do aluno no modo Guiado e do
+provedor identificado no manifesto. Roteiro, Livre, turnos de parceiro e
+outros provedores ficam fora. Turno concluído com fallback ou erro conta
+como falha técnica, assim como estado `failed`; pendentes não entram no
+denominador dos resultados terminais. As 30 avaliações e as cinco aulas
+distintas são contadas apenas sobre respostas concluídas sem fallback/erro.
+O limiar de utilidade é >= 80% e o de falha técnica é < 5%, comparados sem
+arredondamento; as taxas arredondadas são apenas para exibição.
+
+O custo do turno já reúne STT e diálogo, portanto não é somado novamente ao
+do job. Qualquer turno terminal sem confirmação de custo na reserva bloqueia
+o gate (`cost_known`), inclusive quando o job/reserva já não existe. Corrigido
+o worker para registrar também custo **zero confirmado** em turnos por texto.
+O gate antigo de transcrição agora filtra `kind=transcription`, para não
+misturar os jobs de conversa com as avaliações de STT.
+
+O relatório não contém texto, áudio, e-mail ou identidade do aluno. A amostra
+corresponde aos registros ainda existentes no banco, sem recorte por conta
+ou período; não substitui o painel de faturamento nem recupera conversas
+excluídas. O piloto continua restrito operacionalmente à conta autorizada.
+Nenhuma flag é alterada, nenhuma chamada ao provedor é feita pelo gate e
+nenhuma aprovação humana foi presumida. Revisão assinada SEC-46, manifesto
+real preenchido, piloto e decisão IA-48 permanecem pendentes.
+
+Reprodução: preencher o manifesto local ignorado e executar
+`make assist-gate modality=conversation review=../config/assist-provider-review.json`.
+O comando retorna 0 para aprovação, 1 para critérios não atendidos e 2 para
+manifesto/argumento inválido; os testes usam apenas o banco descartável.
+
+Validação local: **126 testes direcionados passaram**, em duas execuções de
+63 casos: gate/CLI/contrato/retenção (4,66 s) e assistência/serviço/rotas/
+aprendizagem/cota (12,73 s). Incluem coleta real no PostgreSQL descartável,
+recusa de manifesto incompatível, custo desconhecido, limites exatos de
+80% e 5%, cinco aulas, exclusão de Roteiro/Livre/outros provedores, ausência
+de conteúdo pessoal no relatório e custo zero confirmado pelo worker.
+Ruff e formatação limpos; mypy strict passou nos 106 arquivos de `app`.
+Não houve execução remota do CI, deploy ou homologação com provedor real.
+
 ### IA-48 Piloto em conta única e decisão
 
+- [x] Suporte local de `conversation` no gate, coleta agregada, manifesto por
+  modalidade e critérios de cinco aulas/custo confirmado, sem ativar produção.
 - [ ] Ativação do modo Guiado **só na conta de Jeferson**, em produção, com
   cota reduzida e orçamento definido no manifesto.
 - [ ] No mínimo 30 turnos avaliados por pessoa ao longo de pelo menos cinco
-  aulas diferentes; `python -m app.cli assist-gate modality=conversation`
+  aulas diferentes; `make assist-gate modality=conversation`
   com os mesmos limiares das outras modalidades: 80% úteis, falha técnica
   abaixo de 5%, custo no orçamento, retenção do provedor compatível.
 - [ ] Revisão pedagógica humana dos prompts e de dez diálogos reais: o
@@ -980,17 +1368,142 @@ fora da rede da stack E2E.
 
 ### SEC-48 Revisão de logs e incidente de provedor
 
+- [x] Runbook de contenção, evidências, comunicação e rotação, com ensaio
+  HTTP local em texto/áudio e inspeção dos logs capturados da API/worker.
 - [ ] Amostragem dos logs da API e do worker em produção: zero ocorrências
   de texto de turno; runbook de incidente para vazamento ou indisponibilidade
   do provedor (revogar token, desligar flag, comunicar); procedimento de
   rotação do token do provedor ensaiado uma vez.
 
+### Registro de preparação — incidentes SEC-48 em 29/10/2026
+
+`docs/modelo_ameacas_assistente_2026-10-26.md` ganhou procedimento operacional
+para revogação, pausa da assistência, preservação de fila/histórico, coleta
+restrita de evidências, comunicação e retomada após decisão humana. Registra
+que `ASSIST_PROVIDER_TOKEN` é compartilhado pelas três modalidades e que
+configuração é cacheada por processo: alterar o painel sem recriar API e
+worker não aplica a pausa ou a chave nova. Também diferencia requisição já
+transmitida de job ainda não despachado e orienta não reabrir turnos terminais.
+
+`tests/test_provider_incident.py` usa gateway HTTP em loopback, banco
+descartável, tokens e áudio sintéticos. Nos caminhos texto/áudio, executa
+sucesso, revogação com 401, pausa sem reivindicar o job pendente, Roteiro sem
+rede, rotação e retomada uma vez, além de indisponibilidade 503 com chave
+válida. O worker usa seu transporte HTTP real; somente o provedor é simulado.
+Os logs formatados da API e do worker são conferidos contra marcadores de
+token, texto do aluno/parceiro, autorização e corpo sensível de erro.
+
+O comando existente `make test-failure-rehearsal` inclui esses dois caminhos:
+**7 testes passaram em 5,03 s**, incluindo os ensaios anteriores de falha de
+banco, fallback, backoff e retomada de worker. Os sete testes existentes de
+logging também passaram durante a validação inicial. Nenhum código de
+produção precisou ser alterado nesta preparação. A fixture inicial de STT
+foi corrigida para incluir metadados por palavra exigidos pelo contrato.
+
+Isso prova o comportamento local com configuração simulada no processo do
+teste. Não prova recriação de containers no EasyPanel, revogação de token
+real, ausência de conteúdo em logs de produção ou entrega de comunicação.
+Esses recibos, a revisão assinada SEC-46 e a liberação IA-48 seguem pendentes;
+nenhuma credencial real ou flag de produção foi alterada e nenhum aviso foi
+enviado. O bloqueio histórico do gate no modelo de ameaças foi atualizado
+para refletir a implementação local de `conversation`, sem presumir revisão.
+
 ### INFRA-48 Custo e backup com as tabelas novas
 
+- [x] Preparação local: agregados de custo diário/mensal no endpoint privado
+  e no relatório operacional; alerta em 80% do orçamento explicitamente definido.
 - [ ] Painel de custo diário/mensal do assistente a partir das métricas
-  agregadas; alerta em 80% do orçamento.
+  agregadas; alerta em 80% do orçamento. Código local pronto; falta configurar
+  os dois orçamentos aprovados no cron/variables e comprovar o alerta no ambiente real.
 - [ ] Backup público restaurado em laboratório com as tabelas novas e lido
   pela aplicação; recibo registrado.
+- [x] Ensaio sintético separado das tabelas de conversa: backup/restore real,
+  leitura pela aplicação e recibo local, sem acessar a produção.
+
+### Registro de preparação — recuperação INFRA-48 em 29/10/2026
+
+O laboratório `aulas-ingles-recovery48` usa quatro volumes próprios, rede
+interna, nenhuma porta publicada e papéis PostgreSQL limitados com os
+marcadores existentes. Não reutiliza nem remove volumes dos ensaios antigos.
+`ops/dialogue_recovery.py` admite somente esse projeto e recusa origem ou
+destino já preenchidos. O destino foi registrado separadamente dos destinos
+legados para preservar suas regras de isolamento.
+
+A fixture acrescenta à base sintética uma conversa concluída, dois turnos
+(texto e áudio), critérios históricos, avaliações útil/não útil, duas reservas
+consumidas com custo confirmado e seus jobs. O custo sintético é 17 microusd.
+Há dois arquivos WAV de silêncio: um do exercício oral e um da conversa.
+Nenhum modelo ou provedor externo participa.
+
+O ensaio executou `pg_dump`, pacote com banco/voz, restauração transacional
+em destino vazio e conferência dos arquivos. Além do snapshot comum, comparou
+contagem e digest de todas as colunas de `speaking_dialogue`, `dialogue_turn`,
+`assist_reservation` e `transcription_job`. A aplicação corrente leu histórico
+e exportação pessoal, verificando critérios, avaliações, texto, custo e bytes
+dos áudios com filesystem/voz somente leitura e transações de leitura.
+Os digests da origem e do destino permaneceram iguais após a leitura.
+
+Recibo privado de restauração:
+`backups/recovery/restore-receipts/aulas-20261029T041512200702Z-b7901f1433ee49f0b973eede4e734d4e.json`.
+Prova complementar da leitura da conversa no mesmo diretório:
+`aulas-20261029T041512200702Z-b7901f1433ee49f0b973eede4e734d4e-conversation.json`.
+Uma segunda tentativa de restore foi recusada por destino não vazio; os
+digests foram conferidos novamente sem alteração. Os containers novos foram
+encerrados, preservando volumes, pacote e recibos.
+
+Reprodução em laboratório ainda vazio, na raiz do projeto:
+
+```sh
+uv run --project backend python -m ops.dialogue_recovery up
+uv run --project backend python -m ops.dialogue_recovery prepare
+uv run --project backend python -m ops.dialogue_recovery check
+uv run --project backend python -m ops.dialogue_recovery down
+```
+
+O comando `down` não apaga volumes; repetir `prepare` ou `check` sobre dados
+existentes recusa sobrescrita. Em falha, preservar os parciais para diagnóstico.
+O job `recovery` do CI passou a executar esse fluxo, com encerramento em
+`always()`, sem publicar dumps, áudios ou manifestos como artifacts.
+
+Validação: **193 testes operacionais passaram**; Ruff limpo em `ops` com a
+configuração do backend; Actionlint 1.7.7 aprovou o workflow. As guardas de
+identidade, papel, mounts e portas foram exercitadas também nos dois bancos
+novos. O restore sintético e a leitura da aplicação passaram localmente.
+O CI remoto não foi executado nesta entrega. O item de backup **público**
+permanece pendente: este recibo é sintético e não atesta uma cópia da produção.
+
+### Registro de preparação — custos operacionais INFRA-48 em 29/10/2026
+
+`/api/operations/metrics` ganhou `assist_costs.daily` e `monthly`: janelas
+UTC de calendário, contagem de reservas consumidas, custo acumulado e custos
+desconhecidos. A fonte é `assist_reservation`, não turnos descartáveis. As
+três modalidades entram uma vez por reserva; apagar conversa/job não apaga
+o custo. Reservas liberadas ou apenas reservadas ficam fora. O recorte usa
+`dispatched_at`, com `created_at` como fallback legado, até o instante da
+amostra. Não depende do fuso da conexão nem soma custo do job ao do turno.
+
+O monitor lê `OPERATIONS_ASSIST_DAILY_BUDGET_MICROUSD` e
+`OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD`. Sem orçamento, avisa; em 80%,
+avisa; em 100%, marca crítico. Custo desconhecido ou métricas ausentes não
+passam como zero confirmado. O cron e o workflow recebem saída 1 para os
+dois níveis de alerta. O workflow agora publica o resumo antes de propagar
+essa saída, para não perder o relatório ao falhar. As variáveis não foram
+configuradas remotamente e nenhum alerta foi enviado durante os testes.
+
+OpenAPI e tipos frontend atualizados. Validação local: **29 testes backend**
+(operação, cota e gate de conversa) e **186 testes operacionais** passaram.
+As provas cobrem dia/mês UTC sob conexão `Pacific/Kiritimati`, ano bissexto,
+virada de ano, instante de despacho, valores futuros, custo parcial/zero,
+limiares exatos 80%/100%, configuração inválida antes da rede e saída do CLI.
+Mypy strict passou em 106 arquivos; Ruff passou nos arquivos alterados com
+a configuração do backend; contrato TypeScript sincronizado e compilação
+TypeScript limpa. Actionlint 1.7.7 aprovou o workflow operacional.
+
+Limite explícito: exclusão de conta remove o ledger daquela conta. O relatório
+é uma visão do ledger ainda existente, não substitui a fatura do provedor.
+Nenhuma flag de assistência foi habilitada. Configuração e comprovação em
+produção, revisão humana e restauração do backup continuam pendentes.
+Operação documentada em `docs/deploy_easypanel.md`, na vigilância agendada.
 
 ---
 
@@ -1019,14 +1532,407 @@ continua verde após a poda; `make help` lista menos de 50 alvos.
 
 ### BE-49 Qualidade da suíte e de `ops/`
 
-- [ ] Marcador `timezone` nos testes que tocam data; o passo
+- [x] Marcador `timezone` nos testes que tocam data; o passo
   `TZ=Pacific/Kiritimati` roda só esse subconjunto.
-- [ ] `test_concurrency.py`: trocar igualdade exata de ticks e latência de
+- [x] `test_concurrency.py`: trocar igualdade exata de ticks e latência de
   parede por asserções de invariante.
-- [ ] `ops/` sob `mypy --strict`; testes para `recovery_archive.py` e para
-  os módulos de smoke sem cobertura.
-- [ ] Separar `/api/health` público (sem versão do Postgres e revisões) do
+- [x] `ops/` sob `mypy --strict`, incluindo novos scripts automaticamente.
+- [x] Testes para `recovery_archive.py`.
+- [x] Testes para os cinco módulos de smoke restantes; resultados no registro
+  de fechamento dos smokes abaixo.
+- [x] Separar `/api/health` público (sem versão do Postgres e revisões) do
   readiness interno.
+
+#### Registro de execução — saúde pública e readiness BE-49 em 29/10/2026
+
+Implementação local: `/api/health` conserva a verificação de conexão e igualdade
+das revisões, retornando apenas `status`, `db`, `schema` e `code`. Banco fora do
+ar ou schema incompatível continuam em 503. `/api/operations/readiness` fornece
+versão do Postgres, ambiente e revisões somente com `OPERATIONS_TOKEN`; retorna
+404 sem configuração ou 401 para credencial ausente/incorreta, sem consultar o
+banco nesses casos. As respostas da API continuam privadas e sem cache.
+
+Gate operacional atualizado para a rota autenticada; smoke de deploy exige
+`status=ok`, `db=up` e `schema=compatible`; probe externo reprova os quatro
+campos internos no health público sem copiar seus valores ao relatório. A
+guarda E2E valida o contrato público e conserva a comprovação de ambiente de
+teste por containers, rede, volumes e marcador/papel do banco. OpenAPI e tipos
+TypeScript regenerados juntos. Runbook em `docs/deploy_easypanel.md` atualizado.
+
+Validação local: 17 testes de health/operações, 194 testes de `ops/` e 65 testes
+da guarda E2E aprovados; Ruff, mypy do backend, contrato OpenAPI/TypeScript,
+compilação TypeScript e ShellCheck 0.11.0 do deploy limpos. `make e2e-up`
+reconstruiu as imagens e aprovou a guarda com todos os serviços saudáveis;
+HTTP real pelo nginx em `127.0.0.1:5198` confirmou health 200 com apenas quatro
+campos e `private, no-store`, e readiness 404 sem token configurado. Stack
+encerrada com `make e2e-down`, preservando volumes sintéticos. A suíte completa
+de navegador não foi repetida. O build web concluiu com aviso de dependência
+circular entre os chunks `lesson-study` e `writing`.
+
+CI remoto e implantação não executados; publicar API e monitor operacional
+juntos para que a nova rota exista no destino.
+Naquele ponto, os demais itens do BE-49 e o aceite completo do ciclo continuavam pendentes.
+
+#### Registro de execução — fusos e concorrência BE-49 em 29/10/2026
+
+Marcador `timezone` registrado no pytest e aplicado explicitamente aos cenários
+de calendário, validade de sessão/token, cotas, custos diários/mensais, retenção,
+revisão, áudio, curso e histórico com datas. Módulos dedicados a regras temporais
+usam marcação de módulo; os demais marcam funções individuais. A coleção local
+seleciona **136 de 1.376 casos**, deixando 1.240 fora da repetição em outro fuso.
+Não há inferência dinâmica de marcadores no `conftest`. O CI mantém a suíte
+completa com cobertura e troca somente a segunda execução por
+`TZ=Pacific/Kiritimati uv run pytest -q --strict-markers -m timezone`.
+
+Os testes de concorrência abandonaram pausas artificiais, igualdade de ticks e
+o teto de um segundo de latência. Eventos coordenam trabalho de hash em threads
+e liberação pelo event loop: os limites 1, 2 e 4 são respeitados, as seis tarefas
+terminam e nenhum trabalho fica ativo ao final. O teste HTTP comprova que
+`/api/live` responde enquanto há verificações de senha pendentes; depois da
+liberação, os oito logins verificam Argon2 real e retornam 200. Timeouts de cinco
+segundos protegem contra deadlock no teste, sem representar SLA de produção.
+O antigo diagnóstico `SPRINT38_LOAD` de RSS/latência foi removido desse teste.
+
+Validação local: **136 testes aprovados em UTC (17,33 s)** e os mesmos **136 em
+Pacific/Kiritimati (17,10 s)**; **22 testes de concorrência aprovados**, tanto
+na janela normal quanto com `LEGACY_WRITES_UNTIL=2000-01-01T00:00:00Z`
+(4,92 s e 3,51 s, respectivamente). Ruff da suíte, mypy dos 106 arquivos da
+aplicação e Actionlint 1.7.7 passaram. README
+documenta os comandos e o critério para marcar testes novos. Nenhum código de
+produção foi alterado neste incremento; CI remoto e deploy não executados.
+Permanece aberto no BE-49 o pacote de tipagem estrita e cobertura de `ops/`.
+
+#### Registro de preparação — tipagem e testes operacionais BE-49 em 29/10/2026
+
+Primeira etapa, sem marcar o item global como concluído. A varredura
+`MYPYPATH=backend uv run --project backend mypy --strict --exclude 'ops/tests/' ops`
+reportava 1.060 erros em 29 arquivos, examinando 39 módulos. Após este incremento,
+reporta **755 erros em 24 arquivos**. Esses números incluem chamadas a funções
+sem anotação; não representam contagem de defeitos de execução independentes.
+
+`mypy-ops.ini` passa em **14 módulos**, com `strict = True`, importação dos tipos
+reais do backend e nenhuma supressão global de erros. A lista contempla formato
+e transferência de backup, probes público/operacional/rollback, EasyPanel,
+inventário de cues, spike de diálogo, benchmarks já tipados e leitura pós-upgrade.
+O comando entrou em `make lint` e no job `recovery` antes dos ensaios Docker.
+Os módulos restantes continuam visíveis no levantamento completo; a lista deve
+crescer nas próximas etapas. Os testes de `ops/` ficam fora do escopo de tipagem,
+mas seguem no Ruff e na execução integral da suíte.
+
+`recovery_archive.py` ganhou contratos de entrada/saída, `FileInfo` tipado,
+validação explícita de formato do manifesto/snapshot e recusa de entrada de tar
+sem conteúdo regular. A transferência de voz preserva a execução isolada com
+apenas os dois arquivos montados no helper. O probe de rollback agora trata
+health JSON que não seja objeto como falha controlada, com retry e saída 2 no
+prazo limite, em vez de escapar com `AttributeError`. O cálculo de orçamento
+explicita a validação de inteiro antes da comparação; seus limites permanecem
+os mesmos. O benchmark de escrita restringe o tipo dos parâmetros HTTP.
+
+**223 testes operacionais aprovados** (194 anteriores + 29 novos). Testes novos
+cobrem manifesto malformado, tar truncado, limites de inventário, referência
+duplicada, symlink, fsync interrompido sem publicação, recibo sem sobrescrita,
+helper standalone, timeouts/limites HTTP, ausência de credencial, erros sem
+vazamento e recusas do smoke de restauração (fixture inesperada, origem errada,
+áudio ausente, recusa incorreta de destino ocupado e alteração dos snapshots).
+Rede, Docker e bancos não foram acionados por esses testes.
+
+Cobertura de linhas medida localmente nos módulos trabalhados: formato de
+backup **99%**, probe público **99%**, gate operacional **98%**, probe de rollback
+**96%**, smoke de recuperação **84%** e transferência de voz **88%**. Os testes
+do helper em subprocesso não entram na medição do processo principal. Estes
+percentuais não são a cobertura de todo `ops/` nem um piso novo do CI.
+Ruff de `ops/`, mypy dos 14 módulos, Actionlint 1.7.7 e `git diff --check` passaram.
+CI remoto, restore integrado e deploy não executados neste incremento.
+
+#### Registro de execução — núcleo de recuperação BE-49 em 29/10/2026
+
+Segunda etapa da tipagem operacional: `mypy-ops.ini` passou de **14 para 22
+módulos**. Entraram `recovery`, `recovery_prune`, `recovery_smoke`,
+`recovery_fixture`, `dialogue_recovery`, `dialogue_recovery_data`,
+`upgrade_smoke` e `rollback_image`. Os comandos de subprocesso têm argumentos,
+streams binários e retornos definidos; alvos, planos de poda, seleção de
+retenção, contextos de lock e fixtures têm contratos explícitos. O JSON
+heterogêneo de Docker/psql continua como fronteira dinâmica; não há supressão
+global de erros nem desativação da análise dos módulos importados.
+
+Guardas acrescentadas recusam inspeção Docker que não seja objeto, inventário
+de voz inválido antes de acessar o destino, fingerprints de tabelas com formato
+incorreto e resposta de leitura da aplicação que não seja objeto. A fixture
+confirma chave e hash presentes antes de ler o áudio.
+
+A revisão encontrou uma divergência entre as listas de destinos: `restore`
+aceitava `DIALOGUE_RESTORE`, mas `voice(..., "import")` não consultava
+`DIALOGUE_DESTINATIONS`. A guarda agora inclui esse registro explícito.
+Testes comprovam importação somente para destinos cadastrados, mantendo
+recusa para as três origens sintéticas e para variantes com outro volume ou
+projeto de produção. O helper conserva rede `none`, raiz somente leitura e
+mount gravável limitado ao volume do destino. Política de retenção, nomes dos
+alvos e comandos de preparação permanecem os mesmos.
+
+**228 testes operacionais aprovados** (223 anteriores + 5 novos), Ruff de
+`ops/`, mypy estrito dos **22 módulos** e `git diff --check` limpos. O comando
+completo de diagnóstico, excluindo `ops/tests/`, caiu de **755 erros em 24
+arquivos para 410 em 16 arquivos**, examinando os mesmos 39 módulos. O item
+global de tipagem de `ops/` continua aberto; os maiores grupos restantes estão
+em `roles_smoke`, `public_backup` e `assist_alignment`.
+
+Os testes usaram arquivos temporários e comandos simulados; nenhum backup,
+restore ou poda real foi executado. Laboratórios e evidências existentes foram
+preservados. A checagem ampliada usa o comando já presente no CI e em `make lint`;
+CI remoto e deploy não foram executados neste incremento.
+
+#### Registro de execução — backup público BE-49 em 29/10/2026
+
+Terceira etapa: `public_backup.py` entrou em `mypy-ops.ini`, elevando a checagem
+estrita para **23 módulos**. Contratos explícitos para streams de SSH, opções
+repassadas ao processo, inventário dos containers, snapshot, arquivo cifrado,
+cópia e relatório de pré-voo. Snapshots exigem revisões não vazias, contagens
+inteiras não negativas e lista de referências; extensões são preservadas na
+comparação antes/depois para não esconder alterações durante a captura. Recibos
+recusam metadados inválidos antes de criar seu diretório.
+
+O ensaio local com `age` real encontrou arquivos AppleDouble (`._*`) acrescentados
+pelo BSD tar no macOS. Eles invalidavam o pacote depois de decifrar/extrair.
+O subprocesso de tar agora recebe `COPYFILE_DISABLE=1`; teste com tar real
+confere que somente os arquivos do pacote são emitidos. A criação do cifrado
+é exclusiva e antecede o subprocesso; a limpeza de falha só remove saída criada
+pela própria chamada. Um arquivo criado concorrentemente permanece intacto.
+
+A cópia externa também usa criação exclusiva, permissão 600, flush/fsync e
+comparação de hash/tamanho antes e depois. Recusa origem que seja symlink antes
+de escrever no destino e preserva arquivos concorrentes. Erro de cópia preserva
+o destino parcial e não anuncia sucesso. Não houve cópia para serviço externo:
+os testes usaram somente pastas temporárias locais.
+
+**242 testes operacionais aprovados** (228 anteriores + 14 novos), Ruff de
+`ops/`, mypy dos **23 módulos** e `git diff --check` limpos. Os testes cobrem
+snapshot malformado, drift em campos adicionais, recibos, CLI, falha de tar/age,
+timeout, criação concorrente, checksum da cópia e empacotamento real. A medição
+local de cobertura de `public_backup.py` ficou em **88%**; não é um piso novo
+nem a cobertura de todo `ops/`.
+
+Prova adicional com ferramentas reais locais: chave age sintética temporária,
+criação do pacote, criptografia, cópia local cifrada com hash idêntico e modo
+600, decifragem e extração sob filtro `data`; os três artefatos permaneceram
+idênticos e `verify_bundle` aprovou o pacote extraído. Chave e temporários foram
+removidos ao final. Não houve SSH, leitura da VM, backup de dados reais, restore
+de banco, mudança de destinatário operacional ou deploy.
+
+A varredura completa dos mesmos 39 módulos, excluindo `ops/tests/`, passou de
+**410 erros em 16 arquivos para 342 em 15 arquivos**. O item global permanece
+aberto, com `roles_smoke` e `assist_alignment` entre os maiores grupos restantes.
+CI remoto não executado; o comando já configurado no CI passa a incluir o módulo.
+
+#### Registro de execução — papéis de banco BE-49 em 29/10/2026
+
+Quarta etapa: `roles.py`, `roles_smoke.py`, `roles_app_smoke.py`,
+`roles_archive_smoke.py`, `roles_assist_smoke.py`, `roles_dialogue_smoke.py` e
+`roles_reorder_smoke.py` entraram em `mypy-ops.ini`, totalizando **30 módulos**.
+Contratos explícitos para alvo, SQL por stdin, credenciais, inventário de papéis,
+retornos dos ensaios assíncronos e grafo editorial. O `Any` do alvo fica limitado
+ao resultado heterogêneo de Docker inspect; banco e administrador são strings.
+
+Credenciais exigem objeto com os quatro papéis de login previstos e senhas
+válidas, sem reproduzir valores na recusa. Escopos e papéis inválidos são
+recusados antes de consultar recursos ou criar arquivos. Inventário malformado,
+papel desconhecido/duplicado, origem de backup inválida e recibo que não seja
+objeto não permitem avançar no provisionamento. As vinculações existentes do
+recibo a backup, destino e snapshot foram mantidas.
+
+O smoke HTTP agora possui `main()` e pode ser importado sem iniciar servidor ou
+alterar o ambiente. Suas respostas atravessam validação de objeto/lista, token e
+metadados editoriais antes do uso. Guardas do laboratório, loopback, verificações
+de replay e encerramento do servidor em falha permanecem. O smoke de diálogo
+exige transcrição presente antes de resolver o turno. A sonda de recusa SQL exige
+stderr em bytes com SQLSTATE `42501`, sem aceitar falha de conexão como evidência
+de privilégio insuficiente.
+
+**257 testes operacionais aprovados** (242 anteriores + 15 novos), Ruff de
+`ops/`, mypy dos **30 módulos** e `git diff --check` limpos. Testes novos cobrem
+estrutura e privacidade das credenciais, inventário, recibos, SQL por stdin,
+privilégios globais, dump vazio, transporte HTTP, ambiente incorreto, limite de
+tentativas, token inválido e divergência de replay. Cobertura local medida:
+`roles.py` **64%**, `roles_smoke.py` **95%** e `roles_app_smoke.py` **99%**;
+esses números não representam execução integrada nem um piso global de `ops/`.
+
+Todos os comandos de banco, Docker e HTTP foram simulados nesta etapa. Não houve
+provisionamento real, alteração de grants, rotação de senhas, acesso à VM ou
+deploy. Os ensaios integrados com papéis reais não foram reexecutados.
+
+A varredura dos mesmos 39 módulos passou de **342 erros em 15 arquivos para
+196 em 8 arquivos**. Restam `study_rollout`, `concurrency_rollout`,
+`dev_alignment`, `assist_alignment`, `assist_alignment_smoke`, `sprint39_rollout`,
+`bootstrap_editorial_keys` e `dialogue_performance`. O item global continua
+aberto. A lista ampliada será verificada pelo comando já configurado no CI;
+CI remoto não executado neste incremento.
+
+#### Registro de execução — provas de migração BE-49 em 29/10/2026
+
+Quinta etapa: `study_rollout.py`, `concurrency_rollout.py` e `dev_alignment.py`
+entraram em `mypy-ops.ini`, elevando a lista estrita para **33 módulos**.
+Alvos, comandos, manifests, recibos e fingerprints possuem contratos explícitos;
+os fingerprints mantêm contagem inteira e SHA-256 de cada tabela histórica.
+
+Inventários de tabelas malformados/duplicados e resultados que não sejam listas
+de registros são recusados antes de gerar a prova. Provas carregadas exigem
+nomes válidos, hashes de 64 caracteres hexadecimais e contagens não negativas;
+campos inesperados não são descartados silenciosamente. Os hashes continuam
+independentes da ordem das linhas, detectando alterações e duplicação de dados.
+
+A auditoria valida todas as contagens antes de imprimir seu relatório. Valores
+textuais, booleanos, nulos, fracionários ou negativos não aparecem como resultado
+válido nem vazam conteúdo pela saída. A prova esperada deve conter exatamente
+as regras atuais com contagens válidas; `audit: null` não desliga a comparação
+nos fluxos de desenvolvimento/concorrência. A opção de preservar divergências
+legadas exige o mesmo booleano capturado. Nenhum reparo de dados foi adicionado.
+
+Leitura de prova privada exige objeto JSON, arquivo privado e ausência de links;
+erros de leitura/decodificação recebem mensagem operacional sem conteúdo bruto.
+A identificação da imagem exige um único resultado com ID não vazio. Ações
+inválidas do rollout de estudo são recusadas antes de consultar o backup.
+
+**274 testes operacionais aprovados** (257 anteriores + 17 novos), Ruff de
+`ops/`, mypy dos **33 módulos** e `git diff --check` limpos. Os testes novos
+cobrem estruturas inválidas, privacidade da auditoria, hashes/contagens,
+identidade da imagem e fluxo completo de captura → ensaio → aplicação com
+recibos em diretório temporário. O fluxo verifica vínculos de backup, imagem,
+clone e revisão, permissão 600, ausência de ensaio, alteração da origem e
+divergência histórica após a migration; falhas não publicam recibo de sucesso.
+
+Cobertura local medida: `study_rollout.py` **59%**, `concurrency_rollout.py`
+**54%** e `dev_alignment.py` **84%**. Permanecem caminhos sem cobertura; esses
+valores não são cobertura global nem evidência de ensaio integrado.
+Banco, voz, Docker e migrations foram simulados. Nenhum ambiente real foi
+migrado, restaurado, parado ou reaberto; nenhum deploy foi executado.
+
+A varredura completa dos mesmos 39 módulos caiu de **196 erros em 8 arquivos
+para 94 em 5 arquivos**. Restam `assist_alignment`, `assist_alignment_smoke`,
+`sprint39_rollout`, `bootstrap_editorial_keys` e `dialogue_performance`.
+O item global de tipagem e cobertura continua aberto. O comando existente de
+CI/`make lint` inclui os três módulos; CI remoto não executado neste incremento.
+
+#### Registro de execução — alinhamento do assistente BE-49 em 29/10/2026
+
+Sexta etapa: `assist_alignment.py` e `sprint39_rollout.py` entraram em
+`mypy-ops.ini`, totalizando **35 módulos**. Contratos explícitos de alvo,
+configuração, comandos, manifests, fingerprints e recibos; ambos os alinhamentos
+validam as provas históricas carregadas antes de prosseguir. O rollout 39 também
+valida a auditoria esperada antes da migration. Contagens de backfill, baseline
+de integridade e reservas legadas exigem inteiros não negativos.
+
+Foi corrigida uma referência antiga em `sprint39_rollout.configuration`: a
+guarda de credenciais exigia `backups/roles-prod.json`, enquanto a leitura já
+usava `secrets/roles-prod.json`. Agora a guarda verifica o diretório privado
+correto. Arquivo ausente continua bloqueando a operação antes de chamar a rotina
+que poderia gerar credenciais; um arquivo legado em `backups/` não satisfaz a
+guarda. Prova com credenciais sintéticas em diretório temporário, sem leitura ou
+alteração das credenciais operacionais existentes.
+
+A validação do relatório HTTP é compartilhada pelos dois alinhamentos: exige
+exatamente o modo clone, 11 verificações, nenhuma conta sintética restante e
+nenhuma chamada ao provedor. Além dos valores, valida os tipos: `verified: 1`,
+`provider_calls: false` e `checks: 11.0` não são aceitos por igualdade implícita
+de Python. Recibos continuam vinculados aos scripts, imagem, backup e destino.
+
+**283 testes operacionais aprovados** (274 anteriores + 9 novos), Ruff de
+`ops/`, mypy dos **35 módulos** e `git diff --check` limpos. Testes novos cobrem
+o caminho de credenciais e sua ausência, escopo inválido, env-file temporário
+600 sem segredo em argv, sucesso dos dois smokes, retry limitado de readiness,
+falha após 20 tentativas, relatório inválido e divergência histórica após HTTP.
+Os smokes simulados encerram/removem somente o container que criaram, e falhas
+não publicam recibo de sucesso. O teste existente de aplicação recebeu fixtures
+com inventário de áudio e hashes completos para continuar exercitando as guardas
+de ensaio/preservação, em vez de falhar antes por fixture incompleta.
+
+Cobertura local medida: `assist_alignment.py` **77%** e `sprint39_rollout.py`
+**50%**. Ainda há caminhos sem cobertura; esses valores não representam ensaio
+integrado ou cobertura global. Docker, banco, migration e HTTP foram simulados;
+nenhum container real foi iniciado, nenhuma senha foi rotacionada e nenhum
+deploy foi executado.
+
+A varredura dos mesmos 39 módulos caiu de **94 erros em 5 arquivos para
+28 em 3 arquivos**: `assist_alignment_smoke.py` (14),
+`bootstrap_editorial_keys.py` (6) e `dialogue_performance.py` (8).
+O item global de tipagem e cobertura permanece aberto. O comando já configurado
+no CI/`make lint` passa a incluir os dois módulos; CI remoto não executado.
+
+#### Registro de execução — tipagem completa de `ops/` BE-49 em 29/10/2026
+
+Sétima etapa: os últimos **28 erros em 3 arquivos foram eliminados**.
+`assist_alignment_smoke.py`, `bootstrap_editorial_keys.py` e
+`dialogue_performance.py` passaram na checagem estrita. `mypy-ops.ini` deixou de
+usar uma lista parcial: agora verifica a pasta `ops/` inteira, excluindo apenas
+`ops/tests/`. Os **39 módulos** incluem `ops/__init__.py`; novos scripts entram
+automaticamente no comando já usado pelo CI e por `make lint`. Não foram usados
+`ignore_errors`, `follow_imports=skip` ou supressões para encerrar a migração.
+
+O smoke HTTP possui contratos de transporte, validação de objetos/listas e
+validação do ID do prompt. O descarte do engine foi movido para `finally`,
+incluindo falhas de conexão, HTTP e limpeza. Testes comprovam as 11 verificações,
+uso do ledger sem provedor, DELETE restrito ao ID + e-mail exatos da conta
+sintética, ausência de recibo de sucesso em falha e descarte do engine.
+
+O bootstrap valida coleções, registros e coordenadas antes de escrever. O cast
+local só ocorre depois de validar o objeto e suas chaves, preservando a mesma
+instância para adicionar a identidade. Testes em arquivos temporários cobrem
+dry-run sem alteração de bytes, aplicação nos seis tipos editoriais, preservação
+do conteúdo, recusa de nova aplicação, coordenada duplicada e estrutura inválida.
+A leitura adicional do seed real detectou posições iniciadas em zero: a validação
+foi ajustada para aceitá-las, com regressão de identidade para exercício e cue.
+Os **2.194 registros** existentes foram percorridos sem escrita e todos mantêm
+suas chaves. O seed real não recebeu bootstrap nem escrita.
+
+O benchmark possui contratos de métricas, datasets e travessias; valida IDs e
+cursores das páginas e compila a consulta de histórico com o dialect da própria
+conexão. Testes puros cobrem paginação, limites de amostras, recusa de ambiente,
+emissão do relatório/código de saída e compilação PostgreSQL/asyncpg sem conectar.
+O benchmark de 1k/10k não foi reexecutado nesta etapa.
+
+**304 testes operacionais aprovados** (283 anteriores + 21 novos), Ruff de
+`ops/` e `git diff --check` limpos. Tanto o comando configurado quanto a varredura
+independente `MYPYPATH=backend uv run --no-sync --project backend mypy --strict
+--exclude 'ops/tests/' ops` passaram com **zero erros nos 39 módulos**.
+Coberturas locais: smoke HTTP **92%**, bootstrap **99%**, benchmark de diálogo
+**39%**; o caminho do benchmark com banco permanece fora dessa execução.
+
+A pendência combinada foi desdobrada para registrar o que está comprovado:
+tipagem completa e testes do arquivo de backup concluídos; cobertura restante
+dos smokes ainda aberta. Nesta suíte, `roles_archive_smoke`, `roles_assist_smoke`,
+`roles_dialogue_smoke`, `roles_reorder_smoke` e `upgrade_smoke` continuam em
+**0%**. Já `recovery_archive` está em **99%**, `recovery_smoke` em **83%**,
+`roles_app_smoke` em **99%** e `roles_smoke` em **95%**. Esses percentuais não
+substituem ensaios integrados nem significam cobertura completa de `ops/`.
+
+Sessões de banco, HTTP e provedores foram simulados; arquivos de escrita eram
+sintéticos e temporários. Nenhuma conta real, banco, stack ou credencial foi
+alterado. CI remoto e deploy não executados neste incremento.
+
+#### Registro de execução — fechamento dos smokes BE-49 em 29/10/2026
+
+Os cinco módulos restantes receberam **34 testes**, elevando a suíte operacional
+para **338 testes aprovados**, com banco, Docker e provedor simulados. Cobertura
+local: `roles_archive_smoke` **98%**, `roles_reorder_smoke` **98%**,
+`roles_assist_smoke` **96%**, `roles_dialogue_smoke` **98%** e `upgrade_smoke`
+**88%**. A execução CLI de upgrade não está inteiramente coberta por essa suíte;
+a cobertura não substitui os ensaios integrados do CI.
+
+Os cenários verificam guardas de ambiente/papel/banco, identidade dos recibos,
+retry idempotente, rollback, invariância das contagens, consumo e custo da cota,
+12 turnos por modalidade, evidências e revisões do worker, isolamento do clone,
+limite de tempo de migration, rollback da aplicação e recusa de recibo em caso
+de divergência de schema, dados, voz, locks ou diretório inseguro.
+
+Os smokes de assistência e diálogo agora podem ser importados sem executar
+serviços. Os editoriais recusam banco fora do laboratório e descartam o engine
+em `finally`; flags e provedor simulado são restaurados. O timeout da migration
+remove com `docker rm -f` somente o contêiner temporário criado pelo ensaio,
+preservando o banco e os volumes para diagnóstico.
+
+Ruff com a configuração do backend e mypy estrito dos **39 módulos operacionais**
+aprovados. Frontend: **454 testes**, lint, tipos, contrato OpenAPI, build,
+orçamento de bundle e **11 testes de scripts** aprovados. A atualização foi
+solicitada para Git/produção; este registro descreve a validação local e não
+constitui confirmação de deploy.
 
 ### FE-49 Lint type-aware, a11y de formulário e CSS por domínio
 

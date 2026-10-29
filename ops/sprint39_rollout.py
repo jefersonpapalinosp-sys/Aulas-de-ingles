@@ -11,6 +11,7 @@ import os
 import sys
 import tempfile
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit
 
@@ -22,7 +23,7 @@ from ops import (
     roles,
     study_rollout,
 )
-from ops.recovery_archive import file_info, require, verify_bundle, write_json
+from ops.recovery_archive import RecoveryError, file_info, require, verify_bundle, write_json
 
 HEAD = "a39d7bc02486"
 BASES = {"dev": "f28c6abe1375", "prod": "d06a4e9cb153"}
@@ -31,7 +32,10 @@ SMOKE = recovery.ROOT / "ops/assist_alignment_smoke.py"
 INTEGRITY_COLUMNS = ["audio_sha256", "integrity_state", "integrity_checked_at"]
 
 
-def fingerprints(target, scope):
+def fingerprints(
+    target: recovery.Target, scope: str
+) -> dict[str, study_rollout.Fingerprint]:
+    require(scope in BASES, "Origem inválida.")
     columns = {"speaking_attempt": INTEGRITY_COLUMNS}
     tables = ["worker_heartbeat"]
     if scope == "prod":
@@ -58,7 +62,8 @@ def fingerprints(target, scope):
     return study_rollout.fingerprints(target, excluded_columns=columns, excluded_tables=tables)
 
 
-def configuration(target, scope, clone=False):
+def configuration(target: recovery.Target, scope: str, clone: bool = False) -> str:
+    require(scope in BASES, "Origem inválida.")
     if clone:
         require(target == CLONES[scope], "Clone inesperado.")
         return (
@@ -73,7 +78,7 @@ def configuration(target, scope, clone=False):
             env.get("DATABASE_PURPOSE") == "runtime",
             "Estudo deve usar runtime limitado.",
         )
-        require((recovery.BACKUPS / "roles-prod.json").is_file(), "Credenciais ausentes.")
+        require((roles.SECRETS / "roles-prod.json").is_file(), "Credenciais ausentes.")
         password = roles.private_credentials("prod")["aulas_migrator"]
         url = (
             f"postgresql+asyncpg://aulas_migrator:{quote(password, safe='')}"
@@ -105,7 +110,7 @@ def configuration(target, scope, clone=False):
     return f"APP_ENV=dev\nDATABASE_URL={url}\nASSISTED_FEATURES_ENABLED=false\n"
 
 
-def migrate(target, scope, image, clone):
+def migrate(target: recovery.Target, scope: str, image: str, clone: bool) -> None:
     with tempfile.NamedTemporaryFile(mode="w", prefix="aulas-39-migrate-") as env:
         env.write(configuration(target, scope, clone))
         env.flush()
@@ -132,7 +137,7 @@ def migrate(target, scope, image, clone):
             )
 
 
-def smoke_clone(target, scope, image):
+def smoke_clone(target: recovery.Target, scope: str, image: str) -> dict[str, object]:
     with tempfile.NamedTemporaryFile(mode="w", prefix="aulas-39-smoke-") as env:
         env.write(configuration(target, scope, True))
         env.flush()
@@ -177,7 +182,7 @@ def smoke_clone(target, scope, image):
                     timeout=5,
                 )
                 break
-            except recovery.RecoveryError:
+            except RecoveryError:
                 if attempt == 19:
                     raise
                 time.sleep(1)
@@ -185,61 +190,48 @@ def smoke_clone(target, scope, image):
             result = json.loads(
                 recovery.docker("exec", "-i", cid, "python", "-", stdin=stream, timeout=90)
             )
-        require(
-            result
-            == {
-                "verified": True,
-                "mode": "http-clone",
-                "checks": 11,
-                "synthetic_user_remaining": 0,
-                "provider_calls": 0,
-            },
-            "Smoke não aprovado.",
-        )
-        return result
+        return assist_alignment.checked_smoke(result)
     finally:
         recovery.docker("stop", cid, timeout=30)
         recovery.docker("rm", cid)
 
 
-def validate_receipt(receipt, binding, clone):
+def validate_receipt(
+    receipt: Mapping[str, object], binding: Mapping[str, object], clone: recovery.Target
+) -> None:
     require(
         all(receipt.get(k) == v for k, v in binding.items())
         and receipt.get("verified") is True
         and receipt.get("revision") == HEAD
-        and receipt.get("target") == f"{clone.project}/{clone.service}"
-        and receipt.get("http")
-        == {
-            "verified": True,
-            "mode": "http-clone",
-            "checks": 11,
-            "synthetic_user_remaining": 0,
-            "provider_calls": 0,
-        },
+        and receipt.get("target") == f"{clone.project}/{clone.service}",
         "Ensaio obrigatório da mesma imagem/script/backup não comprovado.",
     )
+    assist_alignment.checked_smoke(receipt.get("http"))
 
 
-def run(action, backup, scope):
+def run(action: str, backup: Path, scope: str) -> None:
     require(
         action in {"capture", "rehearse", "apply"} and scope in BASES,
         "Ação/alvo inválidos.",
     )
     manifest = verify_bundle(backup)
+    origin = study_rollout.json_object(manifest.get("source"))
+    snapshot = study_rollout.json_object(manifest.get("snapshot"))
+    audio_files = study_rollout.json_object(manifest.get("audio_files"))
     source, clone = recovery.source_target(scope), CLONES[scope]
     info = recovery.check_target(source)
     recovery.quiet(source)
     require(
-        manifest["source"]["kind"] == scope
-        and manifest["source"]["project"] == source.project
-        and manifest["source"]["database"] == source.database
-        and manifest["source"]["db_container_id"] == info["Id"]
-        and manifest["source"]["voice_volume"] == source.voice_volume
-        and manifest["snapshot"]["revision"] == [BASES[scope]],
+        origin.get("kind") == scope
+        and origin.get("project") == source.project
+        and origin.get("database") == source.database
+        and origin.get("db_container_id") == info["Id"]
+        and origin.get("voice_volume") == source.voice_volume
+        and snapshot.get("revision") == [BASES[scope]],
         "Backup/origem divergentes.",
     )
     image = dev_alignment.image_id()
-    binding = {
+    binding: dict[str, object] = {
         "manifest": file_info(backup / "manifest.json"),
         "tools_image": image,
         "smoke_script": file_info(SMOKE),
@@ -270,11 +262,13 @@ def run(action, backup, scope):
             print("Captura privada concluída; nenhum dado pessoal exposto.")
             return
         proof = concurrency_rollout.private_json(capture)
+        tables = study_rollout.checked_fingerprints(proof.get("tables"))
+        expected_audit = concurrency_rollout.checked_audit(proof.get("audit"))
         require(
             all(proof.get(k) == v for k, v in binding.items()),
             "Imagem/script/backup mudou.",
         )
-        require(fingerprints(source, scope) == proof["tables"], "Histórico de origem mudou.")
+        require(fingerprints(source, scope) == tables, "Histórico de origem mudou.")
         if action == "rehearse":
             restored = concurrency_rollout.private_json(
                 recovery.BACKUPS / "restore-receipts" / f"{manifest['bundle_id']}.json"
@@ -293,7 +287,7 @@ def run(action, backup, scope):
         recovery.quiet(target)
         require(
             recovery.query(target, recovery.SNAPSHOT_SQL) == manifest["snapshot"]
-            and fingerprints(target, scope) == proof["tables"],
+            and fingerprints(target, scope) == tables,
             "Destino divergente.",
         )
         dev_alignment.verify_voice(target, manifest)
@@ -303,7 +297,7 @@ def run(action, backup, scope):
         if scope == "prod":
             assist_alignment.verify_backfill(target)
         require(
-            recovery.query(
+            study_rollout.query_count(
                 target,
                 "SELECT count(*) FROM speaking_attempt WHERE audio_sha256 IS NOT NULL "
                 "OR integrity_state != 'unknown' OR integrity_checked_at IS NOT NULL",
@@ -315,11 +309,11 @@ def run(action, backup, scope):
         recovery.quiet(target)
         require(
             recovery.query(target, recovery.SNAPSHOT_SQL)
-            == {**manifest["snapshot"], "revision": [HEAD]}
-            and fingerprints(target, scope) == proof["tables"],
+            == {**snapshot, "revision": [HEAD]}
+            and fingerprints(target, scope) == tables,
             "Dados históricos divergiram; não reabrir.",
         )
-        concurrency_rollout.audit(target, preserve_legacy=True, expected=proof["audit"])
+        concurrency_rollout.audit(target, preserve_legacy=True, expected=expected_audit)
         dev_alignment.verify_voice(target, manifest)
         result = {
             **binding,
@@ -328,9 +322,9 @@ def run(action, backup, scope):
             "target": f"{target.project}/{target.service}",
             "http": http,
             "migration_seconds": elapsed,
-            "tables": len(proof["tables"]),
-            "rows": sum(t["count"] for t in proof["tables"].values()),
-            "audio_count": len(manifest["audio_files"]),
+            "tables": len(tables),
+            "rows": sum(t["count"] for t in tables.values()),
+            "audio_count": len(audio_files),
         }
         write_json(Path(f"{prefix}-{action}.json"), result)
         print(
@@ -351,7 +345,7 @@ def run(action, backup, scope):
         )
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["capture", "rehearse", "apply"])

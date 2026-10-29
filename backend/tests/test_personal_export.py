@@ -37,6 +37,7 @@ def test_inventory_covers_every_personal_model():
     }
 
 
+@pytest.mark.timezone
 async def test_new_modalities_orphan_feedback_and_account_isolation(client, session):
     a = await conta(client, "complete-a")
     lesson = (await client.get("/api/lessons/31")).json()
@@ -138,6 +139,7 @@ async def test_new_modalities_orphan_feedback_and_account_isolation(client, sess
     )
 
 
+@pytest.mark.timezone
 async def test_dialogues_and_turns_are_exported_only_to_their_owner(client, session):
     a = await conta(client, "dialogue-a")
     b = await conta(client, "dialogue-b")
@@ -178,7 +180,12 @@ async def test_dialogues_and_turns_are_exported_only_to_their_owner(client, sess
                 state="completed",
                 transcript="I am a student.",
                 checks={"target_terms_missing": True, "too_short": False},
+                check_details={
+                    "target_terms": [{"text": "student", "covered": True}],
+                    "grammar_patterns": [],
+                },
                 cost_microusd=12,
+                human_rating="helpful",
                 expires_at=expires_at,
             ),
         ]
@@ -190,10 +197,18 @@ async def test_dialogues_and_turns_are_exported_only_to_their_owner(client, sess
     assert data["schema_version"] == "2.1"
     assert [item["mode"] for item in data["dialogues"]] == ["guided"]
     assert data["dialogues"][0]["operation_key"] == dialogue.operation_key
+    assert data["dialogues"][0]["provider_name"] == "cloudflare-workers-ai"
+    assert data["dialogue_turns"][1]["cost_microusd"] == 12
+    assert data["dialogue_turns"][1]["human_rating"] == "helpful"
     assert [turn["position"] for turn in data["dialogue_turns"]] == [1, 2]
     assert data["dialogue_turns"][1]["transcript"] == "I am a student."
     assert data["dialogue_turns"][1]["checks"] == {"target_terms_missing": True, "too_short": False}
     assert data["dialogue_turns"][0]["hints"] == []
+    assert data["dialogue_turns"][0]["check_details"] is None
+    assert data["dialogue_turns"][1]["check_details"] == {
+        "target_terms": [{"text": "student", "covered": True}],
+        "grammar_patterns": [],
+    }
     assert data["scope"]["row_counts"]["speaking_dialogue"] == 1
     assert data["scope"]["row_counts"]["dialogue_turn"] == 2
     other = (await client.get("/api/me/export", headers=b)).json()
@@ -270,6 +285,7 @@ async def test_export_timeout_releases_transaction_and_can_retry(client, monkeyp
     assert (await client.get("/api/me/export", headers=headers)).status_code == 200
 
 
+@pytest.mark.timezone
 async def test_audio_manifest_auth_integrity_and_expired_transcription(
     client, session, monkeypatch, tmp_path
 ):

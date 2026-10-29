@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -63,6 +63,7 @@ async def test_metrics_agregadas_tem_cardinalidade_fixa_e_nenhum_conteudo(
         "database",
         "transcription_queue",
         "dialogue",
+        "assist_costs",
         "account_deletions",
         "legacy_review",
         "media",
@@ -87,11 +88,14 @@ async def test_metrics_agregadas_tem_cardinalidade_fixa_e_nenhum_conteudo(
     assert body["media"]["filesystem_free_bytes"] == 4_000
     assert body["legacy_review"]["unlinked_cards"] == 0
     assert body["legacy_review"]["mismatched_links"] == 0
+    assert set(body["assist_costs"]) == {"daily", "monthly"}
+    assert body["assist_costs"]["daily"]["cost_microusd"] == 0
     serialized = response.text.lower()
     for forbidden in ("email", "transcript_text", "storage_key", "authorization", TOKEN.lower()):
         assert forbidden not in serialized
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_metrica_de_dialogo_conta_o_dia_sem_dizer_o_que_foi_falado(
     client: AsyncClient, session: AsyncSession, monkeypatch: pytest.MonkeyPatch
@@ -189,6 +193,7 @@ async def test_metrica_de_dialogo_conta_o_dia_sem_dizer_o_que_foi_falado(
         assert proibido not in serializado
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_cota_de_conversa_no_painel_usa_a_mesma_conta_do_429(
     client: AsyncClient, session: AsyncSession, monkeypatch: pytest.MonkeyPatch
@@ -244,3 +249,67 @@ async def test_cota_de_conversa_no_painel_usa_a_mesma_conta_do_429(
     assert dialogue["quota_used"] == limite
     assert dialogue["quota_exhausted_accounts"] == 1
     assert "cota-painel" not in response.text.lower()
+
+
+@pytest.mark.timezone
+@pytest.mark.parametrize("timezone", ["UTC", "Pacific/Kiritimati"])
+async def test_custo_diario_mensal_usa_ledger_e_despacho_em_utc(session, timezone):
+    # O fuso da conexão não pode mudar o mês/dia do painel.
+    await session.execute(text("SELECT set_config('TimeZone', :tz, true)"), {"tz": timezone})
+    now = datetime(2026, 3, 10, 1, tzinfo=UTC)
+    yesterday = now - timedelta(days=1)
+    user = User(email="cost-private@example.test", password_hash="x", display_name="Private")
+    session.add(user)
+    await session.flush()
+    rows = [
+        ("conversation", "consumed", yesterday, now, 10, True),
+        ("writing", "consumed", yesterday, yesterday, 20, True),
+        ("transcription", "consumed", now, now, 7, False),
+        ("conversation", "consumed", now, now, 0, True),
+        ("conversation", "consumed", now, None, 3, True),  # legado
+        ("writing", "reserved", now, None, 900, False),
+        ("writing", "released", now, None, 900, True),
+        ("writing", "consumed", now - timedelta(days=31), now - timedelta(days=31), 900, True),
+        ("writing", "consumed", now + timedelta(hours=1), now + timedelta(hours=1), 900, True),
+    ]
+    for modality, state, created, dispatched, cost, known in rows:
+        session.add(
+            AssistReservation(
+                user_id=user.id,
+                request_key=str(uuid4()),
+                fingerprint="f" * 64,
+                modality=modality,
+                provider_key=str(uuid4()),
+                state=state,
+                cost_microusd=cost,
+                cost_known=known,
+                created_at=created,
+                expires_at=created + timedelta(hours=1),
+                dispatched_at=dispatched,
+            )
+        )
+    await session.flush()
+    # Não há turno/job: excluir resultados ou expirar texto não zera o ledger.
+    result = await operations_metrics._assist_costs(session, now)
+    assert result.daily.consumed == 4 and result.daily.cost_microusd == 20
+    assert result.monthly.consumed == 5 and result.monthly.cost_microusd == 40
+    assert result.daily.unknown_cost_reservations == result.monthly.unknown_cost_reservations == 1
+    assert result.daily.starts_at == datetime(2026, 3, 10, tzinfo=UTC)
+    assert result.daily.ends_at == datetime(2026, 3, 11, tzinfo=UTC)
+    assert result.monthly.starts_at == datetime(2026, 3, 1, tzinfo=UTC)
+    assert result.monthly.ends_at == datetime(2026, 4, 1, tzinfo=UTC)
+    assert user.email not in result.model_dump_json()
+
+
+@pytest.mark.timezone
+@pytest.mark.parametrize(
+    ("now", "end"),
+    [
+        (datetime(2024, 2, 29, tzinfo=UTC), datetime(2024, 3, 1, tzinfo=UTC)),
+        (datetime(2026, 12, 31, tzinfo=UTC), datetime(2027, 1, 1, tzinfo=UTC)),
+    ],
+)
+async def test_janela_de_custo_usa_mes_calendario(session, now, end):
+    result = await operations_metrics._assist_costs(session, now)
+    assert result.monthly.ends_at == end
+    assert result.monthly.consumed == result.monthly.cost_microusd == 0

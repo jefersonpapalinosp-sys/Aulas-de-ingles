@@ -17,6 +17,8 @@ from app.db.models import DialogueTurn, Lesson, SpeakingDialogue, User
 from app.services import maintenance
 from app.services.dialogue_prompts import PROMPT_VERSION
 
+pytestmark = pytest.mark.timezone
+
 
 async def _turno_vencido(session: AsyncSession, *, vencido: bool) -> DialogueTurn:
     sufixo = "vencido" if vencido else "vigente"
@@ -51,6 +53,10 @@ async def _turno_vencido(session: AsyncSession, *, vencido: bool) -> DialogueTur
         state="completed",
         transcript="I waited on the platform for twenty minutes.",
         checks={"target_terms_missing": True, "too_short": True},
+        check_details={
+            "target_terms": [{"text": "platform", "covered": True}],
+            "grammar_patterns": [],
+        },
         partner_text="That sounds like a long wait.",
         hints=[{"code": "too_short", "message": "Diga mais uma frase."}],
         confidence=0.82,
@@ -85,6 +91,10 @@ async def test_texto_vencido_sai_e_a_evidencia_permanece(session: AsyncSession) 
     # O que prova a prática fica: a linha não é apagada.
     assert turno.state == "completed"
     assert turno.checks == {"target_terms_missing": True, "too_short": True}
+    assert turno.check_details == {
+        "target_terms": [{"text": "platform", "covered": True}],
+        "grammar_patterns": [],
+    }
     assert turno.cost_microusd == 7
     assert turno.human_rating == "helpful"
     assert turno.confidence == 0.82

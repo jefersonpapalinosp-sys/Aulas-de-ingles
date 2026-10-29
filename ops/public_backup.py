@@ -25,11 +25,14 @@ import shlex
 import shutil
 import subprocess
 import sys
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
+from typing import IO, TypedDict, Unpack, cast
 from uuid import uuid4
 
 from ops import recovery
 from ops.recovery_archive import (
+    FileInfo,
     RecoveryError,
     create_bundle,
     file_info,
@@ -59,23 +62,75 @@ TOOLS = ("recovery_archive.py", "voice_transfer.py")
 AGE_RECIPIENT = re.compile(r"age1[0-9a-z]{58}")
 
 
-def container(service):
+class SshOptions(TypedDict, total=False):
+    stdin: IO[bytes] | int | None
+    stdout: IO[bytes] | int | None
+    timeout: float
+
+
+class Snapshot(TypedDict):
+    revision: list[str]
+    counts: dict[str, int]
+    audio: list[dict[str, object]]
+
+
+class ContainerIdentity(TypedDict):
+    id: str
+    image_id: str
+    image_ref: str
+
+
+class CopiedFile(FileInfo):
+    path: str
+
+
+class EncryptedFile(CopiedFile):
+    recipient: str
+
+
+class CheckReport(TypedDict):
+    host_configured: bool
+    containers: dict[str, str]
+    database: str
+    backup_role: str
+    revision: list[str]
+    age_available: bool
+
+
+def checked_snapshot(value: object) -> Snapshot:
+    if not isinstance(value, dict):
+        raise RecoveryError("Snapshot remoto incompleto.")
+    revision, counts, audio = value.get("revision"), value.get("counts"), value.get("audio")
+    if (
+        not isinstance(revision, list) or not revision
+        or not all(isinstance(item, str) and item for item in revision)
+        or not isinstance(counts, dict)
+        or not all(isinstance(key, str) and type(count) is int and count >= 0
+                   for key, count in counts.items())
+        or not isinstance(audio, list) or not all(isinstance(item, dict) for item in audio)
+    ):
+        raise RecoveryError("Snapshot remoto incompleto.")
+    # Preservar o objeto inteiro, inclusive extensões, para comparar antes/depois da captura.
+    return cast(Snapshot, value)
+
+
+def container(service: str) -> str:
     return f"{PROJECT}_{SERVICE}-{service}-1"
 
 
-def voice_volume():
+def voice_volume() -> str:
     return f"{PROJECT}_{SERVICE}_speaking_data"
 
 
-def api_image():
+def api_image() -> str:
     return f"{PROJECT}_{SERVICE}-api"
 
 
-def receipts_dir():
+def receipts_dir() -> Path:
     return recovery.BACKUPS / "public-receipts"
 
 
-def resolve_host(explicit=None):
+def resolve_host(explicit: str | None = None) -> str:
     host = explicit or os.environ.get(HOST_ENV) or DEFAULT_HOST
     require(
         re.fullmatch(r"[A-Za-z0-9._-]+@[A-Za-z0-9.-]+", host) is not None,
@@ -84,7 +139,10 @@ def resolve_host(explicit=None):
     return host
 
 
-def ssh(host, remote, *, stdin=None, stdout=None, timeout=600):
+def ssh(
+    host: str, remote: str, *, stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None, timeout: float = 600,
+) -> bytes:
     """Executa um comando remoto. stderr nunca é repassado: pode conter caminhos ou dados."""
     try:
         result = subprocess.run(
@@ -100,7 +158,7 @@ def ssh(host, remote, *, stdin=None, stdout=None, timeout=600):
         raise RecoveryError("Comando remoto falhou; nenhum sucesso foi confirmado.") from exc
 
 
-def scp(host, sources, remote_dir):
+def scp(host: str, sources: Iterable[str | Path], remote_dir: str) -> None:
     try:
         subprocess.run(
             ["scp", "-q", *SSH_OPTIONS, *map(str, sources), f"{host}:{remote_dir}/"],
@@ -113,12 +171,12 @@ def scp(host, sources, remote_dir):
         raise RecoveryError("Cópia das ferramentas para a VM falhou.") from exc
 
 
-def in_db(host, command, **kwargs):
+def in_db(host: str, command: str, **kwargs: Unpack[SshOptions]) -> bytes:
     # `sh -c` roda dentro do container: $POSTGRES_DB é resolvido lá, nunca aqui.
     return ssh(host, f"docker exec -i {container('db')} sh -c {shlex.quote(command)}", **kwargs)
 
 
-def psql(host, sql, **kwargs):
+def psql(host: str, sql: str, **kwargs: Unpack[SshOptions]) -> bytes:
     return in_db(
         host,
         f'psql -U {BACKUP_ROLE} -d "$POSTGRES_DB" -XAt -v ON_ERROR_STOP=1 -c {shlex.quote(sql)}',
@@ -126,22 +184,21 @@ def psql(host, sql, **kwargs):
     )
 
 
-def snapshot(host):
+def snapshot(host: str) -> Snapshot:
     try:
         value = json.loads(psql(host, recovery.SNAPSHOT_SQL))
     except ValueError as exc:
         raise RecoveryError("Snapshot remoto inválido.") from exc
-    require(isinstance(value, dict) and bool(value.get("revision")), "Snapshot remoto incompleto.")
-    return value
+    return checked_snapshot(value)
 
 
-def database_name(host):
+def database_name(host: str) -> str:
     name = psql(host, "SELECT current_database()").decode().strip()
     require(re.fullmatch(r"[A-Za-z0-9_]+", name) is not None, "Nome de banco remoto inesperado.")
     return name
 
 
-def inventory(host):
+def inventory(host: str) -> dict[str, ContainerIdentity]:
     """Identidades imutáveis dos containers e imagens; sem env, sem segredos."""
     names = [container("db"), container("api"), container("worker")]
     raw = ssh(
@@ -159,7 +216,7 @@ def inventory(host):
     }
 
 
-def local_pg_restore_list(dump):
+def local_pg_restore_list(dump: Path) -> None:
     """Valida o índice do dump com a imagem de PostgreSQL já usada pelas stacks locais."""
     with dump.open("rb") as stream:
         recovery.docker(
@@ -176,7 +233,7 @@ def local_pg_restore_list(dump):
         )
 
 
-def export_voice(host, stream):
+def export_voice(host: str, stream: IO[bytes]) -> None:
     """Mesmo exportador validado do fluxo local, rodando na VM a partir de cópia efêmera."""
     tools = f"/tmp/aulas-ingles-backup-tools-{uuid4().hex}"
     # 755/644: o container roda como uid 10001 e precisa ler os scripts que o
@@ -206,20 +263,20 @@ def export_voice(host, stream):
             ssh(host, f"rm -rf {tools}")
 
 
-def worktree_info():
+def worktree_info() -> dict[str, str | bool]:
     return {
         "worktree_head": recovery.run(["git", "rev-parse", "HEAD"]).decode().strip(),
         "worktree_dirty": bool(recovery.run(["git", "status", "--porcelain"])),
     }
 
 
-def capture(host, attempts=MAX_ATTEMPTS):
+def capture(host: str, attempts: int = MAX_ATTEMPTS) -> Path:
     """Publica um pacote v2 da stack pública ou levanta RecoveryError, sem parciais anunciados."""
     recovery.local_daemon()
     containers = inventory(host)
     database = database_name(host)
 
-    def do_capture(staging):
+    def do_capture(staging: Path) -> dict[str, object]:
         before = snapshot(host)
         with (staging / "database.dump").open("xb") as stream:
             in_db(
@@ -265,7 +322,7 @@ def capture(host, attempts=MAX_ATTEMPTS):
     raise RecoveryError(DRIFT)
 
 
-def read_recipient(path):
+def read_recipient(path: str | Path) -> str:
     recipient_path = Path(path)
     require(
         recipient_path.is_file() and not recipient_path.is_symlink(),
@@ -279,7 +336,7 @@ def read_recipient(path):
     return recipient
 
 
-def encrypt(bundle, recipient, out_dir):
+def encrypt(bundle: Path, recipient: str, out_dir: str | Path) -> EncryptedFile:
     """tar do pacote publicado cifrado para o destinatário; a chave privada fica fora daqui."""
     require(shutil.which("age") is not None, "Instale `age` para criptografar (brew install age).")
     out = Path(out_dir)
@@ -290,28 +347,33 @@ def encrypt(bundle, recipient, out_dir):
     )
     target = out / f"{bundle.name}.tar.age"
     require(not target.exists(), "Pacote criptografado já existe; nada foi sobrescrito.")
+    created = False
     try:
-        with (
-            subprocess.Popen(
+        with target.open("xb") as stream:
+            created = True
+            os.chmod(target, 0o600)
+            with subprocess.Popen(
                 ["tar", "-C", str(bundle.parent), "-cf", "-", bundle.name],
+                # BSD tar no macOS acrescenta AppleDouble (._*), invalidando o pacote
+                # após decifrar/extrair. GNU tar ignora esta variável.
+                env={**os.environ, "COPYFILE_DISABLE": "1"},
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-            ) as tar,
-            target.open("xb") as stream,
-        ):
-            os.chmod(target, 0o600)
-            sealed = subprocess.run(
-                ["age", "-r", recipient],
-                stdin=tar.stdout,
-                stdout=stream,
-                stderr=subprocess.PIPE,
-                timeout=900,
-            )
-            tar.stdout.close()
-            tar.wait(timeout=120)
-            ok = sealed.returncode == 0 and tar.returncode == 0
+            ) as tar:
+                assert tar.stdout is not None  # PIPE definido explicitamente acima.
+                sealed = subprocess.run(
+                    ["age", "-r", recipient],
+                    stdin=tar.stdout,
+                    stdout=stream,
+                    stderr=subprocess.PIPE,
+                    timeout=900,
+                )
+                tar.stdout.close()
+                tar.wait(timeout=120)
+                ok = sealed.returncode == 0 and tar.returncode == 0
     except (OSError, subprocess.SubprocessError) as exc:
-        target.unlink(missing_ok=True)
+        if created:
+            target.unlink(missing_ok=True)
         raise RecoveryError("Criptografia falhou; nenhum pacote cifrado foi publicado.") from exc
     if not ok:
         target.unlink(missing_ok=True)
@@ -319,7 +381,7 @@ def encrypt(bundle, recipient, out_dir):
     return {"path": str(target), **file_info(target), "recipient": recipient}
 
 
-def copy_external(encrypted, destination_dir):
+def copy_external(encrypted: str | Path, destination_dir: str | Path) -> CopiedFile:
     """Só cópia cifrada sai do Mac; o destino pode ser uma pasta sincronizada ou montada."""
     source = Path(encrypted)
     require(
@@ -329,23 +391,44 @@ def copy_external(encrypted, destination_dir):
     require(destination.is_dir() and not destination.is_symlink(), "Destino externo inexistente.")
     target = destination / source.name
     require(not target.exists(), "Cópia externa já existe; nada foi sobrescrito.")
-    shutil.copy2(source, target)
-    require(file_info(target) == file_info(source), "Cópia externa divergente da origem.")
+    expected = file_info(source)
+    try:
+        # A criação exclusiva mantém a recusa de sobrescrita mesmo com duas cópias concorrentes.
+        with source.open("rb") as incoming, target.open("xb") as outgoing:
+            os.chmod(target, 0o600)
+            shutil.copyfileobj(incoming, outgoing)
+            outgoing.flush()
+            os.fsync(outgoing.fileno())
+    except OSError as exc:
+        raise RecoveryError(
+            "Cópia externa falhou; preserve o destino parcial para diagnóstico."
+        ) from exc
+    require(
+        file_info(target) == expected == file_info(source),
+        "Cópia externa divergente da origem.",
+    )
     return {"path": str(target), **file_info(target)}
 
 
-def write_receipt(manifest, encrypted=None, external=None):
+def write_receipt(
+    manifest: Mapping[str, object], encrypted: EncryptedFile | None = None,
+    external: CopiedFile | None = None,
+) -> Path:
+    snapshot_data = checked_snapshot(manifest.get("snapshot"))
+    audio, application = manifest.get("audio_files"), manifest.get("application")
+    if not isinstance(audio, dict) or not isinstance(application, dict):
+        raise RecoveryError("Inventário/aplicação do manifesto inválidos.")
     directory = receipts_dir()
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
     receipt = {
         "bundle_id": manifest["bundle_id"],
         "created_at": manifest["created_at"],
-        "revision": manifest["snapshot"]["revision"],
-        "counts": manifest["snapshot"]["counts"],
+        "revision": snapshot_data["revision"],
+        "counts": snapshot_data["counts"],
         "artifacts": manifest["artifacts"],
-        "audio_file_count": len(manifest["audio_files"]),
+        "audio_file_count": len(audio),
         "source": manifest["source"],
-        "deployed_containers": manifest["application"]["deployed_containers"],
+        "deployed_containers": application["deployed_containers"],
         "encrypted": encrypted,
         "external_copy": external,
     }
@@ -354,7 +437,7 @@ def write_receipt(manifest, encrypted=None, external=None):
     return path
 
 
-def check(host):
+def check(host: str) -> CheckReport:
     """Pré-voo sem captura: acesso, containers, papel, revisão e ferramentas locais."""
     recovery.local_daemon()
     containers = inventory(host)
@@ -369,7 +452,7 @@ def check(host):
     }
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--host", help=f"usuario@host da VM (padrão: ${HOST_ENV} ou documentado)")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -400,13 +483,18 @@ def main(argv=None):
         recipient = read_recipient(args.recipient_file) if args.recipient_file else None
         bundle = capture(host)
         manifest = verify_bundle(bundle)
+        snapshot_data = checked_snapshot(manifest.get("snapshot"))
         encrypted = encrypt(bundle, recipient, args.encrypted_dir) if recipient else None
-        external = copy_external(encrypted["path"], args.copy_to) if args.copy_to else None
+        external = None
+        if args.copy_to:
+            if encrypted is None:
+                raise RecoveryError("Cópia externa exige pacote cifrado confirmado.")
+            external = copy_external(encrypted["path"], args.copy_to)
         receipt = write_receipt(manifest, encrypted, external)
         summary = {
             "bundle": str(bundle),
-            "revision": manifest["snapshot"]["revision"],
-            "counts": manifest["snapshot"]["counts"],
+            "revision": snapshot_data["revision"],
+            "counts": snapshot_data["counts"],
             "encrypted": encrypted["path"] if encrypted else None,
             "external_copy": external["path"] if external else None,
             "receipt": str(receipt),
@@ -415,7 +503,7 @@ def main(argv=None):
             print(json.dumps(summary, indent=2, sort_keys=True))
         else:
             print(f"Pacote publicado e verificado: {bundle}")
-            print(f"Revisão do schema: {', '.join(manifest['snapshot']['revision'])}")
+            print(f"Revisão do schema: {', '.join(snapshot_data['revision'])}")
             if encrypted:
                 print(f"Cifrado para cópia externa: {encrypted['path']}")
             else:
@@ -432,7 +520,7 @@ def main(argv=None):
         return 1
 
 
-def _render_check(report):
+def _render_check(report: CheckReport) -> str:
     lines = [
         f"Banco: {report['database']} (papel {report['backup_role']})",
         f"Revisão Alembic: {', '.join(report['revision'])}",

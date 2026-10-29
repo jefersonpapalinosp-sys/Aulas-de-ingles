@@ -15,52 +15,88 @@ e `fallback=true`, porque o aluno precisa poder continuar a conversa.
 """
 
 import logging
-from typing import Annotated
+from datetime import UTC, datetime
+from hashlib import sha256
+from typing import Annotated, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, status
-from sqlalchemy import select
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    Header,
+    HTTPException,
+    Path,
+    Query,
+    Request,
+    Response,
+    status,
+)
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.concurrency import require_idempotency_key
 from app.api.deps import UsuarioAtual
 from app.api.errors import IDEMPOTENCY_KEY_RESPONSES
 from app.core.config import get_settings
-from app.db.models import DialogueTurn, Lesson, SpeakingAttempt, SpeakingDialogue
+from app.db.models import (
+    DialogueTurn,
+    Lesson,
+    ReviewItem,
+    SkillEvidence,
+    SpeakingAttempt,
+    SpeakingDialogue,
+    TranscriptionJob,
+)
 from app.db.session import get_session
-from app.schemas.assist import HumanRatingIn
+from app.domain.enums import TurnInputKind
+from app.pagination import InvalidCursor, decode_time_id_cursor
+from app.schemas.assist import HumanRatingIn, TranscriptionWordOut
 from app.schemas.dialogue import (
+    DialogueCheckDetails,
     DialogueCreateIn,
     DialogueHintOut,
     DialogueOut,
+    DialoguePageOut,
+    DialogueStatusOut,
     DialogueTurnAcceptedOut,
     DialogueTurnOut,
     TurnTextIn,
 )
 from app.services import dialogue as dialogue_service
-from app.services.assist_quota import QuotaExceeded
+from app.services.assist_quota import DIALOGUE_MODALITY, QuotaExceeded, release, usage
+from app.services.audio_cleanup import discard_unreferenced_audio
 from app.services.audio_inspection import inspect_audio
 from app.services.audio_storage import AudioStorage, normalized_mime_type
 from app.services.audio_upload import read_audio
+from app.services.dialogue_history import history_page
 from app.services.publication import lock_publication, published_lesson_ids
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/speaking/dialogues", tags=["speaking"])
 
 
-def _turn_out(turn: DialogueTurn) -> DialogueTurnOut:
+def _turn_out(turn: DialogueTurn, job: TranscriptionJob | None = None) -> DialogueTurnOut:
     return DialogueTurnOut(
         position=turn.position,
         role=turn.role,
         input_kind=turn.input_kind,
-        state=turn.state,
+        state="failed"
+        if turn.state == "pending" and job and job.status == "failed"
+        else turn.state,
         transcript=turn.transcript,
         checks=dict(turn.checks or {}),
+        check_details=DialogueCheckDetails.model_validate(turn.check_details)
+        if turn.check_details is not None
+        else None,
         hints=[DialogueHintOut.model_validate(hint) for hint in (turn.hints or [])],
         partner_text=turn.partner_text,
         confidence=turn.confidence,
         fallback=turn.fallback,
-        error_code=turn.error_code,
+        error_code=turn.error_code or (job.error_code if job else None),
+        words=[TranscriptionWordOut.model_validate(word) for word in (job.words or [])]
+        if job and job.expires_at > datetime.now(UTC)
+        else [],
         human_rating=turn.human_rating,
         job_id=turn.transcription_job_id,
         created_at=turn.created_at,
@@ -73,7 +109,29 @@ def _remaining(dialogue: SpeakingDialogue, turns: list[DialogueTurn]) -> int:
     return max(0, dialogue.turn_limit - usados)
 
 
-def _dialogue_out(dialogue: SpeakingDialogue, turns: list[DialogueTurn]) -> DialogueOut:
+async def _dialogue_out(
+    session: AsyncSession, dialogue: SpeakingDialogue, turns: list[DialogueTurn]
+) -> DialogueOut:
+    jobs = (
+        {
+            job.id: job
+            for job in (
+                await session.scalars(
+                    select(TranscriptionJob).where(
+                        TranscriptionJob.id.in_(
+                            [
+                                turn.transcription_job_id
+                                for turn in turns
+                                if turn.transcription_job_id
+                            ]
+                        )
+                    )
+                )
+            ).all()
+        }
+        if turns
+        else {}
+    )
     ordenados = sorted(turns, key=lambda turn: turn.position)
     return DialogueOut(
         id=dialogue.id,
@@ -87,7 +145,12 @@ def _dialogue_out(dialogue: SpeakingDialogue, turns: list[DialogueTurn]) -> Dial
         rubric_version=dialogue.rubric_version,
         started_at=dialogue.started_at,
         ended_at=dialogue.ended_at,
-        turns=[_turn_out(turn) for turn in ordenados],
+        turns=[
+            _turn_out(
+                turn, jobs.get(turn.transcription_job_id) if turn.transcription_job_id else None
+            )
+            for turn in ordenados
+        ],
     )
 
 
@@ -176,7 +239,52 @@ async def criar_dialogo(
             detail={"code": "assist_disabled", "mode": corpo.mode},
         ) from error
     await session.commit()
-    return _dialogue_out(dialogue, await _turns(session, dialogue.id))
+    return await _dialogue_out(session, dialogue, await _turns(session, dialogue.id))
+
+
+@router.get("", response_model=DialoguePageOut)
+async def listar_dialogos(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Query(max_length=256)] = None,
+) -> DialoguePageOut:
+    _private(response)
+    try:
+        position = decode_time_id_cursor(cursor) if cursor else None
+    except InvalidCursor:
+        raise HTTPException(422, "Cursor de histórico inválido.") from None
+    return await history_page(session, usuario.id, limit, position)
+
+
+@router.get("/status", response_model=DialogueStatusOut)
+async def status_dialogos(
+    usuario: UsuarioAtual,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    response: Response,
+) -> DialogueStatusOut:
+    _private(response)
+    settings = get_settings()
+    balance = await usage(session, usuario.id, modalities=(DIALOGUE_MODALITY,))
+    guided = bool(
+        settings.dialogue_practice_enabled
+        and settings.assisted_features_enabled
+        and settings.dialogue_assist_configured
+    )
+    return DialogueStatusOut(
+        enabled=settings.dialogue_practice_enabled,
+        guided_enabled=guided,
+        audio_enabled=guided and bool(settings.assist_transcription_url),
+        daily_quota=settings.assist_dialogue_daily_turns,
+        remaining_today=max(0, settings.assist_dialogue_daily_turns - balance.used),
+        reserved_today=balance.reserved,
+        consumed_today=balance.consumed,
+        quota_resets_at=balance.resets_at,
+        retention_days=settings.assist_retention_days,
+        cost_microusd_today=balance.cost,
+        cost_incomplete=balance.incomplete,
+    )
 
 
 @router.get("/{dialogue_id}", response_model=DialogueOut)
@@ -188,7 +296,7 @@ async def obter_dialogo(
 ) -> DialogueOut:
     _private(response)
     dialogue = await _owned_dialogue(session, dialogue_id, usuario.id)
-    return _dialogue_out(dialogue, await _turns(session, dialogue.id))
+    return await _dialogue_out(session, dialogue, await _turns(session, dialogue.id))
 
 
 async def _admit(
@@ -196,7 +304,7 @@ async def _admit(
     dialogue: SpeakingDialogue,
     position: int,
     *,
-    input_kind: str,
+    input_kind: TurnInputKind,
     idempotency_key: str,
     transcript: str | None = None,
     speaking_attempt_id: int | None = None,
@@ -211,7 +319,7 @@ async def _admit(
             session,
             dialogue,
             position,
-            input_kind=input_kind,  # type: ignore[arg-type]
+            input_kind=input_kind,
             idempotency_key=idempotency_key,
             transcript=transcript,
             speaking_attempt_id=speaking_attempt_id,
@@ -254,7 +362,7 @@ async def _admit(
 )
 async def turno_por_texto(
     dialogue_id: int,
-    position: int,
+    position: Annotated[int, Path(ge=1, le=50)],
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[TurnTextIn, Body()],
@@ -280,11 +388,14 @@ async def turno_por_texto(
 )
 async def turno_por_audio(
     dialogue_id: int,
-    position: int,
+    position: Annotated[int, Path(ge=1, le=50)],
     request: Request,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
+    consent: Annotated[Literal["true"], Header(alias="X-Audio-Consent")],
+    response: Response,
 ) -> DialogueTurnAcceptedOut:
+    _private(response)
     settings = get_settings()
     mime_type = normalized_mime_type(request.headers.get("content-type"))
     if mime_type is None:
@@ -293,6 +404,8 @@ async def turno_por_audio(
             detail="Formato de áudio não suportado.",
         )
     dialogue = await _owned_dialogue(session, dialogue_id, usuario.id)
+    if dialogue.mode == "script":
+        raise HTTPException(409, "No Roteiro, use texto. Áudio exige transcrição no modo Guiado.")
     # Não retém conexão nem lock durante recepção lenta — mesma regra do
     # shadowing. Só leituras até aqui.
     await session.commit()
@@ -309,6 +422,19 @@ async def turno_por_audio(
         )
     ).scalar_one_or_none()
     if existente is not None:
+        attempt = (
+            await session.get(SpeakingAttempt, existente.speaking_attempt_id)
+            if existente.speaking_attempt_id
+            else None
+        )
+        if (
+            existente.input_kind != "audio"
+            or attempt is None
+            or attempt.user_id != usuario.id
+            or attempt.mime_type != mime_type
+            or not AudioStorage(settings.speaking_storage_dir).matches(attempt.storage_key, data)
+        ):
+            raise HTTPException(409, "O turno já contém outra entrada. Não foi sobrescrito.")
         # Reenvio do mesmo turno: nada de segundo áudio nem segunda cobrança.
         return DialogueTurnAcceptedOut(
             position=existente.position,
@@ -331,36 +457,49 @@ async def turno_por_audio(
         mime_type=mime_type,
         file_size=len(data),
         integrity_state="verified",
+        audio_sha256=sha256(data).hexdigest(),
+        integrity_checked_at=datetime.now(UTC),
+        consented_at=datetime.now(UTC),
     )
-    session.add(attempt)
-    await session.flush()
-    return await _admit(
-        session,
-        dialogue,
-        position,
-        input_kind="audio",
-        idempotency_key=f"dialogue-{dialogue.id}-{position}",
-        speaking_attempt_id=attempt.id,
-    )
+    try:
+        session.add(attempt)
+        await session.flush()
+        return await _admit(
+            session,
+            dialogue,
+            position,
+            input_kind="audio",
+            idempotency_key=f"dialogue-{dialogue.id}-{position}",
+            speaking_attempt_id=attempt.id,
+        )
+    except BaseException:
+        await discard_unreferenced_audio(session, storage, key)
+        raise
 
 
 @router.get("/{dialogue_id}/turns/{position}", response_model=DialogueTurnOut)
 async def obter_turno(
     dialogue_id: int,
-    position: int,
+    position: Annotated[int, Path(ge=1, le=50)],
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
     response: Response,
 ) -> DialogueTurnOut:
     _private(response)
     dialogue = await _owned_dialogue(session, dialogue_id, usuario.id)
-    return _turn_out(await _owned_turn(session, dialogue, position))
+    turn = await _owned_turn(session, dialogue, position)
+    job = (
+        await session.get(TranscriptionJob, turn.transcription_job_id)
+        if turn.transcription_job_id
+        else None
+    )
+    return _turn_out(turn, job)
 
 
 @router.put("/{dialogue_id}/turns/{position}/rating", response_model=DialogueTurnOut)
 async def avaliar_turno(
     dialogue_id: int,
-    position: int,
+    position: Annotated[int, Path(ge=1, le=50)],
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
     corpo: Annotated[HumanRatingIn, Body()],
@@ -392,7 +531,32 @@ async def excluir_dialogo(
     exclusão de gravação, não daqui, para não criar um segundo lugar que
     remove bytes do aluno.
     """
-    dialogue = await _owned_dialogue(session, dialogue_id, usuario.id)
+    dialogue = await _owned_dialogue(session, dialogue_id, usuario.id, lock=True)
+    job_ids = select(DialogueTurn.transcription_job_id).where(
+        DialogueTurn.dialogue_id == dialogue.id
+    )
+    jobs = (
+        await session.scalars(
+            select(TranscriptionJob)
+            .where(
+                TranscriptionJob.id.in_(job_ids),
+                TranscriptionJob.user_id == usuario.id,
+            )
+            .with_for_update()
+        )
+    ).all()
+    for job in jobs:
+        await release(session, job.assist_reservation_id, "dialogue_deleted")
+        await session.delete(job)
+    turn_ids = select(DialogueTurn.id).where(DialogueTurn.dialogue_id == dialogue.id)
+    for model in (SkillEvidence, ReviewItem):
+        await session.execute(
+            delete(model).where(
+                model.user_id == usuario.id,
+                model.source_type == "dialogue_turn",
+                model.source_id.in_(turn_ids),
+            )
+        )
     await session.delete(dialogue)
     await session.commit()
     logger.info("dialogue_deleted", extra={"dialogue_id": dialogue_id})

@@ -31,6 +31,8 @@ class Thresholds:
     # aluno reclamar. O fallback atende, mas o diálogo deixou de ser diálogo.
     maximum_dialogue_failure_rate: float = 0.2
     minimum_dialogue_turns: int = 5
+    assist_daily_budget_microusd: int | None = None
+    assist_monthly_budget_microusd: int | None = None
 
 
 @dataclass(frozen=True)
@@ -52,6 +54,77 @@ def _check(
     action: str,
 ) -> Check:
     return Check(name, "ok" if good else "critical", observed, threshold, owner, action)
+
+
+def _assist_cost_checks(metrics: dict[str, Any], thresholds: Thresholds) -> list[Check]:
+    section = metrics.get("assist_costs")
+    if not isinstance(section, dict):
+        return [
+            _check(
+                "assist_cost_accounting",
+                False,
+                "ausente",
+                "presente",
+                "release manager",
+                "Implantar a API com assist_costs antes de confiar no orçamento.",
+            )
+        ]
+    checks = []
+    for period, budget in (
+        ("daily", thresholds.assist_daily_budget_microusd),
+        ("monthly", thresholds.assist_monthly_budget_microusd),
+    ):
+        window = section.get(period)
+        cost = window.get("cost_microusd") if isinstance(window, dict) else None
+        unknown = (
+            window.get("unknown_cost_reservations")
+            if isinstance(window, dict)
+            else None
+        )
+        valid = all(type(value) is int and value >= 0 for value in (cost, unknown))
+        checks.append(
+            _check(
+                f"assist_{period}_cost_known",
+                valid and unknown == 0,
+                unknown if valid else "métrica inválida",
+                "= 0",
+                "release manager",
+                "Conciliar custos desconhecidos com o provedor; "
+                "zero não significa custo confirmado.",
+            )
+        )
+        if budget is None:
+            state: State = "warning"
+            threshold = "orçamento positivo definido"
+            action = (
+                f"Definir OPERATIONS_ASSIST_{period.upper()}_BUDGET_MICROUSD "
+                "após aprovar o orçamento."
+            )
+        else:
+            if type(budget) is not int or budget <= 0:
+                raise ValueError("Orçamento deve ser inteiro positivo em microusd.")
+            if type(cost) is not int or not valid or cost >= budget:
+                state = "critical"
+            elif cost * 5 >= budget * 4:
+                state = "warning"
+            else:
+                state = "ok"
+            threshold = f"alerta >= 80% de {budget}; crítico >= 100% (microusd)"
+            action = (
+                "Conferir consumo e fatura; ao atingir o teto, "
+                "suspender assistência antes de religar."
+            )
+        checks.append(
+            Check(
+                f"assist_{period}_budget",
+                state,
+                cost if valid else None,
+                threshold,
+                "release manager",
+                action,
+            )
+        )
+    return checks
 
 
 def evaluate(
@@ -86,7 +159,8 @@ def evaluate(
         ),
         _check(
             "request_error_rate",
-            total < thresholds.minimum_requests or error_rate <= thresholds.maximum_error_rate,
+            total < thresholds.minimum_requests
+            or error_rate <= thresholds.maximum_error_rate,
             round(error_rate, 6),
             f"<= {thresholds.maximum_error_rate} após {thresholds.minimum_requests} requests",
             "backend on-call",
@@ -96,7 +170,8 @@ def evaluate(
         _check(
             "queue_age_seconds",
             queue["oldest_queued_seconds"] is None
-            or int(queue["oldest_queued_seconds"]) <= thresholds.maximum_queue_age_seconds,
+            or int(queue["oldest_queued_seconds"])
+            <= thresholds.maximum_queue_age_seconds,
             queue["oldest_queued_seconds"],
             f"<= {thresholds.maximum_queue_age_seconds}",
             "worker on-call",
@@ -106,7 +181,8 @@ def evaluate(
         _check(
             "worker_age_seconds",
             queue["worker_age_seconds"] is not None
-            and int(queue["worker_age_seconds"]) <= thresholds.maximum_worker_age_seconds,
+            and int(queue["worker_age_seconds"])
+            <= thresholds.maximum_worker_age_seconds,
             queue["worker_age_seconds"],
             f"<= {thresholds.maximum_worker_age_seconds}",
             "worker on-call",
@@ -115,7 +191,8 @@ def evaluate(
         _check(
             "maintenance_age_seconds",
             queue.get("maintenance_age_seconds") is not None
-            and int(queue["maintenance_age_seconds"]) <= thresholds.maximum_maintenance_age_seconds,
+            and int(queue["maintenance_age_seconds"])
+            <= thresholds.maximum_maintenance_age_seconds,
             queue.get("maintenance_age_seconds"),
             f"<= {thresholds.maximum_maintenance_age_seconds}",
             "worker on-call",
@@ -142,7 +219,8 @@ def evaluate(
             "legacy_review_reconciliation",
             int(legacy_review["unlinked_cards"]) == 0
             and int(legacy_review["mismatched_links"]) == 0,
-            int(legacy_review["unlinked_cards"]) + int(legacy_review["mismatched_links"]),
+            int(legacy_review["unlinked_cards"])
+            + int(legacy_review["mismatched_links"]),
             "= 0",
             "database operator",
             "Manter review_card e o tráfego bloqueados; reconciliar no clone a ligação "
@@ -160,7 +238,8 @@ def evaluate(
         _check(
             "dialogue_provider_failure_rate",
             dialogue_turns < thresholds.minimum_dialogue_turns
-            or dialogue_failures / dialogue_turns <= thresholds.maximum_dialogue_failure_rate,
+            or dialogue_failures / dialogue_turns
+            <= thresholds.maximum_dialogue_failure_rate,
             round(dialogue_failures / dialogue_turns, 3) if dialogue_turns else None,
             f"<= {thresholds.maximum_dialogue_failure_rate} "
             f"(amostra >= {thresholds.minimum_dialogue_turns})",
@@ -180,7 +259,8 @@ def evaluate(
         _check(
             "media_free_bytes",
             bool(media["filesystem_available"])
-            and int(media["filesystem_free_bytes"] or 0) >= thresholds.minimum_media_free_bytes,
+            and int(media["filesystem_free_bytes"] or 0)
+            >= thresholds.minimum_media_free_bytes,
             media["filesystem_free_bytes"],
             f">= {thresholds.minimum_media_free_bytes}",
             "storage operator",
@@ -188,7 +268,14 @@ def evaluate(
             "ampliar/limpar apenas pela política de retenção.",
         ),
     ]
-    overall = "critical" if any(item.state == "critical" for item in checks) else "ok"
+    checks.extend(_assist_cost_checks(metrics, thresholds))
+    overall = (
+        "critical"
+        if any(item.state == "critical" for item in checks)
+        else "warning"
+        if any(item.state == "warning" for item in checks)
+        else "ok"
+    )
     return {"status": overall, "checks": [asdict(item) for item in checks]}
 
 
@@ -228,10 +315,24 @@ def main(argv: list[str] | None = None) -> int:
         print("OPERATIONS_TOKEN ausente; gate não executado.", file=sys.stderr)
         return 2
     try:
+
+        def budget(period: str) -> int | None:
+            value = os.environ.get(f"OPERATIONS_ASSIST_{period}_BUDGET_MICROUSD")
+            if value is None or not value.strip():
+                return None
+            parsed = int(value)
+            if parsed <= 0:
+                raise ValueError("Orçamento deve ser positivo.")
+            return parsed
+
+        thresholds = Thresholds(
+            assist_daily_budget_microusd=budget("DAILY"),
+            assist_monthly_budget_microusd=budget("MONTHLY"),
+        )
         report = evaluate(
-            fetch(args.base_url, "/api/health"),
+            fetch(args.base_url, "/api/operations/readiness", token=token),
             fetch(args.base_url, "/api/operations/metrics", token=token),
-            Thresholds(),
+            thresholds,
         )
     except Exception:
         print(

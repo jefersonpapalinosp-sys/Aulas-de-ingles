@@ -1,6 +1,7 @@
 """Gate humano e de privacidade dos provedores assistidos."""
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -99,6 +100,90 @@ def test_manifesto_rejeita_campos_de_privacidade_ambiguos(tmp_path: Path) -> Non
     path.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(ValueError, match="provider_uses_data_for_training"):
+        load_provider_review(path)
+
+
+def conversation_metrics() -> GateMetrics:
+    return GateMetrics(30, 30, 0, 30, 24, 900, rated_lessons=5)
+
+
+def test_conversation_usa_configuracao_propria_e_nao_ativa_flags() -> None:
+    review = replace(approved_review(), modality="conversation")
+    settings = Settings(
+        assist_provider_name="pilot-provider",
+        assist_writing_url="https://gateway.example/writing",
+    )
+    report = evaluate_gate("conversation", conversation_metrics(), review, settings)
+    assert report.blocking_reasons == ["provider_configured"]
+    settings.assist_dialogue_url = "https://gateway.example/dialogue"
+    settings.assist_writing_url = None
+    assert evaluate_gate("conversation", conversation_metrics(), review, settings).approved
+    assert not settings.assisted_features_enabled
+    assert not settings.dialogue_practice_enabled
+
+
+@pytest.mark.parametrize("modality", [None, "writing", "transcription"])
+def test_conversation_nao_reutiliza_manifesto_de_outra_modalidade(modality) -> None:
+    report = evaluate_gate(
+        "conversation",
+        conversation_metrics(),
+        replace(approved_review(), modality=modality),
+        Settings(assist_provider_name="pilot-provider", assist_dialogue_url="https://example.test"),
+    )
+    assert report.blocking_reasons == ["review_modality_matches"]
+
+
+@pytest.mark.parametrize(
+    ("metrics", "reason"),
+    [
+        (replace(conversation_metrics(), rated_lessons=4), "minimum_rated_lessons"),
+        (replace(conversation_metrics(), unknown_cost_turns=1), "cost_known"),
+        (replace(conversation_metrics(), cost_microusd=1001), "within_budget"),
+        (replace(conversation_metrics(), successful=38, failed=2), "technical_failure_rate"),
+        (replace(conversation_metrics(), rated=29), "minimum_human_ratings"),
+        # 79,999% arredonda para 80%; o gate deve recusar mesmo assim.
+        (replace(conversation_metrics(), rated=100_000, helpful=79_999), "helpful_rate"),
+    ],
+)
+def test_conversation_recusa_evidencia_insuficiente(metrics, reason) -> None:
+    report = evaluate_gate(
+        "conversation",
+        metrics,
+        replace(approved_review(), modality="conversation"),
+        Settings(assist_provider_name="pilot-provider", assist_dialogue_url="https://example.test"),
+    )
+    assert reason in report.blocking_reasons and not report.approved
+
+
+def test_limiar_de_falha_nao_arredonda_antes_de_decidir() -> None:
+    metrics = replace(conversation_metrics(), successful=95_001, failed=4_999)
+    report = evaluate_gate(
+        "conversation",
+        metrics,
+        replace(approved_review(), modality="conversation"),
+        Settings(assist_provider_name="pilot-provider", assist_dialogue_url="https://example.test"),
+    )
+    assert report.metrics["technical_failure_rate"] == 0.05
+    assert report.approved  # 4,999% é estritamente menor que 5%.
+
+
+def test_manifesto_exemplo_conversation_falha_fechado() -> None:
+    review = load_provider_review(
+        Path(__file__).resolve().parents[2] / "config/assist-provider-review.example.json"
+    )
+    assert review.modality == "conversation"
+    report = evaluate_gate("conversation", conversation_metrics(), review, Settings())
+    assert not report.approved
+    assert "region_approved" in report.blocking_reasons
+    assert "provider_training_disabled" in report.blocking_reasons
+    assert "retention_compatible" in report.blocking_reasons
+
+
+@pytest.mark.parametrize("modality", ["invalid", [], {}])
+def test_manifesto_rejeita_modalidade_invalida(tmp_path, modality) -> None:
+    path = tmp_path / "review.json"
+    path.write_text(json.dumps({"modality": modality}))
+    with pytest.raises(ValueError, match="modality"):
         load_provider_review(path)
 
 

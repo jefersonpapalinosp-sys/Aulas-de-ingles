@@ -85,6 +85,7 @@ async def test_audio_de_dialogo_dispensa_cue_e_shadowing_continua_exigindo(
         await session.rollback()
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_job_de_dialogo_por_texto_dispensa_audio_e_transcricao_nao(
     session: AsyncSession,

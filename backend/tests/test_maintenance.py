@@ -20,6 +20,8 @@ from app.db.session import get_sessionmaker
 from app.services import assist_quota, maintenance, transcription_queue
 from tests.test_writing import conta
 
+pytestmark = pytest.mark.timezone
+
 
 async def fixtures(session, *, jobs=0):
     now = datetime.now(UTC)

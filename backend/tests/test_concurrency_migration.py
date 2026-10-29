@@ -20,6 +20,7 @@ async def test_audit_empty_personal_data_reports_counts_only(session):
     assert all(isinstance(count, int) and count == 0 for count in report.values())
 
 
+@pytest.mark.timezone
 async def test_audit_reports_cross_owner_and_missing_sources_without_repair(session):
     owner = User(email="audit-owner@example.com", password_hash="synthetic", display_name="Owner")
     other = User(email="audit-other@example.com", password_hash="synthetic", display_name="Other")

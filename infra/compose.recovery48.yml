@@ -1,0 +1,27 @@
+# Laboratório sintético INFRA-48, separado dos recibos e volumes antigos.
+name: aulas-ingles-recovery48
+services:
+  source-db:
+    extends:
+      file: compose.recovery.yml
+      service: source-db
+  target-db:
+    extends:
+      file: compose.recovery.yml
+      service: target-db
+  volumes:
+    extends:
+      file: compose.recovery.yml
+      service: volumes
+networks:
+  default:
+    internal: true
+volumes:
+  source_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  target_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  source_voice:
+    labels: {org.aulas.environment: disposable-recovery}
+  target_voice:
+    labels: {org.aulas.environment: disposable-recovery}

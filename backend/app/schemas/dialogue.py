@@ -21,6 +21,7 @@ from app.domain.enums import (
     TurnRole,
     TurnState,
 )
+from app.schemas.assist import TranscriptionWordOut
 
 
 class DialogueCreateIn(BaseModel):
@@ -41,6 +42,16 @@ class DialogueHintOut(BaseModel):
     message: str
 
 
+class DialogueTermCheck(BaseModel):
+    text: str
+    covered: bool
+
+
+class DialogueCheckDetails(BaseModel):
+    target_terms: list[DialogueTermCheck]
+    grammar_patterns: list[DialogueTermCheck]
+
+
 class DialogueTurnOut(BaseModel):
     position: int
     role: TurnRole
@@ -49,6 +60,7 @@ class DialogueTurnOut(BaseModel):
     transcript: str | None
     # Mapa código→cumpriu. Sem nota, sem percentual: é o contrato do ADR.
     checks: dict[str, bool]
+    check_details: DialogueCheckDetails | None = None
     partner_text: str | None
     hints: list[DialogueHintOut]
     confidence: float | None
@@ -58,9 +70,24 @@ class DialogueTurnOut(BaseModel):
     job_id: int | None
     created_at: datetime
     completed_at: datetime | None
+    words: list[TranscriptionWordOut] = Field(default_factory=list)
 
 
-class DialogueOut(BaseModel):
+class DialogueStatusOut(BaseModel):
+    enabled: bool
+    guided_enabled: bool
+    audio_enabled: bool
+    daily_quota: int
+    remaining_today: int
+    reserved_today: int
+    consumed_today: int
+    quota_resets_at: datetime
+    retention_days: int
+    cost_microusd_today: int
+    cost_incomplete: bool
+
+
+class DialogueSummaryOut(BaseModel):
     id: int
     lesson_id: int
     mode: DialogueMode
@@ -74,7 +101,15 @@ class DialogueOut(BaseModel):
     rubric_version: str
     started_at: datetime
     ended_at: datetime | None
+
+
+class DialogueOut(DialogueSummaryOut):
     turns: list[DialogueTurnOut]
+
+
+class DialoguePageOut(BaseModel):
+    items: list[DialogueSummaryOut]
+    next_cursor: str | None
 
 
 class DialogueTurnAcceptedOut(BaseModel):

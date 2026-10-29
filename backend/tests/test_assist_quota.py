@@ -246,6 +246,7 @@ async def test_deleted_inflight_job_keeps_cost_without_recreating_text(
     assert await session.scalar(select(func.count()).select_from(TranscriptionJob)) == 0
 
 
+@pytest.mark.timezone
 @pytest.mark.parametrize("expired", ["reservation", "job", "missing_audio"])
 async def test_no_dispatch_without_live_reservation_and_audio(
     client, session, providers, tmp_path, expired
@@ -261,7 +262,11 @@ async def test_no_dispatch_without_live_reservation_and_audio(
             )
         )
     elif expired == "job":
-        await session.execute(update(TranscriptionJob).values(expires_at=datetime.now(UTC)))
+        # O worker usa o relógio Python; a retenção usa o PostgreSQL. Este
+        # cenário exige um job já vencido em ambos, não igualdade entre relógios.
+        await session.execute(update(TranscriptionJob).values(
+            expires_at=func.least(func.now(), datetime.now(UTC)) - timedelta(minutes=1)
+        ))
     else:
         for path in tmp_path.iterdir():
             path.unlink()
@@ -281,6 +286,7 @@ async def test_no_dispatch_without_live_reservation_and_audio(
     assert job is None if expired == "job" else job.status == "failed"
 
 
+@pytest.mark.timezone
 async def test_utc_boundary_expiry_and_other_account_isolation(client, session, providers):
     first = await conta(client, "first")
     second = await conta(client, "second")
@@ -330,6 +336,7 @@ async def test_provider_failure_consumes_once_but_disabled_does_not(client, prov
     assert (await status(client, headers))["used_today"] == 1
 
 
+@pytest.mark.timezone
 async def test_expiry_during_uncommitted_dispatch_does_not_admit_extra_unit(
     client, session, providers, monkeypatch
 ):

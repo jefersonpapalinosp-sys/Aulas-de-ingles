@@ -8,12 +8,19 @@ arquivo de homologação.
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import get_args
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
-from app.db.models import TranscriptionJob, WritingFeedbackRecord
+from app.db.models import (
+    AssistReservation,
+    DialogueTurn,
+    SpeakingDialogue,
+    TranscriptionJob,
+    WritingFeedbackRecord,
+)
 from app.domain.enums import AssistModality
 
 # Conjunto único em app/domain/enums.py; o nome local é mantido.
@@ -28,6 +35,8 @@ class GateMetrics:
     rated: int
     helpful: int
     cost_microusd: int
+    rated_lessons: int = 0
+    unknown_cost_turns: int = 0
 
     @property
     def helpful_rate(self) -> float | None:
@@ -51,6 +60,7 @@ class ProviderReview:
     budget_microusd: int | None
     safety_review_approved: bool
     automation_notice_understood: bool
+    modality: Modality | None = None
 
 
 @dataclass(frozen=True)
@@ -91,6 +101,9 @@ def load_provider_review(path: Path) -> ProviderReview:
         return value
 
     provider_name = raw.get("provider_name")
+    modality = raw.get("modality")
+    if modality is not None and modality not in get_args(Modality):
+        raise ValueError("modality precisa ser transcription, writing ou conversation.")
     provider_uses_data_for_training = raw.get("provider_uses_data_for_training")
     if not isinstance(provider_name, str) or not provider_name.strip():
         raise ValueError("provider_name precisa ser preenchido.")
@@ -110,10 +123,69 @@ def load_provider_review(path: Path) -> ProviderReview:
         budget_microusd=optional_int("budget_microusd"),
         safety_review_approved=boolean("safety_review_approved"),
         automation_notice_understood=boolean("automation_notice_understood"),
+        modality=modality,
     )
 
 
-async def collect_gate_metrics(session: AsyncSession, modality: Modality) -> GateMetrics:
+async def _conversation_metrics(session: AsyncSession, provider_name: str) -> GateMetrics:
+    # Um turno contém texto e STT: somar o job novamente duplicaria o custo.
+    successful = (
+        (DialogueTurn.state == "completed")
+        & ~DialogueTurn.fallback
+        & DialogueTurn.error_code.is_(None)
+    )
+    terminal = DialogueTurn.state.in_(("completed", "failed"))
+    rated = successful & DialogueTurn.human_rating.is_not(None)
+    row = (
+        await session.execute(
+            select(
+                func.count(DialogueTurn.id),
+                func.count(DialogueTurn.id).filter(successful),
+                func.count(DialogueTurn.id).filter(terminal & ~successful),
+                func.count(DialogueTurn.id).filter(rated),
+                func.count(DialogueTurn.id).filter(
+                    successful, DialogueTurn.human_rating == "helpful"
+                ),
+                func.coalesce(func.sum(DialogueTurn.cost_microusd), 0),
+                func.count(func.distinct(SpeakingDialogue.lesson_id)).filter(rated),
+                func.count(DialogueTurn.id).filter(
+                    terminal, AssistReservation.cost_known.is_distinct_from(True)
+                ),
+            )
+            .select_from(DialogueTurn)
+            .join(SpeakingDialogue, DialogueTurn.dialogue_id == SpeakingDialogue.id)
+            .outerjoin(TranscriptionJob, DialogueTurn.transcription_job_id == TranscriptionJob.id)
+            .outerjoin(
+                AssistReservation,
+                TranscriptionJob.assist_reservation_id == AssistReservation.id,
+            )
+            .where(
+                SpeakingDialogue.mode == "guided",
+                SpeakingDialogue.provider_name == provider_name,
+                DialogueTurn.role == "student",
+                DialogueTurn.user_id == SpeakingDialogue.user_id,
+            )
+        )
+    ).one()
+    return GateMetrics(
+        total=int(row[0]),
+        successful=int(row[1]),
+        failed=int(row[2]),
+        rated=int(row[3]),
+        helpful=int(row[4]),
+        cost_microusd=int(row[5]),
+        rated_lessons=int(row[6]),
+        unknown_cost_turns=int(row[7]),
+    )
+
+
+async def collect_gate_metrics(
+    session: AsyncSession, modality: Modality, *, provider_name: str | None = None
+) -> GateMetrics:
+    if modality == "conversation":
+        if not provider_name or not provider_name.strip():
+            raise ValueError("conversation exige o nome do provedor avaliado.")
+        return await _conversation_metrics(session, provider_name)
     if modality == "transcription":
         row = (
             await session.execute(
@@ -130,10 +202,10 @@ async def collect_gate_metrics(session: AsyncSession, modality: Modality) -> Gat
                         TranscriptionJob.human_rating == "helpful",
                     ),
                     func.coalesce(func.sum(TranscriptionJob.cost_microusd), 0),
-                )
+                ).where(TranscriptionJob.kind == "transcription")
             )
         ).one()
-    else:
+    elif modality == "writing":
         assisted = WritingFeedbackRecord.provider.is_not(None)
         row = (
             await session.execute(
@@ -161,6 +233,8 @@ async def collect_gate_metrics(session: AsyncSession, modality: Modality) -> Gat
                 )
             )
         ).one()
+    else:
+        raise ValueError("Modalidade de assistência inválida.")
 
     return GateMetrics(
         total=int(row[0]),
@@ -178,11 +252,12 @@ def evaluate_gate(
     review: ProviderReview,
     settings: Settings,
 ) -> GateReport:
-    provider_configured = (
-        bool(settings.assist_transcription_url)
-        if modality == "transcription"
-        else settings.writing_assist_configured
-    )
+    providers: dict[Modality, bool] = {
+        "transcription": bool(settings.assist_transcription_url),
+        "writing": settings.writing_assist_configured,
+        "conversation": settings.dialogue_assist_configured,
+    }
+    provider_configured = providers[modality]
     criteria = {
         "provider_configured": provider_configured,
         "provider_name_matches": review.provider_name == settings.assist_provider_name,
@@ -197,12 +272,18 @@ def evaluate_gate(
         "within_budget": review.budget_microusd is not None
         and metrics.cost_microusd <= review.budget_microusd,
         "minimum_human_ratings": metrics.rated >= 30,
-        "helpful_rate": metrics.helpful_rate is not None and metrics.helpful_rate >= 0.8,
-        "technical_failure_rate": metrics.technical_failure_rate is not None
-        and metrics.technical_failure_rate < 0.05,
+        # Arredondamento é só para exibição, nunca para decidir o limiar.
+        "helpful_rate": metrics.rated > 0 and metrics.helpful * 5 >= metrics.rated * 4,
+        "technical_failure_rate": metrics.successful + metrics.failed > 0
+        and metrics.failed * 20 < metrics.successful + metrics.failed,
         "safety_review_approved": review.safety_review_approved,
         "automation_notice_understood": review.automation_notice_understood,
     }
+    if review.modality is not None or modality == "conversation":
+        criteria["review_modality_matches"] = review.modality == modality
+    if modality == "conversation":
+        criteria["minimum_rated_lessons"] = metrics.rated_lessons >= 5
+        criteria["cost_known"] = metrics.unknown_cost_turns == 0
     reasons = [name for name, passed in criteria.items() if not passed]
     return GateReport(
         modality=modality,

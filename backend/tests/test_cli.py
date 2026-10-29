@@ -86,17 +86,22 @@ def test_editorial_audit_recusa_argumento_desconhecido_antes_do_banco(
     assert saida.value.code == 2
 
 
-def test_gate_assistido_falha_fechado(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+@pytest.mark.parametrize("modality", ["writing", "transcription", "conversation"])
+def test_gate_assistido_falha_fechado(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, modality: str
+) -> None:
     review = tmp_path / "review.json"
     review.write_text("{}", encoding="utf-8")
 
     async def gate(_modality: str, _review_path: Path) -> bool:
+        assert _modality == modality
+        assert _review_path == review
         return False
 
     monkeypatch.setattr(cli, "_assist_gate", gate)
     with pytest.raises(SystemExit) as saida:
         cli.main_com_argumentos(
-            ["assist-gate", "--modality", "writing", "--review-file", str(review)]
+            ["assist-gate", "--modality", modality, "--review-file", str(review)]
         )
     assert saida.value.code == 1
 

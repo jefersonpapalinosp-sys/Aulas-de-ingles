@@ -1,0 +1,9 @@
+.dialogue-workspace label { display: grid; gap: .4rem; margin-block: .8rem; }
+.dialogue-workspace textarea { width: 100%; min-height: 6rem; resize: vertical; }
+.dialogue-workspace button { margin: .3rem .5rem .3rem 0; }
+.dialogue-turns { padding-inline-start: 1.4rem; }
+.dialogue-turn { margin-block: 1rem; padding: .8rem; border: 1px solid currentColor; border-radius: .5rem; overflow-wrap: anywhere; }
+.dialogue-partner { font-size: 1.1rem; }
+.dialogue-recording audio { display: block; max-width: 100%; }
+.dialogue-workspace .low-confidence { text-decoration: underline dotted; }
+.dialogue-workspace :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }

@@ -13,12 +13,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import (
     Course,
     CourseUnit,
+    DialogueTurn,
     Exercise,
     ExerciseAttempt,
     Lesson,
     LessonMedia,
     SkillEvidence,
     SpeakingAttempt,
+    SpeakingDialogue,
     TranscriptCue,
     WritingFeedbackRecord,
     WritingPrompt,
@@ -76,7 +78,17 @@ async def skill_summaries(
         .join(Course, Lesson.course_id == Course.id)
         .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
     )
+    dialogue_ids = scoped_ids(
+        select(DialogueTurn.id)
+        .join(SpeakingDialogue, DialogueTurn.dialogue_id == SpeakingDialogue.id)
+        .join(Lesson, SpeakingDialogue.lesson_id == Lesson.id)
+        .join(Course, Lesson.course_id == Course.id)
+        .join(CourseUnit, Lesson.unit_id == CourseUnit.id)
+    )
     scope_filter = or_(
+        and_(
+            SkillEvidence.source_type == "dialogue_turn", SkillEvidence.source_id.in_(dialogue_ids)
+        ),
         and_(
             SkillEvidence.source_type == "exercise_attempt",
             SkillEvidence.source_id.in_(exercise_ids),

@@ -6,7 +6,7 @@ import urllib.error
 import urllib.request
 
 
-def get(path: str):
+def get(path: str) -> object:
     with urllib.request.urlopen(
         f"http://rollback-api:8000{path}", timeout=3
     ) as response:
@@ -22,7 +22,8 @@ def main() -> None:
             health = get("/api/health")
             courses = get("/api/courses")
             if (
-                health.get("status") != "ok"
+                not isinstance(health, dict)
+                or health.get("status") != "ok"
                 or not isinstance(courses, list)
                 or not courses
             ):

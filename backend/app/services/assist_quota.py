@@ -175,12 +175,14 @@ async def release(session: AsyncSession, reservation_id: int | None, reason: str
     )
 
 
-async def record_cost(session: AsyncSession, reservation_id: int | None, cost: int) -> None:
+async def record_cost(
+    session: AsyncSession, reservation_id: int | None, cost: int, *, known: bool = True
+) -> None:
     await session.execute(
         update(AssistReservation)
         .where(
             AssistReservation.id == reservation_id,
             AssistReservation.state == "consumed",
         )
-        .values(cost_microusd=cost, cost_known=True)
+        .values(cost_microusd=cost, cost_known=known)
     )

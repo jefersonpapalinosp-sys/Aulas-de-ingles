@@ -15,7 +15,7 @@ ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -
         prod-seed backup restore cov test-db-up test-db-down test-api-prepare e2e-up e2e-down e2e-check \
         recovery-lab-up recovery-lab-prepare recovery-lab-down upgrade-lab-up upgrade-lab-prepare upgrade-lab-down backup-verify test-recovery \
         test-recovery-integration test-upgrade-integration roles-lab-up roles-lab-prepare test-roles roles-lab-down \
-        notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark \
+        notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark dialogue-benchmark \
         operations-check operations-alert public-probe cue-audit test-failure-rehearsal easypanel-env easypanel-check
 
 help: ## Lista os comandos
@@ -69,7 +69,8 @@ test-failure-rehearsal: test-api-prepare ## Ensaia falhas controladas de banco, 
 		tests/test_writing.py::test_feedback_assistido_e_opcional_avaliavel_e_tem_fallback \
 		tests/test_speaking.py::test_falha_do_provedor_mantem_audio_e_autoavaliacao \
 		tests/test_speaking.py::test_worker_repete_com_backoff_e_chave_idempotente \
-		tests/test_speaking.py::test_worker_retoma_job_interrompido_apos_timeout
+		tests/test_speaking.py::test_worker_retoma_job_interrompido_apos_timeout \
+		tests/test_provider_incident.py
 
 easypanel-env: ## Gera segredos locais; origin=https://dominio-publico é opcional
 	python3 -m ops.easypanel_deploy init $(if $(origin),--origin "$(origin)",)
@@ -119,6 +120,9 @@ test-api: test-api-prepare ## pytest contra banco descartável, nunca contra dev
 notebook-benchmark: test-api-prepare ## Mede Caderno 1k/10k só no PostgreSQL descartável
 	$(OPS) -m ops.notebook_performance
 
+dialogue-benchmark: test-api-prepare ## Mede histórico e Caderno com 1k/10k turnos sintéticos
+	$(OPS) -m ops.dialogue_performance $(DIALOGUE_BENCHMARK_ARGS)
+
 review-benchmark: test-api-prepare ## Mede Revisão 1k/10k só no PostgreSQL descartável
 	$(OPS) -m ops.review_performance
 
@@ -136,6 +140,7 @@ test-web: ## vitest
 
 lint: ## ruff + mypy + eslint + tsc
 	cd backend && uv run ruff check . && uv run mypy app
+	uv run --project backend mypy --config-file mypy-ops.ini
 	cd frontend && npm run lint && npm run typecheck
 
 fmt: ## Formata o backend

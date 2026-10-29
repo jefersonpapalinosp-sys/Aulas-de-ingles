@@ -44,6 +44,8 @@ export const STUDY_INVALIDATIONS = {
   transcriptionChange: ['speaking-attempts', 'assist-status'],
   /** Avaliação humana de uma transcrição. */
   transcriptionRating: ['speaking-attempts'],
+  /** Resultado/exclusão de diálogo: cota, revisão e evidência. */
+  dialogueChange: ['dialogue-status', 'review', 'today', 'skills'],
   /** Anotação do caderno criada, editada ou excluída. */
   notebookEntry: ['notebook'],
   /** Plano de estudo salvo. */

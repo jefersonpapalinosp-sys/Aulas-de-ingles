@@ -179,6 +179,7 @@ async def test_rascunho_e_isolado_por_conta(client: AsyncClient) -> None:
     assert versions["items"] == []
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_paginas_de_escrita_sao_estaveis_pequenas_e_privadas(
     client: AsyncClient, session: AsyncSession, monkeypatch: pytest.MonkeyPatch

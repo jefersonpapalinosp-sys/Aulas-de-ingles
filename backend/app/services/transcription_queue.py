@@ -19,7 +19,7 @@ from sqlalchemy.exc import TimeoutError as PoolTimeout
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
-from app.db.models import DialogueTurn, Lesson, SpeakingAttempt, SpeakingDialogue, TranscriptionJob
+from app.db.models import DialogueTurn, SpeakingAttempt, SpeakingDialogue, TranscriptionJob
 from app.db.session import dispose_engine, get_sessionmaker
 from app.domain.enums import JobKind
 from app.services import account_deletion, assist_quota, assistance, editorial_history, maintenance
@@ -237,24 +237,24 @@ async def _record_success(
 
 async def _dialogue_transcript(
     session: AsyncSession, settings: Settings, turn: DialogueTurn
-) -> tuple[str | None, str | None]:
+) -> tuple[str | None, str | None, assistance.TranscriptionResult | None]:
     """Transcrição do turno: já vem pronta no texto, ou sai do áudio.
 
-    Devolve `(transcript, erro)`. O turno por texto não gasta STT — é por isso
+    Devolve `(transcript, erro, metadados de STT)`. O turno por texto não gasta STT — é por isso
     que entrar por texto é alternativa de primeira classe e não um degrau
     inferior: custa menos e falha menos.
     """
     if turn.input_kind == "text":
-        return (turn.transcript or ""), None
+        return (turn.transcript or ""), None, None
     attempt = (
         await session.execute(
             select(SpeakingAttempt).where(SpeakingAttempt.id == turn.speaking_attempt_id)
         )
     ).scalar_one_or_none()
     if attempt is None or not attempt.storage_key or not attempt.mime_type:
-        return None, "audio_unavailable"
+        return None, "audio_unavailable", None
     if not settings.assist_transcription_url:
-        return None, "feature_disabled"
+        return None, "feature_disabled", None
     storage = AudioStorage(settings.speaking_storage_dir)
     try:
         audio = await asyncio.to_thread(
@@ -264,7 +264,7 @@ async def _dialogue_transcript(
             settings.speaking_max_bytes,
         )
     except (OSError, ValueError):
-        return None, "audio_unavailable"
+        return None, "audio_unavailable", None
     try:
         result = await asyncio.to_thread(
             assistance.call_transcription_provider,
@@ -276,10 +276,10 @@ async def _dialogue_transcript(
             idempotency_key=f"dialogue-stt-{turn.id}",
         )
     except assistance.ProviderFailure as error:
-        return None, error.code
+        return None, error.code, None
     except Exception:
-        return None, "internal_provider_error"
-    return result.text, None
+        return None, "internal_provider_error", None
+    return result.text, None, result
 
 
 async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
@@ -305,24 +305,28 @@ async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
                 select(SpeakingDialogue).where(SpeakingDialogue.id == turn.dialogue_id)
             )
         ).scalar_one()
-        lesson = (
-            await session.execute(select(Lesson).where(Lesson.id == dialogue_row.lesson_id))
-        ).scalar_one()
-        transcript, erro = await _dialogue_transcript(session, settings, turn)
+        lesson = await dialogue_service.lesson_for_dialogue(session, dialogue_row.lesson_id)
+        if not await _authorize_dispatch(claim):
+            return True
+        transcript, erro, stt = await _dialogue_transcript(session, settings, turn)
         if transcript is None:
             await _record_failure(claim, erro or "internal_provider_error", retryable=False)
-            return True
-        if not await _authorize_dispatch(claim):
             return True
         brief = await dialogue_service.brief_for_lesson(session, lesson)
         outcome = await dialogue_service.resolve_turn(
             session, turn, dialogue_row, brief, transcript
         )
-        await session.commit()
-    if outcome.cost_microusd and outcome.cost_known:
-        async with get_sessionmaker()() as session, session.begin():
+        # Resultado, custo e confirmação do job são atômicos. Uma queda
+        # entre commits não pode deixar o turno pronto com custo não registrado.
+        total_cost = outcome.cost_microusd + (stt.cost_microusd if stt else 0)
+        cost_known = outcome.cost_known and (stt.cost_known if stt else True)
+        if stt is not None:
+            turn.cost_microusd = total_cost
+            await assist_quota.record_cost(
+                session, claim.reservation_id, total_cost, known=cost_known
+            )
+        elif outcome.cost_known:
             await assist_quota.record_cost(session, claim.reservation_id, outcome.cost_microusd)
-    async with get_sessionmaker()() as session, session.begin():
         job = (
             await session.execute(
                 select(TranscriptionJob).where(TranscriptionJob.id == claim.job_id)
@@ -333,6 +337,12 @@ async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
             job.completed_at = datetime.now(UTC)
             job.processing_started_at = None
             job.error_code = outcome.error_code
+            if stt is not None:
+                job.words = stt.words
+                job.transcript_text = stt.text
+                job.mean_confidence = stt.mean_confidence
+                job.cost_microusd = total_cost
+        await session.commit()
     logger.info(
         "dialogue_job_completed",
         extra={

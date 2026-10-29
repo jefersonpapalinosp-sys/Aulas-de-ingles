@@ -7,8 +7,9 @@ import json
 import os
 import re
 import shutil
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 from ops.recovery_archive import FORMAT, LEGACY_FORMAT, RecoveryError, require
@@ -59,22 +60,22 @@ class PrunePlan:
     partials: tuple[Partial, ...]
     foreign: tuple[Foreign, ...]
 
-    def partial_removable(self, partial):
+    def partial_removable(self, partial: Partial) -> bool:
         return self.now - partial.touched >= PARTIAL_GRACE
 
-    def targets(self):
+    def targets(self) -> list[str]:
         removable = [p.name for p in self.partials if self.partial_removable(p)]
         return [b.name for b in self.remove] + removable
 
 
-def parse_stamp(stamp):
+def parse_stamp(stamp: str) -> datetime | None:
     try:
         return datetime.strptime(stamp, STAMP_FORMAT).replace(tzinfo=UTC)
     except ValueError:
         return None
 
 
-def tree_size(path):
+def tree_size(path: Path) -> int:
     total = 0
     for current, _dirs, files in os.walk(path):
         for name in files:
@@ -82,13 +83,13 @@ def tree_size(path):
     return total
 
 
-def last_touch(path, stamp):
+def last_touch(path: Path, stamp: datetime) -> datetime:
     moments = [stamp, datetime.fromtimestamp(path.lstat().st_mtime, UTC)]
     moments += [datetime.fromtimestamp(child.lstat().st_mtime, UTC) for child in path.iterdir()]
     return max(moments)
 
 
-def identity_matches(path):
+def identity_matches(path: Path) -> bool:
     """Só confere que o manifesto existe e nomeia este diretório; nada do conteúdo é retido."""
     manifest = path / "manifest.json"
     if manifest.is_symlink() or not manifest.is_file() or manifest.stat().st_size > MAX_MANIFEST:
@@ -104,12 +105,14 @@ def identity_matches(path):
     )
 
 
-def scan(root):
+def scan(root: Path) -> tuple[list[Bundle], list[Partial], list[Foreign]]:
     require(
         root.is_dir() and not root.is_symlink(),
         "Diretório de backups ausente ou é link; poda recusada.",
     )
-    bundles, partials, foreign = [], [], []
+    bundles: list[Bundle] = []
+    partials: list[Partial] = []
+    foreign: list[Foreign] = []
     for entry in sorted(root.iterdir(), key=lambda p: p.name):
         name = entry.name
         if entry.is_symlink():
@@ -142,15 +145,17 @@ def scan(root):
     return bundles, partials, foreign
 
 
-def select(bundles, keep_daily=KEEP_DAILY, keep_weekly=KEEP_WEEKLY):
+def select(
+    bundles: Iterable[Bundle], keep_daily: int = KEEP_DAILY, keep_weekly: int = KEEP_WEEKLY
+) -> tuple[tuple[tuple[Bundle, tuple[str, ...]], ...], tuple[Bundle, ...]]:
     """Mais recente sempre; o mais novo de cada um dos últimos `keep_daily` dias civis UTC;
     o mais novo de cada uma das `keep_weekly` semanas ISO anteriores à semana do diário mais antigo.
     """
     ordered = sorted(bundles, key=lambda b: (b.stamp, b.name), reverse=True)
-    reasons = {}
+    reasons: dict[str, list[str]] = {}
     if ordered:
         reasons.setdefault(ordered[0].name, []).append("mais recente")
-    days = []
+    days: list[date] = []
     for bundle in ordered:
         day = bundle.stamp.date()
         if day in days:
@@ -160,7 +165,7 @@ def select(bundles, keep_daily=KEEP_DAILY, keep_weekly=KEEP_WEEKLY):
         days.append(day)
         reasons.setdefault(bundle.name, []).append("diário")
     oldest_daily_week = days[-1].isocalendar()[:2] if days else None
-    weeks = []
+    weeks: list[tuple[int, ...]] = []
     for bundle in ordered:
         week = bundle.stamp.isocalendar()[:2]
         if (oldest_daily_week is not None and week >= oldest_daily_week) or week in weeks:
@@ -174,7 +179,10 @@ def select(bundles, keep_daily=KEEP_DAILY, keep_weekly=KEEP_WEEKLY):
     return keep, remove
 
 
-def plan_prune(root, now=None, keep_daily=KEEP_DAILY, keep_weekly=KEEP_WEEKLY):
+def plan_prune(
+    root: str | Path, now: datetime | None = None,
+    keep_daily: int = KEEP_DAILY, keep_weekly: int = KEEP_WEEKLY,
+) -> PrunePlan:
     root = Path(root)
     now = now or datetime.now(UTC)
     bundles, partials, foreign = scan(root)
@@ -193,7 +201,7 @@ def plan_prune(root, now=None, keep_daily=KEEP_DAILY, keep_weekly=KEEP_WEEKLY):
     )
 
 
-def confirm_removable(plan, name):
+def confirm_removable(plan: PrunePlan, name: str) -> Path:
     require(
         BUNDLE_RE.fullmatch(name.removeprefix(PARTIAL_PREFIX)) is not None,
         "Nome fora do padrão de pacote; remoção recusada.",
@@ -216,8 +224,8 @@ def confirm_removable(plan, name):
     return path
 
 
-def apply_prune(plan):
-    removed = []
+def apply_prune(plan: PrunePlan) -> list[str]:
+    removed: list[str] = []
     for name in plan.targets():
         path = confirm_removable(plan, name)
         try:
@@ -230,7 +238,7 @@ def apply_prune(plan):
     return removed
 
 
-def human(size):
+def human(size: int) -> str:
     value = float(size)
     for unit in ("B", "KB", "MB", "GB"):
         if value < 1024:
@@ -239,15 +247,15 @@ def human(size):
     return f"{value:.1f} TB"
 
 
-def _when(moment):
+def _when(moment: datetime) -> str:
     return f"{moment:%Y-%m-%d %H:%M:%SZ}"
 
 
-def _age_hours(plan, partial):
+def _age_hours(plan: PrunePlan, partial: Partial) -> float:
     return (plan.now - partial.touched) / timedelta(hours=1)
 
 
-def render_text(plan, removed):
+def render_text(plan: PrunePlan, removed: Sequence[str] | None) -> str:
     mode = "aplicada" if removed is not None else "dry-run"
     lines = [
         f"Poda de {plan.root} ({mode}); referência {plan.now:%Y-%m-%dT%H:%M:%SZ}; "
@@ -275,7 +283,7 @@ def render_text(plan, removed):
     return "\n".join(lines)
 
 
-def plan_as_dict(plan, removed):
+def plan_as_dict(plan: PrunePlan, removed: Sequence[str] | None) -> dict[str, object]:
     return {
         "root": str(plan.root),
         "mode": "apply" if removed is not None else "dry-run",
@@ -310,7 +318,9 @@ def plan_as_dict(plan, removed):
     }
 
 
-def render_plan(plan, removed=None, as_json=False):
+def render_plan(
+    plan: PrunePlan, removed: Sequence[str] | None = None, as_json: bool = False
+) -> str:
     if as_json:
         return json.dumps(plan_as_dict(plan, removed), ensure_ascii=False, indent=2, sort_keys=True)
     return render_text(plan, removed)

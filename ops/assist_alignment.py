@@ -10,10 +10,18 @@ import os
 import sys
 import tempfile
 import time
+from collections.abc import Mapping
 from pathlib import Path
 
 from ops import concurrency_rollout, dev_alignment, recovery, study_rollout
-from ops.recovery_archive import RecoveryError, file_info, require, verify_bundle, write_json
+from ops.recovery_archive import (
+    FileInfo,
+    RecoveryError,
+    file_info,
+    require,
+    verify_bundle,
+    write_json,
+)
 
 BASE = "e17b5fad0264"
 HEAD = "f28c6abe1375"
@@ -24,21 +32,23 @@ NEW_COLUMNS = {
 SMOKE_SCRIPT = recovery.ROOT / "ops" / "assist_alignment_smoke.py"
 
 
-def fingerprints(target):
+def fingerprints(target: recovery.Target) -> dict[str, study_rollout.Fingerprint]:
     return study_rollout.fingerprints(
         target, excluded_columns=NEW_COLUMNS, excluded_tables=("assist_reservation",)
     )
 
 
-def validate_manifest(manifest):
+def validate_manifest(manifest: Mapping[str, object]) -> None:
+    origin = study_rollout.json_object(manifest.get("source"))
+    snapshot = study_rollout.json_object(manifest.get("snapshot"))
     require(
-        manifest["source"]["kind"] == "dev" and manifest["source"]["project"] == "aulas-ingles",
+        origin.get("kind") == "dev" and origin.get("project") == "aulas-ingles",
         "Exige backup do desenvolvimento; estudo/produção não são aceitos.",
     )
-    require(manifest["snapshot"]["revision"] == [BASE], "Revisão de origem não prevista.")
+    require(snapshot.get("revision") == [BASE], "Revisão de origem não prevista.")
 
 
-def verify_backfill(target):
+def verify_backfill(target: recovery.Target) -> None:
     # EXCEPT ALL nos dois sentidos verifica também duplicatas, ausências, vínculos,
     # custo desconhecido, datas e ausência de despacho inventado. Zero é válido.
     sql = """
@@ -72,12 +82,14 @@ def verify_backfill(target):
        WHERE provider IS NULL AND assist_reservation_id IS NOT NULL)
     """
     require(
-        recovery.query(target, sql) == 0,
+        study_rollout.query_count(target, sql) == 0,
         "Backfill diverge dos registros legados observáveis.",
     )
 
 
-def validate_receipt(receipt, *, manifest_hash, tools_image):
+def validate_receipt(
+    receipt: Mapping[str, object], *, manifest_hash: FileInfo, tools_image: str
+) -> None:
     require(
         receipt.get("verified") is True
         and receipt.get("revision") == HEAD
@@ -88,31 +100,47 @@ def validate_receipt(receipt, *, manifest_hash, tools_image):
     )
 
 
-def validate_smoke_receipt(receipt, *, manifest_hash, tools_image):
-    validate_receipt(receipt, manifest_hash=manifest_hash, tools_image=tools_image)
+def checked_smoke(value: object) -> dict[str, object]:
+    result = study_rollout.json_object(value)
     require(
-        receipt.get("smoke_script") == file_info(SMOKE_SCRIPT)
-        and receipt.get("http")
-        == {
+        result == {
             "verified": True,
             "mode": "http-clone",
             "checks": 11,
             "synthetic_user_remaining": 0,
             "provider_calls": 0,
-        },
+        }
+        and result["verified"] is True
+        and all(type(result[key]) is int for key in (
+            "checks", "synthetic_user_remaining", "provider_calls"
+        )),
+        "Smoke HTTP não aprovado.",
+    )
+    return result
+
+
+def validate_smoke_receipt(
+    receipt: Mapping[str, object], *, manifest_hash: FileInfo, tools_image: str
+) -> None:
+    validate_receipt(receipt, manifest_hash=manifest_hash, tools_image=tools_image)
+    require(
+        receipt.get("smoke_script") == file_info(SMOKE_SCRIPT),
         "Smoke HTTP da mesma versão não comprovado.",
     )
+    checked_smoke(receipt.get("http"))
 
 
-def smoke_clone(backup):
+def smoke_clone(backup: Path) -> None:
     manifest = verify_bundle(backup)
     validate_manifest(manifest)
+    snapshot = study_rollout.json_object(manifest["snapshot"])
     manifest_hash = file_info(backup / "manifest.json")
     tools_image = dev_alignment.image_id()
     prefix = f"dev39f-{manifest['bundle_id']}"
     receipt = concurrency_rollout.private_json(recovery.BACKUPS / f"{prefix}-rehearse.json")
     validate_receipt(receipt, manifest_hash=manifest_hash, tools_image=tools_image)
     proof = concurrency_rollout.private_json(recovery.BACKUPS / f"{prefix}-capture.json")
+    tables = study_rollout.checked_fingerprints(proof.get("tables"))
     require(
         proof["manifest"] == manifest_hash and proof["tools_image"] == tools_image,
         "Captura de outro backup/imagem.",
@@ -121,10 +149,10 @@ def smoke_clone(backup):
     recovery.check_target(target)
     recovery.quiet(target)
     with recovery.lease("dev-alignment"):
-        require(fingerprints(target) == proof["tables"], "Clone divergiu antes do smoke.")
+        require(fingerprints(target) == tables, "Clone divergiu antes do smoke.")
         require(
             recovery.query(target, recovery.SNAPSHOT_SQL)
-            == {**manifest["snapshot"], "revision": [HEAD]},
+            == {**snapshot, "revision": [HEAD]},
             "Revisão inesperada no clone.",
         )
         verify_backfill(target)
@@ -203,7 +231,7 @@ def smoke_clone(backup):
             recovery.docker("stop", container_id, timeout=30)
             recovery.docker("rm", container_id)
         recovery.quiet(target)
-        require(fingerprints(target) == proof["tables"], "Histórico mudou no smoke.")
+        require(fingerprints(target) == tables, "Histórico mudou no smoke.")
         verify_backfill(target)
         dev_alignment.verify_voice(target, manifest)
         receipt = {**receipt, "smoke_script": file_info(SMOKE_SCRIPT), "http": result}
@@ -212,17 +240,20 @@ def smoke_clone(backup):
         print("Smoke HTTP no clone: 11 verificações; dados preservados; nenhum provedor chamado.")
 
 
-def run(action, backup):
+def run(action: str, backup: Path) -> None:
     require(action in {"capture", "rehearse", "apply"}, "Ação não prevista.")
     manifest = verify_bundle(backup)
     validate_manifest(manifest)
+    snapshot = study_rollout.json_object(manifest["snapshot"])
+    origin = study_rollout.json_object(manifest["source"])
+    audio_files = study_rollout.json_object(manifest.get("audio_files"))
     source = recovery.source_target("dev")
     info = recovery.check_target(source)
     recovery.quiet(source)
     require(
-        manifest["source"]["database"] == source.database
-        and manifest["source"]["db_container_id"] == info["Id"]
-        and manifest["source"]["voice_volume"] == source.voice_volume,
+        origin.get("database") == source.database
+        and origin.get("db_container_id") == info["Id"]
+        and origin.get("voice_volume") == source.voice_volume,
         "Backup pertence a outra origem.",
     )
     manifest_hash = file_info(backup / "manifest.json")
@@ -247,12 +278,13 @@ def run(action, backup):
             print("Captura privada 39F concluída; sem conteúdo pessoal nos logs.")
             return
         proof = concurrency_rollout.private_json(capture_path)
+        tables = study_rollout.checked_fingerprints(proof.get("tables"))
         require(
             proof["manifest"] == manifest_hash and proof["tools_image"] == tools_image,
             "Backup ou imagem mudou após captura; exige novo ensaio.",
         )
         require(
-            fingerprints(source) == proof["tables"],
+            fingerprints(source) == tables,
             "Dados da origem mudaram após captura.",
         )
         if action == "rehearse":
@@ -283,7 +315,7 @@ def run(action, backup):
         recovery.quiet(target)
         require(
             recovery.query(target, recovery.SNAPSHOT_SQL) == manifest["snapshot"]
-            and fingerprints(target) == proof["tables"],
+            and fingerprints(target) == tables,
             "Destino diverge da origem capturada.",
         )
         dev_alignment.verify_voice(target, manifest)
@@ -291,8 +323,8 @@ def run(action, backup):
         recovery.quiet(target)
         require(
             recovery.query(target, recovery.SNAPSHOT_SQL)
-            == {**manifest["snapshot"], "revision": [HEAD]}
-            and fingerprints(target) == proof["tables"],
+            == {**snapshot, "revision": [HEAD]}
+            and fingerprints(target) == tables,
             "Dados históricos divergiram; não reabrir.",
         )
         verify_backfill(target)
@@ -303,10 +335,10 @@ def run(action, backup):
             "tools_image": tools_image,
             "revision": HEAD,
             "target": recovery.CONFIRM_ASSIST_CHECK if action == "rehearse" else "aulas-ingles/db",
-            "tables": len(proof["tables"]),
-            "rows": sum(t["count"] for t in proof["tables"].values()),
-            "audio_count": len(manifest["audio_files"]),
-            "legacy_reservations": recovery.query(
+            "tables": len(tables),
+            "rows": sum(t["count"] for t in tables.values()),
+            "audio_count": len(audio_files),
+            "legacy_reservations": study_rollout.query_count(
                 target, "SELECT count(*) FROM assist_reservation"
             ),
         }
@@ -316,7 +348,7 @@ def run(action, backup):
         )
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["capture", "rehearse", "smoke", "apply"])

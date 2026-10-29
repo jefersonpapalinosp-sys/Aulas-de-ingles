@@ -11,6 +11,8 @@ from app.api.activity import uncovered
 from app.db.models import StudyActiveInterval, StudyActivitySession
 from tests.test_dashboard import conta
 
+pytestmark = pytest.mark.timezone
+
 
 async def activity(client, session, headers, *, course="voa-level-1", number=31, start=None):
     lesson = (await client.get(f"/api/courses/{course}/lessons/{number}")).json()

@@ -92,12 +92,28 @@ class DialogueMetricsOut(BaseModel):
     quota_exhausted_accounts: int
 
 
+class AssistCostWindowOut(BaseModel):
+    starts_at: datetime
+    ends_at: datetime
+    consumed: int
+    cost_microusd: int
+    unknown_cost_reservations: int
+
+
+class AssistCostsOut(BaseModel):
+    """Ledger existente das três modalidades, por despacho e calendário UTC."""
+
+    daily: AssistCostWindowOut
+    monthly: AssistCostWindowOut
+
+
 class OperationsMetricsOut(BaseModel):
     sampled_at: datetime
     requests: RequestMetricsOut
     database: DatabaseMetricsOut
     transcription_queue: QueueMetricsOut
     dialogue: DialogueMetricsOut
+    assist_costs: AssistCostsOut
     account_deletions: DeletionMetricsOut
     legacy_review: LegacyReviewMetricsOut
     media: MediaMetricsOut

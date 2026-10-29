@@ -15,6 +15,7 @@ class AssistAlignmentTests(unittest.TestCase):
             "source": {"kind": "dev", "project": "aulas-ingles"},
             "snapshot": {"revision": [alignment.BASE]},
             "bundle_id": "fixture",
+            "audio_files": {},
         }
         receipt = {
             "verified": True,
@@ -219,11 +220,12 @@ class AssistAlignmentTests(unittest.TestCase):
         sql = query.call_args.args[1]
         self.assertEqual(sql.count("EXCEPT ALL"), 2)
         self.assertIn("provider IS NULL AND assist_reservation_id IS NOT NULL", sql)
-        with (
-            patch.object(recovery, "query", return_value=1),
-            self.assertRaises(RecoveryError),
-        ):
-            alignment.verify_backfill(recovery.ASSIST_CHECK)
+        for value in (1, None, False, 0.0, -1, "0"):
+            with (
+                patch.object(recovery, "query", return_value=value),
+                self.assertRaises(RecoveryError),
+            ):
+                alignment.verify_backfill(recovery.ASSIST_CHECK)
 
     def test_apply_needs_rehearsal_and_preservation_before_any_migration(self):
         target = recovery.Target("aulas-ingles", "db", "dev", "app", "db", "voice", None)
@@ -237,11 +239,12 @@ class AssistAlignmentTests(unittest.TestCase):
             },
             "snapshot": {"revision": [alignment.BASE]},
             "bundle_id": "fixture",
+            "audio_files": {},
         }
         proof = {
             "manifest": "hash",
             "tools_image": "image",
-            "tables": {"old": {"count": 1}},
+            "tables": {"old": {"count": 1, "sha256": "a" * 64}},
         }
         for changed in (False, True):
             with (

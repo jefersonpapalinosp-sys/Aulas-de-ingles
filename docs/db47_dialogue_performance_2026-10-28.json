@@ -1,0 +1,273 @@
+{
+  "contract": "dialogue-performance-v1",
+  "datasets": {
+    "1000": {
+      "dialogues": 84,
+      "notebook_entries": 1000,
+      "p95_pass": true,
+      "plans": {
+        "history_deep": {
+          "actual_rows": 8,
+          "execution_ms": 0.108,
+          "indexes": [
+            "uq_dialogue_turn_position"
+          ],
+          "node_types": [
+            "Limit",
+            "Result",
+            "Sort",
+            "Seq Scan",
+            "Aggregate",
+            "Bitmap Heap Scan",
+            "Bitmap Index Scan"
+          ],
+          "planning_ms": 0.418,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 124,
+          "shared_read_blocks_sum": 0
+        },
+        "notebook_deep": {
+          "actual_rows": 51,
+          "execution_ms": 0.093,
+          "indexes": [
+            "ix_notebook_entry_user_updated_id",
+            "uq_course_unit_id_course",
+            "uq_lesson_id_course"
+          ],
+          "node_types": [
+            "Limit",
+            "Nested Loop",
+            "Nested Loop",
+            "Nested Loop",
+            "Index Scan",
+            "Memoize",
+            "Index Scan",
+            "Memoize",
+            "Index Scan",
+            "Materialize",
+            "Seq Scan"
+          ],
+          "planning_ms": 1.027,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 46,
+          "shared_read_blocks_sum": 0
+        }
+      },
+      "routes": {
+        "history_deep": {
+          "http_ms": {
+            "max": 4.46,
+            "min": 3.03,
+            "p50": 3.25,
+            "p95": 4.17
+          },
+          "response_bytes_max": 1854,
+          "server_ms": {
+            "max": 3.15,
+            "min": 2.06,
+            "p50": 2.26,
+            "p95": 3.1
+          },
+          "sql_queries_max": 2
+        },
+        "history_first": {
+          "http_ms": {
+            "max": 23.35,
+            "min": 3.48,
+            "p50": 4.64,
+            "p95": 7.27
+          },
+          "response_bytes_max": 11503,
+          "server_ms": {
+            "max": 21.9,
+            "min": 2.53,
+            "p50": 3.38,
+            "p95": 6.04
+          },
+          "sql_queries_max": 2
+        },
+        "notebook_deep": {
+          "http_ms": {
+            "max": 8.46,
+            "min": 3.49,
+            "p50": 4.09,
+            "p95": 7.14
+          },
+          "response_bytes_max": 14653,
+          "server_ms": {
+            "max": 6.22,
+            "min": 2.48,
+            "p50": 2.94,
+            "p95": 4.45
+          },
+          "sql_queries_max": 2
+        },
+        "notebook_first": {
+          "http_ms": {
+            "max": 5.78,
+            "min": 3.21,
+            "p50": 3.47,
+            "p95": 5.38
+          },
+          "response_bytes_max": 14704,
+          "server_ms": {
+            "max": 4.85,
+            "min": 2.32,
+            "p50": 2.51,
+            "p95": 4.02
+          },
+          "sql_queries_max": 2
+        }
+      },
+      "traversal": {
+        "history": {
+          "exact_order": true,
+          "pages": 2,
+          "rows": 84
+        },
+        "notebook": {
+          "exact_order": true,
+          "pages": 20,
+          "rows": 1000
+        }
+      },
+      "turns": 1000
+    },
+    "10000": {
+      "dialogues": 834,
+      "notebook_entries": 10000,
+      "p95_pass": true,
+      "plans": {
+        "history_deep": {
+          "actual_rows": 51,
+          "execution_ms": 0.386,
+          "indexes": [
+            "ix_dialogue_user_started",
+            "uq_dialogue_turn_position"
+          ],
+          "node_types": [
+            "Limit",
+            "Index Scan",
+            "Aggregate",
+            "Index Scan"
+          ],
+          "planning_ms": 0.68,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 664,
+          "shared_read_blocks_sum": 0
+        },
+        "notebook_deep": {
+          "actual_rows": 51,
+          "execution_ms": 0.645,
+          "indexes": [
+            "ix_notebook_entry_user_updated_id",
+            "uq_course_unit_id_course",
+            "uq_lesson_id_course"
+          ],
+          "node_types": [
+            "Limit",
+            "Nested Loop",
+            "Nested Loop",
+            "Nested Loop",
+            "Index Scan",
+            "Memoize",
+            "Index Scan",
+            "Memoize",
+            "Index Scan",
+            "Materialize",
+            "Seq Scan"
+          ],
+          "planning_ms": 2.263,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 46,
+          "shared_read_blocks_sum": 0
+        }
+      },
+      "routes": {
+        "history_deep": {
+          "http_ms": {
+            "max": 20.06,
+            "min": 3.1,
+            "p50": 3.49,
+            "p95": 12.79
+          },
+          "response_bytes_max": 11503,
+          "server_ms": {
+            "max": 16.84,
+            "min": 2.17,
+            "p50": 2.52,
+            "p95": 9.56
+          },
+          "sql_queries_max": 2
+        },
+        "history_first": {
+          "http_ms": {
+            "max": 5.49,
+            "min": 3.36,
+            "p50": 3.53,
+            "p95": 5.36
+          },
+          "response_bytes_max": 11554,
+          "server_ms": {
+            "max": 3.95,
+            "min": 2.36,
+            "p50": 2.52,
+            "p95": 3.28
+          },
+          "sql_queries_max": 2
+        },
+        "notebook_deep": {
+          "http_ms": {
+            "max": 26.76,
+            "min": 3.08,
+            "p50": 4.46,
+            "p95": 20.31
+          },
+          "response_bytes_max": 14704,
+          "server_ms": {
+            "max": 21.72,
+            "min": 2.21,
+            "p50": 3.16,
+            "p95": 16.67
+          },
+          "sql_queries_max": 2
+        },
+        "notebook_first": {
+          "http_ms": {
+            "max": 20.35,
+            "min": 3.34,
+            "p50": 3.69,
+            "p95": 12.24
+          },
+          "response_bytes_max": 14756,
+          "server_ms": {
+            "max": 17.57,
+            "min": 2.44,
+            "p50": 2.65,
+            "p95": 10.15
+          },
+          "sql_queries_max": 2
+        }
+      },
+      "traversal": {
+        "history": {
+          "exact_order": true,
+          "pages": 17,
+          "rows": 834
+        },
+        "notebook": {
+          "exact_order": true,
+          "pages": 200,
+          "rows": 10000
+        }
+      },
+      "turns": 10000
+    }
+  },
+  "p95_pass": true,
+  "page_size": 50,
+  "postgres": "16.15",
+  "samples_per_route": 30,
+  "synthetic_accounts_removed": 2,
+  "target_p95_ms": 100
+}

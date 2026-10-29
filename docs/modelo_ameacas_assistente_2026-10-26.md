@@ -175,7 +175,7 @@ código pode verificar o que o provedor faz com o texto depois de recebê-lo. O
 que um gate pode garantir é que a declaração existe, está datada e foi lida
 antes de a modalidade ser liberada.
 
-**Bloqueio aberto, verificado em 26/10/2026.** O gate de liberação
+**Registro histórico, verificado em 26/10/2026; corrigido localmente em 29/10/2026.** O gate de liberação
 (`app/services/assist_gate.py`) cobre `transcription` e `writing`; a modalidade
 `conversation` **não existe nele** — `AssistModality` é
 `Literal["transcription", "writing"]`, e `evaluate_gate` decide
@@ -186,6 +186,115 @@ aceita `conversation` em `ck_assist_modality` (DB-45) e a cota já a trata
 manifesto da modalidade. Até lá, região, retenção e não-treinamento do provedor
 de diálogo são promessa escrita sem verificação, e **a modalidade não pode ser
 liberada ao aluno** — o que é também o motivo de o SEC-46 bloquear o FE-47.
+
+Atualização de 29/10: `assist-gate --modality conversation` já existe e exige
+manifesto da modalidade, declarações de privacidade, 30 avaliações válidas
+em cinco aulas, utilidade >= 80%, falha técnica < 5% e custo confirmado no
+orçamento. Isso encerra a lacuna de código descrita acima; o preenchimento
+real do manifesto, a revisão assinada abaixo e o piloto continuam pendentes.
+
+## Procedimento de incidente e rotação do provedor — SEC-48
+
+Este procedimento cobre suspeita de exposição de texto/token, credencial
+revogada, indisponibilidade e consumo inesperado. O responsável técnico
+coordena contenção, evidências e retomada; o responsável pela privacidade
+avalia os dados afetados e a comunicação. No projeto atual essas funções
+cabem a Jeferson. Não há execução automática de revogação ou envio de avisos.
+
+### Contenção
+
+1. Registrar horário UTC, ambiente, versão implantada, sintoma, códigos de
+   erro e IDs operacionais necessários. Não colar texto de aluno, áudio,
+   credencial, corpo de resposta do provedor ou dump de ambiente no ticket.
+2. Em suspeita de token comprometido ou vazamento, revogar imediatamente a
+   credencial no provedor. Parar o worker em execução para interromper novos
+   despachos. Uma requisição já transmitida não pode ser recolhida pela flag.
+3. No ambiente EasyPanel, configurar `EASYPANEL_ASSISTED_FEATURES_ENABLED=false`
+   e recriar **API e worker** pelo fluxo de deploy vigente. A aplicação recebe
+   `ASSISTED_FEATURES_ENABLED`; `get_settings()` é cacheado por processo, então
+   editar o painel sem recriar os processos não aplica a contenção. Manter
+   ambos com assistência desligada durante a investigação.
+4. O token `EASYPANEL_ASSIST_PROVIDER_TOKEN` é compartilhado por STT, escrita
+   e diálogo: a revogação e a pausa afetam as três modalidades. Não rotacionar
+   JWT ou senhas do banco como substituto da revogação do provedor.
+5. Preservar banco, uploads e fila. Não usar `down -v`, apagar jobs, devolver
+   cota manualmente nem reenviar turnos já concluídos. Com assistência
+   desligada, a fila não reivindica novos jobs. O modo Roteiro continua local
+   **se a interface de conversa já estiver liberada**; este procedimento não
+   autoriza habilitar `DIALOGUE_PRACTICE_ENABLED`.
+
+### Evidências e amostragem dos logs
+
+Registrar separadamente API e worker, janela UTC, versão, quantidade de
+eventos examinados, método de amostragem e resultado. Inspecionar amostras
+em ambiente restrito; no relatório compartilhado guardar apenas contagens,
+nomes de eventos/campos e resultado, sem reproduzir ocorrências sensíveis.
+Verificar `msg`, campos extras e `exception`, além de mensagens do gateway.
+Procurar texto de turno, fala do parceiro, áudio serializado, cabeçalhos de
+autorização e valores de credencial. Se houver ocorrência, restringir acesso
+ao artefato e tratar o próprio log como dado afetado; não anexá-lo ao Git.
+
+Os eventos esperados incluem `dialogue_turn_admitted`, `transcription_claimed`,
+`dialogue_turn_fallback`, `transcription_failed` e `dialogue_job_completed`.
+Eles permitem correlacionar IDs e códigos sem conteúdo. `provider_unavailable`
+agrega falhas HTTP, inclusive 401 e 503: o código sozinho não distingue token
+revogado de indisponibilidade. Conferir o painel do provedor sem exportar
+corpos/credenciais. Não declarar ausência global de vazamento com base em uma
+amostra; registrar seu escopo e quaisquer lacunas.
+
+### Rotação e retomada controlada
+
+1. Com os despachos pausados, emitir no provedor uma credencial de privilégio
+   mínimo para o gateway contratado. Confirmar que a antiga está revogada.
+   Guardar a nova somente no gerenciador/painel de segredos, nunca em comando,
+   log, manifesto de homologação ou arquivo versionado.
+2. Atualizar `EASYPANEL_ASSIST_PROVIDER_TOKEN` no painel e recriar API e worker
+   ainda com assistência desligada. Um simples reinício que conserva o
+   ambiente do container não troca o segredo. Conferir saúde dos serviços
+   sem imprimir o ambiente ou o cabeçalho `Authorization`.
+3. Conferir causas, privacidade, custos desconhecidos e fila pendente antes
+   de reativar. Jobs não despachados só podem retomar enquanto reserva e job
+   estiverem válidos; expiração deve seguir o tratamento normal do worker.
+   No diálogo, falha do modelo conclui com fallback; falha de STT termina o
+   turno com erro e permite continuar por texto. Não reabrir esses turnos para
+   testar a chave nova. Despachos já consumidos não devolvem cota.
+4. Após decisão humana registrada e dentro dos gates SEC-46/IA-48, reativar
+   assistência apenas no escopo do piloto autorizado e recriar os processos.
+   Validar com turno sintético autorizado, custo, ausência de fallback
+   inesperado, heartbeat e logs. Confirmar que a fila não duplicou envios.
+   Em reincidência, repetir a contenção, mantendo o histórico.
+5. Registrar UTC da revogação, atualização e retomada, referência da
+   credencial no painel (sem valor), responsável, evidências e decisão.
+   Rotação não é homologação pedagógica nem aprovação automática do provedor.
+
+### Comunicação
+
+Preparar um aviso com horário, funcionalidade afetada, comportamento
+temporário (Roteiro/texto, quando disponíveis), medidas adotadas e próxima
+atualização. Distinguir fatos confirmados de suspeitas. Se houver dados
+afetados, o responsável pela privacidade define destinatários e conteúdo
+antes do envio. Não incluir credenciais ou exemplos de fala do aluno.
+Rascunho: “Desde [UTC], [função] está [pausada/instável]. [Medida] foi
+aplicada. Você pode [alternativa verificada]. A próxima atualização será
+em [UTC].” Nenhum aviso foi enviado pelo ensaio local.
+
+### Ensaio local reproduzível
+
+`make test-failure-rehearsal` prepara exclusivamente o banco marcado como
+descartável e inclui `tests/test_provider_incident.py`. O gateway de teste
+usa HTTP em `127.0.0.1`, porta efêmera e tokens sintéticos; não consulta nem
+altera provedor externo. A API, fila e chamadas HTTP do worker são reais
+dentro do laboratório. Áudio é WAV sintético, sem voz humana.
+
+Os dois caminhos (texto e áudio) exercitam: sucesso com chave antiga,
+revogação no servidor com resposta 401, pausa sem reivindicar o job pendente,
+Roteiro sem rede, troca de chave e retomada uma única vez, seguida de 503
+com credencial válida. O teste inspeciona os logs formatados da API/worker
+e exige ausência dos tokens, texto do aluno/parceiro, corpo sensível do erro
+e autorização do aluno. A troca de configuração é simulada no processo do
+teste; ela **não prova** que o EasyPanel recriou containers ou que um token
+real foi revogado. Esses passos e a amostragem de produção precisam de recibo
+operacional separado.
 
 ## Revisão do fluxo de dados
 

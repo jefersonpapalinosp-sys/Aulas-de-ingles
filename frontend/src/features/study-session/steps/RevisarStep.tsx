@@ -1,6 +1,7 @@
 import type { LessonDetail } from '../../../api/client'
 import { PronunciationList, VocabTable } from '../../../components/LessonSections'
 import { Markdown } from '../../../components/Markdown'
+import { DialogueEntry } from '../../dialogue/DialogueEntry'
 import { ShadowingPractice } from '../../speaking/ShadowingPractice'
 import { WritingWorkspace } from '../../writing/WritingWorkspace'
 
@@ -18,6 +19,7 @@ export function RevisarStep({ lesson, userId }: { lesson: LessonDetail; userId: 
 
   return (
     <>
+      <DialogueEntry lesson={lesson} userId={userId} />
       {writingPrompt && <WritingWorkspace prompt={writingPrompt} userId={userId} />}
       {shadowingMedia && (
         <ShadowingPractice

@@ -7,17 +7,20 @@ virar vazamento.
 """
 
 import shutil
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import NamedTuple, cast
 
-from sqlalchemy import text
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
+from app.db.models import AssistReservation
 from app.db.session import get_engine
 from app.observability import request_metrics
 from app.schemas.operations import (
+    AssistCostsOut,
+    AssistCostWindowOut,
     DatabaseMetricsOut,
     DeletionMetricsOut,
     DialogueMetricsOut,
@@ -273,6 +276,50 @@ async def _media(session: AsyncSession) -> tuple[int, int]:
     return int(row[0]), int(row[1])
 
 
+async def _assist_costs(session: AsyncSession, now: datetime) -> AssistCostsOut:
+    now = now.astimezone(UTC)
+    day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    month = day.replace(day=1)
+    next_month = (month + timedelta(days=32)).replace(day=1)
+    # Ledger sobrevive à exclusão do turno/job. Legados sem dispatched_at
+    # usam created_at; nunca contamos reserva apenas criada ou liberada.
+    dispatched = func.coalesce(AssistReservation.dispatched_at, AssistReservation.created_at)
+    today = dispatched >= day
+    row = (
+        await session.execute(
+            select(
+                func.count(),
+                func.coalesce(func.sum(AssistReservation.cost_microusd), 0),
+                func.count().filter(~AssistReservation.cost_known),
+                func.count().filter(today),
+                func.coalesce(func.sum(AssistReservation.cost_microusd).filter(today), 0),
+                func.count().filter(today, ~AssistReservation.cost_known),
+            ).where(
+                AssistReservation.state == "consumed",
+                AssistReservation.modality.in_(("transcription", "writing", "conversation")),
+                dispatched >= month,
+                dispatched <= now,
+            )
+        )
+    ).one()
+    return AssistCostsOut(
+        daily=AssistCostWindowOut(
+            starts_at=day,
+            ends_at=day + timedelta(days=1),
+            consumed=int(row[3]),
+            cost_microusd=int(row[4]),
+            unknown_cost_reservations=int(row[5]),
+        ),
+        monthly=AssistCostWindowOut(
+            starts_at=month,
+            ends_at=next_month,
+            consumed=int(row[0]),
+            cost_microusd=int(row[1]),
+            unknown_cost_reservations=int(row[2]),
+        ),
+    )
+
+
 def _queue_out(queue: QueueRow, heartbeat: Heartbeat | None, now: datetime) -> QueueMetricsOut:
     """Idade do worker e da manutenção são derivadas aqui: o painel compara
     com o limiar de alerta sem precisar saber o relógio do processo."""
@@ -303,6 +350,7 @@ async def snapshot(session: AsyncSession, settings: Settings) -> OperationsMetri
     queue = await _queue(session)
     heartbeat = await _heartbeat(session)
     dialogue = await _dialogue(session)
+    assist_costs = await _assist_costs(session, now)
     quota_limit = daily_limit(DIALOGUE_MODALITY)
     quota_used, quota_exhausted = await _dialogue_quota(session, quota_limit)
     deletions = await _deletions(session)
@@ -346,6 +394,7 @@ async def snapshot(session: AsyncSession, settings: Settings) -> OperationsMetri
             quota_exhausted_accounts=quota_exhausted,
         ),
         account_deletions=DeletionMetricsOut(pending=deletions[0], failed=deletions[1]),
+        assist_costs=assist_costs,
         legacy_review=LegacyReviewMetricsOut(
             cards=legacy_review[0],
             unlinked_cards=legacy_review[1],

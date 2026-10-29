@@ -958,6 +958,9 @@ class DialogueTurn(Base):
     checks: Mapped[dict[str, bool]] = mapped_column(
         JSONB, default=dict, server_default=text("'{}'::jsonb")
     )
+    check_details: Mapped[dict[str, list[dict[str, str | bool]]] | None] = mapped_column(
+        JSONB(none_as_null=True), default=None
+    )
     partner_text: Mapped[str | None] = mapped_column(Text, default=None)
     hints: Mapped[list[dict[str, str]]] = mapped_column(
         JSONB, default=list, server_default=text("'[]'::jsonb")

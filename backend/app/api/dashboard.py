@@ -11,6 +11,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
+from app.core.config import get_settings
 from app.db.models import (
     Course,
     CourseReview,
@@ -34,6 +35,7 @@ from app.schemas.dashboard import (
     Weekday,
 )
 from app.services.curriculum import DEFAULT_COURSE_SLUG
+from app.services.dialogue_learning import conversation_recommendation
 from app.services.skills import skill_summaries
 
 router = APIRouter(prefix="/me", tags=["dashboard"])
@@ -206,6 +208,11 @@ async def _recommendation(
             estimated_minutes=review.estimated_minutes,
             course_slug=review.course_slug,
         )
+
+    if get_settings().dialogue_practice_enabled:
+        conversation = await conversation_recommendation(session, user_id, course)
+        if conversation is not None:
+            return conversation
 
     next_lesson = (
         await session.execute(

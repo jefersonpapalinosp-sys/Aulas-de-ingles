@@ -88,6 +88,9 @@ def fetch(url: str) -> tuple[int, dict[str, Any], str, int]:
 
 
 def evaluate(status: int, body: dict[str, Any], server: str, latency_ms: int) -> dict[str, Any]:
+    exposes_details = any(
+        field in body for field in ("version", "env", "schema_current", "schema_required")
+    )
     probes = [
         _probe(
             "health_status_code",
@@ -102,6 +105,13 @@ def evaluate(status: int, body: dict[str, Any], server: str, latency_ms: int) ->
             body.get("schema") or body.get("status") or "sem corpo",
             "status=ok e schema=compatible",
             "Imagem e migration desalinhadas: alinhar sem downgrade destrutivo.",
+        ),
+        _probe(
+            "health_hides_details",
+            not exposes_details,
+            "detalhes expostos" if exposes_details else "sem detalhes",
+            "sem versão, ambiente ou revisões",
+            "Usar readiness autenticada para diagnóstico; corrigir a exposição na rota pública.",
         ),
         _probe(
             "edge_hides_version",

@@ -50,9 +50,13 @@ async def _seed(*, dry_run: bool = False, path: Path | None = None) -> bool:
 
 async def _assist_gate(modality: Modality, review_path: Path) -> bool:
     review = load_provider_review(review_path)
-    async with get_sessionmaker()() as session:
-        metrics = await collect_gate_metrics(session, modality)
-    await dispose_engine()
+    try:
+        async with get_sessionmaker()() as session:
+            metrics = await collect_gate_metrics(
+                session, modality, provider_name=review.provider_name
+            )
+    finally:
+        await dispose_engine()
     report = evaluate_gate(modality, metrics, review, get_settings())
     print(json.dumps(report.as_dict(), ensure_ascii=False, indent=2, sort_keys=True))
     return report.approved
@@ -270,7 +274,7 @@ def main_com_argumentos(argumentos: list[str]) -> None:
         except (ValueError, IndexError):
             print(
                 "uso: python -m app.cli assist-gate --modality "
-                "transcription|writing --review-file caminho.json",
+                "transcription|writing|conversation --review-file caminho.json",
                 file=sys.stderr,
             )
             raise SystemExit(2) from None
@@ -278,10 +282,13 @@ def main_com_argumentos(argumentos: list[str]) -> None:
         modalidades: dict[str, Modality] = {
             "transcription": "transcription",
             "writing": "writing",
+            "conversation": "conversation",
         }
         escolhida = modalidades.get(modality)
         if escolhida is None:
-            print("modalidade inválida: use transcription ou writing", file=sys.stderr)
+            print(
+                "modalidade inválida: use transcription, writing ou conversation", file=sys.stderr
+            )
             raise SystemExit(2)
         try:
             approved = asyncio.run(_assist_gate(escolhida, review_path))

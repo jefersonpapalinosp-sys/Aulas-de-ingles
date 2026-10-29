@@ -13,12 +13,32 @@ x-api: &api
     COOKIE_SECURE: "false"
     SPEAKING_STORAGE_DIR: /app/data/speaking
     ASSIST_WRITING_ENABLED: "false"
-    ASSISTED_FEATURES_ENABLED: "false"
+    ASSISTED_FEATURES_ENABLED: "true"
     ASSIST_TRANSCRIPTION_ENABLED: "false"
+    DIALOGUE_PRACTICE_ENABLED: "true"
+    ASSIST_PROVIDER_KIND: gateway
+    ASSIST_PROVIDER_NAME: synthetic-e2e
+    ASSIST_TRANSCRIPTION_URL: http://gateway:8080/stt
+    ASSIST_DIALOGUE_URL: http://gateway:8080/dialogue
+    ASSIST_TIMEOUT_SECONDS: "5"
+    ASSIST_WORKER_POLL_SECONDS: "0.2"
   volumes:
     - speaking_data:/app/data/speaking
 
 services:
+  gateway:
+    image: aulas-ingles-e2e-gateway:local
+    build:
+      context: ./e2e-gateway
+    networks: [gateway]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "python", "gateway.py", "health"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
   db:
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
     environment:
@@ -42,11 +62,26 @@ services:
         condition: service_healthy
   api:
     <<: *api
+    networks: [default, gateway]
     depends_on:
       prepare:
         condition: service_completed_successfully
+      gateway:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+  worker:
+    <<: *api
+    networks: [default, gateway]
+    command: ["python", "-m", "app.cli", "assist-worker"]
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.cli", "worker-health"]
       interval: 3s
       timeout: 5s
       retries: 30
@@ -65,6 +100,10 @@ services:
       interval: 3s
       timeout: 5s
       retries: 30
+
+networks:
+  gateway:
+    internal: true
 
 volumes:
   pgdata:

@@ -94,6 +94,7 @@ def test_seed_rejects_invented_or_incomplete_provenance():
         seed.validate_editorial_provenance(impossible_date)
 
 
+@pytest.mark.timezone
 async def test_provenance_migration_nulls_generated_dates_without_inventing_downgrade(session):
     path = (
         Path(__file__).resolve().parents[1]

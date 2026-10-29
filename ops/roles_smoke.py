@@ -8,17 +8,20 @@ from ops import recovery, roles
 from ops.recovery_archive import RecoveryError, require
 
 
-def forbidden(info, role, statement):
+def forbidden(info: roles.TargetInfo, role: str, statement: str) -> None:
     try:
         roles.sql(info, "\\set VERBOSITY verbose\n" + statement, role)
     except RecoveryError as exc:
         stderr = getattr(exc.__cause__, "stderr", b"")
-        require(b"42501" in stderr, "Recusa não foi por privilégio insuficiente.")
+        require(
+            isinstance(stderr, bytes) and b"42501" in stderr,
+            "Recusa não foi por privilégio insuficiente.",
+        )
     else:
         raise RecoveryError("Operação proibida foi permitida no laboratório.")
 
 
-def main():
+def main() -> None:
     info = roles.target("lab")
     for role in roles.NAMES[1:]:
         flags = json.loads(
@@ -106,6 +109,17 @@ def main():
     forbidden(info, "aulas_worker", "INSERT INTO assist_reservation DEFAULT VALUES")
     forbidden(info, "aulas_worker", "UPDATE speaking_attempt SET status=status")
     forbidden(info, "aulas_worker", "DELETE FROM refresh_session")
+    forbidden(info, "aulas_worker", "UPDATE skill_evidence SET score=score")
+    forbidden(info, "aulas_worker", "DELETE FROM skill_evidence")
+    forbidden(info, "aulas_worker", "UPDATE review_item SET due_at=due_at")
+    forbidden(info, "aulas_worker", "DELETE FROM review_item")
+    forbidden(info, "aulas_worker", "SELECT * FROM exercise_answer")
+    forbidden(info, "aulas_worker", "SELECT prompt, answer FROM review_item")
+    roles.sql(
+        info,
+        "SELECT id FROM vocab_item LIMIT 1; SELECT id FROM skill_evidence LIMIT 1",
+        "aulas_worker",
+    )
     forbidden(info, "aulas_runtime", "DELETE FROM account_deletion_job")
     forbidden(info, "aulas_worker", "INSERT INTO account_deletion_job DEFAULT VALUES")
     # DB-45: fora de human_rating, a API não altera turnos; o worker nunca apaga
@@ -113,6 +127,7 @@ def main():
     for statement in (
         "DELETE FROM dialogue_turn",
         "UPDATE dialogue_turn SET transcript=transcript",
+        "UPDATE dialogue_turn SET check_details=check_details",
         "UPDATE dialogue_turn SET partner_text=partner_text",
         "UPDATE dialogue_turn SET state=state",
         "UPDATE dialogue_turn SET cost_microusd=cost_microusd",
@@ -193,6 +208,8 @@ def main():
     roles.lab_run("runtime", "python", "/tools/roles_app_smoke.py")
     roles.lab_run("runtime", "python", "/tools/roles_assist_smoke.py")
     roles.lab_run("worker", "python", "/tools/roles_assist_smoke.py")
+    roles.lab_run("runtime", "python", "/tools/roles_dialogue_smoke.py")
+    roles.lab_run("worker", "python", "/tools/roles_dialogue_smoke.py")
     roles.lab_run(
         "worker",
         "python",

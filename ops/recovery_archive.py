@@ -5,8 +5,10 @@ import json
 import os
 import re
 import tarfile
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import IO, TypedDict
 from uuid import uuid4
 
 FORMAT = "aulas-recovery-v2"
@@ -17,25 +19,31 @@ MAX_FILES = 100_000
 MAX_TOTAL = 20 * 1024 * 1024 * 1024
 
 
+class FileInfo(TypedDict):
+    size: int
+    sha256: str
+
+
 class RecoveryError(RuntimeError):
     """Erro operacional seguro para exibir, sem corpos, credenciais ou SQL."""
 
 
-def require(condition, message):
+def require(condition: object, message: str) -> None:
     if not condition:
         raise RecoveryError(message)
 
 
-def safe_key(key):
-    require(
-        isinstance(key, str)
-        and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,79}", key)
-        and not key.endswith(".tmp"),
-        "Chave de áudio insegura ou upload incompleto.",
-    )
+def safe_key(key: object) -> str:
+    if (
+        not isinstance(key, str)
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,79}", key)
+        or key.endswith(".tmp")
+    ):
+        raise RecoveryError("Chave de áudio insegura ou upload incompleto.")
+    return key
 
 
-def safe_storage_member(name):
+def safe_storage_member(name: object) -> None:
     """Somente voz plana ou três nomes reservados de uma operação de quarentena."""
     if isinstance(name, str) and name.startswith(".quarantine/"):
         require(
@@ -46,14 +54,14 @@ def safe_storage_member(name):
         safe_key(name)
 
 
-def digest(stream):
+def digest(stream: IO[bytes]) -> str:
     result = hashlib.sha256()
     for chunk in iter(lambda: stream.read(1024 * 1024), b""):
         result.update(chunk)
     return result.hexdigest()
 
 
-def file_info(path):
+def file_info(path: Path) -> FileInfo:
     require(
         path.is_file() and not path.is_symlink(),
         "Artefato ausente ou link não permitido.",
@@ -62,9 +70,9 @@ def file_info(path):
         return {"size": path.stat().st_size, "sha256": digest(stream)}
 
 
-def audio_inventory(path):
+def audio_inventory(path: Path) -> dict[str, FileInfo]:
     """Não extrai nada. Links, traversal, duplicatas e arquivos especiais são recusados."""
-    inventory = {}
+    inventory: dict[str, FileInfo] = {}
     total = 0
     try:
         with tarfile.open(path, "r:") as archive:
@@ -83,7 +91,10 @@ def audio_inventory(path):
                     len(inventory) < MAX_FILES and total <= MAX_TOTAL,
                     "Pacote excede limites operacionais; não foi extraído.",
                 )
-                with archive.extractfile(member) as stream:
+                source = archive.extractfile(member)
+                if source is None:
+                    raise RecoveryError("Entrada de voz sem conteúdo regular.")
+                with source as stream:
                     inventory[member.name] = {
                         "size": member.size,
                         "sha256": digest(stream),
@@ -93,23 +104,21 @@ def audio_inventory(path):
     return inventory
 
 
-def check_references(snapshot, inventory):
-    require(
-        isinstance(snapshot, dict) and bool(snapshot.get("revision")),
-        "Snapshot sem revisão de schema.",
-    )
-    require(
-        isinstance(snapshot.get("counts"), dict) and isinstance(snapshot.get("audio"), list),
-        "Snapshot incompleto.",
-    )
-    keys = set()
-    for reference in snapshot["audio"]:
-        require(isinstance(reference, dict), "Referência de áudio inválida.")
+def check_references(snapshot: object, inventory: Mapping[str, FileInfo]) -> int:
+    if not isinstance(snapshot, dict) or not snapshot.get("revision"):
+        raise RecoveryError("Snapshot sem revisão de schema.")
+    audio = snapshot.get("audio")
+    if not isinstance(snapshot.get("counts"), dict) or not isinstance(audio, list):
+        raise RecoveryError("Snapshot incompleto.")
+    keys: set[str] = set()
+    for reference in audio:
+        if not isinstance(reference, dict):
+            raise RecoveryError("Referência de áudio inválida.")
         key = reference.get("key")
         if key is None:
             require(reference.get("status") != "ready", "Áudio pronto sem chave no banco.")
             continue
-        safe_key(key)
+        key = safe_key(key)
         require(key not in keys, "Chave de áudio referenciada mais de uma vez.")
         keys.add(key)
         require(
@@ -120,7 +129,7 @@ def check_references(snapshot, inventory):
     return len({key for key in inventory if not key.startswith(".quarantine/")} - keys)
 
 
-def write_json(path, value):
+def write_json(path: Path, value: object) -> None:
     with path.open("x", encoding="utf-8") as stream:
         os.chmod(path, 0o600)
         json.dump(value, stream, ensure_ascii=False, indent=2, sort_keys=True)
@@ -129,7 +138,7 @@ def write_json(path, value):
         os.fsync(stream.fileno())
 
 
-def verify_bundle(path):
+def verify_bundle(path: str | Path) -> dict[str, object]:
     path = Path(path)
     require(
         path.is_dir() and not path.is_symlink() and not path.name.startswith(".partial-"),
@@ -145,7 +154,9 @@ def verify_bundle(path):
         "Manifesto inválido.",
     )
     try:
-        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+        manifest: object = json.loads(manifest_file.read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict) or not isinstance(manifest.get("artifacts"), dict):
+            raise RecoveryError("Manifesto inválido ou incompleto.")
         require(
             manifest["format"] in {FORMAT, LEGACY_FORMAT} and manifest["bundle_id"] == path.name,
             "Formato ou identidade do pacote divergente.",
@@ -177,7 +188,9 @@ def verify_bundle(path):
         raise RecoveryError("Manifesto inválido ou incompleto.") from exc
 
 
-def create_bundle(root, capture):
+def create_bundle(
+    root: str | Path, capture: Callable[[Path], Mapping[str, object]]
+) -> Path:
     """capture escreve os dois artefatos e retorna metadados após conferir quiescência.
 
     Em erro preserva .partial-* privado para diagnóstico. Nunca publica um parcial.

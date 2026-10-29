@@ -204,6 +204,7 @@ def test_listening_link_to_another_lesson_is_rejected_before_database():
         seed_graph(courses, lessons)
 
 
+@pytest.mark.timezone
 async def test_blocked_seed_preserves_draft_revision_voice_answer_and_review(session):
     stored, ids = await read_graph(session)
     user = User(

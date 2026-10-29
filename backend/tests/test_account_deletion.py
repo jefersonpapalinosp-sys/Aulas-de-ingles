@@ -120,6 +120,7 @@ async def test_delete_account_revokes_sessions_and_leaves_anonymous_receipt(
     assert not hasattr(receipt, "email")
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_delete_account_cascades_rows_then_worker_removes_audio(
     client: AsyncClient,
@@ -189,6 +190,7 @@ async def test_delete_account_cascades_rows_then_worker_removes_audio(
     assert receipt.deleted_file_count == receipt.file_count == 1
 
 
+@pytest.mark.timezone
 @pytest.mark.asyncio
 async def test_audio_cleanup_stops_after_bounded_retries(
     client: AsyncClient,

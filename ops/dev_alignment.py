@@ -9,11 +9,14 @@ import json
 import os
 import sys
 import tempfile
+from collections.abc import Mapping
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from ops import concurrency_rollout, recovery, study_rollout
 from ops.recovery_archive import (
+    FileInfo,
+    RecoveryError,
     audio_inventory,
     file_info,
     require,
@@ -43,25 +46,39 @@ NEW_COLUMNS = {
 }
 
 
-def fingerprints(target):
+def fingerprints(target: recovery.Target) -> dict[str, study_rollout.Fingerprint]:
     return study_rollout.fingerprints(
         target, excluded_columns=NEW_COLUMNS, excluded_tables=NEW_TABLES
     )
 
 
-def image_id():
-    return json.loads(recovery.docker("image", "inspect", recovery.HELPER))[0]["Id"]
+def image_id() -> str:
+    images: object = json.loads(recovery.docker("image", "inspect", recovery.HELPER))
+    if not isinstance(images, list) or len(images) != 1:
+        raise RecoveryError("Imagem de ferramentas ausente ou ambígua.")
+    identity = study_rollout.json_object(images[0]).get("Id")
+    if not isinstance(identity, str) or not identity:
+        raise RecoveryError("Identidade da imagem de ferramentas inválida.")
+    return identity
 
 
-def validate_manifest(manifest):
+def validate_manifest(manifest: Mapping[str, object]) -> None:
+    source = study_rollout.json_object(manifest.get("source"))
+    snapshot = study_rollout.json_object(manifest.get("snapshot"))
     require(
-        manifest["source"]["kind"] == "dev" and manifest["source"]["project"] == "aulas-ingles",
+        source.get("kind") == "dev" and source.get("project") == "aulas-ingles",
         "Exige backup do desenvolvimento; estudo/produção não são aceitos.",
     )
-    require(manifest["snapshot"]["revision"] == [BASE], "Revisão de origem não prevista.")
+    require(snapshot.get("revision") == [BASE], "Revisão de origem não prevista.")
 
 
-def run_migration(target, tools_image, *, head=HEAD, clone=recovery.DEV_CHECK):
+def run_migration(
+    target: recovery.Target,
+    tools_image: str,
+    *,
+    head: str = HEAD,
+    clone: recovery.Target = recovery.DEV_CHECK,
+) -> None:
     require(
         (head, clone) in {(HEAD, recovery.DEV_CHECK), ("f28c6abe1375", recovery.ASSIST_CHECK)},
         "Par revisão/clone não previsto.",
@@ -124,11 +141,11 @@ def run_migration(target, tools_image, *, head=HEAD, clone=recovery.DEV_CHECK):
             )
 
 
-def verify_initial_state(target):
+def verify_initial_state(target: recovery.Target) -> None:
     concurrency_rollout.verify_new_state(target)
     for table in NEW_TABLES:
         require(
-            recovery.query(target, f"SELECT count(*) FROM {table}") == 0,
+            study_rollout.query_count(target, f"SELECT count(*) FROM {table}") == 0,
             "Tabelas novas contêm eventos não previstos.",
         )
     for sql in (
@@ -143,12 +160,12 @@ def verify_initial_state(target):
         "SELECT count(*) FROM study_plan WHERE timezone != 'UTC'",
     ):
         require(
-            recovery.query(target, sql) == 0,
+            study_rollout.query_count(target, sql) == 0,
             "Estado inicial inesperado nas colunas novas.",
         )
 
 
-def verify_voice(target, manifest):
+def verify_voice(target: recovery.Target, manifest: Mapping[str, object]) -> None:
     with tempfile.TemporaryDirectory(prefix="aulas-dev-voice-") as directory:
         path = Path(directory) / "voice.tar"
         with path.open("xb") as stream:
@@ -156,7 +173,9 @@ def verify_voice(target, manifest):
         require(audio_inventory(path) == manifest["audio_files"], "Voz divergiu do backup.")
 
 
-def validate_receipt(receipt, *, manifest_hash, tools_image):
+def validate_receipt(
+    receipt: Mapping[str, object], *, manifest_hash: FileInfo, tools_image: str
+) -> None:
     require(
         receipt.get("verified") is True
         and receipt.get("revision") == HEAD
@@ -167,17 +186,20 @@ def validate_receipt(receipt, *, manifest_hash, tools_image):
     )
 
 
-def run(action, backup):
+def run(action: str, backup: Path) -> None:
     require(action in {"capture", "rehearse", "apply"}, "Ação não prevista.")
     manifest = verify_bundle(backup)
     validate_manifest(manifest)
+    origin = study_rollout.json_object(manifest["source"])
+    snapshot = study_rollout.json_object(manifest["snapshot"])
+    audio_files = study_rollout.json_object(manifest.get("audio_files"))
     source = recovery.source_target("dev")
     source_info = recovery.check_target(source)
     recovery.quiet(source)
     require(
-        manifest["source"]["database"] == source.database
-        and manifest["source"]["db_container_id"] == source_info["Id"]
-        and manifest["source"]["voice_volume"] == source.voice_volume,
+        origin.get("database") == source.database
+        and origin.get("db_container_id") == source_info["Id"]
+        and origin.get("voice_volume") == source.voice_volume,
         "Backup pertence a outra origem.",
     )
     manifest_hash = file_info(backup / "manifest.json")
@@ -205,15 +227,17 @@ def run(action, backup):
             print("Captura privada concluída; sem textos pessoais ou credenciais nos logs.")
             return
         proof = concurrency_rollout.private_json(capture_path)
+        tables = study_rollout.checked_fingerprints(proof.get("tables"))
+        expected_audit = concurrency_rollout.checked_audit(proof.get("audit"))
         require(
             proof["manifest"] == manifest_hash and proof["tools_image"] == tools_image,
             "Backup ou imagem mudou após captura; exige novo ensaio.",
         )
         require(
-            fingerprints(source) == proof["tables"],
+            fingerprints(source) == tables,
             "Dados da origem mudaram após captura.",
         )
-        concurrency_rollout.audit(source, expected=proof["audit"])
+        concurrency_rollout.audit(source, expected=expected_audit)
         verify_voice(source, manifest)
         if action == "rehearse":
             restored = concurrency_rollout.private_json(
@@ -240,21 +264,21 @@ def run(action, backup):
             recovery.query(target, recovery.SNAPSHOT_SQL) == manifest["snapshot"],
             "Destino não corresponde ao backup de origem.",
         )
-        require(fingerprints(target) == proof["tables"], "Conteúdo do destino diverge.")
+        require(fingerprints(target) == tables, "Conteúdo do destino diverge.")
         verify_voice(target, manifest)
         run_migration(target, tools_image)
         recovery.quiet(target)
         require(
             recovery.query(target, recovery.SNAPSHOT_SQL)
-            == {**manifest["snapshot"], "revision": [HEAD]},
+            == {**snapshot, "revision": [HEAD]},
             "Snapshot pós-migration diverge.",
         )
         require(
-            fingerprints(target) == proof["tables"],
+            fingerprints(target) == tables,
             "Dados históricos divergiram; não reabrir.",
         )
         verify_initial_state(target)
-        concurrency_rollout.audit(target, expected=proof["audit"])
+        concurrency_rollout.audit(target, expected=expected_audit)
         verify_voice(target, manifest)
         write_json(
             recovery.BACKUPS / f"{prefix}-{action}.json",
@@ -264,16 +288,16 @@ def run(action, backup):
                 "tools_image": tools_image,
                 "revision": HEAD,
                 "target": recovery.CONFIRM_DEV_CHECK if action == "rehearse" else "aulas-ingles/db",
-                "tables": len(proof["tables"]),
-                "rows": sum(table["count"] for table in proof["tables"].values()),
-                "audio_count": len(manifest["audio_files"]),
+                "tables": len(tables),
+                "rows": sum(table["count"] for table in tables.values()),
+                "audio_count": len(audio_files),
                 "audit": proof["audit"],
             },
         )
-        print(f"{action}: {len(proof['tables'])} tabelas históricas e voz preservadas; {HEAD}.")
+        print(f"{action}: {len(tables)} tabelas históricas e voz preservadas; {HEAD}.")
 
 
-def main():
+def main() -> None:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["capture", "rehearse", "apply"])

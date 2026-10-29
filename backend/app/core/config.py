@@ -74,6 +74,8 @@ class Settings(BaseSettings):
     # Recursos assistidos são experimentais, opt-in e ficam desligados sem
     # um gateway explicitamente configurado. O gateway recebe áudio bruto ou
     # texto/rubrica e devolve JSON no contrato documentado pelo serviço.
+    # Só habilitar junto da interface FE-47 e da revisão SEC-46 assinada.
+    dialogue_practice_enabled: bool = False
     assisted_features_enabled: bool = False
     assist_transcription_url: str | None = None
     assist_writing_url: str | None = None

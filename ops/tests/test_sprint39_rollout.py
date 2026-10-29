@@ -1,13 +1,85 @@
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
-from ops import recovery
+from ops import recovery, roles
 from ops import sprint39_rollout as rollout
 from ops.assist_alignment_smoke import validate_environment
-from ops.recovery_archive import RecoveryError
+from ops.recovery_archive import RecoveryError, write_json
 
 
 class Final39Tests(unittest.TestCase):
+    def test_prod_configuration_reads_existing_credentials_from_secrets(self):
+        target = recovery.Target("synthetic-prod", "db", "synthetic", "admin", "db", "voice", None)
+        credentials = {name: "synthetic-password-0000000000000000" for name in roles.NAMES[1:]}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            private = root / "secrets"
+            private.mkdir(mode=0o700)
+            backups = root / "backups"
+            backups.mkdir()
+            write_json(private / "roles-prod.json", credentials)
+            with (
+                patch.object(roles, "SECRETS", private),
+                patch.object(recovery, "BACKUPS", backups),
+                patch.object(recovery, "source_target", return_value=target),
+                patch.object(recovery, "container", return_value={"Config": {"Env": [
+                    "DATABASE_PURPOSE=runtime", "JWT_SECRET=" + "synthetic-secret-" * 3,
+                ]}}),
+            ):
+                config = rollout.configuration(target, "prod")
+            self.assertIn("DATABASE_PURPOSE=migrator\n", config)
+            self.assertIn("@db:5432/synthetic\n", config)
+            self.assertIn("aulas_migrator:" + credentials["aulas_migrator"], config)
+            self.assertFalse((backups / "roles-prod.json").exists())
+            self.assertEqual((private / "roles-prod.json").stat().st_mode & 0o777, 0o600)
+
+    def test_legacy_backup_file_cannot_replace_missing_private_credentials(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "roles-prod.json").write_text("legacy-placeholder")
+            with (
+                patch.object(roles, "SECRETS", root / "absent-secrets"),
+                patch.object(recovery, "BACKUPS", root),
+                patch.object(recovery, "source_target", return_value=recovery.STUDY39_CHECK),
+                patch.object(recovery, "container", return_value={"Config": {
+                    "Env": ["DATABASE_PURPOSE=runtime"]
+                }}),
+                patch.object(roles, "private_credentials") as credentials,
+                self.assertRaisesRegex(RecoveryError, "Credenciais ausentes"),
+            ):
+                rollout.configuration(recovery.STUDY39_CHECK, "prod")
+            credentials.assert_not_called()
+            self.assertFalse((root / "absent-secrets").exists())
+
+    def test_unknown_scope_is_refused_before_source_lookup(self):
+        with patch.object(recovery, "source_target") as source:
+            for scope in ("", "study", "../dev"):
+                for operation in (rollout.configuration, rollout.fingerprints):
+                    with self.assertRaises(RecoveryError):
+                        operation(recovery.DEV39_CHECK, scope)
+            source.assert_not_called()
+
+    def test_clone_migration_keeps_credentials_out_of_arguments(self):
+        captured = []
+
+        def docker(*args, **kwargs):
+            self.assertNotIn("restore_disposable_only", " ".join(args))
+            self.assertIn(f"{recovery.PROJECT}_default", args)
+            self.assertNotIn("--mount", args)
+            self.assertIn("--read-only", args)
+            envfile = Path(args[args.index("--env-file") + 1])
+            captured.append(envfile)
+            self.assertEqual(envfile.stat().st_mode & 0o777, 0o600)
+            self.assertIn("@dev39-check-db:5432/aulas_ingles_restore", envfile.read_text())
+            return b""
+
+        with patch.object(recovery, "docker", side_effect=docker) as command:
+            rollout.migrate(recovery.DEV39_CHECK, "dev", "sha256:synthetic", True)
+        self.assertEqual(command.call_count, 3)
+        self.assertTrue(all(not path.exists() for path in captured))
+
     def test_receipt_requires_same_image_backup_scripts_clone_and_http(self):
         binding = {
             "manifest": "backup",

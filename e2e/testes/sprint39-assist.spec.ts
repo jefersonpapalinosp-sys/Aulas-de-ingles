@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 
 // Interface com respostas simuladas; concorrência/consumo real são testados no PostgreSQL.
-// Não habilita assistência nem envia texto a provedor no ambiente E2E.
+// A escrita continua simulada; STT e diálogo têm gateway sintético interno no E2E.
 test('Sprint 39F: cota explícita e retry de escrita preservam chave e texto', async ({ page }) => {
   const account = await page.request.post('/api/auth/register', {
     data: { email: `quota-${randomUUID()}@example.com`, password: 'synthetic-long-password', display_name: 'Quota test' },
