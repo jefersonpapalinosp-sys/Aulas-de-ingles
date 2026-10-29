@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import select, update
+from sqlalchemy import or_, select, true, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.exc import TimeoutError as PoolTimeout
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -94,12 +94,22 @@ async def _recover_stale_jobs(now: datetime) -> None:
 
 async def _claim_next_job(now: datetime) -> ClaimedJob | None:
     await _recover_stale_jobs(now)
+    settings = get_settings()
+    account_filter = (
+        or_(
+            TranscriptionJob.kind != "dialogue",
+            TranscriptionJob.user_id.in_(settings.dialogue_pilot_user_ids),
+        )
+        if settings.dialogue_accounts_restricted
+        else true()
+    )
     claim: ClaimedJob | None = None
     async with get_sessionmaker()() as session, session.begin():
         job = (
             await session.execute(
                 select(TranscriptionJob)
                 .where(
+                    account_filter,
                     TranscriptionJob.status == "queued",
                     TranscriptionJob.next_attempt_at <= now,
                     TranscriptionJob.attempt_count < TranscriptionJob.max_attempts,
@@ -140,13 +150,18 @@ async def _authorize_dispatch(claim: ClaimedJob) -> bool:
         ).scalar_one_or_none()
         if job is None:
             return False
-        if job.expires_at <= datetime.now(UTC):
+        error_code = "reservation_unavailable"
+        if job.kind == "dialogue" and not get_settings().dialogue_account_allowed(job.user_id):
+            error_code = "assist_disabled"
+            await assist_quota.release(session, job.assist_reservation_id, error_code)
+            allowed = False
+        elif job.expires_at <= datetime.now(UTC):
             await assist_quota.release(session, job.assist_reservation_id, "job_expired")
             allowed = False
         else:
             allowed = await assist_quota.consume(session, job.assist_reservation_id)
         if not allowed:
-            job.status, job.error_code = "failed", "reservation_unavailable"
+            job.status, job.error_code = "failed", error_code
             job.processing_started_at = None
             job.completed_at = datetime.now(UTC)
         return allowed

@@ -306,6 +306,7 @@ async def partner_reply(
         and dialogue.mode != "script"
         and settings.assisted_features_enabled
         and settings.dialogue_assist_configured
+        and settings.dialogue_account_allowed(dialogue.user_id)
     )
     if not usar_modelo:
         motivo = None if dialogue.mode == "script" else "assist_disabled"
@@ -372,7 +373,9 @@ async def create_dialogue(
     await assist_quota.lock_user(session, usuario.id)
     settings = get_settings()
     if mode != "script" and not (
-        settings.assisted_features_enabled and settings.dialogue_assist_configured
+        settings.assisted_features_enabled
+        and settings.dialogue_assist_configured
+        and settings.dialogue_account_allowed(usuario.id)
     ):
         raise DialogueUnavailable(mode)
 
@@ -433,6 +436,8 @@ async def admit_turn(
     Idempotência por `(dialogue_id, position)`: reenviar o mesmo turno devolve
     o que já foi admitido, sem segunda cobrança nem segundo job.
     """
+    if dialogue.mode != "script" and not get_settings().dialogue_account_allowed(dialogue.user_id):
+        raise DialogueUnavailable(dialogue.mode)
     existing = (
         await session.execute(
             select(DialogueTurn).where(

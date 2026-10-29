@@ -2224,11 +2224,34 @@ Jobs longos, provedor externo e rascunhos/áudio no navegador não foram ensaiad
 **Publicação concluída:** FE/DB/INFRA/SEC-49 integradas no PR #41, com CI e
 deploy aprovados, incluindo upgrade e rotação; ver quadro consolidado.
 **Próxima frente:** fechar os requisitos operacionais e a revisão SEC-46,
-preparar a restrição do piloto à conta autorizada e preencher a
+publicar e configurar a restrição do piloto à conta autorizada e preencher a
 [matriz da Sprint 48](matriz_aceite_sprint_48.md). Acessibilidade manual e
 pendências de backup continuam abertas; este ensaio não encerra esses itens.
 
 ---
+
+## Registro de execução — restrição do piloto (29/10/2026)
+
+Implementação local de `DIALOGUE_PILOT_USER_IDS`, lista validada de IDs positivos.
+Produção/perfil público negam acesso assistido quando a lista está vazia.
+Status, criação e novos turnos verificam a conta; upload recusado não grava
+áudio. Worker filtra a fila por participante e verifica novamente antes de
+consumir cota e chamar STT/LLM. Roteiro e portabilidade permanecem disponíveis.
+Compose repassa a lista à API e ao worker, inclusive no EasyPanel.
+
+Validação local: **1.399 testes backend aprovados**, incluindo 18 novos casos,
+com **94,31% de cobertura**; **345 testes operacionais** aprovados. Ruff,
+mypy (106 módulos backend e 40 operacionais), ESLint e TypeScript sem erros.
+Composes de produção/EasyPanel conferidos com lista vazia e lista explícita
+iguais na API e no worker. Baseline OpenAPI preservado. Provedores simulados,
+sem envio real de áudio/texto e sem alteração em produção.
+
+**Estado:** ainda não publicado/aplicado à VM; assistência continua desligada.
+Próximos passos: publicação, vínculo privado da conta autorizada, gateway real,
+monitoramento autenticado e revisão SEC-46. Antes de habilitar áudio, restringir
+também a STT compartilhada, que atende uma modalidade fora da conversa. Um
+piloto somente texto mantém URLs de STT/escrita ausentes. Orçamento permanece USD 0.
+Detalhes e limites operacionais na [matriz](matriz_aceite_sprint_48.md).
 
 ## Definição de pronto comum
 

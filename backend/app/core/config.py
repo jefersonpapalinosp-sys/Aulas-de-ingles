@@ -4,7 +4,7 @@ import hashlib
 import hmac
 from datetime import UTC, datetime
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 from urllib.parse import urlparse
 
 from pydantic import Field
@@ -75,6 +75,11 @@ class Settings(BaseSettings):
     # um gateway explicitamente configurado. O gateway recebe áudio bruto ou
     # texto/rubrica e devolve JSON no contrato documentado pelo serviço.
     # Só habilitar junto da interface FE-47 e da revisão SEC-46 assinada.
+    # JSON de IDs internos. Vazio bloqueia produção/public; dev/test locais
+    # continuam livres para ensaios. Nunca usar email/token nesta configuração.
+    dialogue_pilot_user_ids: list[Annotated[int, Field(strict=True, gt=0)]] = Field(
+        default_factory=list
+    )
     dialogue_practice_enabled: bool = False
     assisted_features_enabled: bool = False
     assist_transcription_url: str | None = None
@@ -137,6 +142,17 @@ class Settings(BaseSettings):
                 self.assist_ollama_base_url.strip() and self.assist_ollama_dialogue_model.strip()
             )
         return bool(self.assist_dialogue_url)
+
+    @property
+    def dialogue_accounts_restricted(self) -> bool:
+        return bool(
+            self.dialogue_pilot_user_ids
+            or self.app_env == "prod"
+            or self.deployment_profile == "public"
+        )
+
+    def dialogue_account_allowed(self, user_id: int) -> bool:
+        return not self.dialogue_accounts_restricted or user_id in self.dialogue_pilot_user_ids
 
     def validar(self) -> None:
         """Erros de configuração que só podem estourar no boot, nunca em produção silenciosa."""

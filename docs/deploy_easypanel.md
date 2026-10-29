@@ -618,3 +618,20 @@ troca e verifica bytes, MIME, cache, shell atual e 404. Este último roda no CI.
 - [Compose Service — documentação oficial do EasyPanel](https://easypanel.io/docs/services/compose)
 - [API do EasyPanel](https://easypanel.io/docs/api)
 - [CLI do EasyPanel](https://easypanel.io/docs/cli)
+
+
+### Restrição do piloto de conversa por conta
+
+Antes de ativar o piloto, configurar `EASYPANEL_DIALOGUE_PILOT_USER_IDS`
+como lista JSON de IDs internos positivos na configuração privada. O Compose
+repassa o mesmo valor à API e ao worker. O padrão `[]` bloqueia conversa
+assistida em produção/public, mesmo com gateway e flags configurados.
+Não publicar IDs reais em Git, logs de deploy ou documentação.
+
+Para alterar/revogar participantes, desligar a assistência, atualizar a lista
+nos dois processos e reiniciá-los antes de eventual reativação. Configuração
+é lida no início do processo; editar somente o arquivo não revoga workers já
+em execução. Chamadas já enviadas não podem ser canceladas retroativamente.
+Histórico/exportação/exclusão e modo Roteiro permanecem disponíveis.
+Os pré-requisitos e o estado de publicação estão na
+[matriz da Sprint 48](matriz_aceite_sprint_48.md).

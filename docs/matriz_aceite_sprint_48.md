@@ -16,7 +16,8 @@ nem constitui autorização de envio de dados ao provedor.
 | Contrato e privacidade | Sem manifesto real validado | Registrar contrato, base legal, região/subprocessadores, retenção e não treinamento com evidências do provedor escolhido |
 | Orçamento | Responsável informou uso do plano gratuito em 29/10; limite adotado de gasto autorizado: USD 0/dia, USD 0/mês e USD 0 no piloto | Confirmar modalidade Workers AI da conta e monitorar franquia; não habilitar cobrança |
 | Participante | Plano prevê somente a conta de Jeferson; identificação privada ainda não vinculada ao piloto | Confirmar a conta e compreensão do aviso de automação, sem publicar seus identificadores |
-| Restrição por conta | Flags atuais são globais; status/admissão não oferecem allowlist de piloto | Implementar e testar restrição no servidor antes de ligar Guiado em produção |
+| Restrição por conta | Implementada localmente: lista de IDs aplicada no status, criação/admissão e worker, antes de STT/LLM | Publicar e configurar a mesma lista privada na API e worker; ainda não aplicada à VM |
+| Isolamento de STT compartilhada | URL de STT também atende transcrição fora da conversa; lista desta entrega cobre conversa | Antes de habilitar áudio, restringir transcrição compartilhada; piloto somente texto exige STT/escrita sem URL |
 | Vigilância pública | Probe executado com sucesso no run 40932540081; schedule existente a cada 30 minutos | Acompanhar execuções agendadas; não inferir entrega de notificação |
 | Métricas e alerta | Leitura pontual antes da definição gratuita: 14 checks `ok`, dois avisos de orçamento; gate GitHub ignorado sem secret | Publicar suporte a teto zero, preparar agendamento autenticado/canal de alerta e provar detecção do worker em 2 minutos |
 
@@ -28,6 +29,43 @@ ou token do provedor. Nenhuma configuração de assistência foi alterada.
 O token operacional existe na VM, mas não foi transferido ao GitHub. Ativar o
 probe público não ativa o gate autenticado nem o alerta de custo. O snapshot
 pontual com avisos de orçamento não comprova monitoramento contínuo.
+
+## Restrição por conta — implementação local de 29/10
+
+`DIALOGUE_PILOT_USER_IDS` recebe uma lista JSON de IDs internos positivos.
+Em `APP_ENV=prod` ou `DEPLOYMENT_PROFILE=public`, lista vazia bloqueia todos
+os diálogos assistidos. Dev/test locais permitem ensaios com lista vazia;
+quando preenchida, a lista restringe qualquer ambiente. No EasyPanel,
+`EASYPANEL_DIALOGUE_PILOT_USER_IDS` alimenta API e worker pelo mesmo bloco.
+Identificadores reais ficam somente na configuração privada.
+
+Contas excluídas não podem criar Guiado/Livre nem enviar novos turnos de
+texto/áudio em conversas existentes. Áudio é recusado antes de armazenamento.
+Roteiro, consulta, exportação e exclusão continuam disponíveis ao titular.
+A lista limita **conversa assistida**; não habilita nem restringe por si só
+as outras modalidades. `ASSIST_TRANSCRIPTION_URL` também habilita transcrição
+fora da conversa quando a flag global está ligada. Antes de um piloto com
+áudio, aplicar controle equivalente à transcrição compartilhada; alternativamente,
+iniciar somente texto, mantendo URLs de transcrição e escrita ausentes. Não
+tratar a lista de conversa como proteção global de todos os recursos assistidos.
+
+Jobs de contas excluídas permanecem na fila sem consumir tentativas ou cota,
+até expiração/limpeza normal; não impedem o processamento de contas permitidas.
+Se a autorização mudar após a reivindicação, o despacho falha com
+`assist_disabled` antes de STT e libera apenas reservas ainda não consumidas.
+A chamada de diálogo também verifica a lista antes de usar o provedor.
+
+Configuração é carregada por processo: aplicar/revogar exige atualizar e
+reiniciar API e worker, mantendo assistência desligada durante a transição.
+Uma requisição externa já enviada não pode ser desfeita pela lista.
+Esta entrega não seleciona a conta real, não inicia piloto e não modifica a VM.
+
+Validação local: **1.399 testes backend aprovados**, incluindo 18 novos casos,
+com **94,31% de cobertura**; **345 testes operacionais** aprovados. Ruff,
+mypy (106 módulos backend e 40 operacionais), ESLint e TypeScript sem erros.
+Composes de produção/EasyPanel conferidos com lista vazia e lista explícita
+iguais na API e no worker. Baseline OpenAPI preservado. Provedores simulados,
+sem envio real de áudio/texto e sem alteração em produção.
 
 ## Manifesto privado e separação dos dois momentos de aceite
 
