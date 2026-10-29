@@ -630,7 +630,7 @@ continua na Sprint 38. Cotas/jobs/retenção de assistência e rollout seguem ab
 
 Referências: [ciclo de vida do service worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers),
 [Cache API e expiração controlada pela aplicação](https://developer.mozilla.org/en-US/docs/Web/API/Cache).
-Operação: [runbook 39E](operacao_sprint_37.md#sprint-39e--pwa-e-cache-público-em-14102026).
+Operação: [runbook 39E](historico_operacao_sprints_37_44.md#sprint-39e--pwa-e-cache-público-em-14102026).
 
 ### Entregas
 
@@ -675,7 +675,7 @@ Testes de interface incluem reenvio por Enter em Chromium desktop/mobile simulad
 com gateway/status interceptados. Essa simulação não prova a cota real: a admissão
 concorrente é ensaiada separadamente no PostgreSQL. Sem nova homologação em leitor
 de tela real. Contrato OpenAPI/tipos regenerados, sem dependência nova.
-[Evidências e pendências 39F](operacao_sprint_37.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
+[Evidências e pendências 39F](historico_operacao_sprints_37_44.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
 
 ### Incremento 39G/H — conclusão da implementação (15/10/2026)
 
@@ -694,7 +694,7 @@ O navegador interativo não estava disponível; a habilidade de navegador confir
 essa limitação. Microfone dos E2E é sintético. **Não homologados:** gravação e
 reprodução física Safari/macOS/iPhone, suspensão do sistema e dispositivos móveis
 reais. O critério de aceite 7 continua pendente; não confundir implementação
-concluída com aprovação integral da sprint. Checklist no [runbook 39G/H](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+concluída com aprovação integral da sprint. Checklist no [runbook 39G/H](historico_operacao_sprints_37_44.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
 
 ## Sprint 40 Histórico e controle dos dados pessoais
 
@@ -745,7 +745,7 @@ Contas acima de 10 mil registros/20 MiB recebem erro explícito, sem exportaçã
 arquivamento e prévia do seed; 40C procedimento de exclusão e decisão sobre backups;
 40D interfaces históricas, conclusão/aceite e implantação no estudo. Não marcar os
 itens agregados de exclusão/histórico como concluídos apenas por entregar esta tela.
-Evidências e limites no [runbook 40A](operacao_sprint_37.md#sprint-40a--exportação-e-meus-dados-em-15102026).
+Evidências e limites no [runbook 40A](historico_operacao_sprints_37_44.md#sprint-40a--exportação-e-meus-dados-em-15102026).
 
 ### Continuidade 40B.1 — proteção editorial, 15/10/2026
 
@@ -754,7 +754,7 @@ ou bundle: prévia read-only e bloqueio de alterações/omissões em conteúdo e
 Isso impede o seed de reinterpretar ou apagar referências históricas, mas **não**
 entrega visualização de snapshots ou conteúdo arquivado. FE-40 permanece em
 andamento; depende do contrato de identidade/versionamento/arquivamento 40B.2.
-[Evidências e limitações](operacao_sprint_37.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
+[Evidências e limitações](historico_operacao_sprints_37_44.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
 
 ### Continuidade 40B.2a — contrato histórico disponível para integração
 
@@ -769,7 +769,7 @@ Não marcar a tela de histórico como entregue: laboratório/prática e apresent
 legadas ainda dependem da integração explícita dos snapshots. Captura permanece
 desligada no DEV/estudo até o rollout ensaiado. Regressão frontend, tipagem e bundle
 foram conferidos; não houve nova homologação física de acessibilidade.
-[Evidências 40B.2a](operacao_sprint_37.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
+[Evidências 40B.2a](historico_operacao_sprints_37_44.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
 
 ### Continuidade 40B.2b.1 — contrato de disponibilidade, 15/10/2026
 
@@ -782,7 +782,7 @@ Não há tela nova nem alteração do schema OpenAPI neste incremento. Faltam me
 de conteúdo arquivado nas telas históricas, navegação sem links quebrados e política
 de invalidação dos textos públicos já cacheados. Não confundir esconder conteúdo na
 API online com revogar cópias offline. Nenhuma unidade foi arquivada no DEV/estudo.
-[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
+[Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
 
 ### Continuidade 40B.2b.2 — identidade para futura integração histórica, 15/10/2026
 
@@ -795,7 +795,7 @@ IDs públicos atuais permanecem iguais, sem alteração de OpenAPI/tipos ou tela
 nas telas, mensagens de arquivados, navegação e política de cache/offline. As chaves
 não invalidam cópias antigas sozinhas nem autorizam atualização do conteúdo existente.
 Nenhuma migration ou ativação de snapshots em DEV/estudo. FE-40 continua parcial.
-[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
+[Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
 
 ### Continuidade 40B.2b.3 — arquivamento ensaiado, interface ainda pendente
 
@@ -809,7 +809,7 @@ Não foi criada tela administrativa ou histórica, nem alterado OpenAPI/tipos.
 API online não invalida cópias offline por si só. Mensagens de arquivados, links,
 cache, conclusão versionada e aceite integrado continuam pendentes; por isso
 prod/public permanecem bloqueados e DEV/estudo não receberam arquivamento.
-[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
+[Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
 
 ### Continuidade 40B.2c — contrato de proveniência sem data inventada
 
@@ -821,7 +821,7 @@ rubrica do DEV foi atualizada nem feedback histórico recalculado.
 **347 testes frontend**, lint, TypeScript, build e orçamento de 171,9 KiB gzip
 aprovados. Uma futura interface editorial deve exibir “data não comprovada” e
 pendência pedagógica, nunca converter `null` em 07/10 ou na data atual.
-[Resultado da auditoria](operacao_sprint_37.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
+[Resultado da auditoria](historico_operacao_sprints_37_44.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
 
 ### Continuidade 40B.2d — ausência histórica honesta na fala
 

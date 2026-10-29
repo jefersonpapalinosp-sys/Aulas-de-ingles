@@ -134,7 +134,7 @@ export function StudyPage() {
 
     if (next) {
       persist(next.slug, completed)
-      navigate(studyPath(courseSlug, lessonNumber, next.slug))
+      void navigate(studyPath(courseSlug, lessonNumber, next.slug))
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
@@ -146,7 +146,7 @@ export function StudyPage() {
   function goBack() {
     if (!previous) return
     persist(previous.slug, completedSteps)
-    navigate(studyPath(courseSlug, lessonNumber, previous.slug))
+    void navigate(studyPath(courseSlug, lessonNumber, previous.slug))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

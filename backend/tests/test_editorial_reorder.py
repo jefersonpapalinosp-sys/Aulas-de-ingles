@@ -302,9 +302,10 @@ async def test_reorder_requires_explicit_valid_confirmation(reorder_lab, field, 
 async def test_reorder_disabled_and_production_rejected(reorder_lab, monkeypatch, setting, value):
     factory = reorder_lab
     graph, _, request = await proposal(factory)
-    monkeypatch.setattr(get_settings(), setting, value)
-    with pytest.raises(ValueError, match="desativada"):
-        await apply(factory, graph, request)
+    with monkeypatch.context() as patch:
+        patch.setattr(get_settings(), setting, value)
+        with pytest.raises(ValueError, match="desativada"):
+            await apply(factory, graph, request)
 
 
 def test_reorder_cli_requires_apply_before_loading_package(monkeypatch):

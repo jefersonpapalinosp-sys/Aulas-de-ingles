@@ -2,7 +2,7 @@
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Course, CourseUnit, Lesson
@@ -246,8 +246,9 @@ async def test_mesmo_numero_pode_existir_em_dois_cursos(client: AsyncClient) -> 
 
 @pytest.mark.asyncio
 async def test_aula_em_unidade_planejada_nao_vaza_nas_rotas_publicas(
-    client: AsyncClient, session: AsyncSession
+    catalog_lab: tuple[AsyncSession, AsyncClient],
 ) -> None:
+    session, client = catalog_lab
     level_2 = (
         await session.execute(select(Course).where(Course.slug == "voa-level-2"))
     ).scalar_one()
@@ -283,14 +284,9 @@ async def test_aula_em_unidade_planejada_nao_vaza_nas_rotas_publicas(
     session.add(accidental)
     await session.commit()
 
-    try:
-        curriculum = (await client.get("/api/courses/voa-level-2/curriculum")).json()
-        unit = next(item for item in curriculum["units"] if item["slug"] == "31-35")
-        assert unit["published_lessons"] == 0
-        assert unit["lessons"] == []
-        assert (await client.get("/api/courses/voa-level-2/lessons/31")).status_code == 404
-        assert (await client.get("/api/exercises?course=voa-level-2&lesson=31")).json() == []
-    finally:
-        await session.execute(delete(Lesson).where(Lesson.id == accidental.id))
-        await session.execute(delete(CourseUnit).where(CourseUnit.id == future_unit.id))
-        await session.commit()
+    curriculum = (await client.get("/api/courses/voa-level-2/curriculum")).json()
+    unit = next(item for item in curriculum["units"] if item["slug"] == "31-35")
+    assert unit["published_lessons"] == 0
+    assert unit["lessons"] == []
+    assert (await client.get("/api/courses/voa-level-2/lessons/31")).status_code == 404
+    assert (await client.get("/api/exercises?course=voa-level-2&lesson=31")).json() == []

@@ -1,3 +1,5 @@
+// Retirada do adaptador legado: alvo 2027-01-29, condicionada à preservação/recuperação.
+// Critérios: docs/politica_migracoes_storage_2026-10-29.md. Não expira nem apaga dados.
 import type { components } from '../../api/schema'
 import { listLocal, readLocal, removeLocal, writeLocal } from '../../storage/local'
 

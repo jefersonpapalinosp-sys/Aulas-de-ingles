@@ -191,6 +191,17 @@ jobs:
         run: make recovery-lab-prepare
       - name: dois pacotes, restore verificado e recusa de destino ocupado
         run: make test-recovery-integration
+      # INFRA-49: build anterior explícito; ops.rollback_image fica sob demanda.
+      - name: checkout do release anterior fixo para a prova de compatibilidade
+        uses: actions/checkout@v4
+        with:
+          ref: d0b1f8cf7b02ca8b06ea75876153d2b1079ea83d
+          path: .rollback42
+          persist-credentials: false
+      - name: imagem anterior para origem legada e leitura após upgrade
+        run: >-
+          docker build -f .rollback42/backend/Dockerfile.prod
+          -t aulas-ingles-rollback42:local .rollback42
       - name: laboratório separado na revisão anterior, com todas as modalidades
         run: |
           make upgrade-lab-up
@@ -216,6 +227,13 @@ jobs:
       - name: encerra somente laboratório de papéis
         if: always()
         run: make roles-lab-down
+      - name: rotação SEC-49 com banco exclusivo, sessões reais e gateway sintético
+        run: |
+          uv run --project backend python -m ops.rotation_rehearsal up
+          uv run --project backend python -m ops.rotation_rehearsal check
+      - name: encerra somente laboratório de rotação; preserva volume e recibos
+        if: always()
+        run: uv run --project backend python -m ops.rotation_rehearsal down
       # Não subir dumps/áudios/manifestos para artifacts de CI.
       - name: encerra só o laboratório; não apaga volumes
         if: always()
@@ -253,6 +271,8 @@ jobs:
           # Preserva o ciclo antigo na base vazia; a recusa nova tem teste próprio.
           uv run alembic upgrade c95f3d8ba042
           uv run alembic downgrade base
+          uv run alembic upgrade head
+          # DB-49: repetir o upgrade deve ser um no-op, sem reaplicar dados.
           uv run alembic upgrade head
           uv run alembic check
       - name: seed

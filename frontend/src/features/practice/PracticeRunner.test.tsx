@@ -255,7 +255,7 @@ describe('PracticeRunner', () => {
     await user.click(screen.getByRole('button', { name: 'Começar Desafio rápido' }))
 
     expect(mutateAsync).toHaveBeenCalledWith({
-      idempotency_key: expect.any(String),
+      idempotency_key: expect.any(String) as unknown,
       mode: 'quick',
       objective: 'recognize',
     })
@@ -300,9 +300,10 @@ describe('PracticeRunner', () => {
       ),
     })
     practiceApi.session.mockReturnValue(queryResult(refreshed))
-    await act(async () => {
+    await act(() => {
       Object.defineProperty(window.navigator, 'onLine', { value: false, configurable: true })
       window.dispatchEvent(new Event('offline'))
+      return Promise.resolve()
     })
 
     expect(screen.getByRole('textbox')).toHaveValue('more fast')
@@ -343,9 +344,10 @@ describe('PracticeRunner', () => {
       ),
     })
     practiceApi.session.mockReturnValue(queryResult(refreshed))
-    await act(async () => {
+    await act(() => {
       Object.defineProperty(window.navigator, 'onLine', { value: false, configurable: true })
       window.dispatchEvent(new Event('offline'))
+      return Promise.resolve()
     })
 
     expect(screen.getByRole('textbox')).toHaveValue('faster')
@@ -369,7 +371,7 @@ describe('PracticeRunner', () => {
       name: 'Progresso da sessão de exercícios',
     })
     expect(progress).toHaveAttribute('aria-valuenow', '0')
-    expect(progress).toHaveAttribute('aria-valuetext', expect.stringContaining('1 aguardando correção'))
+    expect(progress).toHaveAttribute('aria-valuetext', expect.stringContaining('1 aguardando correção') as unknown)
     expect(screen.getByRole('button', { name: 'Próxima →' })).toBeEnabled()
   })
 
@@ -390,9 +392,10 @@ describe('PracticeRunner', () => {
     expect(mutateAsync).not.toHaveBeenCalled()
     expect(localStorage.getItem('aulas-ingles:practice-position:v1:7:71')).toBe('1')
 
-    await act(async () => {
+    await act(() => {
       Object.defineProperty(window.navigator, 'onLine', { value: true, configurable: true })
       window.dispatchEvent(new Event('online'))
+      return Promise.resolve()
     })
 
     await waitFor(() =>
@@ -400,7 +403,7 @@ describe('PracticeRunner', () => {
         sessionId: 71,
         currentPosition: 1,
         expectedRevision: 1,
-        idempotencyKey: expect.any(String),
+        idempotencyKey: expect.any(String) as unknown,
       }),
     )
     await waitFor(() =>
@@ -430,7 +433,7 @@ describe('PracticeRunner', () => {
       sessionId: 71,
       currentPosition: 1,
       expectedRevision: 1,
-      idempotencyKey: expect.any(String),
+      idempotencyKey: expect.any(String) as unknown,
     })
   })
 
@@ -440,7 +443,7 @@ describe('PracticeRunner', () => {
     const latest = makeNavigableSession({ state_revision: 2 })
     const refetch = vi.fn().mockResolvedValue({ data: latest })
     const mutateAsync = vi
-      .fn()
+      .fn<(command: { idempotencyKey: string }) => Promise<unknown>>()
       .mockRejectedValueOnce(new Error('conflito de revisão'))
       .mockResolvedValueOnce(makeNavigableSession({ current_position: 1, state_revision: 3 }))
     practiceApi.active.mockReturnValue(queryResult(session))
@@ -511,7 +514,7 @@ describe('PracticeRunner', () => {
     ).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Recomeçar com conteúdo atualizado' }))
     expect(mutateAsync).toHaveBeenCalledWith({
-      idempotency_key: expect.any(String),
+      idempotency_key: expect.any(String) as unknown,
       mode: 'guided',
       skill: 'grammar',
     })

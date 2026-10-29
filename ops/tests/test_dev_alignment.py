@@ -116,7 +116,7 @@ class DevAlignmentTests(unittest.TestCase):
         self.assertNotIn("writing_prompt", dev_alignment.NEW_COLUMNS)
         self.assertNotIn("position_seconds", dev_alignment.NEW_COLUMNS["media_progress"])
         self.assertNotIn("total_seconds", dev_alignment.NEW_COLUMNS["study_session_progress"])
-        with patch.object(dev_alignment.study_rollout, "fingerprints") as fingerprint:
+        with patch.object(dev_alignment.rollout, "fingerprints") as fingerprint:
             dev_alignment.fingerprints(recovery.DEV_CHECK)
         self.assertEqual(fingerprint.call_args.kwargs["excluded_tables"], dev_alignment.NEW_TABLES)
 

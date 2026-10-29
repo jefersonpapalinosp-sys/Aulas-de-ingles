@@ -1,3 +1,5 @@
+# ESTUDO LOCAL em 5181. Não é a produção pública do EasyPanel.
+# Nome/volumes preservados para compatibilidade; ver docs/operacao_local.md.
 # Produção local: bundle buildado atrás de nginx, API sem reload, Postgres
 # com volume próprio. Portas deslocadas para conviver com o compose de dev.
 #

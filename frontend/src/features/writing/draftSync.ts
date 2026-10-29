@@ -207,7 +207,7 @@ export class DraftSync {
     }
     if (this.text !== this.queued && !this.state.conflict) {
       this.queued = this.text
-      this.save(this.text)
+      void this.save(this.text)
     }
     await this.queue.catch(() => undefined)
   }

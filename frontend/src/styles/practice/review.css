@@ -1,0 +1,58 @@
+/* ---------- revisão ---------- */
+.badge { display: inline-block; margin-left: 8px; font-family: var(--mono); font-size: 10.5px; background: var(--accent); color: var(--paper); padding: 1px 6px; border-radius: 100px; font-variant-numeric: tabular-nums; }
+
+.carta { margin-top: 30px; border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; padding: 40px 30px; text-align: center; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.carta-origem { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.skill-evidence-meta, .practice-time-budget { color: var(--ink-3); font-size: 0.82rem; line-height: 1.5; }
+.carta-termo { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.carta-ipa { font-family: var(--mono); font-size: 14px; color: var(--ink-3); }
+.carta-verso { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule-soft); width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.carta-traducao { font-size: 21px; color: var(--ink); }
+.carta-exemplo { font-size: 15px; font-style: italic; color: var(--ink-2); max-width: 46ch; margin: 0 auto; }
+.virar { margin-top: 20px; }
+
+.notas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 16px; }
+.nota { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 13px 8px; border: 1px solid var(--rule); background: var(--surface); border-radius: 5px; }
+.nota:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-wash); }
+.nota-rotulo { font-size: 14px; font-weight: 500; }
+.nota-tecla { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; }
+.nota.errei:hover:not(:disabled) { border-color: var(--bad); background: var(--bad-wash); }
+.nota.facil:hover:not(:disabled) { border-color: var(--ok); background: var(--ok-wash); }
+
+.ultima { margin-top: 12px; font-size: 14px; color: var(--ok); font-family: var(--mono); }
+.review-page { width: min(100%, 900px); }
+.review-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 9px; margin-top: 24px; padding: 14px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.review-filters label { display: grid; min-width: 135px; flex: 1 1 135px; gap: 4px; color: var(--ink-3); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.review-filters select { width: 100%; padding: 7px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: 13px var(--sans); text-transform: none; }
+.review-filters > button { padding: 7px 9px; border: 0; background: transparent; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
+.review-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; }
+.review-card-meta span { padding: 3px 8px; border: 1px solid var(--rule); border-radius: 100px; color: var(--ink-3); font: 10px var(--mono); text-transform: uppercase; }
+.review-card-meta span:first-child { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); }
+.review-reason { display: grid; grid-template-columns: auto 1fr; gap: 8px; margin-top: 9px; padding: 10px 12px; border-left: 2px solid var(--warn); background: var(--warn-wash); color: var(--ink-2); font-size: 12.5px; }
+.review-reason strong { color: var(--warn); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
+.review-card-meta + .review-reason + .carta { margin-top: 14px; }
+.review-audio { width: min(100%, 520px); margin-top: 8px; }
+.review-item-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 15px; color: var(--ink-3); font: 11px var(--mono); }
+.review-item-actions button, .review-suspended button { padding: 0; border: 0; background: transparent; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
+.review-item-actions button:last-child, .review-suspended button:last-child { color: var(--bad); }
+.review-suspended { margin-top: 42px; }
+.review-suspended ul { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+.review-suspended li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.review-suspended li > div { display: grid; min-width: 0; }
+.review-suspended li span { color: var(--ink-3); font: 10px var(--mono); text-transform: uppercase; }
+.review-suspended li strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.add-deck { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; padding: 4px 8px; border: 1px solid var(--rule); background: none; color: var(--accent); border-radius: 3px; white-space: nowrap; }
+.add-deck:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-wash); }
+.add-deck:disabled { color: var(--ok); border-color: var(--rule-soft); opacity: 1; }
+
+@media (max-width: 600px) {
+  .connectivity { right: 10px; bottom: 10px; left: 10px; flex-wrap: wrap; max-width: none; }
+  .notas { grid-template-columns: repeat(2, 1fr); }
+  .review-filters { display: grid; grid-template-columns: 1fr 1fr; }
+  .review-filters label:first-child { grid-column: 1 / -1; }
+  .review-reason { grid-template-columns: 1fr; }
+  .carta { padding: 30px 18px; }
+  .carta-termo { font-size: 29px; }
+  .review-suspended li { grid-template-columns: 1fr auto; }
+  .review-suspended li > div { grid-column: 1 / -1; }
+}

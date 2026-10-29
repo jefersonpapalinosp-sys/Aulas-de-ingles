@@ -300,7 +300,7 @@ Decisões do responsável: manutenção local autorizada após ensaio; **RPO 24h
 Backup permanece no Mac por escolha explícita para o estágio de desenvolvimento.
 Permissões 0700/0600 e FileVault ativo; sem criptografia independente dos pacotes
 ou cópia fora do equipamento. Sem agendamento/limpeza automática; não se afirma
-RPO continuamente cumprido. Política e comandos em [operação local](operacao_sprint_37.md).
+RPO continuamente cumprido. Política e comandos em [operação local](historico_operacao_sprints_37_44.md).
 
 Ensaio de papéis:
 
@@ -439,7 +439,7 @@ da integridade dessas jornadas. Reconciliação segue pendente.
 47 testes operacionais aprovados. API e worker reabertos com papéis anteriores;
 INSERT/SELECT de review_event permitidos ao runtime, UPDATE/DELETE recusados;
 worker sem leitura de auth_rate_bucket. Novo backup pós-migration verificado.
-Pacotes e procedimento: [registro operacional](operacao_sprint_37.md#sprint-38--implantação-autorizada-em-14102026).
+Pacotes e procedimento: [registro operacional](historico_operacao_sprints_37_44.md#sprint-38--implantação-autorizada-em-14102026).
 
 ### Entregas
 
@@ -501,7 +501,7 @@ originais e zero áudios; sem seed, reparos ou alterações de papéis. Auditada
 sem violações no dev; não confundir com divergências legadas do estudo. Segunda execução
 das migrations sem alterações e Alembic check aprovado nos dois bancos. Após smoke
 HTTP e remoção da conta temporária, hashes históricos novamente idênticos. Banco de
-estudo 5434 continua em `d06a4e9cb153`. [Evidências e limites](operacao_sprint_37.md#sprint-39a--alinhamento-autorizado-do-desenvolvimento-em-14102026).
+estudo 5434 continua em `d06a4e9cb153`. [Evidências e limites](historico_operacao_sprints_37_44.md#sprint-39a--alinhamento-autorizado-do-desenvolvimento-em-14102026).
 
 Não há purge automático novo: 7 dias é janela de aceitação de replay, **não retenção
 do banco**. Retenção/compactação e exclusão auditável seguem pendentes; não apagar
@@ -566,7 +566,7 @@ de retenção, consumo assistido e reconciliação mutante continuam abertos.
 
 Regressão final backend: **850 testes / 93,62% de cobertura**. Inventário de dev
 executado apenas para leitura: zero referências/arquivos, sem alterações. Nenhuma
-base de estudo foi usada pelos testes. [Registro operacional](operacao_sprint_37.md#sprint-39c--atualização-da-api-dev-sem-alteração-de-dados-em-14102026).
+base de estudo foi usada pelos testes. [Registro operacional](historico_operacao_sprints_37_44.md#sprint-39c--atualização-da-api-dev-sem-alteração-de-dados-em-14102026).
 
 ### Incremento 39D — exclusão mútua e journal privado (14/10/2026)
 
@@ -616,7 +616,7 @@ pessoais não é confundida com TTL do conteúdo público.
 Regressão backend: **912 testes**, cobertura **93,70%**, em PostgreSQL descartável
 55435. Somente essa base foi preparada/migrada/semeada nesta entrega. Sem nova
 medição de RPO/RTO, dump/restore ou alteração da base de estudo em 5434.
-[Registro operacional 39E](operacao_sprint_37.md#sprint-39e--pwa-e-cache-público-em-14102026).
+[Registro operacional 39E](historico_operacao_sprints_37_44.md#sprint-39e--pwa-e-cache-público-em-14102026).
 
 ### Entregas
 
@@ -682,8 +682,8 @@ manutenção, backup/restore e ensaio com imagem imutável. As 44 tabelas histó
 6.768 linhas conservaram seus fingerprints; nenhum seed, reconciliação ou mudança
 de papéis foi feito. O backfill real tinha zero resultados assistidos; os casos
 não vazios permanecem cobertos na base sintética 55435. Estudo 5434 não migrado.
-[Alinhamento e recibos](operacao_sprint_37.md#sprint-39f--alinhamento-do-desenvolvimento-em-15102026).
-[Registro 39F](operacao_sprint_37.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
+[Alinhamento e recibos](historico_operacao_sprints_37_44.md#sprint-39f--alinhamento-do-desenvolvimento-em-15102026).
+[Registro 39F](historico_operacao_sprints_37_44.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
 
 ### Incremento 39G/H — aplicado em 15/10/2026
 
@@ -699,7 +699,7 @@ novas de cada base. Backfill de ledger conferido; 15/20 divergências histórica
 jornada preservadas. Zero arquivos reais nas origens; casos não vazios de áudio e
 restauração cobertos por fixtures sintéticas, sem declarar evidência física.
 
-Detalhes, recibos, retenção ainda opt-in e limites de recuperação no [runbook](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+Detalhes, recibos, retenção ainda opt-in e limites de recuperação no [runbook](historico_operacao_sprints_37_44.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
 
 ## Sprint 40 Versionamento editorial e portabilidade
 
@@ -756,7 +756,7 @@ Campos secretos/operacionais não fazem parte da portabilidade.
 
 **Sprint em andamento:** 40B preservação editorial/seed, 40C exclusão com retry e
 política de backups, 40D histórico/aceite integrado. Nenhum expurgo ou alteração
-de seed foi executado. [Contrato e verificação](operacao_sprint_37.md#sprint-40a--exportação-e-meus-dados-em-15102026).
+de seed foi executado. [Contrato e verificação](historico_operacao_sprints_37_44.md#sprint-40a--exportação-e-meus-dados-em-15102026).
 
 ### Incremento 40B.1 — proteção antes de migrations editoriais, 15/10/2026
 
@@ -787,7 +787,7 @@ Prévia DEV: 82 diferenças de `writing_prompt.requirements` e 3 registros
 `lesson_version` antigos mantidos. Somente leitura; preservação integral.
 Diferença de representação de rubrica ainda precisa ser distinguida de mudança
 semântica antes de propor migração, sem sobrescrever o estado local automaticamente.
-[Contrato e testes](operacao_sprint_37.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
+[Contrato e testes](historico_operacao_sprints_37_44.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
 
 ### Incremento 40B.2a — tabela de evidências imutáveis, 15/10/2026
 
@@ -813,7 +813,7 @@ não alteradas nos ambientes de uso.
 
 **Pendentes de 40B.2:** UUID/chave editorial estável, arquivamento, proveniência real,
 impacto no diff e rollout após backup/restore. As 82 rubricas divergentes do DEV
-não foram normalizadas/sobrescritas. [Contrato e verificação](operacao_sprint_37.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
+não foram normalizadas/sobrescritas. [Contrato e verificação](historico_operacao_sprints_37_44.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
 
 ### Incremento 40B.2b.1 — diagnóstico de impacto, 15/10/2026
 
@@ -835,7 +835,7 @@ No DEV, prévia do bloco 31–40 encontrou 10 aulas, 111 exercícios, 10 prompts
 naquele corte. Isso não é inventário de todas as contas/ambientes. Não houve
 migration nem concessão de privilégios. Identidade estável, aplicação auditada e
 integração desse plano ao seed ainda pendentes.
-[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
+[Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
 
 ### Incremento 40B.2b.2 — chaves imutáveis e compatibilidade, 15/10/2026
 
@@ -865,7 +865,7 @@ somente teste descartável e laboratório de papéis estão em c51.
 Reordenação continua bloqueada: referências posicionais de listening/checkpoints
 e fingerprints da prática ainda precisam de tratamento no plano editorial futuro.
 Proveniência, 82 rubricas DEV, integração de impacto/arquivamento e rollout pendentes.
-[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
+[Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
 
 ### Incremento 40B.2b.3 — recibo e transação de arquivamento, 15/10/2026
 
@@ -896,7 +896,7 @@ congeladas e checkpoints externos bloqueiam a aplicação.
 Migration/constraints/rollback ensaiados no banco descartável e em laboratório de
 papéis. Ensaios de arquivamento foram revertidos integralmente por rollback, sem
 desabilitar triggers para apagar recibos. DEV/estudo não migrados nem arquivados;
-prod/public bloqueados. [Contrato e evidências](operacao_sprint_37.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
+prod/public bloqueados. [Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
 
 ### Incremento DB-40B.2c — ausência explícita de data e auditoria read-only
 
@@ -911,7 +911,7 @@ O auditor usa snapshot `REPEATABLE READ, READ ONLY`, sem tabelas pessoais. No DE
 A consulta não fez DML. Upgrade/reseed e migration unitária foram ensaiados apenas
 no banco 55435; `alembic check` ficou limpo. **1.088 backend e 88 testes operacionais**
 passaram. DEV/estudo continuam no schema anterior, sem correção ou rubrica aplicada.
-[Contrato completo](operacao_sprint_37.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
+[Contrato completo](historico_operacao_sprints_37_44.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
 
 ### Incremento DB-40B.2d — projeção mínima do worker
 

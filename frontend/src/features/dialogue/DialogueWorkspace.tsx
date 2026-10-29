@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type LessonDetail } from '../../api/client'
 import { invalidateStudy } from '../../api/invalidateStudy'
@@ -14,6 +14,7 @@ import './dialogue.css'
 export default function DialogueWorkspace({ lesson, userId, transport = dialogueTransport }: {
   lesson: LessonDetail; userId: number; transport?: DialogueTransport
 }) {
+  const replyHelp = useId()
   const engine = useMemo(() => new DialogueSession(userId, transport), [userId, transport])
   const state = useSyncExternalStore(engine.subscribe, engine.snapshot)
   const queryClient = useQueryClient()
@@ -139,24 +140,26 @@ export default function DialogueWorkspace({ lesson, userId, transport = dialogue
         disabled={blocked} onRate={(rating) => void engine.rate(turn.position, rating)} onSpeak={say} />)}</ol>
       {state.phase === 'partner_speaking' && <button onClick={() => { speech.cancel(); engine.speaking(false); input.current?.focus() }}>Parar voz</button>}
       {finished ? <p role="status">Conversa concluída. Você chegou ao limite de turnos.</p> : <>
-        <label>Sua resposta em inglês<textarea ref={input} lang="en" maxLength={2000} value={text}
+        <label>Sua resposta em inglês<textarea aria-describedby={replyHelp} ref={input} lang="en" maxLength={2000} value={text}
           disabled={blocked || Boolean(recording)} onChange={(event) => setText(event.target.value)} /></label>
-        <p>{text.length}/2000 caracteres. Procure usar de três a sessenta palavras.</p>
+        <p id={replyHelp}>{text.length}/2000 caracteres. Procure usar de três a sessenta palavras.</p>
         <button className="btn" disabled={blocked || Boolean(recording) || !text.trim()} onClick={() => void engine.sendText(text)}>Enviar texto</button>
         {audioAllowed && <div className="dialogue-recording">
-          <p>Grave até {policy.data!.recording_target_ms / 1000} segundos. Envio limitado a {policy.data!.max_bytes.toLocaleString('pt-BR')} bytes.</p>
+          <p>Grave até {policy.data.recording_target_ms / 1000} segundos. Envio limitado a {policy.data.max_bytes.toLocaleString('pt-BR')} bytes.</p>
           {state.phase === 'listening' ? <button onClick={() => {
             if (microphoneStarted.current) recorder.stop()
             else { recorder.cancel(); engine.listening(false) }
           }}>Parar gravação</button>
             : <button disabled={blocked || Boolean(recording)} onClick={startRecording}>Gravar resposta</button>}
           {recording && recordingUrl && <>
+            {/* Prévia local da voz do aluno; transcrição exige consentimento separado. */}
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <audio controls src={recordingUrl} aria-label="Ouvir gravação local" />
             <a href={recordingUrl} download="minha-resposta">Baixar gravação</a>
             <label><input type="checkbox" checked={consent} disabled={blocked}
               onChange={(event) => setConsent(event.target.checked)} />Concordo em salvar e transcrever esta gravação para responder à conversa.</label>
             {recordingInvalid && <p role="alert">Gravação fora dos limites. Baixe o áudio ou grave um trecho menor.</p>}
-            <button disabled={blocked || !consent || recordingInvalid} onClick={() => void engine.sendAudio(recording.blob, recording.duration, consent, policy.data!)}>Enviar áudio</button>
+            <button disabled={blocked || !consent || recordingInvalid} onClick={() => void engine.sendAudio(recording.blob, recording.duration, consent, policy.data)}>Enviar áudio</button>
             <button disabled={blocked} onClick={clearRecording}>Descartar gravação local</button>
             <p>A gravação fica nesta tela até o envio. Baixe antes de sair para guardar uma cópia.</p>
           </>}

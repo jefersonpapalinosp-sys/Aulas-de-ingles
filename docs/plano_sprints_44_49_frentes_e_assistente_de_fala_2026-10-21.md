@@ -1,6 +1,6 @@
 # Plano das Sprints 44 a 49 — correções por frente e assistente de conversa
 
-Atualização: 21 de outubro de 2026. Base: `main` em `f9b03f3`, head Alembic
+Atualização: 29 de outubro de 2026. Base original de 21/10: `main` em `f9b03f3`, head Alembic
 `a42c7d1e9f20`, produção pública no EasyPanel (projeto `papalino`, serviço
 `aulas-ingles`) e estudo local em `localhost:5181`.
 
@@ -30,6 +30,42 @@ Regras herdadas que este plano não altera:
   Essa decisão fica registrada aqui para não ser reaberta por acidente.
 
 ---
+
+## Situação consolidada em 29/10/2026
+
+Este quadro atualiza o estado presente; os registros datados abaixo preservam
+as evidências e limitações da ocasião. Caixas de entregas técnicas já provadas
+foram reconciliadas com esses registros. Implementação não encerra aceite humano.
+
+| Ciclo/frente | Estado atual | O que permanece |
+|---|---|---|
+| 44–45 | Entregas técnicas publicadas; deploy automático operacional | Comprovar pendências de guarda externa da chave e recibos do backup; build único compartilhado no CI segue adiado |
+| 46 | Backend, schema, retenção, frontend e defesas implementados | Revisão SEC-46 assinada, provedor real e vigilância configurados, medições operacionais de aceite DB-46 |
+| 47 | Interface e E2E implementados; CI remoto verde | Liberação da interface condicionada à revisão SEC-46; assistência continua desligada |
+| 48 | Gate, métricas de custo, runbook e ensaios sintéticos prontos | Manifesto real, piloto na conta autorizada, avaliações/pedagogia/VoiceOver, orçamento e alertas reais, aceites operacionais |
+| BE-49 | Concluído, incluindo os cinco smokes | Nenhuma entrega de código pendente neste pacote |
+| FE-49 | Implementada e validada localmente | Publicação desta entrega e aceite manual de acessibilidade, sem encerrar o piloto |
+| DB-49 | Implementada e validada localmente | Publicação e CI remoto da política de downgrade/isolamento de testes |
+| INFRA-49 | Implementada e validada localmente | Publicação e CI remoto, incluindo o ensaio integrado de upgrade |
+| SEC-49 | Implementada e ensaiada localmente | Publicação e CI remoto do ensaio de rotação; sem alteração de segredos reais |
+
+**Publicação comprovada:** PR #39 integrada em `41aa3f7`; PR #40 em
+`ef47515`, corrigindo os chunks antigos que retornavam 404 no Caderno após
+um deploy. CI e deploy da `main` aprovados no run `40880779035`; os 636
+arquivos versionados da VM foram comparados com o código local, sem divergência.
+Web, API, worker e banco saudáveis. Os bundles antigos recuperados responderam
+HTTP 200 com SHA-256 idêntico ao artefato original. O volume de assets passa a
+reter versões por mais de 30 dias após sua retirada.
+
+O release anterior incluiu backup público, restore em clone isolado na própria
+VM, ensaio de migration/leitura pela aplicação e backup posterior. Isso não
+substitui as avaliações do piloto com diálogos reais, a revisão assinada ou
+os aceites operacionais específicos ainda indicados no ciclo 48.
+
+**Correções do checklist:** SEC/BE/FE-45 já tinham implementação registrada;
+o spike IA-45 e o manifesto exemplo já existem; DB-46 já está aplicado; a
+retenção descrita em DB-48 foi antecipada em DB-46 e possui testes; INFRA-47
+já foi aprovado remotamente. Nenhum desses itens deve gerar retrabalho.
 
 ## Visão geral
 
@@ -277,7 +313,7 @@ posterior); registro completo em
 [deploy_easypanel.md](deploy_easypanel.md#registro-do-segundo-deploy--21102026-sprint-44).
 A produção pública está em `d2b7e4c9a150`. No mesmo dia, com autorização, a
 produção local de estudo em 5181 foi recriada com este código pela sequência da
-Sprint 43 (registro no [runbook](operacao_sprint_37.md#sprint-44--implantação-autorizada-no-estudo-em-21102026));
+Sprint 43 (registro no [runbook](historico_operacao_sprints_37_44.md#sprint-44--implantação-autorizada-no-estudo-em-21102026));
 a correção do `PUBLIC_ORIGIN` no worker e no migrador locais (`b42de48`) saiu
 dessa implantação. Pendência que fica: copiar a chave privada `age` para fora
 do Mac.
@@ -329,13 +365,13 @@ Critérios de aceite:
 
 Entregas:
 
-- [ ] `security_opt: [no-new-privileges:true]`, `cap_drop: [ALL]` e
+- [x] `security_opt: [no-new-privileges:true]`, `cap_drop: [ALL]` e
   `read_only: true` onde couber, na stack EasyPanel primeiro.
-- [ ] `server_tokens off`, `gzip_vary on`, `limit_req_zone` em `/api/auth/`.
-- [ ] `docker-entrypoint.prod.sh` tolera volume read-only, removendo o
+- [x] `server_tokens off`, `gzip_vary on`, `limit_req_zone` em `/api/auth/`.
+- [x] `docker-entrypoint.prod.sh` tolera volume read-only, removendo o
   `entrypoint: []` + UID duplicado em dois Compose.
-- [ ] `shellcheck`, `hadolint` e `actionlint` no CI.
-- [ ] Pins de patch nos estágios de build (`uv`, `node`).
+- [x] `shellcheck`, `hadolint` e `actionlint` no CI.
+- [x] Pins de patch nos estágios de build (`uv`, `node`).
 
 Critérios de aceite: Trivy mantém zero críticas/altas; os quatro shell
 scripts passam no shellcheck; a stack pública sobe com as três opções de
@@ -345,25 +381,25 @@ hardening e todos os smokes verdes.
 
 Entregas:
 
-- [ ] `services/completion.py` a partir de `get_course_completion`
+- [x] `services/completion.py` a partir de `get_course_completion`
   (`api/courses.py:137`, 297 linhas); o router fica com validação, resolução
   e cabeçalhos.
-- [ ] `services/writing_feedback.py` a partir de `analisar_texto`
+- [x] `services/writing_feedback.py` a partir de `analisar_texto`
   (`api/writing.py:292`, 205 linhas): rubrica, reserva de cota, provedor,
   persistência, evidência e revisão como funções nomeadas.
-- [ ] Mover `adicionar_item_revisao`, `adicionar_cartas` e
+- [x] Mover `adicionar_item_revisao`, `adicionar_cartas` e
   `remover_item_por_origem` de `api/review.py` para `services/review.py`;
   atualizar os quatro imports.
-- [ ] Um helper único de conferência de idempotência em `tentar`
+- [x] Um helper único de conferência de idempotência em `tentar`
   (`api/progress.py:461` e `:501`).
-- [ ] Colunas enum-like como `Mapped[Literal[...]]`; zero
+- [x] Colunas enum-like como `Mapped[Literal[...]]`; zero
   `type: ignore[arg-type]` em `app/`.
-- [ ] Consolidar os pares "query legada / query de página" em `review.py`,
+- [x] Consolidar os pares "query legada / query de página" em `review.py`,
   `speaking.py`, `writing.py` e `me.py`; nenhum `-> Any` em `api/`.
-- [ ] Alinhar `POST /writing/prompts/{id}/feedback` ao contrato de revisão:
+- [x] Alinhar `POST /writing/prompts/{id}/feedback` ao contrato de revisão:
   ou passa a chamar `require_revision` e declara o 428, ou sai do registro
   `REVISIONED_WRITES` do frontend. Hoje o cliente envia e o servidor ignora.
-- [ ] 428 próprio (`idempotency_key_required`) quando `grade` recebe revisão
+- [x] 428 próprio (`idempotency_key_required`) quando `grade` recebe revisão
   mas não a chave; o frontend trata os dois códigos no mesmo banner.
 
 Critérios de aceite: nenhum endpoint acima de 80 linhas em `api/`; cobertura
@@ -373,16 +409,16 @@ não cai abaixo de 93%; baseline OpenAPI inalterado neste pacote.
 
 Entregas:
 
-- [ ] `api/notebook.ts` com 4 queries e 4 mutações via `useQuery`/
+- [x] `api/notebook.ts` com 4 queries e 4 mutações via `useQuery`/
   `useMutation` lançando `ApiError`; fim dos 8 `throw Error()` vazios.
-- [ ] `usePagedItems` substituído por `useInfiniteQuery`; remoção do
+- [x] `usePagedItems` substituído por `useInfiniteQuery`; remoção do
   `setSpeakingEntries` manual.
-- [ ] `NotebookPage` dividida em `NotebookCompose`, `NotebookList`,
+- [x] `NotebookPage` dividida em `NotebookCompose`, `NotebookList`,
   `WritingHistorySection`, `SpeakingHistorySection`,
   `HistoricalEvidenceSection`.
-- [ ] `LessonRail`: o toggle manual de unidade sobrevive a refetch do
+- [x] `LessonRail`: o toggle manual de unidade sobrevive a refetch do
   currículo.
-- [ ] Política única de `retry`/`networkMode` documentada em `api/queries.ts`
+- [x] Política única de `retry`/`networkMode` documentada em `api/queries.ts`
   e aplicada a `dashboard.ts`, `review.ts` e `practice.ts`.
 
 Critérios de aceite: nenhum arquivo de página acima de 300 linhas; teste de
@@ -458,13 +494,14 @@ Entregas:
 - [x] Prompt do sistema e esquema JSON versionados em `app/services/dialogue_prompts.py`,
   derivados exclusivamente de `seed/lessons.json` (objetivos, frases,
   vocabulário, blocos de gramática) e nunca da conversa anterior sem filtro.
-- [ ] Spike de latência: 30 turnos sintéticos em Ollama `qwen2.5:7b` no Mac
+- [x] Spike de latência: 30 turnos sintéticos em Ollama `qwen2.5:7b` no Mac
   e 30 em um gateway HTTPS; registrar p50/p95 e custo por turno.
 - [x] Decisão de TTS (registrada no ADR): `speechSynthesis` do navegador como padrão (zero custo,
   dado não sai do dispositivo, funciona offline); gateway de TTS fica para
   depois do piloto, se a qualidade da voz for reprovada.
-- [ ] Manifesto de homologação do provedor para a modalidade `conversation`
-  em `config/assist-provider-review.example.json`.
+- [x] Manifesto **exemplo** para a modalidade `conversation` em
+  `config/assist-provider-review.example.json`; aprovações reais continuam
+  pendentes no IA-48 e não são inferidas do exemplo.
 
 Critérios de aceite:
 
@@ -548,7 +585,7 @@ Critérios de aceite:
 
 ### DB-46 Migration, grants e exclusão em cascata
 
-- [ ] Aplicar a migration de DB-45 no laboratório e no clone do estudo;
+- [x] Aplicar a migration de DB-45 no laboratório e no clone do estudo;
   `alembic check` limpo; grants mínimos; `account_deletion` cobre as duas
   tabelas; exportação pessoal 1.7 com diálogos e turnos.
 - [x] Retenção: `transcript` e `partner_text` seguem `ASSIST_RETENTION_DAYS`
@@ -1214,8 +1251,9 @@ Não houve deploy ou ativação do provedor.
   determinístico, com cenários de sucesso, lentidão, falha e resposta
   inválida; worker real e fluxo completo do diálogo em desktop e mobile
   incluídos no job E2E do CI.
-- [ ] Confirmar execução remota verde do job após publicar as alterações.
-  A evidência deste registro é local; nenhum resultado de CI foi presumido.
+- [x] Execução remota verde confirmada nos releases das PRs #39 e #40,
+  incluindo o E2E com gateway simulado. Os registros de preparação abaixo
+  preservam o estado que existia em cada execução local.
 
 Aceite: E2E do diálogo verde no CI; o gateway simulado nunca é alcançável
 fora da rede da stack E2E.
@@ -1362,7 +1400,7 @@ Não houve execução remota do CI, deploy ou homologação com provedor real.
 
 ### DB-48 Retenção de turnos
 
-- [ ] Job de manutenção apaga `transcript` e `partner_text` após
+- [x] Job de manutenção apaga `transcript` e `partner_text` após
   `ASSIST_RETENTION_DAYS`, preservando checks agregados e avaliações; teste
   com relógio injetado.
 
@@ -1513,22 +1551,70 @@ Pode começar após o ciclo 45 sempre que houver folga.
 
 ### INFRA-49 Poda de topologia, scripts e documentação
 
-- [ ] Remover os perfis `final39-check`, `assist-check` e `dev-check` de
+- [x] Remover os perfis `final39-check`, `assist-check` e `dev-check` de
   `infra/compose.recovery.yml`; remover `ops/sprint39_rollout.py` e seu
   teste; unificar `study_rollout`/`concurrency_rollout` em `ops/rollout.py`
   parametrizado; tirar `ops.rollback_image` do caminho do CI, mantendo-o
   como ferramenta sob demanda.
-- [ ] Decidir o destino de `infra/compose.prod.yml` e do overlay
+- [x] Decidir o destino de `infra/compose.prod.yml` e do overlay
   `compose.roles.prod.yml` agora que `make prod-up` está desativado e a
   produção vive no EasyPanel.
-- [ ] README: changelog de sprints sai para `docs/changelog.md`; o README
+- [x] README: changelog de sprints sai para `docs/changelog.md`; o README
   volta a ter menos de 400 linhas e aponta para os runbooks.
-- [ ] `docs/operacao_sprint_37.md` dividido em runbook vigente e histórico.
-- [ ] Apagar as 15 branches locais já mergeadas; derrubar os containers de
+- [x] `docs/operacao_sprint_37.md` dividido em runbook vigente e histórico.
+- [x] Apagar as 15 branches locais já mergeadas; derrubar os containers de
   laboratório parados há dias (`recovery-study-check`, `upgrade42`).
 
 Aceite: `docker ps` do projeto mostra só dev, estudo local e teste; o CI
 continua verde após a poda; `make help` lista menos de 50 alvos.
+
+**Execução em 29/10/2026 — implementação e validação local concluídas;
+publicação/CI remoto pendentes.**
+
+`ops.rollout` reúne os perfis históricos `study`/`concurrency` com seleção
+explícita, mantendo revisões, destinos, hashes, política de legado e nomes dos
+recibos. Os consumidores e testes foram migrados. `ops.sprint39_rollout` e seus
+oito testes específicos foram retirados; o histórico Git preserva esse código.
+Os testes compartilhados continuam verificando o smoke de assistência ativo.
+
+O Compose principal de recuperação perdeu os três perfis indicados. Os dois
+alinhamentos históricos ainda referenciados (`dev-check`/`assist-check`) ficam
+no overlay opt-in `infra/compose.legacy-rehearsal.yml`, fora da stack padrão e
+do CI. O perfil `final39-check`, seus destinos e declarações de volumes saíram.
+Nenhum volume existente foi apagado.
+
+O CI faz checkout do SHA completo do release anterior e build explícito para
+a prova de upgrade/leitura. `upgrade-lab-up` exige a imagem já preparada;
+`ops.rollback_image` permanece sob demanda. O smoke de compatibilidade segue
+no CI: não foi substituído por uma simples verificação de configuração.
+
+Decisão sobre os arquivos `compose.prod.yml`/`compose.roles.prod.yml`:
+**mantidos para o estudo local 5181**, com identificação corrigida. Projeto,
+nomes de volumes e credenciais permanecem compatíveis. A produção pública usa
+`infra/easypanel/compose.yml`; os fluxos genéricos `prod-up`/`prod-seed` continuam
+bloqueados. `make help` mostra **43 comandos**; `help-all` preserva o acesso aos
+atalhos avançados e de laboratório.
+
+README reduzido de **1.652 para 112 linhas**. As entregas datadas foram para
+[changelog](changelog.md), a referência de produto/testes para
+[guia técnico](guia_tecnico.md), e a operação foi dividida em
+[runbook vigente](operacao_local.md) e
+[histórico 37–44](historico_operacao_sprints_37_44.md). O arquivo antigo aponta
+para os novos destinos; links internos e âncoras foram atualizados.
+
+As **15 branches locais** ancestrais de `main` e fora de worktrees foram
+retiradas com `git branch -d`, preservando `main`, a branch de trabalho e as
+branches remotas. O inventário Docker confirmou apenas desenvolvimento e
+estudo local ativos neste projeto: os laboratórios antigos já estavam
+encerrados. Containers de outros projetos não foram alterados.
+
+Validação local: **336 testes operacionais** aprovados (341 anteriores, menos
+oito exclusivos do script retirado, mais três testes dos perfis), Ruff limpo,
+mypy estrito dos **37 módulos**, Compose principal/overlay válidos e actionlint
+do workflow alterado aprovado. O ensaio integrado de upgrade será comprovado
+pelo CI remoto; não foi reexecutado sobre volumes de ensaios anteriores.
+Continuação **SEC-49** registrada abaixo. FE/DB/INFRA/SEC-49 ainda aguardam
+publicação e CI remoto para fechamento comum.
 
 ### BE-49 Qualidade da suíte e de `ops/`
 
@@ -1945,28 +2031,146 @@ com **1.376 testes e 94,30% de cobertura**; 65 guardas E2E também passaram.
 
 ### FE-49 Lint type-aware, a11y de formulário e CSS por domínio
 
-- [ ] `tseslint.configs.recommendedTypeChecked` (ativa
+- [x] `tseslint.configs.recommendedTypeChecked` (ativa
   `no-floating-promises`) e `eslint-plugin-jsx-a11y`; `public/sw.js` e
   `scripts/` entram no lint.
-- [ ] `aria-describedby`/`aria-invalid` em todos os formulários; texto de
+- [x] `aria-describedby`/`aria-invalid` em todos os formulários; texto de
   ajuda fora do `<label>` em `LoginPage`.
-- [ ] `styles.css` dividido por domínio (`base`, `layout`, `study`,
+- [x] `styles.css` dividido por domínio (`base`, `layout`, `study`,
   `practice`, `writing`, `speaking`, `dialogue`, `notebook`) sem seção por
   sprint; `!important` reduzido a casos documentados.
-- [ ] Data de remoção para as migrações de chave de storage v1/v2.
+- [x] Data de remoção para as migrações de chave de storage v1/v2.
+
+**Execução em 29/10/2026 — implementação e validação local concluídas.**
+
+O lint passou a usar tipos e regras JSX de acessibilidade, incluindo service
+worker e scripts. Mocks de rede/áudio foram tipados; promessas intencionais
+foram explicitadas. Exceções pontuais documentadas cobrem referências de spies,
+o teclado do `dialog` nativo e áudios com texto associado ou gravação privada
+sem transcrição autorizada. Isso não equivale a homologação com leitor de tela.
+
+Os seis formulários (login, plano, exercícios, checkpoint, autoavaliação e
+exclusão de conta) associam ajuda/feedback por IDs. Erros nativos são anunciados;
+a edição limpa somente o erro do campo alterado. Radios usam o estado de
+invalidez no grupo, sem atributo incompatível no controle. Falha de rede não
+marca uma resposta como inválida. A prévia de áudio deixou de usar `<label>`.
+
+`styles.css` é agora um índice de 24 arquivos por domínio, com ordem da cascata
+preservada e regras responsivas compartilhadas em `layout`. O diálogo mantém
+seu CSS lazy. Os únicos `!important` restantes atendem movimento reduzido e
+cores forçadas, com justificativa no arquivo. A classe antiga `map-title`, sem
+uso no JSX, foi retirada. Os tetos de bundle existentes foram mantidos.
+
+A [política de migrações de storage](politica_migracoes_storage_2026-10-29.md)
+define **29/01/2027** como data-alvo condicionada à recuperação/migração;
+nenhum dado expira ou é apagado por calendário. Formatos ativos v1/v2 ficam
+fora da retirada.
+
+Verificações locais aprovadas: contrato OpenAPI em sincronia, lint sem avisos, TypeScript, 456 testes
+Vitest, 14 testes de scripts, 65 guardas de isolamento, seis cenários de
+fila/diálogo/recuperação e dois cenários de atualização PWA. Build aprovado;
+bundle inicial 128,5 KiB gzip, base abaixo de 184 KiB e diálogo abaixo de 8 KiB.
+A suíte completa passou com **158 E2E aprovados e dois skips previstos**
+(medição de baseline restrita a Chromium). Inclui o novo cenário de validação
+nativa e axe em cadastro/plano, desktop e celular, além de teclado/modalidade
+em Firefox e WebKit. Execução: `make e2e-up` e `npm --prefix e2e test`, na
+stack descartável com isolamento verificado, em 10,2 minutos.
+
+Na continuação de 29/10, a conferência adicional foi autorizada e concluída:
+os oito assets JS/CSS servidos pelo Docker em `127.0.0.1:5198` têm SHA-256
+idêntico ao build local. `make e2e-down` encerrou os sete contêineres e as duas
+redes da stack descartável, preservando os volumes sintéticos. A indisponibilidade
+anterior do serviço de aprovação deixou de bloquear essas duas verificações.
+
+Esta entrega está na branch `sprint/49-frontend-quality`, ainda sem publicação.
+O quadro inicial registra as publicações anteriores. Aceite manual de
+VoiceOver/piloto continua pendente no ciclo 48. A continuação abaixo executa
+**DB-49**; depois ficam as frentes operacionais INFRA/SEC-49.
 
 ### DB-49 Política de downgrade e testes
 
-- [ ] Política escrita: migrations aditivas, downgrade permitido até qual
+- [x] Política escrita: migrations aditivas, downgrade permitido até qual
   revisão, o que o CI testa; `d06a4e9cb153` referenciada como marco.
-- [ ] Limpeza do `conftest` por `TRUNCATE` das tabelas não-seed ou
+- [x] Limpeza do `conftest` por `TRUNCATE` das tabelas não-seed ou
   transação com rollback, substituindo o `DELETE` ad hoc da unidade `31-35`.
+
+**Execução em 29/10/2026 — implementação e validação local concluídas.**
+
+A [política de migrations e downgrade](politica_migrations_downgrade_2026-10-29.md)
+documenta expansão/contração, o ciclo legado vazio até `c95f3d8ba042`, o marco
+irreversível `d06a4e9cb153` e as condições de retorno por aplicação compatível
+ou restauração em outra base. O CI passa a repetir `upgrade head` antes do
+`alembic check`; não foi liberado downgrade de dados de aluno.
+
+O isolamento classifica explicitamente as 53 tabelas dos modelos: 19 de seed
+e 34 transitórias. A fixture confirma ambiente e identidade real, limpa as
+transitórias com `TRUNCATE ... RESTART IDENTITY RESTRICT` antes/depois de cada
+cenário e preserva commits e conexões independentes dos testes de concorrência.
+Inventário incompleto/sobreposto e dependência externa recusam a limpeza.
+
+O cenário curricular `31-35` usa agora transação externa e savepoints, com
+rollback inclusive após commit e exceção. Foram retirados os deletes por slug.
+Cinco novos testes cobrem preservação integral do seed, limpeza idempotente,
+recusa de alvo/inventário/dependência e visibilidade/rollback pela API.
+As simulações de ambiente de produção nos testes de quarentena e edição
+terminam antes do teardown, mantendo a recusa de limpeza fora do ambiente de teste.
+
+Ruff e mypy estrito aprovados na aplicação (106 módulos) e no helper de
+isolamento. Os 15 testes direcionados de isolamento, cursos e migration
+passaram. Após ajustar as simulações de ambiente, a suíte completa passou
+com **1.381 testes e 94,30% de cobertura**, em 7min05s. O helper também foi
+revalidado isoladamente, com cinco testes aprovados após o ajuste de importação.
+
+A identidade do PostgreSQL descartável foi confirmada; `upgrade head` rodou
+duas vezes e `alembic check` terminou sem novas operações. O ciclo legado
+vazio não foi repetido sobre essa base já migrada; permanece no CI. Nenhuma
+migration nova foi necessária. `make test-db-down` encerrou o contêiner e a
+rede de testes, preservando o volume sintético.
+
+Publicação e CI remoto das entregas FE/DB-49 ainda pendentes. A continuação
+INFRA-49 está registrada acima; o ensaio SEC-49 está registrado abaixo.
 
 ### SEC-49 Ensaio de rotação
 
-- [ ] Rotacionar `JWT_SECRET`, token do provedor e senhas dos papéis de
+- [x] Rotacionar `JWT_SECRET`, token do provedor e senhas dos papéis de
   banco em laboratório, medindo impacto em sessões ativas e documentando a
   ordem segura.
+
+#### Registro de execução — 29/10/2026
+
+O [runbook de rotação](rotacao_segredos_2026-10-29.md) registra a ordem
+**backup → migrador → worker → runtime**, seguida da troca coordenada do JWT
+e da sobreposição/revogação do token do provedor quando suportada.
+O laboratório exclusivo `aulas-ingles-rotation49` usa banco marcado, rede
+interna sem portas, credenciais aleatórias e gateway HTTP sintético.
+
+As quatro senhas antigas foram recusadas em conexões novas; as quatro novas
+foram aceitas. Conexões abertas sobreviveram. Runtime com senha desatualizada
+respondeu health 503; após atualização, health 200 e sessão anterior válida.
+O JWT novo invalidou access/refresh antigos (401); novo login/refresh passou
+(200). Instâncias com chaves diferentes demonstraram respostas 200/401 à mesma
+sessão. A sequência do gateway foi 200/200/200/401/200 usando o cliente real.
+
+Nota sintética, grants de tabelas, atributos/membros dos papéis e chaves do
+limitador com segredo explícito foram preservados. A conta criada foi removida;
+zero usuários restantes. O proprietário NOLOGIN e a senha administrativa não
+foram rotacionados. Não houve alteração de segredos ou dados de produção.
+
+Execução final: **9.772 ms** totais; senhas/reinício **3.513 ms**, JWT
+**1.376 ms**, gateway **505 ms**. Medições locais não equivalem a SLA.
+Recibos privados contêm somente agregados e hashes dos scripts. O laboratório
+foi encerrado preservando seu volume; ausência de containers do projeto
+confirmada, sem limpeza global de Docker.
+
+Validação: **343 testes operacionais** (sete novos), Ruff, mypy estrito em
+**40 módulos**, Compose e actionlint aprovados. Ensaio integrado repetido com
+os scripts finais. Etapas adicionadas ao CI, incluindo encerramento obrigatório.
+Jobs longos, provedor externo e rascunhos/áudio no navegador não foram ensaiados.
+
+**Próxima entrega:** publicar FE/DB/INFRA/SEC-49 e comprovar o CI remoto,
+incluindo upgrade e rotação. Permanecem os aceites humanos e operacionais de
+SEC-46/ciclo 48, a acessibilidade manual e as pendências de backup do quadro
+consolidado; este ensaio não encerra esses itens.
 
 ---
 

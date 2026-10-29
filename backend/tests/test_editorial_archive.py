@@ -180,9 +180,10 @@ async def test_archive_requires_explicit_valid_confirmation(archive_lab, field, 
 async def test_archive_disabled_and_production_rejected(archive_lab, monkeypatch, setting, value):
     factory, _ = archive_lab
     request, _ = await proposal(factory)
-    monkeypatch.setattr(get_settings(), setting, value)
-    with pytest.raises(ValueError, match="desativado"):
-        await apply(factory, request)
+    with monkeypatch.context() as patch:
+        patch.setattr(get_settings(), setting, value)
+        with pytest.raises(ValueError, match="desativado"):
+            await apply(factory, request)
 
 
 async def test_receipt_failure_rolls_back_status_and_releases_lock(archive_lab, monkeypatch):

@@ -1,0 +1,12 @@
+/* ---------- estados ---------- */
+.muted { color: var(--ink-3); font-size: 15px; }
+.erro { color: var(--bad); font-weight: 600; }
+.estado-erro { border: 1px solid var(--bad); background: var(--bad-wash); border-radius: 5px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.estado-erro button { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.07em; text-transform: uppercase; padding: 8px 13px; border: 1px solid var(--bad); background: none; color: var(--bad); border-radius: 4px; }
+.estado-erro button:hover { background: var(--bad); color: var(--paper); }
+.recovery-screen { margin: 1rem; max-width: 48rem; overflow-wrap: anywhere; }
+.recovery-screen h1 { font-size: clamp(1.4rem, 5vw, 2rem); }
+.recovery-screen button, .recovery-screen a { min-height: 44px; max-width: 100%; white-space: normal; }
+.recovery-screen :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+
+.navbtns { display: flex; justify-content: space-between; gap: 12px; margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--rule); }

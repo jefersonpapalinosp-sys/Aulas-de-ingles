@@ -45,7 +45,7 @@ describe('disponibilidade offline', () => {
     fireEvent.click(button)
     expect(await screen.findByText(/Textos removidos/)).toBeInTheDocument()
     expect(inspectCache).toHaveBeenCalledWith('PWA_CLEAR_TEXT', '/api/courses/voa-level-1/lessons/31')
-    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('não serão apagados'))
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('não serão apagados') as unknown)
   })
   it('não promete offline quando armazenamento ou worker falham', async () => {
     vi.mocked(inspectCache).mockRejectedValue(new Error('QuotaExceededError'))

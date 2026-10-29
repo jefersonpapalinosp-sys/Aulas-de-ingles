@@ -43,7 +43,7 @@ papéis mínimos ativos. Desenvolvimento em 5180 não foi migrado/reiniciado.
 Jeferson autorizou fechamento **técnico** com homologação pedagógica humana
 pendente, e backup somente no Mac no estágio atual. Metas RPO/RTO/retenção
 registradas como metas a validar, sem SLA, agendamento ou cópia externa.
-Consulte [operação local](operacao_sprint_37.md) e os oitavos incrementos dos
+Consulte [operação local](historico_operacao_sprints_37_44.md) e os oitavos incrementos dos
 planos por frente. Naquele fechamento as Sprints 38–42 permaneciam planejadas.
 
 ### Atualização de implementação — 14/10/2026

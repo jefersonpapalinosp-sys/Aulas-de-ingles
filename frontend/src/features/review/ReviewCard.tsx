@@ -42,6 +42,8 @@ export function ReviewCard({
         <div className="carta-termo"><Markdown>{item.prompt}</Markdown></div>
         {item.prompt_note && <p className="carta-ipa">{item.prompt_note}</p>}
         {item.media_url && (
+          // Áudio complementar ao texto do cartão, exibido nesta atividade.
+          // eslint-disable-next-line jsx-a11y/media-has-caption
           <audio className="review-audio" controls preload="metadata" src={item.media_url}>
             Seu navegador não suporta áudio.
           </audio>

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { NotebookPage } from './NotebookPage'
 
 const clientMocks = vi.hoisted(() => ({
-  GET: vi.fn(),
+  GET: vi.fn<(path: string, options?: { params?: { query?: { cursor?: string } } }) => Promise<unknown>>(),
   POST: vi.fn(),
   PUT: vi.fn(),
   DELETE: vi.fn(),
@@ -88,26 +88,26 @@ function mockQueries(
   nextHistoricalEntries: Record<string, unknown>[] = [],
   historicalContent: Record<string, unknown> | null = null,
 ) {
-  clientMocks.GET.mockImplementation(async (path, options) => {
+  clientMocks.GET.mockImplementation((path, options) => {
     if (path === '/api/me/notebook/page') {
       const cursor = options?.params?.query?.cursor
-      return cursor
+      return Promise.resolve(cursor
         ? { data: { items: nextEntries, next_cursor: null } }
-        : { data: { items: entries, next_cursor: nextCursor } }
+        : { data: { items: entries, next_cursor: nextCursor } })
     }
     if (path === '/api/speaking/attempts/page') {
-      return options?.params?.query?.cursor
+      return Promise.resolve(options?.params?.query?.cursor
         ? { data: { items: nextSpeakingEntries, next_cursor: null } }
-        : { data: { items: speakingEntries, next_cursor: nextSpeakingCursor } }
+        : { data: { items: speakingEntries, next_cursor: nextSpeakingCursor } })
     }
     if (path === '/api/writing/prompts/{prompt_id}/feedback') {
-      return { data: { items: feedbacks, next_cursor: null } }
+      return Promise.resolve({ data: { items: feedbacks, next_cursor: null } })
     }
     if (path === '/api/writing/history/page') {
       if (options?.params?.query?.cursor) {
-        return { data: { items: nextWritingEntries, next_cursor: null } }
+        return Promise.resolve({ data: { items: nextWritingEntries, next_cursor: null } })
       }
-      return {
+      return Promise.resolve({
         data: {
           items: [
             {
@@ -125,17 +125,17 @@ function mockQueries(
           ],
           next_cursor: nextWritingCursor,
         },
-      }
+      })
     }
     if (path === '/api/me/history/page') {
-      return options?.params?.query?.cursor
+      return Promise.resolve(options?.params?.query?.cursor
         ? { data: { items: nextHistoricalEntries, next_cursor: null } }
-        : { data: { items: historicalEntries, next_cursor: nextHistoricalCursor } }
+        : { data: { items: historicalEntries, next_cursor: nextHistoricalCursor } })
     }
     if (path === '/api/me/history/{kind}/{evidence_id}/content') {
-      return { data: historicalContent ?? undefined }
+      return Promise.resolve({ data: historicalContent ?? undefined })
     }
-    return { data: undefined }
+    return Promise.resolve({ data: undefined })
   })
 }
 
@@ -431,7 +431,7 @@ describe('NotebookPage', () => {
     mockCurriculum()
     mockQueries([])
     const blob = new Blob(['{"schema_version":"1.0"}'], { type: 'application/json' })
-    clientMocks.authenticatedFetch.mockResolvedValue({ ok: true, blob: async () => blob })
+    clientMocks.authenticatedFetch.mockResolvedValue({ ok: true, blob: () => Promise.resolve(blob) })
     const createObjectURL = vi.fn().mockReturnValue('blob:export')
     const revokeObjectURL = vi.fn()
     vi.stubGlobal('URL', { createObjectURL, revokeObjectURL })

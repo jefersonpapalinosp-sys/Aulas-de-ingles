@@ -13,7 +13,7 @@ import time
 from collections.abc import Mapping
 from pathlib import Path
 
-from ops import concurrency_rollout, dev_alignment, recovery, study_rollout
+from ops import dev_alignment, recovery, rollout
 from ops.recovery_archive import (
     FileInfo,
     RecoveryError,
@@ -32,15 +32,15 @@ NEW_COLUMNS = {
 SMOKE_SCRIPT = recovery.ROOT / "ops" / "assist_alignment_smoke.py"
 
 
-def fingerprints(target: recovery.Target) -> dict[str, study_rollout.Fingerprint]:
-    return study_rollout.fingerprints(
+def fingerprints(target: recovery.Target) -> dict[str, rollout.Fingerprint]:
+    return rollout.fingerprints(
         target, excluded_columns=NEW_COLUMNS, excluded_tables=("assist_reservation",)
     )
 
 
 def validate_manifest(manifest: Mapping[str, object]) -> None:
-    origin = study_rollout.json_object(manifest.get("source"))
-    snapshot = study_rollout.json_object(manifest.get("snapshot"))
+    origin = rollout.json_object(manifest.get("source"))
+    snapshot = rollout.json_object(manifest.get("snapshot"))
     require(
         origin.get("kind") == "dev" and origin.get("project") == "aulas-ingles",
         "Exige backup do desenvolvimento; estudo/produção não são aceitos.",
@@ -82,7 +82,7 @@ def verify_backfill(target: recovery.Target) -> None:
        WHERE provider IS NULL AND assist_reservation_id IS NOT NULL)
     """
     require(
-        study_rollout.query_count(target, sql) == 0,
+        rollout.query_count(target, sql) == 0,
         "Backfill diverge dos registros legados observáveis.",
     )
 
@@ -101,7 +101,7 @@ def validate_receipt(
 
 
 def checked_smoke(value: object) -> dict[str, object]:
-    result = study_rollout.json_object(value)
+    result = rollout.json_object(value)
     require(
         result == {
             "verified": True,
@@ -133,14 +133,14 @@ def validate_smoke_receipt(
 def smoke_clone(backup: Path) -> None:
     manifest = verify_bundle(backup)
     validate_manifest(manifest)
-    snapshot = study_rollout.json_object(manifest["snapshot"])
+    snapshot = rollout.json_object(manifest["snapshot"])
     manifest_hash = file_info(backup / "manifest.json")
     tools_image = dev_alignment.image_id()
     prefix = f"dev39f-{manifest['bundle_id']}"
-    receipt = concurrency_rollout.private_json(recovery.BACKUPS / f"{prefix}-rehearse.json")
+    receipt = rollout.private_json(recovery.BACKUPS / f"{prefix}-rehearse.json")
     validate_receipt(receipt, manifest_hash=manifest_hash, tools_image=tools_image)
-    proof = concurrency_rollout.private_json(recovery.BACKUPS / f"{prefix}-capture.json")
-    tables = study_rollout.checked_fingerprints(proof.get("tables"))
+    proof = rollout.private_json(recovery.BACKUPS / f"{prefix}-capture.json")
+    tables = rollout.checked_fingerprints(proof.get("tables"))
     require(
         proof["manifest"] == manifest_hash and proof["tools_image"] == tools_image,
         "Captura de outro backup/imagem.",
@@ -159,7 +159,7 @@ def smoke_clone(backup: Path) -> None:
         smoke_receipt_path = recovery.BACKUPS / f"{prefix}-smoke.json"
         if smoke_receipt_path.exists():
             validate_smoke_receipt(
-                concurrency_rollout.private_json(smoke_receipt_path),
+                rollout.private_json(smoke_receipt_path),
                 manifest_hash=manifest_hash,
                 tools_image=tools_image,
             )
@@ -244,9 +244,9 @@ def run(action: str, backup: Path) -> None:
     require(action in {"capture", "rehearse", "apply"}, "Ação não prevista.")
     manifest = verify_bundle(backup)
     validate_manifest(manifest)
-    snapshot = study_rollout.json_object(manifest["snapshot"])
-    origin = study_rollout.json_object(manifest["source"])
-    audio_files = study_rollout.json_object(manifest.get("audio_files"))
+    snapshot = rollout.json_object(manifest["snapshot"])
+    origin = rollout.json_object(manifest["source"])
+    audio_files = rollout.json_object(manifest.get("audio_files"))
     source = recovery.source_target("dev")
     info = recovery.check_target(source)
     recovery.quiet(source)
@@ -277,8 +277,8 @@ def run(action: str, backup: Path) -> None:
             )
             print("Captura privada 39F concluída; sem conteúdo pessoal nos logs.")
             return
-        proof = concurrency_rollout.private_json(capture_path)
-        tables = study_rollout.checked_fingerprints(proof.get("tables"))
+        proof = rollout.private_json(capture_path)
+        tables = rollout.checked_fingerprints(proof.get("tables"))
         require(
             proof["manifest"] == manifest_hash and proof["tools_image"] == tools_image,
             "Backup ou imagem mudou após captura; exige novo ensaio.",
@@ -288,7 +288,7 @@ def run(action: str, backup: Path) -> None:
             "Dados da origem mudaram após captura.",
         )
         if action == "rehearse":
-            receipt = concurrency_rollout.private_json(
+            receipt = rollout.private_json(
                 recovery.BACKUPS / "restore-receipts" / f"{manifest['bundle_id']}.json"
             )
             require(
@@ -301,12 +301,12 @@ def run(action: str, backup: Path) -> None:
             target = recovery.ASSIST_CHECK
         else:
             validate_receipt(
-                concurrency_rollout.private_json(recovery.BACKUPS / f"{prefix}-rehearse.json"),
+                rollout.private_json(recovery.BACKUPS / f"{prefix}-rehearse.json"),
                 manifest_hash=manifest_hash,
                 tools_image=tools_image,
             )
             validate_smoke_receipt(
-                concurrency_rollout.private_json(recovery.BACKUPS / f"{prefix}-smoke.json"),
+                rollout.private_json(recovery.BACKUPS / f"{prefix}-smoke.json"),
                 manifest_hash=manifest_hash,
                 tools_image=tools_image,
             )
@@ -338,7 +338,7 @@ def run(action: str, backup: Path) -> None:
             "tables": len(tables),
             "rows": sum(t["count"] for t in tables.values()),
             "audio_count": len(audio_files),
-            "legacy_reservations": study_rollout.query_count(
+            "legacy_reservations": rollout.query_count(
                 target, "SELECT count(*) FROM assist_reservation"
             ),
         }

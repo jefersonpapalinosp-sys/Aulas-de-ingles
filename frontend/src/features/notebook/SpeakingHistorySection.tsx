@@ -95,6 +95,8 @@ export function SpeakingHistorySection({ scope, onMessage }: Props) {
           {items.length} gravações carregadas.
         </p>
       )}
+      {/* Gravação privada do aluno; a transcrição é opcional e requer consentimento. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       {playing && <audio aria-label="Gravação do caderno" controls autoPlay src={playing.url} />}
     </section>
   )

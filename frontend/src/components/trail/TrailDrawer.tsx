@@ -33,6 +33,8 @@ export function TrailDrawer({
       </div>
 
       {open && (
+        // O diálogo nativo trata Escape/Tab e clique no backdrop; não é conteúdo estático.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
         <dialog
           ref={drawerRef}
           className="trail-drawer-backdrop"

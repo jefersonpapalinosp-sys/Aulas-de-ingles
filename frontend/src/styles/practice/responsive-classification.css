@@ -1,0 +1,3 @@
+@media (max-width: 520px) {
+  .classification-grid label { grid-template-columns: 1fr; gap: 4px; }
+}

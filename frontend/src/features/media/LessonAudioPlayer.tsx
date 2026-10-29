@@ -130,6 +130,8 @@ function LessonAudioPlayerContent({
         </span>
       </div>
 
+      {/* Áudio didático acompanhado pela transcrição textual abaixo. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio
         ref={audioRef}
         controls

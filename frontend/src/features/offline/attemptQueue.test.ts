@@ -68,7 +68,7 @@ describe('fila offline de tentativas', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: { attempt_id: 401, correct: true },
       response: new Response(),
-    } as never)
+    })
 
     await expect(syncAttemptQueue(7)).resolves.toEqual({
       synced: 1,
@@ -106,7 +106,7 @@ describe('fila offline de tentativas', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: { attempt_id: 402, correct: false },
       response: new Response(),
-    } as never)
+    })
 
     await expect(syncAttemptQueue(7)).resolves.toEqual({
       synced: 1,
@@ -147,7 +147,7 @@ describe('fila offline de tentativas', () => {
 
   it('mantém a tentativa quando a rede continua indisponível', async () => {
     await queueAttempt(attempt)
-    vi.mocked(api.POST).mockResolvedValue({ data: undefined, response: undefined } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: undefined, response: undefined })
 
     await expect(syncAttemptQueue(7)).resolves.toEqual({
       synced: 0,
@@ -184,10 +184,10 @@ describe('fila offline de tentativas', () => {
   it('interrompe toda a rodada se a conta muda durante a primeira resposta', async () => {
     await queueAttempt(attempt)
     await queueAttempt({ ...attempt, exerciseId: 32, idempotencyKey: 'offline-2' })
-    vi.mocked(api.POST).mockImplementationOnce(async () => {
+    vi.mocked(api.POST).mockImplementationOnce(() => {
       setAccessToken('outra-conta')
       setSessionUser(8)
-      return { data: { attempt_id: 401, correct: true }, response: new Response() } as never
+      return Promise.resolve({ data: { attempt_id: 401, correct: true }, response: new Response() } as never)
     })
     expect(await syncAttemptQueue(7)).toMatchObject({ synced: 0, pending: 2 })
     expect(api.POST).toHaveBeenCalledTimes(1)
@@ -221,11 +221,11 @@ describe('fila offline de tentativas', () => {
       .mockResolvedValueOnce({
         data: undefined,
         response: new Response(null, { status: 409 }),
-      } as never)
+      })
       .mockResolvedValueOnce({
         data: { attempt_id: 403, correct: true },
         response: new Response(),
-      } as never)
+      })
 
     const result = await syncAttemptQueue(7)
 
@@ -248,8 +248,8 @@ describe('fila offline de tentativas', () => {
     expect(await listQueuedAttempts(7)).toEqual([
       expect.objectContaining({
         ...staleAttempt,
-        syncFailure: expect.objectContaining({ status: 409 }),
-      }),
+        syncFailure: expect.objectContaining({ status: 409 }) as unknown,
+      }) as unknown,
     ])
     expect(await getAttemptQueueStats(7)).toEqual({ pending: 0, blocked: 1, total: 1 })
 
@@ -271,7 +271,7 @@ describe('fila offline de tentativas', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: undefined,
       response: new Response(null, { status: 428 }),
-    } as never)
+    })
 
     await expect(syncAttemptQueue(7)).resolves.toMatchObject({
       synced: 0, pending: 2, blocked: 0, rejectedAttempts: [],

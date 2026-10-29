@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type Exercise } from './client'
+import { api } from './client'
 import type {
   CreatePracticeSessionInput,
   PracticeFilters,
-  PracticeSession,
 } from '../features/practice/types'
 import { READ_POLICY } from './readPolicy'
 
@@ -55,7 +54,7 @@ export function usePracticeExercises(
         },
       )
       if (!data) throw practiceError(response?.status, 'buscar os exercícios')
-      return data as Exercise[]
+      return data
     },
     enabled: enabled && Boolean(courseSlug) && Number.isInteger(lessonNumber),
   })
@@ -76,7 +75,7 @@ export function useActivePracticeSession(
       )
       if (response?.status === 204) return null
       if (!data) throw practiceError(response?.status, 'buscar sua sessão de exercícios')
-      return data as PracticeSession
+      return data
     },
     enabled: enabled && Boolean(courseSlug) && Number.isInteger(lessonNumber),
     staleTime: 0,
@@ -92,7 +91,7 @@ export function usePracticeSession(sessionId: number | null, enabled = true) {
         params: { path: { session_id: sessionId ?? 0 } },
       })
       if (!data) throw practiceError(response?.status, 'buscar sua sessão de exercícios')
-      return data as PracticeSession
+      return data
     },
     enabled: enabled && sessionId !== null,
     staleTime: 0,
@@ -111,7 +110,7 @@ export function useCreatePracticeSession(courseSlug: string, lessonNumber: numbe
         },
       )
       if (!data) throw practiceError(response?.status, 'iniciar a prática')
-      return data as PracticeSession
+      return data
     },
     onSuccess: (session) => {
       qc.setQueryData(['practice-session-active', courseSlug, lessonNumber], session)
@@ -146,7 +145,7 @@ export function useUpdatePracticePosition() {
         },
       )
       if (!data) throw practiceError(response?.status, 'salvar a posição da prática')
-      return data as PracticeSession
+      return data
     },
     onSuccess: (session) => {
       qc.setQueryData(['practice-session', session.id], session)

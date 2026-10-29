@@ -41,13 +41,13 @@ function resposta(status: number, corpo: unknown = {}) {
   })
 }
 
-let fetchMock: ReturnType<typeof vi.fn>
+let fetchMock: ReturnType<typeof vi.fn<(input: Request | string) => Promise<Response>>>
 
 beforeEach(() => {
   setAccessToken('token-velho')
   setSessionReadOnly(false)
   setSessionUser(null)
-  fetchMock = vi.fn()
+  fetchMock = vi.fn<(input: Request | string) => Promise<Response>>()
   vi.stubGlobal('fetch', fetchMock)
 })
 
@@ -118,12 +118,12 @@ describe('renovação automática no 401', () => {
   it('várias chamadas simultâneas compartilham um único refresh', async () => {
     // O refresh rotaciona: usar um revoga o anterior. Sem o single-flight, a
     // segunda chamada invalidaria a sessão que a primeira acabou de renovar.
-    fetchMock.mockImplementation(async (arg: unknown) => {
+    fetchMock.mockImplementation((arg: unknown) => {
       if (caminhoDe(arg) === '/api/auth/refresh') {
-        return resposta(200, { access_token: 'token-novo' })
+        return Promise.resolve(resposta(200, { access_token: 'token-novo' }))
       }
       const autorizacao = typeof arg === 'string' ? null : (arg as Request).headers.get('Authorization')
-      return autorizacao === 'Bearer token-novo' ? resposta(200, []) : resposta(401)
+      return Promise.resolve(autorizacao === 'Bearer token-novo' ? resposta(200, []) : resposta(401))
     })
 
     const resultados = await Promise.all([
@@ -169,7 +169,7 @@ describe('corpos realmente consumidos e transporte binário', () => {
     expect(result.response.status).toBe(200)
     expect(bodies).toHaveLength(2)
     expect(bodies[1]).toBe(bodies[0])
-    if (method === 'POST') expect(JSON.parse(bodies[1]!).idempotency_key).toBe('mesma-chave')
+    if (method === 'POST') expect((JSON.parse(bodies[1]!) as { idempotency_key: string }).idempotency_key).toBe('mesma-chave')
     expect(requests[1]!.method).toBe(method)
     expect(requests[1]!.headers.get('X-Request-Id')).toBe('pedido-31')
     expect(requests[1]!.headers.get('Content-Type')).toBe('application/json')
@@ -208,7 +208,8 @@ describe('corpos realmente consumidos e transporte binário', () => {
 
   it('não copia nem repete ReadableStream', async () => {
     const body = new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array([7])); controller.close() } })
-    fetchMock.mockImplementation(async (req: Request) => {
+    fetchMock.mockImplementation(async (input: Request | string) => {
+      const req = new Request(input)
       expect([...new Uint8Array(await req.arrayBuffer())]).toEqual([7])
       return resposta(401)
     })
@@ -266,7 +267,8 @@ describe('indisponibilidade não é revogação', () => {
   })
 
   it('não reenvia automaticamente uma escrita cuja resposta se perdeu', async () => {
-    fetchMock.mockImplementationOnce(async (req: Request) => {
+    fetchMock.mockImplementationOnce(async (input: Request | string) => {
+      const req = new Request(input)
       await req.text()
       throw new TypeError('Connection lost after commit')
     })
@@ -406,7 +408,7 @@ describe('cutover de 13/11/2026: escritas revisionadas', () => {
   })
 
   it('rotas sem revisão no contrato e leituras não são tocadas pelo guard', async () => {
-    fetchMock.mockImplementation(async () => resposta(200, {}))
+    fetchMock.mockImplementation(() => Promise.resolve(resposta(200, {})))
     await api.PUT('/api/me/study-plan', {
       body: { weekly_minutes: 60, preferred_days: ['mon'], goal: 'travel', timezone: 'America/Sao_Paulo' },
     })

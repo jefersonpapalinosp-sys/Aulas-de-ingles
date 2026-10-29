@@ -1,0 +1,60 @@
+# Ensaios históricos 39A/39F, somente sob demanda. Ver docs/operacao_local.md.
+# Overlay de compose.recovery.yml; sem portas nem volumes do aluno.
+services:
+  assist-check-db:
+    profiles: ["assist-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_restore_admin
+      POSTGRES_PASSWORD: restore_admin_disposable_only
+      POSTGRES_DB: postgres
+    depends_on:
+      assist-check-volume:
+        condition: service_completed_successfully
+    volumes:
+      - assist_check_db:/var/lib/postgresql/data
+      - ./restore-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_restore -d aulas_ingles_restore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  assist-check-volume:
+    profiles: ["assist-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    entrypoint: ["true"]
+    volumes:
+      - assist_check_voice:/voice
+  dev-check-db:
+    profiles: ["dev-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: aulas_restore_admin
+      POSTGRES_PASSWORD: restore_admin_disposable_only
+      POSTGRES_DB: postgres
+    depends_on:
+      dev-check-volume:
+        condition: service_completed_successfully
+    volumes:
+      - dev_check_db:/var/lib/postgresql/data
+      - ./restore-db-init.sql:/docker-entrypoint-initdb.d/01-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aulas_restore -d aulas_ingles_restore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  dev-check-volume:
+    profiles: ["dev-check"]
+    image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    entrypoint: ["true"]
+    volumes:
+      - dev_check_voice:/voice
+volumes:
+  assist_check_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  assist_check_voice:
+    labels: {org.aulas.environment: disposable-recovery}
+  dev_check_db:
+    labels: {org.aulas.environment: disposable-recovery}
+  dev_check_voice:
+    labels: {org.aulas.environment: disposable-recovery}

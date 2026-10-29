@@ -6,8 +6,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from ops import concurrency_rollout as rollout
-from ops import recovery
+from ops import recovery, rollout
 from ops.recovery_archive import RecoveryError, write_json
 
 
@@ -82,7 +81,7 @@ class ConcurrencyRolloutTests(unittest.TestCase):
             patch.object(recovery, "quiet"),
             patch.object(recovery, "docker") as docker,
         ):
-            rollout.clone_run("alembic", "upgrade", rollout.HEAD)
+            rollout.clone_run("alembic", "upgrade", rollout.CONCURRENCY_HEAD, profile="concurrency")
             check.assert_called_once_with(recovery.CONCURRENCY_CHECK)
             args = docker.call_args.args
             self.assertIn("aulas-ingles-recovery_default", args)
@@ -108,7 +107,7 @@ class ConcurrencyRolloutTests(unittest.TestCase):
             )
 
         with patch.object(recovery, "query", side_effect=query):
-            result = rollout.fingerprints(recovery.CONCURRENCY_CHECK)
+            result = rollout.concurrency_fingerprints(recovery.CONCURRENCY_CHECK)
         self.assertEqual(len(result), 4)
         self.assertIn("- 'revision'", queries[1])
         self.assertIn("- 'successor_jti'", queries[2])
@@ -117,7 +116,10 @@ class ConcurrencyRolloutTests(unittest.TestCase):
         self.assertTrue(all("- 'text'" not in sql for sql in queries))
 
     def test_refuses_wrong_schema_before_docker(self):
-        for kind, revision in (("lab", [rollout.BASE]), ("prod", [rollout.HEAD])):
+        for kind, revision in (
+            ("lab", [rollout.CONCURRENCY_BASE]),
+            ("prod", [rollout.CONCURRENCY_HEAD]),
+        ):
             with (
                 patch.object(
                     rollout,
@@ -130,7 +132,7 @@ class ConcurrencyRolloutTests(unittest.TestCase):
                 patch.object(recovery, "source_target") as source,
             ):
                 with self.assertRaises(RecoveryError):
-                    rollout.run("capture", Path("unused"))
+                    rollout.run("capture", Path("unused"), profile="concurrency")
                 source.assert_not_called()
 
     def test_restore_receipt_requires_exact_clone_bundle_and_hash(self):

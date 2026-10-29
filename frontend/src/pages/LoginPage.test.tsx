@@ -39,6 +39,8 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('E-mail ou senha incorretos.')
+    expect(screen.getByLabelText('E-mail')).toHaveAccessibleDescription('E-mail ou senha incorretos.')
+    expect(screen.getByLabelText('E-mail')).toHaveAttribute('aria-invalid', 'false')
   })
 
   it('alterna para criar conta e pede o nome', async () => {
@@ -49,7 +51,9 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: 'Ainda não tenho conta' }))
     expect(screen.getByLabelText('Nome')).toBeInTheDocument()
     expect(screen.getByLabelText('Nome')).toHaveFocus()
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0 })
-    expect(screen.getByText('No mínimo 8 caracteres.')).toBeInTheDocument()
+    expect(screen.getByText('No mínimo 8 caracteres.').closest('label')).toBeNull()
+    expect(screen.getByLabelText('Senha')).toHaveAccessibleDescription('No mínimo 8 caracteres.')
   })
 })

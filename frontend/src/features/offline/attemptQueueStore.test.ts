@@ -53,6 +53,7 @@ describe('fila transacional v3', () => {
   it('transação abortada após sucesso do request não publica gravação confirmada', async () => {
     const listener = vi.fn()
     window.addEventListener(ATTEMPT_QUEUE_EVENT, listener)
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- O método original é invocado com apply(this, args) no mock abaixo.
     const original = IDBObjectStore.prototype.add
     vi.spyOn(IDBObjectStore.prototype, 'add').mockImplementation(function (this: IDBObjectStore, ...args) {
       const request = original.apply(this, args)
@@ -107,6 +108,7 @@ describe('migração recuperável v1/v2', () => {
   it('migração com falha é atômica e conserva a fonte original', async () => {
     const raw = JSON.stringify([entry(1), entry(2)])
     localStorage.setItem(LEGACY_ATTEMPT_QUEUE_STORAGE_KEY, raw)
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- O método original é invocado com apply(this, args) no mock abaixo.
     const original = IDBObjectStore.prototype.put
     const spy = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: IDBObjectStore, ...args) {
       if (this.name === 'attempts' && (args[0] as QueuedAttempt).exerciseId === 3) throw new DOMException('Full', 'QuotaExceededError')
@@ -170,7 +172,7 @@ describe('migração recuperável v1/v2', () => {
 describe('sincronização exclusiva e recuperação', () => {
   it('serializa rodadas concorrentes e envia cada chave uma única vez', async () => {
     await Promise.all([queueAttempt(entry(1)), queueAttempt(entry(2))])
-    vi.mocked(api.POST).mockResolvedValue({ data: { attempt_id: 1, correct: true }, response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: { attempt_id: 1, correct: true }, response: new Response() })
     const result = await Promise.all([syncAttemptQueue(7), syncAttemptQueue(7)])
     expect(result.reduce((total, item) => total + item.synced, 0)).toBe(2)
     expect(api.POST).toHaveBeenCalledTimes(2)
@@ -179,7 +181,7 @@ describe('sincronização exclusiva e recuperação', () => {
 
   it('commit remoto seguido de falha local conserva a chave para reconciliação', async () => {
     await queueAttempt(entry(1))
-    vi.mocked(api.POST).mockResolvedValue({ data: { attempt_id: 1, correct: true }, response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: { attempt_id: 1, correct: true }, response: new Response() })
     const spy = vi.spyOn(attemptStore, 'finish').mockRejectedValueOnce(new Error('Falha no commit local'))
     await expect(syncAttemptQueue(7)).rejects.toThrow('Falha no commit local')
     expect(await listQueuedAttempts(7)).toEqual([entry(1)])
@@ -200,7 +202,7 @@ describe('sincronização exclusiva e recuperação', () => {
 
   it('HTTP 200 sem confirmação válida não remove a resposta', async () => {
     await queueAttempt(entry(1))
-    vi.mocked(api.POST).mockResolvedValueOnce({ data: {}, response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValueOnce({ data: {}, response: new Response() })
     await expect(syncAttemptQueue(7)).rejects.toThrow('resultado válido')
     expect(await listQueuedAttempts(7)).toEqual([entry(1)])
   })

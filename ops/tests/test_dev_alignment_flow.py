@@ -8,8 +8,8 @@ from contextlib import nullcontext, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from ops import concurrency_rollout, recovery
 from ops import dev_alignment as alignment
+from ops import recovery, rollout
 from ops.recovery_archive import RecoveryError, file_info, write_json
 
 
@@ -67,7 +67,7 @@ class DevAlignmentFlowTests(unittest.TestCase):
         self.patch(alignment, "verify_voice")
         self.patch(alignment, "verify_initial_state")
         self.patch(
-            concurrency_rollout, "audit", return_value=dict.fromkeys(concurrency_rollout.RULES, 0)
+            rollout, "audit", return_value=dict.fromkeys(rollout.RULES, 0)
         )
         self.migrate = self.patch(
             alignment, "run_migration", side_effect=lambda target, image: self.migrated.add(target)
@@ -104,13 +104,13 @@ class DevAlignmentFlowTests(unittest.TestCase):
         self.prepare_rehearsal()
         self.migrate.assert_not_called()
         self.run_action("rehearse")
-        receipt = concurrency_rollout.private_json(self.rehearsal)
+        receipt = rollout.private_json(self.rehearsal)
         self.assertEqual(receipt["target"], recovery.CONFIRM_DEV_CHECK)
         self.assertEqual(receipt["tools_image"], "sha256:synthetic-image")
         self.assertEqual(receipt["manifest"], file_info(self.bundle / "manifest.json"))
         self.assertEqual((receipt["tables"], receipt["rows"], receipt["audio_count"]), (1, 1, 0))
         self.run_action("apply")
-        applied = concurrency_rollout.private_json(self.applied)
+        applied = rollout.private_json(self.applied)
         self.assertTrue(applied["verified"])
         self.assertEqual(applied["revision"], alignment.HEAD)
         self.assertEqual(applied["target"], "aulas-ingles/db")
@@ -133,7 +133,7 @@ class DevAlignmentFlowTests(unittest.TestCase):
 
     def test_changed_capture_is_refused_before_migration(self):
         self.prepare_rehearsal()
-        good = concurrency_rollout.private_json(self.capture)
+        good = rollout.private_json(self.capture)
         for field, value in (
             ("manifest", {}), ("tools_image", "different-image"), ("tables", []),
             ("audit", None), ("audit", {}),
@@ -164,7 +164,7 @@ class DevAlignmentFlowTests(unittest.TestCase):
             self.run_action("apply")
         self.migrate.assert_not_called()
         self.run_action("rehearse")
-        good = concurrency_rollout.private_json(self.rehearsal)
+        good = rollout.private_json(self.rehearsal)
         self.migrate.reset_mock()
         for field, value in (
             ("verified", False), ("tools_image", "different-image"), ("manifest", {}),

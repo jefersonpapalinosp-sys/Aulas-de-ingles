@@ -13,7 +13,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-from ops import concurrency_rollout, recovery, study_rollout
+from ops import recovery, rollout
 from ops.recovery_archive import (
     FileInfo,
     RecoveryError,
@@ -27,13 +27,13 @@ from ops.recovery_archive import (
 BASE = "b84e2c7a9d31"
 HEAD = "e17b5fad0264"
 NEW_TABLES = (
-    *concurrency_rollout.NEW_TABLES,
+    *rollout.NEW_TABLES,
     "study_activity_session",
     "study_activity_event",
     "study_active_interval",
 )
 NEW_COLUMNS = {
-    **concurrency_rollout.NEW_COLUMNS,
+    **rollout.NEW_COLUMNS,
     "writing_feedback": ["algorithm_version", "rubric_version", "rubric_snapshot"],
     "media_progress": [
         "revision",
@@ -46,8 +46,8 @@ NEW_COLUMNS = {
 }
 
 
-def fingerprints(target: recovery.Target) -> dict[str, study_rollout.Fingerprint]:
-    return study_rollout.fingerprints(
+def fingerprints(target: recovery.Target) -> dict[str, rollout.Fingerprint]:
+    return rollout.fingerprints(
         target, excluded_columns=NEW_COLUMNS, excluded_tables=NEW_TABLES
     )
 
@@ -56,15 +56,15 @@ def image_id() -> str:
     images: object = json.loads(recovery.docker("image", "inspect", recovery.HELPER))
     if not isinstance(images, list) or len(images) != 1:
         raise RecoveryError("Imagem de ferramentas ausente ou ambígua.")
-    identity = study_rollout.json_object(images[0]).get("Id")
+    identity = rollout.json_object(images[0]).get("Id")
     if not isinstance(identity, str) or not identity:
         raise RecoveryError("Identidade da imagem de ferramentas inválida.")
     return identity
 
 
 def validate_manifest(manifest: Mapping[str, object]) -> None:
-    source = study_rollout.json_object(manifest.get("source"))
-    snapshot = study_rollout.json_object(manifest.get("snapshot"))
+    source = rollout.json_object(manifest.get("source"))
+    snapshot = rollout.json_object(manifest.get("snapshot"))
     require(
         source.get("kind") == "dev" and source.get("project") == "aulas-ingles",
         "Exige backup do desenvolvimento; estudo/produção não são aceitos.",
@@ -142,10 +142,10 @@ def run_migration(
 
 
 def verify_initial_state(target: recovery.Target) -> None:
-    concurrency_rollout.verify_new_state(target)
+    rollout.verify_new_state(target)
     for table in NEW_TABLES:
         require(
-            study_rollout.query_count(target, f"SELECT count(*) FROM {table}") == 0,
+            rollout.query_count(target, f"SELECT count(*) FROM {table}") == 0,
             "Tabelas novas contêm eventos não previstos.",
         )
     for sql in (
@@ -160,7 +160,7 @@ def verify_initial_state(target: recovery.Target) -> None:
         "SELECT count(*) FROM study_plan WHERE timezone != 'UTC'",
     ):
         require(
-            study_rollout.query_count(target, sql) == 0,
+            rollout.query_count(target, sql) == 0,
             "Estado inicial inesperado nas colunas novas.",
         )
 
@@ -190,9 +190,9 @@ def run(action: str, backup: Path) -> None:
     require(action in {"capture", "rehearse", "apply"}, "Ação não prevista.")
     manifest = verify_bundle(backup)
     validate_manifest(manifest)
-    origin = study_rollout.json_object(manifest["source"])
-    snapshot = study_rollout.json_object(manifest["snapshot"])
-    audio_files = study_rollout.json_object(manifest.get("audio_files"))
+    origin = rollout.json_object(manifest["source"])
+    snapshot = rollout.json_object(manifest["snapshot"])
+    audio_files = rollout.json_object(manifest.get("audio_files"))
     source = recovery.source_target("dev")
     source_info = recovery.check_target(source)
     recovery.quiet(source)
@@ -213,7 +213,7 @@ def run(action: str, backup: Path) -> None:
             "Origem mudou após o backup; não aplicar.",
         )
         if action == "capture":
-            audit = concurrency_rollout.audit(source)
+            audit = rollout.audit(source)
             verify_voice(source, manifest)
             write_json(
                 capture_path,
@@ -226,9 +226,9 @@ def run(action: str, backup: Path) -> None:
             )
             print("Captura privada concluída; sem textos pessoais ou credenciais nos logs.")
             return
-        proof = concurrency_rollout.private_json(capture_path)
-        tables = study_rollout.checked_fingerprints(proof.get("tables"))
-        expected_audit = concurrency_rollout.checked_audit(proof.get("audit"))
+        proof = rollout.private_json(capture_path)
+        tables = rollout.checked_fingerprints(proof.get("tables"))
+        expected_audit = rollout.checked_audit(proof.get("audit"))
         require(
             proof["manifest"] == manifest_hash and proof["tools_image"] == tools_image,
             "Backup ou imagem mudou após captura; exige novo ensaio.",
@@ -237,10 +237,10 @@ def run(action: str, backup: Path) -> None:
             fingerprints(source) == tables,
             "Dados da origem mudaram após captura.",
         )
-        concurrency_rollout.audit(source, expected=expected_audit)
+        rollout.audit(source, expected=expected_audit)
         verify_voice(source, manifest)
         if action == "rehearse":
-            restored = concurrency_rollout.private_json(
+            restored = rollout.private_json(
                 recovery.BACKUPS / "restore-receipts" / f"{manifest['bundle_id']}.json"
             )
             require(
@@ -253,7 +253,7 @@ def run(action: str, backup: Path) -> None:
             target = recovery.DEV_CHECK
         else:
             validate_receipt(
-                concurrency_rollout.private_json(rehearsal_path),
+                rollout.private_json(rehearsal_path),
                 manifest_hash=manifest_hash,
                 tools_image=tools_image,
             )
@@ -278,7 +278,7 @@ def run(action: str, backup: Path) -> None:
             "Dados históricos divergiram; não reabrir.",
         )
         verify_initial_state(target)
-        concurrency_rollout.audit(target, expected=expected_audit)
+        rollout.audit(target, expected=expected_audit)
         verify_voice(target, manifest)
         write_json(
             recovery.BACKUPS / f"{prefix}-{action}.json",

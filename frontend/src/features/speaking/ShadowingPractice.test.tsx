@@ -8,12 +8,12 @@ import { ShadowingPractice } from './ShadowingPractice'
 import { setAccessToken, setSessionReadOnly, setSessionUser } from '../../api/session'
 
 const clientMocks = vi.hoisted(() => ({
-  GET: vi.fn(),
+  GET: vi.fn<(path: string, ...args: unknown[]) => Promise<unknown>>(),
   POST: vi.fn(),
   PUT: vi.fn(),
   DELETE: vi.fn(),
-  authenticatedFetch: vi.fn(),
-  policy: vi.fn(),
+  authenticatedFetch: vi.fn<(url: string, options: RequestInit) => Promise<Partial<Response>>>(),
+  policy: vi.fn<() => Promise<unknown>>(),
 }))
 
 vi.mock('../../api/client', () => ({
@@ -160,15 +160,16 @@ describe('ShadowingPractice', () => {
     clientMocks.GET.mockResolvedValue({ data: [] })
     clientMocks.POST.mockResolvedValue({ data: { id: 44 } })
     const view = await recordLocally()
-    clientMocks.authenticatedFetch.mockImplementationOnce(async () => {
+    clientMocks.authenticatedFetch.mockImplementationOnce(() => {
       setAccessToken(null); setSessionUser(null)
       view.unmount()
-      return { ok: false, status: 401 }
+      return Promise.resolve({ ok: false, status: 401 })
     })
     await userEvent.click(screen.getByRole('checkbox', { name: /Concordo em salvar/ }))
     await userEvent.click(screen.getByRole('button', { name: 'Salvar na minha conta' }))
     setAccessToken('new-token'); setSessionUser(7)
     let urlNumber = 0
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     vi.mocked(URL.createObjectURL).mockImplementation(() => `blob:recovered-${++urlNumber}`)
     const restoredView = renderPractice()
     expect(await screen.findByText(/Gravação recuperada nesta aba/)).toBeInTheDocument()
@@ -181,6 +182,7 @@ describe('ShadowingPractice', () => {
     restoredView.unmount()
     expect(urlNumber).toBe(2) // setup/cleanup/setup do StrictMode
     for (let index = 1; index <= urlNumber; index++) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
       expect(URL.revokeObjectURL).toHaveBeenCalledWith(`blob:recovered-${index}`)
     }
   })
@@ -316,12 +318,12 @@ describe('ShadowingPractice', () => {
 
     await waitFor(() => expect(clientMocks.POST).toHaveBeenCalledOnce())
     expect(clientMocks.POST).toHaveBeenCalledWith('/api/speaking/attempts', {
-      body: expect.objectContaining({ cue_id: 21, self_rating: 'confident', consent: true }),
-      signal: expect.any(AbortSignal),
+      body: expect.objectContaining({ cue_id: 21, self_rating: 'confident', consent: true }) as unknown,
+      signal: expect.any(AbortSignal) as unknown,
     })
     expect(clientMocks.authenticatedFetch).toHaveBeenCalledWith(
       '/api/speaking/attempts/44/audio',
-      expect.objectContaining({ method: 'PUT', body: expect.any(Blob) }),
+      expect.objectContaining({ method: 'PUT', body: expect.any(Blob) as unknown }) as unknown,
     )
     expect(await screen.findByText(/Gravação salva na sua conta/)).toBeInTheDocument()
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['speaking-attempts'] })
@@ -379,8 +381,8 @@ describe('ShadowingPractice', () => {
   })
 
   it('não reconstrói trecho legado nem oferece nova comparação automática', async () => {
-    clientMocks.GET.mockImplementation(async (path) =>
-      path === '/api/assist/status'
+    clientMocks.GET.mockImplementation((path) =>
+      Promise.resolve(path === '/api/assist/status'
         ? {
             data: {
               transcription_enabled: true,
@@ -409,7 +411,7 @@ describe('ShadowingPractice', () => {
                 created_at: '2026-10-07T23:50:00Z',
               },
             ],
-          },
+          }),
     )
     renderPractice()
 
@@ -447,8 +449,8 @@ describe('ShadowingPractice', () => {
       completed_at: '2026-10-07T23:50:02Z',
       expires_at: '2026-11-06T23:50:00Z',
     }
-    clientMocks.GET.mockImplementation(async (path) =>
-      path === '/api/assist/status'
+    clientMocks.GET.mockImplementation((path) =>
+      Promise.resolve(path === '/api/assist/status'
         ? {
             data: {
               transcription_enabled: true,
@@ -479,7 +481,7 @@ describe('ShadowingPractice', () => {
                 transcription,
               },
             ],
-          },
+          }),
     )
     clientMocks.PUT.mockResolvedValue({ data: { ...transcription, human_rating: 'helpful' } })
     renderPractice()
@@ -495,8 +497,8 @@ describe('ShadowingPractice', () => {
   })
 
   it('explica quando o worker agendou uma nova tentativa', async () => {
-    clientMocks.GET.mockImplementation(async (path) =>
-      path === '/api/assist/status'
+    clientMocks.GET.mockImplementation((path) =>
+      Promise.resolve(path === '/api/assist/status'
         ? {
             data: {
               transcription_enabled: true,
@@ -550,7 +552,7 @@ describe('ShadowingPractice', () => {
                 },
               },
             ],
-          },
+          }),
     )
 
     renderPractice()

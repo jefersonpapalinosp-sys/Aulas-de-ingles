@@ -302,7 +302,7 @@ describe('MapPage / painel Hoje', () => {
     render(<MapPage />, { wrapper: MemoryRouter })
 
     const planned = screen.getByRole('article', { name: 'Unidade 45–49: Em preparação' })
-    expect(planned).toHaveAttribute('aria-disabled', 'true')
+    expect(planned).toHaveAttribute('data-unavailable', 'true')
     expect(within(planned).getByText('5 aulas planejadas')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /Unidade 45–49/ })).not.toBeInTheDocument()
   })

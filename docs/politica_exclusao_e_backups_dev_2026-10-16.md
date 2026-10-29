@@ -122,5 +122,5 @@ ser comunicado separadamente, sem afirmar conclusão integral.
 - backup verificado e restore isolado antes de migration em qualquer ambiente de uso.
 
 Os procedimentos gerais de backup, restore e papéis continuam em
-[operacao_sprint_37.md](operacao_sprint_37.md). Esta política complementa o runbook;
+[historico_operacao_sprints_37_44.md](historico_operacao_sprints_37_44.md). Esta política complementa o runbook;
 não autoriza apagar backups, volumes ou dados fora do alvo confirmado.

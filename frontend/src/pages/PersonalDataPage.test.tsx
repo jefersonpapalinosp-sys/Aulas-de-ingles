@@ -5,20 +5,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PersonalDataPage } from './PersonalDataPage'
 
 const mocks = vi.hoisted(() => ({
-  fetch: vi.fn(), cache: vi.fn(), clear: vi.fn(), ended: vi.fn(), offline: false,
+  fetch: vi.fn<(url: string, options: RequestInit) => Promise<Partial<Response>>>(), cache: vi.fn(), clear: vi.fn(), ended: vi.fn(), offline: false,
 }))
 vi.mock('../api/auth', () => ({ useSessao: () => ({ usuario: { id: 1 },
   offline: mocks.offline, encerrarContaExcluida: mocks.ended }) }))
 vi.mock('../api/client', () => ({ authenticatedFetch: mocks.fetch }))
 vi.mock('../features/offline/pwa', () => ({ inspectCache: mocks.cache }))
 vi.mock('../features/privacy/deviceInventory', () => ({
-  inspectDevice: async () => ({ drafts: 1, mediaCommands: 0, activityEvents: 0,
+  inspectDevice: () => Promise.resolve({ drafts: 1, mediaCommands: 0, activityEvents: 0,
     localCopies: 0, pendingAnswers: 2, blockedAnswers: 1, voiceDraft: false }),
   clearDeviceData: mocks.clear,
 }))
 vi.mock('../features/offline/attemptQueue', () => ({
   subscribeAttemptQueue: () => () => undefined,
-  getAttemptQueueStats: async () => ({ pending: 2, blocked: 1 }),
+  getAttemptQueueStats: () => Promise.resolve({ pending: 2, blocked: 1 }),
 }))
 
 const exported = {
@@ -48,7 +48,8 @@ describe('Meus dados', () => {
     download.focus()
     await user.keyboard('{Enter}')
     await screen.findByRole('button', { name: 'Baixar gravação 7' })
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/me/export', expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) }))
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/me/export', expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) as unknown }) as unknown)
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
     expect(localStorage.length).toBe(0)
     await user.click(screen.getByRole('button', { name: 'Baixar gravação 7' }))
@@ -63,6 +64,7 @@ describe('Meus dados', () => {
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Nenhum arquivo parcial')
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
     expect(await screen.findByText(/Nenhuma gravação registrada/)).toBeVisible()
@@ -75,9 +77,11 @@ describe('Meus dados', () => {
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
     await screen.findByRole('button', { name: 'Baixar gravação 7' })
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Atualize a aplicação')
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
   })
 
@@ -123,6 +127,7 @@ describe('Meus dados', () => {
     expect(signal.aborted).toBe(true)
     resolve(new Response(JSON.stringify(exported)))
     await Promise.resolve()
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled()
   })
 
@@ -134,6 +139,7 @@ describe('Meus dados', () => {
     await user.click(screen.getByRole('button', { name: 'Baixar meus dados em JSON' }))
     await user.click(await screen.findByRole('button', { name: 'Baixar gravação 7' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Preserve qualquer cópia local')
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1)
   })
 
@@ -166,7 +172,8 @@ describe('Meus dados', () => {
     const [path, options] = mocks.fetch.mock.calls[0]!
     expect(path).toBe('/api/me/account')
     expect(options).toMatchObject({ method: 'DELETE', cache: 'no-store' })
-    expect(JSON.parse(options.body)).toMatchObject({
+    if (typeof options.body !== 'string') throw new Error('Esperado payload JSON textual')
+    expect(JSON.parse(options.body) as unknown).toMatchObject({
       password: 'senha-bem-grande', confirmation: 'EXCLUIR MINHA CONTA',
     })
   })

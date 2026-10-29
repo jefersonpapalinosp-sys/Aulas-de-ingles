@@ -1,0 +1,57 @@
+/* ---------- caderno ---------- */
+.notebook-page { width: min(100%, 900px); }
+.notebook-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.notebook-header .btn { flex: none; }
+.notebook-privacy { margin-top: 22px; padding: 13px 15px; border-left: 3px solid var(--accent); border-radius: 0 4px 4px 0; background: var(--accent-wash); color: var(--ink-2); font-size: 13.5px; }
+.notebook-message { margin-top: 12px; color: var(--ok); font-family: var(--mono); font-size: 11px; }
+.notebook-compose { padding: 22px; border: 1px solid var(--accent); border-radius: 6px; background: var(--surface); }
+.notebook-compose h2 { margin-top: 4px; font-size: 21px; }
+.notebook-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+.notebook-fields label, .notebook-editor, .notebook-filters label { display: grid; gap: 5px; color: var(--ink-3); font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.notebook-fields select, .notebook-filters select, .notebook-edit select { width: 100%; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: 13px var(--sans); letter-spacing: normal; text-transform: none; }
+.notebook-editor { margin-top: 12px; }
+.notebook-editor textarea, .notebook-edit textarea { width: 100%; min-height: 110px; resize: vertical; padding: 11px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: 15px/1.55 var(--sans); letter-spacing: normal; text-transform: none; }
+.notebook-compose-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.notebook-compose-actions span { color: var(--ink-3); font-family: var(--mono); font-size: 10px; }
+.notebook-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.notebook-section-head h2, .notebook-page section > h2 { margin-top: 4px; font-size: 21px; }
+.notebook-filters { display: flex; gap: 8px; }
+.notebook-filters label { min-width: 105px; }
+.notebook-empty { margin-top: 16px; padding: 16px; border: 1px dashed var(--rule); border-radius: 5px; color: var(--ink-3); font-size: 13.5px; }
+.notebook-list, .notebook-writing-list, .notebook-recordings, .notebook-history-list { display: grid; gap: 10px; margin: 17px 0 0; padding: 0; list-style: none; }
+.notebook-list > li { padding: 15px 16px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.notebook-entry-meta { display: flex; flex-wrap: wrap; gap: 7px; color: var(--ink-3); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
+.notebook-entry-meta span:first-child { color: var(--accent); }
+.notebook-entry-meta time { margin-left: auto; }
+.notebook-list > li > p { margin-top: 8px; white-space: pre-wrap; }
+.notebook-entry-actions { display: flex; gap: 12px; margin-top: 10px; }
+.notebook-entry-actions button, .notebook-edit button { padding: 0; border: 0; background: transparent; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
+.notebook-entry-actions button:last-child { color: var(--bad); }
+.notebook-edit { display: grid; gap: 9px; }
+.notebook-edit > div { display: flex; gap: 12px; }
+.notebook-writing-list > li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.notebook-writing-list li > div { display: grid; min-width: 0; gap: 2px; }
+.writing-feedback-provenance { min-width: 0; overflow-wrap: anywhere; }
+.notebook-writing-list span, .notebook-writing-list small { color: var(--ink-3); font-family: var(--mono); font-size: 10px; }
+.notebook-writing-list strong { font-size: 14px; }
+.notebook-writing-list a { flex: none; font-size: 12px; }
+.notebook-recordings li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.notebook-recordings li > div { display: grid; min-width: 0; gap: 2px; }
+.notebook-recordings span, .notebook-recordings small { color: var(--ink-3); font-family: var(--mono); font-size: 10px; }
+.notebook-recordings strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.notebook-recordings button { padding: 5px 8px; border: 1px solid var(--rule); border-radius: 3px; background: var(--paper); color: var(--accent); font-size: 12px; }
+.notebook-recordings button:last-child { color: var(--bad); }
+.notebook-history-list > li { padding: 14px 16px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.historical-content-details { margin-top: 9px; }
+.historical-content-details summary { cursor: pointer; color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
+.historical-content-body { display: grid; gap: 7px; margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule-soft); overflow-wrap: anywhere; }
+.historical-content-body p { margin: 0; font-size: 13px; }
+.historical-version-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 10px; margin: 3px 0; font-family: var(--mono); font-size: 10px; }
+.historical-version-list dt { color: var(--ink-3); }
+.historical-version-list dd { margin: 0; }
+.historical-question-list { display: grid; gap: 6px; font-size: 13px; }
+.historical-question-list ol { display: grid; gap: 7px; margin: 0; padding-left: 22px; }
+.historical-question-list li { padding-left: 3px; }
+.historical-question-list small { display: block; color: var(--ink-3); }
+.historical-unavailable { margin-top: 10px; color: var(--ink-2); font-size: 13px; }
+.notebook-page section > audio { width: 100%; margin-top: 12px; }

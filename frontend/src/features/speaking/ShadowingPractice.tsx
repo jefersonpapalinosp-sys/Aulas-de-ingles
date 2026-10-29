@@ -220,6 +220,8 @@ export function ShadowingPractice({
         <span>{cue.text_en}</span>
       </blockquote>
 
+      {/* O texto do trecho modelo é exibido no blockquote desta atividade. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio
         ref={modelRef}
         src={media.source_url}

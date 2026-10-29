@@ -40,7 +40,7 @@ class AssistAlignmentTests(unittest.TestCase):
                 patch.object(alignment, "file_info", return_value="hash"),
                 patch.object(dev_alignment, "image_id", return_value="image"),
                 patch.object(
-                    alignment.concurrency_rollout,
+                    alignment.rollout,
                     "private_json",
                     side_effect=[
                         receipt,
@@ -140,7 +140,7 @@ class AssistAlignmentTests(unittest.TestCase):
             source.assert_not_called()
 
     def test_preserves_earlier_sprint_tables_and_columns(self):
-        with patch.object(alignment.study_rollout, "fingerprints") as fingerprint:
+        with patch.object(alignment.rollout, "fingerprints") as fingerprint:
             alignment.fingerprints(recovery.ASSIST_CHECK)
         self.assertEqual(
             fingerprint.call_args.kwargs,
@@ -264,7 +264,7 @@ class AssistAlignmentTests(unittest.TestCase):
                     return_value={} if changed else proof["tables"],
                 ),
                 patch.object(
-                    alignment.concurrency_rollout,
+                    alignment.rollout,
                     "private_json",
                     side_effect=[proof, {}],
                 ),
