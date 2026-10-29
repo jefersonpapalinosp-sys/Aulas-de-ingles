@@ -115,7 +115,7 @@ jobs:
           category: trivy-image-web
       - name: publica relatórios para triagem, sem expor lock exportado
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-inventory-${{ github.sha }}
           path: |
@@ -365,7 +365,7 @@ jobs:
         run: docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml logs api prepare worker gateway
       - name: guarda o trace quando falha
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
