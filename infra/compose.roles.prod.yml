@@ -1,3 +1,4 @@
+# Papéis separados do ESTUDO LOCAL (compose.prod.yml), não do EasyPanel.
 # Opt-in após backup verificado/provisionamento. Não usar com Compose de dev.
 services:
   api:

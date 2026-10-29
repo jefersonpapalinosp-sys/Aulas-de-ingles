@@ -8,9 +8,9 @@ function setup() {
   const dialogue = dialogueFixture()
   const transport = {
     session: () => account,
-    create: vi.fn<DialogueTransport['create']>(async () => dialogue), read: vi.fn<DialogueTransport['read']>(async () => dialogue),
-    text: vi.fn<DialogueTransport['text']>(async () => ({})), audio: vi.fn<DialogueTransport['audio']>(async () => ({})),
-    rate: vi.fn<DialogueTransport['rate']>(async () => ({})), remove: vi.fn<DialogueTransport['remove']>(async () => undefined),
+    create: vi.fn<DialogueTransport['create']>(() => Promise.resolve(dialogue)), read: vi.fn<DialogueTransport['read']>(() => Promise.resolve(dialogue)),
+    text: vi.fn<DialogueTransport['text']>(() => Promise.resolve({})), audio: vi.fn<DialogueTransport['audio']>(() => Promise.resolve({})),
+    rate: vi.fn<DialogueTransport['rate']>(() => Promise.resolve({})), remove: vi.fn<DialogueTransport['remove']>(() => Promise.resolve(undefined)),
   } satisfies DialogueTransport
   const engine = new DialogueSession(3, transport, 10)
   return { account, dialogue, transport, engine }
@@ -24,7 +24,7 @@ describe('sessão da conversa', () => {
     await engine.open(31, 'guided', null)
     const first = transport.create.mock.calls[0]
     await engine.open(31, 'guided', null)
-    expect(transport.create.mock.calls[1]).toEqual([first![0], expect.any(AbortSignal)])
+    expect(transport.create.mock.calls[1]).toEqual([first![0], expect.any(AbortSignal) as unknown])
     expect(engine.snapshot().dialogue?.id).toBe(7)
   })
   it('retry preserva texto, chave e posição e bloqueia uma entrada diferente', async () => {
@@ -76,7 +76,7 @@ describe('sessão da conversa', () => {
     engine.leave()
     await engine.open(31, 'script', null)
     expect(transport.remove).not.toHaveBeenCalled()
-    expect(transport.create).toHaveBeenLastCalledWith(expect.objectContaining({ mode: 'script' }), expect.any(AbortSignal))
+    expect(transport.create).toHaveBeenLastCalledWith(expect.objectContaining({ mode: 'script' }) as unknown, expect.any(AbortSignal) as unknown)
   })
   it('limite de turnos não admite um envio extra', async () => {
     const { engine, transport, dialogue } = setup()

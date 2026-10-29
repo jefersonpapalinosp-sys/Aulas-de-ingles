@@ -386,15 +386,17 @@ async def test_command_refuses_wrong_targets(client, tmp_path, monkeypatch, case
 
     settings = get_settings()
     monkeypatch.setattr(settings, "speaking_storage_dir", str(tmp_path))
-    if case == "prod":
-        monkeypatch.setattr(settings, "app_env", "prod")
-    with pytest.raises(QuarantineRefused):
-        await command.execute(
-            action="invalid" if case == "action" else "quarantine",
-            operation=OP,
-            confirm_storage="/" if case == "root" else str(tmp_path),
-            confirm_database="wrong" if case == "database" else DATABASE,
-        )
+    # O ambiente simulado termina antes da limpeza protegida da base de testes.
+    with monkeypatch.context() as patch:
+        if case == "prod":
+            patch.setattr(settings, "app_env", "prod")
+        with pytest.raises(QuarantineRefused):
+            await command.execute(
+                action="invalid" if case == "action" else "quarantine",
+                operation=OP,
+                confirm_storage="/" if case == "root" else str(tmp_path),
+                confirm_database="wrong" if case == "database" else DATABASE,
+            )
     assert list(tmp_path.iterdir()) == []
 
 

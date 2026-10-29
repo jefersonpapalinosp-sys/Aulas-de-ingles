@@ -8,7 +8,7 @@ function Harness() {
   const navigate = useNavigate()
   return (
     <>
-      <button type="button" onClick={() => navigate('/cursos/voa-level-1/aulas/31/exercicios')}>
+      <button type="button" onClick={() => void navigate('/cursos/voa-level-1/aulas/31/exercicios')}>
         Abrir exercícios
       </button>
       <main id="main-content" tabIndex={-1}>

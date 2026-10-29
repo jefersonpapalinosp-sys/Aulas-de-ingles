@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { StudyPlan, StudyPlanInput } from '../../api/client'
 import { useSaveStudyPlan } from '../../api/dashboard'
+import { useFormValidation } from '../../components/useFormValidation'
 
 /** Dias e minutos que o aluno se compromete a estudar.
  *
@@ -19,6 +20,9 @@ const DAYS = [
 
 export function PlanEditor({ plan }: { plan: StudyPlan }) {
   const save = useSaveStudyPlan()
+  const validation = useFormValidation()
+  const help = `${validation.id}-plan-help`
+  const description = [help, save.isError ? `${validation.id}-save-error` : ''].filter(Boolean).join(' ')
   const [weeklyMinutes, setWeeklyMinutes] = useState(plan.weekly_minutes)
   const [preferredDays, setPreferredDays] = useState<string[]>(plan.preferred_days)
   const [goal, setGoal] = useState(plan.goal)
@@ -48,6 +52,7 @@ export function PlanEditor({ plan }: { plan: StudyPlan }) {
       <label>
         Meta
         <input
+          {...validation.field('goal', description)}
           type="text"
           value={goal}
           maxLength={200}
@@ -58,20 +63,22 @@ export function PlanEditor({ plan }: { plan: StudyPlan }) {
       <label>
         Minutos por semana
         <input
+          {...validation.field('minutes', description)}
           className="today-minutes"
           type="number"
           min={30}
           max={600}
           step={15}
+          required
           value={weeklyMinutes}
           onChange={(event) => setWeeklyMinutes(Number(event.target.value))}
         />
       </label>
       <label>
         Fuso horário da semana (IANA)
-        <input value={timezone} required maxLength={80} list="study-timezones"
+        <input {...validation.field('timezone', description)} value={timezone} required maxLength={80} list={`${validation.id}-timezones`}
           onChange={(event) => setTimezone(event.target.value)} />
-        <datalist id="study-timezones"><option value="UTC" /><option value="America/Sao_Paulo" /></datalist>
+        <datalist id={`${validation.id}-timezones`}><option value="UTC" /><option value="America/Sao_Paulo" /></datalist>
       </label>
       <fieldset>
         <legend>Dias preferidos</legend>
@@ -79,6 +86,7 @@ export function PlanEditor({ plan }: { plan: StudyPlan }) {
           {DAYS.map(([value, label]) => (
             <label key={value}>
               <input
+                aria-describedby={help}
                 type="checkbox"
                 checked={preferredDays.includes(value)}
                 onChange={(event) =>
@@ -94,13 +102,15 @@ export function PlanEditor({ plan }: { plan: StudyPlan }) {
           ))}
         </div>
       </fieldset>
+      <p id={help}>Escolha ao menos um dia; 30–600 minutos, em múltiplos de 15. Fuso IANA: America/Sao_Paulo ou UTC.</p>
+      {validation.messages}
       {save.isSuccess && (
         <p className="today-save ok" role="status">
           Plano salvo.
         </p>
       )}
       {save.isError && (
-        <p className="today-save erro" role="alert">
+        <p id={`${validation.id}-save-error`} className="today-save erro" role="alert">
           Não foi possível salvar.
         </p>
       )}

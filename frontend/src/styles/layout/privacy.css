@@ -1,0 +1,24 @@
+.pwa-status {
+  margin-bottom: 1rem;
+  padding: .65rem .85rem;
+  border: 1px solid var(--rule);
+  border-radius: .4rem;
+  overflow-wrap: anywhere;
+}
+.pwa-status summary { cursor: pointer; min-height: 44px; align-content: center; }
+.pwa-status p { margin: .5rem 0; }
+.pwa-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.pwa-actions button { min-height: 44px; white-space: normal; }
+.personal-data-page { max-width: 960px; margin: 0 auto; overflow-wrap: anywhere; }
+.data-panel { margin: 24px 0; padding: clamp(16px, 3vw, 28px); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+.data-panel h2 { margin-top: 0; }
+.data-panel.estado-erro { align-items: stretch; }
+.data-panel.estado-erro form, .data-panel.estado-erro label { display: grid; gap: 8px; }
+.data-panel.estado-erro form { max-width: 480px; }
+.data-panel.estado-erro input { width: 100%; max-width: none; padding: 9px 11px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); }
+.data-inventory { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+.data-inventory div { border-bottom: 1px solid var(--rule); padding-bottom: 12px; }
+.data-inventory dd { margin: 6px 0 0; font-weight: 700; }
+.data-audio-list { padding-left: 20px; }
+.data-audio-list li { margin-block: 16px; }
+.data-audio-list li > * { display: block; margin-block: 8px; }

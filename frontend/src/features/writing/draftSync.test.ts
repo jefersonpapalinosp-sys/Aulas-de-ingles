@@ -7,16 +7,16 @@ const KEY = 'aulas-ingles:writing-draft:v1:7:4'
 /** Conta de verdade em miniatura: a revisão só avança por save aceito. */
 function account(initial: Partial<WritingDraft> = {}) {
   let remote: WritingDraft = { prompt_id: 4, text: '', revision: 0, updated_at: null, ...initial }
-  const read = vi.fn(async () => remote)
-  const save = vi.fn(async (body: { text: string; expected_revision: number }) => {
-    if (body.expected_revision !== remote.revision) throw new DraftConflict(remote)
+  const read = vi.fn(() => Promise.resolve(remote))
+  const save = vi.fn((body: { text: string; expected_revision: number }) => {
+    if (body.expected_revision !== remote.revision) return Promise.reject(new DraftConflict(remote))
     remote = { ...remote, text: body.text, revision: (remote.revision ?? 0) + 1, updated_at: new Date().toISOString() }
-    return remote
+    return Promise.resolve(remote)
   })
-  const createVersion = vi.fn(async (body: { text: string; expected_revision: number }) => {
-    if (body.expected_revision !== remote.revision) throw new DraftConflict(remote)
+  const createVersion = vi.fn((body: { text: string; expected_revision: number }) => {
+    if (body.expected_revision !== remote.revision) return Promise.reject(new DraftConflict(remote))
     remote = { ...remote, revision: (remote.revision ?? 0) + 1 }
-    return { id: 1, version: 1, text: body.text, created_at: new Date().toISOString(), draft_revision: remote.revision }
+    return Promise.resolve({ id: 1, version: 1, text: body.text, created_at: new Date().toISOString(), draft_revision: remote.revision })
   })
   return { read, save, createVersion, remote: () => remote,
     elsewhere: (text: string) => { remote = { ...remote, text, revision: (remote.revision ?? 0) + 1, updated_at: new Date().toISOString() } } }

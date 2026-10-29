@@ -1,0 +1,27 @@
+/* ---------- shell ---------- */
+.skip-link { position: fixed; z-index: 100; top: 8px; left: 8px; padding: 8px 12px; border-radius: 4px; background: var(--accent); color: #fff; transform: translateY(-150%); }
+.skip-link:focus { color: #fff; transform: translateY(0); }
+.connectivity { position: fixed; z-index: 20; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 10px; max-width: min(520px, calc(100vw - 32px)); padding: 10px 12px; border: 1px solid var(--warn); border-radius: 5px; background: var(--warn-wash); box-shadow: 0 4px 18px rgb(0 0 0 / 14%); color: var(--ink-2); font-size: 12.5px; }
+.connectivity.online { border-color: var(--ok); background: var(--ok-wash); }
+.queue-status { flex-wrap: wrap; max-height: min(55dvh, 34rem); overflow-y: auto; }
+.queue-status > p, .queue-status > details, .queue-status > div { flex-basis: 100%; min-width: 0; }
+.queue-status summary { cursor: pointer; }
+.queue-status ul { padding-left: 18px; }
+.queue-status li + li { margin-top: 16px; }
+.queue-status pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: inherit; }
+.queue-status button { min-height: 44px; white-space: normal; max-width: 100%; }
+.connectivity button { flex: none; padding: 5px 8px; border: 1px solid currentColor; border-radius: 3px; background: transparent; color: var(--accent); font-family: var(--mono); font-size: 10.5px; }
+.session-status { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0 24px; padding: 14px; border: 1px solid var(--warn); border-radius: 5px; background: var(--warn-wash); color: var(--ink); overflow-wrap: anywhere; }
+.session-status > span { flex: 1 1 20rem; min-width: 0; }
+.session-status button { min-height: 44px; max-width: 100%; padding: 8px 12px; border: 1px solid currentColor; border-radius: 4px; background: var(--surface); color: var(--accent); }
+.update-required .confirm-reload { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1 1 100%; }
+.update-required .confirm-reload p { flex: 1 1 20rem; margin: 0; }
+.shell { display: grid; min-height: 100vh; }
+main { width: 100%; min-width: 0; padding: 44px 46px 100px; }
+
+.rail {
+  background: var(--rail);
+  border-right: 1px solid var(--rule);
+  align-self: start;
+}
+.brand { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }

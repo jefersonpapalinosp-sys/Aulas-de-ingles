@@ -20,7 +20,7 @@ describe('acesso local explícito', () => {
   it('quota não simula sucesso, não altera a cópia anterior e não expõe texto no erro', () => {
     localStorage.setItem('draft', 'cópia anterior')
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('texto privado', 'QuotaExceededError') })
-    expect(writeLocal('draft', 'novo texto')).toEqual({ ok: false, error: expect.stringContaining('cheio') })
+    expect(writeLocal('draft', 'novo texto')).toEqual({ ok: false, error: expect.stringContaining('cheio') as unknown })
     expect(localStorage.getItem('draft')).toBe('cópia anterior')
   })
 })

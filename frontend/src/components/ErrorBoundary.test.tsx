@@ -27,7 +27,7 @@ describe('recuperação de renderização e chunks', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
   it('rejeição de import lazy usa mensagem específica, não retry impossível de React.lazy', async () => {
-    const Page = lazy(async () => { throw new TypeError('Failed to fetch dynamically imported module') })
+    const Page = lazy(() => { return Promise.reject(new TypeError('Failed to fetch dynamically imported module')) })
     render(<ErrorBoundary><Suspense fallback="Carregando"><Page /></Suspense></ErrorBoundary>)
     expect(await screen.findByRole('heading', { name: 'Não foi possível carregar esta tela' })).toHaveFocus()
     expect(screen.queryByRole('button', { name: 'Tentar abrir novamente' })).not.toBeInTheDocument()

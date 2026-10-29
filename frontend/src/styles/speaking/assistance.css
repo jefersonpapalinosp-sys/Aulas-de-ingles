@@ -1,0 +1,12 @@
+.transcription-result { grid-column: 1 / -1; width: 100%; padding: 13px 14px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); }
+.transcription-result.failed { border-color: var(--bad); background: var(--bad-wash); }
+.transcription-result .transcription-copy { margin-top: 7px; color: var(--ink); font-size: 15px; line-height: 1.7; }
+.transcription-copy .low-confidence { padding: 1px 2px; border-radius: 2px; background: var(--warn-wash); color: var(--warn); text-decoration: underline wavy; text-underline-offset: 3px; }
+.transcription-result .transcription-metrics { margin-top: 5px; font: 10.5px var(--mono); }
+p.assist-label { color: var(--accent); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+p.assist-disclosure, p.assist-warning { padding: 10px 12px; border-left: 2px solid var(--warn); background: var(--warn-wash); color: var(--ink-2); font-size: 12.5px; }
+p.assist-warning { margin-top: 9px; color: var(--warn); }
+.assist-rating { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 10px; color: var(--ink-2); font-size: 12px; }
+.assist-rating button { padding: 4px 8px; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); color: var(--accent); text-decoration: none; }
+.assist-rating button[aria-pressed='true'] { border-color: var(--ok); background: var(--ok-wash); color: var(--ok); }
+.transcription-result .assist-delete { display: block; margin-top: 10px; color: var(--bad); }

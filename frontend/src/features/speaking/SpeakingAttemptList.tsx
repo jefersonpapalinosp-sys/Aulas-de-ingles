@@ -158,6 +158,8 @@ export function SpeakingAttemptList({
         </ul>
       )}
       {history.savedAudioUrl && history.playingAttemptId !== null && (
+        // Gravação privada; não inventar legenda nem enviar para transcrição automaticamente.
+        // eslint-disable-next-line jsx-a11y/media-has-caption
         <audio aria-label="Reprodução da gravação salva" controls autoPlay src={history.savedAudioUrl} />
       )}
     </div>

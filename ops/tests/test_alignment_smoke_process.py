@@ -9,8 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ops import assist_alignment as assist
-from ops import concurrency_rollout, dev_alignment, recovery
-from ops import sprint39_rollout as rollout
+from ops import dev_alignment, recovery, rollout
 from ops.recovery_archive import RecoveryError
 
 GOOD_HTTP = {
@@ -21,7 +20,7 @@ GOOD_HTTP = {
 
 class AlignmentSmokeProcessTests(unittest.TestCase):
     @contextmanager
-    def fixture(self, variant, *, payload=None, failures=0, drift=False):
+    def fixture(self, *, payload=None, failures=0, drift=False):
         with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
             root = Path(directory)
             script = root / "smoke.py"
@@ -41,7 +40,6 @@ class AlignmentSmokeProcessTests(unittest.TestCase):
             written = stack.enter_context(patch.object(assist, "write_json"))
             stack.enter_context(patch.object(recovery, "BACKUPS", root))
             stack.enter_context(patch.object(assist, "SMOKE_SCRIPT", script))
-            stack.enter_context(patch.object(rollout, "SMOKE", script))
             stack.enter_context(patch.object(assist, "file_info", return_value=info))
             stack.enter_context(patch.object(assist, "verify_bundle", return_value=manifest))
             stack.enter_context(patch.object(
@@ -50,7 +48,7 @@ class AlignmentSmokeProcessTests(unittest.TestCase):
             stack.enter_context(patch.object(dev_alignment, "verify_voice"))
             stack.enter_context(patch.object(assist, "verify_backfill"))
             stack.enter_context(patch.object(
-                concurrency_rollout, "private_json", side_effect=[receipt, proof]
+                rollout, "private_json", side_effect=[receipt, proof]
             ))
             stack.enter_context(patch.object(recovery, "check_target"))
             stack.enter_context(patch.object(recovery, "quiet"))
@@ -90,9 +88,7 @@ class AlignmentSmokeProcessTests(unittest.TestCase):
             stack.enter_context(redirect_stdout(output))
 
             def run():
-                if variant == "assist":
-                    return assist.smoke_clone(root)
-                return rollout.smoke_clone(recovery.DEV39_CHECK, "dev", "sha256:synthetic")
+                return assist.smoke_clone(root)
 
             yield run, command, written, output
 
@@ -103,54 +99,45 @@ class AlignmentSmokeProcessTests(unittest.TestCase):
         )
 
     def test_smoke_success_binds_payload_and_stops_only_its_container(self):
-        for variant in ("assist", "sprint39"):
-            with self.subTest(variant=variant), self.fixture(variant) as (run, command, write, _):
-                result = run()
-                self.assert_cleanup(command)
-                if variant == "assist":
-                    write.assert_called_once()
-                    self.assertEqual(write.call_args.args[1]["http"], GOOD_HTTP)
-                    self.assertIn("smoke_script", write.call_args.args[1])
-                else:
-                    self.assertEqual(result, GOOD_HTTP)
+        with self.fixture() as (run, command, write, _):
+            run()
+            self.assert_cleanup(command)
+            write.assert_called_once()
+            self.assertEqual(write.call_args.args[1]["http"], GOOD_HTTP)
+            self.assertIn("smoke_script", write.call_args.args[1])
 
     def test_readiness_retries_before_running_smoke(self):
-        for variant in ("assist", "sprint39"):
-            with self.fixture(variant, failures=2) as (run, command, _, _):
-                run()
-                probes = [call for call in command.call_args_list if "-c" in call.args]
-                self.assertEqual(len(probes), 3)
-                self.assert_cleanup(command)
+        with self.fixture(failures=2) as (run, command, _, _):
+            run()
+            probes = [call for call in command.call_args_list if "-c" in call.args]
+            self.assertEqual(len(probes), 3)
+            self.assert_cleanup(command)
 
     def test_readiness_exhaustion_cleans_up_without_success(self):
-        for variant in ("assist", "sprint39"):
-            with self.fixture(variant, failures=20) as (run, command, write, output):
+        with self.fixture(failures=20) as (run, command, write, output):
+            with self.assertRaises(RecoveryError):
+                run()
+            self.assertEqual(sum("-c" in call.args for call in command.call_args_list), 20)
+            self.assert_cleanup(command)
+            write.assert_not_called()
+            self.assertEqual(output.getvalue(), "")
+
+    def test_bad_http_evidence_is_refused_and_cleaned_up(self):
+        for payload in (
+            [], "private-value", {**GOOD_HTTP, "verified": 1},
+            {**GOOD_HTTP, "provider_calls": False}, {**GOOD_HTTP, "checks": 11.0},
+            {**GOOD_HTTP, "synthetic_user_remaining": 1}, {**GOOD_HTTP, "provider_calls": 1},
+        ):
+            with self.subTest(payload=payload), self.fixture(payload=payload) as context:
+                run, command, write, output = context
                 with self.assertRaises(RecoveryError):
                     run()
-                self.assertEqual(sum("-c" in call.args for call in command.call_args_list), 20)
                 self.assert_cleanup(command)
                 write.assert_not_called()
                 self.assertEqual(output.getvalue(), "")
 
-    def test_bad_http_evidence_is_refused_and_cleaned_up(self):
-        for variant in ("assist", "sprint39"):
-            for payload in (
-                [], "private-value", {**GOOD_HTTP, "verified": 1},
-                {**GOOD_HTTP, "provider_calls": False}, {**GOOD_HTTP, "checks": 11.0},
-                {**GOOD_HTTP, "synthetic_user_remaining": 1}, {**GOOD_HTTP, "provider_calls": 1},
-            ):
-                with (
-                    self.subTest(variant=variant, payload=payload),
-                    self.fixture(variant, payload=payload) as (run, command, write, output),
-                ):
-                    with self.assertRaises(RecoveryError):
-                        run()
-                    self.assert_cleanup(command)
-                    write.assert_not_called()
-                    self.assertEqual(output.getvalue(), "")
-
     def test_history_drift_after_http_does_not_publish_receipt(self):
-        with self.fixture("assist", drift=True) as (run, command, write, output):
+        with self.fixture(drift=True) as (run, command, write, output):
             with self.assertRaisesRegex(RecoveryError, "Histórico mudou"):
                 run()
             self.assert_cleanup(command)

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useFormValidation } from '../components/useFormValidation'
 import { Link } from 'react-router-dom'
 import { useSessao } from '../api/auth'
 import { authenticatedFetch } from '../api/client'
@@ -16,6 +17,9 @@ type Audio = components['schemas']['AudioExportEntry']
 
 export function PersonalDataPage() {
   const { usuario, offline, encerrarContaExcluida } = useSessao()
+  const validation = useFormValidation()
+  const deletionHelp = `${validation.id}-deletion-help`
+  const deletionFailure = `${validation.id}-deletion-failure`
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -220,23 +224,24 @@ export function PersonalDataPage() {
       </section>
       <section className="data-panel estado-erro" aria-labelledby="delete-account-title">
         <h2 id="delete-account-title">Excluir conta</h2>
-        <p>A exclusão remove o perfil e os dados enviados ao servidor. Áudios são removidos por uma tarefa retomável. Backups de desenvolvimento podem conservar uma cópia temporária conforme a política de retenção.</p>
+        <p id={deletionHelp}>A exclusão remove o perfil e os dados enviados ao servidor. Áudios são removidos por uma tarefa retomável. Backups de desenvolvimento podem conservar uma cópia temporária conforme a política de retenção.</p>
         <p>Dados deste navegador, de outras abas ou dispositivos e arquivos que você baixou exigem limpeza separada.</p>
         <form onSubmit={(event) => { void deleteAccount(event) }}>
           <label>Senha atual
-            <input type="password" autoComplete="current-password" minLength={8} required
+            <input {...validation.field('password', `${deletionHelp}${deletionError ? ` ${deletionFailure}` : ''}`)} type="password" autoComplete="current-password" minLength={8} required
               value={password} onChange={(event) => setPassword(event.target.value)} />
           </label>
           <label>Digite <strong>EXCLUIR MINHA CONTA</strong>
-            <input type="text" autoComplete="off" required value={confirmation}
+            <input {...validation.field('confirmation', deletionHelp)} type="text" autoComplete="off" required value={confirmation}
               onChange={(event) => setConfirmation(event.target.value)} />
           </label>
+          {validation.messages}
           <button type="submit" disabled={deleting || offline || confirmation !== 'EXCLUIR MINHA CONTA'}>
             {deleting ? 'Excluindo conta…' : 'Excluir minha conta definitivamente'}
           </button>
         </form>
         {offline && <p role="status">Conecte-se e confirme a sessão para excluir a conta.</p>}
-        {deletionError && <p role="alert" className="erro">{deletionError}</p>}
+        {deletionError && <p id={deletionFailure} role="alert" className="erro">{deletionError}</p>}
       </section>
       <Link to="/caderno">Voltar ao caderno e ao histórico</Link>
     </div>

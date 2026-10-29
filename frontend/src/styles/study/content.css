@@ -1,0 +1,54 @@
+/* ---------- cabeçalho de página ---------- */
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(27px, 4vw, 38px); margin-top: 10px; }
+.lead { font-size: 16.5px; color: var(--ink-2); margin-top: 12px; max-width: 62ch; }
+.chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; }
+.chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 9px; border: 1px solid var(--rule); border-radius: 100px; color: var(--ink-2); background: var(--surface); }
+.chip.key { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.lesson-editorial { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 12px; margin-top: 18px; padding: 14px; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface-2); }
+.lesson-editorial div { display: grid; gap: 2px; }
+.lesson-editorial div > span, .media-sync { color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lesson-editorial strong { font-size: 13px; }
+.lesson-editorial strong span { font-weight: 600; }
+.watch { display: inline-flex; gap: 7px; margin-top: 18px; font-family: var(--mono); font-size: 12px; padding: 8px 13px; border: 1px solid var(--accent); border-radius: 4px; text-decoration: none; background: var(--surface); }
+.watch:hover { background: var(--accent-wash); }
+
+section { margin-top: 42px; }
+.sec-h { display: flex; align-items: baseline; gap: 12px; padding-bottom: 9px; border-bottom: 1px solid var(--rule); }
+.sec-h .num { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.1em; }
+.sec-h h2 { font-size: 15px; letter-spacing: 0.02em; text-transform: uppercase; font-weight: 700; }
+.stack { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
+.stack.tight { gap: 12px; }
+
+/* ---------- objetivos ---------- */
+ul.goals { list-style: none; padding: 0; margin: 18px 0 0; display: flex; flex-direction: column; gap: 9px; }
+ul.goals li { position: relative; padding-left: 22px; font-size: 15.5px; }
+ul.goals li::before { content: ''; position: absolute; left: 5px; top: 9px; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; }
+
+/* ---------- gramática ---------- */
+.gram { border: 1px solid var(--rule); background: var(--surface); border-radius: 5px; padding: 19px 21px; }
+.gram h3 { font-size: 17px; }
+.gram .why { font-size: 15px; color: var(--ink-2); margin-top: 8px; }
+.tw { overflow-x: auto; margin-top: 15px; border: 1px solid var(--rule-soft); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); text-align: left; padding: 9px 13px; background: var(--surface-2); white-space: nowrap; }
+td { padding: 9px 13px; border-top: 1px solid var(--rule-soft); vertical-align: top; }
+.warn { margin-top: 14px; font-size: 14.5px; border-left: 2px solid var(--warn); background: var(--warn-wash); padding: 9px 13px; color: var(--ink-2); border-radius: 0 3px 3px 0; }
+
+/* ---------- frases ---------- */
+.line { padding-left: 15px; border-left: 2px solid var(--rule); }
+.line .en { font-size: 17px; line-height: 1.45; }
+.line .pt { font-size: 14.5px; color: var(--ink-2); font-style: italic; margin-top: 3px; }
+.line .nt { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-top: 5px; line-height: 1.5; }
+
+/* ---------- vocabulário ---------- */
+table.vocab td:first-child { white-space: nowrap; }
+.termo { font-weight: 600; font-size: 15px; display: block; }
+.ipa { font-family: var(--mono); font-size: 11px; color: var(--ink-3); display: block; margin-top: 2px; }
+.exemplo { font-style: italic; color: var(--ink-2); }
+
+/* ---------- pronúncia ---------- */
+ul.pron { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-direction: column; gap: 13px; }
+ul.pron li { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr); gap: 14px; font-size: 14.5px; align-items: start; }
+.say { font-family: var(--mono); font-size: 12.5px; color: var(--accent); background: var(--accent-wash); padding: 5px 9px; border-radius: 3px; line-height: 1.4; }
+.exp { color: var(--ink-2); }

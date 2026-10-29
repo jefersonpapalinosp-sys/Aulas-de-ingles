@@ -36,3 +36,4 @@ playwright-report/
 test-results/
 test-results-queue/
 pwa-test-results/
+.rollback42/

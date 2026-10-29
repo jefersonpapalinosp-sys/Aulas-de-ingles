@@ -60,7 +60,7 @@ describe('VoiceRecorder lifecycle', () => {
     const pending = controller.start(30_000, ['audio/webm']); mic.resolve(); await pending
     await vi.advanceTimersByTimeAsync(30_000)
     expect(mic.stop).toHaveBeenCalledOnce()
-    expect(events.finished).toHaveBeenCalledWith(expect.any(Blob), 30_000)
+    expect(events.finished).toHaveBeenCalledWith(expect.any(Blob) as unknown, 30_000)
     expect(vi.getTimerCount()).toBe(0)
   })
   it('prefere MP4 quando WebM não é suportado (capacidade, não detecção de navegador)', async () => {

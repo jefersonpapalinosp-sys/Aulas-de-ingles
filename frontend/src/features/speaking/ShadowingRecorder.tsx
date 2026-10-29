@@ -39,10 +39,12 @@ export function ShadowingRecorder({
   const formatoRecusado = Boolean(recordingBlob && policy && !policy.mime_types.includes(tipo))
   return (
     <div className="shadowing-result">
-      <label>
-        3. Ouvir minha gravação
-        <audio controls src={recordingUrl} preload="metadata" />
-      </label>
+      <div className="recording-preview">
+        <p>3. Ouvir minha gravação</p>
+        {/* Prévia privada: sem transcrição automática ou envio sem consentimento. */}
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <audio aria-label="Ouvir minha gravação" controls src={recordingUrl} preload="metadata" />
+      </div>
       <fieldset>
         <legend>4. Como foi sua tentativa?</legend>
         {RATINGS.map(([value, label]) => (

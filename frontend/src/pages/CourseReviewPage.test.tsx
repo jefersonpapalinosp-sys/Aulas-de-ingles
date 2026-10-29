@@ -393,10 +393,12 @@ describe('CourseReviewPage', () => {
     }
     expect(hooks.mutate).toHaveBeenNthCalledWith(1, expectedAttempt)
     expect(hooks.mutate).toHaveBeenNthCalledWith(2, expectedAttempt)
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(globalThis.crypto.randomUUID).toHaveBeenCalledOnce()
   })
 
   it('restaura e anuncia o resultado, depois inicia nova execução com foco e nova chave', async () => {
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     vi.mocked(globalThis.crypto.randomUUID)
       .mockReset()
       .mockReturnValueOnce('123e4567-e89b-12d3-a456-426614174000')
@@ -457,7 +459,7 @@ describe('CourseReviewPage', () => {
     expect(hooks.mutate).toHaveBeenLastCalledWith(
       expect.objectContaining({
         idempotency_key: '223e4567-e89b-12d3-a456-426614174000',
-      }),
+      }) as unknown,
     )
   })
 
@@ -508,6 +510,7 @@ describe('CourseReviewPage', () => {
     expect(
       screen.getByRole('radio', { name: 'faster than' }),
     ).not.toBeChecked()
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para configuração/asserção, sem invocação sem receiver.
     expect(globalThis.crypto.randomUUID).toHaveBeenCalledTimes(2)
     expect(hooks.useSubmitCourseReview).toHaveBeenLastCalledWith(
       'voa-level-1',

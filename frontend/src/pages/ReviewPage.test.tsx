@@ -5,11 +5,11 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ReviewPage } from './ReviewPage'
 
-const avaliar = vi.fn()
-const setStatus = vi.fn()
+const avaliar = vi.fn<(command: unknown, callbacks: { onError: (error: Error) => void }) => void>()
+const setStatus = vi.fn<(command: unknown, callbacks: { onSuccess: () => void }) => void>()
 const deleteItem = vi.fn()
-const useDueCards = vi.fn()
-const useSuspended = vi.fn()
+const useDueCards = vi.fn<(filters: unknown) => unknown>()
+const useSuspended = vi.fn<(filters: unknown, cursor: unknown) => unknown>()
 const queryHooks = vi.hoisted(() => ({
   useCourses: vi.fn(),
   useCourseCurriculum: vi.fn(),
@@ -174,7 +174,7 @@ describe('ReviewPage', () => {
     await user.click(screen.getByRole('button', { name: 'Suspender item' }))
     expect(setStatus).toHaveBeenCalledWith(
       { itemId: 7, status: 'suspended' },
-      expect.objectContaining({ onSuccess: expect.any(Function) }),
+      expect.objectContaining({ onSuccess: expect.any(Function) as unknown }) as unknown,
     )
   })
 
@@ -208,7 +208,7 @@ describe('ReviewPage', () => {
     expect(screen.getAllByText(/Let's Learn English — Level 1 · Aula 31/)).toHaveLength(2)
     await user.selectOptions(screen.getByLabelText('Unidade'), '')
     expect(useDueCards).toHaveBeenLastCalledWith(
-      expect.objectContaining({ courseSlug: 'voa-level-1', unitSlug: undefined }),
+      expect.objectContaining({ courseSlug: 'voa-level-1', unitSlug: undefined }) as unknown,
     )
   })
 
@@ -226,7 +226,7 @@ describe('ReviewPage', () => {
     await user.click(screen.getByRole('button', { name: 'Reativar' }))
     expect(setStatus).toHaveBeenCalledWith(
       { itemId: 7, status: 'active' },
-      expect.objectContaining({ onSuccess: expect.any(Function) }),
+      expect.objectContaining({ onSuccess: expect.any(Function) as unknown }) as unknown,
     )
   })
 
@@ -272,8 +272,8 @@ describe('ReviewPage', () => {
     await user.keyboard('3')
     await waitFor(() =>
       expect(avaliar).toHaveBeenCalledWith(
-        { cardId: 7, quality: 4, expectedRevision: 0, idempotencyKey: expect.any(String) },
-        expect.objectContaining({ onSuccess: expect.any(Function) }),
+        { cardId: 7, quality: 4, expectedRevision: 0, idempotencyKey: expect.any(String) as unknown },
+        expect.objectContaining({ onSuccess: expect.any(Function) as unknown }) as unknown,
       ),
     )
   })
@@ -303,7 +303,7 @@ describe('ReviewPage', () => {
     await user.click(screen.getByRole('button', { name: 'Mostrar resposta' }))
     await user.click(screen.getByText('Errei'))
 
-    expect(avaliar.mock.calls[0]![0]).toEqual({ cardId: 7, quality: 1, expectedRevision: 0, idempotencyKey: expect.any(String) })
+    expect(avaliar.mock.calls[0]![0]).toEqual({ cardId: 7, quality: 1, expectedRevision: 0, idempotencyKey: expect.any(String) as unknown })
   })
 
   it('deck vazio explica como encher', () => {

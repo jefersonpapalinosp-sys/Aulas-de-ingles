@@ -18,8 +18,13 @@ ROLES_COMPOSE := docker compose --env-file infra/e2e.env -p aulas-ingles-roles -
         notebook-benchmark review-benchmark speaking-benchmark writing-benchmark database-benchmark dialogue-benchmark \
         operations-check operations-alert public-probe cue-audit test-failure-rehearsal easypanel-env easypanel-check
 
-help: ## Lista os comandos
+help: ## Lista os comandos principais; help-all inclui laboratórios e ferramentas
 	@grep -E '^[a-z0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+
+help-all: ## Lista também ferramentas avançadas e laboratórios
+	@grep -E '^[a-z0-9-]+:.*?##@? .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?##@? "};{printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: help-all
 
 .env:
 	@cp .env.example .env && echo "✓ .env criado a partir do .env.example"
@@ -37,7 +42,7 @@ up: .env ## Sobe db + api + worker + web, aplica migrations e carrega o seed
 down: ## Derruba os containers (mantém o volume do banco)
 	$(COMPOSE) down
 
-reset: ## Derruba tudo e APAGA o volume do banco
+reset: ##@ Derruba tudo e APAGA o volume do banco
 	$(COMPOSE) down -v
 
 logs: ## Acompanha os logs
@@ -78,11 +83,11 @@ easypanel-env: ## Gera segredos locais; origin=https://dominio-publico é opcion
 easypanel-check: ## Valida o arquivo privado e o Compose público sem exibir segredos
 	python3 -m ops.easypanel_deploy check
 
-api: .env ## Roda a API no host (contra o Postgres do compose)
+api: .env ##@ Roda a API no host (contra o Postgres do compose)
 	cd backend && DATABASE_URL=postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles \
 		uv run uvicorn app.main:app --reload --port 8010
 
-web: ## Roda o Vite no host
+web: ##@ Roda o Vite no host
 	cd frontend && VITE_API_PROXY_TARGET=http://localhost:8010 npm run dev
 
 test: test-api test-web ## Roda as duas suítes de unidade/integração
@@ -117,22 +122,22 @@ cov: test-api-prepare ## pytest com cobertura, somente na base exclusiva de test
 test-api: test-api-prepare ## pytest contra banco descartável, nunca contra dev/prod
 	cd backend && uv run pytest -q
 
-notebook-benchmark: test-api-prepare ## Mede Caderno 1k/10k só no PostgreSQL descartável
+notebook-benchmark: test-api-prepare ##@ Mede Caderno 1k/10k só no PostgreSQL descartável
 	$(OPS) -m ops.notebook_performance
 
-dialogue-benchmark: test-api-prepare ## Mede histórico e Caderno com 1k/10k turnos sintéticos
+dialogue-benchmark: test-api-prepare ##@ Mede histórico e Caderno com 1k/10k turnos sintéticos
 	$(OPS) -m ops.dialogue_performance $(DIALOGUE_BENCHMARK_ARGS)
 
-review-benchmark: test-api-prepare ## Mede Revisão 1k/10k só no PostgreSQL descartável
+review-benchmark: test-api-prepare ##@ Mede Revisão 1k/10k só no PostgreSQL descartável
 	$(OPS) -m ops.review_performance
 
-speaking-benchmark: test-api-prepare ## Mede Speaking 1k/10k só no PostgreSQL descartável
+speaking-benchmark: test-api-prepare ##@ Mede Speaking 1k/10k só no PostgreSQL descartável
 	$(OPS) -m ops.speaking_performance $(SPEAKING_BENCHMARK_ARGS)
 
-writing-benchmark: test-api-prepare ## Mede escrita 1k/10k só no PostgreSQL descartável
+writing-benchmark: test-api-prepare ##@ Mede escrita 1k/10k só no PostgreSQL descartável
 	$(OPS) -m ops.writing_performance $(WRITING_BENCHMARK_ARGS)
 
-database-benchmark: test-api-prepare ## Mede usuários/eventos/jobs 1k/10k só no banco descartável
+database-benchmark: test-api-prepare ##@ Mede usuários/eventos/jobs 1k/10k só no banco descartável
 	$(OPS) -m ops.database_performance
 
 test-web: ## vitest
@@ -149,7 +154,7 @@ fmt: ## Formata o backend
 migrate: ## Aplica as migrations pendentes
 	$(COMPOSE) exec -T api alembic upgrade head
 
-migration: ## Gera uma revisão a partir dos modelos — make migration m="texto"
+migration: ##@ Gera uma revisão a partir dos modelos — make migration m="texto"
 	$(COMPOSE) exec -T api alembic revision --autogenerate -m "$(m)"
 
 seed-plan: ## Prévia somente leitura do seed; código 1 se houver alterações bloqueadas
@@ -171,10 +176,10 @@ assist-gate: ## Avalia o piloto: make assist-gate modality=writing review=../con
 	cd backend && uv run python -m app.cli assist-gate \
 		--modality "$(modality)" --review-file "$(review)"
 
-assist-worker: ## Processa um job pendente da fila assistida
+assist-worker: ##@ Processa um job pendente da fila assistida
 	$(COMPOSE) exec -T worker python -m app.cli assist-worker --once
 
-# ---------- produção local ----------
+# ---------- estudo local (nome legado prod) ----------
 
 # Credenciais dos papéis moram em secrets/ (ignorado pelo Git), nunca junto dos dumps.
 PROD_ROLES := $(if $(wildcard secrets/roles-prod.env),--env-file secrets/roles-prod.env -f infra/compose.roles.prod.yml)
@@ -185,48 +190,48 @@ PROD := docker compose --env-file .env.prod -f infra/compose.prod.yml $(PROD_ROL
 	@echo "  cp .env.prod.example .env.prod && openssl rand -hex 32" >&2
 	@exit 1
 
-prod-up: .env.prod ## Sobe o compose de produção (nginx + uvicorn + Postgres)
+prod-up: .env.prod ##@ Fluxo legado bloqueado; estudo local exige rollout pelo runbook
 	@echo "Fluxo legado bloqueado: ele iniciava código antes de migration/seed." >&2
 	@echo "Use o checklist versionado em docs/runbook_sprint_42.md." >&2
 	@exit 1
 
-prod-down: ## Derruba o compose de produção (mantém o volume)
+prod-down: ##@ Para o estudo local em 5181 (mantém o volume)
 	$(PROD) down
 
-prod-logs: ## Logs de produção (JSON, uma linha por requisição)
+prod-logs: ##@ Logs do estudo local em 5181 (JSON)
 	$(PROD) logs -f api
 
-prod-seed: ## Recarrega o seed em produção
+prod-seed: ##@ Seed genérico bloqueado no estudo local
 	@echo "Seed completo genérico bloqueado; use plano editorial auditado por release." >&2
 	@echo "Consulte docs/runbook_sprint_42.md." >&2
 	@exit 1
 
 # ---------- backup ----------
 
-recovery-lab-up: ## Sobe laboratório de recuperação sem portas e sem volumes do aluno
+recovery-lab-up: ##@ Sobe laboratório de recuperação sem portas e sem volumes do aluno
 	$(OPS) -m ops.recovery lab-resources
 	docker build -f backend/Dockerfile.prod -t aulas-ingles-recovery-tools:local .
 	$(RECOVERY_COMPOSE) up -d --wait --wait-timeout 120
 	$(OPS) -m ops.recovery lab-resources
 
-recovery-lab-prepare: ## Prepara apenas a origem vazia do laboratório, com WAV sintético
+recovery-lab-prepare: ##@ Prepara apenas a origem vazia do laboratório, com WAV sintético
 	$(OPS) -m ops.recovery lab-prepare
 
-recovery-lab-down: ## Para só o laboratório de recuperação; preserva todos os seus volumes
+recovery-lab-down: ##@ Para só o laboratório de recuperação; preserva todos os seus volumes
 	$(OPS) -m ops.recovery lab-resources
 	$(RECOVERY_COMPOSE) down
 
-upgrade-lab-up: ## Sobe laboratório DB-42 novo, interno e separado dos volumes anteriores
+upgrade-lab-up: ##@ Sobe DB-42; prepare a imagem anterior conforme operacao_local.md
+	docker image inspect aulas-ingles-rollback42:local --format '{{.Id}}' >/dev/null
 	$(OPS) -m ops.recovery upgrade-lab-resources
 	docker build -f backend/Dockerfile.prod -t aulas-ingles-recovery-tools:local .
-	$(OPS) -m ops.rollback_image
 	$(UPGRADE_COMPOSE) up -d --wait --wait-timeout 120
 	$(OPS) -m ops.recovery upgrade-lab-resources
 
-upgrade-lab-prepare: ## Cria origem DB-42 diretamente na revisão anterior com dados sintéticos
+upgrade-lab-prepare: ##@ Cria origem DB-42 diretamente na revisão anterior com dados sintéticos
 	$(OPS) -m ops.recovery upgrade-lab-prepare
 
-upgrade-lab-down: ## Para apenas o laboratório DB-42; preserva volumes e recibos
+upgrade-lab-down: ##@ Para apenas o laboratório DB-42; preserva volumes e recibos
 	$(OPS) -m ops.recovery upgrade-lab-resources
 	$(UPGRADE_COMPOSE) down
 
@@ -245,24 +250,24 @@ restore: ## Somente destino vazio isolado: make restore f=... confirm=aulas-ingl
 test-recovery: ## Testes operacionais puros, sem Docker ou banco
 	$(OPS) -m unittest discover -s ops/tests -v
 
-test-recovery-integration: ## Ensaia 2 backups e 1 restore; exige laboratório preparado e destino vazio
+test-recovery-integration: ##@ Ensaia 2 backups e 1 restore; exige laboratório preparado e destino vazio
 	$(OPS) -m ops.recovery_smoke
 
-test-upgrade-integration: ## Faz backup/restore/upgrade da revisão anterior e prova preservação
+test-upgrade-integration: ##@ Faz backup/restore/upgrade da revisão anterior e prova preservação
 	$(OPS) -m ops.upgrade_smoke
 
-roles-lab-up: ## Sobe somente o banco sintético para permissões, sem portas
+roles-lab-up: ##@ Sobe somente o banco sintético para permissões, sem portas
 	$(OPS) -m ops.roles resources
 	docker build -f backend/Dockerfile.prod -t aulas-ingles-recovery-tools:local .
 	$(ROLES_COMPOSE) up -d --wait
 
-roles-lab-prepare: ## Provisiona papéis, aplica migrations e seed somente no laboratório
+roles-lab-prepare: ##@ Provisiona papéis, aplica migrations e seed somente no laboratório
 	$(OPS) -m ops.roles prepare
 
-test-roles: ## Recusas de privilégio, HTTP runtime, worker e backup limitado
+test-roles: ##@ Recusas de privilégio, HTTP runtime, worker e backup limitado
 	$(OPS) -m ops.roles_smoke
 
-roles-lab-down: ## Encerra somente laboratório de papéis, preserva o volume
+roles-lab-down: ##@ Encerra somente laboratório de papéis, preserva o volume
 	$(OPS) -m ops.roles resources
 	$(ROLES_COMPOSE) down
 

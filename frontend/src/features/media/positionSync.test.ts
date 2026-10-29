@@ -5,11 +5,11 @@ const initial = (): Position => ({ media_id: 9, position_seconds: 0, updated_at:
 function server() {
   let remote = initial()
   let online = false
-  const read = vi.fn(async () => remote)
-  const save = vi.fn(async (body: PositionCommand) => {
-    if (body.expected_revision !== remote.revision) throw new PositionConflict(remote)
+  const read = vi.fn(() => Promise.resolve(remote))
+  const save = vi.fn((body: PositionCommand) => {
+    if (body.expected_revision !== remote.revision) return Promise.reject(new PositionConflict(remote))
     remote = { ...remote, ...body, completed: body.completed ?? false, revision: remote.revision + 1, updated_at: new Date().toISOString() }
-    return remote
+    return Promise.resolve(remote)
   })
   return { read, save, allowed: () => online, connect: () => { online = true }, disconnect: () => { online = false },
     remote: () => remote, change: (p: number) => { remote = { ...remote, position_seconds: p, revision: remote.revision + 1, updated_at: new Date().toISOString() } } }

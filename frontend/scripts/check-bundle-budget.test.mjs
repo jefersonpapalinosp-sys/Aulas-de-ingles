@@ -42,7 +42,7 @@ describe('orçamento do bundle com dois tetos', () => {
     assert.match(line(result, 'index-abc123.js'), /\(inicial\)$/)
     assert.match(line(result, 'lesson-study-x.js'), /\(lazy\)$/)
     assert.match(line(result, 'inicial (entrada'), /^OK /)
-    assert.match(line(result, 'total JS\/CSS'), /^OK /)
+    assert.match(line(result, 'total JS/CSS'), /^OK /)
   })
 
   it('falha quando a entrada cresce além do teto inicial, mesmo com o total dentro do limite', () => {
@@ -52,7 +52,7 @@ describe('orçamento do bundle com dois tetos', () => {
     assert.ok(result.initial > LIMITS.initial)
     assert.ok(result.total <= LIMITS.total)
     assert.match(line(result, 'inicial (entrada'), /^ERRO /)
-    assert.match(line(result, 'total JS\/CSS'), /^OK /)
+    assert.match(line(result, 'total JS/CSS'), /^OK /)
   })
 
   it('não falha quando um chunk lazy novo é criado dentro do teto total; o inicial não muda', () => {
@@ -73,7 +73,7 @@ describe('orçamento do bundle com dois tetos', () => {
     assert.ok(result.initial <= LIMITS.initial)
     assert.ok(result.total > LIMITS.total)
     assert.match(line(result, 'inicial (entrada'), /^OK /)
-    assert.match(line(result, 'total JS\/CSS'), /^ERRO /)
+    assert.match(line(result, 'total JS/CSS'), /^ERRO /)
   })
 
   it('limites por arquivo continuam: CSS acima de 15 KiB reprova', () => {

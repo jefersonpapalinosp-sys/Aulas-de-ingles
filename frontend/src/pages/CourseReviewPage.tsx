@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { useFormValidation } from '../components/useFormValidation'
 import { Link, useParams } from 'react-router-dom'
 import { useSessao } from '../api/auth'
 import { useCourseReview, useSubmitCourseReview } from '../api/courseReviews'
@@ -32,10 +33,14 @@ function CourseReviewContent({
   courseSlug: string
   unitSlug: string
 }) {
+  const validation = useFormValidation()
+  const helpId = `${validation.id}-help`
+  const errorId = `${validation.id}-failure`
   const { usuario } = useSessao()
   const review = useCourseReview(courseSlug, unitSlug)
   const curriculum = useCourseCurriculum(courseSlug)
   const submit = useSubmitCourseReview(courseSlug, unitSlug)
+  const description = `${helpId}${submit.error ? ` ${errorId}` : ''}`
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [retrying, setRetrying] = useState(false)
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
@@ -98,7 +103,7 @@ function CourseReviewContent({
             {courseLevelLabel(courseSlug)} · Checkpoint curricular · unidade {unitSlug}
           </p>
           <h1>{data.title}</h1>
-          <p className="lead">{data.intro}</p>
+          <p id={helpId} className="lead">{data.intro}</p>
         </div>
         <span>{data.estimated_minutes} min</span>
       </header>
@@ -193,7 +198,7 @@ function CourseReviewContent({
             <ol className="checkpoint-questions">
               {data.questions.map((question, questionIndex) => (
                 <li key={question.id}>
-                  <fieldset>
+                  <fieldset aria-invalid={validation.invalid(String(question.id))} aria-describedby={helpId}>
                     <legend>
                       <span>
                         {question.position}. {question.skill === 'listening' ? 'Listening' : 'Prática'}
@@ -210,6 +215,8 @@ function CourseReviewContent({
                                   ? firstAnswerRef
                                   : undefined
                               }
+                              {...validation.field(String(question.id), description, 'radio')}
+                              required
                               type="radio"
                               name={`question-${question.id}`}
                               value={option}
@@ -233,6 +240,8 @@ function CourseReviewContent({
                         <input
                           ref={questionIndex === 0 ? firstAnswerRef : undefined}
                           id={`checkpoint-answer-${question.id}`}
+                          {...validation.field(String(question.id), description)}
+                          required
                           type="text"
                           maxLength={500}
                           value={answers[question.id] ?? ''}
@@ -250,8 +259,9 @@ function CourseReviewContent({
               ))}
             </ol>
 
+            {validation.messages}
             {submit.error && (
-              <p className="erro" role="alert">
+              <p id={errorId} className="erro" role="alert">
                 {submit.error.message}
               </p>
             )}

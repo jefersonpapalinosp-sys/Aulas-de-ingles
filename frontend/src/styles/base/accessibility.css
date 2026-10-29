@@ -1,0 +1,15 @@
+/* !important é intencional: preferências de movimento e cores do sistema prevalecem sobre qualquer domínio. */
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+@media (forced-colors: active) {
+  :focus-visible { outline-color: Highlight; }
+  a { color: LinkText; }
+  button, select, .btn, .watch {
+    border-color: ButtonText !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+  }
+  button:disabled { border-color: GrayText !important; color: GrayText !important; }
+  .choice-options input:checked + span, .today-days input:checked + span,
+  .shadowing-result fieldset button.selected { border-color: Highlight; }
+}

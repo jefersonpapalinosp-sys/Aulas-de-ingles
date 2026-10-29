@@ -1,0 +1,40 @@
+@media (max-width: 600px) {
+  .today-title-row, .today-recommendation, .today-section-head { align-items: stretch; flex-direction: column; }
+  .today-week { min-width: 0; text-align: left; }
+  .today-recommendation .btn { text-align: center; }
+  .today-days { grid-template-columns: repeat(4, 1fr); }
+  .today-section-head .btn { width: 100%; text-align: center; }
+  .study-entry, .study-header { align-items: stretch; flex-direction: column; }
+  .study-entry .btn { text-align: center; }
+  .study-overview-link { margin-top: 0; }
+  .study-body { margin-top: 26px; }
+  .study-intro-card, .study-instructions { padding: 19px 17px; }
+  .study-actions { position: static; backdrop-filter: none; }
+  .study-actions .btn { max-width: 50%; white-space: normal; text-align: center; }
+  .study-sync { display: none; }
+  .audio-player { padding: 18px 15px; }
+  .audio-player-head { flex-direction: column; gap: 5px; }
+  .audio-toolbar label { width: 100%; margin-left: 0; margin-top: 3px; }
+  .audio-transcript-head { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .transcript-cues { max-height: 280px; }
+  .full-transcript-lines li { grid-template-columns: 1fr; gap: 4px; }
+  .shadowing-card { padding: 19px 16px; }
+  .shadowing-actions .btn { width: 100%; }
+  .speaking-save-actions .btn { width: 100%; }
+  .speaking-history li { grid-template-columns: 1fr auto; }
+  .speaking-history li div { grid-column: 1 / -1; }
+  .writing-workspace { padding: 19px 16px; }
+  .writing-meta { align-items: flex-start; flex-direction: column; gap: 3px; }
+  .writing-actions .btn { flex: 1 1 100%; text-align: center; }
+  .writing-history li { grid-template-columns: 1fr auto; }
+  .writing-history li button:last-child { grid-column: 1 / -1; text-align: left; }
+  .writing-diff-head, .notebook-header, .notebook-section-head { align-items: stretch; flex-direction: column; }
+  .notebook-header .btn { text-align: center; }
+  .notebook-compose { padding: 18px 15px; }
+  .notebook-fields { grid-template-columns: 1fr; }
+  .notebook-filters { display: grid; grid-template-columns: 1fr 1fr; }
+  .notebook-writing-list > li { align-items: flex-start; flex-direction: column; }
+  .notebook-recordings li { grid-template-columns: 1fr auto; }
+  .notebook-recordings li > div { grid-column: 1 / -1; }
+  .writing-history li button { grid-column: 1 / -1; justify-self: start; }
+}

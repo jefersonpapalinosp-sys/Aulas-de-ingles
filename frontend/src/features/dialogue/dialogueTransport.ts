@@ -42,7 +42,8 @@ export const dialogueTransport: DialogueTransport = {
       headers: { 'Content-Type': blob.type, 'X-Audio-Consent': 'true' },
     })
     if (!response.ok) throw new DialogueError(response.status)
-    return response.json()
+    const result: unknown = await response.json()
+    return result
   },
   rate: async (dialogue_id, position, rating, signal) => unwrap(await api.PUT('/api/speaking/dialogues/{dialogue_id}/turns/{position}/rating', { params: { path: { dialogue_id, position } }, body: { rating }, signal })),
   remove: async (dialogue_id, signal) => {

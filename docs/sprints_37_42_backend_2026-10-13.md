@@ -226,7 +226,7 @@ Fechamento **técnico autorizado** por Jeferson, com revisão humana dos exemplo
 explicitamente pendente. Os avisos de limitação do corretor permanecem;
 não se substituiu validação linguística por presença lexical ou Ollama.
 Próxima implementação: BE-38 em conjunto com FE/DB-38.
-Procedimento, backup e limitações: [operação local](operacao_sprint_37.md).
+Procedimento, backup e limitações: [operação local](historico_operacao_sprints_37_44.md).
 Os registros anteriores retratam suas respectivas etapas, não o status vigente.
 
 ## Sprint 38 Autenticação e mutações concorrentes
@@ -291,7 +291,7 @@ As duas divergências históricas de jornada detectadas na auditoria foram manti
 idênticas, não declaradas corrigidas: 20 jornadas sem detalhamento completo e 15
 sem data final. Nova inconsistência não é aceita pela prova de rollout.
 Procedimento específico: ops/concurrency_rollout.py. study_rollout.py continua
-fixo na Sprint 37. Detalhes no [registro operacional](operacao_sprint_37.md#sprint-38--implantação-autorizada-em-14102026).
+fixo na Sprint 37. Detalhes no [registro operacional](historico_operacao_sprints_37_44.md#sprint-38--implantação-autorizada-em-14102026).
 
 Referências técnicas: [locks PostgreSQL 16](https://www.postgresql.org/docs/16/explicit-locking.html)
 e [pool limitado do AnyIO](https://anyio.readthedocs.io/en/stable/threads.html).
@@ -357,7 +357,7 @@ aprovados. API exercitada também sob papel runtime no laboratório (36 recusas 
 privilégio). Após autorização separada, desenvolvimento 5180/8010 alinhado ao head
 `e17b5fad0264`: backup real restaurado e ensaiado, 39 tabelas/6.766 registros históricos
 preservados, 23 verificações HTTP aprovadas e conta de teste removida. 5181 permanece
-intacto na Sprint 38. [Registro operacional](operacao_sprint_37.md#sprint-39a--alinhamento-autorizado-do-desenvolvimento-em-14102026).
+intacto na Sprint 38. [Registro operacional](historico_operacao_sprints_37_44.md#sprint-39a--alinhamento-autorizado-do-desenvolvimento-em-14102026).
 Orçamento frontend e os 112 cenários Playwright do build otimizado aprovados.
 O incremento de upload 39B e as pendências de cotas, reconciliação e jobs estão abaixo.
 
@@ -413,7 +413,7 @@ e callback que nega aberturas externas impedem usar URLs/arquivos referenciados 
 container. Não é sandbox de segurança do SO nem atestado contra vulnerabilidade nativa.
 
 Aceita uma faixa de áudio mono/estéreo, 8–48 kHz. Famílias/codec permitidos estão em
-`audio_probe_worker.py`; o [README](../README.md#sprint-39c--inspeção-real-de-áudio-e-inventário-somente-leitura-14102026)
+`audio_probe_worker.py`; o [changelog](changelog.md#sprint-39c--inspeção-real-de-áudio-e-inventário-somente-leitura-14102026)
 registra o contrato e seus limites. Mede amostras e extensão temporal dos frames;
 recusa tipo falso/vídeo/múltiplas faixas e mais de 30 s reais, inclusive em arquivo
 com poucos bytes. WAV RIFF truncado é recusado. Decodificação não é análise forense
@@ -469,7 +469,7 @@ pontos de interrupção também foram exercitados em Linux sem rede e UID não p
 Backup v2 conserva journals/bytes; v1 segue aceito. Não foi homologado restore do
 journal como identidade operacional de um volume novo nem queda física de energia.
 
-Sem migration, mudança de papéis ou rollout em 5181. Ver [runbook 39D](operacao_sprint_37.md#sprint-39d--quarentena-reversível-e-backup-v2-em-14102026).
+Sem migration, mudança de papéis ou rollout em 5181. Ver [runbook 39D](historico_operacao_sprints_37_44.md#sprint-39d--quarentena-reversível-e-backup-v2-em-14102026).
 
 ### Incremento 39E — opt-in de conteúdo público para o PWA (14/10/2026)
 
@@ -486,7 +486,7 @@ também marcador, tipo e política corretos antes de gravar; não basta parecer 
 
 Sem nova migration, seed do ambiente de estudo ou alteração de contrato JSON/OpenAPI.
 PostgreSQL descartável usado para regressão; detalhes e contagens em
-[runbook 39E](operacao_sprint_37.md#sprint-39e--pwa-e-cache-público-em-14102026).
+[runbook 39E](historico_operacao_sprints_37_44.md#sprint-39e--pwa-e-cache-público-em-14102026).
 Reservas/cotas concorrentes de assistência, estados de jobs, retenção e rollout de
 BE-39 permanecem abertos; este incremento não encerra a sprint.
 
@@ -547,12 +547,12 @@ Fora do escopo: cobrança financeira ao usuário, avaliação automática de pro
 Migration `f28c6abe1375`, contrato OpenAPI e consumidor tipado atualizados juntos.
 Não habilitar código novo sobre schema anterior nem manter worker antigo admitindo
 jobs sem reserva. Backfill não recupera consumo de resultados já apagados.
-[Política, ensaios e limites operacionais 39F](operacao_sprint_37.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
+[Política, ensaios e limites operacionais 39F](historico_operacao_sprints_37_44.md#sprint-39f--reservas-e-cotas-assistidas-em-14102026).
 **Estado histórico ao concluir 39F:** próximo bloco era 39G, jobs/retenção, além do
 rollout de estudo, checksum durável e homologações reais restantes. O alinhamento
 do DEV foi concluído em 15/10: API/worker recriados juntos, configuração existente
 preservada e 11 verificações HTTP autenticadas aprovadas, sem chamar provedores.
-[Registro operacional](operacao_sprint_37.md#sprint-39f--alinhamento-do-desenvolvimento-em-15102026).
+[Registro operacional](historico_operacao_sprints_37_44.md#sprint-39f--alinhamento-do-desenvolvimento-em-15102026).
 
 ### Incremento 39G/H — execução técnica e limites de aceite (15/10/2026)
 
@@ -569,7 +569,7 @@ transitório registrado; repetição tripla e segunda suíte completa passaram.
 
 A limpeza automática de refresh/pending antigos fica desligada, com rotinas
 prontas e dry-run disponível, até decidir política. Homologação física Safari/iOS
-continua pendente; não declarar aceite integral. [Procedimentos e evidências](operacao_sprint_37.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
+continua pendente; não declarar aceite integral. [Procedimentos e evidências](historico_operacao_sprints_37_44.md#sprint-39gh--retenção-integridade-e-implantação-em-15102026).
 
 ## Sprint 40 Histórico editorial e dados pessoais
 
@@ -626,7 +626,7 @@ do teto; não existe exportação assíncrona implantada nem promessa de capacid
 em produção derivada destes testes. Ensaio e evolução ficam para BE-41 se necessário.
 
 Sequência registrada: **40B** editorial/seed, **40C** exclusão/backups, **40D** histórico
-e fechamento integrado. [Inventário e evidências](operacao_sprint_37.md#sprint-40a--exportação-e-meus-dados-em-15102026).
+e fechamento integrado. [Inventário e evidências](historico_operacao_sprints_37_44.md#sprint-40a--exportação-e-meus-dados-em-15102026).
 
 ### Incremento 40B.1 — barreira do seed, 15/10/2026
 
@@ -662,7 +662,7 @@ Não usar esse resultado para apagar versões ou reaplicar rubricas automaticame
 identidade estável, snapshots, arquivamento e proveniência real, com migração
 ensaiada; tratar o drift DEV sem reconstruir histórico a partir do gabarito atual.
 O comando direcionado `writing-rubrics` é anterior a esta entrega e não faz parte
-da proteção do seed; não foi executado. [Evidências e operação](operacao_sprint_37.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
+da proteção do seed; não foi executado. [Evidências e operação](historico_operacao_sprints_37_44.md#sprint-40b1--prévia-e-barreira-editorial-do-seed-em-15102026).
 
 ### Incremento 40B.2a — snapshots privados de novas evidências, 15/10/2026
 
@@ -694,7 +694,7 @@ Desligar a captura não oculta snapshots que já existam na leitura/exportação
 arquivamento/publicação centralizados, proveniência por revisão, integração das
 demais projeções históricas/UI e do consumo posterior de cues pelo STT, além do
 rollout com backup/restore ensaiado. Não habilita edição destrutiva: a barreira
-40B.1 continua integralmente ativa. [Evidências](operacao_sprint_37.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
+40B.1 continua integralmente ativa. [Evidências](historico_operacao_sprints_37_44.md#sprint-40b2a--snapshots-privados-de-evidências-em-15102026).
 
 ### Incremento 40B.2b.1 — disponibilidade e prévia de arquivamento, 15/10/2026
 
@@ -722,7 +722,7 @@ editorial nem autorização de execução. A barreira insert-only do seed perman
 proveniência por revisão, aplicação auditada/serializada de arquivamento,
 invalidação do cache público, interfaces históricas e rollout ainda faltam.
 Sem migration, alteração de status no DEV/estudo, ativação de snapshots ou merge.
-[Contrato e evidências](operacao_sprint_37.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
+[Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b1--disponibilidade-e-prévia-de-arquivamento-em-15102026).
 
 ### Incremento 40B.2b.2 — identidade editorial estável, 15/10/2026
 
@@ -749,7 +749,7 @@ como identidade já persistida. DEV continua com 82 diferenças de rubrica bloqu
 
 Próximo passo: aplicação auditada/serializada de arquivamento e integração do impacto
 ao seed, seguidas de proveniência, rubricas, histórico/STT, cache e rollout.
-Sprint 40 continua parcial. [Contrato e evidências](operacao_sprint_37.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
+Sprint 40 continua parcial. [Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b2--identidade-editorial-estável-em-15102026).
 
 ### Incremento 40B.2b.3 — arquivamento auditado local, 15/10/2026
 
@@ -779,7 +779,7 @@ mas seguem bloqueados para aplicação pelo seed; omissões nunca viram exclusõ
 
 **1.082 testes backend**, 94% de cobertura; ensaio com papéis reais aprovado.
 Ainda faltam proveniência/rubricas, histórico/STT, interfaces/cache, regra de
-conclusão e implantação. [Contrato e evidências](operacao_sprint_37.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
+conclusão e implantação. [Contrato e evidências](historico_operacao_sprints_37_44.md#sprint-40b2b3--arquivamento-auditado-local-em-15102026).
 
 ### Incremento 40B.2c — rubricas e proveniência auditáveis, 15/10/2026
 
@@ -800,7 +800,7 @@ downgrade que inventaria informação. Ensaiada apenas na base descartável; DEV
 estudo permaneceram sem migration ou escrita. **1.088 testes backend**, 94% de
 cobertura; 347 frontend e 88 operacionais aprovados. As 63 mudanças dependem de
 nova versão/snapshots e homologação antes de rollout.
-[Runbook e resultado DEV](operacao_sprint_37.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
+[Runbook e resultado DEV](historico_operacao_sprints_37_44.md#sprint-40b2c--auditoria-de-rubricas-e-proveniência-15102026).
 
 ### Incremento 40B.2d — projeções históricas e STT imutável, 15/10/2026
 

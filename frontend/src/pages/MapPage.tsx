@@ -127,7 +127,7 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
               <article
                 className="unit-card"
                 key={unit.id}
-                aria-disabled="true"
+                data-unavailable="true"
                 aria-label={`${unit.title}: ${state}`}
               >
                 {content}

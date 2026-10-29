@@ -38,8 +38,6 @@ CONFIRM_STUDY_CHECK = "aulas-ingles-recovery/study-check-db"
 CONFIRM_CONCURRENCY_CHECK = "aulas-ingles-recovery/concurrency-check-db"
 CONFIRM_DEV_CHECK = "aulas-ingles-recovery/dev-check-db"
 CONFIRM_ASSIST_CHECK = "aulas-ingles-recovery/assist-check-db"
-CONFIRM_DEV39_CHECK = "aulas-ingles-recovery/dev39-check-db"
-CONFIRM_STUDY39_CHECK = "aulas-ingles-recovery/study39-check-db"
 CONFIRM_UPGRADE42 = "aulas-ingles-upgrade42/target-db"
 CONFIRM_DIALOGUE = "aulas-ingles-recovery48/target-db"
 
@@ -139,32 +137,12 @@ ASSIST_CHECK = Target(
     f"{PROJECT}_assist_check_voice",
     "aulas-ingles:recovery-target:v1",
 )
-DEV39_CHECK = Target(
-    PROJECT,
-    "dev39-check-db",
-    "aulas_ingles_restore",
-    "aulas_restore",
-    f"{PROJECT}_dev39_check_db",
-    f"{PROJECT}_dev39_check_voice",
-    "aulas-ingles:recovery-target:v1",
-)
-STUDY39_CHECK = Target(
-    PROJECT,
-    "study39-check-db",
-    "aulas_ingles_restore",
-    "aulas_restore",
-    f"{PROJECT}_study39_check_db",
-    f"{PROJECT}_study39_check_voice",
-    "aulas-ingles:recovery-target:v1",
-)
 DESTINATIONS = {
     CONFIRM_TARGET: RESTORE,
     CONFIRM_STUDY_CHECK: STUDY_CHECK,
     CONFIRM_CONCURRENCY_CHECK: CONCURRENCY_CHECK,
     CONFIRM_DEV_CHECK: DEV_CHECK,
     CONFIRM_ASSIST_CHECK: ASSIST_CHECK,
-    CONFIRM_DEV39_CHECK: DEV39_CHECK,
-    CONFIRM_STUDY39_CHECK: STUDY39_CHECK,
 }
 UPGRADE_DESTINATIONS = {CONFIRM_UPGRADE42: UPGRADE_RESTORE}
 DIALOGUE_DESTINATIONS = {CONFIRM_DIALOGUE: DIALOGUE_RESTORE}
@@ -264,10 +242,6 @@ def lab_resources() -> None:
         DEV_CHECK.voice_volume,
         ASSIST_CHECK.db_volume,
         ASSIST_CHECK.voice_volume,
-        DEV39_CHECK.db_volume,
-        DEV39_CHECK.voice_volume,
-        STUDY39_CHECK.db_volume,
-        STUDY39_CHECK.voice_volume,
     ):
         if name in existing:
             volume(name, PROJECT)

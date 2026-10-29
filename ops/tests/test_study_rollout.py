@@ -2,18 +2,18 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from ops import recovery, study_rollout
+from ops import recovery, rollout
 from ops.recovery_archive import RecoveryError
 
 
 class StudyRolloutTests(unittest.TestCase):
     def test_invalid_action_stops_before_backup_or_docker(self):
         with (
-            patch.object(study_rollout, "verify_bundle") as bundle,
+            patch.object(rollout, "verify_bundle") as bundle,
             patch.object(recovery, "source_target") as source,
             self.assertRaises(RecoveryError),
         ):
-            study_rollout.run("apply", Path("unused"))
+            rollout.run("apply", Path("unused"), profile="study")
         bundle.assert_not_called()
         source.assert_not_called()
 
@@ -24,7 +24,7 @@ class StudyRolloutTests(unittest.TestCase):
                 patch.object(recovery, "query", return_value=tables) as query,
                 self.assertRaises(RecoveryError),
             ):
-                study_rollout.fingerprints(recovery.STUDY_CHECK)
+                rollout.fingerprints(recovery.STUDY_CHECK)
             self.assertEqual(query.call_count, 1)
 
     def test_malformed_rows_cannot_produce_preservation_proof(self):
@@ -33,12 +33,12 @@ class StudyRolloutTests(unittest.TestCase):
                 patch.object(recovery, "query", side_effect=[["app_user"], rows]),
                 self.assertRaises(RecoveryError) as raised,
             ):
-                study_rollout.fingerprints(recovery.STUDY_CHECK)
+                rollout.fingerprints(recovery.STUDY_CHECK)
             self.assertNotIn("private-content", str(raised.exception))
 
     def test_fingerprint_proof_validates_counts_hashes_and_fields(self):
         good = {"app_user": {"count": 1, "sha256": "a" * 64}}
-        self.assertEqual(study_rollout.checked_fingerprints(good), good)
+        self.assertEqual(rollout.checked_fingerprints(good), good)
         for value in (
             None, [], {"app_user": None}, {"app_user": {}},
             {"app_user;DROP": good["app_user"]},
@@ -49,15 +49,15 @@ class StudyRolloutTests(unittest.TestCase):
               for digest in (None, "short", "z" * 64, 123)),
         ):
             with self.subTest(value=value), self.assertRaises(RecoveryError):
-                study_rollout.checked_fingerprints(value)
+                rollout.checked_fingerprints(value)
 
     def test_fingerprint_detects_duplicate_row_count(self):
         row = {"id": 1, "text": "synthetic-private-content"}
         with patch.object(
             recovery, "query", side_effect=[["app_user"], [row], ["app_user"], [row, row]]
         ):
-            before = study_rollout.fingerprints(recovery.STUDY_CHECK)
-            after = study_rollout.fingerprints(recovery.STUDY_CHECK)
+            before = rollout.fingerprints(recovery.STUDY_CHECK)
+            after = rollout.fingerprints(recovery.STUDY_CHECK)
         self.assertEqual(before["app_user"]["count"], 1)
         self.assertEqual(after["app_user"]["count"], 2)
         self.assertNotEqual(before["app_user"]["sha256"], after["app_user"]["sha256"])
@@ -77,9 +77,9 @@ class StudyRolloutTests(unittest.TestCase):
                 [{"id": 1, "value": "different"}, {"id": 2, "value": "b"}],
             ],
         ):
-            before = study_rollout.fingerprints(target)
-            self.assertEqual(study_rollout.fingerprints(target), before)
-            self.assertNotEqual(study_rollout.fingerprints(target), before)
+            before = rollout.fingerprints(target)
+            self.assertEqual(rollout.fingerprints(target), before)
+            self.assertNotEqual(rollout.fingerprints(target), before)
             self.assertNotIn("value", str(before))
 
     def test_only_intended_columns_are_excluded(self):
@@ -90,7 +90,7 @@ class StudyRolloutTests(unittest.TestCase):
             return ["writing_prompt", "writing_feedback"] if len(queries) == 1 else []
 
         with patch.object(recovery, "query", side_effect=query):
-            study_rollout.fingerprints(recovery.STUDY_CHECK)
+            rollout.fingerprints(recovery.STUDY_CHECK)
         self.assertIn("- 'requirements'", queries[1])
         self.assertNotIn("- 'instructions'", queries[1])
         self.assertIn("- 'algorithm_version'", queries[2])
@@ -100,19 +100,19 @@ class StudyRolloutTests(unittest.TestCase):
     def test_table_name_guard_precedes_dynamic_sql(self):
         with patch.object(recovery, "query", return_value=["app_user;DROP"]) as query:
             with self.assertRaises(RecoveryError):
-                study_rollout.fingerprints(recovery.STUDY_CHECK)
+                rollout.fingerprints(recovery.STUDY_CHECK)
             self.assertEqual(query.call_count, 1)
 
     def test_checksum_column_accepts_digits_without_accepting_sql(self):
         with patch.object(recovery, "query", side_effect=[["speaking_attempt"], []]) as query:
-            study_rollout.fingerprints(
+            rollout.fingerprints(
                 recovery.STUDY_CHECK,
                 excluded_columns={"speaking_attempt": ["audio_sha256"]},
             )
             self.assertIn("- 'audio_sha256'", query.call_args.args[1])
         with patch.object(recovery, "query", return_value=["speaking_attempt"]) as query:
             with self.assertRaises(RecoveryError):
-                study_rollout.fingerprints(
+                rollout.fingerprints(
                     recovery.STUDY_CHECK,
                     excluded_columns={"speaking_attempt": ["sha'; DROP"]},
                 )
@@ -124,7 +124,7 @@ class StudyRolloutTests(unittest.TestCase):
             patch.object(recovery, "quiet"),
             patch.object(recovery, "docker") as docker,
         ):
-            study_rollout.clone_run("alembic", "upgrade", "head")
+            rollout.clone_run("alembic", "upgrade", "head", profile="study")
             check.assert_called_once_with(recovery.STUDY_CHECK)
             args = docker.call_args.args
             self.assertIn("aulas-ingles-recovery_default", args)

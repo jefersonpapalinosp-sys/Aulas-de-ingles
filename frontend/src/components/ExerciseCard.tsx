@@ -1,4 +1,4 @@
-import { type Ref, useRef, useState } from 'react'
+import { type Ref, useId, useRef, useState } from 'react'
 import type { Exercise, ExerciseHint } from '../api/client'
 import {
   classificationAnswer,
@@ -70,6 +70,7 @@ export function ExerciseCard({
   onActivity?: (event: ExerciseActivityEvent) => void
   promptRef?: Ref<HTMLHeadingElement>
 }) {
+  const id = useId()
   const [texto, setTexto] = useState('')
   const [veredito, setVeredito] = useState<Veredito>(() =>
     initialVerdict(initialSessionItem, initialQueued),
@@ -109,6 +110,7 @@ export function ExerciseCard({
     exercicio.activity_type !== 'classification' ||
     (classificationItems.length > 0 && classificationCategories.length >= 2)
   const supported = SUPPORTED_ACTIVITY_TYPES.has(exercicio.activity_type) && classificationReady
+  const accessibility = { description: `${id}-prompt ${id}-verdict`, invalid: veredito.tipo === 'errado' }
   const bloqueado = finalizado || ocupado
 
   function tentarNovamente() {
@@ -132,7 +134,7 @@ export function ExerciseCard({
 
   return (
     <div className={`ex ${estado}`}>
-      <h3 className="q" ref={promptRef} tabIndex={-1}>
+      <h3 id={`${id}-prompt`} className="q" ref={promptRef} tabIndex={-1}>
         <span className="qn">{numero}.</span>
         <span>
           <Markdown>{exercicio.prompt}</Markdown>
@@ -164,6 +166,7 @@ export function ExerciseCard({
               categories={classificationCategories}
               assignments={classificacoes}
               disabled={bloqueado}
+              {...accessibility}
               firstRef={firstClassificationRef}
               onAssign={atualizarClassificacao}
             />
@@ -172,6 +175,7 @@ export function ExerciseCard({
               options={exercicio.options}
               ordem={ordem}
               disabled={bloqueado}
+              {...accessibility}
               firstRef={firstReorderRef}
               onChange={atualizarOrdem}
             />
@@ -181,6 +185,7 @@ export function ExerciseCard({
               options={exercicio.options}
               value={texto}
               disabled={bloqueado}
+              {...accessibility}
               firstRef={firstChoiceRef}
               onChange={setTexto}
             />
@@ -189,6 +194,7 @@ export function ExerciseCard({
               numero={numero}
               value={texto}
               disabled={bloqueado}
+              {...accessibility}
               inputRef={inputRef}
               onChange={setTexto}
             />
@@ -221,7 +227,7 @@ export function ExerciseCard({
       )}
       {pedirDica.isError && <p className="exercise-hint-error" role="alert">{pedirDica.error.message}</p>}
 
-      <ExerciseVerdict veredito={veredito} exercicio={exercicio} onRetry={tentarNovamente} />
+      <div id={`${id}-verdict`}><ExerciseVerdict veredito={veredito} exercicio={exercicio} onRetry={tentarNovamente} /></div>
     </div>
   )
 }

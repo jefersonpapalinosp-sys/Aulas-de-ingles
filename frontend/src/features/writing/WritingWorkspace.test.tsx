@@ -6,9 +6,9 @@ import type { WritingPrompt } from '../../api/client'
 import { WritingWorkspace } from './WritingWorkspace'
 
 const apiMocks = vi.hoisted(() => ({
-  GET: vi.fn(),
-  PUT: vi.fn(),
-  POST: vi.fn(),
+  GET: vi.fn<(path: string, options?: { params?: { query?: { cursor?: string } } }) => Promise<unknown>>(),
+  PUT: vi.fn<(path: string, options: { body: Record<string, unknown> }) => Promise<unknown>>(),
+  POST: vi.fn<(path: string, options: { body: Record<string, unknown> }) => Promise<unknown>>(),
 }))
 
 vi.mock('../../api/client', () => ({ api: apiMocks }))
@@ -40,10 +40,10 @@ function mockDraft(
   draft: Record<string, unknown>,
   versions: Record<string, unknown>[] = [],
 ) {
-  apiMocks.GET.mockImplementation(async (path) =>
-    path === '/api/writing/prompts/{prompt_id}/versions'
+  apiMocks.GET.mockImplementation((path) =>
+    Promise.resolve(path === '/api/writing/prompts/{prompt_id}/versions'
       ? { data: { items: versions, next_cursor: null } }
-      : { data: draft },
+      : { data: draft }),
   )
 }
 
@@ -55,7 +55,7 @@ afterEach(() => {
 
 describe('WritingWorkspace', () => {
   it('reutiliza chave após perda de resposta e mantém texto diante de análise já iniciada', async () => {
-    apiMocks.GET.mockImplementation(async (path) => ({ data: path.includes('assist/status')
+    apiMocks.GET.mockImplementation((path) => Promise.resolve({ data: path.includes('assist/status')
       ? { writing_enabled: true, remaining_today: 2, reserved_today: 0, consumed_today: 1, cost_microusd_today: 0 }
       : path === '/api/writing/prompts/{prompt_id}/versions'
         ? { items: [], next_cursor: null }
@@ -90,7 +90,7 @@ describe('WritingWorkspace', () => {
     await waitFor(() => expect(editor).toHaveValue('Text A.'))
     await userEvent.click(screen.getByRole('button', { name: 'Analisar texto' }))
     fireEvent.change(editor, { target: { value: 'Text B.' } })
-    await act(async () => resolve({ data: { id: 1, ready: true, checks: [] } }))
+    await act(() => Promise.resolve(resolve({ data: { id: 1, ready: true, checks: [] } })))
     expect(screen.queryByRole('heading', { name: 'Critérios automáticos atendidos' })).not.toBeInTheDocument()
     expect(editor).toHaveValue('Text B.')
   })
@@ -140,7 +140,7 @@ describe('WritingWorkspace', () => {
     await waitFor(() => expect(apiMocks.PUT).toHaveBeenCalled(), { timeout: 1800 })
     view.unmount()
     localStorage.setItem('aulas-ingles:writing-draft:v1:7:4', 'Newer local.')
-    await act(async () => resolve({ data: { prompt_id: 4, revision: 1, text: 'Pending old.', revisions: [] } }))
+    await act(() => Promise.resolve(resolve({ data: { prompt_id: 4, revision: 1, text: 'Pending old.', revisions: [] } })))
     expect(localStorage.getItem('aulas-ingles:writing-draft:v1:7:4')).toBe('Newer local.')
   })
   it('quota e falha remota mantêm texto editável, sem afirmar persistência', async () => {
@@ -187,7 +187,7 @@ describe('WritingWorkspace', () => {
   it('recupera e salva o rascunho automaticamente', async () => {
     const user = userEvent.setup()
     mockDraft({ prompt_id: 4, text: 'Old text.', updated_at: null })
-    apiMocks.PUT.mockImplementation(async (_path, options) => ({
+    apiMocks.PUT.mockImplementation((_path, options) => Promise.resolve({
       data: {
         prompt_id: 4,
         text: options.body.text,
@@ -217,9 +217,9 @@ describe('WritingWorkspace', () => {
     apiMocks.PUT.mockResolvedValue({
       data: { prompt_id: 4, text: '', updated_at: '2026-10-07T22:30:00Z', revisions: [] },
     })
-    apiMocks.POST.mockImplementation(async (path) => {
+    apiMocks.POST.mockImplementation((path) => {
       if (path.endsWith('/feedback')) {
-        return {
+        return Promise.resolve({
           data: {
             word_count: 39,
             sentence_count: 4,
@@ -236,16 +236,16 @@ describe('WritingWorkspace', () => {
               },
             ],
           },
-        }
+        })
       }
-      return {
+      return Promise.resolve({
         data: {
           id: 12,
           version: 1,
           text: 'The train is faster than the bus.',
           created_at: '2026-10-07T22:30:00Z',
         },
-      }
+      })
     })
 
     const { queryClient } = renderWorkspace()
@@ -299,11 +299,11 @@ describe('WritingWorkspace', () => {
 
   it('carrega mais versões e move o foco para o resultado anunciado', async () => {
     const user = userEvent.setup()
-    apiMocks.GET.mockImplementation(async (path, options) => {
+    apiMocks.GET.mockImplementation((path, options) => {
       if (path !== '/api/writing/prompts/{prompt_id}/versions') {
-        return { data: { prompt_id: 4, revision: 2, text: 'Current text.' } }
+        return Promise.resolve({ data: { prompt_id: 4, revision: 2, text: 'Current text.' } })
       }
-      return options?.params?.query?.cursor
+      return Promise.resolve(options?.params?.query?.cursor
         ? {
             data: {
               items: [{ id: 10, version: 1, text: 'First.', created_at: '2026-10-14T12:00:00Z' }],
@@ -315,7 +315,7 @@ describe('WritingWorkspace', () => {
               items: [{ id: 11, version: 2, text: 'Second.', created_at: '2026-10-15T12:00:00Z' }],
               next_cursor: 'versions-page-2',
             },
-          }
+          })
     })
     apiMocks.POST.mockResolvedValue({
       data: {
@@ -348,8 +348,8 @@ describe('WritingWorkspace', () => {
 
   it('faz opt-in explícito, mostra baixa confiança e permite avaliar a assistência', async () => {
     const user = userEvent.setup()
-    apiMocks.GET.mockImplementation(async (path) =>
-      path === '/api/assist/status'
+    apiMocks.GET.mockImplementation((path) =>
+      Promise.resolve(path === '/api/assist/status'
         ? {
             data: {
               transcription_enabled: false,
@@ -364,7 +364,7 @@ describe('WritingWorkspace', () => {
           }
         : path === '/api/writing/prompts/{prompt_id}/versions'
           ? { data: { items: [], next_cursor: null } }
-          : { data: { prompt_id: 4, text: '', updated_at: null } },
+          : { data: { prompt_id: 4, text: '', updated_at: null } }),
     )
     const assistedFeedback = {
       id: 81,
@@ -386,10 +386,10 @@ describe('WritingWorkspace', () => {
       created_at: '2026-10-07T23:50:00Z',
     }
     apiMocks.POST.mockResolvedValue({ data: assistedFeedback })
-    apiMocks.PUT.mockImplementation(async (path) =>
-      path.includes('/rating')
+    apiMocks.PUT.mockImplementation((path) =>
+      Promise.resolve(path.includes('/rating')
         ? { data: { ...assistedFeedback, human_rating: 'helpful' } }
-        : { data: { prompt_id: 4, text: 'The train is faster.', updated_at: null, revisions: [] } },
+        : { data: { prompt_id: 4, text: 'The train is faster.', updated_at: null, revisions: [] } }),
     )
     renderWorkspace()
     const editor = await screen.findByRole('textbox', { name: 'Seu texto em inglês' })
@@ -402,7 +402,7 @@ describe('WritingWorkspace', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Baixa confiança')
     expect(apiMocks.POST).toHaveBeenCalledWith('/api/writing/prompts/{prompt_id}/feedback', {
       params: { path: { prompt_id: 4 } },
-      body: { text: 'The train is faster.', assisted: true, operation_key: expect.any(String) },
+      body: { text: 'The train is faster.', assisted: true, operation_key: expect.any(String) as unknown },
     })
     await user.click(screen.getByRole('button', { name: 'Sim' }))
     expect(apiMocks.PUT).toHaveBeenCalledWith('/api/writing/feedback/{feedback_id}/rating', {

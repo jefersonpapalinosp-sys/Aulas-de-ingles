@@ -1,0 +1,9 @@
+@media (max-width: 860px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
+  main { padding: 28px 18px 70px; }
+  .ahead, .arow { grid-template-columns: 44px 1fr; }
+  .ag, .ap, .ahead span:nth-child(3), .ahead span:nth-child(4) { display: none; }
+  ul.pron li { grid-template-columns: 1fr; gap: 5px; }
+  .today-grid { grid-template-columns: 1fr; }
+}

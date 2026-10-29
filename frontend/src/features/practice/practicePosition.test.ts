@@ -15,13 +15,14 @@ function sessao(overrides: Partial<PracticeSession> = {}): PracticeSession {
 /** Conta em miniatura: o PUT só é aceito com a revisão corrente. */
 function conta(session = sessao()) {
   let remote = session
-  const save = vi.fn(async (command: { currentPosition: number; expectedRevision: number; idempotencyKey: string }) => {
-    if (command.expectedRevision !== remote.state_revision) throw new Error('revision_conflict')
+  const save = vi.fn((command: { currentPosition: number; expectedRevision: number; idempotencyKey: string }) => {
+    if (command.expectedRevision !== remote.state_revision) return Promise.reject(new Error('revision_conflict'))
     remote = { ...remote, current_position: command.currentPosition, state_revision: remote.state_revision + 1 }
+    return Promise.resolve()
   })
-  const reload = vi.fn(async () => remote)
+  const reload = vi.fn(() => Promise.resolve(remote))
   return { save, reload, remote: () => remote, elsewhere: (patch: Partial<PracticeSession>) => {
-    remote = { ...remote, ...patch, state_revision: remote.state_revision + 1 } as PracticeSession
+    remote = { ...remote, ...patch, state_revision: remote.state_revision + 1 }
   } }
 }
 
@@ -33,7 +34,7 @@ describe('PracticePosition', () => {
     const motor = new PracticePosition(7, transporte)
     await motor.moveTo(sessao(), 1, true)
     expect(transporte.save).toHaveBeenCalledWith({ sessionId: 71, currentPosition: 1, expectedRevision: 3,
-      idempotencyKey: expect.any(String) })
+      idempotencyKey: expect.any(String) as unknown })
     expect(motor.snapshot().local).toBeNull()
     expect(localStorage.getItem(KEY)).toBeNull()
     expect(transporte.remote().current_position).toBe(1)
@@ -66,9 +67,9 @@ describe('PracticePosition', () => {
 
   it('resposta perdida depois de aplicada não reenvia: a conta já está na posição', async () => {
     const transporte = conta()
-    transporte.save.mockImplementationOnce(async () => {
+    transporte.save.mockImplementationOnce(() => {
       transporte.elsewhere({ current_position: 1 })
-      throw new TypeError('network')
+      return Promise.reject(new TypeError('network'))
     })
     const motor = new PracticePosition(7, transporte)
     await motor.moveTo(sessao(), 1, true)

@@ -19,7 +19,7 @@ vi.mock('../speaking/voiceRecorder', () => ({ VoiceRecorder: class {
 vi.mock('../../api/client', () => ({ api: { GET: vi.fn() } }))
 
 beforeEach(() => {
-  vi.mocked(api.GET).mockImplementation(async (path) => ({ data: path === '/api/speaking/policy' ? policyFixture : statusFixture, response: new Response() }) as never)
+  vi.mocked(api.GET).mockImplementation((path) => Promise.resolve({ data: path === '/api/speaking/policy' ? policyFixture : statusFixture, response: new Response() }))
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
   URL.createObjectURL = vi.fn(() => 'blob:synthetic')
   URL.revokeObjectURL = vi.fn()
@@ -30,16 +30,18 @@ function setup() {
   const dialogue = dialogueFixture()
   const transport = {
     session: () => ({ usuarioId: 3, token: 'synthetic', geracao: 1, perfilNaoConfirmado: false }),
-    create: vi.fn<DialogueTransport['create']>(async (body) => { dialogue.mode = body.mode; return { ...dialogue } }),
-    read: vi.fn<DialogueTransport['read']>(async () => ({ ...dialogue })),
-    text: vi.fn<DialogueTransport['text']>(async (_id, pos, body) => {
+    create: vi.fn<DialogueTransport['create']>((body) => { dialogue.mode = body.mode; return Promise.resolve({ ...dialogue }) }),
+    read: vi.fn<DialogueTransport['read']>(() => Promise.resolve({ ...dialogue })),
+    text: vi.fn<DialogueTransport['text']>((_id, pos, body) => {
       dialogue.turns = [{ ...turnFixture(pos), transcript: body.text }]; dialogue.turns_remaining--
+      return Promise.resolve()
     }),
-    audio: vi.fn<DialogueTransport['audio']>(async () => {
+    audio: vi.fn<DialogueTransport['audio']>(() => {
       dialogue.turns = [{ ...turnFixture(), input_kind: 'audio', words: [{ text: 'bus', start_ms: 0, end_ms: 500, confidence: 0.6 }] }]
+      return Promise.resolve()
     }),
-    rate: vi.fn<DialogueTransport['rate']>(async (_id, _pos, rating) => { dialogue.turns[0]!.human_rating = rating }),
-    remove: vi.fn<DialogueTransport['remove']>(async () => undefined),
+    rate: vi.fn<DialogueTransport['rate']>((_id, _pos, rating) => { dialogue.turns[0]!.human_rating = rating; return Promise.resolve() }),
+    remove: vi.fn<DialogueTransport['remove']>(() => Promise.resolve(undefined)),
   } satisfies DialogueTransport
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const view = render(<StrictMode><QueryClientProvider client={queryClient}>
@@ -64,7 +66,7 @@ it('Roteiro funciona sem microfone e mantém resposta em texto com foco previsí
   expect(input).toHaveFocus()
   expect(input).toHaveValue('')
   expect(screen.queryByRole('button', { name: 'Gravar resposta' })).not.toBeInTheDocument()
-  expect(transport.text).toHaveBeenCalledWith(7, 1, expect.objectContaining({ idempotency_key: expect.any(String) }), expect.any(AbortSignal))
+  expect(transport.text).toHaveBeenCalledWith(7, 1, expect.objectContaining({ idempotency_key: expect.any(String) as unknown }) as unknown, expect.any(AbortSignal) as unknown)
 })
 
 it('Guiado exige consentimento por gravação, mostra confiança e permite avaliação e exclusão', async () => {
@@ -87,6 +89,7 @@ it('Guiado exige consentimento por gravação, mostra confiança e permite avali
   await user.click(screen.getByRole('button', { name: 'Confirmar exclusão' }))
   await screen.findByRole('button', { name: 'Iniciar conversa' })
   expect(transport.remove).toHaveBeenCalledOnce()
+  // eslint-disable-next-line @typescript-eslint/unbound-method -- Referência do spy para asserção; não há chamada sem receiver.
   expect(URL.revokeObjectURL).toHaveBeenCalled()
 })
 
@@ -112,7 +115,7 @@ it('offline preserva o rascunho e impede envio até a conexão voltar', async ()
 })
 
 it('oculta a entrada e não abre diálogo quando a flag está desligada', async () => {
-  vi.mocked(api.GET).mockResolvedValue({ data: { ...statusFixture, enabled: false }, response: new Response() } as never)
+  vi.mocked(api.GET).mockResolvedValue({ data: { ...statusFixture, enabled: false }, response: new Response() })
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(<QueryClientProvider client={client}><DialogueEntry userId={3} lesson={lessonFixture} /></QueryClientProvider>)
   await waitFor(() => expect(api.GET).toHaveBeenCalled())

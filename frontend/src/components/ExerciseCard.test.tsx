@@ -9,7 +9,7 @@ import { attemptStore } from '../features/offline/attemptQueueStore'
 import type { PracticeSessionItem } from '../features/practice/types'
 import { ExerciseCard } from './ExerciseCard'
 
-vi.mock('../api/client', async () => ({
+vi.mock('../api/client', () => Promise.resolve({
   api: { GET: vi.fn(), POST: vi.fn() },
 }))
 const { api } = await import('../api/client')
@@ -89,7 +89,7 @@ describe('ExerciseCard', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: feedback(true),
       response: new Response(),
-    } as never)
+    })
 
     const aoResponder = vi.fn()
     const { queryClient } = montar({ aoResponder })
@@ -102,7 +102,7 @@ describe('ExerciseCard', () => {
     // A correção é do servidor — o componente não compara nada sozinho.
     expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
       params: { path: { exercise_id: 1 } },
-      body: { answer: 'faster', idempotency_key: expect.any(String) },
+      body: { answer: 'faster', idempotency_key: expect.any(String) as unknown },
     })
     // FE-44: competências e a jornada da aula também ficam velhas após uma tentativa.
     for (const key of ['progress', 'review', 'today', 'skills', 'study-session', 'course-completion']) {
@@ -115,7 +115,7 @@ describe('ExerciseCard', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: feedback(false),
       response: new Response(),
-    } as never)
+    })
 
     montar()
     await user.type(screen.getByRole('textbox'), 'more fast')
@@ -128,6 +128,11 @@ describe('ExerciseCard', () => {
     // Veredito que pede ação do aluno é anunciado na hora, não quando sobrar
     // silêncio: quem usa leitor de tela precisa saber que há o que refazer.
     expect(screen.getByRole('alert')).toHaveTextContent('Ainda não')
+    expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByRole('textbox')).toHaveAccessibleDescription(/palavra ou estrutura a mais/)
+    await user.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+    expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'false')
+    expect(screen.getByRole('textbox')).toHaveFocus()
   })
 
   it('acerto é anúncio educado, não alerta', async () => {
@@ -135,7 +140,7 @@ describe('ExerciseCard', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: feedback(true),
       response: new Response(),
-    } as never)
+    })
 
     montar()
     await user.type(screen.getByRole('textbox'), 'faster')
@@ -151,7 +156,7 @@ describe('ExerciseCard', () => {
     vi.mocked(api.GET).mockResolvedValue({
       data: { answers: ['should', 'ought to'], explanation: 'os dois valem.' },
       response: new Response(),
-    } as never)
+    })
 
     montar()
     await user.click(screen.getByRole('button', { name: 'Resposta' }))
@@ -164,7 +169,7 @@ describe('ExerciseCard', () => {
 
   it('API fora do ar preserva a tentativa para sincronizar depois', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.POST).mockResolvedValue({ data: undefined, response: undefined } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: undefined, response: undefined })
 
     montar()
     await user.type(screen.getByRole('textbox'), 'faster')
@@ -191,7 +196,7 @@ describe('ExerciseCard', () => {
         sessionId: 44,
         courseSlug: 'voa-level-1',
         lessonNumber: 31,
-      }),
+      }) as unknown,
     ])
   })
 
@@ -215,7 +220,7 @@ describe('ExerciseCard', () => {
         sessionId: 44,
         courseSlug: 'voa-level-1',
         lessonNumber: 31,
-      }),
+      }) as unknown,
     ])
   })
 
@@ -224,7 +229,7 @@ describe('ExerciseCard', () => {
     vi.mocked(api.POST).mockResolvedValue({
       data: undefined,
       response: new Response(null, { status: 422 }),
-    } as never)
+    })
 
     montar({ practiceSessionId: 44, courseSlug: 'voa-level-1', lessonNumber: 31 })
     await user.type(screen.getByRole('textbox'), 'faster')
@@ -264,7 +269,7 @@ describe('ExerciseCard', () => {
     expect(screen.getByRole('textbox')).toBeEnabled()
     expect(screen.queryByText('Na fila')).not.toBeInTheDocument()
     quota.mockRestore()
-    vi.mocked(api.POST).mockResolvedValueOnce({ data: feedback(true), response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValueOnce({ data: feedback(true), response: new Response() })
     await user.click(screen.getByRole('button', { name: 'Verificar' }))
     expect(await screen.findByText('Correto')).toBeInTheDocument()
     expect(vi.mocked(api.POST).mock.calls[1]?.[1]).toEqual(vi.mocked(api.POST).mock.calls[0]?.[1])
@@ -292,12 +297,12 @@ describe('ExerciseCard', () => {
       .mockResolvedValueOnce({
         data: { level: 1, content: 'Pense no comparativo curto.' },
         response: new Response(),
-      } as never)
+      })
       .mockResolvedValueOnce({
         data: { level: 2, content: 'Adicione a terminação *-er*.' },
         response: new Response(),
-      } as never)
-    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() } as never)
+      })
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() })
 
     montar()
     await user.click(screen.getByRole('button', { name: 'Dica 1' }))
@@ -317,7 +322,7 @@ describe('ExerciseCard', () => {
 
   it('renderiza atividade de múltipla escolha sem campo de texto', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() })
     montar({
       exercicio: {
         ...exercicio,
@@ -334,13 +339,13 @@ describe('ExerciseCard', () => {
     await waitFor(() => expect(screen.getByText('Correto')).toBeInTheDocument())
     expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
       params: { path: { exercise_id: 1 } },
-      body: { answer: 'Metro', idempotency_key: expect.any(String) },
+      body: { answer: 'Metro', idempotency_key: expect.any(String) as unknown },
     })
   })
 
   it('monta uma frase ordenando palavras pelo teclado ou clique', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() })
     montar({
       exercicio: {
         ...exercicio,
@@ -358,13 +363,13 @@ describe('ExerciseCard', () => {
     await waitFor(() => expect(api.POST).toHaveBeenCalled())
     expect(api.POST).toHaveBeenCalledWith('/api/exercises/{exercise_id}/attempt', {
       params: { path: { exercise_id: 1 } },
-      body: { answer: 'You should study', idempotency_key: expect.any(String) },
+      body: { answer: 'You should study', idempotency_key: expect.any(String) as unknown },
     })
   })
 
   it('classifica todos os itens com selects nativos e envia JSON determinístico', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(true), response: new Response() })
     montar({
       exercicio: {
         ...exercicio,
@@ -390,14 +395,14 @@ describe('ExerciseCard', () => {
       params: { path: { exercise_id: 1 } },
       body: {
         answer: '{"careful":"adjective","carefully":"adverb"}',
-        idempotency_key: expect.any(String),
+        idempotency_key: expect.any(String) as unknown,
       },
     })
   })
 
   it('devolve o foco ao primeiro seletor ao tentar a classificação novamente', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() })
     montar({
       exercicio: {
         ...exercicio,
@@ -424,7 +429,7 @@ describe('ExerciseCard', () => {
         explanation: 'Adjetivos descrevem nomes; advérbios modificam ações.',
       },
       response: new Response(),
-    } as never)
+    })
     montar({
       exercicio: {
         ...exercicio,
@@ -469,7 +474,7 @@ describe('ExerciseCard', () => {
         answer: '{"careful":"adjective","carefully":"adverb"}',
         courseSlug: 'voa-level-2',
         lessonNumber: 6,
-      }),
+      }) as unknown,
     ])
   })
 
@@ -482,7 +487,7 @@ describe('ExerciseCard', () => {
         item: {},
       },
       response: new Response(),
-    } as never)
+    })
     const onActivity = vi.fn()
 
     montar({ practiceSessionId: 44, onActivity })
@@ -525,7 +530,7 @@ describe('ExerciseCard', () => {
 
   it('devolve o foco à primeira opção ao tentar novamente', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() } as never)
+    vi.mocked(api.POST).mockResolvedValue({ data: feedback(false), response: new Response() })
     montar({
       exercicio: {
         ...exercicio,

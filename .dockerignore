@@ -14,3 +14,4 @@ backups/
 e2e/
 playwright-report/
 test-results/
+.rollback42/

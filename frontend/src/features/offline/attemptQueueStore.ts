@@ -1,3 +1,5 @@
+// Retirada do adaptador legado: alvo 2027-01-29, condicionada à preservação/recuperação.
+// Critérios: docs/politica_migracoes_storage_2026-10-29.md. Não expira nem apaga dados.
 import type { QueuedAttempt } from './attemptQueue'
 import { readLocal, removeLocal, writeLocal } from '../../storage/local'
 
@@ -96,10 +98,11 @@ function merge(previous: QueuedAttempt, next: QueuedAttempt): QueuedAttempt {
   }
 }
 
-function request<T>(req: IDBRequest<T>): Promise<T> {
+function request<T = unknown>(req: EventTarget & Pick<IDBRequest<unknown>, 'result' | 'error'>): Promise<T> {
   return new Promise((resolve, reject) => {
-    req.onsuccess = () => resolve(req.result)
-    req.onerror = () => reject(req.error)
+    // Fronteira do IDB: o schema dos stores é imposto pelos writers deste módulo.
+    req.addEventListener('success', () => resolve(req.result as T), { once: true })
+    req.addEventListener('error', () => reject(req.error ?? new QueueStorageError()), { once: true })
   })
 }
 
@@ -114,7 +117,7 @@ function open(): Promise<IDBDatabase> {
       db.createObjectStore('receipts', { keyPath: ['userId', 'idempotencyKey'] })
       db.createObjectStore('migration')
     }
-    req.onerror = () => reject(req.error)
+    req.onerror = () => reject(req.error ?? new QueueStorageError())
     req.onblocked = () => {
       blocked = true
       reject(new QueueStorageError('Feche as abas antigas deste aplicativo e tente abrir a fila novamente. Nenhuma resposta foi removida.'))
@@ -214,7 +217,7 @@ export const attemptStore = {
       }
       const previous = await request<QueuedAttempt | undefined>(store.get(key))
       if (previous) { merge(previous, item); return false }
-      if (await request(store.index('user').count(item.userId)) >= MAX_ATTEMPTS_PER_USER) {
+      if (await request<number>(store.index('user').count(item.userId)) >= MAX_ATTEMPTS_PER_USER) {
         throw new QueueStorageError(`Sua fila atingiu ${MAX_ATTEMPTS_PER_USER} respostas. Sincronize as pendências antes de salvar outra. A nova resposta continua apenas na tela.`)
       }
       await request(store.add(item))

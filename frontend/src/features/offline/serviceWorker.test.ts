@@ -15,24 +15,25 @@ const json = (text = '{"title":"Public lesson"}', headers: Record<string, string
 class MemoryCache {
   entries = new Map<string, Response>()
   fail = false
-  async put(key: Request, response: Response) {
-    if (this.fail) throw new Error('QuotaExceededError')
+  put(key: Request, response: Response) {
+    if (this.fail) return Promise.reject(new Error('QuotaExceededError'))
     this.entries.set(key.url, response.clone())
+    return Promise.resolve()
   }
-  async match(key: Request) { return this.entries.get(key.url)?.clone() }
-  async keys() { return [...this.entries.keys()].map((url) => new Request(url)) }
-  async delete(key: Request) { return this.entries.delete(key.url) }
+  match(key: Request) { return Promise.resolve(this.entries.get(key.url)?.clone()) }
+  keys() { return Promise.resolve([...this.entries.keys()].map((url) => new Request(url))) }
+  delete(key: Request) { return Promise.resolve(this.entries.delete(key.url)) }
 }
 
 function worker() {
   const storage = new Map<string, MemoryCache>()
   const caches = {
-    open: async (name: string) => {
+    open: (name: string) => {
       if (!storage.has(name)) storage.set(name, new MemoryCache())
-      return storage.get(name)!
+      return Promise.resolve(storage.get(name)!)
     },
-    keys: async () => [...storage.keys()],
-    delete: async (name: string) => storage.delete(name),
+    keys: () => Promise.resolve([...storage.keys()]),
+    delete: (name: string) => Promise.resolve(storage.delete(name)),
   }
   // Eventos e funções rodam o worker real; apenas a plataforma de cache/rede é simulada.
   const listeners: Record<string, (event: unknown) => void> = {}
@@ -61,7 +62,7 @@ describe('service worker: política executável', () => {
     const w = worker()
     w.fetch.mockResolvedValueOnce(json())
     expect((await w.dispatch(lesson))?.status).toBe(200)
-    expect(w.fetch).toHaveBeenCalledWith(lesson, expect.objectContaining({ credentials: 'omit', cache: 'no-store' }))
+    expect(w.fetch).toHaveBeenCalledWith(lesson, expect.objectContaining({ credentials: 'omit', cache: 'no-store' }) as unknown)
     const response = await w.dispatch(lesson)
     expect(response?.headers.get('X-Aulas-Offline-Source')).toBe('cache')
     expect(await response?.json()).toEqual({ title: 'Public lesson' })
@@ -182,7 +183,7 @@ describe('service worker: política executável', () => {
       data: { type: 'PWA_CLEAR_TEXT', lessonPath: new URL(lesson).pathname },
       waitUntil: (p: Promise<void>) => { pending = p } })
     await pending
-    expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({ count: 0, lesson: false }))
+    expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({ count: 0, lesson: false }) as unknown)
     expect(await w.caches.keys()).toContain('other-app')
     expect(await w.caches.keys()).toContain(`aulas-pwa-${version}-static`)
   })

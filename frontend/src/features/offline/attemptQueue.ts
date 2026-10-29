@@ -85,7 +85,8 @@ export function subscribeAttemptQueue(
 ): () => void {
   let channel: BroadcastChannel | null = null
   try { if (typeof BroadcastChannel !== 'undefined') channel = new BroadcastChannel('aulas:attempt-queue:v3') } catch { /* Foco relê a fila. */ }
-  if (channel) channel.onmessage = ({ data }: MessageEvent) => {
+  if (channel) channel.onmessage = ({ data }: MessageEvent<unknown>) => {
+    if (!data || typeof data !== 'object' || !('kind' in data) || !('detail' in data)) return
     if (data?.kind === 'change') change(new CustomEvent(ATTEMPT_QUEUE_EVENT, { detail: data.detail }))
     if (data?.kind === 'sync') sync?.(new CustomEvent(ATTEMPT_QUEUE_SYNC_EVENT, { detail: data.detail }))
   }
@@ -242,6 +243,6 @@ async function synchronize(userId: number, inicio: number): Promise<AttemptQueue
     rejectedAttempts,
   }
   publish('sync', { userId, ...result })
-  if (failure) throw failure
+  if (failure) throw failure instanceof Error ? failure : new QueueStorageError()
   return result
 }

@@ -1,0 +1,52 @@
+/* ---------- mapa ---------- */
+.today { margin-top: 0; }
+.today-title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.today-week { display: grid; min-width: 210px; gap: 2px; text-align: right; }
+.today-week strong { font-family: var(--mono); font-size: 16px; }
+.today-week span { color: var(--ink-3); font-size: 11px; }
+.today-week > div { height: 4px; overflow: hidden; margin-top: 5px; border-radius: 3px; background: var(--rule); }
+.today-week i { display: block; height: 100%; background: var(--accent); }
+.today-recommendation { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 24px; padding: 22px 24px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent-wash); }
+.today-recommendation h2 { margin-top: 5px; font-size: 23px; }
+.today-recommendation p:last-child { max-width: 56ch; margin-top: 6px; color: var(--ink-2); font-size: 14px; }
+.today-recommendation .btn { flex: none; }
+.today-resume { margin-top: 10px; color: var(--ink-3); font-size: 12px; }
+.today-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 20px; }
+.today-plan, .today-skills { padding: 19px 20px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+.today-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.today-section-head h2 { margin-top: 4px; font-size: 16px; }
+.today-plan > label { display: grid; gap: 4px; margin-top: 15px; color: var(--ink-3); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.today-plan input[type='text'], .today-plan input[type='number'] { width: 100%; max-width: none; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: 14px var(--sans); }
+.today-plan fieldset { margin: 15px 0 0; padding: 0; border: 0; }
+.today-plan legend { color: var(--ink-3); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.today-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
+.today-days label { position: relative; cursor: pointer; }
+.today-days input { position: absolute; opacity: 0; }
+.today-days span { display: block; padding: 5px 2px; border: 1px solid var(--rule); border-radius: 3px; color: var(--ink-3); font: 10px var(--mono); text-align: center; }
+.today-days input:checked + span { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); font-weight: 700; }
+.today-days input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.today-save { margin-top: 8px; font-size: 12px; }
+.today-save.ok { color: var(--ok); }
+.today-skills ul { display: grid; gap: 0; margin: 11px 0 0; padding: 0; list-style: none; }
+.today-skills li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1px 12px; padding: 10px 0; border-top: 1px solid var(--rule-soft); }
+.today-skills li > div { display: grid; }
+.today-skills strong { font-size: 14px; }
+.today-skills small { color: var(--ink-3); font-size: 10px; }
+.skill-insufficient { color: var(--ink-3); font: 10px var(--mono); }
+.skill-score { min-width: 45px; padding: 3px 6px; border-radius: 100px; background: var(--surface-2); font: 12px var(--mono); text-align: center; }
+.skill-score.developing { color: var(--bad); background: var(--bad-wash); }
+.skill-score.steady { color: var(--warn); background: var(--warn-wash); }
+.skill-score.strong { color: var(--ok); background: var(--ok-wash); }
+.today-skills li > p { grid-column: 1 / -1; margin-top: 5px; color: var(--warn); font-size: 11px; }
+.map-section { margin-top: 58px; }
+.arc { margin-top: 26px; border: 1px solid var(--rule); border-radius: 5px; overflow: hidden; }
+.ahead, .arow { display: grid; grid-template-columns: 54px minmax(0, 1.5fr) minmax(0, 1.5fr) 120px; align-items: center; }
+.ahead { background: var(--surface-2); }
+.ahead span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); padding: 9px 14px; }
+.arow { background: var(--surface); border-top: 1px solid var(--rule-soft); text-decoration: none; color: inherit; }
+.arow:hover { background: var(--accent-wash); color: inherit; }
+.arow > span { padding: 12px 14px; }
+.an { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+.at { font-weight: 500; font-size: 15px; }
+.ag { font-size: 14px; color: var(--ink-2); }
+.ap { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; }

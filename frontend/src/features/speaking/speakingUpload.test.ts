@@ -12,8 +12,8 @@ const PEDIDO = () => ({
 
 function conta(overrides: Partial<SpeakingSession> = {}) {
   let session: SpeakingSession = { usuarioId: 7, token: 'tok', perfilNaoConfirmado: false, geracao: 1, ...overrides }
-  const createAttempt = vi.fn(async () => ({ id: 55 }))
-  const putAudio = vi.fn(async () => ({ ok: true, status: 204 }))
+  const createAttempt = vi.fn(() => Promise.resolve({ id: 55 }))
+  const putAudio = vi.fn(() => Promise.resolve({ ok: true, status: 204 }))
   const transport: SpeakingUploadTransport = { createAttempt, putAudio, session: () => session }
   return { ...transport, createAttempt, putAudio,
     trocar: (patch: Partial<SpeakingSession>) => { session = { ...session, ...patch } } }
@@ -28,7 +28,7 @@ describe('SpeakingUpload', () => {
     const resultado = await motor.save(PEDIDO())
 
     expect(transporte.createAttempt).toHaveBeenCalledTimes(1)
-    expect(transporte.putAudio).toHaveBeenCalledWith(55, expect.any(Blob), expect.any(AbortSignal))
+    expect(transporte.putAudio).toHaveBeenCalledWith(55, expect.any(Blob) as unknown, expect.any(AbortSignal) as unknown)
     expect(resultado).toMatchObject({ ok: true })
     expect(motor.snapshot()).toMatchObject({ saved: true, saving: false, pending: true })
     // Confirmado: a gravação não precisa mais ficar guardada nesta aba.
@@ -70,9 +70,9 @@ describe('SpeakingUpload', () => {
 
   it('troca de sessão no meio do envio interrompe antes do áudio', async () => {
     const transporte = conta()
-    transporte.createAttempt.mockImplementationOnce(async () => {
+    transporte.createAttempt.mockImplementationOnce(() => {
       transporte.trocar({ geracao: 2 })
-      return { id: 55 }
+      return Promise.resolve({ id: 55 })
     })
     const motor = new SpeakingUpload(7, transporte)
     const resultado = await motor.save(PEDIDO())
@@ -82,9 +82,9 @@ describe('SpeakingUpload', () => {
 
   it('sessão perdida preserva a gravação para a volta do aluno', async () => {
     const transporte = conta()
-    transporte.createAttempt.mockImplementationOnce(async () => {
+    transporte.createAttempt.mockImplementationOnce(() => {
       transporte.trocar({ usuarioId: null, token: null })
-      return { id: 55 }
+      return Promise.resolve({ id: 55 })
     })
     const motor = new SpeakingUpload(7, transporte)
     await motor.save(PEDIDO())
@@ -121,9 +121,9 @@ describe('SpeakingUpload', () => {
 
   it('descarte explícito tira a gravação da memória da aba', async () => {
     const transporte = conta()
-    transporte.putAudio.mockImplementationOnce(async () => {
+    transporte.putAudio.mockImplementationOnce(() => {
       transporte.trocar({ usuarioId: null, token: null })
-      throw new TypeError('Failed to fetch')
+      return Promise.reject(new TypeError('Failed to fetch'))
     })
     const motor = new SpeakingUpload(7, transporte)
     await motor.save(PEDIDO())

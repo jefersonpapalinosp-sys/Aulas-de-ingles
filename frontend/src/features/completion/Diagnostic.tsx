@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useFormValidation } from '../../components/useFormValidation'
 import { Link } from 'react-router-dom'
 import type { CourseCompletion } from '../../api/client'
 import { coursePath } from '../../routing/courseRoutes'
@@ -35,6 +36,8 @@ const diagnosticChoices: ReadonlyArray<{
 ]
 
 export function Diagnostic({ data }: { data: CourseCompletion }) {
+  const validation = useFormValidation()
+  const helpId = `${validation.id}-help`
   const nextCourse = data.next_course
   const [answers, setAnswers] = useState<Partial<Record<DiagnosticQuestionId, DiagnosticChoice>>>(
     {},
@@ -92,13 +95,13 @@ export function Diagnostic({ data }: { data: CourseCompletion }) {
       <p className="eyebrow">Autoavaliação curta · antes do próximo nível</p>
       <h2 id="diagnostic-title">{nextCourse.diagnostic.title}</h2>
       <p>{nextCourse.diagnostic.description}</p>
-      <p className="completion-diagnostic-disclaimer">
+      <p id={helpId} className="completion-diagnostic-disclaimer">
         Esta autoavaliação não é prova, não gera nota e não altera seu progresso.
       </p>
 
       <form onSubmit={submit}>
         {diagnosticQuestions.map((question, questionIndex) => (
-          <fieldset key={question.id}>
+          <fieldset key={question.id} aria-invalid={validation.invalid(question.id)} aria-describedby={helpId}>
             <legend>
               <span>{questionIndex + 1}</span>
               {question.prompt}
@@ -107,6 +110,8 @@ export function Diagnostic({ data }: { data: CourseCompletion }) {
               {diagnosticChoices.map((choice) => (
                 <label key={choice.value}>
                   <input
+                    {...validation.field(question.id, helpId, 'radio')}
+                    required
                     type="radio"
                     name={`diagnostic-${question.id}`}
                     value={choice.value}
@@ -122,6 +127,7 @@ export function Diagnostic({ data }: { data: CourseCompletion }) {
             </div>
           </fieldset>
         ))}
+        {validation.messages}
         <button className="btn" type="submit" disabled={!complete}>
           Ver orientação
         </button>

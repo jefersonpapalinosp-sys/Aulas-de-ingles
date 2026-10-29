@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSessao } from '../api/auth'
+import { useFormValidation } from '../components/useFormValidation'
 
 export function LoginPage() {
   const { entrar, registrar } = useSessao()
@@ -10,6 +11,8 @@ export function LoginPage() {
   const [erro, setErro] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
   const nomeInputRef = useRef<HTMLInputElement>(null)
+  const validation = useFormValidation()
+  const errorId = erro ? `${validation.id}-login-error` : undefined
 
   useEffect(() => {
     if (modo === 'criar') {
@@ -43,11 +46,12 @@ export function LoginPage() {
             : 'Crie uma conta para o seu progresso ficar guardado.'}
         </p>
 
-        <form onSubmit={enviar}>
+        <form onSubmit={(event) => { void enviar(event) }}>
           {modo === 'criar' && (
             <label>
               Nome
               <input
+                {...validation.field('name', errorId)}
                 ref={nomeInputRef}
                 type="text"
                 value={nome}
@@ -60,6 +64,7 @@ export function LoginPage() {
           <label>
             E-mail
             <input
+              {...validation.field('email', errorId)}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -70,6 +75,7 @@ export function LoginPage() {
           <label>
             Senha
             <input
+              {...validation.field('password', [modo === 'criar' ? `${validation.id}-password-help` : '', errorId].filter(Boolean).join(' '))}
               type="password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
@@ -77,11 +83,12 @@ export function LoginPage() {
               minLength={8}
               autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'}
             />
-            {modo === 'criar' && <small>No mínimo 8 caracteres.</small>}
           </label>
+          {modo === 'criar' && <small id={`${validation.id}-password-help`}>No mínimo 8 caracteres.</small>}
+          {validation.messages}
 
           {erro && (
-            <p className="erro" role="alert">
+            <p id={errorId} className="erro" role="alert">
               {erro}
             </p>
           )}
@@ -97,6 +104,7 @@ export function LoginPage() {
           onClick={() => {
             setModo(modo === 'entrar' ? 'criar' : 'entrar')
             setErro(null)
+            validation.reset()
           }}
         >
           {modo === 'entrar' ? 'Ainda não tenho conta' : 'Já tenho conta'}

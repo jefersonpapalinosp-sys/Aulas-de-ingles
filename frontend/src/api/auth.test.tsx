@@ -62,12 +62,12 @@ function montar(strict = false, workspace = false) {
   return { ...render(strict ? <StrictMode>{app}</StrictMode> : app), queryClient }
 }
 
-let fetchMock: ReturnType<typeof vi.fn>
+let fetchMock: ReturnType<typeof vi.fn<(input: Request | string) => Promise<Response>>>
 beforeEach(() => {
   setAccessToken(null)
   setSessionReadOnly(false)
   setSessionUser(null)
-  fetchMock = vi.fn()
+  fetchMock = vi.fn<(input: Request | string) => Promise<Response>>()
   vi.stubGlobal('fetch', fetchMock)
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
 })
@@ -81,10 +81,10 @@ afterEach(() => {
 })
 
 function servidorValido() {
-  fetchMock.mockImplementation(async (input: Request | string) => {
-    if (path(input) === '/api/auth/refresh') return response(200, { access_token: 'access' })
-    if (path(input) === '/api/auth/me') return response(200, perfil)
-    return response(200)
+  fetchMock.mockImplementation((input: Request | string) => {
+    if (path(input) === '/api/auth/refresh') return Promise.resolve(response(200, { access_token: 'access' }))
+    if (path(input) === '/api/auth/me') return Promise.resolve(response(200, perfil))
+    return Promise.resolve(response(200))
   })
 }
 
@@ -139,7 +139,7 @@ describe('SessaoProvider e transporte integrados', () => {
     fireEvent.change(screen.getByLabelText('Rascunho'), { target: { value: 'Meu texto não pode sumir.' } })
     queryClient.setQueryData(['draft', 7], 'rascunho em cache')
     await queueAttempt({ userId: 7, exerciseId: 31, answer: 'better', idempotencyKey: 'a-7', createdAt: '2026-10-13T10:00:00Z' })
-    fetchMock.mockImplementation(async (input: Request | string) => (
+    fetchMock.mockImplementation((input: Request | string) => Promise.resolve(
       path(input) === '/api/auth/refresh' ? response(503) : response(401)
     ))
     await act(async () => {
@@ -154,12 +154,12 @@ describe('SessaoProvider e transporte integrados', () => {
   })
 
   it('autosave real de WritingWorkspace mantém texto e backup após refresh 503', async () => {
-    fetchMock.mockImplementation(async (input: Request | string) => {
+    fetchMock.mockImplementation((input: Request | string) => {
       const route = path(input)
-      if (route === '/api/auth/refresh') return response(200, { access_token: 'access' })
-      if (route === '/api/auth/me') return response(200, perfil)
-      if (route === '/api/writing/prompts/4/draft') return response(200, { text: '', revisions: [] })
-      return response(200, { writing_enabled: false })
+      if (route === '/api/auth/refresh') return Promise.resolve(response(200, { access_token: 'access' }))
+      if (route === '/api/auth/me') return Promise.resolve(response(200, perfil))
+      if (route === '/api/writing/prompts/4/draft') return Promise.resolve(response(200, { text: '', revisions: [] }))
+      return Promise.resolve(response(200, { writing_enabled: false }))
     })
     montar(false, true)
     const editor = await screen.findByRole('textbox', { name: 'Seu texto em inglês' })
@@ -288,7 +288,7 @@ describe('SessaoProvider e transporte integrados', () => {
     fetchMock.mockResolvedValueOnce(response(200))
     fireEvent.click(screen.getByRole('button', { name: 'Sair' }))
     await screen.findByText('sem sessão · expirada')
-    await act(async () => { atrasado.resolve(response(200, perfil)) })
+    await act(() => { atrasado.resolve(response(200, perfil)); return Promise.resolve() })
     expect(screen.getByText('sem sessão · expirada')).toBeInTheDocument()
     expect(sessionSnapshot().token).toBeNull()
     expect(localStorage.getItem(perfilKey)).toBeNull()
