@@ -567,6 +567,38 @@ de 50.000 não é aluno conversando.
 - Não vigia o provedor de IA diretamente. O que ele vê é o efeito —
   `provider_failures` e `fallback` nas métricas do dia.
 
+## Bundles de abas abertas durante um deploy
+
+O PWA aguarda todas as abas fecharem antes de ativar uma atualização. Enquanto
+isso, o shell antigo pode pedir pela primeira vez um chunk lazy, como Caderno.
+Substituir a imagem removendo esse arquivo causava 404 e a tela de recuperação.
+Em 29/10/2026, os logs confirmaram o problema nos arquivos
+`study-tools-DYItHnjn.js` e `HistoricalContentDetails-zf8C-HIs.js`.
+
+O serviço `web` agora monta `web_assets` em `/var/lib/aulas-web`. No boot,
+`frontend/40-retain-assets.sh` arquiva os bundles públicos da imagem com troca
+atômica por arquivo. O manifesto `.current-assets` renova a data da versão que
+está saindo: mesmo uma versão ativa há meses tem mais de 30 dias de retenção
+após a substituição. Arquivos fora dessa janela são removidos no próximo boot.
+O nginx procura primeiro na imagem atual, depois nesse arquivo persistente;
+um nome inexistente continua retornando 404, sem cache imutável nem HTML.
+O volume não recebe HTML, service worker, banco, rascunhos ou gravações.
+
+Na primeira implantação dessa correção, é necessário semear o volume com
+os `/usr/share/nginx/html/assets` das imagens anteriores disponíveis, incluindo
+a versão ativa, antes de substituí-la. Os arquivos do incidente foram
+recuperados da imagem local `f2b0ba288981`, sem reconstruir ou renomear bundles:
+um hash antigo deve sempre corresponder aos bytes originais. Sem esse artefato,
+o aluno precisa salvar o trabalho pendente e fechar todas as abas/janelas do
+aplicativo para ativar a versão atual; limpar dados do site não é necessário.
+Nos próximos deploys o arquivamento é automático. Preserve `web_assets` também
+em rollback e não use `compose down -v`.
+
+Regressão: `npm run test:scripts --prefix frontend` cobre retenção/expiração e
+`bash ops/test_web_assets.sh aulas-ingles-e2e-web:local` troca dois containers
+nginx com dados sintéticos, pede o chunk antigo pela primeira vez só depois da
+troca e verifica bytes, MIME, cache, shell atual e 404. Este último roda no CI.
+
 ## Referências do painel
 
 - [Compose Service — documentação oficial do EasyPanel](https://easypanel.io/docs/services/compose)
