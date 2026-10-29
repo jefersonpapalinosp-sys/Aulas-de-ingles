@@ -3,12 +3,32 @@
 import io
 import json
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
 from ops import recovery_smoke as smoke
 from ops.recovery_archive import RecoveryError
+
+
+class RecoverySmokeCliTests(unittest.TestCase):
+    def test_cli_reports_safe_failure_location_without_external_error_payload(self):
+        for error in (RuntimeError("private-database-payload"), RecoveryError("Alvo recusado.")):
+            output = io.StringIO()
+            with patch.object(smoke, "main", side_effect=error), redirect_stderr(output):
+                self.assertEqual(smoke.cli(), 1)
+            self.assertIn("recovery_smoke.py:", output.getvalue())
+            self.assertIn(type(error).__name__, output.getvalue())
+            self.assertNotIn("private-database-payload", output.getvalue())
+            if isinstance(error, RecoveryError):
+                self.assertIn("Alvo recusado.", output.getvalue())
+
+    def test_cli_success_does_not_emit_failure_diagnostic(self):
+        output = io.StringIO()
+        with patch.object(smoke, "main") as main, redirect_stderr(output):
+            self.assertEqual(smoke.cli(), 0)
+        main.assert_called_once_with()
+        self.assertEqual(output.getvalue(), "")
 
 
 class RecoverySmokeTests(unittest.TestCase):
