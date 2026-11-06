@@ -46,7 +46,7 @@ EXPECTED = {
     "old_connections_survived": 4,
     "old_passwords_rejected": 4,
     "new_passwords_accepted": 4,
-    "runtime_stale_health": 503,
+    "runtime_stale_startup_rejected": True,
     "runtime_rotated_health": 200,
     "database_session_survived": True,
     "grants_preserved": True,
@@ -204,25 +204,52 @@ def request(
         return Response(result.status, payload, value.value if value else None)
 
 
+def api_process(env: dict[str, str], port: int) -> subprocess.Popen[bytes]:
+    return subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "app.main:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--no-access-log",
+        ],
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def close_api(process: subprocess.Popen[bytes]) -> None:
+    process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
+
+
+def stale_startup_rejected(env: dict[str, str]) -> bool:
+    # O lifespan consulta a capacidade do banco antes de servir HTTP. Com a
+    # senha revogada, o Uvicorn precisa encerrar por falha de startup (código 3).
+    # rotate_passwords já comprovou SQLSTATE 28P01; a API com senha nova será
+    # iniciada logo depois, preservando a configuração restante e a sessão.
+    process = api_process(env, 8001)
+    try:
+        require(process.wait(timeout=10) == 3, "Runtime com senha antiga não recusou startup.")
+        return True
+    finally:
+        if process.poll() is None:
+            close_api(process)
+
+
 class API:
     def __init__(self, env: dict[str, str], port: int = 8000) -> None:
         self.port = port
-        self.process = subprocess.Popen(
-            [
-                sys.executable,
-                "-m",
-                "uvicorn",
-                "app.main:app",
-                "--host",
-                "127.0.0.1",
-                "--port",
-                str(port),
-                "--no-access-log",
-            ],
-            env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        self.process = api_process(env, port)
         try:
             for _ in range(100):
                 require(self.process.poll() is None, "API sintética encerrou antes do readiness.")
@@ -238,12 +265,7 @@ class API:
             raise
 
     def close(self) -> None:
-        self.process.terminate()
-        try:
-            self.process.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            self.process.kill()
-            self.process.wait(timeout=5)
+        close_api(self.process)
 
 
 def milliseconds(start: float) -> int:
@@ -397,11 +419,7 @@ async def run() -> dict[str, int | bool]:
                 request(8000, "/auth/me", token=token).status == 200, "Pool ativo perdeu sessão."
             )
             STAGE = "stale_consumer"
-            stale = API(env, 8001)
-            servers.append(stale)
-            report["runtime_stale_health"] = request(8001, "/health").status
-            stale.close()
-            servers.remove(stale)
+            report["runtime_stale_startup_rejected"] = stale_startup_rejected(env)
             api.close()
             servers.remove(api)
             env["DATABASE_URL"] = url("aulas_runtime", new["aulas_runtime"])

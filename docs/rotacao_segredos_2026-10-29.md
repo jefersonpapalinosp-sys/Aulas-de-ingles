@@ -5,6 +5,15 @@ absoluto para retirar a anterior. Para novas rotações, seguir o
 [procedimento vigente](migrations_grants_jwt_sprint56_2026-11-05.md).
 O resultado abaixo registra o ensaio antigo, sem janela de dupla validade.
 
+Atualização de 06/11/2026: a verificação do orçamento de conexões acontece
+durante a inicialização da API. O runtime com senha revogada agora encerra
+antes de servir HTTP, com código de saída 3 do Uvicorn. O ensaio exige esse
+encerramento natural, além da recusa PostgreSQL `28P01` nas conexões novas;
+timeout ou outros códigos não aprovam a prova. O runtime com senha nova
+continua exigindo health 200 e preservação da sessão autenticada. O recibo
+vigente registra `runtime_stale_startup_rejected=true`; o health 503 abaixo
+permanece como observação histórica de 29/10.
+
 Registro de 29/10/2026. Ensaio aprovado em laboratório exclusivo, com API real,
 PostgreSQL e gateway HTTP sintético. Nenhum segredo de estudo ou produção foi
 alterado. Publicado pelo [PR #41](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/pull/41),
