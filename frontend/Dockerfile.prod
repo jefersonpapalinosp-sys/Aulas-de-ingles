@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM public.ecr.aws/docker/library/nginx:1.30.6-alpine3.24@sha256:dc06c17afbc08d6fe9fbe48159aa81459da2b56baddddc45002f1a68ef77e256 AS runtime
+FROM public.ecr.aws/docker/library/nginx:1.31.8-alpine3.24@sha256:b2f80f8f88146b0772fdcc7d92cea621aa8c2889fa8d07ed61d4884fcea53e09 AS runtime
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/security-headers.conf
