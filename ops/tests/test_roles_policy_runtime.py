@@ -187,7 +187,8 @@ class RolesPolicyRuntimeTests(unittest.TestCase):
             (user_id,session_id,operation_key,expected_revision,revision,payload)
             VALUES(90000001,90000001,'00000000-0000-4000-8000-000000000061',0,1,
               '{"kind":"answer","question_id":"stay","selected_ids":["two"]}');
-          INSERT INTO native_listening_position(user_id,session_id,position_seconds,revision,completed)
+          INSERT INTO native_listening_position
+            (user_id,session_id,position_seconds,revision,completed)
             VALUES(90000001,90000001,18,1,false);
           COMMIT;""")
         inventory = """SELECT json_build_object(
@@ -196,7 +197,9 @@ class RolesPolicyRuntimeTests(unittest.TestCase):
           'responses',(SELECT json_agg(t ORDER BY id) FROM native_listening_response t),
           'positions',(SELECT json_agg(t ORDER BY id) FROM native_listening_position t))"""
         before = roles.sql(target, inventory)
-        archive = docker("exec", db, "pg_dump", "-U", "aulas_backup", "-d", "aulas_roles_lab", "-Fc")
+        archive = docker(
+            "exec", db, "pg_dump", "-U", "aulas_backup", "-d", "aulas_roles_lab", "-Fc"
+        )
         docker("exec", db, "createdb", "-U", "lab_admin", "aulas_native_restore60")
         docker("exec", "-i", db, "pg_restore", "--exit-on-error", "--no-owner", "--no-privileges",
                "-U", "lab_admin", "-d", "aulas_native_restore60", data=archive)
