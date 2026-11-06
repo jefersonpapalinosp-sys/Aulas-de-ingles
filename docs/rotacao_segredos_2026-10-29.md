@@ -1,5 +1,10 @@
 # SEC-49 — ensaio e ordem de rotação de segredos
 
+Atualização local da Sprint 56: a aplicação suporta `kid`, duas chaves e prazo
+absoluto para retirar a anterior. Para novas rotações, seguir o
+[procedimento vigente](migrations_grants_jwt_sprint56_2026-11-05.md).
+O resultado abaixo registra o ensaio antigo, sem janela de dupla validade.
+
 Registro de 29/10/2026. Ensaio aprovado em laboratório exclusivo, com API real,
 PostgreSQL e gateway HTTP sintético. Nenhum segredo de estudo ou produção foi
 alterado. Publicado pelo [PR #41](https://github.com/jefersonpapalinosp-sys/Aulas-de-ingles/pull/41),
@@ -42,12 +47,10 @@ Executar uma classe de segredo por vez, validando antes de avançar:
    nova, identidade/privilégios e funcionamento do consumidor. O migrador
    precisa continuar podendo assumir o papel proprietário; o backup deve
    manter leitura. Respeitar o término dos jobs antes de reiniciar workers.
-2. **JWT:** distribuir a nova configuração a todas as instâncias e coordenar
-   a substituição dos processos da API na mesma janela. A implementação usa
-   uma chave por processo; manter instâncias antigas e novas no tráfego
-   produz respostas inconsistentes. Validar rejeição do access e refresh
-   antigos, novo login e novo refresh. Comunicar que será necessário entrar
-   novamente.
+2. **JWT:** usar a sequência de distribuição, troca e retirada da chave no
+   runbook da Sprint 56. Pré-distribuir a chave de verificação a todas as
+   instâncias antes de emitir tokens novos. Uma troca sem chave anterior
+   continua sendo revogação imediata por assinatura, como no ensaio histórico.
 3. **Provedor:** quando o provedor permitir duas credenciais simultâneas,
    criar a nova, instalar em todos os consumidores, validar uma chamada,
    revogar a anterior e validar novamente. Se não houver sobreposição,

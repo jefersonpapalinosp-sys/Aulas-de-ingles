@@ -28,8 +28,11 @@ jobs:
     name: probe externo + gate operacional
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: decide o que está armado
         id: gate
@@ -40,12 +43,15 @@ jobs:
           if [ -z "$PUBLIC_ORIGIN" ]; then
             echo "::notice::vigilância desarmada: crie a secret PUBLIC_PROBE_ORIGIN com https://dominio-publico (docs/deploy_easypanel.md)."
             echo "probe=false" >> "$GITHUB_OUTPUT"
+            echo "metrics=false" >> "$GITHUB_OUTPUT"
+            exit 0
           else
             echo "probe=true" >> "$GITHUB_OUTPUT"
           fi
           if [ -z "$OPERATIONS_TOKEN" ]; then
-            echo "::notice::gate operacional desarmado: crie a secret OPERATIONS_TOKEN."
+            echo "::error::PUBLIC_PROBE_ORIGIN configurada sem OPERATIONS_TOKEN; vigilância incompleta."
             echo "metrics=false" >> "$GITHUB_OUTPUT"
+            exit 1
           else
             echo "metrics=true" >> "$GITHUB_OUTPUT"
           fi
@@ -56,16 +62,19 @@ jobs:
           PUBLIC_ORIGIN: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
         run: |
           # O relatório não carrega URL, corpo nem cabeçalho: o log é público.
-          python3 -m ops.public_probe --base-url "$PUBLIC_ORIGIN" | tee probe.json
+          probe_status=0
+          python3 -m ops.public_probe --base-url "$PUBLIC_ORIGIN" > probe.json || probe_status=$?
           {
             echo '### Probe externo'
             echo '```json'
             cat probe.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+          cat probe.json
+          exit "$probe_status"
 
       - name: gate operacional (worker, fila, custo diário e mensal da assistência)
-        if: steps.gate.outputs.probe == 'true' && steps.gate.outputs.metrics == 'true'
+        if: ${{ !cancelled() && steps.gate.outputs.probe == 'true' && steps.gate.outputs.metrics == 'true' }}
         env:
           PUBLIC_ORIGIN: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
           OPERATIONS_TOKEN: ${{ secrets.OPERATIONS_TOKEN }}
@@ -73,11 +82,12 @@ jobs:
           OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD: ${{ vars.OPERATIONS_ASSIST_MONTHLY_BUDGET_MICROUSD }}
         run: |
           gate_status=0
-          python3 -m ops.observability_check --base-url "$PUBLIC_ORIGIN" | tee gate.json || gate_status=$?
+          python3 -m ops.observability_check --base-url "$PUBLIC_ORIGIN" > gate.json || gate_status=$?
           {
             echo '### Gate operacional'
             echo '```json'
             cat gate.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+          cat gate.json
           exit "$gate_status"

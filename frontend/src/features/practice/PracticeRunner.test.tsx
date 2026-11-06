@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Exercise } from '../../api/client'
 import type { PracticeSession } from './types'
 import { PracticeRunner } from './PracticeRunner'
+import { queueAttempt } from '../offline/attemptQueue'
 
 const practiceApi = vi.hoisted(() => ({
   exercises: vi.fn(),
@@ -175,6 +176,19 @@ afterEach(() => {
 })
 
 describe('PracticeRunner', () => {
+  it('retoma resposta pausada como aguardando correção, sem permitir tentativa duplicada', async () => {
+    const session = makeSession()
+    practiceApi.active.mockReturnValue(queryResult(session))
+    practiceApi.session.mockReturnValue(queryResult(session))
+    await queueAttempt({ userId: 7, exerciseId: 101, sessionId: 71, answer: 'bigger',
+      idempotencyKey: 'paused', createdAt: '2026-11-05T12:00:00Z', serverFailures: 3,
+      syncFailure: { status: 503, failedAt: '2026-11-05T12:01:00Z', retryable: true } })
+    renderRunner()
+    await userEvent.click(screen.getByRole('button', { name: 'Retomar sessão' }))
+    expect(await screen.findByText('Na fila')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Progresso da sessão de exercícios' })).toHaveAttribute('aria-valuenow', '0')
+    expect(screen.getByRole('button', { name: 'Verificar' })).toBeDisabled()
+  })
   it('posição offline com quota cheia permanece utilizável e avisa que não persistiu', async () => {
     Object.defineProperty(navigator, 'onLine', { value: false, configurable: true })
     const session = makeNavigableSession()

@@ -1,0 +1,6 @@
+# Scripts executados pelos containers e runners Linux precisam de LF no checkout.
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary

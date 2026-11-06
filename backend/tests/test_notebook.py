@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.db.models import Course, Lesson, NotebookEntry, User
 from app.performance import BYTES_HEADER, POOL_HEADER, SQL_HEADER
+from tests.http_assertions import assert_status
 from tests.test_media import position_body
 from tests.test_progress import salvar_sessao
 from tests.test_writing import criar_versao, salvar_rascunho
@@ -175,10 +176,12 @@ async def test_crud_filtros_e_isolamento_do_caderno(client: AsyncClient) -> None
     review = (await client.get("/api/review/due?item_type=phrase", headers=ana)).json()
     assert [item["answer"] for item in review] == ["A taxi is faster than a bus."]
 
-    await client.post(
-        "/api/me/notebook",
-        headers=ana,
-        json={"lesson_number": 32, "kind": "note", "content": "Objects after verbs."},
+    assert_status(
+        await client.post(
+            "/api/me/notebook",
+            headers=ana,
+            json={"lesson_number": 32, "kind": "note", "content": "Objects after verbs."},
+        )
     )
     filtered = (
         await client.get("/api/me/notebook?lesson=31&kind=favorite_phrase", headers=ana)
@@ -222,11 +225,13 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
     prompt = lesson["writing_prompts"][0]
     text = "The train is faster than the bus. Visitors should take the train."
 
-    await client.put("/api/lessons/31/studied", headers=headers)
-    await client.put(
-        f"/api/media/{lesson['media'][0]['id']}/position",
-        headers=headers,
-        json=position_body(42.5),
+    assert_status(await client.put("/api/lessons/31/studied", headers=headers))
+    assert_status(
+        await client.put(
+            f"/api/media/{lesson['media'][0]['id']}/position",
+            headers=headers,
+            json=position_body(42.5),
+        )
     )
     draft = await salvar_rascunho(client, headers, prompt["id"], text)
     assert draft.status_code == 200
@@ -242,10 +247,12 @@ async def test_exportacao_reune_dados_sem_segredos(client: AsyncClient) -> None:
     assert feedback.status_code == 200
     assert feedback.json()["id"] > 0
     assert feedback.json()["created_at"] is not None
-    await client.post(
-        "/api/me/notebook",
-        headers=headers,
-        json={"lesson_number": 31, "kind": "note", "content": "Review comparatives."},
+    assert_status(
+        await client.post(
+            "/api/me/notebook",
+            headers=headers,
+            json={"lesson_number": 31, "kind": "note", "content": "Review comparatives."},
+        )
     )
 
     exported = await client.get("/api/me/export", headers=headers)
@@ -376,10 +383,12 @@ async def test_historico_de_escrita_e_privado(client: AsyncClient) -> None:
     ana = await conta(client, "historico-ana")
     text = "The Metro is faster than the bus. You should take it."
     assert (await criar_versao(client, ana, prompt["id"], text)).status_code == 200
-    await client.post(
-        f"/api/writing/prompts/{prompt['id']}/feedback",
-        headers=ana,
-        json={"text": text, "operation_key": str(uuid4())},
+    assert_status(
+        await client.post(
+            f"/api/writing/prompts/{prompt['id']}/feedback",
+            headers=ana,
+            json={"text": text, "operation_key": str(uuid4())},
+        )
     )
 
     history = (await client.get("/api/writing/history", headers=ana)).json()

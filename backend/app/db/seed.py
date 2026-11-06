@@ -191,6 +191,36 @@ def validate_course_reviews(courses: list[dict[str, Any]], lessons: list[dict[st
 
     for course in courses:
         course_slug = str(course["slug"])
+        previous_numbers: set[int] = set()
+        for unit in sorted(course["units"], key=lambda item: int(item["lesson_start"])):
+            start, end = int(unit["lesson_start"]), int(unit["lesson_end"])
+            if start < 1 or end < start or end > 10000:
+                raise ValueError(f"Faixas de unidade inválidas ou sobrepostas em {course_slug}.")
+            numbers = set(range(start, end + 1))
+            overlap = numbers & previous_numbers
+            declared = unit.get("review_overlap_lesson_numbers", [])
+            if (
+                not isinstance(declared, list)
+                or any(type(n) is not int for n in declared)
+                or len(declared) != len(set(declared))
+                or set(declared) != overlap
+            ):
+                raise ValueError(
+                    f"Faixas de unidade sobrepostas sem revisão explícita em {course_slug}."
+                )
+            review = unit.get("review") or {}
+            reviewed = {review.get("review_lesson_number"), review.get("listening_lesson_number")}
+            for question in review.get("questions", []):
+                reviewed.update(question.get("lesson_numbers", []))
+            for number in overlap:
+                previous_lesson = lessons_by_course_number.get((course_slug, number))
+                if (
+                    not previous_lesson
+                    or previous_lesson["unit_slug"] == unit["slug"]
+                    or number not in reviewed
+                ):
+                    raise ValueError(f"Sobreposição não corresponde a revisão em {course_slug}.")
+            previous_numbers.update(numbers)
         for unit in course["units"]:
             unit_lessons = [
                 lesson
@@ -243,9 +273,7 @@ def validate_course_reviews(courses: list[dict[str, Any]], lessons: list[dict[st
             listening_number = review.get("listening_lesson_number")
             listening_position = review.get("listening_media_position")
             listening_key = review.get("listening_media_key")
-            if (listening_number is None) != (
-                listening_position is None and listening_key is None
-            ):
+            if (listening_number is None) != (listening_position is None and listening_key is None):
                 raise ValueError(
                     f"Checkpoint {course_slug}/{unit['slug']} deve informar aula e referência "
                     "de listening juntas."
@@ -314,9 +342,7 @@ def validate_course_reviews(courses: list[dict[str, Any]], lessons: list[dict[st
                     str(media["editorial_key"]): media
                     for media in listening_lesson.get("media", [])
                 }
-                listening_media = media_by_key.get(
-                    editorial_identity.validate_key(listening_key)
-                )
+                listening_media = media_by_key.get(editorial_identity.validate_key(listening_key))
                 if listening_media is None:
                     raise ValueError(
                         f"Checkpoint {course_slug}/{unit['slug']} referencia mídia inexistente "

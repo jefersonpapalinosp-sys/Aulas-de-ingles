@@ -2,6 +2,7 @@
 
 from collections.abc import AsyncIterator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -36,6 +37,9 @@ def get_engine() -> AsyncEngine:
                 {
                     "statement_timeout": str(settings.database_statement_timeout_ms),
                     "lock_timeout": str(settings.database_lock_timeout_ms),
+                    "idle_in_transaction_session_timeout": str(
+                        settings.database_idle_transaction_timeout_ms
+                    ),
                 },
             ),
         )
@@ -67,3 +71,21 @@ async def dispose_engine() -> None:
         await _engine.dispose()
     _engine = None
     _sessionmaker = None
+
+
+async def check_connection_budget() -> None:
+    """Valida o teto declarado de todos os processos contra a capacidade do PG."""
+    settings = get_settings()
+    async with get_sessionmaker()() as session:
+        capacity = await session.scalar(
+            text("""
+            SELECT current_setting('max_connections')::int
+                 - current_setting('superuser_reserved_connections')::int
+                 - coalesce(current_setting('reserved_connections', true), '0')::int
+        """)
+        )
+    if (
+        capacity is None
+        or settings.database_connection_budget + settings.database_connection_reserve > capacity
+    ):
+        raise RuntimeError("Orçamento de conexões excede a capacidade disponível do PostgreSQL.")

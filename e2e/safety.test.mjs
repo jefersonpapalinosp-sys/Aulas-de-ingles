@@ -2,7 +2,13 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import test from 'node:test'
-import { assertContainer, assertGatewayNetwork, assertInitSource, assertLocalEndpoint, assertPublicReadiness, assertTarget, assertVolume, BASE_URL, DATABASE_URL, PROJECT, ROOT } from './safety.mjs'
+import { assertContainer, assertGatewayNetwork, assertInitSource, assertLocalEndpoint, assertPublicReadiness, assertTarget, assertVolume, BASE_URL, DATABASE_URL, PROJECT, ROOT, safetyFailureMessage } from './safety.mjs'
+
+test('diagnóstico conserva a guarda sem vazar valores ou stderr', () => {
+  const failure = new assert.AssertionError({ message: 'Volume de outro projeto', actual: 'private-sentinel', expected: 'synthetic' })
+  assert.equal(safetyFailureMessage(failure), 'Volume de outro projeto')
+  assert.ok(!safetyFailureMessage(new Error('private-sentinel')).includes('private-sentinel'))
+})
 
 test('readiness pública exige schema compatível e não divulga diagnóstico interno', () => {
   const healthy = { status: 'ok', db: 'up', schema: 'compatible', code: null }

@@ -2,6 +2,10 @@
 <!--
 Agendamento diário do backup da stack pública (INFRA-44), via launchd do macOS.
 
+LEGADO: substituir pelo timer em infra/systemd após validar a rotina na VM,
+a custódia separada e duas execuções consecutivas. Não desativar antes do aceite.
+Ver docs/backup_recuperacao_publica_2026-11-05.md.
+
 Copie para ~/Library/LaunchAgents/br.com.papalino.aulas-backup-public.plist,
 troque os caminhos marcados e carregue com:
 

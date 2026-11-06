@@ -89,6 +89,30 @@ function servidorValido() {
 }
 
 describe('SessaoProvider e transporte integrados', () => {
+  it('uma confirmação antiga só limpa a conta excluída após trocar de conta', async () => {
+    servidorValido()
+    let current!: ReturnType<typeof useSessao>
+    function Capture() { current = useSessao(); return null }
+    const queryClient = new QueryClient()
+    render(<QueryClientProvider client={queryClient}>
+      <SessaoProvider><Capture /></SessaoProvider>
+    </QueryClientProvider>)
+    await waitFor(() => expect(current.usuario?.id).toBe(7))
+    const oldConfirmation = current.encerrarContaExcluida
+    localStorage.setItem('aulas-ingles:writing-draft:v1:7:31', 'excluir')
+    localStorage.setItem('aulas-ingles:writing-draft:v1:8:31', 'preservar')
+    fetchMock.mockImplementation((input) => Promise.resolve(path(input) === '/api/auth/me'
+      ? response(200, { ...perfil, id: 8 }) : response(200, { access_token: 'access-8' })))
+    await act(() => current.entrar('outra@example.com', 'senha-de-teste'))
+    await waitFor(() => expect(current.usuario?.id).toBe(8))
+    await act(() => oldConfirmation(false))
+    expect(current.usuario?.id).toBe(8)
+    expect(sessionSnapshot().token).toBe('access-8')
+    expect(localStorage.getItem('aulas-ingles:writing-draft:v1:7:31')).toBeNull()
+    expect(localStorage.getItem('aulas-ingles:writing-draft:v1:8:31')).toBe('preservar')
+    expect(JSON.parse(localStorage.getItem(perfilKey)!)).toMatchObject({ id: 8 })
+  })
+
   it('faz uma única renovação inicial mesmo sob StrictMode', async () => {
     servidorValido()
     montar(true)

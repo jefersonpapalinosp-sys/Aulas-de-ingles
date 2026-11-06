@@ -9,6 +9,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Exercise, ExerciseHint, Lesson, PracticeSession
+from tests.http_assertions import assert_status
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -431,15 +432,19 @@ async def test_repetir_erros_materializa_apenas_itens_frageis(client: AsyncClien
     first_id = first["exercise"]["id"]
     second_id = second["exercise"]["id"]
 
-    await client.post(
-        f"/api/exercises/{first_id}/attempt",
-        headers=headers,
-        json=attempt("more faster", source["id"]),
+    assert_status(
+        await client.post(
+            f"/api/exercises/{first_id}/attempt",
+            headers=headers,
+            json=attempt("more faster", source["id"]),
+        )
     )
-    await client.post(
-        f"/api/exercises/{first_id}/attempt",
-        headers=headers,
-        json=attempt("faster", source["id"]),
+    assert_status(
+        await client.post(
+            f"/api/exercises/{first_id}/attempt",
+            headers=headers,
+            json=attempt("faster", source["id"]),
+        )
     )
     finished = await client.post(
         f"/api/exercises/{second_id}/attempt",

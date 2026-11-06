@@ -23,7 +23,10 @@ docker volume create "$asset_test_volume" >/dev/null
 
 start_release() {
   docker run -d --pull never --name "$asset_test_name" --read-only \
-    --tmpfs /var/cache/nginx --tmpfs /var/run \
+    --cap-drop ALL --security-opt no-new-privileges --user 101:101 \
+    --sysctl net.ipv4.ip_unprivileged_port_start=0 \
+    --tmpfs /var/cache/nginx:uid=101,gid=101,mode=0700 \
+    --tmpfs /var/run:uid=101,gid=101,mode=0700 \
     -e AULAS_ASSET_ARCHIVE=/var/lib/aulas-web \
     -v "$asset_test_volume:/var/lib/aulas-web" \
     -v "$asset_test_dir/$1:/usr/share/nginx/html:ro" \

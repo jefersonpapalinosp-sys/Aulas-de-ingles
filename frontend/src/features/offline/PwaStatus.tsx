@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { ConfirmReload } from '../../components/ErrorBoundary'
 import { inspectCache, PWA_EVENT, registrationError, type CacheStatus } from './pwa'
 
 export function PwaStatus() {
@@ -8,6 +9,7 @@ export function PwaStatus() {
   const lessonPath = match ? `/api/courses/${match[1]}/lessons/${match[2]}` : undefined
   const [snapshot, setSnapshot] = useState<CacheStatus | null>(null)
   const [waiting, setWaiting] = useState(false)
+  const [updating, setUpdating] = useState(false)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const generation = useRef(0)
@@ -59,19 +61,21 @@ export function PwaStatus() {
 
   return (
     <aside className="pwa-status" aria-label="Disponibilidade offline e versão">
-      {waiting && <p role="status">Atualização disponível. Salve seus textos e envie ou baixe as gravações pendentes. Depois feche todas as abas e janelas deste aplicativo e abra novamente. Nada será recarregado automaticamente. Após atualizar, abra as aulas com conexão novamente.</p>}
+      {(waiting || updating) && <div className="update-required">
+        <p role="status">Atualização disponível. Ao confirmar, a nova versão é ativada e só então recarrega. Dados locais são preservados.</p>
+        <ConfirmReload onStart={() => setUpdating(true)} />
+      </div>}
       <details>
         <summary>Offline e atualizações</summary>
         {snapshot ? <>
-          <p>{snapshot.count} respostas públicas armazenadas ({Math.ceil(snapshot.bytes / 1024)} KiB). Limite: 120 respostas ou 8 MiB; validade de até 7 dias.</p>
+          <p>{snapshot.count} textos públicos ({Math.ceil(snapshot.bytes / 1024)} KiB), válidos por até 7 dias.</p>
           {lessonPath && <p>{snapshot.lesson
             ? `Texto desta aula armazenado até ${new Date(snapshot.expiresAt!).toLocaleString('pt-BR')}.`
-            : 'Texto desta aula não armazenado. Abra a aula com conexão e verifique novamente.'}</p>}
+            : 'Texto desta aula não armazenado. Abra-a com conexão.'}</p>}
           {snapshot.cacheUnavailable && <p>O armazenamento apresentou uma falha. Não conte com a disponibilidade offline.</p>}
           <p className="muted">Versão {snapshot.version}</p>
-        </> : <p>{registrationError ? 'Não foi possível instalar o modo offline.' : 'Disponibilidade offline não confirmada. Use a versão instalada/build com conexão para preparar o cache.'}</p>}
-        <p>Somente textos públicos já abertos e telas carregadas podem funcionar sem rede. Áudio e vídeo continuam online. Gravações locais não entram na fila de exercícios: envie ou baixe antes de fechar a aba.</p>
-        <p>O navegador pode liberar esse armazenamento. O cache não é backup e não inclui dados privados da conta.</p>
+        </> : <p>{registrationError ? 'Modo offline não instalado.' : 'Disponibilidade offline não confirmada.'}</p>}
+        <p>Offline cobre telas e textos públicos já abertos. Áudio, vídeo e gravações exigem rede; o cache pode expirar e não é backup.</p>
         <div className="pwa-actions">
           <button type="button" onClick={() => { void check() }} disabled={busy}>Verificar disponibilidade e versão</button>
           <button type="button" onClick={() => { void clear() }} disabled={busy || !snapshot}>Limpar somente textos públicos</button>

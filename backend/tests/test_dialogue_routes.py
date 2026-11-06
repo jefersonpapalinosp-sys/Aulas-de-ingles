@@ -11,6 +11,7 @@ from httpx import AsyncClient
 
 from app.core.config import get_settings
 from app.services import assistance
+from tests.http_assertions import assert_status
 from tests.test_auth import auth, registrar
 
 
@@ -182,10 +183,12 @@ async def test_avaliacao_humana_e_o_unico_campo_que_a_api_altera(
     headers = auth(await registrar(client, "dialogo-nota"))
     _, corpo = await _criar(client, headers)
     dialogo_id = corpo["id"]
-    await client.post(
-        f"/api/speaking/dialogues/{dialogo_id}/turns/1/text",
-        headers=headers,
-        json={"text": "The bus is cheaper than the train.", "idempotency_key": str(uuid4())},
+    assert_status(
+        await client.post(
+            f"/api/speaking/dialogues/{dialogo_id}/turns/1/text",
+            headers=headers,
+            json={"text": "The bus is cheaper than the train.", "idempotency_key": str(uuid4())},
+        )
     )
     avaliado = await client.put(
         f"/api/speaking/dialogues/{dialogo_id}/turns/1/rating",
@@ -203,10 +206,12 @@ async def test_exclusao_leva_os_turnos_e_a_conversa_deixa_de_existir(
     headers = auth(await registrar(client, "dialogo-exclusao"))
     _, corpo = await _criar(client, headers)
     dialogo_id = corpo["id"]
-    await client.post(
-        f"/api/speaking/dialogues/{dialogo_id}/turns/1/text",
-        headers=headers,
-        json={"text": "Something to remember.", "idempotency_key": str(uuid4())},
+    assert_status(
+        await client.post(
+            f"/api/speaking/dialogues/{dialogo_id}/turns/1/text",
+            headers=headers,
+            json={"text": "Something to remember.", "idempotency_key": str(uuid4())},
+        )
     )
     assert (
         await client.delete(f"/api/speaking/dialogues/{dialogo_id}", headers=headers)

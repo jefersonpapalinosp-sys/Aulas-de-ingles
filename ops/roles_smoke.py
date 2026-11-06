@@ -6,6 +6,7 @@ import tempfile
 
 from ops import recovery, roles
 from ops.recovery_archive import RecoveryError, require
+from ops.roles_verify import verify_policy
 
 
 def forbidden(info: roles.TargetInfo, role: str, statement: str) -> None:
@@ -35,6 +36,7 @@ def main() -> None:
             )
         )
         require(flags == [False] * 5, "Papel com poderes globais.")
+    verify_policy(info)
     for role in ("aulas_runtime", "aulas_worker", "aulas_backup"):
         for statement in (
             "CREATE TABLE public.forbidden_role_probe (id integer)",
@@ -246,6 +248,8 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("roles_smoke", exc)
         print("Ensaio de papéis falhou; não liberar rollout.", file=sys.stderr)
         raise SystemExit(1) from None

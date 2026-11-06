@@ -13,6 +13,8 @@ from app.domain.answers import acertou, analisar_resposta, normalizar
         ("faster.", "faster"),
         ("Won't", "won't"),
         ("won’t", "won't"),  # apóstrofo tipográfico
+        ("won‘t", "won't"),
+        ("“Hello!”", "hello"),
         ("the  most   serious", "the most serious"),
         ("I disagree!", "i disagree"),
     ],
@@ -37,6 +39,7 @@ def test_acento_nao_e_ignorado() -> None:
     """Em inglês não aparece, mas apagar acento quebraria resposta em português."""
     assert normalizar("sílaba") == "sílaba"
     assert not acertou("silaba", ["sílaba"])
+    assert not acertou("well", ["we'll"])
 
 
 @pytest.mark.parametrize(

@@ -33,6 +33,8 @@ from fastapi import (
     status,
 )
 from sqlalchemy import delete, select
+from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.concurrency import require_idempotency_key
@@ -64,6 +66,7 @@ from app.schemas.dialogue import (
     TurnTextIn,
 )
 from app.services import dialogue as dialogue_service
+from app.services import dialogue_audio_cleanup
 from app.services.assist_quota import DIALOGUE_MODALITY, QuotaExceeded, release, usage
 from app.services.audio_cleanup import discard_unreferenced_audio
 from app.services.audio_inspection import inspect_audio
@@ -532,13 +535,26 @@ async def excluir_dialogo(
     session: Annotated[AsyncSession, Depends(get_session)],
     response: Response,
 ) -> Response:
-    """Apaga o diálogo e, por cascata do PostgreSQL, seus turnos.
-
-    O áudio segue a política de speaking: o arquivo sai pelo caminho de
-    exclusão de gravação, não daqui, para não criar um segundo lugar que
-    remove bytes do aluno.
-    """
+    """Apaga o diálogo e gravações; falhas de arquivo ficam na fila durável."""
     dialogue = await _owned_dialogue(session, dialogue_id, usuario.id, lock=True)
+    attempt_ids = select(DialogueTurn.speaking_attempt_id).where(
+        DialogueTurn.dialogue_id == dialogue.id
+    )
+    attempts = list(
+        (
+            await session.scalars(
+                select(SpeakingAttempt)
+                .where(
+                    SpeakingAttempt.id.in_(attempt_ids),
+                    SpeakingAttempt.user_id == usuario.id,
+                    SpeakingAttempt.origin == "dialogue",
+                )
+                .order_by(SpeakingAttempt.id)
+                .with_for_update()
+            )
+        ).all()
+    )
+    keys = [attempt.storage_key for attempt in attempts if attempt.storage_key]
     job_ids = select(DialogueTurn.transcription_job_id).where(
         DialogueTurn.dialogue_id == dialogue.id
     )
@@ -564,7 +580,14 @@ async def excluir_dialogo(
                 model.source_id.in_(turn_ids),
             )
         )
+    for attempt in attempts:
+        # O trigger registra a chave opaca na mesma transação do DELETE.
+        await session.delete(attempt)
     await session.delete(dialogue)
     await session.commit()
+    try:
+        await dialogue_audio_cleanup.process_batch(limit=len(keys), keys=keys)
+    except (DBAPIError, PoolTimeout, OSError, ConnectionError, TimeoutError):
+        logger.warning("dialogue_audio_cleanup_pending")
     logger.info("dialogue_deleted", extra={"dialogue_id": dialogue_id})
     return Response(status_code=status.HTTP_204_NO_CONTENT)

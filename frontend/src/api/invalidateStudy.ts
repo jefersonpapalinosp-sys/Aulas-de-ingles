@@ -48,6 +48,9 @@ export const STUDY_INVALIDATIONS = {
   dialogueChange: ['dialogue-status', 'review', 'today', 'skills'],
   /** Anotação do caderno criada, editada ou excluída. */
   notebookEntry: ['notebook'],
+  /** Marcação externa confirmada ou recusada: não altera projeções VOA. */
+  nativeListeningChange: ['native-listening-session', 'native-listening-history'],
+  listeningChange: ['listening-progress'],
   /** Plano de estudo salvo. */
   studyPlan: ['today'],
   /** Tempo ativo creditado pela API. */

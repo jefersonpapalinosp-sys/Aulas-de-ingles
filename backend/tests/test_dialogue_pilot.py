@@ -232,7 +232,8 @@ async def test_shared_stt_rejects_non_pilot_before_reserving_and_preserves_audio
     status = (await client.get("/api/assist/status", headers=headers)).json()
     assert not status["transcription_enabled"] and not status["writing_enabled"]
     denied = await client.post(f"/api/speaking/attempts/{aid}/transcription", headers=headers)
-    assert denied.status_code == 503
+    assert denied.status_code == 409
+    assert denied.json()["detail"]["code"] == "assist_disabled"
     assert (await session.scalars(select(AssistReservation))).all() == []
     assert (await session.scalars(select(TranscriptionJob))).all() == []
     assert (

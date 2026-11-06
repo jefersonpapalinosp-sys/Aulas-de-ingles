@@ -1,0 +1,128 @@
+{
+  "baseline_plans": {
+    "auth_user_10k": {
+      "actual_rows": 1,
+      "execution_ms": 0.073,
+      "indexes": [
+        "ix_app_user_email"
+      ],
+      "node_types": [
+        "Index Scan"
+      ],
+      "planning_ms": 0.477,
+      "root_node": "Index Scan",
+      "shared_hit_blocks_sum": 4,
+      "shared_read_blocks_sum": 0
+    },
+    "curriculum": {
+      "actual_rows": 52,
+      "execution_ms": 0.412,
+      "indexes": [
+        "course_pkey",
+        "uq_course_unit_id_course"
+      ],
+      "node_types": [
+        "Sort",
+        "Nested Loop",
+        "Nested Loop",
+        "Seq Scan",
+        "Memoize",
+        "Index Scan",
+        "Memoize",
+        "Index Scan"
+      ],
+      "planning_ms": 2.585,
+      "root_node": "Sort",
+      "shared_hit_blocks_sum": 132,
+      "shared_read_blocks_sum": 0
+    },
+    "transcription_expiry_10k": {
+      "actual_rows": 100,
+      "execution_ms": 4.848,
+      "indexes": [],
+      "node_types": [
+        "Limit",
+        "Sort",
+        "Seq Scan"
+      ],
+      "planning_ms": 0.055,
+      "root_node": "Limit",
+      "shared_hit_blocks_sum": 768,
+      "shared_read_blocks_sum": 0
+    },
+    "transcription_queue_10k": {
+      "actual_rows": 1,
+      "execution_ms": 0.057,
+      "indexes": [
+        "ix_transcription_job_queued"
+      ],
+      "node_types": [
+        "Limit",
+        "Index Scan"
+      ],
+      "planning_ms": 1.192,
+      "root_node": "Limit",
+      "shared_hit_blocks_sum": 6,
+      "shared_read_blocks_sum": 0
+    },
+    "weekly_panel_10k": {
+      "actual_rows": 1,
+      "execution_ms": 3.3,
+      "indexes": [],
+      "node_types": [
+        "Aggregate",
+        "Seq Scan"
+      ],
+      "planning_ms": 0.632,
+      "root_node": "Aggregate",
+      "shared_hit_blocks_sum": 184,
+      "shared_read_blocks_sum": 0
+    }
+  },
+  "contract": "database-performance-v1",
+  "datasets": {
+    "1000": {
+      "events_insert_ms": 145.46,
+      "jobs_insert_ms": 129.99,
+      "users_insert_ms": 9.63
+    },
+    "10000": {
+      "events_insert_ms": 1684.11,
+      "jobs_insert_ms": 1387.04,
+      "users_insert_ms": 94.61
+    }
+  },
+  "environment": {
+    "database": "aulas_ingles_test",
+    "marker": "aulas-ingles:disposable-test:v1",
+    "postgres": "16.15",
+    "role": "aulas_test"
+  },
+  "queue_candidate": {
+    "build_ms": 38.66,
+    "definition": "(next_attempt_at,id) WHERE status='queued'",
+    "insert_10k_with_candidate_ms": 1941.37,
+    "insert_10k_without_candidate_ms": 1387.04,
+    "plan": {
+      "actual_rows": 1,
+      "execution_ms": 0.1,
+      "indexes": [
+        "ix_transcription_queue_ready_bench"
+      ],
+      "node_types": [
+        "Limit",
+        "Index Scan"
+      ],
+      "planning_ms": 0.622,
+      "root_node": "Limit",
+      "shared_hit_blocks_sum": 2,
+      "shared_read_blocks_sum": 4
+    },
+    "size_bytes_after_write_probe": 1269760,
+    "size_bytes_before_write_probe": 368640
+  },
+  "volumes": [
+    1000,
+    10000
+  ]
+}

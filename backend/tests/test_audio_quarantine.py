@@ -7,7 +7,11 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from app.services.audio_audit import inventory
-from app.services.audio_quarantine import Quarantine, QuarantineRefused
+
+if os.name == "posix":
+    from app.services.audio_quarantine import Quarantine, QuarantineRefused
+
+pytestmark = pytest.mark.skipif(os.name != "posix", reason="quarentena usa descritores POSIX")
 
 KEY = "a" * 32 + ".wav"
 OP = "b" * 32

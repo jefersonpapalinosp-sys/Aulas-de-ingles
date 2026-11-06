@@ -18,7 +18,7 @@ describe('inventário local privado', () => {
     retainVoiceDraft({ key: '1:voa-level-1:31:2', blob: new Blob(['audio']), duration: 1, attemptId: null })
     const before = { ...localStorage }
     expect(await inspectDevice(1)).toEqual({ drafts: 1, mediaCommands: 1, activityEvents: 1,
-      localCopies: 1, pendingAnswers: 1, blockedAnswers: 0, voiceDraft: true })
+      localCopies: 1, pendingAnswers: 1, blockedAnswers: 0, voiceDraft: true, nativeDrafts: 0, nativePending: 0 })
     expect(await inspectDevice(10)).toMatchObject({ drafts: 1, voiceDraft: false })
     expect({ ...localStorage }).toEqual(before)
     expect(takeVoiceDraft('1:voa-level-1:31:2')).not.toBeNull()
@@ -49,5 +49,19 @@ describe('inventário local privado', () => {
       blockedAnswers: 0, voiceDraft: false })
     expect(await inspectDevice(32)).toMatchObject({ drafts: 1, pendingAnswers: 1 })
     expect(localStorage.getItem('public-cache')).toBe('preservar')
+  })
+
+  it('continua a limpeza dos rascunhos e da voz se IndexedDB falhar', async () => {
+    localStorage.setItem('aulas-ingles:writing-draft:v1:41:3', 'apagar')
+    localStorage.setItem('aulas-ingles:media-position:v2:41:1', 'apagar')
+    localStorage.setItem('aulas-ingles:writing-draft:v1:42:3', 'preservar')
+    retainVoiceDraft({ key: '41:voa-level-1:31:2', blob: new Blob(['audio']),
+      duration: 1, attemptId: null })
+    vi.spyOn(indexedDB, 'open').mockImplementation(() => { throw new Error('blocked') })
+    await expect(clearDeviceData(41)).rejects.toThrow('não pôde ser concluída')
+    expect(localStorage.getItem('aulas-ingles:writing-draft:v1:41:3')).toBeNull()
+    expect(localStorage.getItem('aulas-ingles:media-position:v2:41:1')).toBeNull()
+    expect(localStorage.getItem('aulas-ingles:writing-draft:v1:42:3')).toBe('preservar')
+    expect(takeVoiceDraft('41:voa-level-1:31:2')).toBeNull()
   })
 })

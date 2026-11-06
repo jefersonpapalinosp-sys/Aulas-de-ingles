@@ -16,9 +16,22 @@ BEGIN
       CASE WHEN obj.relkind='S' THEN 'SEQUENCE' ELSE 'TABLE' END, obj.relname);
   END LOOP;
 END $$;
-REVOKE ALL ON ALL TABLES IN SCHEMA public FROM aulas_runtime, aulas_worker, aulas_backup;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM aulas_runtime, aulas_worker, aulas_backup;
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC, aulas_runtime, aulas_worker, aulas_backup;
+-- REVOKE na tabela não remove privilégios concedidos a colunas separadamente.
+DO $$
+DECLARE obj record;
+BEGIN
+  FOR obj IN SELECT c.relname, string_agg(quote_ident(a.attname), ',' ORDER BY a.attnum) AS cols
+    FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+    JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped
+    WHERE n.nspname='public' AND c.relkind IN ('r','p') GROUP BY c.relname
+  LOOP
+    EXECUTE format('REVOKE ALL (%s) ON TABLE public.%I FROM PUBLIC, aulas_runtime, aulas_worker, aulas_backup', obj.cols, obj.relname);
+  END LOOP;
+END $$;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC, aulas_runtime, aulas_worker, aulas_backup;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM aulas_runtime, aulas_worker, aulas_backup;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO aulas_runtime, aulas_backup;
 -- Audit identifies an operational actor, not a student-facing resource.
 DO $$ BEGIN
@@ -77,7 +90,23 @@ DO $$ BEGIN
     GRANT SELECT, UPDATE ON assist_reservation TO aulas_worker;
   END IF;
 END $$;
--- Tabelas futuras não recebem escrita automaticamente; migration deve declarar DML.
+-- Tabelas futuras não recebem escrita automaticamente; declarar DML nesta política.
+DO $$ BEGIN
+  IF to_regclass('public.native_listening_position') IS NOT NULL THEN
+    GRANT INSERT, UPDATE ON native_listening_position TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE native_listening_position_id_seq TO aulas_runtime;
+  END IF;
+  IF to_regclass('public.native_listening_version') IS NOT NULL THEN
+    GRANT INSERT, UPDATE ON native_listening_session TO aulas_runtime;
+    GRANT INSERT ON native_listening_response TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE native_listening_session_id_seq, native_listening_response_id_seq TO aulas_runtime;
+  END IF;
+  IF to_regclass('public.listening_resource') IS NOT NULL THEN
+    GRANT INSERT, UPDATE ON listening_progress TO aulas_runtime;
+    GRANT INSERT ON listening_operation TO aulas_runtime;
+    GRANT USAGE ON SEQUENCE listening_progress_id_seq, listening_operation_id_seq TO aulas_runtime;
+  END IF;
+END $$;
 DO $$ BEGIN
   IF to_regclass('public.evidence_content_snapshot') IS NOT NULL THEN
     GRANT INSERT ON evidence_content_snapshot TO aulas_runtime;
@@ -105,6 +134,14 @@ DO $$ BEGIN
     GRANT USAGE ON SEQUENCE account_deletion_file_id_seq TO aulas_runtime;
     GRANT SELECT, UPDATE ON account_deletion_job TO aulas_worker;
     GRANT SELECT, UPDATE, DELETE ON account_deletion_file TO aulas_worker;
+  END IF;
+END $$;
+-- Sprint 52: somente o trigger cria tarefas; API e worker concluem a limpeza.
+DO $$ BEGIN
+  IF to_regclass('public.dialogue_audio_deletion') IS NOT NULL THEN
+    GRANT SELECT, UPDATE, DELETE ON dialogue_audio_deletion TO aulas_runtime, aulas_worker;
+    GRANT EXECUTE ON FUNCTION public.aulas_dialogue_audio_retention(integer, boolean)
+      TO aulas_worker;
   END IF;
 END $$;
 -- DB-45: a API cria/encerra diálogos e insere turnos; só altera a avaliação

@@ -69,6 +69,20 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # Nenhum UPDATE/DDL antes da guarda: jamais trunca respostas silenciosamente.
+    op.execute("LOCK TABLE exercise_attempt, exercise_answer IN SHARE ROW EXCLUSIVE MODE")
+    count = (
+        op.get_bind()
+        .execute(
+            sa.text(
+                "SELECT (SELECT count(*) FROM exercise_attempt WHERE length(answer) > 200) + "
+                "(SELECT count(*) FROM exercise_answer WHERE length(value) > 200)"
+            )
+        )
+        .scalar_one()
+    )
+    if count:
+        raise RuntimeError(f"Downgrade recusado: {count} respostas excedem 200 caracteres.")
     # A versão anterior não sabe renderizar nem validar classification. Ao
     # voltar, degrade o tipo para uma resposta textual e remova filtros de
     # sessões ativas; o próximo seed restaura o contrato estruturado.
@@ -84,7 +98,6 @@ def downgrade() -> None:
         existing_type=sa.Text(),
         type_=sa.String(length=200),
         existing_nullable=False,
-        postgresql_using="left(answer, 200)",
     )
     op.alter_column(
         "exercise_answer",
@@ -92,7 +105,6 @@ def downgrade() -> None:
         existing_type=sa.Text(),
         type_=sa.String(length=200),
         existing_nullable=False,
-        postgresql_using="left(value, 200)",
     )
     op.drop_constraint("ck_exercise_classification_contract", "exercise", type_="check")
     op.drop_column("exercise", "classification_categories")

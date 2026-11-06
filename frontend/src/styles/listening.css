@@ -1,0 +1,16 @@
+.listening-page { max-width: 74rem; margin-inline: auto; }
+.listening-filters { display: flex; gap: 1rem; flex-wrap: wrap; margin-block: 1.5rem; }
+.listening-filters label { display: grid; gap: .4rem; flex: 1 1 15rem; }
+.listening-filters input, .listening-filters select, .listening-card select { width: 100%; min-height: 2.75rem; font: inherit; padding: .6rem; border: 1px solid var(--line, #c8c8c8); border-radius: .4rem; background: var(--paper, #fff); color: inherit; }
+.listening-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1rem; padding: 0; list-style: none; }
+.listening-card { border: 1px solid var(--line, #c8c8c8); border-radius: .7rem; padding: 1.25rem; display: flex; flex-direction: column; align-items: stretch; }
+.listening-card h2 { font-size: 1.25rem; margin-block: .25rem .5rem; }
+.listening-card label { margin-block: 1rem .4rem; font-size: .875rem; }
+.listening-card .muted { font-size: .875rem; }
+.listening-source { margin-top: auto; padding-block: .6rem; font-weight: 600; }
+
+.native-map { margin: 1.5rem 0; }
+.native-map table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.native-map td { border: 1px solid currentColor; padding: .65rem; overflow-wrap: anywhere; }
+.native-map figcaption { margin-top: .75rem; }
+.native-transcript { white-space: pre-line; }

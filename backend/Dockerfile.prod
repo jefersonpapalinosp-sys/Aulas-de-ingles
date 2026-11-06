@@ -3,9 +3,9 @@
 # O contexto de build é a RAIZ do repositório, não backend/, porque o seed
 # vive em seed/ e a imagem precisa ser autocontida: produção não pode
 # depender de um arquivo montado do host.
-FROM public.ecr.aws/docker/library/python:3.12.15-alpine3.24 AS build
+FROM public.ecr.aws/docker/library/python:3.12.15-alpine3.24@sha256:b658b05ce9c4eb97ec6fc19424818a1f31993659c2b505a532f470e83807815d AS build
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.33 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.33@sha256:77280f2f771df71f90786c314fe1bbc1e023feac652969bbf139c280babf2eb7 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 WORKDIR /app
 
@@ -18,7 +18,7 @@ COPY backend/alembic.ini ./
 COPY seed ./seed
 RUN uv sync --frozen --no-dev
 
-FROM public.ecr.aws/docker/library/python:3.12.15-alpine3.24 AS runtime
+FROM public.ecr.aws/docker/library/python:3.12.15-alpine3.24@sha256:b658b05ce9c4eb97ec6fc19424818a1f31993659c2b505a532f470e83807815d AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -32,7 +32,8 @@ RUN apk add --no-cache su-exec=0.3-r0 \
 WORKDIR /app
 COPY --from=build --chown=app:app /app /app
 COPY backend/docker-entrypoint.prod.sh /usr/local/bin/aulas-entrypoint
-RUN chmod 755 /usr/local/bin/aulas-entrypoint
+RUN sed -i 's/\r$//' /usr/local/bin/aulas-entrypoint \
+    && chmod 755 /usr/local/bin/aulas-entrypoint
 
 EXPOSE 8000
 # Workers de verdade; o reload do dev some.

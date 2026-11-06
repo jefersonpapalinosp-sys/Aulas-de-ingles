@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { markRevisionRequired, resetRevisionRequired } from '../api/revisionRequired'
@@ -31,13 +31,13 @@ describe('aviso "Atualize o aplicativo" após 428', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Recarregar aplicativo…' }))
     expect(reload).not.toHaveBeenCalled()
-    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Cancelar' }))
     expect(reload).not.toHaveBeenCalled()
     expect(screen.getByRole('alert')).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: 'Recarregar aplicativo…' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Confirmar recarga' }))
-    expect(reload).toHaveBeenCalledOnce()
+    await userEvent.click(await screen.findByRole('button', { name: 'Confirmar recarga' }))
+    await waitFor(() => expect(reload).toHaveBeenCalledOnce())
     expect(localStorage.getItem('aulas-ingles:writing-draft:v1:7:4')).toBe('meu texto')
     expect(localStorage.getItem('aulas-ingles:activity-event:v1:7:abc')).toContain('15000')
   })

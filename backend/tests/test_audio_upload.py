@@ -1,6 +1,7 @@
 """Recepção limitada sem depender de Content-Length e contrato do proxy."""
 
 import asyncio
+import os
 from pathlib import Path
 
 import pytest
@@ -58,10 +59,11 @@ async def test_exact_limit_without_header_and_empty_or_truncated_body():
 
 @pytest.mark.asyncio
 async def test_slow_or_disconnected_upload_does_not_produce_body(monkeypatch):
-    monkeypatch.setattr(audio_upload, "UPLOAD_TIMEOUT_SECONDS", 0.01)
+    # O timeout cancela no próximo yield, sem depender da velocidade do host.
+    monkeypatch.setattr(audio_upload, "UPLOAD_TIMEOUT_SECONDS", 0)
 
     async def slow():
-        await asyncio.sleep(0.1)
+        await asyncio.Future()
 
     async def disconnect():
         return {"type": "http.disconnect"}
@@ -78,9 +80,7 @@ def test_api_configuration_cannot_exceed_proxy_cap():
     # que o limite exista em algum lugar que as rotas da API incluam, e que ele
     # seja exatamente o do contrato — nem o nome do arquivo nem a ordem.
     raiz = Path(__file__).resolve().parents[2] / "frontend"
-    borda = "\n".join(
-        (raiz / nome).read_text() for nome in ("nginx.conf", "api-proxy.conf")
-    )
+    borda = "\n".join((raiz / nome).read_text() for nome in ("nginx.conf", "api-proxy.conf"))
     assert f"client_max_body_size {audio_upload.MAX_AUDIO_BYTES};" in borda
     # E as duas rotas da API precisam incluir o arquivo que carrega o teto.
     diretivas = "\n".join(
@@ -97,6 +97,7 @@ def test_api_configuration_cannot_exceed_proxy_cap():
             Settings(speaking_max_bytes=limit)
 
 
+@pytest.mark.skipif(os.name != "posix", reason="permissões e fsync de diretório POSIX")
 def test_storage_retry_match_and_private_file(tmp_path):
     storage = AudioStorage(str(tmp_path))
     key = storage.save(b"bounded-synthetic-audio", "audio/webm")
@@ -108,6 +109,7 @@ def test_storage_retry_match_and_private_file(tmp_path):
 
 
 @pytest.mark.parametrize("failure", [1, 2])
+@pytest.mark.skipif(os.name != "posix", reason="fsync de diretório POSIX")
 def test_storage_fsync_failure_never_reports_publication(tmp_path, monkeypatch, failure):
     import os
 

@@ -52,15 +52,13 @@ ps: ## Estado dos containers
 	$(COMPOSE) ps
 
 health: ## Bate no /api/health e mostra a resposta
-	@curl -s -o /dev/stdout -w "\nHTTP %{http_code}\n" http://localhost:$${API_HOST_PORT:-8010}/api/health
+	@curl -s -w "\nHTTP %{http_code}\n" http://localhost:$${API_HOST_PORT:-8010}/api/health
 
 operations-check: ## Avalia readiness/alertas; lê OPERATIONS_TOKEN sem imprimi-lo
 	$(OPS) -m ops.observability_check --base-url "$${OPERATIONS_BASE_URL:-http://127.0.0.1:8011}"
 
 operations-alert: ## Para o cron da VM: silencioso quando está bom, falante quando não
-	@$(OPS) -m ops.observability_check --base-url "$${OPERATIONS_BASE_URL:-http://127.0.0.1:8011}" > /tmp/aulas-gate.json 2>/tmp/aulas-gate.err \
-		|| { echo "ALERTA operacional em $$(date -Is)"; cat /tmp/aulas-gate.json /tmp/aulas-gate.err 2>/dev/null; rm -f /tmp/aulas-gate.json /tmp/aulas-gate.err; exit 1; }
-	@rm -f /tmp/aulas-gate.json /tmp/aulas-gate.err
+	@$(OPS) -m ops.operations_alert --base-url "$${OPERATIONS_BASE_URL:-http://127.0.0.1:8011}"
 
 public-probe: ## Probe externo do domínio público; não usa credencial
 	$(OPS) -m ops.public_probe --base-url "$${PUBLIC_PROBE_ORIGIN:?defina PUBLIC_PROBE_ORIGIN}"
@@ -78,10 +76,10 @@ test-failure-rehearsal: test-api-prepare ## Ensaia falhas controladas de banco, 
 		tests/test_provider_incident.py
 
 easypanel-env: ## Gera segredos locais; origin=https://dominio-publico é opcional
-	python3 -m ops.easypanel_deploy init $(if $(origin),--origin "$(origin)",)
+	$(OPS) -m ops.easypanel_deploy init $(if $(origin),--origin "$(origin)",) $(if $(proxy_cidrs),--trusted-proxy-cidrs "$(proxy_cidrs)",)
 
 easypanel-check: ## Valida o arquivo privado e o Compose público sem exibir segredos
-	python3 -m ops.easypanel_deploy check
+	$(OPS) -m ops.easypanel_deploy check
 
 api: .env ##@ Roda a API no host (contra o Postgres do compose)
 	cd backend && DATABASE_URL=postgresql+asyncpg://aulas:aulas_local@localhost:5433/aulas_ingles \
@@ -236,7 +234,7 @@ upgrade-lab-down: ##@ Para apenas o laboratório DB-42; preserva volumes e recib
 	$(UPGRADE_COMPOSE) down
 
 backup: ## Banco + voz: make backup source=lab|dev|prod|public (local exige manutenção; public lê a VM por SSH)
-	$(if $(filter public,$(source)),$(OPS) -m ops.public_backup capture $(if $(recipient),--recipient-file "$(recipient)",) $(if $(copy_to),--copy-to "$(copy_to)",),$(OPS) -m ops.recovery backup --source "$(source)")
+	$(if $(filter public,$(source)),$(OPS) -m ops.public_backup capture $(if $(recipient),--recipient-file "$(recipient)",) $(if $(copy_to),--copy-to "$(copy_to)",),$(OPS) -m ops.recovery backup --source "$(source)") $(if $(filter true,$(hold)),--hold,)
 
 backup-public-check: ## Pré-voo da stack pública: SSH, containers, papel de backup e revisão, sem capturar
 	$(OPS) -m ops.public_backup check
@@ -287,4 +285,7 @@ deploy-public: ## Publica um SHA de origin/main na stack pública: make deploy-p
 deploy-public-dry-run: ## Imprime os comandos do deploy sem contatar a VM: make deploy-public-dry-run sha=<sha>
 	bash ops/deploy_public.sh --dry-run "$(sha)"
 
-.PHONY: deploy-public deploy-public-dry-run
+deploy-public-rollback: ## Reativa as imagens preservadas, sem rebuild ou downgrade do banco
+	bash ops/deploy_public.sh --rollback
+
+.PHONY: deploy-public deploy-public-dry-run deploy-public-rollback

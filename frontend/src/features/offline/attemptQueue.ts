@@ -23,11 +23,13 @@ export type QueuedAttempt = {
   courseSlug?: string
   lessonNumber?: number
   syncFailure?: AttemptSyncFailure
+  serverFailures?: number
 }
 
 export type AttemptSyncFailure = {
   status: number
   failedAt: string
+  retryable?: boolean
 }
 
 export type SyncedQueuedAttempt = {
@@ -130,6 +132,16 @@ export async function discardBlockedAttempts(userId: number, keys?: string[]): P
   publish('change', { reason: 'discarded' })
 }
 
+export async function resumeQueuedAttempt(userId: number, key: string): Promise<void> {
+  await attemptStore.resume(userId, key)
+  publish('change', { reason: 'queued' })
+}
+
+export async function pauseQueuedAttempt(userId: number, key: string): Promise<void> {
+  await attemptStore.pause(userId, key)
+  publish('change', { reason: 'blocked' })
+}
+
 export async function deleteAttemptQueueForUser(userId: number): Promise<void> {
   await attemptStore.deleteUser(userId)
   publish('change', { reason: 'discarded' })
@@ -172,6 +184,7 @@ async function synchronize(userId: number, inicio: number): Promise<AttemptQueue
       // A fila pertence ao aluno, não ao token disponível quando uma Promise
       // antiga retoma. Logout/troca de conta interrompem também os próximos itens.
       if (!mesmaSessao()) break
+      if (!(await listPendingAttempts(userId)).some((item) => item.idempotencyKey === attempt.idempotencyKey)) continue
       const body: AttemptRequestBody = {
         answer: attempt.answer,
         idempotency_key: attempt.idempotencyKey,
@@ -196,10 +209,16 @@ async function synchronize(userId: number, inicio: number): Promise<AttemptQueue
       const { data, response } = result
 
       if (!data) {
+        if (response && response.status >= 500) {
+          const paused = await attemptStore.serverFailure(userId, attempt.idempotencyKey, response.status)
+          publish('change', { reason: paused ? 'blocked' : 'external' })
+          if (paused) continue
+          break
+        }
         // Falhas permanentes ficam preservadas como bloqueadas, mas não impedem
         // as tentativas seguintes. Isso é essencial quando uma sessão ficou
         // incompatível após uma atualização de conteúdo. Rede, autenticação,
-        // limite e erros 5xx continuam interrompendo a rodada para tentar depois.
+        // limite interrompem a rodada; 5xx persistente é pausado acima.
         if (response && isPermanentClientError(response.status)) {
           await attemptStore.block(userId, attempt.idempotencyKey, response.status)
           publish('change', { reason: 'blocked' })

@@ -1,0 +1,7 @@
+#!/bin/sh
+# Instalar como root:root 0755 em /usr/local/libexec, fora do checkout gravável.
+set -eu
+PATH=/usr/local/bin:/usr/bin:/bin
+export PATH
+cd /opt/aulas-deploy
+exec /usr/bin/python3 -I -c 'import sys; sys.path.insert(0,"/opt/aulas-deploy"); from ops.deploy_server import main; raise SystemExit(main())'

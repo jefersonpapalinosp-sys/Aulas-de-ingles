@@ -1,4 +1,4 @@
-"""Lotes fixos, canceláveis entre transações, sem acesso aos arquivos de áudio."""
+"""Lotes fixos: anonimizam textos e enfileiram a limpeza durável de áudio."""
 
 from datetime import UTC, datetime
 from typing import Any
@@ -10,9 +10,9 @@ from app.core.config import get_settings
 from app.db.models import WorkerHeartbeat
 from app.db.session import get_sessionmaker
 
-# `dialogues` anonimiza texto de turno vencido; os outros apagam ou liberam
-# linha. A ordem importa no `sweep`: ver `scopes` lá.
-SCOPES = ("transcriptions", "reservations", "refresh", "pending", "dialogues")
+# `dialogues` anonimiza texto; `dialogue_audio` remove o registro de gravação
+# e seu trigger enfileira bytes. A tarefa sobrevive ao diálogo e à conta.
+SCOPES = ("transcriptions", "reservations", "refresh", "pending", "dialogues", "dialogue_audio")
 
 
 async def retention_batch(kind: str, *, apply: bool = False, limit: int = 100) -> int:
@@ -21,8 +21,13 @@ async def retention_batch(kind: str, *, apply: bool = False, limit: int = 100) -
     async with get_sessionmaker()() as session, session.begin():
         await session.execute(text("SET LOCAL statement_timeout = '5s'"))
         await session.execute(text("SET LOCAL lock_timeout = '1s'"))
+        query = (
+            "SELECT public.aulas_dialogue_audio_retention(:limit, :apply)"
+            if kind == "dialogue_audio"
+            else "SELECT public.aulas_retention_batch(:kind, :limit, :apply)"
+        )
         result = await session.scalar(
-            text("SELECT public.aulas_retention_batch(:kind, :limit, :apply)"),
+            text(query),
             {"kind": kind, "limit": limit, "apply": apply},
         )
         return int(result or 0)
@@ -30,18 +35,22 @@ async def retention_batch(kind: str, *, apply: bool = False, limit: int = 100) -
 
 async def sweep() -> dict[str, int]:
     from app.services.account_deletion import status_counts
+    from app.services.dialogue_audio_cleanup import status_counts as audio_status_counts
 
     settings = get_settings()
-    # `dialogues` roda sempre, junto dos dois primeiros: ele não apaga linha
-    # nem toca em arquivo — só anonimiza texto já vencido. Deixá-lo atrás da
-    # flag de limpeza manteria transcrição de aluno além do prazo em qualquer
-    # instalação que não a ligou, e o prazo é promessa, não preferência.
-    scopes = SCOPES if settings.maintenance_cleanup_enabled else (*SCOPES[:2], "dialogues")
+    # Texto e gravação seguem expires_at do turno (padrão: 30 dias), mesmo
+    # com a limpeza opcional desligada. Órfãos antigos também são recolhidos.
+    scopes = (
+        SCOPES
+        if settings.maintenance_cleanup_enabled
+        else (*SCOPES[:2], "dialogues", "dialogue_audio")
+    )
     counts = {
         scope: await retention_batch(scope, apply=True, limit=settings.maintenance_batch_size)
         for scope in scopes
     }
     counts.update(await status_counts())
+    counts.update(await audio_status_counts())
     return counts
 
 

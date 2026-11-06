@@ -9,6 +9,9 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 INDEXES = [
+    ("study_active_interval", "ix_study_active_interval_event_id", "(event_id)"),
+    ("review_event", "ix_review_event_item_id", "(item_id)"),
+    ("practice_session", "ix_practice_session_source_session_id", "(source_session_id)"),
     ("notebook_entry", "ix_notebook_entry_user_updated_id", "(user_id, updated_at, id)"),
     ("review_item", "ix_review_item_user_status_created_id", "(user_id, status, created_at, id)"),
     (

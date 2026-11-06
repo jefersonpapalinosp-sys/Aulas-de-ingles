@@ -23,6 +23,20 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 describe('painel da fila', () => {
+  it('permite pular e retomar uma falha do serviço sem oferecer descarte como incompatível', async () => {
+    await queueAttempt(entry(1))
+    await attemptStore.serverFailure(7, 'id-1', 503)
+    const user = userEvent.setup()
+    montar()
+    await user.click(await screen.findByText('Consultar respostas preservadas'))
+    await user.click(screen.getByRole('button', { name: 'Pular por enquanto' }))
+    expect(await screen.findByRole('button', { name: 'Retomar envio' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Descartar incompatíveis…' })).not.toBeInTheDocument()
+    expect(screen.getByText('answer-1')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Retomar envio' }))
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Retomar envio' })).not.toBeInTheDocument())
+    expect(await listQueuedAttempts(7)).toEqual([{ ...entry(1), serverFailures: 0, syncFailure: undefined }])
+  })
   it('expõe motivo, texto e aula; remoção exige confirmação e não afeta pendentes ou outra conta', async () => {
     await Promise.all([queueAttempt(entry(1)), queueAttempt(entry(2)), queueAttempt(entry(1, 8))])
     await attemptStore.block(7, 'id-1', 409)

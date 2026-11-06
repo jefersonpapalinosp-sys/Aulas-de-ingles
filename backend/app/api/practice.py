@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
-from app.db.models import Exercise, Lesson, PracticeSession, PracticeSessionItem
+from app.db.models import Exercise, Lesson, PracticeSession, PracticeSessionItem, User
 from app.db.session import get_session
 from app.domain.enums import ExerciseObjective
 from app.schemas.lesson import ExerciseOut, exercise_public_payload
@@ -289,6 +289,10 @@ async def create_practice_session(
     _private(response)
     lesson = await _lesson_or_404(session, course_slug, number)
     key = str(body.idempotency_key)
+    user_id, lesson_id = usuario.id, lesson.id
+    # Também serializa a ausência da sessão ativa; FOR UPDATE só na sessão
+    # não protege duas criações quando ainda não existe linha.
+    await session.execute(select(User.id).where(User.id == user_id).with_for_update())
     existing_key = await _sessao_por_chave(session, usuario.id, key)
     if existing_key is not None:
         if existing_key.lesson_id != lesson.id or not _same_request(existing_key, body):
@@ -336,14 +340,14 @@ async def create_practice_session(
     except IntegrityError:
         await session.rollback()
         # Corrida de duas abas: a unicidade escolheu uma sessão; devolvemos-a.
-        winner = await _sessao_ativa(session, usuario.id, lesson.id)
+        winner = await _sessao_ativa(session, user_id, lesson_id)
         if winner is None or not _same_request(winner, body):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Outra sessão foi criada ao mesmo tempo.",
             ) from None
         response.status_code = status.HTTP_200_OK
-        return await _practice_out(session, winner, usuario.id)
+        return await _practice_out(session, winner, user_id)
     return await _practice_out(session, practice, usuario.id)
 
 

@@ -7,6 +7,7 @@ com permissão 0600, e é ignorado pelo Git e pelo contexto de build do Docker.
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import os
 import re
 import secrets
@@ -95,9 +96,23 @@ def validate_origin(origin: str) -> None:
         raise ConfigurationError("EASYPANEL_PUBLIC_ORIGIN possui domínio inválido")
 
 
+def validate_proxy_ranges(value: str) -> None:
+    if any(character in value for character in "\r\n"):
+        raise ConfigurationError("EASYPANEL_TRUSTED_PROXY_CIDRS deve ocupar uma única linha")
+    try:
+        networks = [ipaddress.ip_network(item.strip(), strict=False) for item in value.split(",")]
+    except ValueError:
+        raise ConfigurationError("EASYPANEL_TRUSTED_PROXY_CIDRS exige IPs/CIDRs válidos") from None
+    if any(network.prefixlen == 0 for network in networks):
+        raise ConfigurationError(
+            "EASYPANEL_TRUSTED_PROXY_CIDRS não pode confiar em toda a internet"
+        )
+
+
 def validate_values(values: dict[str, str]) -> None:
     origin = values.get("EASYPANEL_PUBLIC_ORIGIN", "")
     validate_origin(origin)
+    validate_proxy_ranges(values.get("EASYPANEL_TRUSTED_PROXY_CIDRS", ""))
 
     secret_values: list[str] = []
     for key in SECRET_KEYS:
@@ -137,12 +152,15 @@ def validate_private_file(path: Path) -> dict[str, str]:
     return values
 
 
-def render_environment(origin: str) -> str:
+def render_environment(origin: str, trusted_proxy_cidrs: str = "") -> str:
     secret_by_key = {key: secrets.token_hex(32) for key in SECRET_KEYS}
     rendered: list[str] = []
     for raw_line in TEMPLATE.read_text(encoding="utf-8").splitlines():
         if raw_line.startswith("EASYPANEL_PUBLIC_ORIGIN="):
             rendered.append(f"EASYPANEL_PUBLIC_ORIGIN={origin}")
+            continue
+        if raw_line.startswith("EASYPANEL_TRUSTED_PROXY_CIDRS="):
+            rendered.append(f"EASYPANEL_TRUSTED_PROXY_CIDRS={trusted_proxy_cidrs}")
             continue
         key = raw_line.split("=", 1)[0]
         if key in secret_by_key:
@@ -152,13 +170,15 @@ def render_environment(origin: str) -> str:
     return "\n".join(rendered) + "\n"
 
 
-def create_environment(path: Path, origin: str) -> None:
+def create_environment(path: Path, origin: str, trusted_proxy_cidrs: str = "") -> None:
     if path.is_symlink() or path.exists():
         raise ConfigurationError(f"recusado sobrescrever arquivo existente: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     if origin != PENDING_ORIGIN:
         validate_origin(origin)
-    contents = render_environment(origin)
+    if trusted_proxy_cidrs:
+        validate_proxy_ranges(trusted_proxy_cidrs)
+    contents = render_environment(origin, trusted_proxy_cidrs)
     descriptor: int | None = None
     try:
         descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -168,7 +188,9 @@ def create_environment(path: Path, origin: str) -> None:
             handle.flush()
             os.fsync(handle.fileno())
         os.chmod(path, 0o600)
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("easypanel_deploy", exc)
         if descriptor is not None:
             os.close(descriptor)
         path.unlink(missing_ok=True)
@@ -209,6 +231,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="origem HTTPS pública exata; sem ela, o check ficará bloqueado",
     )
     init_parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV)
+    init_parser.add_argument("--trusted-proxy-cidrs", default="")
 
     check_parser = subparsers.add_parser("check", help="valida segurança e Compose")
     check_parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV)
@@ -220,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "init":
-            create_environment(args.env_file.resolve(), args.origin)
+            create_environment(args.env_file.resolve(), args.origin, args.trusted_proxy_cidrs)
             print(f"Configuração privada criada com permissão 0600: {args.env_file}")
             print("Os valores não foram exibidos. Guarde uma cópia segura fora do Git.")
             return 0

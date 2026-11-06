@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { invalidateStudy } from '../../api/invalidateStudy'
 import { practicePath } from '../../routing/courseRoutes'
 import {
-  discardBlockedAttempts, listQueuedAttempts, subscribeAttemptQueue, syncAttemptQueue,
+  discardBlockedAttempts, listQueuedAttempts, pauseQueuedAttempt, resumeQueuedAttempt, subscribeAttemptQueue, syncAttemptQueue,
   type AttemptQueueSyncEventDetail, type QueuedAttempt,
 } from './attemptQueue'
 
@@ -35,6 +35,7 @@ export function ConnectivityStatus({ userId, offlineSession }: { userId: number;
   const [confirmation, setConfirmation] = useState<string[] | null>(null)
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
   const blocked = attempts.filter((item) => item.syncFailure)
+  const incompatible = blocked.filter((item) => !item.syncFailure?.retryable)
   const pending = attempts.length - blocked.length
 
   const refreshPending = useCallback(async () => {
@@ -131,7 +132,15 @@ export function ConnectivityStatus({ userId, offlineSession }: { userId: number;
         <ul>
           {attempts.map((item) => <li key={item.idempotencyKey}>
             <strong>{item.lessonNumber ? `Aula ${item.lessonNumber} · ` : ''}Exercício {item.exerciseId}</strong>
-            <p>{item.syncFailure ? `${failureReason(item.syncFailure.status)} (HTTP ${item.syncFailure.status})` : 'Aguardando sincronização.'}</p>
+            <p>{item.syncFailure?.retryable ? 'Envio pausado após falha do serviço. Sua resposta está preservada.'
+              : item.syncFailure ? `${failureReason(item.syncFailure.status)} (HTTP ${item.syncFailure.status})`
+              : item.serverFailures ? `O serviço falhou ${item.serverFailures} vez(es). A resposta continua pendente.` : 'Aguardando sincronização.'}</p>
+            {(item.syncFailure?.retryable || (!item.syncFailure && !!item.serverFailures)) && <button type="button" disabled={syncing} onClick={() => {
+              const action = item.syncFailure?.retryable ? resumeQueuedAttempt : pauseQueuedAttempt
+              void action(userId, item.idempotencyKey).then(refreshPending).catch((err: unknown) => {
+                if (alive.current) setError(err instanceof Error ? err.message : 'Não foi possível atualizar a fila.')
+              })
+            }}>{item.syncFailure?.retryable ? 'Retomar envio' : 'Pular por enquanto'}</button>}
             <pre>{item.answer}</pre>
             {item.courseSlug && item.lessonNumber && (
               <Link to={practicePath(item.courseSlug, item.lessonNumber)}>Abrir exercícios da aula</Link>
@@ -139,8 +148,8 @@ export function ConnectivityStatus({ userId, offlineSession }: { userId: number;
           </li>)}
         </ul>
       </details>}
-      {blocked.length > 0 && !confirmation && (
-        <button type="button" onClick={() => setConfirmation(blocked.map((item) => item.idempotencyKey))}>Descartar incompatíveis…</button>
+      {incompatible.length > 0 && !confirmation && (
+        <button type="button" onClick={() => setConfirmation(incompatible.map((item) => item.idempotencyKey))}>Descartar incompatíveis…</button>
       )}
       {confirmation && <div>
         <p>Remover {confirmation.length} resposta(s) bloqueada(s) desta fila? Copie o texto antes; esta remoção não pode ser desfeita pela interface. Pendências não serão apagadas.</p>

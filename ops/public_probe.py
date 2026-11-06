@@ -146,7 +146,9 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         report = evaluate(*fetch(url))
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("public_probe", exc)
         # Sem URL, sem corpo, sem cabeçalho: o log do CI é público.
         print("Probe do domínio público falhou antes de avaliar.", file=sys.stderr)
         return 2

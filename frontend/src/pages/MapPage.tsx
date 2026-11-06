@@ -4,6 +4,7 @@ import { useCourseCurriculum } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
 import { lessonProgressKey } from '../features/curriculum/curriculum'
 import { TodayPanel } from '../features/plan/TodayPanel'
+import { useOnline } from '../features/offline/useOnline'
 import {
   courseCompletionPath,
   coursePath,
@@ -21,21 +22,19 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
   const unitSlug = params.unitSlug
   const curriculum = useCourseCurriculum(courseSlug)
   const progress = useProgress(courseSlug)
+  const online = useOnline()
 
   if (curriculum.isPending) return <Carregando oque="o mapa do curso" />
-  if (curriculum.error) {
+  if (curriculum.error && !curriculum.data) {
     return (
       <Erro erro={curriculum.error} aoTentarDeNovo={() => void curriculum.refetch()} />
     )
   }
-  if (progress.isPending) return <Carregando oque="o progresso deste curso" />
-  if (progress.error) {
-    return <Erro erro={progress.error} aoTentarDeNovo={() => void progress.refetch()} />
-  }
+  const progressAvailable = online && !progress.error && !!progress.data
 
   const studied = new Set(
-    progress.data?.lessons
-      .filter((lesson) => lesson.studied)
+    (progressAvailable ? progress.data?.lessons : undefined)
+      ?.filter((lesson) => lesson.studied)
       .map((lesson) => lessonProgressKey(lesson.course_slug, lesson.lesson_number)) ?? [],
   )
   const selectedUnit = unitSlug
@@ -65,6 +64,10 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
         className={showToday ? 'map-section course-map' : 'course-map'}
         aria-labelledby="map-title"
       >
+        {!progressAvailable && <div role="status" className="media-fallback">
+          <p>{online ? 'Progresso indisponível no momento.' : 'Você está offline. O mapa usa o conteúdo já consultado.'} As aulas continuam acessíveis; o progresso não está confirmado. Áudios e páginas ainda não visitadas podem exigir internet.</p>
+          {online && <button type="button" onClick={() => void progress.refetch()}>Atualizar progresso</button>}
+        </div>}
         <p className="eyebrow">
           {curriculum.data.course.title} · {curriculum.data.course.proficiency_label} ·{' '}
           {curriculum.data.course.provider}
@@ -98,7 +101,7 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                   ? 'Em preparação'
                   : 'Sem aulas publicadas'
                 : completed === 0
-                ? 'Não iniciada'
+                ? progressAvailable ? 'Não iniciada' : 'Progresso não confirmado'
                 : completed === unit.lessons.length
                   ? unit.review
                     ? 'Aulas concluídas · checkpoint disponível'
@@ -118,7 +121,7 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                   <strong>
                     {unit.published_lessons === 0
                       ? `${unit.total_lessons} ${unit.total_lessons === 1 ? 'aula planejada' : 'aulas planejadas'}`
-                      : `${completed}/${unit.lessons.length} ${unit.lessons.length === 1 ? 'aula' : 'aulas'}`}
+                      : progressAvailable ? `${completed}/${unit.lessons.length} ${unit.lessons.length === 1 ? 'aula' : 'aulas'}` : `${unit.lessons.length} aulas disponíveis`}
                   </strong>
                 </span>
               </>
@@ -196,7 +199,7 @@ export function MapPage({ showToday = false }: { showToday?: boolean }) {
                   <span className="at">{lesson.title}</span>
                   <span className="ag">{lesson.grammar_tag}</span>
                   <span className={`ap ${isStudied ? 'is-studied' : ''}`}>
-                    {isStudied ? 'Estudada' : 'Pendente'}
+                    {!progressAvailable ? 'Não confirmado' : isStudied ? 'Estudada' : 'Pendente'}
                   </span>
                 </Link>
               )

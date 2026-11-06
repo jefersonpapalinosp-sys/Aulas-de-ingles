@@ -61,6 +61,9 @@ async def usage(
     """Consumo do dia. Sem `modalities`, soma todas — útil para manutenção e
     relatório; um teto sempre pergunta pelo seu próprio grupo."""
     now = now or datetime.now(UTC)
+    if now.tzinfo is None:
+        raise ValueError("Quota exige instante com fuso horário.")
+    now = now.astimezone(UTC)
     start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     reserved = (AssistReservation.state == "reserved") & (AssistReservation.expires_at > now)
     consumed = AssistReservation.state == "consumed"

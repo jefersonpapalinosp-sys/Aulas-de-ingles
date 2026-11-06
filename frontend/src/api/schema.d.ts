@@ -502,6 +502,211 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/listening/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Config */
+        get: operations["config_api_listening_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_api_listening_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/native": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog */
+        get: operations["catalog_api_listening_native_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/native-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Config */
+        get: operations["config_api_listening_native_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/native/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detail */
+        get: operations["detail_api_listening_native__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/native/{slug}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start */
+        post: operations["start_api_listening_native__slug__sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/native/{slug}/versions/{version}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audio */
+        get: operations["audio_api_listening_native__slug__versions__version__audio_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resources */
+        get: operations["resources_api_listening_resources_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/resources/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resource */
+        get: operations["resource_api_listening_resources__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Native Session */
+        get: operations["get_native_session_api_listening_sessions__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/sessions/{session_id}/position": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Position */
+        get: operations["read_position_api_listening_sessions__session_id__position_get"];
+        /** Save Position */
+        put: operations["save_position_api_listening_sessions__session_id__position_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listening/sessions/{session_id}/responses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Respond */
+        post: operations["respond_api_listening_sessions__session_id__responses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/live": {
         parameters: {
             query?: never;
@@ -617,6 +822,40 @@ export interface paths {
         /** Historical Content */
         get: operations["historical_content_api_me_history__kind___evidence_id__content_get"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/listening/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Progress */
+        get: operations["progress_api_me_listening_progress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/listening/progress/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Progress */
+        put: operations["update_progress_api_me_listening_progress__slug__put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1160,11 +1399,7 @@ export interface paths {
         post?: never;
         /**
          * Excluir Dialogo
-         * @description Apaga o diálogo e, por cascata do PostgreSQL, seus turnos.
-         *
-         *     O áudio segue a política de speaking: o arquivo sai pelo caminho de
-         *     exclusão de gravação, não daqui, para não criar um segundo lugar que
-         *     remove bytes do aluno.
+         * @description Apaga o diálogo e gravações; falhas de arquivo ficam na fila durável.
          */
         delete: operations["excluir_dialogo_api_speaking_dialogues__dialogue_id__delete"];
         options?: never;
@@ -1530,7 +1765,7 @@ export interface components {
              * Code
              * @enum {string}
              */
-            code: "session_invalid" | "invalid_credentials" | "conflict" | "service_unavailable";
+            code: "session_invalid" | "invalid_credentials" | "password_mismatch" | "conflict" | "service_unavailable";
             /** Detail */
             detail: string | {
                 [key: string]: unknown;
@@ -2821,6 +3056,85 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** ListeningConfigOut */
+        ListeningConfigOut: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /** ListeningProgressIn */
+        ListeningProgressIn: {
+            /** Expected Revision */
+            expected_revision: number;
+            /**
+             * Operation Key
+             * Format: uuid
+             */
+            operation_key: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "not_started" | "in_progress" | "completed";
+        };
+        /** ListeningProgressOut */
+        ListeningProgressOut: {
+            /** Resource Slug */
+            resource_slug: string;
+            /** Revision */
+            revision: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "not_started" | "in_progress" | "completed";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ListeningResourceOut */
+        ListeningResourceOut: {
+            /**
+             * Availability
+             * @enum {string}
+             */
+            availability: "available" | "unavailable";
+            /**
+             * Checked On
+             * Format: date
+             */
+            checked_on: string;
+            /** Description */
+            description: string;
+            /**
+             * Level
+             * @constant
+             */
+            level: "A2";
+            /**
+             * Mode
+             * @constant
+             */
+            mode: "external_link";
+            /** Position */
+            position: number;
+            /** Slug */
+            slug: string;
+            /**
+             * Source
+             * @constant
+             */
+            source: "Test-English";
+            /** Source Url */
+            source_url: string;
+            /** Title */
+            title: string;
+            /** Topic */
+            topic: string;
+            /** Version */
+            version: number;
+        };
         /** LoginIn */
         LoginIn: {
             /**
@@ -2882,6 +3196,225 @@ export interface components {
             revision: number;
             /** Updated At */
             updated_at: string | null;
+        };
+        /** NativeActivityOut */
+        NativeActivityOut: {
+            /** Attribution */
+            attribution: string;
+            /** Audio Duration Seconds */
+            audio_duration_seconds: number;
+            /** Instructions */
+            instructions: string;
+            /** Level */
+            level: string;
+            /** Map Description */
+            map_description: string | null;
+            /** Map Rows */
+            map_rows: string[][];
+            /** Preview */
+            preview: boolean;
+            /** Questions */
+            questions: components["schemas"]["NativeQuestion"][];
+            /** Rights Note */
+            rights_note: string;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+            /** Topic */
+            topic: string;
+            /** Version */
+            version: number;
+        };
+        /** NativeConfigOut */
+        NativeConfigOut: {
+            /** Enabled */
+            enabled: boolean;
+            /** Preview */
+            preview: boolean;
+        };
+        /** NativeFeedbackOut */
+        NativeFeedbackOut: {
+            /** Answer Ids */
+            answer_ids: string[];
+            /** Correct */
+            correct: boolean;
+            /** Explanation */
+            explanation: string;
+            /** First Response */
+            first_response: boolean;
+            /** Kind */
+            kind: string;
+            /** Question Id */
+            question_id: string;
+            /** Selected Ids */
+            selected_ids: string[];
+        };
+        /** NativeHistoryItem */
+        NativeHistoryItem: {
+            /** Answered */
+            answered: number;
+            /** Available */
+            available: boolean;
+            /** Completed */
+            completed: boolean;
+            /** First Score */
+            first_score: number;
+            /** Last Response At */
+            last_response_at: string | null;
+            /** Latest Score */
+            latest_score: number;
+            /** Position Seconds */
+            position_seconds: number;
+            /** Session Id */
+            session_id: number;
+            /** Slug */
+            slug: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Support Revealed */
+            support_revealed: boolean;
+            /** Title */
+            title: string;
+            /** Total */
+            total: number;
+            /** Version */
+            version: number;
+        };
+        /** NativeHistoryOut */
+        NativeHistoryOut: {
+            /** Attempts */
+            attempts: number;
+            /** First Attempt At */
+            first_attempt_at: string | null;
+            /** Items */
+            items: components["schemas"]["NativeHistoryItem"][];
+            /** Last Attempt At */
+            last_attempt_at: string | null;
+            /** Next Before */
+            next_before: number | null;
+        };
+        /** NativeOption */
+        NativeOption: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+        };
+        /**
+         * NativePositionIn
+         * @description Mesmo protocolo de sincronização do player; identidade é uma sessão nativa.
+         */
+        NativePositionIn: {
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /**
+             * Completed
+             * @default false
+             */
+            completed: boolean;
+            /** Expected Revision */
+            expected_revision: number;
+            /**
+             * Operation Key
+             * Format: uuid
+             */
+            operation_key: string;
+            /** Position Seconds */
+            position_seconds: number;
+        };
+        /** NativePositionOut */
+        NativePositionOut: {
+            /** Changed At */
+            changed_at: string | null;
+            /** Completed */
+            completed: boolean;
+            /** Operation Key */
+            operation_key: string | null;
+            /** Position Seconds */
+            position_seconds: number;
+            /** Revision */
+            revision: number;
+            /** Session Id */
+            session_id: number;
+            /** Updated At */
+            updated_at: string | null;
+        };
+        /** NativeQuestion */
+        NativeQuestion: {
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "single_choice" | "multi_select";
+            /** Options */
+            options: components["schemas"]["NativeOption"][];
+            /** Prompt */
+            prompt: string;
+            /** Selection Count */
+            selection_count: number;
+        };
+        /** NativeResponseIn */
+        NativeResponseIn: {
+            /** Expected Revision */
+            expected_revision: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "answer" | "reveal" | "transcript";
+            /**
+             * Operation Key
+             * Format: uuid
+             */
+            operation_key: string;
+            /** Question Id */
+            question_id?: string | null;
+            /** Selected Ids */
+            selected_ids?: string[];
+        };
+        /** NativeSessionOut */
+        NativeSessionOut: {
+            activity: components["schemas"]["NativeActivityOut"];
+            /** Completed */
+            completed: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Feedback */
+            feedback: components["schemas"]["NativeFeedbackOut"][];
+            /** Id */
+            id: number;
+            /** Revision */
+            revision: number;
+            /** Score */
+            score: number;
+            /** Support Revealed */
+            support_revealed: boolean;
+            /** Total */
+            total: number;
+            /** Transcript */
+            transcript: string | null;
+        };
+        /** NativeStartIn */
+        NativeStartIn: {
+            /**
+             * Operation Key
+             * Format: uuid
+             */
+            operation_key: string;
+            /** Version */
+            version: number;
         };
         /** NextCourseOut */
         NextCourseOut: {
@@ -3062,12 +3595,32 @@ export interface components {
             lesson_progress: {
                 [key: string]: unknown;
             }[];
+            /** Listening Operations */
+            listening_operations?: {
+                [key: string]: unknown;
+            }[];
+            /** Listening Progress */
+            listening_progress?: {
+                [key: string]: unknown;
+            }[];
             /** Login Sessions */
             login_sessions?: {
                 [key: string]: unknown;
             }[];
             /** Media Progress */
             media_progress: {
+                [key: string]: unknown;
+            }[];
+            /** Native Listening Positions */
+            native_listening_positions?: {
+                [key: string]: unknown;
+            }[];
+            /** Native Listening Responses */
+            native_listening_responses?: {
+                [key: string]: unknown;
+            }[];
+            /** Native Listening Sessions */
+            native_listening_sessions?: {
                 [key: string]: unknown;
             }[];
             /** Notebook */
@@ -5947,6 +6500,731 @@ export interface operations {
             };
         };
     };
+    config_api_listening_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningConfigOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    history_api_listening_history_get: {
+        parameters: {
+            query?: {
+                before?: number | null;
+                limit?: number;
+                slug?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeHistoryOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    catalog_api_listening_native_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeActivityOut"][];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    config_api_listening_native_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeConfigOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    detail_api_listening_native__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeActivityOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    start_api_listening_native__slug__sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NativeStartIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeSessionOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    audio_api_listening_native__slug__versions__version__audio_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "audio/mpeg": string;
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    resources_api_listening_resources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningResourceOut"][];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    resource_api_listening_resources__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningResourceOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    get_native_session_api_listening_sessions__session_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeSessionOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    read_position_api_listening_sessions__session_id__position_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativePositionOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    save_position_api_listening_sessions__session_id__position_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NativePositionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativePositionOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    respond_api_listening_sessions__session_id__responses_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NativeResponseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeSessionOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
     live_api_live_get: {
         parameters: {
             query?: never;
@@ -6020,6 +7298,15 @@ export interface operations {
             };
             /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Senha de confirmação incorreta. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6301,6 +7588,115 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HistoricalContentOut"];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    progress_api_me_listening_progress_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningProgressOut"][];
+                };
+            };
+            /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Conflito; preservar o trabalho e conferir o estado antes de reenviar. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+            /** @description Indisponibilidade; preservar o trabalho. Não implica sessão revogada. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorOut"];
+                };
+            };
+        };
+    };
+    update_progress_api_me_listening_progress__slug__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ListeningProgressIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListeningProgressOut"];
                 };
             };
             /** @description Sessão inválida ou credenciais recusadas; não repetir indefinidamente. */

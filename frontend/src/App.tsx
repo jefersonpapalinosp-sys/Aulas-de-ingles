@@ -9,7 +9,7 @@ import { ConnectivityStatus } from './features/offline/ConnectivityStatus'
 import { PwaStatus } from './features/offline/PwaStatus'
 import { SessionStatus } from './components/SessionStatus'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { RouteStatus } from './components/RouteStatus'
+import { RouteStatus, routeLabel } from './components/RouteStatus'
 import { UpdateRequired } from './components/UpdateRequired'
 
 /**
@@ -26,6 +26,8 @@ const PracticePage = lazy(() => import('./pages/PracticePage').then((m) => ({ de
 const ReviewPage = lazy(() => import('./pages/ReviewPage').then((m) => ({ default: m.ReviewPage })))
 const StudyPage = lazy(() => import('./pages/StudyPage').then((m) => ({ default: m.StudyPage })))
 const TestPage = lazy(() => import('./pages/TestPage').then((m) => ({ default: m.TestPage })))
+const NativeListeningPage = lazy(() => import('./pages/NativeListeningPage').then(m => ({ default: m.NativeListeningPage })))
+const ListeningPage = lazy(() => import('./pages/ListeningPage').then((m) => ({ default: m.ListeningPage })))
 import {
   assessmentPath,
   DEFAULT_COURSE_SLUG,
@@ -49,7 +51,7 @@ export default function App() {
   const location = useLocation()
   // Enquanto o /refresh não responde, mostrar o login faria a tela piscar
   // para quem já tem sessão válida no cookie.
-  if (carregando) return <p className="booting">Carregando…</p>
+  if (carregando) return <p className="booting" role="status">Verificando sua sessão…</p>
   if (!usuario) return <><SessionStatus /><LoginPage /></>
 
   return (
@@ -66,7 +68,7 @@ export default function App() {
           <SessionStatus />
           <UpdateRequired />
           <ErrorBoundary resetKey={`${usuario.id}:${location.pathname}`} home={<Link to="/inicio">Voltar ao início</Link>}>
-          <Suspense fallback={<p className="muted" role="status">Carregando…</p>}>
+          <Suspense fallback={<p className="muted" role="status">Carregando: {routeLabel(location.pathname)}…</p>}>
             <Routes>
             <Route path="/" element={<Navigate to="/inicio" replace />} />
             <Route path="/inicio" element={<MapPage showToday />} />
@@ -113,6 +115,8 @@ export default function App() {
             <Route path="/revisar" element={<ReviewPage />} />
             <Route path="/caderno" element={<NotebookPage />} />
             <Route path="/meus-dados" element={<PersonalDataPage />} />
+            <Route path="/listening/:slug" element={<NativeListeningPage />} />
+            <Route path="/listening" element={<ListeningPage />} />
             <Route
               path="/prova"
               element={

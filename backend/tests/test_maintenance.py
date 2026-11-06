@@ -152,9 +152,13 @@ async def test_worker_once_cleans_without_enabled_provider(session, monkeypatch)
 
 
 async def test_worker_recovers_database_failure_and_remains_cancellable(monkeypatch):
+    monkeypatch.setattr(
+        transcription_queue.dialogue_audio_cleanup, "process_batch", AsyncMock(return_value=0)
+    )
     sweep = AsyncMock(side_effect=[ConnectionError("private diagnostic"), {}])
     monkeypatch.setattr(maintenance, "sweep", sweep)
-    monkeypatch.setattr(maintenance, "heartbeat", AsyncMock())
+    heartbeat = AsyncMock()
+    monkeypatch.setattr(maintenance, "heartbeat", heartbeat)
     monkeypatch.setattr(transcription_queue, "dispose_engine", AsyncMock())
     monkeypatch.setattr(
         transcription_queue.account_deletion,
@@ -170,8 +174,9 @@ async def test_worker_recovers_database_failure_and_remains_cancellable(monkeypa
     monkeypatch.setattr(transcription_queue.asyncio, "sleep", pause)
     with pytest.raises(asyncio.CancelledError):
         await transcription_queue.run_transcription_worker()
-    assert sweep.await_count == 2
-    assert 2 <= pause.await_args.args[0] <= 3
+    assert sweep.await_count == 1
+    heartbeat.assert_awaited_once_with()
+    pause.assert_not_awaited()
 
 
 async def test_claim_ignores_expired_jobs_before_dispatch(session):
@@ -193,12 +198,17 @@ async def test_additional_cleanup_is_opt_in(monkeypatch, session):
     batch = AsyncMock(return_value=0)
     monkeypatch.setattr(maintenance, "retention_batch", batch)
     monkeypatch.setattr(get_settings(), "maintenance_cleanup_enabled", False)
-    deletion_metrics = {"account_deletions_pending", "account_deletions_failed"}
+    deletion_metrics = {
+        "account_deletions_pending",
+        "account_deletions_failed",
+        "dialogue_audio_pending",
+        "dialogue_audio_failed",
+    }
     # `dialogues` entra mesmo com a limpeza desligada: ele só anonimiza texto
     # de turno já vencido, sem apagar linha nem tocar arquivo. Deixá-lo atrás
     # da flag faria uma instalação que não a ligou guardar transcrição de aluno
     # além do prazo — e o prazo é promessa, não preferência de instalação.
-    sempre = {"transcriptions", "reservations", "dialogues"}
+    sempre = {"transcriptions", "reservations", "dialogues", "dialogue_audio"}
     assert set(await maintenance.sweep()) == sempre | deletion_metrics
     monkeypatch.setattr(get_settings(), "maintenance_cleanup_enabled", True)
     assert set(await maintenance.sweep()) == set(maintenance.SCOPES) | deletion_metrics

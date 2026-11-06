@@ -24,12 +24,14 @@ function validCommand(value: unknown): value is PositionCommand {
     && typeof c.completed === 'boolean' && (!c.completed || c.position_seconds === 0)
 }
 
-/** Cada comando tem chave própria: abas não sobrescrevem o trabalho pendente.
- * A revisão é imutável, mesmo após perder a resposta. Um conflito exige escolha. */
+/** Só a última posição ainda não enviada por esta instância pode ser combinada.
+ * Web Locks exclui envio por outra aba durante a alteração. Após despacho, chave,
+ * conteúdo e revisão são imutáveis, inclusive quando a resposta se perde. */
 export class PositionSync {
   readonly prefix: string
   private cacheKey: string
-  private queue: PositionCommand[] = []
+  private queue: (PositionCommand & { dispatched?: boolean })[] = []
+  private mutableKey: string | null = null
   private memoryOnly = new Set<string>()
   private remote: Position | null = null
   private legacy: number | null = null
@@ -39,9 +41,11 @@ export class PositionSync {
   private state: PositionState = { position: 0, completed: false, pending: 0, ready: false, confirmed: false,
     conflict: null, error: '', warning: '' }
 
-  constructor(readonly userId: number, readonly mediaId: number, private transport: Transport) {
-    this.prefix = `aulas-ingles:media-pending:v2:${userId}:${mediaId}:`
-    this.cacheKey = `aulas-ingles:media-position:v2:${userId}:${mediaId}`
+  constructor(readonly userId: number, readonly mediaId: number, private transport: Transport, namespace = 'media') {
+    this.prefix = namespace === 'media' ? `aulas-ingles:media-pending:v2:${userId}:${mediaId}:`
+      : `aulas-ingles:native-pending:v1:${userId}:${namespace}:${mediaId}:`
+    this.cacheKey = namespace === 'media' ? `aulas-ingles:media-position:v2:${userId}:${mediaId}`
+      : `aulas-ingles:native-position:v1:${userId}:${namespace}:${mediaId}`
     const cached = readLocal(this.cacheKey)
     if (cached.ok && cached.value) {
       try {
@@ -50,7 +54,7 @@ export class PositionSync {
           && value.media_id === mediaId) this.remote = value
       } catch { this.state.warning = 'Posição local inválida preservada; confira a conta.' }
     } else if (!cached.ok) this.state.warning = cached.error
-    if (!this.remote) {
+    if (!this.remote && namespace === 'media') {
       const old = readLocal(`aulas-ingles:media-position:v1:${userId}:${mediaId}`)
       if (old.ok && old.value && Number.isFinite(Number(old.value)) && Number(old.value) > 0) this.legacy = Number(old.value)
     }
@@ -87,26 +91,47 @@ export class PositionSync {
     if (this.queue.length) this.legacy = null
   }
 
-  record(position: number, completed = false) {
+  private async exclusive<T>(work: () => Promise<T> | T, phase = 'write'): Promise<T> {
+    return await (navigator.locks
+      ? navigator.locks.request(this.prefix + phase, { mode: 'exclusive' }, work)
+      : Promise.resolve().then(work))
+  }
+
+  record = async (position: number, completed = false) => {
+    try { await this.exclusive(() => this.append(position, completed)) }
+    catch { this.publish({ error: 'Não foi possível guardar a posição. Mantenha esta página aberta e tente novamente.' }) }
+    if (this.transport.allowed() && !this.busy) void this.sync()
+  }
+
+  private append(position: number, completed = false) {
     if (!Number.isFinite(position) || position < 0) return
     this.reload()
-    if (this.queue.length >= 1000) {
+    const tail = this.queue.at(-1)
+    const combine = !!navigator.locks && tail?.operation_key === this.mutableKey && !tail?.dispatched
+      && !tail?.completed && !completed
+    if (!combine && this.queue.length >= 1000) {
       this.publish({ error: 'Fila de posições cheia. Reconecte e resolva a sincronização antes de salvar mais.' })
       return
     }
-    const tail = this.queue.at(-1)
     const command: PositionCommand = { position_seconds: completed ? 0 : position, completed,
-      expected_revision: tail ? tail.expected_revision + 1 : this.remote?.revision ?? 0,
+      expected_revision: combine ? tail.expected_revision : tail ? tail.expected_revision + 1 : this.remote?.revision ?? 0,
       operation_key: crypto.randomUUID(), changed_at: new Date().toISOString() }
-    this.queue.push(command)
+    if (combine) this.queue[this.queue.length - 1] = command
+    else this.queue.push(command)
+    this.mutableKey = command.operation_key
     this.legacy = null
     const result = writeLocal(this.prefix + command.operation_key, JSON.stringify(command))
     if (!result.ok) this.memoryOnly.add(command.operation_key)
+    if (combine && result.ok) {
+      const removed = removeLocal(this.prefix + tail.operation_key)
+      if (removed.ok) this.memoryOnly.delete(tail.operation_key)
+      else this.state.warning = removed.error
+    }
     this.publish({ ready: true, confirmed: false, warning: result.ok ? this.state.warning : `${result.error} A retomada local não está garantida.` })
-    void this.sync()
   }
 
   private acknowledge(command: PositionCommand, remote: Position): boolean {
+    this.reload()
     this.remote = remote
     const cached = writeLocal(this.cacheKey, JSON.stringify(remote))
     // Sem cache confirmado mantemos o recibo pendente para recuperar a resposta.
@@ -119,6 +144,11 @@ export class PositionSync {
   }
 
   sync = async () => {
+    try { await this.exclusive(this.synchronize, 'sync') }
+    catch { this.publish({ error: 'Sincronização pausada. As posições locais foram preservadas.' }) }
+  }
+
+  private synchronize = async () => {
     if (this.busy || !this.active || !this.transport.allowed() || this.state.conflict) return
     this.busy = true
     try {
@@ -130,18 +160,33 @@ export class PositionSync {
         if (remote.updated_at !== null) { this.publish({ conflict: remote, ready: true }); return }
         const legacy = this.legacy
         this.legacy = null
-        this.record(legacy)
+        await this.exclusive(() => this.append(legacy))
       }
       this.publish({ ready: true, error: '' })
-      while (this.queue.length > 0 && this.active && this.transport.allowed()) {
-        const command = this.queue[0]!
+      while (this.active && this.transport.allowed()) {
+        const command = await this.exclusive(() => {
+          this.reload()
+          const next = this.queue[0]
+          if (!next) return
+          const current = this.remote!
+          if (current.operation_key !== next.operation_key && next.expected_revision !== current.revision) throw new PositionConflict(current)
+          // A marca é durável antes de liberar o lock curto para novas posições.
+          next.dispatched = true
+          const marked = writeLocal(this.prefix + next.operation_key, JSON.stringify(next))
+          if (!marked.ok) { this.publish({ warning: marked.error }); return }
+          return next
+        })
+        if (!command || !this.active || !this.transport.allowed()) break
         if (this.remote.operation_key === command.operation_key) {
-          if (!this.acknowledge(command, this.remote)) break
+          const current = this.remote
+          if (!await this.exclusive(() => this.acknowledge(command, current))) break
         } else {
-          if (command.expected_revision !== this.remote.revision) throw new PositionConflict(this.remote)
-          const saved = await this.transport.save(command)
+          const body: PositionCommand = { position_seconds: command.position_seconds,
+            completed: command.completed, expected_revision: command.expected_revision,
+            operation_key: command.operation_key, changed_at: command.changed_at }
+          const saved = await this.transport.save(body)
           if (!this.active || !this.transport.allowed()) return
-          if (!this.acknowledge(command, saved)) break
+          if (!await this.exclusive(() => this.acknowledge(command, saved))) break
         }
         this.publish()
       }
@@ -159,6 +204,11 @@ export class PositionSync {
 
   /** Escolha explícita substitui só os comandos que foram mostrados nesta aba. */
   resolve = async (choice: 'local' | 'remote') => {
+    try { await this.exclusive(() => this.resolveLocked(choice), 'sync') }
+    catch { this.publish({ error: 'Não foi possível resolver a posição. As posições locais foram preservadas.' }) }
+  }
+
+  private resolveLocked = async (choice: 'local' | 'remote') => {
     if (this.busy || !this.transport.allowed()) return
     this.busy = true
     const chosen = { position: this.state.position, completed: this.state.completed }
@@ -166,27 +216,29 @@ export class PositionSync {
     try {
       const remote = await this.transport.read()
       if (!this.active || !this.transport.allowed()) return
-      // Registra a escolha antes de remover comandos anteriores, inclusive após crash.
-      const replacement: PositionCommand | null = choice === 'local' ? {
-        position_seconds: chosen.position, completed: chosen.completed, expected_revision: remote.revision,
-        operation_key: crypto.randomUUID(), changed_at: new Date().toISOString(),
-      } : null
-      const saved = replacement
-        ? writeLocal(this.prefix + replacement.operation_key, JSON.stringify(replacement))
-        : writeLocal(this.cacheKey, JSON.stringify(remote))
-      if (!saved.ok) { this.publish({ warning: saved.error }); return }
-      for (const command of pending) {
-        const removed = removeLocal(this.prefix + command.operation_key)
-        if (!removed.ok) { this.publish({ warning: removed.error }); return }
-        this.memoryOnly.delete(command.operation_key)
-      }
-      const newer = this.queue.filter((c) => !pending.some((old) => old.operation_key === c.operation_key))
-      this.queue = [...(replacement ? [replacement] : []), ...newer]
-      this.remote = remote
-      this.legacy = null
-      this.publish({ conflict: null, error: '', ready: true })
+      await this.exclusive(() => {
+        // Registra a escolha antes de remover comandos anteriores, inclusive após crash.
+        const replacement: PositionCommand | null = choice === 'local' ? {
+          position_seconds: chosen.position, completed: chosen.completed, expected_revision: remote.revision,
+          operation_key: crypto.randomUUID(), changed_at: new Date().toISOString(),
+        } : null
+        const saved = replacement
+          ? writeLocal(this.prefix + replacement.operation_key, JSON.stringify(replacement))
+          : writeLocal(this.cacheKey, JSON.stringify(remote))
+        if (!saved.ok) { this.publish({ warning: saved.error }); return }
+        for (const command of pending) {
+          const removed = removeLocal(this.prefix + command.operation_key)
+          if (!removed.ok) { this.publish({ warning: removed.error }); return }
+          this.memoryOnly.delete(command.operation_key)
+        }
+        const newer = this.queue.filter((c) => !pending.some((old) => old.operation_key === c.operation_key))
+        this.queue = [...(replacement ? [replacement] : []), ...newer]
+        this.remote = remote
+        this.legacy = null
+        this.publish({ conflict: null, error: '', ready: true })
+      })
     } catch { this.publish({ error: 'Não foi possível confirmar a posição da conta. Suas posições locais foram preservadas.' }) }
     finally { this.busy = false }
-    if (!this.state.conflict) await this.sync()
+    if (!this.state.conflict) await this.synchronize()
   }
 }

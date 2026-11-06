@@ -5,6 +5,16 @@ Level 1 e 30 do Level 2**, com 16 checkpoints no recorte publicado.
 Inclui vocabulário com IPA, exercícios corrigidos no servidor, áudio, escrita,
 revisão espaçada, Caderno, progresso e exportação dos dados do aluno.
 
+A Sprint 59 acrescenta o [Listening rápido A2](docs/listening_rapido.md):
+31 links externos com busca e progresso autodeclarado, independente dos cursos.
+O módulo depende da ativação por configuração após migration, seed e aceite.
+
+A Sprint 60 prepara o [piloto nativo de listening](docs/listening_nativo.md):
+três atividades próprias com áudio, exercícios e correção pelo servidor.
+A Sprint 61 acrescenta histórico, retomada de áudio e rascunhos/respostas offline
+por conta. O piloto permanece desativado; os rascunhos aguardam revisão editorial
+e de direitos. Veja as [evidências técnicas](docs/execucao_sprint61_2026-11-06.md).
+
 Recursos assistidos são opcionais e permanecem desligados por padrão. Testes
 automatizados não substituem a homologação pedagógica, o piloto ou a avaliação
 com leitores de tela. O certificado interno não é um certificado da VOA.
@@ -72,7 +82,9 @@ fallback para outro banco. Detalhes na
 
 O CI verifica contrato, lint/tipos, cobertura, navegadores, segurança, backup,
 restore e upgrade com leitura pela aplicação anterior. Resultados e pendências
-por entrega estão no [plano vigente](docs/plano_sprints_44_49_frentes_e_assistente_de_fala_2026-10-21.md).
+por entrega estão no [histórico das Sprints 44–49](docs/plano_sprints_44_49_frentes_e_assistente_de_fala_2026-10-21.md).
+O [plano vigente das Sprints 50–61](docs/plano_sprints_50_58_auditoria_2026-11-04.md)
+reúne as correções da auditoria e o módulo planejado de prática rápida de listening.
 
 ## Arquitetura
 
@@ -105,6 +117,20 @@ Texto, áudio e credenciais do aluno não entram em logs.
 - [Política de migrações do storage](docs/politica_migracoes_storage_2026-10-29.md).
 - [Rotação de segredos: ensaio e ordem operacional](docs/rotacao_segredos_2026-10-29.md).
 - [Plano e pendências das Sprints 44–49](docs/plano_sprints_44_49_frentes_e_assistente_de_fala_2026-10-21.md).
+- [Plano vigente: auditoria e listening rápido, Sprints 50–61](docs/plano_sprints_50_58_auditoria_2026-11-04.md).
+- [Implementação e validações: Sprint 50 e atualização urgente da PWA](docs/execucao_sprint50_e_fe01_2026-11-05.md).
+- [Implementação e validações: Sprint 51 — borda, sessão e autenticação](docs/execucao_sprint51_2026-11-05.md).
+- [Implementação e validações: Sprint 52 — privacidade, retenção e exclusão](docs/execucao_sprint52_2026-11-05.md).
+- [Implementação e validações: Sprint 53 — concorrência e continuidade do worker](docs/execucao_sprint53_2026-11-05.md).
+- [Implementação e validações: Sprint 54 — backup e recuperação](docs/execucao_sprint54_2026-11-05.md).
+- [Implementação e validações: Sprint 55 — deploy seguro](docs/execucao_sprint55_2026-11-05.md).
+- [Implementação e validações: Sprint 56 — migrations, grants e JWT](docs/execucao_sprint56_2026-11-05.md).
+- [Implementação e validações: Sprint 57 — PWA e offline](docs/execucao_sprint57_2026-11-05.md).
+- [Runbook de migrations, grants e rotação JWT](docs/migrations_grants_jwt_sprint56_2026-11-05.md).
+- [Runbook de deploy restrito e rollback](docs/deploy_seguro_2026-11-05.md).
+- [Triagem dos 12 PRs de dependências e branches](docs/triagem_dependencias_sprint55_2026-11-05.md).
+- [Runbook de backup no servidor e recuperação pública](docs/backup_recuperacao_publica_2026-11-05.md).
+- [Análise do módulo de listening rápido e integração com Test-English](docs/analise_modulo_listening_rapido_2026-11-05.md).
 - [Changelog das entregas](docs/changelog.md).
 - [Histórico operacional das Sprints 37–44](docs/historico_operacao_sprints_37_44.md).
 

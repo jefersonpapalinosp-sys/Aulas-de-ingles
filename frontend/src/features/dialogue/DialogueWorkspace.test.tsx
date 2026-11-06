@@ -19,7 +19,7 @@ vi.mock('../speaking/voiceRecorder', () => ({ VoiceRecorder: class {
 vi.mock('../../api/client', () => ({ api: { GET: vi.fn() } }))
 
 beforeEach(() => {
-  vi.mocked(api.GET).mockImplementation((path) => Promise.resolve({ data: path === '/api/speaking/policy' ? policyFixture : statusFixture, response: new Response() }))
+  vi.mocked(api.GET<'/api/speaking/policy' | '/api/speaking/dialogues/status', Record<string, never>>).mockImplementation((path) => Promise.resolve({ data: path === '/api/speaking/policy' ? policyFixture : statusFixture, response: new Response() }))
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
   URL.createObjectURL = vi.fn(() => 'blob:synthetic')
   URL.revokeObjectURL = vi.fn()
@@ -115,7 +115,7 @@ it('offline preserva o rascunho e impede envio até a conexão voltar', async ()
 })
 
 it('oculta a entrada e não abre diálogo quando a flag está desligada', async () => {
-  vi.mocked(api.GET).mockResolvedValue({ data: { ...statusFixture, enabled: false }, response: new Response() })
+  vi.mocked(api.GET<'/api/speaking/policy' | '/api/speaking/dialogues/status', Record<string, never>>).mockResolvedValue({ data: { ...statusFixture, enabled: false }, response: new Response() })
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(<QueryClientProvider client={client}><DialogueEntry userId={3} lesson={lessonFixture} /></QueryClientProvider>)
   await waitFor(() => expect(api.GET).toHaveBeenCalled())

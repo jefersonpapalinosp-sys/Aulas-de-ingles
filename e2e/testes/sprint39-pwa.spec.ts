@@ -17,6 +17,8 @@ async function prepare(page: Page) {
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
   await page.getByText('Offline e atualizações', { exact: true }).click()
+  // O painel pode ter consultado o cache antes da resposta editorial desta navegação.
+  await page.getByRole('button', { name: 'Verificar disponibilidade e versão' }).click()
   await expect(page.getByText(/Texto desta aula armazenado até/)).toBeVisible()
 }
 
@@ -28,7 +30,7 @@ test('Sprint 39E: texto visitado e jornada abrem offline; aula ausente informa e
   await expect(page.getByRole('heading', { name: 'Take Me Out to the Ball Game' })).toBeVisible()
   await page.getByText('Offline e atualizações', { exact: true }).click()
   await expect(page.getByText(/Texto desta aula armazenado até/)).toBeVisible()
-  await expect(page.getByText(/Áudio e vídeo continuam online/)).toBeVisible()
+  await expect(page.getByText(/Áudio, vídeo e gravações exigem rede/)).toBeVisible()
   await page.goto('/cursos/voa-level-1/aulas/32')
   await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible()
   await page.getByText('Offline e atualizações', { exact: true }).click()

@@ -15,6 +15,7 @@ Nenhum texto de turno, transcrição ou resposta do provedor entra em log aqui �
 só identificadores e códigos. É requisito do ADR e tem teste próprio.
 """
 
+import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -283,6 +284,7 @@ async def partner_reply(
     *,
     idempotency_key: str,
     allow_provider: bool = True,
+    release_connection: bool = False,
 ) -> TurnOutcome:
     """Avalia a fala do aluno e produz o turno do parceiro.
 
@@ -331,7 +333,11 @@ async def partner_reply(
             cost_known=True,
         )
 
-    partner, custo, custo_conhecido, erro = _provider_turn(
+    # Tudo necessário já está em memória. Não retenha conexão/locks durante HTTP.
+    if release_connection:
+        await session.commit()
+    partner, custo, custo_conhecido, erro = await asyncio.to_thread(
+        _provider_turn,
         settings,
         brief,
         dialogue.mode,
@@ -548,6 +554,8 @@ async def resolve_turn(
     dialogue: SpeakingDialogue,
     brief: LessonBrief,
     transcript: str,
+    *,
+    outcome: TurnOutcome | None = None,
 ) -> TurnOutcome:
     """Fecha o turno com o resultado: checks, resposta do parceiro e estado.
 
@@ -555,11 +563,6 @@ async def resolve_turn(
     no Roteiro, pela própria rota. O turno sai de `pending` com tudo gravado —
     é o `GET` do diálogo que o cliente consulta depois.
     """
-    # Ordem única também para o worker: dois turnos do mesmo diálogo não
-    # podem observar contagens diferentes ao criar a revisão recorrente.
-    await session.execute(
-        select(SpeakingDialogue.id).where(SpeakingDialogue.id == dialogue.id).with_for_update()
-    )
     await session.refresh(turn)
     if turn.state == "completed":
         # Reentrega do job não chama o provedor nem cobra novamente. Checks
@@ -586,14 +589,28 @@ async def resolve_turn(
             cost_microusd=0,
             cost_known=True,
         )
-    outcome = await partner_reply(
-        session,
-        dialogue,
-        brief,
-        turn.position,
-        transcript,
-        idempotency_key=f"turn-{turn.id}",
+    if outcome is None:
+        outcome = await partner_reply(
+            session,
+            dialogue,
+            brief,
+            turn.position,
+            transcript,
+            idempotency_key=f"turn-{turn.id}",
+        )
+    # Somente a persistência e a criação de evidências ficam sob lock.
+    await session.execute(
+        select(SpeakingDialogue.id).where(SpeakingDialogue.id == dialogue.id).with_for_update()
     )
+    turn = (
+        await session.scalars(
+            select(DialogueTurn)
+            .where(DialogueTurn.id == turn.id)
+            .execution_options(populate_existing=True)
+        )
+    ).one()
+    if turn.state == "completed":
+        return await resolve_turn(session, turn, dialogue, brief, transcript, outcome=outcome)
     _apply_outcome(turn, dialogue, outcome, transcript)
     await session.flush()
     await dialogue_learning.record_learning(session, dialogue, turn)

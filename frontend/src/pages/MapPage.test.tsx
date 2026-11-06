@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -35,6 +35,7 @@ let studiedLessonNumbers: number[] = []
 let courseStatus: 'planned' | 'published' = 'published'
 let publishedLessonCount = 10
 let requestedTodayCourse = ''
+let progressUnavailable = false
 
 vi.mock('../api/queries', () => ({
   useCourseCurriculum: () => ({
@@ -122,7 +123,9 @@ vi.mock('../api/queries', () => ({
 
 vi.mock('../api/progress', () => ({
   useProgress: () => ({
-    data: {
+    error: progressUnavailable ? new TypeError('Failed to fetch') : null,
+    refetch: vi.fn(),
+    data: progressUnavailable ? undefined : {
       studied_count: 0,
       total_lessons: 5,
       attempts: 0,
@@ -220,11 +223,40 @@ vi.mock('../api/dashboard', () => ({
 
 describe('MapPage / painel Hoje', () => {
   beforeEach(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+    progressUnavailable = false
     savePlan.mockReset()
     studiedLessonNumbers = []
     courseStatus = 'published'
     publishedLessonCount = 10
     requestedTodayCourse = ''
+  })
+
+  it('mantém Hoje e o mapa offline sem inventar progresso e retoma o painel ao reconectar', () => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    studiedLessonNumbers = [31]
+    render(<MapPage showToday />, { wrapper: MemoryRouter })
+    expect(screen.getByRole('heading', { name: 'Hoje' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Escolher uma aula no mapa' })).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Você está offline')
+    expect(screen.queryByText('Concluída')).not.toBeInTheDocument()
+    expect(screen.queryByText(/18 min/)).not.toBeInTheDocument()
+    expect(screen.getAllByText('Progresso não confirmado').length).toBeGreaterThan(0)
+    act(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+      window.dispatchEvent(new Event('online'))
+    })
+    expect(screen.getByRole('link', { name: 'Estudar agora' })).toBeInTheDocument()
+  })
+
+  it('mantém as aulas navegáveis quando a consulta privada de progresso falha', () => {
+    progressUnavailable = true
+    render(<MemoryRouter initialEntries={['/cursos/voa-level-1/unidades/31-40']}><Routes>
+      <Route path="/cursos/:courseSlug/unidades/:unitSlug" element={<MapPage />} />
+    </Routes></MemoryRouter>)
+    expect(screen.getByRole('link', { name: /Take Me Out to the Ball Game/ })).toHaveAttribute('href', '/cursos/voa-level-1/aulas/31')
+    expect(screen.getByText('Não confirmado')).toBeInTheDocument()
+    expect(screen.queryByText('Pendente')).not.toBeInTheDocument()
   })
 
   it('explica a recomendação e converte o link antigo para a rota canônica', () => {

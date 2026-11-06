@@ -9,6 +9,8 @@ import {
   getAttemptQueueStats,
   listQueuedAttempts,
   queueAttempt,
+  pauseQueuedAttempt,
+  resumeQueuedAttempt,
   syncAttemptQueue,
   type AttemptQueueSyncEventDetail,
 } from './attemptQueue'
@@ -33,6 +35,36 @@ beforeEach(() => {
 })
 
 describe('fila offline de tentativas', () => {
+  it('conta 5xx por resposta, pausa após três falhas e permite sincronizar a próxima', async () => {
+    await queueAttempt(attempt)
+    await queueAttempt({ ...attempt, idempotencyKey: 'offline-2' })
+    vi.mocked(api.POST).mockResolvedValue({ response: new Response(null, { status: 503 }) })
+    await syncAttemptQueue(7); await syncAttemptQueue(7)
+    expect((await listQueuedAttempts(7))[0]).toMatchObject({ serverFailures: 2 })
+    vi.mocked(api.POST).mockResolvedValueOnce({ response: new Response(null, { status: 503 }) })
+      .mockResolvedValueOnce({ data: { attempt_id: 501, correct: true }, response: new Response() })
+    expect(await syncAttemptQueue(7)).toMatchObject({ synced: 1, blocked: 1, pending: 0, rejectedAttempts: [] })
+    expect((await listQueuedAttempts(7))[0]).toMatchObject({ answer: 'faster', serverFailures: 3, syncFailure: { retryable: true } })
+    await discardBlockedAttempts(7)
+    expect(await listQueuedAttempts(7)).toHaveLength(1)
+    await resumeQueuedAttempt(7, attempt.idempotencyKey)
+    vi.mocked(api.POST).mockResolvedValue({ data: { attempt_id: 502, correct: true }, response: new Response() })
+    expect(await syncAttemptQueue(7)).toMatchObject({ synced: 1, pending: 0, blocked: 0 })
+    expect(api.POST).toHaveBeenLastCalledWith('/api/exercises/{exercise_id}/attempt', {
+      params: { path: { exercise_id: attempt.exerciseId } },
+      body: { answer: attempt.answer, idempotency_key: attempt.idempotencyKey },
+    })
+  })
+  it('pula uma falha transitória sem excluir texto nem alterar a fila de outra conta', async () => {
+    await queueAttempt(attempt)
+    await queueAttempt({ ...attempt, userId: 8 })
+    vi.mocked(api.POST).mockResolvedValue({ response: new Response(null, { status: 500 }) })
+    await syncAttemptQueue(7)
+    await pauseQueuedAttempt(7, attempt.idempotencyKey)
+    expect(await getAttemptQueueStats(7)).toEqual({ pending: 0, blocked: 1, total: 1 })
+    expect(await listQueuedAttempts(8)).toEqual([{ ...attempt, userId: 8 }])
+    expect((await listQueuedAttempts(7))[0]?.answer).toBe(attempt.answer)
+  })
   it('separa a fila por aluno e não duplica a mesma chave idempotente', async () => {
     const listener = vi.fn()
     window.addEventListener(ATTEMPT_QUEUE_EVENT, listener)

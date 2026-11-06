@@ -1,13 +1,18 @@
 """Decodificação real e limites do processo, sem som/voz pessoal."""
 
 import asyncio
+import os
 
 import pytest
 from fastapi import HTTPException
 
 from app.services import audio_inspection as service
-from app.services.audio_probe_worker import InvalidAudio, inspect
 from tests.audio_samples import encoded, wav
+
+if os.name == "posix":
+    from app.services.audio_probe_worker import InvalidAudio, inspect
+
+pytestmark = pytest.mark.skipif(os.name != "posix", reason="worker limita recursos via POSIX")
 
 
 @pytest.mark.parametrize(
@@ -39,6 +44,16 @@ async def test_real_container_codec_and_decoded_duration(kind, mime):
         (wav(30_001), "audio/wav", 422),
         (wav(rate=96000), "audio/wav", 415),
         (bytes(2_000_001), "audio/wav", 413),
+    ],
+    ids=[
+        "invalid-header",
+        "remote-playlist",
+        "filesystem-playlist",
+        "truncated",
+        "wrong-mime",
+        "too-long",
+        "high-sample-rate",
+        "oversized",
     ],
 )
 async def test_bad_files_fake_mime_oversize_duration_and_external_playlists(data, mime, code):

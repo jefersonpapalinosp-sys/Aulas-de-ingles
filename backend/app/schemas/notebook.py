@@ -109,6 +109,11 @@ class PersonalDataExportOut(BaseModel):
     content_snapshots: list[dict[str, Any]] = Field(default_factory=list)
     dialogues: list[dict[str, Any]] = Field(default_factory=list)
     dialogue_turns: list[dict[str, Any]] = Field(default_factory=list)
+    native_listening_positions: list[dict[str, Any]] = Field(default_factory=list)
+    native_listening_sessions: list[dict[str, Any]] = Field(default_factory=list)
+    native_listening_responses: list[dict[str, Any]] = Field(default_factory=list)
+    listening_progress: list[dict[str, Any]] = Field(default_factory=list)
+    listening_operations: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AccountDeletionIn(BaseModel):

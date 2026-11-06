@@ -16,6 +16,7 @@ from app.core.config import Settings, get_settings
 from app.db.models import AuthRateBucket, RefreshSession, ReviewEvent, ReviewItem, StepProgress
 from app.main import create_app
 from app.services.auth_limits import password_work
+from tests.http_assertions import assert_status
 from tests.test_auth import auth, credenciais, registrar
 from tests.test_writing import proposta
 
@@ -57,7 +58,7 @@ async def test_refresh_converges_and_logout_revokes_family(client, session):
         "/api/auth/refresh", headers={"Cookie": f"refresh_token={successor}"}
     )
     assert result.cookies.get("refresh_token") == successor
-    await client.post("/api/auth/logout", headers={"Cookie": f"refresh_token={old}"})
+    assert_status(await client.post("/api/auth/logout", headers={"Cookie": f"refresh_token={old}"}))
     for cookie in (old, successor):
         assert (
             await client.post("/api/auth/refresh", headers={"Cookie": f"refresh_token={cookie}"})

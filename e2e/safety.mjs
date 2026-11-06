@@ -29,7 +29,7 @@ export function assertTarget(value = BASE_URL) {
 
 export function assertLocalEndpoint(endpoint) {
   assert.ok(typeof endpoint === 'string' && endpoint.startsWith('unix:///'),
-    'E2E exige Docker local via socket Unix (macOS/Linux); endpoints TCP/SSH são recusados.')
+    'E2E exige Docker local via socket Unix (Linux/WSL/macOS). No Windows, execute pelo WSL; TCP/SSH são recusados.')
 }
 
 export function assertInitSource(source, platform = process.platform) {
@@ -166,6 +166,12 @@ export function assertPublicReadiness(health) {
   }
 }
 
+export function safetyFailureMessage(error) {
+  return error instanceof assert.AssertionError && !error.generatedMessage
+    ? error.message.split('\n')[0]
+    : 'Não foi possível verificar o Docker local e os recursos descartáveis.'
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     assertTarget(process.env.E2E_BASE_URL)
@@ -173,7 +179,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     else if (process.argv[2] === 'stack') await checkStack()
     else throw new Error('uso: node e2e/safety.mjs resources | stack')
     console.log('✓ isolamento E2E verificado')
-  } catch {
+  } catch (error) {
+    // Asserções com mensagem explícita descrevem a guarda; nunca exibir actual,
+    // expected, stack ou stderr do Docker, que podem conter dados do host errado.
+    console.error(safetyFailureMessage(error))
     console.error('E2E bloqueado: alvo/recursos não verificados. Use exclusivamente make e2e-up e a porta 5198.')
     process.exitCode = 1
   }

@@ -4,6 +4,7 @@ import { useSessao } from '../api/auth'
 import { useMarcarEstudada, useSalvarStudySession, useStudySession } from '../api/progress'
 import { useLesson } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
+import { scrollToTop } from '../lib/scroll'
 import { ActiveStudyTime } from '../features/study-session/ActiveStudyTime'
 import { StepContent } from '../features/study-session/StepContent'
 import { StepNavigator } from '../features/study-session/StepNavigator'
@@ -135,7 +136,7 @@ export function StudyPage() {
     if (next) {
       persist(next.slug, completed)
       void navigate(studyPath(courseSlug, lessonNumber, next.slug))
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      scrollToTop()
       return
     }
 
@@ -147,7 +148,7 @@ export function StudyPage() {
     if (!previous) return
     persist(previous.slug, completedSteps)
     void navigate(studyPath(courseSlug, lessonNumber, previous.slug))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollToTop()
   }
 
   return (

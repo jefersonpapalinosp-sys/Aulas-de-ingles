@@ -1,0 +1,332 @@
+[
+  {
+    "slug": "hotel-riverside",
+    "title": "A room at the Riverside Hotel",
+    "topic": "Hospedagem",
+    "instructions": "Listen to a guest and a receptionist. Choose one answer for each question.",
+    "transcript": "Receptionist: Good evening. Welcome to the Riverside Hotel. How can I help you?\nGuest: Hello. My name is Alex Green. I have a reservation for two nights.\nReceptionist: Let me check. Yes, a room for one person, from Friday to Sunday.\nGuest: That is right. Is breakfast included?\nReceptionist: Yes. Breakfast is in the restaurant on the ground floor. It starts at seven, but on Saturday it starts at half past seven.\nGuest: Great. I am meeting a friend at nine tomorrow, so that is fine. Does the room have a view of the river?\nReceptionist: No, your room looks onto the garden. It is very quiet. Your room number is two hundred and six, on the second floor. The lift is next to the stairs.\nGuest: Thank you. What time do I need to leave the room on Sunday?\nReceptionist: Before eleven in the morning. You can leave your bags here after that.\nGuest: Perfect. My train is at three, so I will do that.",
+    "questions": [
+      {
+        "id": "stay",
+        "prompt": "How many nights is Alex staying?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "one",
+            "label": "One"
+          },
+          {
+            "id": "two",
+            "label": "Two"
+          },
+          {
+            "id": "three",
+            "label": "Three"
+          }
+        ],
+        "answer_ids": [
+          "two"
+        ],
+        "explanation": "Alex reservou duas noites, de sexta a domingo."
+      },
+      {
+        "id": "breakfast",
+        "prompt": "What time does breakfast start tomorrow?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "seven",
+            "label": "7:00"
+          },
+          {
+            "id": "half-seven",
+            "label": "7:30"
+          },
+          {
+            "id": "nine",
+            "label": "9:00"
+          }
+        ],
+        "answer_ids": [
+          "half-seven"
+        ],
+        "explanation": "A chegada é na sexta-feira. No sábado, o café começa às 7h30."
+      },
+      {
+        "id": "view",
+        "prompt": "What can Alex see from the room?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "river",
+            "label": "The river"
+          },
+          {
+            "id": "street",
+            "label": "The street"
+          },
+          {
+            "id": "garden",
+            "label": "The garden"
+          }
+        ],
+        "answer_ids": [
+          "garden"
+        ],
+        "explanation": "A recepcionista informa que o quarto tem vista para o jardim."
+      },
+      {
+        "id": "checkout",
+        "prompt": "When must Alex leave the room on Sunday?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "eleven",
+            "label": "Before 11:00 a.m."
+          },
+          {
+            "id": "three",
+            "label": "At 3:00 p.m."
+          },
+          {
+            "id": "nine",
+            "label": "At 9:00 a.m."
+          }
+        ],
+        "answer_ids": [
+          "eleven"
+        ],
+        "explanation": "O quarto deve ser liberado antes das 11h. O trem das 15h é uma informação diferente."
+      }
+    ],
+    "version": 1,
+    "level": "A2",
+    "status": "draft",
+    "audio_file": "hotel-riverside-v1.mp3",
+    "audio_sha256": "4f92449be1d522e9d539877682e098c7dcef421b118af1f8c7356c9c0117461d",
+    "audio_duration_seconds": 77.11,
+    "attribution": "Texto original preparado para Aulas de Inglês; voz sintética de prévia.",
+    "rights_note": "Rascunho para revisão local. Revisão humana de conteúdo, áudio e direitos pendente; publicação não autorizada por este pacote.",
+    "audio_provenance": "eSpeak NG 1.51.1 (Alpine package 1.51.1-r1), en-us, 135 words/minute; FFmpeg 6.1.1, libmp3lame 64 kbps; 2026-11-05. One synthetic voice reads the speaker labels. Local review preview only.",
+    "reviewed_by": null,
+    "reviewed_on": null,
+    "rights_approved": false
+  },
+  {
+    "slug": "caminho-ao-museu",
+    "title": "Find the museum",
+    "topic": "Orientação urbana",
+    "instructions": "Use the map and listen to the directions. North is at the top. Start at the station.",
+    "map_rows": [
+      [
+        "A · Library",
+        "B · Museum",
+        "C · Park"
+      ],
+      [
+        "D · Café",
+        "E · Town hall",
+        "F · Shop"
+      ],
+      [
+        "G · Station",
+        "H · Hotel",
+        "I · Bank"
+      ]
+    ],
+    "map_description": "North is at the top. West to east: north row A Library, B Museum, C Park; middle row D Café, E Town hall, F Shop; south row G Station, H Hotel, I Bank. Streets run between the columns and rows. Each move to the next row or column is one block.",
+    "transcript": "Visitor: Excuse me. Can you help me find the museum? I am outside the station.\nLocal: Of course. Look at the map. The station is in the bottom left corner. The top of the map is north.\nVisitor: Yes, I can see it. Do I go east, past the hotel?\nLocal: No. First go north one block. You will reach the cafe. There is a small bus stop outside it.\nVisitor: Is that where I turn?\nLocal: Yes. Turn east and walk one block to the town hall. Then go north one more block. The museum is there, between the library and the park.\nVisitor: Thank you. Can I get a drink at the museum?\nLocal: There is no cafe inside it. You can have a drink at the cafe near the station before you go.\nVisitor: Good idea. Is the museum open this afternoon?\nLocal: Yes. It closes at five, and the last tickets are sold at four thirty.\nVisitor: It is only two now. I have plenty of time.",
+    "questions": [
+      {
+        "id": "first-stop",
+        "prompt": "Which place do you reach after going north one block from the station?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "a",
+            "label": "A · Library"
+          },
+          {
+            "id": "d",
+            "label": "D · Café"
+          },
+          {
+            "id": "h",
+            "label": "H · Hotel"
+          }
+        ],
+        "answer_ids": [
+          "d"
+        ],
+        "explanation": "O café está uma quadra ao norte da estação."
+      },
+      {
+        "id": "museum",
+        "prompt": "Which letter marks the end of the route?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "a",
+            "label": "A"
+          },
+          {
+            "id": "b",
+            "label": "B"
+          },
+          {
+            "id": "e",
+            "label": "E"
+          },
+          {
+            "id": "f",
+            "label": "F"
+          }
+        ],
+        "answer_ids": [
+          "b"
+        ],
+        "explanation": "O percurso é G → D → E → B: norte, leste e norte novamente."
+      },
+      {
+        "id": "tickets",
+        "prompt": "What is the latest time to buy a ticket?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "two",
+            "label": "2:00 p.m."
+          },
+          {
+            "id": "half-four",
+            "label": "4:30 p.m."
+          },
+          {
+            "id": "five",
+            "label": "5:00 p.m."
+          }
+        ],
+        "answer_ids": [
+          "half-four"
+        ],
+        "explanation": "Os últimos ingressos são vendidos às 16h30. O museu fecha às 17h."
+      }
+    ],
+    "version": 1,
+    "level": "A2",
+    "status": "draft",
+    "audio_file": "caminho-ao-museu-v1.mp3",
+    "audio_sha256": "97d90ce322ccd2d0746cb13037347802ad5cebc54ee4d374916adb9b5b60d927",
+    "audio_duration_seconds": 77.34,
+    "attribution": "Texto original preparado para Aulas de Inglês; voz sintética de prévia.",
+    "rights_note": "Rascunho para revisão local. Revisão humana de conteúdo, áudio e direitos pendente; publicação não autorizada por este pacote.",
+    "audio_provenance": "eSpeak NG 1.51.1 (Alpine package 1.51.1-r1), en-us, 135 words/minute; FFmpeg 6.1.1, libmp3lame 64 kbps; 2026-11-05. One synthetic voice reads the speaker labels. Local review preview only.",
+    "reviewed_by": null,
+    "reviewed_on": null,
+    "rights_approved": false
+  },
+  {
+    "slug": "sabado-com-amigos",
+    "title": "A Saturday with friends",
+    "topic": "Lazer",
+    "instructions": "Listen to two friends making plans. For the first question, choose exactly TWO activities.",
+    "transcript": "Maya: What shall we do on Saturday, Ben? We could go swimming or see a film.\nBen: The swimming pool is closed this weekend. And I went to the cinema yesterday.\nMaya: What about a bike ride? The weather report says it will be sunny in the morning.\nBen: That sounds good. We can ride beside the river. But I need to be home by one because my sister is visiting.\nMaya: Let's meet at the park gate at ten, then. We can ride for an hour and have lunch at the market afterwards.\nBen: I like that idea. The market has a new food stall with vegetable sandwiches. My sister told me they are very good.\nMaya: Great. Shall I bring my camera?\nBen: Yes, and bring a bottle of water. There are no shops along the river path.\nMaya: I will. Do we need to book a table at the market?\nBen: No. We can sit on the benches outside. I will bring some cash because the new stall does not take cards yet.\nMaya: See you at ten on Saturday!",
+    "questions": [
+      {
+        "id": "activities",
+        "prompt": "Which TWO activities do Maya and Ben agree to do?",
+        "kind": "multi_select",
+        "selection_count": 2,
+        "options": [
+          {
+            "id": "swim",
+            "label": "Go swimming"
+          },
+          {
+            "id": "film",
+            "label": "Watch a film"
+          },
+          {
+            "id": "bike",
+            "label": "Ride bikes"
+          },
+          {
+            "id": "lunch",
+            "label": "Have lunch at the market"
+          }
+        ],
+        "answer_ids": [
+          "bike",
+          "lunch"
+        ],
+        "explanation": "Eles combinam pedalar e almoçar no mercado. A piscina está fechada e Ben já foi ao cinema."
+      },
+      {
+        "id": "meeting",
+        "prompt": "Where will they meet?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "park",
+            "label": "At the park gate"
+          },
+          {
+            "id": "market",
+            "label": "Inside the market"
+          },
+          {
+            "id": "home",
+            "label": "At Ben’s home"
+          }
+        ],
+        "answer_ids": [
+          "park"
+        ],
+        "explanation": "Maya propõe o portão do parque como ponto de encontro, às dez."
+      },
+      {
+        "id": "cash",
+        "prompt": "Why is Ben bringing cash?",
+        "kind": "single_choice",
+        "selection_count": 1,
+        "options": [
+          {
+            "id": "cards",
+            "label": "The food stall does not take cards"
+          },
+          {
+            "id": "bike",
+            "label": "He needs to rent a bike"
+          },
+          {
+            "id": "pool",
+            "label": "He needs to pay for swimming"
+          }
+        ],
+        "answer_ids": [
+          "cards"
+        ],
+        "explanation": "A barraca de comida ainda não aceita cartões."
+      }
+    ],
+    "version": 1,
+    "level": "A2",
+    "status": "draft",
+    "audio_file": "sabado-com-amigos-v1.mp3",
+    "audio_sha256": "c86e7fb82d057f877895ad7374b7a74656bb65bd872dc1e444354e5f9795bf61",
+    "audio_duration_seconds": 77.8,
+    "attribution": "Texto original preparado para Aulas de Inglês; voz sintética de prévia.",
+    "rights_note": "Rascunho para revisão local. Revisão humana de conteúdo, áudio e direitos pendente; publicação não autorizada por este pacote.",
+    "audio_provenance": "eSpeak NG 1.51.1 (Alpine package 1.51.1-r1), en-us, 135 words/minute; FFmpeg 6.1.1, libmp3lame 64 kbps; 2026-11-05. One synthetic voice reads the speaker labels. Local review preview only.",
+    "reviewed_by": null,
+    "reviewed_on": null,
+    "rights_approved": false
+  }
+]

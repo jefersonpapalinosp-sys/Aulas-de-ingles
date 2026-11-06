@@ -21,6 +21,7 @@ from app.db.models import (
 from app.db.session import get_sessionmaker
 from app.services import personal_export
 from tests.audio_samples import encoded
+from tests.http_assertions import assert_status
 from tests.test_assist_quota import audio_attempt
 from tests.test_course_reviews import REVIEW_URL, attempt_body
 from tests.test_notebook import conta
@@ -66,7 +67,7 @@ async def test_new_modalities_orphan_feedback_and_account_isolation(client, sess
     review = (await client.get(REVIEW_URL, headers=a)).json()
     checkpoint = await client.post(f"{REVIEW_URL}/attempts", headers=a, json=attempt_body(review))
     assert checkpoint.status_code == 201, checkpoint.text
-    await client.put("/api/lessons/31/studied", headers=a)
+    assert_status(await client.put("/api/lessons/31/studied", headers=a))
     due = (await client.get("/api/review/due", headers=a)).json()[0]
     grade = await client.post(
         f"/api/review/{due['id']}/grade",

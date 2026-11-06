@@ -36,12 +36,13 @@ def normalizar(resposta: str) -> str:
     """Põe a resposta na forma em que duas respostas podem ser comparadas.
 
     Ignora caixa, pontuação, espaço sobrando e o tipo de apóstrofo — digitar
-    `Won't`, `wont` ou `won’t` não pode ser a diferença entre acerto e erro.
+    `Won't`, `won‘t` ou `won’t` não pode ser a diferença entre acerto e erro.
+    Preserva o apóstrofo: `we'll` e `well` continuam sendo palavras diferentes.
     O que ela **não** ignora é acento: em inglês isso não aparece, e apagar
     acento quebraria qualquer resposta em português no futuro.
     """
     texto = unicodedata.normalize("NFC", resposta).strip().casefold()
-    texto = texto.replace("’", "'").replace("`", "'")
+    texto = texto.replace("’", "'").replace("‘", "'").replace("`", "'")
     texto = _PONTUACAO.sub("", texto)
     return _ESPACOS.sub(" ", texto).strip()
 

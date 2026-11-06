@@ -384,7 +384,9 @@ if __name__ == "__main__":
             raise ValueError("Argumento inválido.")
         else:
             main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("upgrade_smoke", exc)
         print(
             "Ensaio de upgrade falhou; preserve volumes/pacote/recibos.",
             file=sys.stderr,

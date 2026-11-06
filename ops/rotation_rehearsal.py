@@ -194,6 +194,8 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("rotation_rehearsal", exc)
         print("Ensaio SEC-49 recusado; preserve o laboratório para diagnóstico.", file=sys.stderr)
         raise SystemExit(1) from None

@@ -180,7 +180,7 @@ describe('Meus dados', () => {
 
   it('senha incorreta preserva a sessão e informa que nada foi excluído', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    mocks.fetch.mockResolvedValue(new Response('{}', { status: 401 }))
+    mocks.fetch.mockResolvedValue(new Response('{"code":"password_mismatch"}', { status: 403 }))
     setup()
     const user = userEvent.setup()
     await user.type(screen.getByLabelText('Senha atual'), 'senha-incorreta')

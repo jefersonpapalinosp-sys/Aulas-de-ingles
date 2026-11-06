@@ -26,7 +26,7 @@ export function pwaBuild(): Plugin {
       })
       const html = readFileSync(resolve(output, 'index.html'))
       const hash = createHash('sha256').update(template).update(html)
-      for (const name of [...assets, 'manifest.webmanifest', 'icon.svg']) {
+      for (const name of [...assets, 'manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png']) {
         hash.update(name).update(readFileSync(resolve(output, name)))
       }
       const worker = template

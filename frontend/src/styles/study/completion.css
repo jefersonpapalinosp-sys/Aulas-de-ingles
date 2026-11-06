@@ -40,7 +40,7 @@
   border: 1px solid var(--rule);
   border-radius: 100px;
   color: var(--ink-2);
-  font: 10px var(--mono);
+  font: 12px var(--mono);
   text-transform: uppercase;
 }
 .completion-status.completed { border-color: var(--ok); background: var(--ok-wash); color: var(--ok); }
@@ -70,7 +70,7 @@
 .completion-link-list a { display: grid; gap: 3px; padding: 11px 12px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--paper); color: var(--ink); text-decoration: none; }
 .completion-link-list a:hover { border-color: var(--accent); background: var(--accent-wash); }
 .completion-link-list strong { font-size: 13px; }
-.completion-link-list span { color: var(--ink-3); font: 10px var(--mono); }
+.completion-link-list span { color: var(--ink-3); font: 12px var(--mono); }
 .completion-positive { margin-top: 16px; padding: 11px 12px; border-left: 3px solid var(--ok); background: var(--ok-wash); color: var(--ok); font-size: 13px; }
 
 .completion-section-intro { max-width: 68ch; margin-top: 10px; color: var(--ink-2); font-size: 13.5px; }
@@ -79,9 +79,9 @@
 .completion-skill-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px 12px; padding: 14px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--paper); }
 .completion-skill-list li > div { display: grid; }
 .completion-skill-list strong { font-size: 14px; }
-.completion-skill-list li > div span { color: var(--ink-3); font-size: 10px; }
+.completion-skill-list li > div span { color: var(--ink-3); font-size: 12px; }
 .completion-skill-list li > p { grid-column: 1 / -1; color: var(--warn); font-size: 11.5px; }
-.completion-skill-state { padding: 4px 7px; border-radius: 100px; background: var(--surface-2); color: var(--ink-2); font: 10px var(--mono); text-align: center; }
+.completion-skill-state { padding: 4px 7px; border-radius: 100px; background: var(--surface-2); color: var(--ink-2); font: 12px var(--mono); text-align: center; }
 .completion-skill-state.insufficient { color: var(--ink-3); }
 .completion-skill-state.developing { background: var(--bad-wash); color: var(--bad); }
 .completion-skill-state.steady { background: var(--warn-wash); color: var(--warn); }

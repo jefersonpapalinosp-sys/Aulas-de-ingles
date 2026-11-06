@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   security-inventory:
-    name: segurança · dependências e imagens para triagem
+    name: segurança · inventário e gate CRITICAL
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -26,9 +26,9 @@ jobs:
       # workflow continua só com leitura.
       security-events: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -55,8 +55,7 @@ jobs:
           docker build -f backend/Dockerfile.prod -t aulas-ingles-ci-api:${{ github.sha }} .
           docker build -f frontend/Dockerfile.prod -t aulas-ingles-ci-web:${{ github.sha }} frontend
       - name: inventário Trivy da imagem da API
-        uses: aquasecurity/trivy-action@v0.36.0
-        continue-on-error: true
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: aulas-ingles-ci-api:${{ github.sha }}
           version: v0.76.0
@@ -66,8 +65,7 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
           exit-code: '0'
       - name: inventário Trivy da imagem web
-        uses: aquasecurity/trivy-action@v0.36.0
-        continue-on-error: true
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: aulas-ingles-ci-web:${{ github.sha }}
           version: v0.76.0
@@ -76,11 +74,13 @@ jobs:
           output: trivy-web.json
           severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
           exit-code: '0'
+      - name: bloqueia CRITICAL e relatórios incompletos
+        run: python3 -m ops.security_gate trivy-api.json trivy-web.json
       # SARIF para a aba Security (code scanning). Mesma política de triagem da
       # Sprint 42 (docs/politica_triagem_seguranca_sprint_42.md): inventário,
       # não aprovação — nenhum destes passos bloqueia o workflow.
       - name: Trivy da imagem da API em SARIF
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         continue-on-error: true
         with:
           image-ref: aulas-ingles-ci-api:${{ github.sha }}
@@ -91,7 +91,7 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
           exit-code: '0'
       - name: Trivy da imagem web em SARIF
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         continue-on-error: true
         with:
           image-ref: aulas-ingles-ci-web:${{ github.sha }}
@@ -102,20 +102,20 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
           exit-code: '0'
       - name: publica SARIF da API na aba Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3
         continue-on-error: true
         with:
           sarif_file: trivy-api.sarif
           category: trivy-image-api
       - name: publica SARIF da web na aba Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3
         continue-on-error: true
         with:
           sarif_file: trivy-web.sarif
           category: trivy-image-web
       - name: publica relatórios para triagem, sem expor lock exportado
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: security-inventory-${{ github.sha }}
           path: |
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       # Os três rodam em container com versão fixa: o resultado não muda
       # porque o runner atualizou uma ferramenta durante a noite.
       # Cada script declara o shell no shebang; o shellcheck usa o de cada um.
@@ -146,6 +146,7 @@ jobs:
           backend/docker-entrypoint.prod.sh
           infra/easypanel/apply-grants.sh
           infra/easypanel/postgres-init.sh
+          infra/ssh/aulas-deploy-command
           ops/ci_pull_bases.sh
           ops/ci_pull_postgres.sh
           ops/deploy_public.sh
@@ -169,10 +170,10 @@ jobs:
     # Recovery, upgrade DB-42, conversa INFRA-48 e papéis; builds compartilham cache.
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
       - run: uv sync --project backend --group dev --locked
@@ -193,7 +194,7 @@ jobs:
         run: make test-recovery-integration
       # INFRA-49: build anterior explícito; ops.rollback_image fica sob demanda.
       - name: checkout do release anterior fixo para a prova de compatibilidade
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: d0b1f8cf7b02ca8b06ea75876153d2b1079ea83d
           path: .rollback42
@@ -224,6 +225,10 @@ jobs:
           make roles-lab-up
           make roles-lab-prepare
           make test-roles
+      - name: detecta drift de ACL por coluna e rollback da aplicação de grants
+        env:
+          AULAS_ROLES_TEST_IMAGE: aulas-ingles-recovery-tools:local
+        run: uv run --project backend python -m unittest ops.tests.test_roles_policy_runtime -v
       - name: encerra somente laboratório de papéis
         if: always()
         run: make roles-lab-down
@@ -239,6 +244,39 @@ jobs:
         if: always()
         run: make recovery-lab-down
 
+  performance:
+    name: performance · cenários sintéticos 1k e 10k
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql+asyncpg://aulas_test:aulas_test_only@127.0.0.1:55435/aulas_ingles_test
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - run: uv sync --project backend --group dev --locked
+      - run: bash ops/ci_pull_postgres.sh
+      - run: make test-api-prepare
+      - name: mede cada cenário em sequência na base exclusiva do job
+        run: |
+          mkdir -p benchmark-results
+          for suite in notebook review speaking writing database dialogue; do
+            uv run --project backend python -m "ops.${suite}_performance" > "benchmark-results/${suite}.json"
+          done
+      - name: guarda somente métricas sintéticas
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: performance-synthetic
+          path: benchmark-results/*.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: encerra apenas a base descartável do job
+        if: always()
+        run: make test-db-down
+
   backend:
     name: backend · ruff + mypy + pytest
     runs-on: ubuntu-latest
@@ -250,8 +288,8 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
       - run: uv sync --group dev --locked
@@ -316,8 +354,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -330,7 +368,7 @@ jobs:
       - name: tsc
         run: npm run typecheck
       - name: vitest
-        run: npm run test
+        run: npm run test:coverage
       - name: build de produção
         run: npm run build
       - name: orçamento de performance
@@ -354,8 +392,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
         with:
           # O builder do daemon enxerga as imagens-base pré-carregadas; um builder
           # em container não enxerga e voltaria a depender do registro.
@@ -364,7 +402,7 @@ jobs:
         run: bash ops/ci_pull_postgres.sh
       - name: imagens-base por digest, com origens equivalentes
         run: bash ops/ci_pull_bases.sh
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -381,15 +419,34 @@ jobs:
         run: make e2e-up
       - name: chunks lazy continuam disponíveis após substituir o container web
         run: bash ops/test_web_assets.sh aulas-ingles-e2e-web:local
+      - name: rollback sem rebuild e nginx sem privilégios (stack sintética isolada)
+        env:
+          AULAS_DEPLOY_TEST_API_IMAGE: aulas-ingles-e2e-api:local
+          AULAS_DEPLOY_TEST_OTHER_IMAGE: aulas-ingles-e2e-gateway:local
+          AULAS_DEPLOY_TEST_WEB_IMAGE: aulas-ingles-e2e-web:local
+        run: python3 -m unittest ops.tests.test_deploy_runtime -v
+      - name: fronteira confiável de proxy e limites por origem (isolados)
+        env:
+          AULAS_PROXY_TEST_IMAGE: aulas-ingles-e2e-web:local
+          AULAS_PROXY_TEST_API_IMAGE: aulas-ingles-e2e-api:local
+        run: python3 -m unittest ops.tests.test_proxy_boundary -v
       - name: roda o E2E desktop/mobile, incluindo diálogo com worker e gateway sintético
         working-directory: e2e
         run: npm test
+      - name: SIGTERM conclui tentativa ativa sem consumir a próxima
+        env:
+          AULAS_WORKER_TEST_IMAGE: aulas-ingles-e2e-api:local
+          AULAS_WORKER_TEST_NETWORK: aulas-ingles-e2e_default
+          AULAS_WORKER_TEST_DB_HOST: db
+        run: |
+          docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml stop worker
+          python3 -m unittest ops.tests.test_worker_shutdown -v
       - name: logs da API quando falha
         if: failure()
         run: docker compose --env-file infra/e2e.env -p aulas-ingles-e2e -f infra/compose.e2e.yml logs api prepare worker gateway
       - name: guarda o trace quando falha
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: playwright-report
           path: |
@@ -400,7 +457,7 @@ jobs:
         if: always()
         run: make e2e-down
 
-  # Deploy da stack pública do EasyPanel por SSH, só quando os quatro jobs
+  # Deploy da stack pública do EasyPanel por SSH, só quando todos os jobs
   # bloqueantes passaram num push à main. Executa ops/deploy_public.sh, que
   # reproduz o procedimento registrado em docs/deploy_easypanel.md (seção
   # "Deploy automatizado"). Um CI vermelho não chega ao EasyPanel: o job nem
@@ -414,8 +471,8 @@ jobs:
   #   PUBLIC_DEPLOY_KNOWN_HOSTS  linha(s) de `ssh-keyscan -t ed25519 <host>`; com
   #                              StrictHostKeyChecking=yes um host desconhecido é
   #                              recusado, nunca aceito no primeiro acesso;
-  #   PUBLIC_DEPLOY_HOST         destino `usuario@host` (opcional; o script tem o
-  #                              padrão documentado).
+  #   PUBLIC_DEPLOY_HOST         destino obrigatório `usuario@host`, sem root.
+  #   PUBLIC_PROBE_ORIGIN        origem HTTPS obrigatória para os smokes.
   # Sem PUBLIC_DEPLOY_SSH_KEY o job apenas avisa e termina verde: o deploy fica
   # desarmado até o segredo existir. Alternativa ao SSH: um token da API do
   # EasyPanel disparando o deploy do serviço (o painel passaria a registrar a
@@ -423,17 +480,17 @@ jobs:
   deploy:
     name: deploy · stack pública do EasyPanel (main verde)
     runs-on: ubuntu-latest
-    needs: [backend, frontend, e2e, recovery]
+    needs: [backend, frontend, e2e, recovery, infra-lint, security-inventory, performance]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
-    timeout-minutes: 20
+    timeout-minutes: 35
     concurrency:
       group: deploy-public
       cancel-in-progress: false
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           # O script confere que o SHA é ancestral de origin/main.
           fetch-depth: 0
@@ -469,4 +526,5 @@ jobs:
         if: steps.gate.outputs.armed == 'true'
         env:
           AULAS_PUBLIC_SSH_HOST: ${{ secrets.PUBLIC_DEPLOY_HOST }}
+          AULAS_PUBLIC_URL: ${{ secrets.PUBLIC_PROBE_ORIGIN }}
         run: bash ops/deploy_public.sh "$GITHUB_SHA"

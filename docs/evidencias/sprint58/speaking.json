@@ -1,0 +1,355 @@
+{
+  "candidate_comparison_available": true,
+  "candidate_index": {
+    "build_ms": 13.84,
+    "columns": [
+      "user_id",
+      "status",
+      "created_at",
+      "id"
+    ],
+    "insert_10k_with_index_ms": 621.59,
+    "insert_10k_without_index_ms": 589.12,
+    "size_bytes_after_11k_rows": 565248,
+    "size_bytes_after_21k_rows": 1056768
+  },
+  "concurrent_burst": {
+    "all_status_200": true,
+    "pool_checked_out_max": 10,
+    "request_p95_ms": 575.62,
+    "requests": 10,
+    "wall_ms": 581.69
+  },
+  "contract": "speaking-performance-v1",
+  "current_schema": {
+    "1000": {
+      "deep_page_90_percent": {
+        "app_ms": {
+          "max": 10.52,
+          "min": 6.43,
+          "p50": 8.0,
+          "p95": 9.84
+        },
+        "payload_bytes": {
+          "max": 20903,
+          "min": 20903
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 12.26,
+          "min": 7.63,
+          "p50": 9.4,
+          "p95": 11.34
+        }
+      },
+      "deep_plan": {
+        "actual_rows": 51,
+        "execution_ms": 1.917,
+        "indexes": [
+          "course_pkey",
+          "ix_speaking_attempt_user_id",
+          "ix_transcript_cue_media_id",
+          "uq_course_unit_id_course",
+          "uq_lesson_media_lesson_id"
+        ],
+        "node_types": [
+          "Limit",
+          "Sort",
+          "Hash Join",
+          "Index Scan",
+          "Hash",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Seq Scan",
+          "Memoize",
+          "Index Scan",
+          "Memoize",
+          "Index Scan",
+          "Index Only Scan",
+          "Index Scan"
+        ],
+        "planning_ms": 4.453,
+        "root_node": "Limit",
+        "shared_hit_blocks_sum": 622,
+        "shared_read_blocks_sum": 0
+      },
+      "first_page": {
+        "app_ms": {
+          "max": 14.22,
+          "min": 7.58,
+          "p50": 9.25,
+          "p95": 13.4
+        },
+        "payload_bytes": {
+          "max": 20954,
+          "min": 20954
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 15.69,
+          "min": 8.64,
+          "p50": 10.4,
+          "p95": 15.51
+        }
+      }
+    },
+    "10000": {
+      "deep_page_90_percent": {
+        "app_ms": {
+          "max": 25.7,
+          "min": 7.71,
+          "p50": 13.73,
+          "p95": 25.04
+        },
+        "payload_bytes": {
+          "max": 21004,
+          "min": 21004
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 28.67,
+          "min": 8.85,
+          "p50": 15.06,
+          "p95": 27.07
+        }
+      },
+      "deep_plan": {
+        "actual_rows": 51,
+        "execution_ms": 1.314,
+        "indexes": [
+          "course_pkey",
+          "ix_speaking_status_created",
+          "ix_transcript_cue_media_id",
+          "uq_course_unit_id_course",
+          "uq_lesson_media_lesson_id"
+        ],
+        "node_types": [
+          "Limit",
+          "Sort",
+          "Hash Join",
+          "Bitmap Heap Scan",
+          "Bitmap Index Scan",
+          "Hash",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Seq Scan",
+          "Memoize",
+          "Index Scan",
+          "Memoize",
+          "Index Scan",
+          "Index Only Scan",
+          "Index Scan"
+        ],
+        "planning_ms": 1.93,
+        "root_node": "Limit",
+        "shared_hit_blocks_sum": 691,
+        "shared_read_blocks_sum": 0
+      },
+      "first_page": {
+        "app_ms": {
+          "max": 31.0,
+          "min": 13.48,
+          "p50": 16.81,
+          "p95": 29.37
+        },
+        "payload_bytes": {
+          "max": 21056,
+          "min": 21056
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 33.37,
+          "min": 14.94,
+          "p50": 18.34,
+          "p95": 32.94
+        }
+      }
+    }
+  },
+  "datasets": {
+    "1000": {
+      "baseline_insert_ms": 56.99,
+      "stable_traversal": {
+        "elapsed_ms": 636.63,
+        "items": 1000,
+        "pages": 20
+      }
+    },
+    "10000": {
+      "baseline_insert_ms": 589.12,
+      "stable_traversal": {
+        "elapsed_ms": 3315.06,
+        "items": 10000,
+        "pages": 200
+      }
+    }
+  },
+  "environment": {
+    "database": "aulas_ingles_test",
+    "marker": "aulas-ingles:disposable-test:v1",
+    "postgres": "16.15",
+    "role": "aulas_test"
+  },
+  "page_size": 50,
+  "samples_per_route": 30,
+  "with_candidate": {
+    "1000": {
+      "deep_page_90_percent": {
+        "app_ms": {
+          "max": 11.7,
+          "min": 6.98,
+          "p50": 9.04,
+          "p95": 11.63
+        },
+        "payload_bytes": {
+          "max": 20903,
+          "min": 20903
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 13.89,
+          "min": 8.41,
+          "p50": 10.31,
+          "p95": 12.96
+        }
+      },
+      "deep_plan": {
+        "actual_rows": 51,
+        "execution_ms": 0.588,
+        "indexes": [
+          "course_pkey",
+          "ix_speaking_attempt_user_status_created_id_bench",
+          "ix_transcript_cue_media_id",
+          "uq_course_unit_id_course",
+          "uq_lesson_media_lesson_id"
+        ],
+        "node_types": [
+          "Limit",
+          "Nested Loop",
+          "Index Scan",
+          "Materialize",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Seq Scan",
+          "Memoize",
+          "Index Scan",
+          "Memoize",
+          "Index Scan",
+          "Index Only Scan",
+          "Index Scan"
+        ],
+        "planning_ms": 1.376,
+        "root_node": "Limit",
+        "shared_hit_blocks_sum": 497,
+        "shared_read_blocks_sum": 0
+      },
+      "first_page": {
+        "app_ms": {
+          "max": 11.68,
+          "min": 8.3,
+          "p50": 9.55,
+          "p95": 11.63
+        },
+        "payload_bytes": {
+          "max": 20954,
+          "min": 20954
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 13.42,
+          "min": 9.52,
+          "p50": 10.87,
+          "p95": 12.94
+        }
+      }
+    },
+    "10000": {
+      "deep_page_90_percent": {
+        "app_ms": {
+          "max": 17.75,
+          "min": 8.65,
+          "p50": 10.35,
+          "p95": 15.74
+        },
+        "payload_bytes": {
+          "max": 21004,
+          "min": 21004
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 19.46,
+          "min": 9.75,
+          "p50": 11.88,
+          "p95": 18.36
+        }
+      },
+      "deep_plan": {
+        "actual_rows": 51,
+        "execution_ms": 1.656,
+        "indexes": [
+          "course_pkey",
+          "ix_speaking_status_created",
+          "ix_transcript_cue_media_id",
+          "uq_course_unit_id_course",
+          "uq_lesson_media_lesson_id"
+        ],
+        "node_types": [
+          "Limit",
+          "Sort",
+          "Hash Join",
+          "Bitmap Heap Scan",
+          "Bitmap Index Scan",
+          "Hash",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Seq Scan",
+          "Memoize",
+          "Index Scan",
+          "Memoize",
+          "Index Scan",
+          "Index Only Scan",
+          "Index Scan"
+        ],
+        "planning_ms": 1.64,
+        "root_node": "Limit",
+        "shared_hit_blocks_sum": 761,
+        "shared_read_blocks_sum": 0
+      },
+      "first_page": {
+        "app_ms": {
+          "max": 24.43,
+          "min": 13.57,
+          "p50": 16.09,
+          "p95": 24.17
+        },
+        "payload_bytes": {
+          "max": 21056,
+          "min": 21056
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 5,
+        "wall_ms": {
+          "max": 26.97,
+          "min": 14.67,
+          "p50": 17.39,
+          "p95": 25.93
+        }
+      }
+    }
+  }
+}

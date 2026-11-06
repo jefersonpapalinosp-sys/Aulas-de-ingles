@@ -23,7 +23,14 @@ from app.db.models import (
     Lesson,
     LessonMedia,
     LessonProgress,
+    ListeningOperation,
+    ListeningProgress,
+    ListeningResource,
     MediaProgress,
+    NativeListeningPosition,
+    NativeListeningResponse,
+    NativeListeningSession,
+    NativeListeningVersion,
     NotebookEntry,
     PracticeSession,
     PracticeSessionItem,
@@ -58,6 +65,8 @@ EXPORT_TIMEOUT_SECONDS = 20
 # Lista deliberada: adicionar uma entidade pessoal exige revisar o contrato.
 # Nenhuma serialização automática de colunas/objetos ORM ou credenciais.
 PERSONAL_MODELS = (
+    ListeningProgress,
+    ListeningOperation,
     LessonProgress,
     StudySessionProgress,
     StudyPlan,
@@ -72,6 +81,9 @@ PERSONAL_MODELS = (
     WritingFeedbackRecord,
     SpeakingAttempt,
     TranscriptionJob,
+    NativeListeningSession,
+    NativeListeningPosition,
+    NativeListeningResponse,
     NotebookEntry,
     CourseReviewAttempt,
     PracticeSession,
@@ -140,11 +152,102 @@ async def _rows(
     return [dict(row) for row in (await session.execute(query.order_by(table.c.id))).mappings()]
 
 
+async def _native_references(session: AsyncSession, data: PersonalDataExportOut) -> None:
+    """Resultados portáveis mesmo com a flag desligada; sem gabaritos não revelados."""
+    version_ids = {row["version_id"] for row in data.native_listening_sessions}
+    if not version_ids:
+        return
+    versions = {
+        row.id: row
+        for row in await session.scalars(
+            select(NativeListeningVersion).where(NativeListeningVersion.id.in_(version_ids))
+        )
+    }
+    sessions = {row["id"]: row for row in data.native_listening_sessions}
+    seen: dict[int, set[str]] = {key: set() for key in sessions}
+    for row in sessions.values():
+        version = versions[row["version_id"]]
+        row.update(
+            activity_slug=version.slug,
+            activity_version=version.version,
+            content_sha256=version.content_sha256,
+            title=version.content["title"],
+            score=0,
+            total=len(version.content["questions"]),
+            support_revealed=False,
+            completed=False,
+        )
+    for event in data.native_listening_responses:
+        row = sessions[event["session_id"]]
+        content = versions[row["version_id"]].content
+        payload = event["payload"]
+        if payload["kind"] == "transcript":
+            row["support_revealed"] = True
+            row["transcript"] = content["transcript"]
+            continue
+        question = next(q for q in content["questions"] if q["id"] == payload["question_id"])
+        first = question["id"] not in seen[row["id"]]
+        correct = payload["kind"] == "answer" and set(payload["selected_ids"]) == set(
+            question["answer_ids"]
+        )
+        seen[row["id"]].add(question["id"])
+        row["score"] += int(first and correct)
+        row["completed"] = len(seen[row["id"]]) == row["total"]
+        event.update(
+            first_response=first,
+            correct=correct,
+            question_prompt=question["prompt"],
+            explanation=question["explanation"],
+        )
+
+
 async def _complete_export(
     session: AsyncSession,
     user_id: int,
     data: PersonalDataExportOut,
 ) -> None:
+    data.native_listening_sessions = await _rows(
+        session,
+        NativeListeningSession,
+        "id version_id operation_key revision created_at",
+        user_id,
+    )
+    data.native_listening_responses = await _rows(
+        session,
+        NativeListeningResponse,
+        "id session_id operation_key expected_revision revision payload created_at",
+        user_id,
+    )
+    data.native_listening_positions = await _rows(
+        session,
+        NativeListeningPosition,
+        "id session_id position_seconds completed revision operation_key changed_at updated_at",
+        user_id,
+    )
+    await _native_references(session, data)
+    data.listening_progress = await _rows(
+        session,
+        ListeningProgress,
+        "id resource_slug state revision updated_at",
+        user_id,
+    )
+    data.listening_operations = await _rows(
+        session,
+        ListeningOperation,
+        "id resource_slug operation_key state expected_revision revision updated_at",
+        user_id,
+    )
+    listening_references = {
+        row.slug: row for row in (await session.scalars(select(ListeningResource))).all()
+    }
+    for item in data.listening_progress:
+        resource = listening_references[item["resource_slug"]]
+        item.update(
+            source_url=resource.source_url,
+            title=resource.title,
+            catalog_version=resource.version,
+            completion_kind="self_reported",
+        )
     if await schema_available(session):
         data.content_snapshots = await _rows(
             session,

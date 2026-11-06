@@ -37,7 +37,9 @@ function parseAttempt(value: unknown): QueuedAttempt {
     || (v.sessionId !== undefined && !positive(v.sessionId))
     || (v.lessonNumber !== undefined && !positive(v.lessonNumber))
     || (v.courseSlug !== undefined && (typeof v.courseSlug !== 'string' || !v.courseSlug.trim()))
+    || (v.serverFailures !== undefined && (!Number.isInteger(v.serverFailures) || v.serverFailures < 0))
     || (v.syncFailure !== undefined && (!v.syncFailure || !Number.isInteger(v.syncFailure.status)
+      || (v.syncFailure.retryable !== undefined && typeof v.syncFailure.retryable !== 'boolean')
       || v.syncFailure.status < 400 || v.syncFailure.status > 599
       || typeof v.syncFailure.failedAt !== 'string' || !Number.isFinite(Date.parse(v.syncFailure.failedAt))))) {
     throw new QueueStorageError('Há dados inválidos na fila. A cópia original foi preservada; não limpe os dados do navegador.')
@@ -48,6 +50,7 @@ function parseAttempt(value: unknown): QueuedAttempt {
     ...(v.sessionId === undefined ? {} : { sessionId: v.sessionId }),
     ...(v.courseSlug === undefined ? {} : { courseSlug: v.courseSlug }),
     ...(v.lessonNumber === undefined ? {} : { lessonNumber: v.lessonNumber }),
+    ...(v.serverFailures === undefined ? {} : { serverFailures: v.serverFailures }),
     ...(v.syncFailure === undefined ? {} : { syncFailure: { ...v.syncFailure } }),
   }
 }
@@ -231,6 +234,37 @@ export const attemptStore = {
       if (item) await request(store.put({ ...item, syncFailure: { status, failedAt: new Date().toISOString() } }))
     }))
   },
+  serverFailure(userId: number, key: string, status: number): Promise<boolean> {
+    return withDatabase((db) => transaction(db, ['attempts'], 'readwrite', async (tx) => {
+      const store = tx.objectStore('attempts')
+      const item = await request<QueuedAttempt | undefined>(store.get([userId, key]))
+      if (!item) return false
+      const serverFailures = (item.serverFailures ?? 0) + 1
+      const paused = serverFailures >= 3
+      await request(store.put({ ...item, serverFailures,
+        ...(paused ? { syncFailure: { status, failedAt: new Date().toISOString(), retryable: true } } : {}),
+      }))
+      return paused
+    }))
+  },
+  pause(userId: number, key: string): Promise<void> {
+    return withDatabase((db) => transaction(db, ['attempts'], 'readwrite', async (tx) => {
+      const store = tx.objectStore('attempts')
+      const item = await request<QueuedAttempt | undefined>(store.get([userId, key]))
+      if (item && !item.syncFailure && item.serverFailures) {
+        await request(store.put({ ...item, syncFailure: { status: 503, failedAt: new Date().toISOString(), retryable: true } }))
+      }
+    }))
+  },
+  resume(userId: number, key: string): Promise<void> {
+    return withDatabase((db) => transaction(db, ['attempts'], 'readwrite', async (tx) => {
+      const store = tx.objectStore('attempts')
+      const item = await request<QueuedAttempt | undefined>(store.get([userId, key]))
+      if (item?.syncFailure?.retryable) {
+        await request(store.put({ ...item, syncFailure: undefined, serverFailures: 0 }))
+      }
+    }))
+  },
   finish(userId: number, idempotencyKey: string): Promise<void> {
     return withDatabase((db) => transaction(db, ['attempts', 'receipts'], 'readwrite', async (tx) => {
       await request(tx.objectStore('receipts').put({ userId, idempotencyKey }))
@@ -242,7 +276,7 @@ export const attemptStore = {
       const store = tx.objectStore('attempts')
       const items = await request<QueuedAttempt[]>(store.index('user').getAll(userId))
       for (const item of items) {
-        if (!item.syncFailure || (keys && !keys.includes(item.idempotencyKey))) continue
+        if (!item.syncFailure || item.syncFailure.retryable || (keys && !keys.includes(item.idempotencyKey))) continue
         await request(tx.objectStore('receipts').put({ userId, idempotencyKey: item.idempotencyKey }))
         await request(store.delete([userId, item.idempotencyKey]))
       }

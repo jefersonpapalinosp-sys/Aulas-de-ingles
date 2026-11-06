@@ -1,3 +1,4 @@
+import { AudioControls, AudioElement } from './AudioPlayback'
 import { useEffect, useRef, useState } from 'react'
 import type { LessonMedia } from '../../api/client'
 import { useMediaPositionSync } from '../../api/media'
@@ -130,10 +131,8 @@ function LessonAudioPlayerContent({
         </span>
       </div>
 
-      {/* Áudio didático acompanhado pela transcrição textual abaixo. */}
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio
-        ref={audioRef}
+      <AudioElement
+        audioRef={audioRef} src={media.source_url}
         controls
         preload="metadata"
         aria-label={media.label}
@@ -151,10 +150,7 @@ function LessonAudioPlayerContent({
           setPosition(0)
         }}
         onError={() => setFailed(true)}
-      >
-        <source src={media.source_url} type="audio/mpeg" />
-        Seu navegador não consegue reproduzir este áudio.
-      </audio>
+      />
 
       <p className="muted">Áudio online · não baixado neste dispositivo.</p>
       <details className="media-rights">
@@ -192,58 +188,10 @@ function LessonAudioPlayerContent({
         </section>
       )}
 
-      <div className="audio-toolbar" aria-label="Controles adicionais do áudio">
-        <button type="button" onClick={() => skip(-5)}>
-          −5 s
-        </button>
-        <button type="button" onClick={() => skip(5)}>
-          +5 s
-        </button>
-        <label>
-          Velocidade
-          <select
-            aria-label="Velocidade do áudio"
-            value={rate}
-            onChange={(event) => changeRate(Number(event.target.value))}
-          >
-            {[0.75, 1, 1.25, 1.5].map((value) => (
-              <option key={value} value={value}>
-                {value}×
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="audio-loop" aria-label="Repetição de trecho">
-        <button
-          type="button"
-          onClick={() => {
-            setLoopStart(audioRef.current?.currentTime ?? 0)
-            setLoopEnd(null)
-          }}
-        >
-          Marcar início A
-        </button>
-        <button
-          type="button"
-          disabled={loopStart === null || position <= loopStart}
-          onClick={() => setLoopEnd(audioRef.current?.currentTime ?? position)}
-        >
-          Marcar fim B
-        </button>
-        {(loopStart !== null || loopEnd !== null) && (
-          <>
-            <span>
-              A {formatAudioTime(loopStart ?? 0)}
-              {loopEnd !== null && ` · B ${formatAudioTime(loopEnd)}`}
-            </span>
-            <button type="button" onClick={clearLoop}>
-              Limpar trecho
-            </button>
-          </>
-        )}
-      </div>
+      <AudioControls rate={rate} position={position} loopStart={loopStart} loopEnd={loopEnd}
+        onSkip={skip} onRate={changeRate} onClear={clearLoop}
+        onStart={() => { setLoopStart(audioRef.current?.currentTime ?? 0); setLoopEnd(null) }}
+        onEnd={() => setLoopEnd(audioRef.current?.currentTime ?? position)} />
 
       {failed && (
         <p className="audio-error" role="alert">

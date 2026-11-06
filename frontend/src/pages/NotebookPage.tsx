@@ -56,8 +56,14 @@ export function NotebookPage() {
       const link = document.createElement('a')
       link.href = url
       link.download = 'aulas-ingles-dados.json'
-      link.click()
-      URL.revokeObjectURL(url)
+      try {
+        document.body.append(link)
+        link.click()
+      } finally {
+        link.remove()
+        // O navegador precisa consumir o URL antes da liberação, mesmo após sair da página.
+        window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+      }
       setMessage('Exportação preparada. Confira os downloads do navegador.')
     } catch (error) {
       setMessage(failureMessage(error, 'Não foi possível exportar seus dados agora.'))

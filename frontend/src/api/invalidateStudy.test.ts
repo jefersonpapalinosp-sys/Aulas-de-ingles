@@ -42,7 +42,7 @@ describe('mapa único evento → chaves', () => {
     // Critério de aceite FE-44: `grep -rn invalidateQueries src` só pode acusar este arquivo.
     const src = resolve(process.cwd(), 'src')
     const offenders = readdirSync(src, { recursive: true, encoding: 'utf8' })
-      .filter((file) => /\.(ts|tsx)$/.test(file) && !/\.test\.tsx?$/.test(file) && file !== 'api/invalidateStudy.ts')
+      .filter((file) => /\.(ts|tsx)$/.test(file) && !/\.test\.tsx?$/.test(file) && file !== join('api', 'invalidateStudy.ts'))
       .filter((file) => readFileSync(join(src, file), 'utf8').includes('invalidateQueries'))
     expect(offenders).toEqual([])
   })

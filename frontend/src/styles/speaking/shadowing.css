@@ -2,7 +2,7 @@
 .shadowing-select { display: grid; gap: 7px; margin-top: 20px; color: var(--ink-2); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; }
 .shadowing-select select { width: 100%; padding: 9px 10px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: 13px/1.4 var(--sans); text-transform: none; }
 .shadowing-card blockquote { display: grid; gap: 5px; margin: 18px 0 0; padding: 18px 20px; border-left: 3px solid var(--accent); background: var(--accent-wash); font-size: 17px; line-height: 1.5; }
-.shadowing-card blockquote strong { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.shadowing-card blockquote strong { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
 .shadowing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .shadowing-actions .recording { background: var(--bad); border-color: var(--bad); }
 .shadowing-warning, .shadowing-status { margin-top: 13px; font-size: 13px; color: var(--ink-2); }

@@ -5,7 +5,7 @@ import json
 import tarfile
 import tempfile
 import unittest
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -70,7 +70,14 @@ class PublicBackupTests(unittest.TestCase):
         self.root = Path(self.tmp.name) / "recovery"
         self.root.mkdir(mode=0o700)
         self.remote = FakeRemote()
+
+        @contextmanager
+        def exported(host):
+            yield public_backup.snapshot(host), "00000001-00000002-1"
+
         patches = [
+            patch.dict("os.environ", {public_backup.HOST_ENV: "backup@vm.test"}),
+            patch.object(public_backup, "exported_snapshot", exported),
             patch.object(recovery, "BACKUPS", self.root),
             patch.object(recovery, "local_daemon"),
             patch.object(public_backup, "ssh", self.remote.ssh),
@@ -91,7 +98,7 @@ class PublicBackupTests(unittest.TestCase):
         manifest = verify_bundle(bundle)
         self.assertEqual(manifest["source"]["kind"], "public")
         self.assertEqual(manifest["source"]["database"], "aulas_ingles")
-        self.assertEqual(manifest["source"]["consistency"], "online-snapshot-check")
+        self.assertEqual(manifest["source"]["consistency"], "exported-snapshot-voice-check")
         self.assertEqual(manifest["snapshot"], SNAPSHOT)
         self.assertEqual(
             [c["service"] for c in manifest["application"]["deployed_containers"]],
@@ -125,7 +132,7 @@ class PublicBackupTests(unittest.TestCase):
         )
 
     def test_snapshot_drift_blocks_publication_after_retries(self):
-        drifted = {**SNAPSHOT, "counts": {**SNAPSHOT["counts"], "users": 2}}
+        drifted = {**SNAPSHOT, "audio": []}
         # before/after divergem em todas as tentativas: nunca publica.
         self.remote.snapshots = [SNAPSHOT, drifted] * 3 + [SNAPSHOT]
         with self.assertRaises(RecoveryError) as error:
@@ -136,7 +143,7 @@ class PublicBackupTests(unittest.TestCase):
         self.assertEqual(len([p for p in self.root.iterdir() if p.name.startswith(".partial-")]), 3)
 
     def test_snapshot_drift_recovers_on_a_later_attempt(self):
-        drifted = {**SNAPSHOT, "counts": {**SNAPSHOT["counts"], "users": 2}}
+        drifted = {**SNAPSHOT, "audio": []}
         self.remote.snapshots = [SNAPSHOT, drifted, SNAPSHOT, SNAPSHOT]
         bundle = public_backup.capture("root@vm.test", attempts=2)
         self.assertEqual(verify_bundle(bundle)["snapshot"], SNAPSHOT)
@@ -212,7 +219,9 @@ class PublicBackupTests(unittest.TestCase):
 
     def test_invalid_snapshot_never_starts_dump_or_publishes_bundle(self):
         for bad in (
-            None, [], {"revision": ["v"]},
+            None,
+            [],
+            {"revision": ["v"]},
             {**SNAPSHOT, "revision": "private"},
             {**SNAPSHOT, "revision": [1]},
             {**SNAPSHOT, "counts": {"users": True}},
@@ -228,14 +237,14 @@ class PublicBackupTests(unittest.TestCase):
                 self.assertFalse(any("pg_dump" in command for command in self.remote.commands))
                 self.assertEqual(list(self.root.glob("aulas-*")), [])
 
-    def test_snapshot_extensions_are_preserved_in_drift_comparison(self):
+    def test_study_counts_and_extensions_do_not_invalidate_voice_capture(self):
         self.remote.snapshots = [
             {**SNAPSHOT, "extension": {"value": 1}},
-            {**SNAPSHOT, "extension": {"value": 2}},
+            {**SNAPSHOT, "extension": {"value": 2}, "counts": {"users": 2}},
         ]
-        with self.assertRaisesRegex(RecoveryError, public_backup.DRIFT):
-            public_backup.capture("root@vm.test", attempts=1)
-        self.assertEqual(list(self.root.glob("aulas-*")), [])
+        bundle = public_backup.capture("root@vm.test", attempts=1)
+        self.assertEqual(verify_bundle(bundle)["snapshot"]["counts"], SNAPSHOT["counts"])
+        self.assertTrue(any("--snapshot=00000001-00000002-1" in c for c in self.remote.commands))
 
     def test_invalid_receipt_metadata_does_not_create_receipt_directory(self):
         for manifest in ({}, {"snapshot": SNAPSHOT, "audio_files": [], "application": {}}):

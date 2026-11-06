@@ -165,8 +165,7 @@ def evaluate(
         ),
         _check(
             "request_error_rate",
-            total < thresholds.minimum_requests
-            or error_rate <= thresholds.maximum_error_rate,
+            total < thresholds.minimum_requests or error_rate <= thresholds.maximum_error_rate,
             round(error_rate, 6),
             f"<= {thresholds.maximum_error_rate} após {thresholds.minimum_requests} requests",
             "backend on-call",
@@ -176,8 +175,7 @@ def evaluate(
         _check(
             "queue_age_seconds",
             queue["oldest_queued_seconds"] is None
-            or int(queue["oldest_queued_seconds"])
-            <= thresholds.maximum_queue_age_seconds,
+            or int(queue["oldest_queued_seconds"]) <= thresholds.maximum_queue_age_seconds,
             queue["oldest_queued_seconds"],
             f"<= {thresholds.maximum_queue_age_seconds}",
             "worker on-call",
@@ -187,8 +185,7 @@ def evaluate(
         _check(
             "worker_age_seconds",
             queue["worker_age_seconds"] is not None
-            and int(queue["worker_age_seconds"])
-            <= thresholds.maximum_worker_age_seconds,
+            and int(queue["worker_age_seconds"]) <= thresholds.maximum_worker_age_seconds,
             queue["worker_age_seconds"],
             f"<= {thresholds.maximum_worker_age_seconds}",
             "worker on-call",
@@ -197,8 +194,7 @@ def evaluate(
         _check(
             "maintenance_age_seconds",
             queue.get("maintenance_age_seconds") is not None
-            and int(queue["maintenance_age_seconds"])
-            <= thresholds.maximum_maintenance_age_seconds,
+            and int(queue["maintenance_age_seconds"]) <= thresholds.maximum_maintenance_age_seconds,
             queue.get("maintenance_age_seconds"),
             f"<= {thresholds.maximum_maintenance_age_seconds}",
             "worker on-call",
@@ -225,8 +221,7 @@ def evaluate(
             "legacy_review_reconciliation",
             int(legacy_review["unlinked_cards"]) == 0
             and int(legacy_review["mismatched_links"]) == 0,
-            int(legacy_review["unlinked_cards"])
-            + int(legacy_review["mismatched_links"]),
+            int(legacy_review["unlinked_cards"]) + int(legacy_review["mismatched_links"]),
             "= 0",
             "database operator",
             "Manter review_card e o tráfego bloqueados; reconciliar no clone a ligação "
@@ -244,8 +239,7 @@ def evaluate(
         _check(
             "dialogue_provider_failure_rate",
             dialogue_turns < thresholds.minimum_dialogue_turns
-            or dialogue_failures / dialogue_turns
-            <= thresholds.maximum_dialogue_failure_rate,
+            or dialogue_failures / dialogue_turns <= thresholds.maximum_dialogue_failure_rate,
             round(dialogue_failures / dialogue_turns, 3) if dialogue_turns else None,
             f"<= {thresholds.maximum_dialogue_failure_rate} "
             f"(amostra >= {thresholds.minimum_dialogue_turns})",
@@ -265,8 +259,7 @@ def evaluate(
         _check(
             "media_free_bytes",
             bool(media["filesystem_available"])
-            and int(media["filesystem_free_bytes"] or 0)
-            >= thresholds.minimum_media_free_bytes,
+            and int(media["filesystem_free_bytes"] or 0) >= thresholds.minimum_media_free_bytes,
             media["filesystem_free_bytes"],
             f">= {thresholds.minimum_media_free_bytes}",
             "storage operator",
@@ -315,6 +308,10 @@ def fetch(base: str, path: str, *, token: str | None = None) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8011")
+    parser.add_argument(
+        "--backup-status-file", default=os.environ.get("OPERATIONS_BACKUP_STATUS_FILE")
+    )
+    parser.add_argument("--require-backup", action="store_true")
     args = parser.parse_args(argv)
     token = os.environ.get("OPERATIONS_TOKEN")
     if not token:
@@ -340,7 +337,34 @@ def main(argv: list[str] | None = None) -> int:
             fetch(args.base_url, "/api/operations/metrics", token=token),
             thresholds,
         )
-    except Exception:
+        if args.backup_status_file or args.require_backup:
+            from pathlib import Path
+
+            from ops.backup_watch import freshness
+
+            good, age = (
+                freshness(Path(args.backup_status_file))
+                if args.backup_status_file
+                else (False, None)
+            )
+            report["checks"].append(
+                asdict(
+                    _check(
+                        "last_backup_age_hours",
+                        good,
+                        age,
+                        "<= 24 e última tentativa aprovada",
+                        "backup operator",
+                        "Conferir timer, cópia externa e recibo; executar restore isolado.",
+                    )
+                )
+            )
+            if not good:
+                report["status"] = "critical"
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+
+        diagnostic("observability_check", exc)
         print(
             "Gate operacional falhou sem expor URL, resposta ou credencial.",
             file=sys.stderr,

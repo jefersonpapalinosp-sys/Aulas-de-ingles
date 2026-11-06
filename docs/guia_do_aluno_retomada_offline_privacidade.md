@@ -1,10 +1,14 @@
 # Guia do aluno — retomada, offline, privacidade e recuperação
 
-Atualizado em 26 de outubro de 2026 (SEC-46: a seção do parceiro de conversa).
+Atualizado em 5 de novembro de 2026 (Sprint 59: catálogo externo de listening).
 Este guia descreve o comportamento atual da aplicação; “salvo neste
 dispositivo” e “salvo na conta” não são sinônimos.
 
 ## Como retomar o estudo
+
+Para a prática complementar de listening, consulte o
+[guia do catálogo A2](listening_rapido.md). A conclusão é marcada por você e
+confirmada pela API; esse módulo ainda não mantém uma fila de marcações offline.
 
 - Entre na mesma conta e abra **Hoje**. A recomendação ou a última sessão leva à
   etapa confirmada mais recente.
@@ -38,9 +42,26 @@ disponível por tempo limitado. Áudio oficial da VOA continua dependente da red
 da política da fonte; a interface nunca promete que ele foi baixado. Login,
 sincronização, novas sessões e recursos assistidos exigem conexão.
 
+**Hoje** oferece acesso ao mapa offline quando o currículo já foi consultado.
+Sem confirmação online, o mapa não apresenta aulas como pendentes ou concluídas:
+o progresso fica identificado como não confirmado. Recomendações e metas voltam
+quando a conexão permite consultar a conta.
+
+Posições intermediárias do áudio ainda não enviadas pela mesma aba são combinadas
+na posição mais recente. A conclusão e os envios que aguardam confirmação são
+preservados separadamente. Se o navegador avisar que não conseguiu salvar, mantenha
+a página aberta; a retomada em outra aba não está garantida.
+
 Uma tentativa de exercício feita numa sessão já aberta pode entrar na fila local.
 Ao voltar a ficar online, mantenha a aba aberta até o estado mudar para confirmado
 ou bloqueado. Não limpe os dados do navegador antes de conferir as pendências.
+
+Após três falhas do serviço para a mesma resposta, o envio fica pausado e a fila
+pode seguir com as próximas respostas. Em **Consultar respostas preservadas**,
+**Pular por enquanto** pausa uma resposta que já falhou; **Retomar envio** permite
+tentar novamente com o mesmo texto. Pausar não exclui nem confirma a resposta.
+Falhas de sessão, limite de solicitações ou atualização obrigatória continuam
+interrompendo a sincronização até serem resolvidas.
 
 ## Sessão expirada ou serviço indisponível
 
@@ -52,6 +73,22 @@ ou bloqueado. Não limpe os dados do navegador antes de conferir as pendências.
   histórico com a versão correspondente.
 - Conflito de escrita: compare local e remoto; mantenha uma, use a outra ou copie
   ambas. Não há sobrescrita silenciosa.
+
+## Atualizar o aplicativo
+
+Para receber esta correção pela primeira vez, salve o que estiver pendente,
+feche todas as abas/janelas do aplicativo e reabra. Uma aba que ainda está na
+versão antiga continua usando o botão antigo até essa primeira atualização.
+
+Quando aparecer um aviso de versão nova ou de recuperação, escolha
+**Recarregar aplicativo…**. Antes de confirmar, copie textos e salve gravações
+que ainda estejam apenas na tela. A atualização preserva rascunhos já salvos
+neste dispositivo e a fila de respostas pendentes.
+
+Após a confirmação, aguarde a atualização terminar. Só a aba em que você
+confirmou será recarregada; outras abas continuam abertas. Se a conexão falhar,
+a tela permanece aberta e permite tentar novamente. Não é necessário limpar
+os dados do navegador.
 
 ## Como interpretar avaliações
 
@@ -77,7 +114,12 @@ ser excluída sem apagar a gravação.
 
 **Limpar este dispositivo** remove cópias locais e pendências, mas não apaga a
 conta. **Excluir minha conta** remove dados do servidor e agenda a limpeza dos
-arquivos pessoais; use somente depois de conferir ou baixar o que deseja guardar.
+arquivos pessoais. Também remove rascunhos, respostas pendentes, posições e a
+gravação temporária dessa conta neste navegador, preservando outras contas.
+Se alguma limpeza local falhar, a tela informa como remover os dados do site.
+Feche outras abas antes da exclusão para que elas não mantenham rascunhos em
+memória. Cópias baixadas e dados de outros dispositivos precisam ser removidos
+nesses locais. Use somente depois de conferir ou baixar o que deseja guardar.
 
 ## O parceiro de conversa e o que sai desta aplicação
 
@@ -122,7 +164,11 @@ aplicação, por regra fixa, e nunca vem do provedor. Quando a resposta dele nã
 chega ou vem fora do formato esperado, a conversa continua pelo roteiro da aula
 e a tela diz que foi o roteiro que respondeu.
 
-O texto dos turnos de conversa é apagado no prazo de retenção exibido na tela.
+O texto e as gravações dos turnos de conversa seguem o prazo de retenção exibido
+na tela (30 dias por padrão). A limpeza dos arquivos ocorre pelo serviço de
+manutenção, com novas tentativas se o armazenamento estiver indisponível.
+Excluir um diálogo inteiro também remove suas gravações; não existe exclusão
+individual de turno.
 O que fica depois disso é a evidência de que você praticou: quando praticou, o
 que a verificação automática apontou e a sua própria avaliação do turno.
 
@@ -134,3 +180,26 @@ que a verificação automática apontou e a sua própria avaliação do turno.
 3. Baixe gravações que ficaram somente na tela.
 4. Exporte o que for necessário em **Meus dados**.
 5. Só então limpe os dados deste dispositivo.
+
+## Listening rápido: histórico e retomada do piloto
+
+O piloto de três atividades próprias ainda depende de revisão humana e ativação;
+o catálogo de links externos continua separado. Quando habilitado, **Meu histórico
+no aplicativo** permite continuar uma sessão e revisar os erros. A nota das primeiras
+respostas é preservada, mesmo quando você acerta numa repetição.
+
+Uma sessão já aberta guarda escolhas e respostas pendentes neste dispositivo.
+Sem conexão, **Pendente de envio** não significa resposta corrigida ou confirmada.
+Volte à prática ou ao histórico com internet e confirme a mesma conta para sincronizar.
+Recarregar mantém as pendências; trocar de conta não as envia como outro aluno.
+O áudio, o início de uma nova prática e a revelação de respostas exigem conexão.
+
+Se duas abas produzirem rascunhos diferentes, escolha na lista qual usar. Se a
+sessão mudou em outro dispositivo, confira a seleção preservada antes de enviá-la
+como nova tentativa. Conflitos de áudio permitem escolher entre a posição local
+e a da conta. A reprodução não começa automaticamente ao retomar.
+
+**Meus dados** conta esses rascunhos, respostas pendentes e posições. A exportação
+JSON contém os dados confirmados no servidor; não contém pendências do navegador.
+Sincronize antes de limpar os dados privados ou trocar de dispositivo. Não limpe
+storage para corrigir um erro de sincronização.

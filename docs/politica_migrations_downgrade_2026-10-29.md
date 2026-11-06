@@ -19,6 +19,11 @@ com consumidores migrados, backup validado, ensaio em clone isolado e estratégi
 de retorno compatível. Uma migration aditiva também precisa de ensaio de locks,
 duração e leitura pelo release anterior quando essa compatibilidade for exigida.
 
+Desde a Sprint 54, gerar o backup pré-migration com `hold=true` no Makefile ou
+`--hold` na CLI. O marcador protege a cópia local e as cópias cifradas da execução
+contra a poda do mesmo dia. Liberar cada hold só após encerrar a janela de retorno,
+com confirmação do identificador; ver [backup e recuperação pública](backup_recuperacao_publica_2026-11-05.md).
+
 ## Limite de downgrade
 
 | Revisão/situação | Política |
@@ -59,14 +64,15 @@ base vazia: não deve ser copiado para uma base que já chegou a `head`.
 
 ## Isolamento por teste
 
-`backend/tests/db_isolation.py` classifica explicitamente as 53 tabelas dos
-modelos: 19 de conteúdo/seed e 34 de dados transitórios do cenário. Uma tabela
+`backend/tests/db_isolation.py` classifica explicitamente as tabelas dos
+modelos entre conteúdo/seed e dados transitórios do cenário. A fila de limpeza
+de áudio da Sprint 52 integra o segundo grupo. Uma tabela
 nova sem classificação ou uma classificação sobreposta interrompe a limpeza.
 `alembic_version` é metadado do migrador e fica fora dessa limpeza.
 
 A fixture `banco_por_teste` confirma ambiente, URL e identidade real da conexão,
 incluindo marcador e privilégios do papel; executa um único `TRUNCATE ...
-RESTART IDENTITY RESTRICT` nas 34 tabelas antes e depois do cenário; confirma
+RESTART IDENTITY RESTRICT` nas tabelas transitórias antes e depois do cenário; confirma
 a transação e descarta o pool ao terminar. Não usa `CASCADE`: uma FK nova de
 uma tabela externa à lista impede a operação em vez de ampliar seu alcance.
 Nenhuma sequência de seed é reiniciada. A limpeza também alcança jobs de
@@ -102,3 +108,13 @@ seed e da sequência de aulas, limpeza idempotente de dados confirmados,
 recusa de dependência fora do inventário, recusa de ambiente não descartável,
 inventário incompleto e rollback de conteúdo visível à API após commit e falha.
 Os resultados datados e o estado de publicação ficam no plano das Sprints 44–49.
+
+## Atualização da Sprint 56
+
+Para limites de execução, transação por revisão, CHECK/FK NOT VALID seguido
+de VALIDATE em outra revisão e guards de downgrade, consultar o
+[procedimento vigente](migrations_grants_jwt_sprint56_2026-11-05.md).
+Essas proteções complementam os requisitos de backup e ensaio deste documento.
+A exceção explícita ao histórico imutável é a guarda de downgrade de
+`b84e2c7a9d31`: remove truncamento e passa a recusar perda; o upgrade publicado
+permanece igual. As alterações de schema da sprint usam três revisões novas.

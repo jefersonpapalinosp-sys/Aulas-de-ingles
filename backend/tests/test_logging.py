@@ -7,6 +7,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.core.logging import CABECALHO, FormatadorJson, request_id_atual
+from tests.http_assertions import assert_status
 
 
 def test_formatador_produz_json_com_os_campos_extra() -> None:
@@ -56,7 +57,7 @@ async def test_request_id_de_fora_e_respeitado(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_requisicao_vira_uma_linha_de_log(client: AsyncClient, caplog) -> None:
     with caplog.at_level(logging.INFO, logger="app.request"):
-        await client.get("/api/live")
+        assert_status(await client.get("/api/live"))
     registro = next(r for r in caplog.records if r.name == "app.request")
     assert registro.status == 200
     assert registro.path == "/api/live"
@@ -69,10 +70,13 @@ async def test_telemetria_nao_registra_corpo_query_ou_autorizacao(
 ) -> None:
     segredo = "senha-que-nao-pode-vazar"
     with caplog.at_level(logging.INFO, logger="app.request"):
-        await client.post(
-            "/api/auth/login?campanha=dado-sensivel",
-            headers={"Authorization": "Bearer token-secreto"},
-            json={"email": "privado@example.com", "password": segredo},
+        assert_status(
+            await client.post(
+                "/api/auth/login?campanha=dado-sensivel",
+                headers={"Authorization": "Bearer token-secreto"},
+                json={"email": "privado@example.com", "password": segredo},
+            ),
+            401,
         )
     registro = next(r for r in caplog.records if r.name == "app.request")
     saida = FormatadorJson().format(registro)
