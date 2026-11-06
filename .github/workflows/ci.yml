@@ -54,6 +54,7 @@ jobs:
         run: |
           docker build -f backend/Dockerfile.prod -t aulas-ingles-ci-api:${{ github.sha }} .
           docker build -f frontend/Dockerfile.prod -t aulas-ingles-ci-web:${{ github.sha }} frontend
+          docker build -f infra/easypanel/Dockerfile.postgres -t aulas-ingles-ci-postgres:${{ github.sha }} .
       - name: inventário Trivy da imagem da API
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -74,8 +75,18 @@ jobs:
           output: trivy-web.json
           severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
           exit-code: '0'
+      - name: inventário Trivy da imagem PostgreSQL e permissions
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: aulas-ingles-ci-postgres:${{ github.sha }}
+          version: v0.76.0
+          scanners: vuln
+          format: json
+          output: trivy-postgres.json
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: '0'
       - name: bloqueia CRITICAL e relatórios incompletos
-        run: python3 -m ops.security_gate trivy-api.json trivy-web.json
+        run: python3 -m ops.security_gate trivy-api.json trivy-web.json trivy-postgres.json
       # SARIF para a aba Security (code scanning). Mesma política de triagem da
       # Sprint 42 (docs/politica_triagem_seguranca_sprint_42.md): inventário,
       # não aprovação — nenhum destes passos bloqueia o workflow.
@@ -107,6 +118,23 @@ jobs:
         with:
           sarif_file: trivy-api.sarif
           category: trivy-image-api
+      - name: Trivy da imagem PostgreSQL em SARIF
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: aulas-ingles-ci-postgres:${{ github.sha }}
+          version: v0.76.0
+          scanners: vuln
+          format: sarif
+          output: trivy-postgres.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: '0'
+      - name: publica SARIF PostgreSQL na aba Security
+        uses: github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3
+        continue-on-error: true
+        with:
+          sarif_file: trivy-postgres.sarif
+          category: trivy-image-postgres
       - name: publica SARIF da web na aba Security
         uses: github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3
         continue-on-error: true
@@ -124,8 +152,10 @@ jobs:
             ${{ runner.temp }}/e2e-npm-audit.json
             trivy-api.json
             trivy-web.json
+            trivy-postgres.json
             trivy-api.sarif
             trivy-web.sarif
+            trivy-postgres.sarif
           if-no-files-found: warn
           retention-days: 14
 

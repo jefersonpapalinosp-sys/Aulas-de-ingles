@@ -1,5 +1,20 @@
 FROM public.ecr.aws/docker/library/postgres:16.15-alpine@sha256:e0e53cfa0884f3cc216a621033e4f38dceb49e52218ac77facc8e48f02973093
 
+# A base traz gosu com biblioteca Go sinalizada pelo scanner. O su-exec mantém
+# a troca para postgres sem carregar esse binário; PostgreSQL e digest ficam iguais.
+# As duas chamadas e o alias upstream são conferidos antes de qualquer troca.
+RUN apk add --no-cache su-exec=0.3-r0 \
+    && test "$(readlink /usr/local/bin/su-exec)" = gosu \
+    && for script in /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-ensure-initdb.sh; do \
+        test "$(grep -Fc 'exec gosu postgres ' "$script")" = 1 \
+        && sed -i 's|exec gosu postgres |exec /sbin/su-exec postgres |' "$script" \
+        && ! grep -qw gosu "$script" || exit 1; \
+    done \
+    && rm /usr/local/bin/gosu /usr/local/bin/su-exec \
+    && ln -s /sbin/su-exec /usr/local/bin/su-exec \
+    && test "$(su-exec postgres id -u)" = "$(id -u postgres)" \
+    && test "$(su-exec postgres id -g)" = "$(id -g postgres)"
+
 COPY infra/easypanel/postgres-init.sh /docker-entrypoint-initdb.d/10-aulas-roles.sh
 COPY infra/easypanel/apply-grants.sh /opt/aulas/apply-grants.sh
 COPY ops/roles_policy.sql /opt/aulas/roles_policy.sql

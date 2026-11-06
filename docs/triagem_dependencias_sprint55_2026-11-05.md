@@ -32,6 +32,38 @@ O Dockerfile instala explicitamente `1.2.1-r0`, versão corrigida indicada pelo
 [Alpine Security Tracker](https://security.alpinelinux.org/vuln/CVE-2026-111497).
 Não foi criada exceção para o achado; a imagem deve passar pelo scan novamente.
 
+## Correção da imagem PostgreSQL em 06/11/2026
+
+O scan da candidata PostgreSQL identificou `CVE-2025-68121` na biblioteca Go
+1.24.6 embutida em `/usr/local/bin/gosu`. O [aviso oficial do Go](https://pkg.go.dev/vuln/GO-2026-4337)
+descreve uma falha de retomada de sessões TLS e as versões corrigidas.
+O achado de componente não comprova que esse caminho TLS é usado pelo gosu;
+o gate CRITICAL continua bloqueando a imagem, sem exceção de scanner.
+
+A imagem mantém PostgreSQL **16.15** e o digest da base. Instala
+`su-exec=0.3-r0` do Alpine 3.24, já utilizado pelo backend, e substitui somente
+as duas chamadas fixas para o usuário `postgres` nos helpers oficiais.
+O build verifica as chamadas esperadas e o alias upstream antes de remover
+o binário Go e redirecionar o alias para `/sbin/su-exec`.
+O [código do su-exec 0.3](https://github.com/ncopa/su-exec/blob/v0.3/su-exec.c)
+aplica usuário/grupos e executa diretamente o processo; o
+[pacote Alpine](https://github.com/alpinelinux/aports/blob/3.24-stable/main/su-exec/APKBUILD)
+fornece o executável usado pela imagem.
+
+O CI agora constrói e varre também a imagem compartilhada por `db` e
+`permissions`, exige seu relatório no mesmo gate de API/web e publica JSON/SARIF.
+Essa correção da candidata não recria nem atualiza automaticamente o banco
+produtivo: o controlador mantém a troca do serviço PostgreSQL separada do deploy
+da aplicação.
+
+Validação local em 06/11: Trivy 0.76.0 detectou zero vulnerabilidades na imagem
+final Alpine 3.24.3. Dois laboratórios isolados comprovaram inicialização de
+volume vazio e troca da imagem anterior para a candidata em volume existente:
+PostgreSQL 16.15, UID/GID 70, migrations até `f61a1b8c9009`, aplicação de grants,
+preservação de registro sentinela e hashes dos papéis/senhas. Reinício como
+`postgres`, helpers `ensure`/`enforce` e encerramento limpo também passaram.
+Nenhum banco produtivo participou desses testes.
+
 ## Branches antigas
 
 As pontas consultadas pela API foram comparadas às referências locais de mesmo
