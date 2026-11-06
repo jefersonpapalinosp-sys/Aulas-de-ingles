@@ -65,7 +65,10 @@ def public_url(base: str) -> str:
 
 def fetch(url: str) -> tuple[int, dict[str, Any], str, int]:
     """Devolve status, corpo, cabeçalho `Server` e latência em ms."""
-    request = urllib.request.Request(url, headers={"Accept": "application/json"})
+    request = urllib.request.Request(
+        url,
+        headers={"Accept": "application/json", "User-Agent": "Aulas-Public-Probe/1.0"},
+    )
     context = ssl.create_default_context()
     started = time.monotonic()
     try:
