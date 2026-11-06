@@ -13,7 +13,9 @@ from starlette.exceptions import HTTPException
 
 from app.core.logging import request_id_atual
 
-ErrorCode = Literal["session_invalid", "invalid_credentials", "conflict", "service_unavailable"]
+ErrorCode = Literal[
+    "session_invalid", "invalid_credentials", "password_mismatch", "conflict", "service_unavailable"
+]
 
 
 class ApiErrorOut(BaseModel):
@@ -92,6 +94,12 @@ def response(
 
 async def http_error(request: Request, exc: Exception) -> Response:
     assert isinstance(exc, HTTPException)
+    if (
+        exc.status_code == 403
+        and isinstance(exc.detail, dict)
+        and exc.detail.get("code") == "password_mismatch"
+    ):
+        return response("password_mismatch", 403, "Senha incorreta.", exc.headers)
     if exc.status_code not in (401, 409, 503):
         return await http_exception_handler(request, exc)
     code: ErrorCode = "conflict" if exc.status_code == 409 else "service_unavailable"

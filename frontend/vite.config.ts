@@ -15,13 +15,18 @@ export default defineConfig({
     minify: 'terser', terserOptions: { maxWorkers: 2, compress: { passes: 4 } },
     rollupOptions: { output: {
       onlyExplicitManualChunks: true,
-      // Jornada e aula completa compartilham player, exercícios e explicações.
-      // Agrupar esses módulos reduz overhead de compressão sem antecipá-los no login/Hoje.
+      // Aula e ferramentas pessoais compartilham um pacote de estudo sob demanda.
+      // Evita ciclos entre escrita/player e comprime contratos/UI compartilhados;
+      // login e Hoje continuam sem carregar esse pacote. Diálogo segue separado.
       manualChunks(id) {
-        // Ferramentas pessoais/históricos usam os mesmos contratos e padrões de UI.
-        // Compartilham um chunk tardio; login/Hoje e aulas não o antecipam.
-        if (/\/src\/(pages\/(NotebookPage|PersonalDataPage|ReviewPage|TestPage|CourseReviewPage|CourseCompletionPage|usePagedItems)\.|api\/(completion|courseReviews|review)\.|features\/(privacy\/deviceInventory\.|(review|completion|checkpoint)\/))/.test(id)) return 'study-tools'
-        if (/\/src\/(pages\/(StudyPage|LessonPage|PracticePage)|api\/(media|practice|assist|addReviewItem)\.|features\/(assist|exercise|media|speaking|study-session|writing|practice)\/|components\/(LessonSections|ExerciseCard|WritingFeedbackProvenance|GrammarBlockView|Markdown))/.test(id)) return 'lesson-study'
+        if (/\/src\/features\/listening\/nativeStore\./.test(id)) return 'native-store'
+        if (/\/src\/features\/media\/positionSync\./.test(id)) return 'position-sync'
+        if (/\/src\/(features\/listening\/|api\/nativePosition\.)/.test(id)) return 'native-listening'
+        if (/\/src\/(pages\/NativeListening|api\/nativeListening\.|features\/media\/NativeAudioPlayer\.)/.test(id)) return 'native-listening'
+        if (/\/src\/features\/(exercise\/SelectionInput|media\/(AudioPlayback|formatAudioTime))\./.test(id)) return 'audio-controls'
+        if (/\/node_modules\/@tanstack\/(?:react-query|query-core)\/.*\/(?:useInfiniteQuery|infiniteQueryObserver)\./.test(id)) return 'study'
+        if (/\/src\/(pages\/(NotebookPage|PersonalDataPage|ReviewPage|TestPage|CourseReviewPage|CourseCompletionPage|usePagedItems)\.|api\/(completion|courseReviews|review|notebook)\.|features\/(privacy\/deviceInventory\.|(review|completion|checkpoint|history|notebook)\/))/.test(id)) return 'study'
+        if (/\/src\/(pages\/(StudyPage|LessonPage|PracticePage)|api\/(writing|speaking|media|practice|assist|addReviewItem)\.|features\/(assist|exercise|media|speaking|study-session|writing|practice)\/|components\/(LessonSections|ExerciseCard|WritingFeedbackProvenance|GrammarBlockView|Markdown))/.test(id)) return 'study'
       },
     } },
   },
@@ -37,6 +42,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/**/*.d.ts', 'src/test-setup.ts', 'src/main.tsx'],
+      reporter: ['text-summary', 'json-summary', 'html'],
+      thresholds: { statements: 80, branches: 74, functions: 78, lines: 85 },
+    },
     // scripts/*.test.mjs rodam com `node --test` (npm run test:scripts), sem jsdom.
     exclude: [...configDefaults.exclude, 'scripts/**'],
   },

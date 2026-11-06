@@ -1,13 +1,26 @@
 # Stack exclusiva: nunca estender compose.prod.yml (tem volumes com nomes globais).
 name: aulas-ingles-e2e
 
+x-runtime-limits: &runtime-limits
+  pids_limit: 256
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 x-api: &api
+  <<: *runtime-limits
   image: aulas-ingles-e2e-api:local
   build:
     context: ..
     dockerfile: backend/Dockerfile.prod
   environment:
     APP_ENV: test
+    LISTENING_ENABLED: "true"
+    LISTENING_NATIVE_ENABLED: "true"
+    LISTENING_NATIVE_PREVIEW: "true"
+    DATABASE_PROCESS_BUDGET: "3"
     DATABASE_URL: postgresql+asyncpg://aulas_test:aulas_test_only@db:5432/aulas_ingles_test
     JWT_SECRET: disposable-e2e-secret-never-use-for-study-or-production
     COOKIE_SECURE: "false"
@@ -27,6 +40,7 @@ x-api: &api
 
 services:
   gateway:
+    <<: *runtime-limits
     image: aulas-ingles-e2e-gateway:local
     build:
       context: ./e2e-gateway
@@ -40,7 +54,11 @@ services:
       timeout: 3s
       retries: 30
   db:
+    <<: *runtime-limits
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    shm_size: 256m
+    command: ["postgres", "-c", "log_lock_waits=on", "-c", "idle_in_transaction_session_timeout=60000",
+              "-c", "log_parameter_max_length=0", "-c", "log_parameter_max_length_on_error=0"]
     environment:
       POSTGRES_USER: aulas_test_admin
       POSTGRES_PASSWORD: disposable_admin_only
@@ -69,7 +87,7 @@ services:
       gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/live', timeout=3)"]
       interval: 3s
       timeout: 5s
       retries: 30
@@ -77,6 +95,7 @@ services:
     <<: *api
     networks: [default, gateway]
     command: ["python", "-m", "app.cli", "assist-worker"]
+    stop_grace_period: ${WORKER_STOP_GRACE_PERIOD:-150s}
     depends_on:
       api:
         condition: service_healthy
@@ -86,6 +105,7 @@ services:
       timeout: 5s
       retries: 30
   web:
+    <<: *runtime-limits
     image: aulas-ingles-e2e-web:local
     build:
       context: ../frontend

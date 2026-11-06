@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErrorBoundary, RecoveryScreen } from './ErrorBoundary'
@@ -38,10 +38,10 @@ describe('recuperação de renderização e chunks', () => {
     expect(reload).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole('button', { name: 'Recarregar aplicativo…' }))
     expect(reload).not.toHaveBeenCalled()
-    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Cancelar' }))
     expect(reload).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole('button', { name: 'Recarregar aplicativo…' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Confirmar recarga' }))
-    expect(reload).toHaveBeenCalledOnce()
+    await userEvent.click(await screen.findByRole('button', { name: 'Confirmar recarga' }))
+    await waitFor(() => expect(reload).toHaveBeenCalledOnce())
   })
 })

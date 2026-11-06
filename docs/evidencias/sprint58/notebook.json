@@ -1,0 +1,176 @@
+{
+  "candidate_comparison_available": false,
+  "concurrent_burst": {
+    "all_status_200": true,
+    "pool_checked_out_max": 10,
+    "request_p95_ms": 599.63,
+    "requests": 10,
+    "wall_ms": 621.77
+  },
+  "contract": "notebook-performance-v1",
+  "current_schema": {
+    "1000": {
+      "deep_page_90_percent": {
+        "app_ms": {
+          "max": 9.06,
+          "min": 3.28,
+          "p50": 4.94,
+          "p95": 8.92
+        },
+        "payload_bytes": {
+          "max": 15004,
+          "min": 15004
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 2,
+        "wall_ms": {
+          "max": 14.38,
+          "min": 4.4,
+          "p50": 7.25,
+          "p95": 11.78
+        }
+      },
+      "deep_plan": {
+        "actual_rows": 51,
+        "execution_ms": 0.309,
+        "indexes": [
+          "ix_course_slug",
+          "ix_notebook_entry_user_updated_id",
+          "uq_course_unit_id_course",
+          "uq_lesson_id_course"
+        ],
+        "node_types": [
+          "Limit",
+          "Nested Loop",
+          "Nested Loop",
+          "Nested Loop",
+          "Index Scan",
+          "Memoize",
+          "Index Scan",
+          "Materialize",
+          "Index Scan",
+          "Index Scan"
+        ],
+        "planning_ms": 1.639,
+        "root_node": "Limit",
+        "shared_hit_blocks_sum": 348,
+        "shared_read_blocks_sum": 0
+      },
+      "first_page": {
+        "app_ms": {
+          "max": 4.28,
+          "min": 2.69,
+          "p50": 3.21,
+          "p95": 4.0
+        },
+        "payload_bytes": {
+          "max": 15105,
+          "min": 15105
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 2,
+        "wall_ms": {
+          "max": 5.59,
+          "min": 3.66,
+          "p50": 4.35,
+          "p95": 5.36
+        }
+      }
+    },
+    "10000": {
+      "deep_page_90_percent": {
+        "app_ms": {
+          "max": 6.45,
+          "min": 3.11,
+          "p50": 3.77,
+          "p95": 6.38
+        },
+        "payload_bytes": {
+          "max": 15155,
+          "min": 15155
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 2,
+        "wall_ms": {
+          "max": 8.4,
+          "min": 4.25,
+          "p50": 5.13,
+          "p95": 7.86
+        }
+      },
+      "deep_plan": {
+        "actual_rows": 51,
+        "execution_ms": 0.947,
+        "indexes": [
+          "ix_course_slug",
+          "ix_notebook_entry_user_updated_id",
+          "uq_course_unit_id_course",
+          "uq_lesson_course_slug"
+        ],
+        "node_types": [
+          "Limit",
+          "Sort",
+          "Hash Join",
+          "Bitmap Heap Scan",
+          "Bitmap Index Scan",
+          "Hash",
+          "Nested Loop",
+          "Nested Loop",
+          "Index Scan",
+          "Index Scan",
+          "Index Scan"
+        ],
+        "planning_ms": 0.451,
+        "root_node": "Limit",
+        "shared_hit_blocks_sum": 833,
+        "shared_read_blocks_sum": 0
+      },
+      "first_page": {
+        "app_ms": {
+          "max": 17.29,
+          "min": 3.05,
+          "p50": 4.73,
+          "p95": 12.35
+        },
+        "payload_bytes": {
+          "max": 15257,
+          "min": 15257
+        },
+        "pool_checkouts_per_request_max": 1,
+        "sql_queries": 2,
+        "wall_ms": {
+          "max": 19.02,
+          "min": 4.22,
+          "p50": 6.14,
+          "p95": 17.38
+        }
+      }
+    }
+  },
+  "datasets": {
+    "1000": {
+      "baseline_insert_ms": 51.64,
+      "stable_traversal": {
+        "elapsed_ms": 378.44,
+        "items": 1000,
+        "pages": 20
+      }
+    },
+    "10000": {
+      "baseline_insert_ms": 501.84,
+      "stable_traversal": {
+        "elapsed_ms": 992.02,
+        "items": 10000,
+        "pages": 200
+      }
+    }
+  },
+  "environment": {
+    "database": "aulas_ingles_test",
+    "marker": "aulas-ingles:disposable-test:v1",
+    "postgres": "16.15",
+    "role": "aulas_test"
+  },
+  "page_size": 50,
+  "samples_per_route": 30
+}

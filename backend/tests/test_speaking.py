@@ -22,6 +22,7 @@ from app.db.models import (
 from app.performance import BYTES_HEADER, POOL_HEADER, SQL_HEADER
 from app.services import assistance, transcription_queue
 from tests.audio_samples import encoded
+from tests.http_assertions import assert_status
 
 
 @pytest.fixture(autouse=True)
@@ -483,7 +484,9 @@ async def test_listagem_isola_gravacoes_quando_numero_da_aula_se_repete(
         assert [item["course_slug"] for item in legacy_items] == ["voa-level-1"]
     finally:
         for attempt_id in attempt_ids:
-            await client.delete(f"/api/speaking/attempts/{attempt_id}", headers=headers)
+            assert_status(
+                await client.delete(f"/api/speaking/attempts/{attempt_id}", headers=headers)
+            )
 
 
 @pytest.mark.asyncio
@@ -536,7 +539,7 @@ async def test_upload_valida_formato_tamanho_e_envio_unico(
     assert len(speaking_review) == 1
     assert speaking_review[0]["media_url"]
     assert speaking_review[0]["skill"] == "speaking"
-    await client.delete(f"/api/speaking/attempts/{attempt_id}", headers=headers)
+    assert_status(await client.delete(f"/api/speaking/attempts/{attempt_id}", headers=headers))
 
 
 @pytest.mark.asyncio
@@ -581,10 +584,12 @@ async def test_transcricao_assistida_expoe_confianca_comparacao_custo_e_avaliaca
             },
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
 
     requested = await client.post(
@@ -669,10 +674,12 @@ async def test_stt_uses_captured_cue_after_editorial_change(
             json={"cue_id": cue, "duration_ms": 1000, "consent": True},
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
     requested = await client.post(
         f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers
@@ -718,10 +725,12 @@ async def test_stt_refuses_legacy_attempt_without_snapshot_before_reserving_quot
             json={"cue_id": await cue_id(client), "duration_ms": 1000, "consent": True},
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
     monkeypatch.setattr(settings, "editorial_snapshots_enabled", True)
     response = await client.post(
@@ -751,10 +760,12 @@ async def test_worker_fails_closed_for_legacy_job_without_calling_provider(
             json={"cue_id": await cue_id(client), "duration_ms": 1000, "consent": True},
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
 
     original_lookup = speaking_api._captured_cue_text
@@ -809,12 +820,16 @@ async def test_falha_do_provedor_mantem_audio_e_autoavaliacao(
             },
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
-    await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
+    assert_status(
+        await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
+    )
     assert await transcription_queue.process_next_transcription() is True
     item = (await client.get("/api/speaking/attempts", headers=headers)).json()[0]
     assert item["transcription"]["status"] == "failed"
@@ -861,10 +876,12 @@ async def test_worker_repete_com_backoff_e_chave_idempotente(
             },
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
     requested = (
         await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
@@ -927,12 +944,16 @@ async def test_workers_concorrentes_reivindicam_job_uma_unica_vez(
             },
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
-    await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
+    assert_status(
+        await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)
+    )
 
     results = await asyncio.gather(
         transcription_queue.process_next_transcription(),
@@ -978,10 +999,12 @@ async def test_worker_retoma_job_interrompido_apos_timeout(
             },
         )
     ).json()
-    await client.put(
-        f"/api/speaking/attempts/{attempt['id']}/audio",
-        headers={**headers, "Content-Type": "audio/webm"},
-        content=encoded(),
+    assert_status(
+        await client.put(
+            f"/api/speaking/attempts/{attempt['id']}/audio",
+            headers={**headers, "Content-Type": "audio/webm"},
+            content=encoded(),
+        )
     )
     requested = (
         await client.post(f"/api/speaking/attempts/{attempt['id']}/transcription", headers=headers)

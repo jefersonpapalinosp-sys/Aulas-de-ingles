@@ -32,7 +32,35 @@ function syntheticDist(files, initial) {
 const line = (result, prefix) => result.lines.find((text) => text.includes(prefix))
 const entry = ['index-abc123.js', 'index-abc123.css']
 
+describe('reserva de listening preserva os tetos da base e da entrada', () => {
+  it('aceita o módulo lazy dentro de 3 KiB e reprova acima do teto', () => {
+    for (const size of [2, 4]) {
+      const result = checkBundleBudget(syntheticDist({
+        'index-abc123.js': 115, 'index-abc123.css': 10, 'study-x.js': 58,
+        'ListeningPage-test.js': size,
+      }, entry))
+      assert.equal(result.ok, size === 2)
+      assert.ok(result.listening > size * 1024)
+    }
+  })
+  it('recusa listening inicial e crescimento da base pago pela reserva', () => {
+    const initial = checkBundleBudget(syntheticDist({ 'index-abc123.js': 100, 'ListeningPage-test.js': 2 }, ['index-abc123.js', 'ListeningPage-test.js']))
+    assert.equal(initial.ok, false)
+    const base = checkBundleBudget(syntheticDist({ 'index-abc123.js': 115, 'study-x.js': 70, 'ListeningPage-test.js': 1 }, ['index-abc123.js']))
+    assert.equal(base.ok, false)
+    assert.match(line(base, 'total JS/CSS base'), /^ERRO /)
+  })
+})
+
 describe('orçamento do bundle com dois tetos', () => {
+  it('limita o piloto e seu player compartilhado sem permitir carregamento inicial', () => {
+    const assets = { 'index-abc123.js': 110, 'study-x.js': 70,
+      'native-listening-x.js': 4, 'audio-controls-x.js': 1, 'listening-x.css': 0.5 }
+    assert.equal(checkBundleBudget(syntheticDist(assets, ['index-abc123.js'])).ok, true)
+    assert.equal(checkBundleBudget(syntheticDist({ ...assets, 'native-listening-x.js': 14 }, ['index-abc123.js'])).ok, false)
+    assert.equal(checkBundleBudget(syntheticDist(assets, ['index-abc123.js', 'audio-controls-x.js'])).ok, false)
+    assert.equal(checkBundleBudget(syntheticDist({ ...assets, 'study-x.js': 76 }, ['index-abc123.js'])).ok, false)
+  })
   it('aprova entrada e total dentro dos limites e rotula o que é inicial e o que é lazy', () => {
     const dist = syntheticDist({ 'index-abc123.js': 115, 'index-abc123.css': 10, 'lesson-study-x.js': 40 }, entry)
     const result = checkBundleBudget(dist)

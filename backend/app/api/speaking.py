@@ -588,8 +588,11 @@ async def solicitar_transcricao(
         or not settings.assist_account_allowed(usuario.id)
     ):
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Transcrição assistida não está habilitada.",
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "assist_disabled",
+                "message": "Transcrição assistida não está habilitada.",
+            },
         )
     # Serializa a admissão e a procura de job existente na mesma conta.
     await assist_quota.lock_user(session, usuario.id)

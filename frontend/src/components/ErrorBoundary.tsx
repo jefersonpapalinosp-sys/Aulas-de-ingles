@@ -1,17 +1,43 @@
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react'
+import { updateAppAndReload } from '../features/offline/appUpdate'
 
 function isChunkError(error: unknown): boolean {
   return error instanceof Error && /ChunkLoadError|Loading chunk|dynamically imported module|Importing a module script|Failed to load module script|Unable to preload CSS/i.test(`${error.name} ${error.message}`)
 }
 
 /** Recarga só após confirmação explícita; nenhum storage é limpo. Compartilhado com o aviso de 428. */
-export function ConfirmReload({ reload = () => window.location.reload() }: { reload?: () => void }) {
+export function ConfirmReload({ reload = () => window.location.reload(), onStart }: {
+  reload?: () => void; onStart?: () => void
+}) {
   const [confirm, setConfirm] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const active = useRef<AbortController | null>(null)
+  useEffect(() => () => active.current?.abort(), [])
+  async function run() {
+    onStart?.()
+    const controller = new AbortController()
+    active.current?.abort()
+    active.current = controller
+    setBusy(true)
+    setError('')
+    try {
+      await updateAppAndReload({ reload, signal: controller.signal })
+    } catch (cause) {
+      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : 'Não foi possível atualizar.')
+    } finally {
+      if (!controller.signal.aborted) setBusy(false)
+      if (active.current === controller) active.current = null
+    }
+  }
   if (!confirm) return <button type="button" onClick={() => setConfirm(true)}>Recarregar aplicativo…</button>
   return <div className="confirm-reload">
     <p>Copie textos ainda visíveis. Recarregar pode perder alterações não salvas. Continuar?</p>
-    <button type="button" onClick={reload}>Confirmar recarga</button>
-    <button type="button" onClick={() => setConfirm(false)}>Cancelar</button>
+    <button type="button" disabled={busy} onClick={() => { void run() }}>
+      {busy ? 'Atualizando…' : error ? 'Tentar atualizar novamente' : 'Confirmar recarga'}
+    </button>
+    <button type="button" disabled={busy} onClick={() => { setConfirm(false); setError('') }}>Cancelar</button>
+    {error && <p role="alert">{error} Dados pendentes continuam preservados.</p>}
   </div>
 }
 

@@ -69,6 +69,7 @@ test('Sprint 39A: conflito de áudio mantém posição local até escolha por te
 
 test('Sprint 39A: interação registra tempo; sinal de aba oculta interrompe eventos', async ({ page }) => {
   test.setTimeout(60000)
+  await page.clock.install()
   const headers = await account(page)
   await page.goto(path)
   const status = page.getByRole('complementary', { name: 'Tempo ativo de estudo' })
@@ -77,15 +78,27 @@ test('Sprint 39A: interação registra tempo; sinal de aba oculta interrompe eve
   await page.getByRole('button', { name: 'Mostrar transcrição' }).click()
   const firstEvent = await page.waitForResponse((response) => response.url().endsWith('/api/me/activity/events') && response.ok(), { timeout: 22000 })
   expect((await firstEvent.json()).credited_ms).toBeGreaterThan(0)
+  const pendingEvents: Promise<unknown>[] = []
+  page.on('request', (request) => {
+    if (request.url().endsWith('/api/me/activity/events')) {
+      pendingEvents.push(request.response().then(async (response) => {
+        expect(response?.ok()).toBe(true)
+        await response?.finished()
+      }))
+    }
+  })
   // Headless mantém páginas em foco. Injeta somente o sinal DOM de visibilidade;
   // não representa homologação de foco do sistema operacional ou dispositivo real.
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' })
     document.dispatchEvent(new Event('visibilitychange'))
   })
-  await page.waitForTimeout(1000) // Aguarda o flush do intervalo parcial.
+  await page.clock.runFor(1000)
+  await Promise.all(pendingEvents) // Aguarda somente o flush que realmente ocorreu.
   const before = await (await page.request.get('/api/me/export', { headers })).json()
-  await page.waitForTimeout(17000) // Janela maior que um heartbeat real, sem fabricar tempo.
+  const requestsBefore = pendingEvents.length
+  await page.clock.runFor(17000) // Mais de um heartbeat oculto, sem esperar 17 s reais.
   const after = await (await page.request.get('/api/me/export', { headers })).json()
+  expect(pendingEvents.length).toBe(requestsBefore)
   expect(after.activity_events.length).toBe(before.activity_events.length)
 })

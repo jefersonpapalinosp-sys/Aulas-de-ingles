@@ -49,7 +49,9 @@ def _tokens(resposta: Response, sessao: RefreshSession) -> TokenOut:
     return TokenOut(access_token=access, expires_in=settings.access_token_minutes * 60)
 
 
-def _new_session(user_id: int, family: str | None = None) -> RefreshSession:
+def _new_session(
+    user_id: int, family: str | None = None, *, expires_at: datetime | None = None
+) -> RefreshSession:
     now = datetime.now(UTC)
     jti = uuid4().hex
     return RefreshSession(
@@ -57,7 +59,7 @@ def _new_session(user_id: int, family: str | None = None) -> RefreshSession:
         jti=jti,
         family_id=family or jti,
         created_at=now,
-        expires_at=now + timedelta(days=get_settings().refresh_token_days),
+        expires_at=expires_at or now + timedelta(days=get_settings().refresh_token_days),
     )
 
 
@@ -130,6 +132,19 @@ async def _locked_cookie(session: AsyncSession, bruto: str) -> RefreshSession | 
     ).scalar_one_or_none()
 
 
+async def _revoke_family(session: AsyncSession, current: RefreshSession) -> None:
+    await session.execute(
+        update(RefreshSession)
+        .where(
+            RefreshSession.user_id == current.user_id,
+            RefreshSession.family_id == current.family_id,
+        )
+        .values(revoked_at=datetime.now(UTC), successor_jti=None)
+    )
+    # Persistir antes do 401: o rollback da dependência não pode desfazer a revogação.
+    await session.commit()
+
+
 @router.post("/refresh", response_model=TokenOut)
 async def renovar(
     request: Request, resposta: Response, session: Annotated[AsyncSession, Depends(get_session)]
@@ -144,11 +159,23 @@ async def renovar(
     now = datetime.now(UTC)
     if current is None or current.expires_at <= now:
         raise HTTPException(401, "Sessão encerrada. Entre de novo.")
+    deadline = await session.scalar(
+        select(RefreshSession.expires_at).where(
+            RefreshSession.jti == current.family_id,
+            RefreshSession.user_id == current.user_id,
+        )
+    )
+    # Também limita famílias emitidas antes desta correção. Sem a raiz não há
+    # evidência do prazo original: exigir login, em vez de inventar mais 30 dias.
+    if deadline is None or deadline <= now:
+        await _revoke_family(session, current)
+        raise HTTPException(401, "Sessão encerrada. Entre de novo.")
     if current.revoked_at is not None:
         if (
             not current.successor_jti
             or (now - current.revoked_at).total_seconds() > REFRESH_GRACE_SECONDS
         ):
+            await _revoke_family(session, current)
             raise HTTPException(401, "Sessão encerrada. Entre de novo.")
         successor = (
             await session.execute(
@@ -168,10 +195,11 @@ async def renovar(
         # Coalesce inclusive pedidos que já receberam o cookie novo.
         successor = current
     else:
-        successor = _new_session(current.user_id, current.family_id)
+        successor = _new_session(current.user_id, current.family_id, expires_at=deadline)
         current.revoked_at = now
         current.successor_jti = successor.jti
         session.add(successor)
+    successor.expires_at = min(successor.expires_at, deadline)
     await session.commit()
     return _tokens(resposta, successor)
 
@@ -185,15 +213,7 @@ async def sair(
         try:
             current = await _locked_cookie(session, bruto)
             if current is not None:
-                await session.execute(
-                    update(RefreshSession)
-                    .where(
-                        RefreshSession.user_id == current.user_id,
-                        RefreshSession.family_id == current.family_id,
-                    )
-                    .values(revoked_at=datetime.now(UTC), successor_jti=None)
-                )
-                await session.commit()
+                await _revoke_family(session, current)
         except TokenInvalido:
             pass
     resposta.delete_cookie(

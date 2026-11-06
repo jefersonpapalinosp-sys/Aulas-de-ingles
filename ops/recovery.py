@@ -72,13 +72,21 @@ RESTORE = Target(
     "aulas-ingles:recovery-target:v1",
 )
 DIALOGUE_LAB = Target(
-    DIALOGUE_PROJECT, "source-db", "aulas_ingles_test", "aulas_test",
-    f"{DIALOGUE_PROJECT}_source_db", f"{DIALOGUE_PROJECT}_source_voice",
+    DIALOGUE_PROJECT,
+    "source-db",
+    "aulas_ingles_test",
+    "aulas_test",
+    f"{DIALOGUE_PROJECT}_source_db",
+    f"{DIALOGUE_PROJECT}_source_voice",
     "aulas-ingles:disposable-test:v1",
 )
 DIALOGUE_RESTORE = Target(
-    DIALOGUE_PROJECT, "target-db", "aulas_ingles_restore", "aulas_restore",
-    f"{DIALOGUE_PROJECT}_target_db", f"{DIALOGUE_PROJECT}_target_voice",
+    DIALOGUE_PROJECT,
+    "target-db",
+    "aulas_ingles_restore",
+    "aulas_restore",
+    f"{DIALOGUE_PROJECT}_target_db",
+    f"{DIALOGUE_PROJECT}_target_voice",
     "aulas-ingles:recovery-target:v1",
 )
 UPGRADE_LAB = Target(
@@ -149,8 +157,12 @@ DIALOGUE_DESTINATIONS = {CONFIRM_DIALOGUE: DIALOGUE_RESTORE}
 
 
 def run(
-    args: Sequence[str], *, stdin: IO[bytes] | int | None = None,
-    stdout: IO[bytes] | int | None = None, timeout: float = 120, reject_stderr: bool = False,
+    args: Sequence[str],
+    *,
+    stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None,
+    timeout: float = 120,
+    reject_stderr: bool = False,
 ) -> bytes:
     try:
         result = subprocess.run(
@@ -169,28 +181,26 @@ def run(
         return result.stdout or b""
     except (OSError, subprocess.SubprocessError) as exc:
         # Não incluir args/stderr: o ambiente errado poderia devolver dados privados.
-        raise RecoveryError(
-            "Comando operacional falhou; nenhum sucesso foi confirmado."
-        ) from exc
+        raise RecoveryError("Comando operacional falhou; nenhum sucesso foi confirmado.") from exc
 
 
 def docker(
-    *args: str, stdin: IO[bytes] | int | None = None,
-    stdout: IO[bytes] | int | None = None, timeout: float = 120, reject_stderr: bool = False,
+    *args: str,
+    stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None,
+    timeout: float = 120,
+    reject_stderr: bool = False,
 ) -> bytes:
-    return run(["docker", *args], stdin=stdin, stdout=stdout, timeout=timeout,
-               reject_stderr=reject_stderr)
+    return run(
+        ["docker", *args], stdin=stdin, stdout=stdout, timeout=timeout, reject_stderr=reject_stderr
+    )
 
 
 def local_daemon() -> None:
     if os.environ.get("DOCKER_HOST"):
-        require(
-            os.environ["DOCKER_HOST"].startswith("unix:///"), "Docker remoto recusado."
-        )
+        require(os.environ["DOCKER_HOST"].startswith("unix:///"), "Docker remoto recusado.")
     endpoint = (
-        docker("context", "inspect", "--format", "{{.Endpoints.docker.Host}}")
-        .decode()
-        .strip()
+        docker("context", "inspect", "--format", "{{.Endpoints.docker.Host}}").decode().strip()
     )
     require(
         endpoint.startswith("unix:///"),
@@ -198,9 +208,7 @@ def local_daemon() -> None:
     )
 
 
-def validate_volume(
-    value: dict[str, Any], project: str, name: str, disposable: bool
-) -> None:
+def validate_volume(value: dict[str, Any], project: str, name: str, disposable: bool) -> None:
     require(
         value["Name"] == name
         and value["Driver"] == "local"
@@ -209,9 +217,7 @@ def validate_volume(
         "Volume incorreto ou redirecionado.",
     )
     labels = value.get("Labels") or {}
-    require(
-        labels.get("com.docker.compose.project") == project, "Volume de outro projeto."
-    )
+    require(labels.get("com.docker.compose.project") == project, "Volume de outro projeto.")
     if disposable:
         require(
             labels.get("org.aulas.environment") == "disposable-recovery",
@@ -226,9 +232,7 @@ def volume(name: str, project: str, disposable: bool = True) -> None:
 
 def lab_resources() -> None:
     local_daemon()
-    existing = set(
-        docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
-    )
+    existing = set(docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines())
     for name in (
         LAB.db_volume,
         LAB.voice_volume,
@@ -249,9 +253,7 @@ def lab_resources() -> None:
 
 def upgrade_lab_resources() -> None:
     local_daemon()
-    existing = set(
-        docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines()
-    )
+    existing = set(docker("volume", "ls", "--format", "{{.Name}}").decode().splitlines())
     for name in (
         UPGRADE_LAB.db_volume,
         UPGRADE_LAB.voice_volume,
@@ -316,9 +318,7 @@ def source_target(source: str) -> Target:
     if api_env.get("DATABASE_PURPOSE") == "runtime":
         role = "aulas_backup"
     require(
-        bool(database)
-        and bool(role)
-        and database not in {"postgres", "template0", "template1"},
+        bool(database) and bool(role) and database not in {"postgres", "template0", "template1"},
         "Banco/usuário da origem não identificados.",
     )
     return Target(
@@ -376,9 +376,7 @@ def check_target(target: Target) -> dict[str, Any]:
         and volumes[0]["Destination"] == "/var/lib/postgresql/data",
         "Mount de banco inesperado.",
     )
-    require(
-        info["Config"]["Image"] == POSTGRES, "Imagem PostgreSQL fora do contrato 16.15."
-    )
+    require(info["Config"]["Image"] == POSTGRES, "Imagem PostgreSQL fora do contrato 16.15.")
     require(
         set(info["NetworkSettings"]["Networks"]) == {f"{target.project}_default"},
         "Banco conectado a rede inesperada.",
@@ -432,16 +430,14 @@ def check_target(target: Target) -> dict[str, Any]:
         require(
             identity["marker"] == target.marker
             and not any(
-                identity[k]
-                for k in ("super", "createdb", "createrole", "bypassrls", "replication")
+                identity[k] for k in ("super", "createdb", "createrole", "bypassrls", "replication")
             ),
             "Marcador/papel limitado não confirmado.",
         )
     if target.role == "aulas_backup":
         require(
             not any(
-                identity[k]
-                for k in ("super", "createdb", "createrole", "bypassrls", "replication")
+                identity[k] for k in ("super", "createdb", "createrole", "bypassrls", "replication")
             ),
             "Backup não pode usar privilégio global.",
         )
@@ -464,8 +460,7 @@ def quiet(target: Target) -> None:
                 "Aplicação aponta para banco diferente da origem.",
             )
             require(
-                set(info["NetworkSettings"]["Networks"])
-                == {f"{target.project}_default"},
+                set(info["NetworkSettings"]["Networks"]) == {f"{target.project}_default"},
                 "Aplicação conectada a rede inesperada.",
             )
             require(
@@ -518,7 +513,10 @@ SELECT json_build_object(
 
 
 def voice(
-    target: Target, action: str, *, stdin: IO[bytes] | int | None = None,
+    target: Target,
+    action: str,
+    *,
+    stdin: IO[bytes] | int | None = None,
     stdout: IO[bytes] | int | None = None,
 ) -> None:
     require(action in {"export", "import"}, "Ação de voz inválida.")
@@ -601,6 +599,29 @@ def lease(name: str) -> Iterator[None]:
         yield
     finally:
         docker("rm", lock)
+
+
+def break_lease(name: str, confirm_id: str, owner_stopped: bool) -> None:
+    import re
+    from datetime import UTC, datetime
+
+    require(re.fullmatch(r"[a-z0-9-]{1,60}", name), "Nome de lease inválido.")
+    require(re.fullmatch(r"[a-f0-9]{64}", confirm_id), "Confirme o ID completo do lock.")
+    require(owner_stopped, "Confirme que o processo proprietário foi encerrado.")
+    local_daemon()
+    info = json.loads(docker("inspect", f"aulas-recovery-{name}-lock"))[0]
+    require(
+        info["Id"] == confirm_id
+        and info["Config"].get("Labels", {}).get("org.aulas.purpose") == "recovery-lock"
+        and not info["State"]["Running"],
+        "Identidade do lock diverge.",
+    )
+    created = datetime.fromisoformat(info["Created"].replace("Z", "+00:00"))
+    require(
+        (datetime.now(UTC) - created).total_seconds() >= 3600,
+        "Lock recente; aguarde uma hora e confirme o proprietário.",
+    )
+    docker("rm", confirm_id)  # ID imutável, nunca rm -f nem remoção por nome reutilizado.
 
 
 def application_info(target: Target) -> dict[str, object]:
@@ -865,6 +886,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     capture.add_argument(
         "--source", choices=("lab", "dialogue-lab", "upgrade-lab", "dev", "prod"), required=True
     )
+    capture.add_argument("--hold", action="store_true")
+    unlock = commands.add_parser("lease-break")
+    unlock.add_argument("name")
+    unlock.add_argument("--confirm-id", required=True)
+    unlock.add_argument("--confirm-owner-stopped", action="store_true")
     verify = commands.add_parser("verify")
     verify.add_argument("bundle", type=Path)
     load = commands.add_parser("restore")
@@ -893,19 +919,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "backup":
-            print(
-                "Pacote publicado (integridade verificada; restore é etapa separada): "
-                f"{backup(args.source)}"
-            )
+            bundle = backup(args.source)
+            if args.hold:
+                from ops.backup_policy import hold
+
+                hold(bundle.parent, bundle.name)
+            print(f"Pacote publicado (integridade verificada; restore é etapa separada): {bundle}")
+        elif args.command == "lease-break":
+            break_lease(args.name, args.confirm_id, args.confirm_owner_stopped)
+            print("Lease órfão liberado; recursos e dados preservados.")
         elif args.command == "verify":
             verify_bundle(args.bundle)
             print(
                 "Integridade do pacote e referências de voz verificadas; isto não executa restore."
             )
         elif args.command == "restore":
-            print(
-                f"Restore isolado verificado. Recibo: {restore(args.bundle, args.confirm)}"
-            )
+            print(f"Restore isolado verificado. Recibo: {restore(args.bundle, args.confirm)}")
         elif args.command == "lab-resources":
             lab_resources()
             print("Recursos locais de recuperação verificados.")
@@ -928,7 +957,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+
+        diagnostic("recovery", exc)
         print(
             "Operação falhou; nenhum sucesso foi confirmado. "
             "Preserve pacote/destino parcial para diagnóstico.",

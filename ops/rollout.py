@@ -421,6 +421,8 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("rollout", exc)
         print("Ensaio não aprovado; preserve os artefatos e não libere tráfego.", file=sys.stderr)
         raise SystemExit(1) from None

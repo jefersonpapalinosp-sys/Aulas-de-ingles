@@ -109,15 +109,13 @@ async def test_audio_confidence_and_combined_cost_reach_the_private_turn(
         await client.delete(f"/api/speaking/dialogues/{did}", headers=headers)
     ).status_code == 204
     assert (await session.scalars(select(TranscriptionJob))).all() == []
-    # Excluir a conversa não remove o áudio antes da política de retenção.
-    # A portabilidade ainda precisa funcionar sem cue ou diálogo associado.
+    # Sprint 52: excluir a conversa remove seus áudios e registros exportáveis.
+    # O consumo de cota permanece mesmo após a exclusão dos resultados.
     exported = await client.get("/api/me/export", headers=headers)
     assert exported.status_code == 200
     data = exported.json()
     assert data["dialogues"] == data["dialogue_turns"] == []
-    assert data["speaking"][0]["id"] == audio["id"]
-    assert data["speaking"][0]["lesson_id"] is None
-    assert data["speaking"][0]["transcription"] is None
+    assert data["speaking"] == data["audio_manifest"] == []
     await session.refresh(reservation)
     assert reservation.state == "consumed" and reservation.cost_microusd == 10
 

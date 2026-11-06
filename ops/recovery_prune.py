@@ -188,6 +188,10 @@ def plan_prune(
     bundles, partials, foreign = scan(root)
     require(bundles, "Nenhum pacote válido no diretório de backups; poda recusada.")
     keep, remove = select(bundles, keep_daily, keep_weekly)
+    from ops.backup_policy import held
+    protected = tuple(b for b in remove if held(root, b.name))
+    keep += tuple((b, ("hold",)) for b in protected)
+    remove = tuple(b for b in remove if b not in protected)
     return PrunePlan(
         root=root,
         now=now,
@@ -202,6 +206,8 @@ def plan_prune(
 
 
 def confirm_removable(plan: PrunePlan, name: str) -> Path:
+    from ops.backup_policy import held
+    require(not held(plan.root, name), "Backup protegido por hold; remoção recusada.")
     require(
         BUNDLE_RE.fullmatch(name.removeprefix(PARTIAL_PREFIX)) is not None,
         "Nome fora do padrão de pacote; remoção recusada.",

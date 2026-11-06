@@ -17,10 +17,76 @@ function server() {
 afterEach(() => { vi.restoreAllMocks(); localStorage.clear() })
 
 describe('PositionSync', () => {
+  it('grava novas posições localmente enquanto um envio anterior está lento', async () => {
+    const transport = server(), sync = new PositionSync(7, 9, transport)
+    const realSave = transport.save.getMockImplementation()!
+    let release!: () => void
+    transport.save.mockImplementationOnce(async (body) => {
+      await new Promise<void>((resolve) => { release = resolve })
+      return realSave(body)
+    })
+    await sync.record(10); transport.connect()
+    const sending = sync.sync()
+    await vi.waitFor(() => expect(release).toBeTypeOf('function'))
+    await sync.record(20); await sync.record(30)
+    expect(new PositionSync(7, 9, transport).snapshot()).toMatchObject({ position: 30, pending: 2 })
+    release(); await sending
+    expect(transport.remote()).toMatchObject({ position_seconds: 30, revision: 2 })
+  })
+  it('outra aba não muda a chave enviada e sem confirmação', async () => {
+    const transport = server(), one = new PositionSync(7, 9, transport), two = new PositionSync(7, 9, transport)
+    const realSave = transport.save.getMockImplementation()!
+    transport.save.mockImplementationOnce(async (body) => { await realSave(body); throw new Error('rede') })
+    await one.record(10); transport.connect(); await two.sync(); transport.disconnect()
+    await one.record(20)
+    expect(one.snapshot().pending).toBe(2)
+    transport.connect(); await one.sync()
+    expect(transport.remote()).toMatchObject({ position_seconds: 20, revision: 2 })
+  })
+  it('falha ao substituir posição preserva a cópia durável anterior e avisa', async () => {
+    const transport = server(), sync = new PositionSync(7, 9, transport)
+    await sync.record(5)
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
+    await sync.record(10)
+    expect(sync.snapshot()).toMatchObject({ position: 10 })
+    expect(sync.snapshot().warning).toContain('retomada local não está garantida')
+    expect(new PositionSync(7, 9, transport).snapshot().position).toBe(5)
+  })
+  it('combina posições offline próprias e preserva somente a última após reabrir', async () => {
+    const transport = server(), sync = new PositionSync(7, 9, transport)
+    for (const position of [5, 10, 15, 20, 25]) await sync.record(position)
+    expect(localStorage.length).toBe(1)
+    const reopened = new PositionSync(7, 9, transport)
+    expect(reopened.snapshot()).toMatchObject({ position: 25, pending: 1 })
+    transport.connect(); await reopened.sync()
+    expect(transport.save).toHaveBeenCalledOnce()
+    expect(transport.remote()).toMatchObject({ position_seconds: 25, revision: 1 })
+  })
+  it('não combina uma operação enviada cuja resposta se perdeu', async () => {
+    const transport = server(), sync = new PositionSync(7, 9, transport)
+    const realSave = transport.save.getMockImplementation()!
+    transport.save.mockImplementationOnce(async (body) => { await realSave(body); throw new Error('rede') })
+    await sync.record(10); transport.connect(); await sync.sync(); transport.disconnect()
+    const sent = transport.save.mock.calls[0]![0]
+    await sync.record(20); await sync.record(30)
+    expect(sync.snapshot().pending).toBe(2)
+    expect(JSON.parse(localStorage.getItem(sync.prefix + sent.operation_key)!)).toMatchObject(sent)
+    transport.connect(); await sync.sync()
+    expect(transport.save).toHaveBeenCalledTimes(2)
+    expect(transport.remote()).toMatchObject({ position_seconds: 30, revision: 2 })
+  })
+  it('não combina sem Web Locks nem altera o comando criado por outra aba', async () => {
+    const transport = server(), one = new PositionSync(7, 9, transport), two = new PositionSync(7, 9, transport)
+    await one.record(5); await two.record(10); await one.record(15)
+    expect(one.snapshot().pending).toBe(3)
+    Object.defineProperty(navigator, 'locks', { configurable: true, value: undefined })
+    await one.record(20)
+    expect(one.snapshot().pending).toBe(4)
+  })
   it('preserva fila offline ao remontar e envia posição seguida de conclusão em ordem', async () => {
     const transport = server()
     const one = new PositionSync(7, 9, transport)
-    one.record(30); one.record(0, true); one.dispose()
+    await one.record(30); await one.record(0, true); one.dispose()
     const two = new PositionSync(7, 9, transport)
     expect(two.snapshot()).toMatchObject({ position: 0, completed: true, pending: 2 })
     transport.connect(); await two.sync()
@@ -30,7 +96,7 @@ describe('PositionSync', () => {
   })
   it('conflito não sobrescreve avanço offline; escolha local usa nova revisão', async () => {
     const transport = server(), sync = new PositionSync(7, 9, transport)
-    sync.record(70); transport.change(20); transport.connect(); await sync.sync()
+    await sync.record(70); transport.change(20); transport.connect(); await sync.sync()
     expect(sync.snapshot()).toMatchObject({ position: 70, pending: 1, conflict: { position_seconds: 20 } })
     expect(transport.save).not.toHaveBeenCalled()
     await sync.resolve('local')
@@ -39,8 +105,8 @@ describe('PositionSync', () => {
   })
   it('escolha da conta é explícita e não toca fila de outra conta', async () => {
     const transport = server(), sync = new PositionSync(7, 9, transport)
-    new PositionSync(8, 9, transport).record(80)
-    sync.record(70); transport.change(20); transport.connect(); await sync.sync(); await sync.resolve('remote')
+    await new PositionSync(8, 9, transport).record(80)
+    await sync.record(70); transport.change(20); transport.connect(); await sync.sync(); await sync.resolve('remote')
     expect(sync.snapshot()).toMatchObject({ position: 20, pending: 0, conflict: null })
     expect(new PositionSync(8, 9, transport).snapshot().pending).toBe(1)
   })
@@ -48,7 +114,7 @@ describe('PositionSync', () => {
     const transport = server(), realSave = transport.save.getMockImplementation()!
     transport.save.mockImplementationOnce(async (body) => { await realSave(body); throw new Error('rede') })
     const sync = new PositionSync(7, 9, transport)
-    sync.record(42); transport.connect(); await sync.sync()
+    await sync.record(42); transport.connect(); await sync.sync()
     expect(sync.snapshot().pending).toBe(1)
     await sync.sync()
     expect(sync.snapshot().pending).toBe(0)
@@ -56,14 +122,14 @@ describe('PositionSync', () => {
   })
   it('não envia nem acusa sucesso sem conta confirmada', async () => {
     const transport = server(), sync = new PositionSync(7, 9, transport)
-    sync.record(42); await sync.sync()
+    await sync.record(42); await sync.sync()
     expect(transport.read).not.toHaveBeenCalled()
     expect(sync.snapshot().pending).toBe(1)
   })
   it('quota mantém comando em memória e avisa; remoção falha preserva recibo', async () => {
     const transport = server(), sync = new PositionSync(7, 9, transport)
     const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('', 'QuotaExceededError') })
-    sync.record(42)
+    await sync.record(42)
     expect(sync.snapshot().warning).toContain('retomada local não está garantida')
     write.mockRestore()
     vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new DOMException('', 'SecurityError') })
@@ -74,7 +140,7 @@ describe('PositionSync', () => {
   })
   it('duas abas mantêm operações próprias e reconhecem recibos já confirmados', async () => {
     const transport = server(), one = new PositionSync(7, 9, transport), two = new PositionSync(7, 9, transport)
-    one.record(20); two.record(40)
+    await one.record(20); await two.record(40)
     expect(localStorage.length).toBe(2)
     transport.connect(); await one.sync(); await two.sync()
     expect(transport.remote().position_seconds).toBe(40)
@@ -90,10 +156,11 @@ describe('PositionSync', () => {
   })
   it('desmontagem durante GET impede envio posterior', async () => {
     const transport = server(), sync = new PositionSync(7, 9, transport)
-    sync.record(30); transport.connect()
+    await sync.record(30); transport.connect()
     let finish!: (value: Position) => void
     transport.read.mockImplementationOnce(() => new Promise((resolve) => { finish = resolve }))
-    const work = sync.sync(); sync.dispose(); finish(initial()); await work
+    const work = sync.sync(); await vi.waitFor(() => expect(finish).toBeTypeOf('function'))
+    sync.dispose(); finish(initial()); await work
     expect(transport.save).not.toHaveBeenCalled()
     expect(sync.snapshot().pending).toBe(1)
   })

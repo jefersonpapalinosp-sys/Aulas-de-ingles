@@ -122,7 +122,7 @@ def inventory(
                     if not reference and (not KEY.fullmatch(name) or not snapshot_complete):
                         add("unclassified_protected", key=name)
                         continue
-                    if info.st_size > budget:
+                    if info.st_size * 2 > budget:
                         complete = False
                         add("hash_budget", key=name)
                         continue
@@ -142,15 +142,21 @@ def inventory(
                             complete = False
                             add("changed_protected", key=name)
                             continue
-                        digest = hashlib.sha256()
-                        remaining = info.st_size
-                        while remaining and time.monotonic() < deadline:
-                            chunk = os.read(descriptor, min(65536, remaining))
-                            if not chunk:
+                        digests = []
+                        for _ in range(2):
+                            os.lseek(descriptor, 0, os.SEEK_SET)
+                            digest = hashlib.sha256()
+                            remaining = info.st_size
+                            while remaining and time.monotonic() < deadline:
+                                chunk = os.read(descriptor, min(65536, remaining))
+                                if not chunk:
+                                    break
+                                digest.update(chunk)
+                                remaining -= len(chunk)
+                                budget -= len(chunk)
+                            digests.append(digest.hexdigest())
+                            if remaining:
                                 break
-                            digest.update(chunk)
-                            remaining -= len(chunk)
-                            budget -= len(chunk)
                         after = os.fstat(descriptor)
                         current = os.stat(name, dir_fd=directory, follow_symlinks=False)
 
@@ -159,6 +165,8 @@ def inventory(
 
                         if (
                             remaining
+                            or len(digests) != 2
+                            or digests[0] != digests[-1]
                             or identity(before) != identity(after)
                             or identity(after) != identity(current)
                         ):

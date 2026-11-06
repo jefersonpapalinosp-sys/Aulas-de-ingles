@@ -74,6 +74,7 @@ def test_redirect_cannot_forward_token():
         b'{"success":true,"result":[]}',
         b"x" * 1_000_001,
     ],
+    ids=["invalid-json", "provider-failure", "invalid-result", "oversized-body"],
 )
 def test_bad_responses_never_leak_body(monkeypatch, payload):
     class Opener:

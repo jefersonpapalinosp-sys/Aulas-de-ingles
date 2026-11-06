@@ -96,7 +96,9 @@ class BasePullTests(unittest.TestCase):
             froms.update(pattern.findall(dockerfile.read_text()))
         self.assertTrue(froms)
         for reference in froms:
-            self.assertIn(f'"{reference}|', script, f"{reference} sem pré-carga em {SCRIPT.name}")
+            alias, digest = reference.split("@", 1)
+            self.assertIn(f'"{alias}|', script, f"{reference} sem pré-carga em {SCRIPT.name}")
+            self.assertIn(digest, script)
         # Base do commit fixo que ops/rollback_image.py reconstrói no laboratório DB-42.
         self.assertIn('"public.ecr.aws/docker/library/python:3.12-slim|', script)
         digests = re.findall(r"\|sha256:([0-9a-f]+)\"", script)

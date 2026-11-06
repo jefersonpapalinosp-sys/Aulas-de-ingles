@@ -363,7 +363,9 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("assist_alignment", exc)
         print(
             "Alinhamento 39F não aprovado; preserve manutenção, backup e clone.",
             file=sys.stderr,

@@ -1,0 +1,2 @@
+# Chave exclusiva do environment production; substituir somente a chave pública.
+restrict,command="/usr/local/libexec/aulas-deploy-command" ssh-ed25519 SUBSTITUIR_CHAVE_PUBLICA aulas-deploy-ci

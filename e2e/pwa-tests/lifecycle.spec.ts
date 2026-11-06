@@ -12,7 +12,7 @@ test.beforeEach(async ({ request }) => {
   expect((await request.post('/__test__/release', { headers: { 'X-Test-Release': 'aaaaaaaaaaaaaaaa' } })).ok()).toBe(true)
 })
 
-test('nova release aguarda duas abas, preserva rascunho/fila e só então remove cache antigo', async ({ page, context, request }) => {
+test('confirmação ativa a nova release com duas abas e só a solicitante recarrega', async ({ page, context, request }) => {
   await page.goto('/')
   await controlled(page)
   await page.locator('#draft').fill('Texto não enviado')
@@ -33,22 +33,41 @@ test('nova release aguarda duas abas, preserva rascunho/fila e só então remove
   const second = await context.newPage()
   await second.goto('/')
   await controlled(second)
+  let firstNavigations = 0
+  let secondNavigations = 0
+  page.on('framenavigated', (frame) => { if (frame === page.mainFrame()) firstNavigations++ })
+  second.on('framenavigated', (frame) => { if (frame === second.mainFrame()) secondNavigations++ })
+  expect(await (await request.get('/sw.js')).text()).not.toContain("type === 'SKIP_WAITING'")
   await request.post('/__test__/release', { headers: { 'X-Test-Release': 'bbbbbbbbbbbbbbbb' } })
-  await page.evaluate(async () => { await (await navigator.serviceWorker.getRegistration())!.update() })
-  await expect.poll(() => page.evaluate(async () => Boolean((await navigator.serviceWorker.getRegistration())?.waiting))).toBe(true)
   expect(await page.evaluate(() => caches.keys())).toContain('aulas-pwa-aaaaaaaaaaaaaaaa-text')
   await expect(page.locator('#draft')).toHaveValue('Texto não enviado')
-  await page.close()
-  expect(await second.evaluate(async () => Boolean((await navigator.serviceWorker.getRegistration())?.waiting))).toBe(true)
+
+  const activation = await page.evaluate(async () => {
+    const previous = navigator.serviceWorker.controller
+    let reloadCalled = false
+    let targetActivated = false
+    const { updateAppAndReload } = await import('/app-update.js?e2e')
+    await updateAppAndReload({ reload: () => {
+      reloadCalled = true
+      const current = navigator.serviceWorker.controller
+      targetActivated = Boolean(current && current !== previous && current.state === 'activated')
+    } })
+    return { reloadCalled, targetActivated }
+  })
+  expect(activation).toEqual({ reloadCalled: true, targetActivated: true })
+
+  await expect.poll(() => page.evaluate(() => caches.keys())).not.toContain('aulas-pwa-aaaaaaaaaaaaaaaa-text')
+  await expect(page.locator('#release')).toHaveText('aaaaaaaaaaaaaaaa')
   await expect(second.locator('#release')).toHaveText('aaaaaaaaaaaaaaaa')
-  await second.close()
-  const reopened = await context.newPage()
-  await reopened.goto('/')
-  await controlled(reopened)
-  await expect(reopened.locator('#release')).toHaveText('bbbbbbbbbbbbbbbb')
-  await expect.poll(() => reopened.evaluate(() => caches.keys())).not.toContain('aulas-pwa-aaaaaaaaaaaaaaaa-text')
-  expect(await reopened.evaluate(() => localStorage.getItem('synthetic-draft'))).toBe('draft preserved')
-  expect(await reopened.evaluate(() => new Promise((resolve) => {
+  expect(firstNavigations).toBe(0)
+  expect(secondNavigations).toBe(0)
+
+  await page.reload()
+  await expect(page.locator('#release')).toHaveText('bbbbbbbbbbbbbbbb')
+  expect(firstNavigations).toBe(1)
+  expect(secondNavigations).toBe(0)
+  expect(await page.evaluate(() => localStorage.getItem('synthetic-draft'))).toBe('draft preserved')
+  expect(await page.evaluate(() => new Promise((resolve) => {
     const open = indexedDB.open('synthetic-queue', 1)
     open.onsuccess = () => {
       const read = open.result.transaction('pending').objectStore('pending').get('one')
@@ -77,4 +96,5 @@ test('instalação com shell divergente falha sem perder versão anterior offlin
   await page.reload()
   await expect(page.locator('#release')).toHaveText('aaaaaaaaaaaaaaaa')
   expect(await page.evaluate(async () => (await fetch('/api/lessons/31')).json())).toEqual({ title: 'Synthetic lesson' })
+  await context.setOffline(false)
 })

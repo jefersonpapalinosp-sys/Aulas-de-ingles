@@ -49,7 +49,7 @@ export function useMediaPositionSync(mediaId: number, userId: number) {
       window.removeEventListener('storage', storage)
     }
   }, [controller])
-  return { ...state, record: (position: number) => controller.record(position),
-    finish: () => controller.record(0, true), retry: controller.sync,
+  return { ...state, record: (position: number) => { void controller.record(position) },
+    finish: () => { void controller.record(0, true) }, retry: controller.sync,
     resolve: controller.resolve, snapshot: controller.snapshot }
 }

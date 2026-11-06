@@ -43,7 +43,7 @@ main { max-width: 1180px; }
   display: grid;
   gap: 4px;
   color: var(--ink-3);
-  font: 10px var(--mono);
+  font: 12px var(--mono);
   letter-spacing: .08em;
   text-transform: uppercase;
 }
@@ -121,7 +121,7 @@ main { max-width: 1180px; }
   text-decoration: none;
 }
 .trail-review-row a:hover, .trail-review-row a.active { background: var(--accent-wash); color: var(--ink); }
-.trail-review-row a > span:first-child { color: var(--accent); font: 600 10px var(--mono); }
+.trail-review-row a > span:first-child { color: var(--accent); font: 600 12px var(--mono); }
 .trail-review-row a > span:last-child { display: grid; min-width: 0; }
 .trail-review-row strong { font-size: 12px; }
 .trail-review-row small { color: var(--ink-3); font: 9.5px var(--mono); }
@@ -238,7 +238,7 @@ main { max-width: 1180px; }
 }
 .course-card h2 { margin-top: 4px; font-size: 20px; }
 .course-card > div > p:last-child { margin-top: 5px; color: var(--ink-2); font-size: 13px; }
-.course-card-level { color: var(--accent); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.course-card-level { color: var(--accent); font: 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .course-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
 .course-card dl div { padding: 9px; border-radius: 4px; background: var(--surface-2); }
 .course-card dt { color: var(--ink-3); font: 9px var(--mono); text-transform: uppercase; }
@@ -272,7 +272,7 @@ main { max-width: 1180px; }
 .unit-card > span { display: grid; }
 .unit-card > span:last-child { text-align: right; }
 .unit-card strong { font-size: 14px; }
-.unit-card small { color: var(--ink-3); font: 10px var(--mono); }
+.unit-card small { color: var(--ink-3); font: 12px var(--mono); }
 .course-unit-lessons { margin-top: 22px; }
 .ap.is-studied { color: var(--ok); }
 .checkpoint-map-row { border-top: 2px solid var(--accent); }
@@ -297,7 +297,7 @@ main { max-width: 1180px; }
 .checkpoint-questions { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
 .checkpoint-questions fieldset { margin: 0; padding: 20px; border: 1px solid var(--rule); border-radius: 6px; }
 .checkpoint-questions legend { display: grid; gap: 6px; width: 100%; padding: 0 4px; color: var(--ink); font-size: 15px; line-height: 1.45; }
-.checkpoint-questions legend span { color: var(--accent); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.checkpoint-questions legend span { color: var(--accent); font: 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .checkpoint-options { display: grid; gap: 8px; margin-top: 14px; }
 .checkpoint-options label { display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--paper); cursor: pointer; }
 .checkpoint-options label:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
@@ -313,7 +313,7 @@ main { max-width: 1180px; }
 .checkpoint-feedback { display: grid; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
 .checkpoint-feedback li { padding: 13px 15px; border-left: 3px solid var(--bad); background: var(--paper); }
 .checkpoint-feedback li.correct { border-color: var(--ok); }
-.checkpoint-feedback strong { color: var(--bad); font: 10px var(--mono); text-transform: uppercase; }
+.checkpoint-feedback strong { color: var(--bad); font: 12px var(--mono); text-transform: uppercase; }
 .checkpoint-feedback .correct strong { color: var(--ok); }
 .checkpoint-feedback p { margin-top: 4px; font-size: 13px; }
 .checkpoint-feedback small { display: block; margin-top: 5px; color: var(--ink-3); }

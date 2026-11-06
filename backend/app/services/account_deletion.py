@@ -36,7 +36,10 @@ async def delete_account(
         password_hash,
     )
     if not valid:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Senha incorreta.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "password_mismatch", "message": "Senha incorreta."},
+        )
 
     operation_key = str(request.operation_key)
     async with session.begin():

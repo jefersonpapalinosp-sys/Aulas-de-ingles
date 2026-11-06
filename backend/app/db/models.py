@@ -7,10 +7,13 @@ editável à mão. Quem decide a aparência é o frontend.
 """
 
 from datetime import date, datetime
+from typing import Any
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -48,6 +51,80 @@ from app.domain.enums import (
     TurnRole,
     TurnState,
 )
+
+
+class ListeningResource(Base):
+    """Metadados autorais; nenhum exercício ou ativo externo é armazenado."""
+
+    __tablename__ = "listening_resource"
+    __table_args__ = (
+        CheckConstraint("level = 'A2' AND mode = 'external_link'", name="ck_listening_mode"),
+        CheckConstraint(
+            "availability IN ('available', 'unavailable')", name="ck_listening_availability"
+        ),
+        CheckConstraint("version > 0 AND position > 0", name="ck_listening_version"),
+    )
+    slug: Mapped[str] = mapped_column(String(100), primary_key=True)
+    title: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str] = mapped_column(String(300))
+    topic: Mapped[str] = mapped_column(String(50))
+    level: Mapped[str] = mapped_column(String(2))
+    source: Mapped[str] = mapped_column(String(30))
+    source_url: Mapped[str] = mapped_column(String(400), unique=True)
+    mode: Mapped[str] = mapped_column(String(20))
+    availability: Mapped[str] = mapped_column(String(20))
+    checked_on: Mapped[date] = mapped_column(Date)
+    version: Mapped[int] = mapped_column(Integer)
+    position: Mapped[int] = mapped_column(Integer)
+
+
+class ListeningProgress(Base):
+    __tablename__ = "listening_progress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "resource_slug"),
+        CheckConstraint(
+            "state IN ('not_started', 'in_progress', 'completed')",
+            name="ck_listening_progress_state",
+        ),
+        CheckConstraint("revision > 0", name="ck_listening_progress_revision"),
+        Index("ix_listening_progress_resource_slug", "resource_slug"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    resource_slug: Mapped[str] = mapped_column(
+        ForeignKey("listening_resource.slug", ondelete="RESTRICT")
+    )
+    state: Mapped[str] = mapped_column(String(20))
+    revision: Mapped[int] = mapped_column(Integer)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ListeningOperation(Base):
+    """Recibo imutável permite repetir uma operação mesmo após marcações posteriores."""
+
+    __tablename__ = "listening_operation"
+    __table_args__ = (
+        UniqueConstraint("user_id", "operation_key"),
+        CheckConstraint(
+            "state IN ('not_started', 'in_progress', 'completed')",
+            name="ck_listening_operation_state",
+        ),
+        CheckConstraint(
+            "expected_revision >= 0 AND revision = expected_revision + 1",
+            name="ck_listening_operation_revision",
+        ),
+        Index("ix_listening_operation_resource_slug", "resource_slug"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    resource_slug: Mapped[str] = mapped_column(
+        ForeignKey("listening_resource.slug", ondelete="RESTRICT")
+    )
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
+    state: Mapped[str] = mapped_column(String(20))
+    expected_revision: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[int] = mapped_column(Integer)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class EditorialArchiveEvent(Base):
@@ -673,9 +750,9 @@ class SpeakingAttempt(Base):
             name="ck_speaking_integrity",
         ),
         Index("ix_speaking_status_created", "status", "created_at"),
+        Index("ix_speaking_dialogue_audio", "id", postgresql_where=text("origin = 'dialogue'")),
         CheckConstraint(
-            "(origin = 'cue') = (transcript_cue_id IS NOT NULL) "
-            "AND origin IN ('cue','dialogue')",
+            "(origin = 'cue') = (transcript_cue_id IS NOT NULL) AND origin IN ('cue','dialogue')",
             name="ck_speaking_origin",
         ),
         CheckConstraint("duration_ms > 0", name="ck_speaking_duration_positive"),
@@ -692,9 +769,7 @@ class SpeakingAttempt(Base):
     transcript_cue_id: Mapped[int | None] = mapped_column(
         ForeignKey("transcript_cue.id", ondelete="CASCADE"), index=True, default=None
     )
-    origin: Mapped[AudioOrigin] = mapped_column(
-        String(20), default="cue", server_default="cue"
-    )
+    origin: Mapped[AudioOrigin] = mapped_column(String(20), default="cue", server_default="cue")
     duration_ms: Mapped[int] = mapped_column(Integer)
     self_rating: Mapped[SelfRating | None] = mapped_column(String(20), default=None)
     consented_at: Mapped[datetime] = mapped_column(
@@ -756,6 +831,23 @@ class WorkerHeartbeat(Base):
     maintenance_counts: Mapped[dict[str, int] | None] = mapped_column(JSONB, default=None)
 
 
+class DialogueAudioDeletion(Base):
+    """Somente chave opaca; sobrevive à exclusão de diálogo e de conta."""
+
+    __tablename__ = "dialogue_audio_deletion"
+    __table_args__ = (
+        CheckConstraint("attempt_count >= 0", name="ck_dialogue_audio_deletion_attempts"),
+        Index("ix_dialogue_audio_deletion_next", "next_attempt_at", "storage_key"),
+    )
+
+    storage_key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    next_attempt_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    last_error_code: Mapped[str | None] = mapped_column(String(50), default=None)
+
+
 class AccountDeletionJob(Base):
     """Recibo sem identidade pessoal para a limpeza assíncrona de arquivos."""
 
@@ -810,6 +902,15 @@ class TranscriptionJob(Base):
 
     __tablename__ = "transcription_job"
     __table_args__ = (
+        UniqueConstraint("assist_reservation_id", name="uq_transcription_job_assist"),
+        UniqueConstraint("idempotency_key", name="uq_transcription_job_idempotency_key"),
+        CheckConstraint(
+            "length(transcript_text) <= 5000 AND (words IS NULL OR words = "
+            "'null'::jsonb OR CASE WHEN jsonb_typeof(words) = 'array' THEN "
+            "jsonb_array_length(words) <= 300 AND octet_length(words::text) <= 262144 "
+            "ELSE false END)",
+            name="ck_transcription_provider_size",
+        ),
         CheckConstraint(
             "status IN ('queued', 'processing', 'completed', 'failed')",
             name="ck_transcription_job_status",
@@ -819,7 +920,19 @@ class TranscriptionJob(Base):
             "AND (kind <> 'transcription' OR speaking_attempt_id IS NOT NULL)",
             name="ck_transcription_job_kind",
         ),
-        Index("ix_transcription_job_kind_status", "kind", "status", "next_attempt_at"),
+        Index(
+            "ix_transcription_job_queued",
+            "status",
+            "next_attempt_at",
+            "id",
+            postgresql_where=text("status = 'queued'"),
+        ),
+        Index(
+            "ix_transcription_job_processing",
+            "processing_started_at",
+            "id",
+            postgresql_where=text("status = 'processing'"),
+        ),
         CheckConstraint(
             "mean_confidence IS NULL OR (mean_confidence >= 0 AND mean_confidence <= 1)",
             name="ck_transcription_confidence",
@@ -835,7 +948,7 @@ class TranscriptionJob(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     assist_reservation_id: Mapped[int | None] = mapped_column(
-        ForeignKey("assist_reservation.id", ondelete="SET NULL"), unique=True, default=None
+        ForeignKey("assist_reservation.id", ondelete="SET NULL"), default=None
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     # Opcional desde o BE-46: o turno por texto também vira job (a chamada ao
@@ -849,13 +962,13 @@ class TranscriptionJob(Base):
     kind: Mapped[JobKind] = mapped_column(
         String(20), default="transcription", server_default="transcription"
     )
-    status: Mapped[TranscriptionStatus] = mapped_column(String(20), default="queued", index=True)
+    status: Mapped[TranscriptionStatus] = mapped_column(String(20), default="queued")
     provider: Mapped[str] = mapped_column(String(80))
-    idempotency_key: Mapped[str] = mapped_column(String(64), unique=True)
+    idempotency_key: Mapped[str] = mapped_column(String(64))
     attempt_count: Mapped[int] = mapped_column(Integer, default=0)
     max_attempts: Mapped[int] = mapped_column(Integer, default=3)
     next_attempt_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), index=True
+        DateTime(timezone=True), server_default=func.now()
     )
     processing_started_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), default=None
@@ -918,8 +1031,22 @@ class DialogueTurn(Base):
 
     __tablename__ = "dialogue_turn"
     __table_args__ = (
+        CheckConstraint(
+            "length(transcript) <= 5000 AND length(partner_text) <= 280 AND CASE WHEN "
+            "jsonb_typeof(hints) = 'array' THEN jsonb_array_length(hints) <= 3 AND "
+            "octet_length(hints::text) <= 4096 ELSE false END",
+            name="ck_dialogue_provider_size",
+        ),
         UniqueConstraint("dialogue_id", "position", name="uq_dialogue_turn_position"),
         UniqueConstraint("speaking_attempt_id", name="uq_dialogue_turn_speaking_attempt"),
+        Index(
+            "ix_dialogue_turn_retention",
+            "expires_at",
+            "id",
+            postgresql_where=text(
+                "transcript IS NOT NULL OR partner_text IS NOT NULL OR hints <> '[]'::jsonb"
+            ),
+        ),
         UniqueConstraint("transcription_job_id", name="uq_dialogue_turn_transcription_job"),
         CheckConstraint("position > 0", name="ck_dialogue_turn_position"),
         CheckConstraint("role IN ('student','partner')", name="ck_dialogue_turn_role"),
@@ -1282,6 +1409,15 @@ class WritingFeedbackRecord(Base):
 
     __tablename__ = "writing_feedback"
     __table_args__ = (
+        UniqueConstraint("assist_reservation_id", name="uq_writing_feedback_assist"),
+        CheckConstraint(
+            "length(assisted_summary) <= 1000 AND (assisted_suggestions IS NULL OR "
+            "assisted_suggestions = 'null'::jsonb OR CASE WHEN "
+            "jsonb_typeof(assisted_suggestions) = 'array' THEN "
+            "jsonb_array_length(assisted_suggestions) <= 12 AND "
+            "octet_length(assisted_suggestions::text) <= 32768 ELSE false END)",
+            name="ck_writing_provider_size",
+        ),
         CheckConstraint(
             "analysis_mode IN ('deterministic', 'assisted', 'fallback')",
             name="ck_writing_feedback_analysis_mode",
@@ -1308,7 +1444,7 @@ class WritingFeedbackRecord(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     assist_reservation_id: Mapped[int | None] = mapped_column(
-        ForeignKey("assist_reservation.id", ondelete="SET NULL"), unique=True, default=None
+        ForeignKey("assist_reservation.id", ondelete="SET NULL"), default=None
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     prompt_id: Mapped[int] = mapped_column(
@@ -1531,7 +1667,7 @@ class StudyActivityEvent(Base):
         CheckConstraint("duration_ms BETWEEN 1 AND 30000", name="ck_activity_duration"),
         CheckConstraint("credited_ms BETWEEN 0 AND duration_ms", name="ck_activity_credit"),
     )
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     session_id: Mapped[str] = mapped_column(
         ForeignKey("study_activity_session.id", ondelete="CASCADE"), index=True
@@ -1556,8 +1692,10 @@ class StudyActiveInterval(Base):
         ),
         Index("ix_active_interval_user_end", "user_id", "ends_at"),
     )
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    event_id: Mapped[int] = mapped_column(ForeignKey("study_activity_event.id", ondelete="CASCADE"))
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    event_id: Mapped[int] = mapped_column(
+        ForeignKey("study_activity_event.id", ondelete="CASCADE"), index=True
+    )
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"))
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -1625,7 +1763,7 @@ class PracticeSession(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lesson.id", ondelete="CASCADE"), index=True)
     source_session_id: Mapped[int | None] = mapped_column(
-        ForeignKey("practice_session.id", ondelete="CASCADE"), default=None
+        ForeignKey("practice_session.id", ondelete="CASCADE"), default=None, index=True
     )
     idempotency_key: Mapped[str] = mapped_column(String(36))
     mode: Mapped[PracticeMode] = mapped_column(String(20))
@@ -1835,9 +1973,11 @@ class ReviewEvent(Base):
         UniqueConstraint("user_id", "idempotency_key", name="uq_review_event_key"),
         CheckConstraint("quality BETWEEN 0 AND 5", name="ck_review_event_quality"),
     )
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"), index=True)
-    item_id: Mapped[int | None] = mapped_column(ForeignKey("review_item.id", ondelete="SET NULL"))
+    item_id: Mapped[int | None] = mapped_column(
+        ForeignKey("review_item.id", ondelete="SET NULL"), index=True
+    )
     idempotency_key: Mapped[str] = mapped_column(String(36))
     fingerprint: Mapped[str] = mapped_column(String(64))
     quality: Mapped[int] = mapped_column(Integer)
@@ -1907,3 +2047,88 @@ class AuthRateBucket(Base):
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     window_start: Mapped[int] = mapped_column(Integer, primary_key=True)
     count: Mapped[int] = mapped_column(Integer)
+
+
+class NativeListeningVersion(Base):
+    """Pacote editorial imutável; nunca serializar content diretamente para o aluno."""
+
+    __tablename__ = "native_listening_version"
+    __table_args__ = (
+        UniqueConstraint("slug", "version"),
+        CheckConstraint("version > 0", name="ck_native_version_positive"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slug: Mapped[str] = mapped_column(String(100))
+    version: Mapped[int] = mapped_column(Integer)
+    content: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    content_sha256: Mapped[str] = mapped_column(String(64))
+
+
+class NativeListeningSession(Base):
+    __tablename__ = "native_listening_session"
+    __table_args__ = (
+        UniqueConstraint("user_id", "operation_key"),
+        UniqueConstraint("id", "user_id"),
+        CheckConstraint("revision BETWEEN 0 AND 100", name="ck_native_session_revision"),
+        Index("ix_native_session_user_id", "user_id", "id"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    version_id: Mapped[int] = mapped_column(
+        ForeignKey("native_listening_version.id", ondelete="RESTRICT"), index=True
+    )
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
+    revision: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class NativeListeningResponse(Base):
+    __tablename__ = "native_listening_response"
+    __table_args__ = (
+        UniqueConstraint("user_id", "operation_key"),
+        UniqueConstraint("session_id", "revision"),
+        ForeignKeyConstraint(
+            ["session_id", "user_id"],
+            ["native_listening_session.id", "native_listening_session.user_id"],
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "expected_revision >= 0 AND revision = expected_revision + 1",
+            name="ck_native_response_revision",
+        ),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    session_id: Mapped[int] = mapped_column(Integer)
+    operation_key: Mapped[str] = mapped_column(Uuid(as_uuid=False))
+    expected_revision: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[int] = mapped_column(Integer)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class NativeListeningPosition(Base):
+    __tablename__ = "native_listening_position"
+    __table_args__ = (
+        UniqueConstraint("user_id", "session_id"),
+        ForeignKeyConstraint(
+            ["session_id", "user_id"],
+            ["native_listening_session.id", "native_listening_session.user_id"],
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "revision >= 0 AND position_seconds >= 0", name="ck_native_position_bounds"
+        ),
+        CheckConstraint("NOT completed OR position_seconds = 0", name="ck_native_position_end"),
+        Index("ix_native_listening_position_session", "session_id"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id", ondelete="CASCADE"))
+    session_id: Mapped[int] = mapped_column(Integer)
+    position_seconds: Mapped[float] = mapped_column(Float, default=0, server_default="0")
+    revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    completed: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    operation_key: Mapped[str | None] = mapped_column(Uuid(as_uuid=False))
+    fingerprint: Mapped[str | None] = mapped_column(String(64))
+    changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -9,7 +9,9 @@ workers, retomada após reinício e retry sem duplicar a requisição lógica.
 import asyncio
 import logging
 import random
+import signal
 import time
+from contextlib import suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
@@ -27,6 +29,7 @@ from app.services import (
     assist_quota,
     assistance,
     cloudflare_provider,
+    dialogue_audio_cleanup,
     editorial_history,
     maintenance,
 )
@@ -275,6 +278,7 @@ async def _dialogue_transcript(
     if not settings.assist_transcription_url:
         return None, "feature_disabled", None
     storage = AudioStorage(settings.speaking_storage_dir)
+    await session.commit()
     try:
         audio = await asyncio.to_thread(
             storage.read_verified,
@@ -321,6 +325,23 @@ async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
         if turn is None:
             await _record_failure(claim, "dialogue_turn_missing", retryable=False)
             return True
+        if turn.state == "completed":
+            await session.execute(
+                update(TranscriptionJob)
+                .where(
+                    TranscriptionJob.id == claim.job_id,
+                    TranscriptionJob.status == "processing",
+                    TranscriptionJob.attempt_count == claim.attempt_number,
+                )
+                .values(
+                    status="completed",
+                    completed_at=datetime.now(UTC),
+                    processing_started_at=None,
+                    error_code=turn.error_code,
+                )
+            )
+            await session.commit()
+            return True
         dialogue_row = (
             await session.execute(
                 select(SpeakingDialogue).where(SpeakingDialogue.id == turn.dialogue_id)
@@ -334,8 +355,53 @@ async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
             await _record_failure(claim, erro or "internal_provider_error", retryable=False)
             return True
         brief = await dialogue_service.brief_for_lesson(session, lesson)
-        outcome = await dialogue_service.resolve_turn(
-            session, turn, dialogue_row, brief, transcript
+        turn_id, dialogue_id = turn.id, dialogue_row.id
+        outcome = await dialogue_service.partner_reply(
+            session,
+            dialogue_row,
+            brief,
+            turn.position,
+            transcript,
+            idempotency_key=f"turn-{turn.id}",
+            release_connection=True,
+        )
+    async with get_sessionmaker()() as session, session.begin():
+        # Mesma ordem da exclusão: diálogo antes de job. A tentativa antiga
+        # não pode gravar texto, evidências, custo nem estado da nova tentativa.
+        locked_dialogue = await session.scalar(
+            select(SpeakingDialogue).where(SpeakingDialogue.id == dialogue_id).with_for_update()
+        )
+        if locked_dialogue is None:
+            return True
+        job = await session.scalar(
+            select(TranscriptionJob)
+            .where(
+                TranscriptionJob.id == claim.job_id,
+                TranscriptionJob.status == "processing",
+                TranscriptionJob.attempt_count == claim.attempt_number,
+                TranscriptionJob.expires_at > datetime.now(UTC),
+            )
+            .with_for_update()
+        )
+        if job is None:
+            return True
+        turn = await session.scalar(
+            select(DialogueTurn)
+            .where(
+                DialogueTurn.id == turn_id,
+                DialogueTurn.transcription_job_id == claim.job_id,
+                DialogueTurn.state == "pending",
+                DialogueTurn.expires_at > datetime.now(UTC),
+            )
+            .with_for_update()
+        )
+        if turn is None:
+            job.status, job.error_code = "failed", "dialogue_turn_unavailable"
+            job.processing_started_at = None
+            job.completed_at = datetime.now(UTC)
+            return True
+        await dialogue_service.resolve_turn(
+            session, turn, locked_dialogue, brief, transcript, outcome=outcome
         )
         # Resultado, custo e confirmação do job são atômicos. Uma queda
         # entre commits não pode deixar o turno pronto com custo não registrado.
@@ -348,11 +414,6 @@ async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
             )
         elif outcome.cost_known:
             await assist_quota.record_cost(session, claim.reservation_id, outcome.cost_microusd)
-        job = (
-            await session.execute(
-                select(TranscriptionJob).where(TranscriptionJob.id == claim.job_id)
-            )
-        ).scalar_one_or_none()
         if job is not None:
             job.status = "completed"
             job.completed_at = datetime.now(UTC)
@@ -363,7 +424,6 @@ async def _process_dialogue_claim(claim: ClaimedJob) -> bool:
                 job.transcript_text = stt.text
                 job.mean_confidence = stt.mean_confidence
                 job.cost_microusd = total_cost
-        await session.commit()
     logger.info(
         "dialogue_job_completed",
         extra={
@@ -389,6 +449,49 @@ async def process_next_transcription() -> bool:
     claim = await _claim_next_job(datetime.now(UTC))
     if claim is None:
         return False
+    try:
+        return await _process_owned_claim(claim)
+    except (DBAPIError, PoolTimeout, ConnectionError, TimeoutError, OSError):
+        raise
+    except Exception:
+        # Job venenoso não derruba o consumidor nem expõe o conteúdo da exceção.
+        await _record_failure(claim, "unexpected_worker_error", retryable=False)
+        return True
+
+
+async def _process_owned_claim(claim: ClaimedJob) -> bool:
+    """Renova a posse enquanto o event loop continua atendendo o provedor."""
+    task = asyncio.create_task(_process_claim(claim))
+    interval = min(10.0, max(0.05, get_settings().assist_job_stale_seconds / 3))
+    try:
+        while not task.done():
+            done, _ = await asyncio.wait({task}, timeout=interval)
+            if done:
+                break
+            async with get_sessionmaker()() as session, session.begin():
+                renewed = await session.scalar(
+                    update(TranscriptionJob)
+                    .where(
+                        TranscriptionJob.id == claim.job_id,
+                        TranscriptionJob.status == "processing",
+                        TranscriptionJob.attempt_count == claim.attempt_number,
+                        TranscriptionJob.expires_at > datetime.now(UTC),
+                    )
+                    .values(processing_started_at=datetime.now(UTC))
+                    .returning(TranscriptionJob.id)
+                )
+            if renewed is None:
+                return True
+        return await task
+    finally:
+        if not task.done():
+            task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
+
+
+async def _process_claim(claim: ClaimedJob) -> bool:
+    settings = get_settings()
     if claim.kind == "dialogue":
         return await _process_dialogue_claim(claim)
     if not settings.assist_transcription_url:
@@ -458,34 +561,88 @@ async def process_next_transcription() -> bool:
     return True
 
 
-async def run_transcription_worker(*, once: bool = False) -> None:
+async def _process_with_heartbeat(*, interval: float = 10) -> bool:
+    task = asyncio.create_task(process_next_transcription())
+    try:
+        while not task.done():
+            done, _ = await asyncio.wait({task}, timeout=interval)
+            if not done:
+                await maintenance.heartbeat()
+        return await task
+    finally:
+        if not task.done():
+            task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
+
+
+async def run_transcription_worker(
+    *,
+    once: bool = False,
+    stop_event: asyncio.Event | None = None,
+) -> None:
     """Executa o consumidor contínuo ou uma única iteração operacional."""
 
     settings = get_settings()
+    stop_event = stop_event or asyncio.Event()
     failures = 0
-    last_maintenance = float("-inf")
+    # Mede tentativas, não sucessos. Uma falha permanente de retenção não
+    # pode transformar o loop num retry apertado nem impedir heartbeat/claims.
+    # O sucesso continua registrado exclusivamente por heartbeat(counts).
+    last_maintenance_attempt = float("-inf")
     last_heartbeat = float("-inf")
     try:
-        while True:
+        while not stop_event.is_set():
             try:
                 now = time.monotonic()
-                if now - last_maintenance >= settings.maintenance_interval_seconds:
-                    counts = await maintenance.sweep()
-                    await maintenance.heartbeat(counts)
-                    logger.info(
-                        "maintenance_batch",
-                        extra={"counts": counts, "limit": settings.maintenance_batch_size},
-                    )
-                    last_maintenance = last_heartbeat = now
-                elif now - last_heartbeat >= 10:
+                if now - last_maintenance_attempt >= settings.maintenance_interval_seconds:
+                    last_maintenance_attempt = now
+                    try:
+                        counts = await maintenance.sweep()
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception:
+                        # Não expõe SQL, DSN, dados ou texto da exceção. O
+                        # heartbeat sem counts abaixo mantém maintenance_at no
+                        # último sweep realmente concluído.
+                        logger.warning(
+                            "worker_maintenance_unavailable",
+                            extra={"error_code": "maintenance_sweep_failed"},
+                        )
+                        await dispose_engine()
+                    else:
+                        await maintenance.heartbeat(counts)
+                        last_heartbeat = now
+                        logger.info(
+                            "maintenance_batch",
+                            extra={
+                                "counts": counts,
+                                "limit": settings.maintenance_batch_size,
+                            },
+                        )
+                if now - last_heartbeat >= 10:
                     await maintenance.heartbeat()
                     last_heartbeat = now
                 deleted = await account_deletion.process_file_batch(limit=1)
-                processed = bool(deleted) or await process_next_transcription()
+                audio_deleted = await dialogue_audio_cleanup.process_batch(limit=1)
+                if stop_event.is_set():
+                    return
+                processed = await _process_with_heartbeat()
+                processed = bool(deleted or audio_deleted or processed)
                 failures = 0
             except (DBAPIError, PoolTimeout, ConnectionError, TimeoutError, OSError):
                 # Sem SQL, DSN, áudio, texto ou stack do provedor nos logs.
                 logger.warning("worker_database_unavailable")
+                await dispose_engine()
+                if once:
+                    raise
+                failures += 1
+                await asyncio.sleep(min(30, 2 ** min(failures, 5)) + random.random())
+                continue
+            except Exception:
+                logger.warning(
+                    "worker_iteration_failed", extra={"error_code": "unexpected_worker_error"}
+                )
                 await dispose_engine()
                 if once:
                     raise
@@ -497,4 +654,23 @@ async def run_transcription_worker(*, once: bool = False) -> None:
             if not processed:
                 await asyncio.sleep(settings.assist_worker_poll_seconds)
     finally:
+        await dispose_engine()
+
+
+async def worker_main(*, once: bool = False) -> None:
+    from app.db.session import check_connection_budget
+
+    stop = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    previous = {}
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        previous[sig] = signal.getsignal(sig)
+        # signal.signal funciona também no Windows; o callback só agenda o stop.
+        signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop.set))
+    try:
+        await check_connection_budget()
+        await run_transcription_worker(once=once, stop_event=stop)
+    finally:
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
         await dispose_engine()

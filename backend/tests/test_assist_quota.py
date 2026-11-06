@@ -19,6 +19,7 @@ from app.db.models import (
 from app.db.session import get_engine, get_sessionmaker
 from app.services import assist_quota, assistance, transcription_queue
 from tests.audio_samples import encoded
+from tests.http_assertions import assert_status
 from tests.test_speaking import cue_id
 from tests.test_writing import conta, proposta
 
@@ -79,9 +80,7 @@ async def status(client, headers):
     return response.json()
 
 
-async def test_status_does_not_offer_transcription_without_snapshot_capture(
-    client, monkeypatch
-):
+async def test_status_does_not_offer_transcription_without_snapshot_capture(client, monkeypatch):
     settings = get_settings()
     monkeypatch.setattr(settings, "assisted_features_enabled", True)
     monkeypatch.setattr(settings, "assist_transcription_url", "http://provider.test/stt")
@@ -253,7 +252,9 @@ async def test_no_dispatch_without_live_reservation_and_audio(
 ):
     headers = await conta(client, "expired")
     attempt = await audio_attempt(client, headers)
-    await client.post(f"/api/speaking/attempts/{attempt}/transcription", headers=headers)
+    assert_status(
+        await client.post(f"/api/speaking/attempts/{attempt}/transcription", headers=headers)
+    )
     if expired == "reservation":
         now = datetime.now(UTC)
         await session.execute(
@@ -264,9 +265,11 @@ async def test_no_dispatch_without_live_reservation_and_audio(
     elif expired == "job":
         # O worker usa o relógio Python; a retenção usa o PostgreSQL. Este
         # cenário exige um job já vencido em ambos, não igualdade entre relógios.
-        await session.execute(update(TranscriptionJob).values(
-            expires_at=func.least(func.now(), datetime.now(UTC)) - timedelta(minutes=1)
-        ))
+        await session.execute(
+            update(TranscriptionJob).values(
+                expires_at=func.least(func.now(), datetime.now(UTC)) - timedelta(minutes=1)
+            )
+        )
     else:
         for path in tmp_path.iterdir():
             path.unlink()
@@ -332,7 +335,9 @@ async def test_provider_failure_consumes_once_but_disabled_does_not(client, prov
     assert len(providers) == 1
     assert (await status(client, headers))["cost_incomplete"] is True
     monkeypatch.setattr(get_settings(), "assisted_features_enabled", False)
-    await client.post(url, headers=headers, json={**body, "operation_key": str(uuid4())})
+    assert_status(
+        await client.post(url, headers=headers, json={**body, "operation_key": str(uuid4())})
+    )
     assert (await status(client, headers))["used_today"] == 1
 
 

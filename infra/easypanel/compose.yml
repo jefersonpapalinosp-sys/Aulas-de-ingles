@@ -14,7 +14,7 @@ x-backend-build: &backend-build
 #
 # `read_only: true` no sistema de arquivos do container exige declarar por
 # onde o processo realmente escreve. Está no `web` (nginx, que só precisa de
-# cache e pid em tmpfs) e no `worker` (que só lê o áudio). A API não entra: ela
+# cache e pid em tmpfs) e no `worker` (áudio em volume gravável). A API não entra: ela
 # grava as gravações no volume e o uvicorn usa /tmp.
 x-hardening: &hardening
   security_opt:
@@ -38,6 +38,12 @@ x-backend-common: &backend-common
   PUBLIC_ORIGIN: ${EASYPANEL_PUBLIC_ORIGIN:?defina a origem HTTPS primária}
   COOKIE_SECURE: "true"
   JWT_SECRET: ${EASYPANEL_JWT_SECRET:?gere um JWT_SECRET privado}
+  JWT_KEY_ID: ${EASYPANEL_JWT_KEY_ID:-legacy}
+  JWT_PREVIOUS_KEY_ID: ${EASYPANEL_JWT_PREVIOUS_KEY_ID:-}
+  JWT_PREVIOUS_SECRET: ${EASYPANEL_JWT_PREVIOUS_SECRET:-}
+  JWT_PREVIOUS_VALID_UNTIL: ${EASYPANEL_JWT_PREVIOUS_VALID_UNTIL:-}
+  MIGRATION_LOCK_TIMEOUT_MS: ${MIGRATION_LOCK_TIMEOUT_MS:-5000}
+  MIGRATION_STATEMENT_TIMEOUT_MS: ${MIGRATION_STATEMENT_TIMEOUT_MS:-300000}
   OPERATIONS_TOKEN: ${EASYPANEL_OPERATIONS_TOKEN:?gere um token operacional privado}
   # Aspas são obrigatórias: sem elas, o parser YAML converte o timestamp e o
   # Compose entrega um formato que o Pydantic recusa.
@@ -49,12 +55,18 @@ x-backend-common: &backend-common
   # Opcional: sem valor, a chave dos contadores de login deriva do JWT_SECRET.
   AUTH_BUCKET_SECRET: ${EASYPANEL_AUTH_BUCKET_SECRET:-}
   DATABASE_POOL_TIMEOUT_SECONDS: "10"
+  DATABASE_PROCESS_BUDGET: ${DATABASE_PROCESS_BUDGET:-3}
+  DATABASE_CONNECTION_RESERVE: ${DATABASE_CONNECTION_RESERVE:-10}
+  DATABASE_IDLE_TRANSACTION_TIMEOUT_MS: ${DATABASE_IDLE_TRANSACTION_TIMEOUT_MS:-60000}
   DATABASE_STATEMENT_TIMEOUT_MS: "30000"
   DATABASE_LOCK_TIMEOUT_MS: "5000"
   SPEAKING_STORAGE_DIR: /app/data/speaking
   SPEAKING_MAX_BYTES: "2000000"
   EDITORIAL_SNAPSHOTS_ENABLED: "false"
   DIALOGUE_PRACTICE_ENABLED: ${EASYPANEL_DIALOGUE_PRACTICE_ENABLED:-false}
+  LISTENING_ENABLED: ${EASYPANEL_LISTENING_ENABLED:-false}
+  LISTENING_NATIVE_ENABLED: ${EASYPANEL_LISTENING_NATIVE_ENABLED:-false}
+  LISTENING_NATIVE_PREVIEW: "false"
   DIALOGUE_PILOT_USER_IDS: "${EASYPANEL_DIALOGUE_PILOT_USER_IDS:-[]}"
   ASSISTED_FEATURES_ENABLED: ${EASYPANEL_ASSISTED_FEATURES_ENABLED:-false}
   ASSIST_TRANSCRIPTION_URL: ${EASYPANEL_ASSIST_TRANSCRIPTION_URL:-}
@@ -84,9 +96,16 @@ x-backend-common: &backend-common
 services:
   db:
     <<: *hardening
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build:
       context: ../..
       dockerfile: infra/easypanel/Dockerfile.postgres
+    shm_size: 256m
+    command: ["postgres", "-c", "log_lock_waits=on", "-c", "idle_in_transaction_session_timeout=60000",
+              "-c", "log_parameter_max_length=0", "-c", "log_parameter_max_length_on_error=0"]
     environment:
       POSTGRES_USER: aulas_admin
       POSTGRES_PASSWORD: ${EASYPANEL_DB_ADMIN_PASSWORD:?gere a senha administrativa}
@@ -109,6 +128,10 @@ services:
 
   migrate:
     <<: *backend-caps
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build: *backend-build
     environment:
       <<: *backend-common
@@ -129,6 +152,10 @@ services:
 
   permissions:
     <<: *hardening
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build:
       context: ../..
       dockerfile: infra/easypanel/Dockerfile.postgres
@@ -147,6 +174,10 @@ services:
 
   api:
     <<: *backend-caps
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build: *backend-build
     environment:
       <<: *backend-common
@@ -154,7 +185,6 @@ services:
       DATABASE_PURPOSE: runtime
       DATABASE_POOL_SIZE: "3"
       DATABASE_MAX_OVERFLOW: "2"
-      DATABASE_PROCESS_BUDGET: "2"
     volumes:
       - speaking_data:/app/data/speaking
     expose:
@@ -167,7 +197,7 @@ services:
         - CMD-SHELL
         - >-
           python -c "import urllib.request,sys;
-          request=urllib.request.Request('http://localhost:8000/api/health',
+          request=urllib.request.Request('http://localhost:8000/api/live',
           headers={'X-Forwarded-Proto':'https'});
           sys.exit(0 if urllib.request.urlopen(request,timeout=3).status==200 else 1)"
       interval: 10s
@@ -179,12 +209,16 @@ services:
     restart: unless-stopped
 
   worker:
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build: *backend-build
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    # O entrypoint da imagem tolera o volume read_only e troca para `app`;
+    # O entrypoint troca para `app`; o volume já deve pertencer a ele;
     # sem CAP_CHOWN de propósito, porque aqui não há nada a ajustar.
     cap_add:
       - SETGID
@@ -193,18 +227,19 @@ services:
     tmpfs:
       - /tmp
     command: ["python", "-m", "app.cli", "assist-worker"]
+    stop_grace_period: ${WORKER_STOP_GRACE_PERIOD:-150s}
     environment:
       <<: *backend-common
       DATABASE_URL: postgresql+asyncpg://aulas_worker:${EASYPANEL_WORKER_PASSWORD}@db:5432/aulas_ingles
       DATABASE_PURPOSE: worker
       DATABASE_POOL_SIZE: "2"
       DATABASE_MAX_OVERFLOW: "1"
-      DATABASE_PROCESS_BUDGET: "1"
     volumes:
       - type: volume
         source: speaking_data
         target: /app/data/speaking
-        read_only: true
+        # O worker conclui tarefas autorizadas de exclusão de áudio (Sprints 40/52).
+        read_only: false
     depends_on:
       api:
         condition: service_healthy
@@ -227,6 +262,10 @@ services:
   # a falha aparece na saída do `up --wait` e em `docker compose ps seed`.
   seed:
     <<: *backend-caps
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build: *backend-build
     environment:
       <<: *backend-common
@@ -241,31 +280,32 @@ services:
     restart: "no"
 
   web:
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     build:
       context: ../../frontend
       dockerfile: Dockerfile.prod
     environment:
       AULAS_ASSET_ARCHIVE: /var/lib/aulas-web
+      AULAS_REQUIRE_TRUSTED_PROXY: "true"
+      AULAS_TRUSTED_PROXY_CIDRS: ${EASYPANEL_TRUSTED_PROXY_CIDRS:?Configure os IPs/CIDRs do proxy de entrada}
     volumes:
       - web_assets:/var/lib/aulas-web
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    # O nginx oficial sobe como root para ler a config e abrir a porta 80,
-    # depois gera os workers como `nginx`. Daí CHOWN/SETGID/SETUID e
-    # NET_BIND_SERVICE; nada além disso.
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - NET_BIND_SERVICE
+    user: "101:101"
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
     read_only: true
     # O que o nginx escreve: cache de proxy/fastcgi e o pid. Em tmpfs, some
     # junto com o container.
     tmpfs:
-      - /var/cache/nginx
-      - /var/run
+      - /var/cache/nginx:uid=101,gid=101,mode=0700
+      - /var/run:uid=101,gid=101,mode=0700
     expose:
       - "80"
     depends_on:

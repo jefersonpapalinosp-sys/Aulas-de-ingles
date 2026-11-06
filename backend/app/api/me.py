@@ -3,11 +3,12 @@
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import Select, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import UsuarioAtual
+from app.api.errors import ApiErrorOut
 from app.db.models import (
     Course,
     CourseUnit,
@@ -32,6 +33,7 @@ from app.schemas.notebook import (
     NotebookPageOut,
     PersonalDataExportOut,
 )
+from app.services.auth_limits import rate_limit
 from app.services.curriculum import DEFAULT_COURSE_SLUG, lesson_by_course_number
 from app.services.review import adicionar_item_revisao, remover_item_por_origem
 
@@ -292,9 +294,11 @@ async def exportar_dados(
     "/account",
     response_model=AccountDeletionOut,
     status_code=status.HTTP_202_ACCEPTED,
+    responses={403: {"model": ApiErrorOut, "description": "Senha de confirmação incorreta."}},
 )
 async def excluir_conta(
     corpo: Annotated[AccountDeletionIn, Body()],
+    request: Request,
     response: Response,
     usuario: UsuarioAtual,
     session: Annotated[AsyncSession, Depends(get_session)],
@@ -303,6 +307,7 @@ async def excluir_conta(
     from app.core.config import get_settings
     from app.services.account_deletion import delete_account
 
+    await rate_limit(session, request, usuario.email)
     result = await delete_account(session, usuario.id, usuario.password_hash, corpo)
     response.delete_cookie(
         COOKIE,

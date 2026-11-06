@@ -23,12 +23,16 @@ export const REVISION_FIELDS = ['expected_revision', 'operation_key', 'idempoten
 export type RevisionField = (typeof REVISION_FIELDS)[number]
 
 export const REVISIONED_WRITES = {
+  'PUT /api/listening/sessions/{session_id}/position': ['expected_revision', 'operation_key'],
+  'POST /api/listening/native/{slug}/sessions': ['operation_key'],
+  'POST /api/listening/sessions/{session_id}/responses': ['expected_revision', 'operation_key'],
   'POST /api/courses/{course_slug}/lessons/{number}/practice-sessions': ['idempotency_key'],
   'PUT /api/courses/{course_slug}/lessons/{number}/study-session': ['expected_revision'],
   'POST /api/courses/{course_slug}/units/{unit_slug}/review/attempts': ['idempotency_key'],
   'POST /api/exercises/{exercise_id}/attempt': ['idempotency_key'],
   'PUT /api/lessons/{number}/study-session': ['expected_revision'],
   'DELETE /api/me/account': ['operation_key'],
+  'PUT /api/me/listening/progress/{slug}': ['expected_revision', 'operation_key'],
   'POST /api/me/activity/events': ['operation_key'],
   'PUT /api/media/{media_id}/position': ['expected_revision', 'operation_key'],
   'PUT /api/practice-sessions/{session_id}/position': ['expected_revision', 'idempotency_key'],

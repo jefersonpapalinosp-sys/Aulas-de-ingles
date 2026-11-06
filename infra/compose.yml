@@ -6,9 +6,21 @@ name: aulas-ingles
 # As imagens vêm do espelho público da AWS, não do Docker Hub: o Hub limita
 # pull anônimo por IP, e o CI compartilha IP com o resto do GitHub Actions.
 # O Postgres está fixado em 16.15 para bater com os volumes já existentes.
+x-runtime-limits: &runtime-limits
+  pids_limit: 256
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   db:
+    <<: *runtime-limits
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    shm_size: 256m
+    command: ["postgres", "-c", "log_lock_waits=on", "-c", "idle_in_transaction_session_timeout=60000",
+              "-c", "log_parameter_max_length=0", "-c", "log_parameter_max_length_on_error=0"]
     container_name: aulas-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-aulas}
@@ -27,17 +39,23 @@ services:
       start_period: 5s
 
   api:
+    <<: *runtime-limits
     build:
       context: ../backend
     container_name: aulas-api
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://aulas:aulas_local@db:5432/aulas_ingles}
-      APP_ENV: ${APP_ENV:-dev}
+      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-5}
+      DATABASE_MAX_OVERFLOW: ${DATABASE_MAX_OVERFLOW:-5}
+      DATABASE_PROCESS_BUDGET: ${DATABASE_PROCESS_BUDGET:-2}
+      DATABASE_CONNECTION_RESERVE: ${DATABASE_CONNECTION_RESERVE:-10}
+      DATABASE_IDLE_TRANSACTION_TIMEOUT_MS: ${DATABASE_IDLE_TRANSACTION_TIMEOUT_MS:-60000}
+      APP_ENV: dev
       EDITORIAL_SNAPSHOTS_ENABLED: ${EDITORIAL_SNAPSHOTS_ENABLED:-false}
       PERFORMANCE_PROBE_ENABLED: ${PERFORMANCE_PROBE_ENABLED:-false}
       OPERATIONS_TOKEN: ${OPERATIONS_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-      DEPLOYMENT_PROFILE: ${DEPLOYMENT_PROFILE:-local}
+      DEPLOYMENT_PROFILE: local
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
       LEGACY_WRITES_UNTIL: ${LEGACY_WRITES_UNTIL:-2026-11-13T00:00:00Z}
@@ -48,6 +66,9 @@ services:
       AUTH_BUCKET_SECRET: ${AUTH_BUCKET_SECRET:-}
       SPEAKING_STORAGE_DIR: /app/data/speaking
       DIALOGUE_PRACTICE_ENABLED: ${DIALOGUE_PRACTICE_ENABLED:-false}
+      LISTENING_ENABLED: ${LISTENING_ENABLED:-false}
+      LISTENING_NATIVE_ENABLED: ${LISTENING_NATIVE_ENABLED:-false}
+      LISTENING_NATIVE_PREVIEW: ${LISTENING_NATIVE_PREVIEW:-false}
       ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED: ${ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED:-false}
       DIALOGUE_PILOT_USER_IDS: "${DIALOGUE_PILOT_USER_IDS:-[]}"
       ASSISTED_FEATURES_ENABLED: ${ASSISTED_FEATURES_ENABLED:-false}
@@ -82,21 +103,28 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      # Readiness real: banco acessível e revisão Alembic igual à imagem.
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').status==200 else 1)\""]
+      # Liveness do processo; `make up` mantém migration/seed como gates externos.
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/live').status==200 else 1)\""]
       interval: 5s
       timeout: 3s
       retries: 12
       start_period: 10s
 
   worker:
+    <<: *runtime-limits
     build:
       context: ../backend
     container_name: aulas-worker
     command: ["python", "-m", "app.cli", "assist-worker"]
+    stop_grace_period: ${WORKER_STOP_GRACE_PERIOD:-150s}
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://aulas:aulas_local@db:5432/aulas_ingles}
-      APP_ENV: ${APP_ENV:-dev}
+      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-5}
+      DATABASE_MAX_OVERFLOW: ${DATABASE_MAX_OVERFLOW:-5}
+      DATABASE_PROCESS_BUDGET: ${DATABASE_PROCESS_BUDGET:-2}
+      DATABASE_CONNECTION_RESERVE: ${DATABASE_CONNECTION_RESERVE:-10}
+      DATABASE_IDLE_TRANSACTION_TIMEOUT_MS: ${DATABASE_IDLE_TRANSACTION_TIMEOUT_MS:-60000}
+      APP_ENV: dev
       LOG_LEVEL: ${LOG_LEVEL:-info}
       SPEAKING_STORAGE_DIR: /app/data/speaking
       ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED: ${ASSIST_CLOUDFLARE_FREE_PLAN_CONFIRMED:-false}
@@ -133,6 +161,7 @@ services:
     restart: unless-stopped
 
   web:
+    <<: *runtime-limits
     build:
       context: ../frontend
     container_name: aulas-web

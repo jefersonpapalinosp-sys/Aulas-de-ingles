@@ -309,7 +309,9 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("dev_alignment", exc)
         print(
             "Alinhamento dev não aprovado. Preserve manutenção, backup e clone; "
             "não faça restore sobre a origem.",

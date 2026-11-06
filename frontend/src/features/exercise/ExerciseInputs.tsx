@@ -1,3 +1,4 @@
+import { SelectionInput } from './SelectionInput'
 import type { Ref } from 'react'
 import type { Exercise } from '../../api/client'
 
@@ -106,26 +107,10 @@ export function ChoiceInput({
   firstRef?: Ref<HTMLInputElement>
   onChange: (value: string) => void
 }) {
-  return (
-    <fieldset aria-describedby={description} aria-invalid={invalid} className="choice-options">
-      <legend>Escolha uma resposta</legend>
-      {options.map((option, index) => (
-        <label key={option}>
-          <input
-            ref={index === 0 ? firstRef : undefined}
-            aria-describedby={description}
-            type="radio"
-            name={`exercise-${exercicio.id}`}
-            value={option}
-            checked={value === option}
-            disabled={disabled}
-            onChange={(event) => onChange(event.target.value)}
-          />
-          <span>{option}</span>
-        </label>
-      ))}
-    </fieldset>
-  )
+  return <SelectionInput name={`exercise-${exercicio.id}`} legend="Escolha uma resposta"
+    options={options.map(option => ({ id: option, label: option }))} selected={[value]}
+    disabled={disabled} description={description} invalid={invalid} firstRef={firstRef}
+    onChange={ids => onChange(ids[0] ?? '')} />
 }
 
 export function TextAnswerInput({

@@ -1,0 +1,8 @@
+# Ferramentas de ensaio local. Não é imagem de aplicação nem de produção.
+FROM aulas-ingles-api:latest
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends docker-cli age git \
+    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1
+WORKDIR /work
+ENTRYPOINT ["python"]

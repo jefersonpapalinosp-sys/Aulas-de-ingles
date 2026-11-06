@@ -6,7 +6,7 @@ diálogo não deve ser ligada antes de este documento ter a revisão do fluxo de
 dados assinada.
 
 **Escopo.** Os modos Roteiro (determinístico, sem provedor), Guiado e Livre da
-unidade; o worker que fala com o provedor; as sete rotas de
+unidade; o worker que fala com o provedor; as nove rotas de
 `/api/speaking/dialogues`; e a retenção dos textos do turno.
 
 **Fora de escopo.** Ameaças já cobertas por documentos próprios: autenticação e
@@ -23,8 +23,10 @@ restore (`docs/politica_exclusao_e_backups_dev_2026-10-16.md`).
    determinística, e nunca vem do modelo.
 3. Uma resposta do provedor fora do contrato não chega ao aluno: ele recebe o
    roteiro da aula, com `fallback=true`.
-4. O texto do turno vence em `ASSIST_RETENTION_DAYS` e a evidência de prática
-   fica (DB-46).
+4. O texto e a gravação do turno vencem no `expires_at` registrado na admissão,
+   definido por `ASSIST_RETENTION_DAYS` (30 dias por padrão). A evidência de prática
+   fica. A Sprint 52 acrescenta remoção da gravação e fila durável para os arquivos;
+   falhas de armazenamento exigem nova tentativa ou intervenção operacional.
 
 ## As sete ameaças
 
@@ -76,7 +78,7 @@ ou com uma nota de pronúncia que o produto promete não dar.
 **O que defende hoje.** O prompt proíbe explicitamente avaliar, pontuar e
 comentar pronúncia; o contrato de saída não tem campo de nota, então uma nota só
 poderia existir como texto livre; o limite de 280 caracteres reduz o espaço; e
-o aluno pode avaliar (`human_rating`) e excluir o turno.
+o aluno pode avaliar (`human_rating`) e excluir o diálogo inteiro.
 
 **Risco residual — aceito e anotado.** **Não há moderação de conteúdo na
 saída.** Uma resposta grosseira dentro de 280 caracteres, sem URL e sem eco de

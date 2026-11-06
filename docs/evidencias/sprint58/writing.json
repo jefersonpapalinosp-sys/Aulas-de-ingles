@@ -1,0 +1,496 @@
+{
+  "candidate_comparison_available": false,
+  "concurrent_bursts": {
+    "feedback": {
+      "all_status_200": true,
+      "pool_checked_out_max": 10,
+      "request_p95_ms": 269.54,
+      "requests": 10,
+      "wall_ms": 312.02
+    },
+    "history": {
+      "all_status_200": true,
+      "pool_checked_out_max": 10,
+      "request_p95_ms": 508.9,
+      "requests": 10,
+      "wall_ms": 553.05
+    },
+    "versions": {
+      "all_status_200": true,
+      "pool_checked_out_max": 10,
+      "request_p95_ms": 386.62,
+      "requests": 10,
+      "wall_ms": 437.39
+    }
+  },
+  "contract": "writing-performance-v1",
+  "current_schema": {
+    "feedback": {
+      "1000": {
+        "deep_page_90_percent": {
+          "app_ms": {
+            "max": 14.05,
+            "min": 5.19,
+            "p50": 8.54,
+            "p95": 11.7
+          },
+          "payload_bytes": {
+            "max": 37003,
+            "min": 37003
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 4,
+          "wall_ms": {
+            "max": 17.78,
+            "min": 6.65,
+            "p50": 10.76,
+            "p95": 15.88
+          }
+        },
+        "deep_plan": {
+          "actual_rows": 51,
+          "execution_ms": 0.108,
+          "indexes": [
+            "ix_writing_feedback_user_prompt_created_id"
+          ],
+          "node_types": [
+            "Limit",
+            "Index Only Scan"
+          ],
+          "planning_ms": 0.198,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 8,
+          "shared_read_blocks_sum": 0
+        },
+        "first_page": {
+          "app_ms": {
+            "max": 35.07,
+            "min": 4.96,
+            "p50": 8.03,
+            "p95": 14.78
+          },
+          "payload_bytes": {
+            "max": 37054,
+            "min": 37054
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 4,
+          "wall_ms": {
+            "max": 44.69,
+            "min": 6.26,
+            "p50": 10.54,
+            "p95": 17.44
+          }
+        }
+      },
+      "10000": {
+        "deep_page_90_percent": {
+          "app_ms": {
+            "max": 19.19,
+            "min": 4.33,
+            "p50": 7.97,
+            "p95": 16.99
+          },
+          "payload_bytes": {
+            "max": 37104,
+            "min": 37104
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 4,
+          "wall_ms": {
+            "max": 22.55,
+            "min": 5.54,
+            "p50": 10.39,
+            "p95": 20.51
+          }
+        },
+        "deep_plan": {
+          "actual_rows": 51,
+          "execution_ms": 0.116,
+          "indexes": [
+            "ix_writing_feedback_user_prompt_created_id"
+          ],
+          "node_types": [
+            "Limit",
+            "Index Only Scan"
+          ],
+          "planning_ms": 0.139,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 8,
+          "shared_read_blocks_sum": 0
+        },
+        "first_page": {
+          "app_ms": {
+            "max": 10.56,
+            "min": 4.18,
+            "p50": 7.03,
+            "p95": 10.5
+          },
+          "payload_bytes": {
+            "max": 37156,
+            "min": 37156
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 4,
+          "wall_ms": {
+            "max": 13.51,
+            "min": 5.73,
+            "p50": 8.86,
+            "p95": 13.19
+          }
+        }
+      }
+    },
+    "history": {
+      "1000": {
+        "deep_page_90_percent": {
+          "app_ms": {
+            "max": 51.43,
+            "min": 12.33,
+            "p50": 17.16,
+            "p95": 36.15
+          },
+          "payload_bytes": {
+            "max": 15203,
+            "min": 15203
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 57.19,
+            "min": 14.49,
+            "p50": 19.52,
+            "p95": 41.09
+          }
+        },
+        "deep_plan": {
+          "actual_rows": 51,
+          "execution_ms": 11.194,
+          "indexes": [
+            "course_pkey",
+            "ix_writing_draft_prompt_id",
+            "ix_writing_feedback_user_id",
+            "ix_writing_prompt_lesson_id",
+            "ix_writing_revision_draft_id",
+            "uq_course_unit_id_course"
+          ],
+          "node_types": [
+            "Limit",
+            "Result",
+            "Sort",
+            "Nested Loop",
+            "Nested Loop",
+            "Nested Loop",
+            "Nested Loop",
+            "Seq Scan",
+            "Memoize",
+            "Index Scan",
+            "Memoize",
+            "Index Scan",
+            "Index Scan",
+            "Index Scan",
+            "Aggregate",
+            "Index Scan",
+            "Aggregate",
+            "Index Scan"
+          ],
+          "planning_ms": 1.081,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 156976,
+          "shared_read_blocks_sum": 0
+        },
+        "first_page": {
+          "app_ms": {
+            "max": 34.93,
+            "min": 13.27,
+            "p50": 18.62,
+            "p95": 26.13
+          },
+          "payload_bytes": {
+            "max": 15304,
+            "min": 15304
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 38.32,
+            "min": 15.74,
+            "p50": 21.42,
+            "p95": 34.73
+          }
+        }
+      },
+      "10000": {
+        "deep_page_90_percent": {
+          "app_ms": {
+            "max": 26.61,
+            "min": 14.04,
+            "p50": 18.45,
+            "p95": 25.78
+          },
+          "payload_bytes": {
+            "max": 15305,
+            "min": 15305
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 28.99,
+            "min": 16.6,
+            "p50": 20.94,
+            "p95": 28.51
+          }
+        },
+        "deep_plan": {
+          "actual_rows": 51,
+          "execution_ms": 17.702,
+          "indexes": [
+            "course_pkey",
+            "ix_writing_draft_prompt_id",
+            "ix_writing_feedback_user_id",
+            "ix_writing_prompt_lesson_id",
+            "ix_writing_revision_draft_id",
+            "uq_course_unit_id_course"
+          ],
+          "node_types": [
+            "Limit",
+            "Result",
+            "Sort",
+            "Nested Loop",
+            "Nested Loop",
+            "Nested Loop",
+            "Nested Loop",
+            "Seq Scan",
+            "Memoize",
+            "Index Scan",
+            "Memoize",
+            "Index Scan",
+            "Index Scan",
+            "Index Scan",
+            "Aggregate",
+            "Index Scan",
+            "Aggregate",
+            "Index Scan"
+          ],
+          "planning_ms": 1.366,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 157476,
+          "shared_read_blocks_sum": 0
+        },
+        "first_page": {
+          "app_ms": {
+            "max": 27.11,
+            "min": 15.59,
+            "p50": 19.43,
+            "p95": 25.24
+          },
+          "payload_bytes": {
+            "max": 15407,
+            "min": 15407
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 29.6,
+            "min": 17.17,
+            "p50": 21.87,
+            "p95": 27.88
+          }
+        }
+      }
+    },
+    "versions": {
+      "1000": {
+        "deep_page_90_percent": {
+          "app_ms": {
+            "max": 9.2,
+            "min": 3.28,
+            "p50": 4.76,
+            "p95": 6.55
+          },
+          "payload_bytes": {
+            "max": 5555,
+            "min": 5555
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 11.0,
+            "min": 4.56,
+            "p50": 6.64,
+            "p95": 8.72
+          }
+        },
+        "deep_plan": {
+          "actual_rows": 51,
+          "execution_ms": 0.268,
+          "indexes": [
+            "ix_writing_draft_user_id",
+            "ix_writing_revision_draft_id"
+          ],
+          "node_types": [
+            "Limit",
+            "Sort",
+            "Nested Loop",
+            "Index Scan",
+            "Index Scan"
+          ],
+          "planning_ms": 0.293,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 60,
+          "shared_read_blocks_sum": 0
+        },
+        "first_page": {
+          "app_ms": {
+            "max": 7.22,
+            "min": 3.07,
+            "p50": 3.84,
+            "p95": 7.15
+          },
+          "payload_bytes": {
+            "max": 5706,
+            "min": 5706
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 10.23,
+            "min": 4.41,
+            "p50": 5.38,
+            "p95": 10.14
+          }
+        }
+      },
+      "10000": {
+        "deep_page_90_percent": {
+          "app_ms": {
+            "max": 17.71,
+            "min": 5.23,
+            "p50": 8.72,
+            "p95": 16.95
+          },
+          "payload_bytes": {
+            "max": 5756,
+            "min": 5756
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 24.89,
+            "min": 7.04,
+            "p50": 11.85,
+            "p95": 20.36
+          }
+        },
+        "deep_plan": {
+          "actual_rows": 51,
+          "execution_ms": 2.067,
+          "indexes": [
+            "ix_writing_draft_user_id",
+            "ix_writing_revision_draft_id"
+          ],
+          "node_types": [
+            "Limit",
+            "Sort",
+            "Nested Loop",
+            "Index Scan",
+            "Index Scan"
+          ],
+          "planning_ms": 0.561,
+          "root_node": "Limit",
+          "shared_hit_blocks_sum": 424,
+          "shared_read_blocks_sum": 0
+        },
+        "first_page": {
+          "app_ms": {
+            "max": 11.53,
+            "min": 5.47,
+            "p50": 8.34,
+            "p95": 10.98
+          },
+          "payload_bytes": {
+            "max": 5908,
+            "min": 5908
+          },
+          "pool_checkouts_per_request_max": 1,
+          "sql_queries": 2,
+          "wall_ms": {
+            "max": 14.13,
+            "min": 6.95,
+            "p50": 10.46,
+            "p95": 13.39
+          }
+        }
+      }
+    }
+  },
+  "datasets": {
+    "feedback": {
+      "1000": {
+        "baseline_insert_ms": 113.6,
+        "stable_traversal": {
+          "elapsed_ms": 211.32,
+          "items": 1000,
+          "pages": 20
+        }
+      },
+      "10000": {
+        "baseline_insert_ms": 723.51,
+        "stable_traversal": {
+          "elapsed_ms": 1786.11,
+          "items": 10000,
+          "pages": 200
+        }
+      }
+    },
+    "history": {
+      "1000": {
+        "baseline_insert_ms": 77.57,
+        "stable_traversal": {
+          "elapsed_ms": 541.28,
+          "items": 1000,
+          "pages": 20
+        }
+      },
+      "10000": {
+        "baseline_insert_ms": 1113.93,
+        "stable_traversal": {
+          "elapsed_ms": 4887.26,
+          "items": 10000,
+          "pages": 200
+        }
+      }
+    },
+    "versions": {
+      "1000": {
+        "baseline_insert_ms": 46.57,
+        "stable_traversal": {
+          "elapsed_ms": 394.25,
+          "items": 1000,
+          "pages": 20
+        }
+      },
+      "10000": {
+        "baseline_insert_ms": 529.43,
+        "stable_traversal": {
+          "elapsed_ms": 1784.13,
+          "items": 10000,
+          "pages": 200
+        }
+      }
+    }
+  },
+  "environment": {
+    "database": "aulas_ingles_test",
+    "marker": "aulas-ingles:disposable-test:v1",
+    "postgres": "16.15",
+    "role": "aulas_test"
+  },
+  "final_indexes_present": {
+    "feedback": true,
+    "history": false,
+    "versions": false
+  },
+  "page_size": 50,
+  "samples_per_route": 30
+}

@@ -20,6 +20,7 @@ from app.db.models import (
     StudySessionProgress,
     User,
 )
+from tests.http_assertions import assert_status
 from tests.test_progress import salvar_sessao
 
 
@@ -111,7 +112,7 @@ async def test_recommendation_prioritizes_due_review_then_resume(client: AsyncCl
     assert resumed["href"].endswith("/assistir")
     assert "parou" in resumed["reason"].lower()
 
-    await client.put("/api/lessons/31/studied", headers=headers)
+    assert_status(await client.put("/api/lessons/31/studied", headers=headers))
     review = (await client.get("/api/me/today", headers=headers)).json()["recommendation"]
     assert review["kind"] == "review"
     assert "venceram" in review["reason"].lower()
@@ -635,15 +636,19 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
     assert grammar["sources"] == []
     assert grammar["score_percent"] is None
 
-    await client.post(
-        f"/api/exercises/{exercise['id']}/attempt",
-        headers=headers,
-        json=attempt("faster", 1),
+    assert_status(
+        await client.post(
+            f"/api/exercises/{exercise['id']}/attempt",
+            headers=headers,
+            json=attempt("faster", 1),
+        )
     )
-    await client.post(
-        f"/api/exercises/{exercise['id']}/attempt",
-        headers=headers,
-        json=attempt("more fast", 2),
+    assert_status(
+        await client.post(
+            f"/api/exercises/{exercise['id']}/attempt",
+            headers=headers,
+            json=attempt("more fast", 2),
+        )
     )
     two = (await client.get("/api/me/skills", headers=headers)).json()
     grammar = next(item for item in two if item["skill"] == "grammar")
@@ -654,10 +659,12 @@ async def test_skill_percentage_requires_three_evidences(client: AsyncClient) ->
     assert grammar["score_percent"] is None
     assert grammar["fragile_topics"]
 
-    await client.post(
-        f"/api/exercises/{exercise['id']}/attempt",
-        headers=headers,
-        json=attempt("faster", 3),
+    assert_status(
+        await client.post(
+            f"/api/exercises/{exercise['id']}/attempt",
+            headers=headers,
+            json=attempt("faster", 3),
+        )
     )
     three = (await client.get("/api/me/skills", headers=headers)).json()
     grammar = next(item for item in three if item["skill"] == "grammar")
@@ -822,10 +829,12 @@ async def test_session_records_steps_without_crediting_abandoned_wall_time(
 async def test_plans_and_skills_are_isolated_by_account(client: AsyncClient) -> None:
     ana = await conta(client, "today-ana")
     bruno = await conta(client, "today-bruno")
-    await client.put(
-        "/api/me/study-plan",
-        headers=ana,
-        json={"weekly_minutes": 210, "preferred_days": ["sat"], "goal": "Viagem"},
+    assert_status(
+        await client.put(
+            "/api/me/study-plan",
+            headers=ana,
+            json={"weekly_minutes": 210, "preferred_days": ["sat"], "goal": "Viagem"},
+        )
     )
 
     ana_plan = (await client.get("/api/me/study-plan", headers=ana)).json()

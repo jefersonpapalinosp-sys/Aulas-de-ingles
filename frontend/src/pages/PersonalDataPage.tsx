@@ -152,7 +152,8 @@ export function PersonalDataPage() {
         body: JSON.stringify({ operation_key: crypto.randomUUID(), password, confirmation }),
       })
       if (!response.ok) {
-        if (response.status === 401) throw new Error('Senha incorreta. A conta não foi excluída.')
+        if (response.status === 403) throw new Error('Senha incorreta. A conta não foi excluída.')
+        if (response.status === 429) throw new Error('Muitas tentativas. Aguarde antes de confirmar novamente.')
         if (response.status === 409) throw new Error('A sessão mudou. Entre novamente antes de excluir a conta.')
         throw new Error('Não foi possível confirmar a exclusão. A conta foi preservada; tente novamente.')
       }
@@ -160,7 +161,7 @@ export function PersonalDataPage() {
       if (result.database_deleted !== true || !['completed', 'cleanup_pending'].includes(result.state ?? '')) {
         throw new Error('O servidor não confirmou a exclusão. Entre novamente para conferir a conta.')
       }
-      encerrarContaExcluida(result.state === 'cleanup_pending')
+      await encerrarContaExcluida(result.state === 'cleanup_pending')
     } catch (cause) {
       setDeletionError(cause instanceof Error ? cause.message : 'Falha ao excluir a conta.')
     } finally {
@@ -206,6 +207,8 @@ export function PersonalDataPage() {
         <p>Contagens da conta atual neste navegador, não uma confirmação de sincronização. Cópias locais podem coincidir com dados já enviados; itens inválidos são preservados.</p>
         <dl className="data-inventory">
           <div><dt>Rascunhos de escrita locais</dt><dd>{count(inventory?.drafts)}</dd></div>
+          <div><dt>Rascunhos de listening locais</dt><dd>{count(inventory?.nativeDrafts)}</dd></div>
+          <div><dt>Respostas de listening pendentes</dt><dd>{count(inventory?.nativePending)}</dd></div>
           <div><dt>Respostas pendentes de envio</dt><dd>{count(inventory?.pendingAnswers)}</dd></div>
           <div><dt>Respostas bloqueadas para revisão</dt><dd>{count(inventory?.blockedAnswers)}</dd></div>
           <div><dt>Comandos de posição de áudio locais</dt><dd>{count(inventory?.mediaCommands)}</dd></div>

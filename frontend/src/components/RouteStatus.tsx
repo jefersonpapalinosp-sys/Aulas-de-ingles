@@ -7,6 +7,8 @@ export function routeLabel(pathname: string): string {
   if (pathname === '/revisar') return 'Revisão'
   if (pathname === '/caderno') return 'Caderno'
   if (pathname === '/meus-dados') return 'Meus dados'
+  if (pathname.startsWith('/listening/')) return 'Prática de listening'
+  if (pathname === '/listening') return 'Listening rápido'
   if (pathname.endsWith('/conclusao')) return 'Conclusão do curso'
   if (pathname.endsWith('/checkpoint')) return 'Checkpoint da unidade'
   if (pathname.endsWith('/avaliacao')) return 'Avaliação da unidade'

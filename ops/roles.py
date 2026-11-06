@@ -335,7 +335,9 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("roles", exc)
         print(
             "Operação de papéis recusada; preserve arquivos/estado para diagnóstico.",
             file=sys.stderr,

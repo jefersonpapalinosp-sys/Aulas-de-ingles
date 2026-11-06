@@ -4,6 +4,7 @@ import { Carregando, Erro } from '../../components/States'
 import { SkillEvidenceMeta } from '../skills/SkillEvidenceMeta'
 import { canonicalizeLegacyHref, courseLevelLabel } from '../../routing/courseRoutes'
 import { PlanEditor } from './PlanEditor'
+import { useOnline } from '../offline/useOnline'
 
 export function TodayPanel({
   courseSlug,
@@ -15,6 +16,13 @@ export function TodayPanel({
   const today = useToday(courseSlug)
   const skills = useSkills(courseSlug, unitSlug)
   const courseLevel = courseLevelLabel(courseSlug)
+  const online = useOnline()
+
+  if (!online) return <section className="today" aria-labelledby="today-title">
+    <h1 id="today-title">Hoje</h1>
+    <p>Continue por uma aula no mapa abaixo. Recomendações, metas e progresso precisam de conexão para serem confirmados.</p>
+    <a href="#map-title">Escolher uma aula no mapa</a>
+  </section>
 
   if (today.isPending || skills.isPending) return <Carregando oque="seu painel de hoje" />
   if (today.error) {

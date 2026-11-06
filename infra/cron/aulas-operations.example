@@ -1,0 +1,7 @@
+# Modelo de crontab DO USUÁRIO. Revisar MAILTO e arquivo privado antes de instalar.
+# Requer Python 3.12+, timeout, flock e entrega de e-mail pelo MTA comprovada.
+# Ajustar o lock para um diretório gravável apenas pelo usuário operacional.
+SHELL=/bin/sh
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=SUBSTITUIR-PELO-DESTINATARIO
+*/2 * * * * timeout 55s flock -n /run/lock/aulas-operations.lock sh -ec 'set -a; . /etc/aulas/operations.env; set +a; cd "$AULAS_CODE_DIR"; exec python3 -m ops.operations_alert --base-url "$OPERATIONS_BASE_URL" --require-backup' || { status=$?; echo "ALERTA operacional: execução terminou com código $status; conferir gate, lock e configuração." >&2; exit "$status"; }

@@ -10,6 +10,8 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 
 from app.core.config import get_settings
+from app.db.listening_seed import seed_listening
+from app.db.native_listening_seed import seed_native_listening
 from app.db.seed import load_seed_graph, preview_seed, seed_lessons
 from app.db.seed_plan import SeedBlocked
 from app.db.session import dispose_engine, get_sessionmaker
@@ -27,7 +29,7 @@ from app.services.editorial_reorder import REASONS as REORDER_REASONS
 from app.services.editorial_reorder import apply_editorial_reorder
 from app.services.editorial_reorder_plan import preview_editorial_reorder
 from app.services.maintenance import SCOPES, heartbeat_age_seconds, retention_batch
-from app.services.transcription_queue import run_transcription_worker
+from app.services.transcription_queue import worker_main
 
 
 async def _seed(*, dry_run: bool = False, path: Path | None = None) -> bool:
@@ -39,6 +41,10 @@ async def _seed(*, dry_run: bool = False, path: Path | None = None) -> bool:
                 return bool(report["allowed"])
             try:
                 total = await seed_lessons(session, path)
+                if path is None:
+                    await seed_listening(session)
+                    await seed_native_listening(session)
+                    await session.commit()
             except SeedBlocked as error:
                 print(json.dumps(error.report, ensure_ascii=False, indent=2, default=str))
                 return False
@@ -301,7 +307,7 @@ def main_com_argumentos(argumentos: list[str]) -> None:
         from app.core.logging import configurar
 
         configurar(get_settings().log_level)
-        asyncio.run(run_transcription_worker(once="--once" in argumentos[1:]))
+        asyncio.run(worker_main(once="--once" in argumentos[1:]))
     elif comando == "worker-health":
         import argparse
 

@@ -19,7 +19,7 @@ if [ "$count" != "5" ]; then
   exit 1
 fi
 
-psql -Xq --set=ON_ERROR_STOP=1 -h db -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+psql -Xq --single-transaction --set=ON_ERROR_STOP=1 -h db -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
   --file /opt/aulas/roles_policy.sql
 
 echo "Política de grants aplicada sem exibir credenciais."

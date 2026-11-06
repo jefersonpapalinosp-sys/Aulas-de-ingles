@@ -28,8 +28,10 @@ papel permanecem no relatório para uma futura equipe não depender de uma pesso
 - banco fora: HTTP 503, `db=down`, `schema=unknown`;
 - banco acessível com migration ausente, excedente, ilegível ou sem permissão:
   HTTP 503, `db=up`, `schema=incompatible`;
-- Compose usa `/api/health` para considerar a API saudável. O frontend de
-  produção depende dessa saúde e não é liberado apenas porque `/live` responde.
+- Compose usa `/api/live` para a saúde do processo. Esse indicador não comprova
+  banco/schema: exigir `/api/health` antes de liberar a web, como na sequência
+  de release abaixo. O deploy público faz esse gate internamente mesmo com
+  `--skip-smoke`; os probes continuam verificando readiness após a publicação.
 
 O endpoint informa somente versões operacionais. Não inclui DSN, SQL, parâmetros,
 usuários ou conteúdo. Readiness incompatível não é autorização para downgrade.

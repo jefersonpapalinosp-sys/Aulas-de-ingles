@@ -27,6 +27,19 @@ from tests.test_auth import auth, credenciais, registrar
 CONFIRMATION = "EXCLUIR MINHA CONTA"
 
 
+async def freeze_worker_at_due_time(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Exercita o instante de elegibilidade, inclusive se o relógio do host voltar."""
+    due = await session.scalar(select(func.max(AccountDeletionFile.next_attempt_at)))
+    assert due is not None
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return due.astimezone(tz) if tz else due.replace(tzinfo=None)
+
+    monkeypatch.setattr(account_deletion, "datetime", Clock)
+
+
 async def account_with_audio(
     client: AsyncClient,
     session: AsyncSession,
@@ -69,7 +82,10 @@ async def test_wrong_password_does_not_delete_account(
             "confirmation": CONFIRMATION,
         },
     )
-    assert response.status_code == 401
+    assert response.status_code == 403
+    assert response.json()["code"] == "password_mismatch"
+    assert "set-cookie" not in response.headers
+    assert (await client.get("/api/auth/me", headers=auth(token))).status_code == 200
     assert (
         await session.scalar(
             select(func.count())
@@ -180,6 +196,7 @@ async def test_delete_account_cascades_rows_then_worker_removes_audio(
     assert await session.scalar(select(func.count()).select_from(SpeakingDialogue)) == 0
     assert await session.scalar(select(func.count()).select_from(DialogueTurn)) == 0
     assert path.is_file(), "o commit do banco deve anteceder a limpeza assíncrona"
+    await freeze_worker_at_due_time(session, monkeypatch)
     assert await account_deletion.process_file_batch() == 1
     assert not path.exists()
     assert await session.scalar(select(func.count()).select_from(AccountDeletionFile)) == 0
@@ -225,6 +242,7 @@ async def test_audio_cleanup_stops_after_bounded_retries(
         raise OSError("synthetic unlink failure")
 
     monkeypatch.setattr(AudioStorage, "delete", fail_delete)
+    await freeze_worker_at_due_time(session, monkeypatch)
     assert await account_deletion.process_file_batch() == 1
     receipt = await session.get(AccountDeletionJob, operation_key)
     assert receipt is not None

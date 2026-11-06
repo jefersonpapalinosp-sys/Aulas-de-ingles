@@ -5,6 +5,7 @@ import { useSessao } from '../api/auth'
 import { useCourseReview, useSubmitCourseReview } from '../api/courseReviews'
 import { useCourseCurriculum } from '../api/queries'
 import { Carregando, Erro } from '../components/States'
+import { scrollToTop } from '../lib/scroll'
 import { lessonReference, ReviewResult } from '../features/checkpoint/ReviewResult'
 import { LessonAudioPlayer } from '../features/media/LessonAudioPlayer'
 import {
@@ -91,7 +92,7 @@ function CourseReviewContent({
     setRetrying(true)
     setIdempotencyKey(crypto.randomUUID())
     submit.reset()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollToTop()
     requestAnimationFrame(() => firstAnswerRef.current?.focus())
   }
 

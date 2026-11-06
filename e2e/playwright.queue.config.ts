@@ -8,7 +8,7 @@ export default defineConfig({
   reporter: 'list',
   use: { baseURL: 'http://127.0.0.1:5197', browserName: 'chromium', serviceWorkers: 'block' },
   webServer: {
-    command: '../frontend/node_modules/.bin/vite --config ../frontend/vite.queue-test.config.ts',
+    command: 'node ../frontend/node_modules/vite/bin/vite.js --config ../frontend/vite.queue-test.config.ts',
     url: 'http://127.0.0.1:5197/test-fixtures/offline-queue.html',
     reuseExistingServer: false,
   },

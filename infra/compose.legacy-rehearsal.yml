@@ -1,9 +1,21 @@
 # Ensaios históricos 39A/39F, somente sob demanda. Ver docs/operacao_local.md.
 # Overlay de compose.recovery.yml; sem portas nem volumes do aluno.
+x-runtime-limits: &runtime-limits
+  pids_limit: 256
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   assist-check-db:
+    <<: *runtime-limits
     profiles: ["assist-check"]
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    shm_size: 256m
+    command: ["postgres", "-c", "log_lock_waits=on", "-c", "idle_in_transaction_session_timeout=60000",
+              "-c", "log_parameter_max_length=0", "-c", "log_parameter_max_length_on_error=0"]
     environment:
       POSTGRES_USER: aulas_restore_admin
       POSTGRES_PASSWORD: restore_admin_disposable_only
@@ -20,14 +32,19 @@ services:
       timeout: 3s
       retries: 30
   assist-check-volume:
+    <<: *runtime-limits
     profiles: ["assist-check"]
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
     entrypoint: ["true"]
     volumes:
       - assist_check_voice:/voice
   dev-check-db:
+    <<: *runtime-limits
     profiles: ["dev-check"]
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
+    shm_size: 256m
+    command: ["postgres", "-c", "log_lock_waits=on", "-c", "idle_in_transaction_session_timeout=60000",
+              "-c", "log_parameter_max_length=0", "-c", "log_parameter_max_length_on_error=0"]
     environment:
       POSTGRES_USER: aulas_restore_admin
       POSTGRES_PASSWORD: restore_admin_disposable_only
@@ -44,6 +61,7 @@ services:
       timeout: 3s
       retries: 30
   dev-check-volume:
+    <<: *runtime-limits
     profiles: ["dev-check"]
     image: public.ecr.aws/docker/library/postgres:16.15-alpine
     entrypoint: ["true"]

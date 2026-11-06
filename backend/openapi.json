@@ -177,6 +177,7 @@
                         "enum": [
                             "session_invalid",
                             "invalid_credentials",
+                            "password_mismatch",
                             "conflict",
                             "service_unavailable"
                         ],
@@ -3746,6 +3747,173 @@
                 "title": "LessonVersionOut",
                 "type": "object"
             },
+            "ListeningConfigOut": {
+                "properties": {
+                    "enabled": {
+                        "title": "Enabled",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "enabled"
+                ],
+                "title": "ListeningConfigOut",
+                "type": "object"
+            },
+            "ListeningProgressIn": {
+                "additionalProperties": false,
+                "properties": {
+                    "expected_revision": {
+                        "maximum": 2147483646.0,
+                        "minimum": 0.0,
+                        "title": "Expected Revision",
+                        "type": "integer"
+                    },
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "state": {
+                        "enum": [
+                            "not_started",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "state",
+                    "expected_revision",
+                    "operation_key"
+                ],
+                "title": "ListeningProgressIn",
+                "type": "object"
+            },
+            "ListeningProgressOut": {
+                "properties": {
+                    "resource_slug": {
+                        "title": "Resource Slug",
+                        "type": "string"
+                    },
+                    "revision": {
+                        "title": "Revision",
+                        "type": "integer"
+                    },
+                    "state": {
+                        "enum": [
+                            "not_started",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "title": "State",
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "format": "date-time",
+                        "title": "Updated At",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "resource_slug",
+                    "state",
+                    "revision",
+                    "updated_at"
+                ],
+                "title": "ListeningProgressOut",
+                "type": "object"
+            },
+            "ListeningResourceOut": {
+                "additionalProperties": false,
+                "properties": {
+                    "availability": {
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ],
+                        "title": "Availability",
+                        "type": "string"
+                    },
+                    "checked_on": {
+                        "format": "date",
+                        "title": "Checked On",
+                        "type": "string"
+                    },
+                    "description": {
+                        "maxLength": 300,
+                        "minLength": 1,
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "level": {
+                        "const": "A2",
+                        "title": "Level",
+                        "type": "string"
+                    },
+                    "mode": {
+                        "const": "external_link",
+                        "title": "Mode",
+                        "type": "string"
+                    },
+                    "position": {
+                        "minimum": 1.0,
+                        "title": "Position",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "maxLength": 100,
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "source": {
+                        "const": "Test-English",
+                        "title": "Source",
+                        "type": "string"
+                    },
+                    "source_url": {
+                        "maxLength": 400,
+                        "title": "Source Url",
+                        "type": "string"
+                    },
+                    "title": {
+                        "maxLength": 120,
+                        "minLength": 1,
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "topic": {
+                        "maxLength": 50,
+                        "minLength": 1,
+                        "title": "Topic",
+                        "type": "string"
+                    },
+                    "version": {
+                        "minimum": 1.0,
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "title",
+                    "description",
+                    "topic",
+                    "level",
+                    "source",
+                    "source_url",
+                    "mode",
+                    "availability",
+                    "checked_on",
+                    "version",
+                    "position"
+                ],
+                "title": "ListeningResourceOut",
+                "type": "object"
+            },
             "LoginIn": {
                 "properties": {
                     "email": {
@@ -3914,6 +4082,629 @@
                     "changed_at"
                 ],
                 "title": "MediaPositionOut",
+                "type": "object"
+            },
+            "NativeActivityOut": {
+                "additionalProperties": false,
+                "properties": {
+                    "attribution": {
+                        "title": "Attribution",
+                        "type": "string"
+                    },
+                    "audio_duration_seconds": {
+                        "title": "Audio Duration Seconds",
+                        "type": "number"
+                    },
+                    "instructions": {
+                        "title": "Instructions",
+                        "type": "string"
+                    },
+                    "level": {
+                        "title": "Level",
+                        "type": "string"
+                    },
+                    "map_description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Map Description"
+                    },
+                    "map_rows": {
+                        "items": {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "title": "Map Rows",
+                        "type": "array"
+                    },
+                    "preview": {
+                        "title": "Preview",
+                        "type": "boolean"
+                    },
+                    "questions": {
+                        "items": {
+                            "$ref": "#/components/schemas/NativeQuestion"
+                        },
+                        "title": "Questions",
+                        "type": "array"
+                    },
+                    "rights_note": {
+                        "title": "Rights Note",
+                        "type": "string"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "topic": {
+                        "title": "Topic",
+                        "type": "string"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "version",
+                    "title",
+                    "topic",
+                    "level",
+                    "preview",
+                    "instructions",
+                    "questions",
+                    "map_rows",
+                    "map_description",
+                    "audio_duration_seconds",
+                    "attribution",
+                    "rights_note"
+                ],
+                "title": "NativeActivityOut",
+                "type": "object"
+            },
+            "NativeConfigOut": {
+                "additionalProperties": false,
+                "properties": {
+                    "enabled": {
+                        "title": "Enabled",
+                        "type": "boolean"
+                    },
+                    "preview": {
+                        "title": "Preview",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "preview"
+                ],
+                "title": "NativeConfigOut",
+                "type": "object"
+            },
+            "NativeFeedbackOut": {
+                "additionalProperties": false,
+                "properties": {
+                    "answer_ids": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Answer Ids",
+                        "type": "array"
+                    },
+                    "correct": {
+                        "title": "Correct",
+                        "type": "boolean"
+                    },
+                    "explanation": {
+                        "title": "Explanation",
+                        "type": "string"
+                    },
+                    "first_response": {
+                        "title": "First Response",
+                        "type": "boolean"
+                    },
+                    "kind": {
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "question_id": {
+                        "title": "Question Id",
+                        "type": "string"
+                    },
+                    "selected_ids": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "title": "Selected Ids",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "question_id",
+                    "kind",
+                    "selected_ids",
+                    "correct",
+                    "first_response",
+                    "answer_ids",
+                    "explanation"
+                ],
+                "title": "NativeFeedbackOut",
+                "type": "object"
+            },
+            "NativeHistoryItem": {
+                "properties": {
+                    "answered": {
+                        "title": "Answered",
+                        "type": "integer"
+                    },
+                    "available": {
+                        "title": "Available",
+                        "type": "boolean"
+                    },
+                    "completed": {
+                        "title": "Completed",
+                        "type": "boolean"
+                    },
+                    "first_score": {
+                        "title": "First Score",
+                        "type": "integer"
+                    },
+                    "last_response_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Last Response At"
+                    },
+                    "latest_score": {
+                        "title": "Latest Score",
+                        "type": "integer"
+                    },
+                    "position_seconds": {
+                        "title": "Position Seconds",
+                        "type": "number"
+                    },
+                    "session_id": {
+                        "title": "Session Id",
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "title": "Slug",
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "format": "date-time",
+                        "title": "Started At",
+                        "type": "string"
+                    },
+                    "support_revealed": {
+                        "title": "Support Revealed",
+                        "type": "boolean"
+                    },
+                    "title": {
+                        "title": "Title",
+                        "type": "string"
+                    },
+                    "total": {
+                        "title": "Total",
+                        "type": "integer"
+                    },
+                    "version": {
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "session_id",
+                    "slug",
+                    "version",
+                    "title",
+                    "available",
+                    "started_at",
+                    "last_response_at",
+                    "completed",
+                    "first_score",
+                    "latest_score",
+                    "answered",
+                    "total",
+                    "support_revealed",
+                    "position_seconds"
+                ],
+                "title": "NativeHistoryItem",
+                "type": "object"
+            },
+            "NativeHistoryOut": {
+                "properties": {
+                    "attempts": {
+                        "title": "Attempts",
+                        "type": "integer"
+                    },
+                    "first_attempt_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "First Attempt At"
+                    },
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/NativeHistoryItem"
+                        },
+                        "title": "Items",
+                        "type": "array"
+                    },
+                    "last_attempt_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Last Attempt At"
+                    },
+                    "next_before": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next Before"
+                    }
+                },
+                "required": [
+                    "items",
+                    "next_before",
+                    "attempts",
+                    "first_attempt_at",
+                    "last_attempt_at"
+                ],
+                "title": "NativeHistoryOut",
+                "type": "object"
+            },
+            "NativeOption": {
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "pattern": "^[a-z][a-z0-9-]{0,39}$",
+                        "title": "Id",
+                        "type": "string"
+                    },
+                    "label": {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "title": "Label",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "label"
+                ],
+                "title": "NativeOption",
+                "type": "object"
+            },
+            "NativePositionIn": {
+                "additionalProperties": false,
+                "description": "Mesmo protocolo de sincronização do player; identidade é uma sessão nativa.",
+                "properties": {
+                    "changed_at": {
+                        "format": "date-time",
+                        "title": "Changed At",
+                        "type": "string"
+                    },
+                    "completed": {
+                        "default": false,
+                        "title": "Completed",
+                        "type": "boolean"
+                    },
+                    "expected_revision": {
+                        "maximum": 2147483646.0,
+                        "minimum": 0.0,
+                        "title": "Expected Revision",
+                        "type": "integer"
+                    },
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "position_seconds": {
+                        "minimum": 0.0,
+                        "title": "Position Seconds",
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "position_seconds",
+                    "expected_revision",
+                    "operation_key",
+                    "changed_at"
+                ],
+                "title": "NativePositionIn",
+                "type": "object"
+            },
+            "NativePositionOut": {
+                "properties": {
+                    "changed_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Changed At"
+                    },
+                    "completed": {
+                        "title": "Completed",
+                        "type": "boolean"
+                    },
+                    "operation_key": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Operation Key"
+                    },
+                    "position_seconds": {
+                        "title": "Position Seconds",
+                        "type": "number"
+                    },
+                    "revision": {
+                        "title": "Revision",
+                        "type": "integer"
+                    },
+                    "session_id": {
+                        "title": "Session Id",
+                        "type": "integer"
+                    },
+                    "updated_at": {
+                        "anyOf": [
+                            {
+                                "format": "date-time",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Updated At"
+                    }
+                },
+                "required": [
+                    "session_id",
+                    "position_seconds",
+                    "revision",
+                    "completed",
+                    "operation_key",
+                    "changed_at",
+                    "updated_at"
+                ],
+                "title": "NativePositionOut",
+                "type": "object"
+            },
+            "NativeQuestion": {
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "pattern": "^[a-z][a-z0-9-]{0,39}$",
+                        "title": "Id",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "enum": [
+                            "single_choice",
+                            "multi_select"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "options": {
+                        "items": {
+                            "$ref": "#/components/schemas/NativeOption"
+                        },
+                        "maxItems": 6,
+                        "minItems": 2,
+                        "title": "Options",
+                        "type": "array"
+                    },
+                    "prompt": {
+                        "maxLength": 400,
+                        "minLength": 1,
+                        "title": "Prompt",
+                        "type": "string"
+                    },
+                    "selection_count": {
+                        "maximum": 2.0,
+                        "minimum": 1.0,
+                        "title": "Selection Count",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "prompt",
+                    "kind",
+                    "selection_count",
+                    "options"
+                ],
+                "title": "NativeQuestion",
+                "type": "object"
+            },
+            "NativeResponseIn": {
+                "additionalProperties": false,
+                "properties": {
+                    "expected_revision": {
+                        "maximum": 100.0,
+                        "minimum": 0.0,
+                        "title": "Expected Revision",
+                        "type": "integer"
+                    },
+                    "kind": {
+                        "enum": [
+                            "answer",
+                            "reveal",
+                            "transcript"
+                        ],
+                        "title": "Kind",
+                        "type": "string"
+                    },
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "question_id": {
+                        "anyOf": [
+                            {
+                                "maxLength": 40,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Question Id"
+                    },
+                    "selected_ids": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "maxItems": 6,
+                        "title": "Selected Ids",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "expected_revision",
+                    "operation_key"
+                ],
+                "title": "NativeResponseIn",
+                "type": "object"
+            },
+            "NativeSessionOut": {
+                "additionalProperties": false,
+                "properties": {
+                    "activity": {
+                        "$ref": "#/components/schemas/NativeActivityOut"
+                    },
+                    "completed": {
+                        "title": "Completed",
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "format": "date-time",
+                        "title": "Created At",
+                        "type": "string"
+                    },
+                    "feedback": {
+                        "items": {
+                            "$ref": "#/components/schemas/NativeFeedbackOut"
+                        },
+                        "title": "Feedback",
+                        "type": "array"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "revision": {
+                        "title": "Revision",
+                        "type": "integer"
+                    },
+                    "score": {
+                        "title": "Score",
+                        "type": "integer"
+                    },
+                    "support_revealed": {
+                        "title": "Support Revealed",
+                        "type": "boolean"
+                    },
+                    "total": {
+                        "title": "Total",
+                        "type": "integer"
+                    },
+                    "transcript": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Transcript"
+                    }
+                },
+                "required": [
+                    "id",
+                    "activity",
+                    "revision",
+                    "completed",
+                    "score",
+                    "total",
+                    "support_revealed",
+                    "transcript",
+                    "feedback",
+                    "created_at"
+                ],
+                "title": "NativeSessionOut",
+                "type": "object"
+            },
+            "NativeStartIn": {
+                "additionalProperties": false,
+                "properties": {
+                    "operation_key": {
+                        "format": "uuid",
+                        "title": "Operation Key",
+                        "type": "string"
+                    },
+                    "version": {
+                        "minimum": 1.0,
+                        "title": "Version",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "version",
+                    "operation_key"
+                ],
+                "title": "NativeStartIn",
                 "type": "object"
             },
             "NextCourseOut": {
@@ -4318,6 +5109,22 @@
                         "title": "Lesson Progress",
                         "type": "array"
                     },
+                    "listening_operations": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Listening Operations",
+                        "type": "array"
+                    },
+                    "listening_progress": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Listening Progress",
+                        "type": "array"
+                    },
                     "login_sessions": {
                         "items": {
                             "additionalProperties": true,
@@ -4332,6 +5139,30 @@
                             "type": "object"
                         },
                         "title": "Media Progress",
+                        "type": "array"
+                    },
+                    "native_listening_positions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Native Listening Positions",
+                        "type": "array"
+                    },
+                    "native_listening_responses": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Native Listening Responses",
+                        "type": "array"
+                    },
+                    "native_listening_sessions": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Native Listening Sessions",
                         "type": "array"
                     },
                     "notebook": {
@@ -9767,6 +10598,941 @@
                 ]
             }
         },
+        "/api/listening/config": {
+            "get": {
+                "operationId": "config_api_listening_config_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListeningConfigOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Config",
+                "tags": [
+                    "listening"
+                ]
+            }
+        },
+        "/api/listening/history": {
+            "get": {
+                "operationId": "history_api_listening_history_get",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "before",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "exclusiveMinimum": 0,
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Before"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "default": 20,
+                            "maximum": 50,
+                            "minimum": 1,
+                            "title": "Limit",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "slug",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Slug"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativeHistoryOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "History",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/native": {
+            "get": {
+                "operationId": "catalog_api_listening_native_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/NativeActivityOut"
+                                    },
+                                    "title": "Response Catalog Api Listening Native Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Catalog",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/native-config": {
+            "get": {
+                "operationId": "config_api_listening_native_config_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativeConfigOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Config",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/native/{slug}": {
+            "get": {
+                "operationId": "detail_api_listening_native__slug__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativeActivityOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Detail",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/native/{slug}/sessions": {
+            "post": {
+                "operationId": "start_api_listening_native__slug__sessions_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NativeStartIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Start",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/native/{slug}/versions/{version}/audio": {
+            "get": {
+                "operationId": "audio_api_listening_native__slug__versions__version__audio_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Slug",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "version",
+                        "required": true,
+                        "schema": {
+                            "title": "Version",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "audio/mpeg": {
+                                "schema": {
+                                    "format": "binary",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Audio",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/resources": {
+            "get": {
+                "operationId": "resources_api_listening_resources_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ListeningResourceOut"
+                                    },
+                                    "title": "Response Resources Api Listening Resources Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Resources",
+                "tags": [
+                    "listening"
+                ]
+            }
+        },
+        "/api/listening/resources/{slug}": {
+            "get": {
+                "operationId": "resource_api_listening_resources__slug__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListeningResourceOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Resource",
+                "tags": [
+                    "listening"
+                ]
+            }
+        },
+        "/api/listening/sessions/{session_id}": {
+            "get": {
+                "operationId": "get_native_session_api_listening_sessions__session_id__get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Get Native Session",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/sessions/{session_id}/position": {
+            "get": {
+                "operationId": "read_position_api_listening_sessions__session_id__position_get",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativePositionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Read Position",
+                "tags": [
+                    "native-listening"
+                ]
+            },
+            "put": {
+                "operationId": "save_position_api_listening_sessions__session_id__position_put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NativePositionIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativePositionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Save Position",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
+        "/api/listening/sessions/{session_id}/responses": {
+            "post": {
+                "operationId": "respond_api_listening_sessions__session_id__responses_post",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "session_id",
+                        "required": true,
+                        "schema": {
+                            "title": "Session Id",
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NativeResponseIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NativeSessionOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Respond",
+                "tags": [
+                    "native-listening"
+                ]
+            }
+        },
         "/api/live": {
             "get": {
                 "description": "Liveness: o processo está de pé. Não toca em dependência nenhuma.",
@@ -9856,6 +11622,16 @@
                             }
                         },
                         "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Senha de confirmação incorreta."
                     },
                     "409": {
                         "content": {
@@ -10265,6 +12041,143 @@
                 "summary": "Historical Content",
                 "tags": [
                     "history"
+                ]
+            }
+        },
+        "/api/me/listening/progress": {
+            "get": {
+                "operationId": "progress_api_me_listening_progress_get",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ListeningProgressOut"
+                                    },
+                                    "title": "Response Progress Api Me Listening Progress Get",
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Progress",
+                "tags": [
+                    "listening"
+                ]
+            }
+        },
+        "/api/me/listening/progress/{slug}": {
+            "put": {
+                "operationId": "update_progress_api_me_listening_progress__slug__put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "required": true,
+                        "schema": {
+                            "title": "Slug",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ListeningProgressIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListeningProgressOut"
+                                }
+                            }
+                        },
+                        "description": "Successful Response"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Sessão inválida ou credenciais recusadas; não repetir indefinidamente."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Conflito; preservar o trabalho e conferir o estado antes de reenviar."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        },
+                        "description": "Validation Error"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorOut"
+                                }
+                            }
+                        },
+                        "description": "Indisponibilidade; preservar o trabalho. Não implica sessão revogada."
+                    }
+                },
+                "summary": "Update Progress",
+                "tags": [
+                    "listening"
                 ]
             }
         },
@@ -13612,7 +15525,7 @@
         },
         "/api/speaking/dialogues/{dialogue_id}": {
             "delete": {
-                "description": "Apaga o diálogo e, por cascata do PostgreSQL, seus turnos.\n\nO áudio segue a política de speaking: o arquivo sai pelo caminho de\nexclusão de gravação, não daqui, para não criar um segundo lugar que\nremove bytes do aluno.",
+                "description": "Apaga o diálogo e gravações; falhas de arquivo ficam na fila durável.",
                 "operationId": "excluir_dialogo_api_speaking_dialogues__dialogue_id__delete",
                 "parameters": [
                     {

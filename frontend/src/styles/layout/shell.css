@@ -24,4 +24,4 @@ main { width: 100%; min-width: 0; padding: 44px 46px 100px; }
   border-right: 1px solid var(--rule);
   align-self: start;
 }
-.brand { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.brand { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }

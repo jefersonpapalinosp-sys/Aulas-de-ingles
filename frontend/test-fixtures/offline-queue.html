@@ -7,10 +7,12 @@
     <script type="module">
       import * as queue from '/src/features/offline/attemptQueue.ts'
       import * as session from '/src/api/session.ts'
+      import { PositionSync } from '/src/features/media/positionSync.ts'
       session.setAccessToken('synthetic-access-token')
       session.setSessionUser(7)
       session.setSessionReadOnly(false)
       window.queue = queue
+      window.PositionSync = PositionSync
       window.queueEvents = []
       window.stopQueueEvents = queue.subscribeAttemptQueue(
         (event) => window.queueEvents.push({ kind: 'change', detail: event.detail }),

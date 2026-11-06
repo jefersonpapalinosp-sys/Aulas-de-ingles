@@ -3,6 +3,7 @@ const VERSION = '__AULAS_RELEASE__'
 const ASSETS = '__AULAS_ASSETS__'
 const ENTRY = '__AULAS_ENTRY__'
 const HTML_HASH = '__AULAS_HTML_HASH__'
+const ICONS = ['/icon.svg', '/icon-180.png', '/icon-192.png', '/icon-512.png']
 const DAY = 86400000
 const LIMITS = {
   shell: { count: 3, bytes: 1048576, item: 524288, ttl: 30 * DAY },
@@ -103,7 +104,7 @@ async function cached(kind, request) {
   } catch { cacheUnavailable = true; return undefined }
 }
 
-// Nenhuma ativação forçada: a versão nova aguarda TODAS as abas antigas fecharem.
+// A versão instalada aguarda; só a confirmação explícita da interface envia SKIP_WAITING.
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const controller = new AbortController()
@@ -116,9 +117,9 @@ self.addEventListener('install', (event) => {
         .map((byte) => byte.toString(16).padStart(2, '0')).join('')
       if (digest !== HTML_HASH) throw new Error('Shell e worker pertencem a builds diferentes')
       if (!await store('shell', '/', page)) throw new Error('Shell não armazenado')
-      for (const url of ['/manifest.webmanifest', '/icon.svg', ...ENTRY]) {
+      for (const url of ['/manifest.webmanifest', ...ICONS, ...ENTRY]) {
         const response = await fetch(url, { cache: 'no-store', credentials: 'omit', signal: controller.signal })
-        if (!await store(url.startsWith('/assets/') ? 'static' : 'shell', url, response)) {
+        if (!await store(url.startsWith('/assets/') || ICONS.includes(url) ? 'static' : 'shell', url, response)) {
           throw new Error('Instalação incompleta')
         }
       }
@@ -163,6 +164,22 @@ async function publicText(request) {
   } finally { clearTimeout(timeout) }
 }
 
+async function navigation(request) {
+  const existing = await cached('shell', '/')
+  if (existing) return existing
+  const response = await fetch(request.url, { credentials: 'omit', cache: 'no-store' })
+  // Recupera o shell removido pelo navegador/TTL sem misturar releases ou URLs pessoais.
+  try {
+    const body = await boundedBody(response.clone(), LIMITS.shell.item)
+    if (body) {
+      const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))]
+        .map(byte => byte.toString(16).padStart(2, '0')).join('')
+      if (digest === HTML_HASH && !await store('shell', '/', response.clone())) cacheUnavailable = true
+    }
+  } catch { cacheUnavailable = true }
+  return response
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
@@ -170,13 +187,14 @@ self.addEventListener('fetch', (event) => {
     || request.destination === 'audio' || request.destination === 'video') return
   if (isPublicTextApi(url)) { event.respondWith(publicText(request)); return }
   if (url.pathname.startsWith('/api/')) return
-  if (!url.search && ['/manifest.webmanifest', '/icon.svg'].includes(url.pathname)) {
-    event.respondWith(cached('shell', request).then((response) => response || fetch(request)))
+  if (!url.search && ['/manifest.webmanifest', ...ICONS].includes(url.pathname)) {
+    const kind = ICONS.includes(url.pathname) ? 'static' : 'shell'
+    event.respondWith(cached(kind, request).then((response) => response || fetch(request)))
     return
   }
   if (request.mode === 'navigate') {
     // Uma única cópia do shell, coerente com os assets deste worker, sem URLs pessoais.
-    event.respondWith(cached('shell', '/').then((page) => page || fetch(request)))
+    event.respondWith(navigation(request))
   } else if (!url.search && ASSETS.includes(url.pathname)) {
     event.respondWith((async () => {
       const existing = await cached('static', request)
@@ -198,7 +216,12 @@ async function status(lessonPath) {
 }
 
 self.addEventListener('message', (event) => {
-  if (!event.source?.url || new URL(event.source.url).origin !== self.location.origin || !event.ports[0]) return
+  if (!event.source?.url || new URL(event.source.url).origin !== self.location.origin) return
+  if (event.data?.type === 'SKIP_WAITING') {
+    event.waitUntil(self.skipWaiting())
+    return
+  }
+  if (!event.ports[0]) return
   if (!['PWA_STATUS', 'PWA_CLEAR_TEXT'].includes(event.data?.type)) return
   event.waitUntil((async () => {
     try {

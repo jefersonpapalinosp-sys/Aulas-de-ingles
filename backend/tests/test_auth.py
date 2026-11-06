@@ -145,6 +145,7 @@ async def test_refresh_usado_nao_serve_fora_da_janela(
     assert antigo
 
     assert (await client.post("/api/auth/refresh")).status_code == 200
+    sucessor = client.cookies.get("refresh_token")
     await session.execute(
         update(RefreshSession)
         .where(RefreshSession.revoked_at.is_not(None))
@@ -156,6 +157,9 @@ async def test_refresh_usado_nao_serve_fora_da_janela(
     reusado = await client.post("/api/auth/refresh")
     assert reusado.status_code == 401
     assert "Entre de novo" in reusado.json()["detail"]
+    assert sucessor
+    client.cookies.set("refresh_token", sucessor, path="/api/auth")
+    assert (await client.post("/api/auth/refresh")).status_code == 401
 
 
 @pytest.mark.asyncio

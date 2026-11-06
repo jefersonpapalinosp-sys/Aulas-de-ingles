@@ -20,6 +20,16 @@ class ProviderFailure(Exception):
         self.code = code
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(
+        self, req: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str
+    ) -> None:
+        return None
+
+
+_opener = urllib.request.build_opener(NoRedirect())
+
+
 @dataclass(frozen=True)
 class TranscriptionResult:
     text: str
@@ -61,7 +71,7 @@ def _post_json(
         headers.update(extra_headers)
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+        with _opener.open(request, timeout=timeout) as response:
             payload = json.loads(response.read(1_000_001))
     except (urllib.error.URLError, TimeoutError):
         raise ProviderFailure("provider_unavailable") from None

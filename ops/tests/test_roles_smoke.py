@@ -69,6 +69,7 @@ class RolesSmokeTests(unittest.TestCase):
                     ),
                     patch.object(roles, "sql", return_value=b"[false,false,false,false,false]"),
                     patch.object(roles_smoke, "forbidden"),
+                    patch.object(roles_smoke, "verify_policy") as policy,
                     patch.object(roles, "lab_run") as lab_run,
                     patch.object(roles_smoke.recovery, "docker", side_effect=docker) as command,
                     redirect_stdout(output),
@@ -79,6 +80,7 @@ class RolesSmokeTests(unittest.TestCase):
                         with self.assertRaisesRegex(RecoveryError, "Dump de leitura vazio"):
                             roles_smoke.main()
                 self.assertEqual(command.call_count, 2 if content else 1)
+                policy.assert_called_once()
                 lab_run.assert_any_call("runtime", "python", "/tools/roles_app_smoke.py")
                 lab_run.assert_any_call("worker", "python", "/tools/roles_dialogue_smoke.py")
                 self.assertEqual("Papéis aprovados" in output.getvalue(), bool(content))

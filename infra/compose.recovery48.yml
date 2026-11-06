@@ -1,15 +1,26 @@
 # Laboratório sintético INFRA-48, separado dos recibos e volumes antigos.
 name: aulas-ingles-recovery48
+x-runtime-limits: &runtime-limits
+  pids_limit: 256
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   source-db:
+    <<: *runtime-limits
     extends:
       file: compose.recovery.yml
       service: source-db
   target-db:
+    <<: *runtime-limits
     extends:
       file: compose.recovery.yml
       service: target-db
   volumes:
+    <<: *runtime-limits
     extends:
       file: compose.recovery.yml
       service: volumes

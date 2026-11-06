@@ -14,6 +14,8 @@ from app.db.test_safety import IDENTITY_SQL, validate_test_identity, validate_te
 from app.main import create_app
 
 SEED_TABLES = frozenset({
+    "listening_resource",
+    "native_listening_version",
     "content_source",
     "course",
     "course_review",
@@ -36,6 +38,12 @@ SEED_TABLES = frozenset({
 })
 
 TRANSIENT_TABLES = frozenset({
+    "native_listening_session",
+    "native_listening_position",
+    "native_listening_response",
+    "listening_progress",
+    "listening_operation",
+    "dialogue_audio_deletion",
     "account_deletion_file",
     "account_deletion_job",
     "app_user",

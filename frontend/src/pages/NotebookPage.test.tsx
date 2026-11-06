@@ -434,6 +434,7 @@ describe('NotebookPage', () => {
     clientMocks.authenticatedFetch.mockResolvedValue({ ok: true, blob: () => Promise.resolve(blob) })
     const createObjectURL = vi.fn().mockReturnValue('blob:export')
     const revokeObjectURL = vi.fn()
+    const timeout = vi.spyOn(window, 'setTimeout')
     vi.stubGlobal('URL', { createObjectURL, revokeObjectURL })
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
     renderNotebook()
@@ -442,6 +443,10 @@ describe('NotebookPage', () => {
     expect(clientMocks.authenticatedFetch).toHaveBeenCalledWith('/api/me/export')
     expect(createObjectURL).toHaveBeenCalledWith(blob)
     expect(click).toHaveBeenCalledOnce()
+    expect(revokeObjectURL).not.toHaveBeenCalled()
+    const release = timeout.mock.calls.find(([, delay]) => delay === 60_000)?.[0]
+    expect(release).toBeTypeOf('function')
+    if (typeof release === 'function') release()
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:export')
     expect(await screen.findByText(/Exportação preparada/)).toBeInTheDocument()
   })

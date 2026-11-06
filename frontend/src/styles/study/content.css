@@ -31,7 +31,7 @@ ul.goals li::before { content: ''; position: absolute; left: 5px; top: 9px; widt
 .gram .why { font-size: 15px; color: var(--ink-2); margin-top: 8px; }
 .tw { overflow-x: auto; margin-top: 15px; border: 1px solid var(--rule-soft); border-radius: 4px; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
-th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); text-align: left; padding: 9px 13px; background: var(--surface-2); white-space: nowrap; }
+th { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); text-align: left; padding: 9px 13px; background: var(--surface-2); white-space: nowrap; }
 td { padding: 9px 13px; border-top: 1px solid var(--rule-soft); vertical-align: top; }
 .warn { margin-top: 14px; font-size: 14.5px; border-left: 2px solid var(--warn); background: var(--warn-wash); padding: 9px 13px; color: var(--ink-2); border-radius: 0 3px 3px 0; }
 

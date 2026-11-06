@@ -176,6 +176,12 @@ export function LessonRail() {
           activeLessonRef={drawerActiveRef}
           onNavigate={() => drawer.close(false)}
         />
+        {usuario && (
+          <p className="trail-account">
+            <span>{usuario.display_name}</span>
+            <button type="button" onClick={() => void sair()}>Sair</button>
+          </p>
+        )}
       </TrailDrawer>
     </aside>
   )

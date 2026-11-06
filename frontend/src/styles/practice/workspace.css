@@ -34,7 +34,7 @@
 .practice-modes input:disabled + span { opacity: .58; cursor: not-allowed; }
 
 .practice-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 17px; }
-.practice-filters label { display: grid; gap: 4px; color: var(--ink-3); font: 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.practice-filters label { display: grid; gap: 4px; color: var(--ink-3); font: 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .practice-filters select { min-width: 0; width: 100%; min-height: 42px; padding: 7px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); font: 13px var(--sans); letter-spacing: normal; text-transform: none; }
 .practice-count, .practice-filter-empty, .practice-offline-note { margin-top: 14px; color: var(--ink-2); font-size: 13px; }
 .practice-filter-empty, .practice-offline-note { padding: 10px 12px; border-left: 2px solid var(--warn); background: var(--warn-wash); }

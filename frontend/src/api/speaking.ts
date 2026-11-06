@@ -73,11 +73,15 @@ export function useSpeakingHistory(
 
   async function transcribe(attemptId: number) {
     announce('Solicitando transcrição automatizada…')
-    const { data, response } = await api.POST('/api/speaking/attempts/{attempt_id}/transcription', {
+    const { data, error, response } = await api.POST('/api/speaking/attempts/{attempt_id}/transcription', {
       params: { path: { attempt_id: attemptId } },
     })
     if (!data) {
-      announce(response?.status === 429
+      const detail = error?.detail
+      const disabled = detail && typeof detail === 'object' && 'code' in detail && detail.code === 'assist_disabled'
+      announce(disabled
+        ? 'A transcrição assistida está desativada nesta instalação. Sua gravação continua salva.'
+        : response?.status === 429
         ? 'A cota diária de análises assistidas foi atingida.'
         : 'O provedor não está disponível. Sua gravação e autoavaliação continuam salvas.')
       await invalidateStudy(queryClient, 'assistUsage')

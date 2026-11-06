@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  listPendingAttempts,
+  listQueuedAttempts,
   subscribeAttemptQueue,
   type AttemptQueueChangeEventDetail,
   type AttemptQueueSyncEventDetail,
@@ -34,7 +34,8 @@ export function useQueuedAttempts(
       if (reason === 'synced' || reason === 'blocked') return
       try {
         if (reason === 'external') await reload()
-        const pending = await listPendingAttempts(userId)
+        const pending = (await listQueuedAttempts(userId))
+          .filter((attempt) => !attempt.syncFailure || attempt.syncFailure.retryable)
         if (!alive || current !== revision) return
         setQueued(new Set(pending
           .filter((attempt) => attempt.sessionId === session.id)

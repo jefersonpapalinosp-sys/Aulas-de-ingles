@@ -174,6 +174,8 @@ def main(argv: list[str] | None = None) -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+        diagnostic("dialogue_recovery", exc)
         print("Ensaio INFRA-48 falhou; preserve os volumes e pacotes para diagnóstico.")
         raise SystemExit(1) from None

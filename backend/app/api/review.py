@@ -332,7 +332,7 @@ async def listar_itens(
                 unit=unit,
                 due_only=False,
             )
-            .order_by(ReviewItem.created_at.desc())
+            .order_by(ReviewItem.created_at.desc(), ReviewItem.id.desc())
             .limit(limit)
         )
     ).scalars()
@@ -446,6 +446,8 @@ async def avaliar(
         now,
     )
     factor = TYPE_INTERVAL_FACTOR[item.item_type]
+    # v1 é composto: o estado guarda o intervalo já ajustado da revisão anterior.
+    # Preservar essa semântica evita recalcular prazos históricos silenciosamente.
     interval = max(1, round(base.interval_days * factor))
     item.ease_factor = base.ease_factor
     item.interval_days = interval

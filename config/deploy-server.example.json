@@ -1,0 +1,8 @@
+{
+  "project": "papalino_aulas-ingles",
+  "repository": "/var/lib/aulas-deploy/repository",
+  "state": "/var/lib/aulas-deploy/state",
+  "existing_code": "/etc/easypanel/projects/papalino/aulas-ingles/code",
+  "env_file": "/etc/easypanel/projects/papalino/aulas-ingles/code/infra/easypanel/.env",
+  "override_file": "/etc/easypanel/projects/papalino/aulas-ingles/code/infra/easypanel/docker-compose.override.yml"
+}

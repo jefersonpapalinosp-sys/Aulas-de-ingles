@@ -1,9 +1,12 @@
 import hashlib
+import os
 from datetime import UTC, datetime, timedelta
 
 import pytest
 
 from app.services.audio_audit import AudioReference, inventory
+
+pytestmark = pytest.mark.skipif(os.name != "posix", reason="descritores e links POSIX")
 
 KEY = "a" * 32 + ".wav"
 OTHER = "b" * 32 + ".webm"
@@ -82,7 +85,8 @@ def test_file_changing_during_hash_is_not_an_orphan_candidate(tmp_path, monkeypa
 
     def changing(fd, size):
         result = original(fd, size)
-        (tmp_path / KEY).write_bytes(b"modified")
+        # O tamanho também muda: não depende da resolução do relógio da VM.
+        (tmp_path / KEY).write_bytes(b"modified-longer")
         return result
 
     monkeypatch.setattr(os, "read", changing)

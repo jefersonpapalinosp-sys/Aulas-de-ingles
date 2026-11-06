@@ -4,3 +4,12 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 *.pyc
+.git/
+.env*
+**/.env*
+secrets/
+**/secrets/
+**/*.pem
+**/*.key
+data/
+backups/

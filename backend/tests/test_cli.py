@@ -112,7 +112,7 @@ def test_worker_pode_processar_uma_unica_iteracao(monkeypatch: pytest.MonkeyPatc
     async def worker(*, once: bool = False) -> None:
         chamado.append(once)
 
-    monkeypatch.setattr(cli, "run_transcription_worker", worker)
+    monkeypatch.setattr(cli, "worker_main", worker)
     cli.main_com_argumentos(["assist-worker", "--once"])
 
     assert chamado == [True]

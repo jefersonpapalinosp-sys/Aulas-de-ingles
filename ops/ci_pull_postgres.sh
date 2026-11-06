@@ -5,7 +5,7 @@ set -euo pipefail
 ci_postgres_image="public.ecr.aws/docker/library/postgres:16.15-alpine"
 # Índice OCI idêntico nos dois registros, conferido em 2026-10-14.
 # Ao atualizar o PostgreSQL, atualizar o tag e verificar este digest novamente.
-ci_postgres_digest="sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea"
+ci_postgres_digest="sha256:e0e53cfa0884f3cc216a621033e4f38dceb49e52218ac77facc8e48f02973093"
 
 for ci_postgres_attempt in 1 2 3 4; do
   for ci_postgres_registry in public.ecr.aws/docker/library/postgres docker.io/library/postgres; do

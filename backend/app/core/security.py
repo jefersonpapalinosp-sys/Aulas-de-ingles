@@ -66,13 +66,34 @@ def criar_token(
         "iat": int(agora.timestamp()),
         "exp": int((expires_at or agora + duracao).timestamp()),
     }
-    return jwt.encode(payload, s.jwt_secret, algorithm="HS256"), identificador
+    return jwt.encode(
+        payload, s.jwt_secret, algorithm="HS256", headers={"kid": s.jwt_key_id}
+    ), identificador
 
 
 def ler_token(token: str, tipo_esperado: TipoToken) -> dict[str, Any]:
     """Valida assinatura, validade e tipo. Qualquer problema vira TokenInvalido."""
     try:
-        payload: dict[str, Any] = jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
+        settings = get_settings()
+        header = jwt.get_unverified_header(token)
+        # Sem kid identifica exclusivamente a primeira chave, nunca tenta todas.
+        kid = header.get("kid", "legacy")
+        if not isinstance(kid, str):
+            raise TokenInvalido("identificador de chave inválido")
+        if kid == settings.jwt_key_id:
+            key = settings.jwt_secret
+        elif (
+            kid == settings.jwt_previous_key_id
+            and settings.jwt_previous_secret is not None
+            and settings.jwt_previous_valid_until is not None
+            and datetime.now(UTC) < settings.jwt_previous_valid_until
+        ):
+            key = settings.jwt_previous_secret
+        else:
+            raise TokenInvalido("chave desconhecida ou encerrada")
+        # Tolera até 30 s de iat/nbf futuro por ajuste do relógio. A expiração
+        # permanece estrita na guarda abaixo; não amplia sessões nem a janela kid.
+        payload: dict[str, Any] = jwt.decode(token, key, algorithms=["HS256"], leeway=30)
     except jwt.PyJWTError as e:
         raise TokenInvalido(str(e)) from e
     if payload.get("type") != tipo_esperado:
@@ -88,4 +109,6 @@ def ler_token(token: str, tipo_esperado: TipoToken) -> dict[str, Any]:
         raise TokenInvalido("sessão inválida")
     if not isinstance(payload.get("iat"), int) or not isinstance(payload.get("exp"), int):
         raise TokenInvalido("validade ausente")
+    if payload["exp"] <= datetime.now(UTC).timestamp():
+        raise TokenInvalido("token expirado")
     return payload

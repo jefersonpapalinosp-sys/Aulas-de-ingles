@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "icons": "node build-icons.mjs",
     "test": "playwright test",
     "test:safety": "node --test safety.test.mjs",
     "test:queue": "playwright test --config playwright.queue.config.ts",

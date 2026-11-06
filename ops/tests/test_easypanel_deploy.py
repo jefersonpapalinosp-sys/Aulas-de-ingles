@@ -25,10 +25,16 @@ def _depends_on(section: str) -> dict[str, str]:
 
 
 class EasyPanelEnvironmentTests(unittest.TestCase):
+    def test_proxy_trust_is_explicit_and_never_universal(self) -> None:
+        for value in ("", "0.0.0.0/0", "::/0", "proxy.example.com", "127.0.0.1;include"):
+            with self.subTest(value=value), self.assertRaises(easypanel_deploy.ConfigurationError):
+                easypanel_deploy.validate_proxy_ranges(value)
+        easypanel_deploy.validate_proxy_ranges("192.0.2.10/32,2001:db8::10/128")
+
     def test_generated_environment_is_private_and_uses_independent_secrets(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             path = Path(temporary_directory) / ".env.easypanel"
-            easypanel_deploy.create_environment(path, "https://ingles.example.com")
+            easypanel_deploy.create_environment(path, "https://ingles.example.com", "192.0.2.10/32")
 
             values = easypanel_deploy.validate_private_file(path)
             secrets = [values[key] for key in easypanel_deploy.SECRET_KEYS]
@@ -64,6 +70,7 @@ class EasyPanelEnvironmentTests(unittest.TestCase):
     def test_weak_or_duplicate_secrets_are_rejected(self) -> None:
         values = {
             "EASYPANEL_PUBLIC_ORIGIN": "https://ingles.example.com",
+            "EASYPANEL_TRUSTED_PROXY_CIDRS": "192.0.2.10/32",
             "EASYPANEL_ASSISTED_FEATURES_ENABLED": "false",
         }
         values.update(
@@ -137,9 +144,7 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
             with self.subTest(path=path):
                 compose = (ROOT / path).read_text(encoding="utf-8")
                 worker = _service(compose, "worker")
-                self.assertIn(
-                    'test: ["CMD", "python", "-m", "app.cli", "worker-health"]', worker
-                )
+                self.assertIn('test: ["CMD", "python", "-m", "app.cli", "worker-health"]', worker)
                 for setting in ("interval: 30s", "timeout: 10s", "retries: 3", "start_period: 40s"):
                     self.assertIn(setting, worker)
 
@@ -147,7 +152,7 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
         nginx = (ROOT / "frontend/nginx.conf").read_text(encoding="utf-8")
         proxy = (ROOT / "frontend/api-proxy.conf").read_text(encoding="utf-8")
         headers = (ROOT / "frontend/security-headers.conf").read_text(encoding="utf-8")
-        self.assertIn("$http_x_forwarded_proto $aulas_forwarded_proto", nginx)
+        self.assertIn("$aulas_trusted_proxy:$http_x_forwarded_proto", nginx)
         # As diretivas de proxy vivem no arquivo compartilhado desde o SEC-45,
         # para /api/ e /api/auth/ não divergirem.
         self.assertIn("proxy_set_header X-Forwarded-Proto $aulas_forwarded_proto", proxy)
@@ -161,9 +166,7 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
         )
         proxy = "\n".join(
             line
-            for line in (ROOT / "frontend/api-proxy.conf")
-            .read_text(encoding="utf-8")
-            .splitlines()
+            for line in (ROOT / "frontend/api-proxy.conf").read_text(encoding="utf-8").splitlines()
             if not line.strip().startswith("#")
         )
         self.assertIn("resolver 127.0.0.11 valid=10s ipv6=off;", proxy)
@@ -191,6 +194,7 @@ class EasyPanelArtifactContractTests(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
+
 class ContainerHardeningTests(unittest.TestCase):
     """SEC-45: as camadas de hardening não podem sair em silêncio.
 
@@ -212,9 +216,9 @@ class ContainerHardeningTests(unittest.TestCase):
             self.assertTrue(declared or inherited, f"{name} sem no-new-privileges")
 
     def test_backend_keeps_only_the_capabilities_the_entrypoint_needs(self) -> None:
-        anchor = self.compose.split("x-backend-caps: &backend-caps", 1)[1].split(
-            "\nservices:", 1
-        )[0]
+        anchor = self.compose.split("x-backend-caps: &backend-caps", 1)[1].split("\nservices:", 1)[
+            0
+        ]
         self.assertIn("- ALL", anchor)
         # O entrypoint começa root para ajustar o diretório das gravações
         # (CHOWN/FOWNER) e troca para `app` (SETUID/SETGID). Nada além.
@@ -266,16 +270,14 @@ class ContainerHardeningTests(unittest.TestCase):
 
     def test_dialogue_edge_limits_writes_but_allows_polling(self) -> None:
         nginx = (ROOT / "frontend/nginx.conf").read_text(encoding="utf-8")
-        mapping = nginx.split("map $request_method $aulas_dialogue_write_key {", 1)[
-            1
-        ].split("}", 1)[0]
+        mapping = nginx.split("map $request_method $aulas_dialogue_write_key {", 1)[1].split(
+            "}", 1
+        )[0]
         self.assertIn('default "";', mapping)
         self.assertNotIn("GET ", mapping)
         for method in ("POST", "PUT", "DELETE"):
             self.assertIn(f"{method} $binary_remote_addr;", mapping)
-        block = nginx.split("location ~ ^/api/speaking/dialogues(?:/|$) {", 1)[1].split(
-            "}", 1
-        )[0]
+        block = nginx.split("location ~ ^/api/speaking/dialogues(?:/|$) {", 1)[1].split("}", 1)[0]
         self.assertIn("limit_req zone=aulas_dialogue burst=24 nodelay;", block)
         self.assertIn("limit_req_status 429;", block)
         self.assertIn("include /etc/nginx/api-proxy.conf;", block)

@@ -21,7 +21,7 @@ type Sessao = {
   entrar: (email: string, senha: string) => Promise<void>
   registrar: (email: string, senha: string, nome: string) => Promise<void>
   sair: () => Promise<void>
-  encerrarContaExcluida: (audioPendente: boolean) => void
+  encerrarContaExcluida: (audioPendente: boolean) => Promise<void>
 }
 
 const Ctx = createContext<Sessao | null>(null)
@@ -239,9 +239,24 @@ export function SessaoProvider({ children }: { children: React.ReactNode }) {
           }
         }
       },
-      encerrarContaExcluida: (audioPendente) => {
-        limpar()
-        setAviso(`A conta foi excluída.${audioPendente ? ' A limpeza dos áudios foi agendada.' : ''} Cópias baixadas e dados de outros dispositivos não podem ser removidos daqui.`)
+      encerrarContaExcluida: async (audioPendente) => {
+        const deletedUserId = usuario?.id
+        const sameAccount = deletedUserId !== undefined && perfilAtual.current?.id === deletedUserId
+        if (sameAccount) limpar()
+        const pedido = operacao.current
+        const profile = readLocal(PERFIL_LOCAL)
+        let localPending = deletedUserId === undefined || (sameAccount && (!profile.ok || profile.value !== null))
+        try {
+          if (deletedUserId !== undefined) {
+            const { clearDeviceData } = await import('../features/privacy/deviceInventory')
+            await clearDeviceData(deletedUserId)
+          }
+        } catch { localPending = true }
+        if (sameAccount && vivo.current && operacao.current === pedido) {
+          setAviso(`A conta foi excluída.${audioPendente ? ' A limpeza dos áudios foi agendada.' : ''}${localPending
+            ? ' Não foi possível concluir a limpeza deste navegador. Feche as outras abas e apague os dados deste site nas configurações do navegador.'
+            : ' Os rascunhos, respostas pendentes e posições desta conta foram removidos deste navegador.'} Cópias baixadas e dados de outros dispositivos não podem ser removidos daqui.`)
+        }
       },
     }),
     [usuario, carregando, estado, revalidando, aviso, revalidar, aplicar, limpar],

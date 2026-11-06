@@ -31,13 +31,21 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        transaction_per_migration=True,
     )
     with context.begin_transaction():
+        context.execute(f"SET lock_timeout = '{settings.migration_lock_timeout_ms}ms'")
+        context.execute(f"SET statement_timeout = '{settings.migration_statement_timeout_ms}ms'")
         context.run_migrations()
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+        transaction_per_migration=True,
+    )
     with context.begin_transaction():
         context.run_migrations()
 
@@ -47,7 +55,13 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        connect_args=connect_args(settings.database_purpose),
+        connect_args=connect_args(
+            settings.database_purpose,
+            {
+                "lock_timeout": str(settings.migration_lock_timeout_ms),
+                "statement_timeout": str(settings.migration_statement_timeout_ms),
+            },
+        ),
     )
     try:
         if settings.app_env == "test":

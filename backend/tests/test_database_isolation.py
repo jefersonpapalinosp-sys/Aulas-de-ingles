@@ -27,8 +27,9 @@ from tests import db_isolation
 async def seed_fingerprints(session):
     result = {}
     for name in sorted(db_isolation.SEED_TABLES):
+        key = "slug" if name == "listening_resource" else "id"
         result[name] = (await session.execute(text(
-            f'SELECT count(*), md5(coalesce(jsonb_agg(to_jsonb(t) ORDER BY id)::text, \'[]\')) '
+            f'SELECT count(*), md5(coalesce(jsonb_agg(to_jsonb(t) ORDER BY {key})::text, \'[]\')) '
             f'FROM "public"."{name}" t'
         ))).one()
     return result

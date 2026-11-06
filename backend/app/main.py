@@ -23,8 +23,11 @@ from app.api import (
     health,
     history,
     lessons,
+    listening,
+    listening_history,
     me,
     media,
+    native_listening,
     operations,
     practice,
     progress,
@@ -46,22 +49,31 @@ from app.services.offline_policy import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    from app.db.session import check_connection_budget
+
     settings = get_settings()
-    logging.getLogger(__name__).info(
-        "API no ar", extra={"env": settings.app_env, "version": app.version}
-    )
-    yield
-    await dispose_engine()
+    try:
+        await check_connection_budget()
+        logging.getLogger(__name__).info(
+            "API no ar", extra={"env": settings.app_env, "version": app.version}
+        )
+        yield
+    finally:
+        await dispose_engine()
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
     configurar(settings.log_level)
+    private_docs = settings.app_env == "prod" or settings.deployment_profile == "public"
     app = FastAPI(
         title="Aulas de Inglês — API",
         version="0.1.0",
         lifespan=lifespan,
         responses=ERROR_RESPONSES,
+        docs_url=None if private_docs else "/docs",
+        redoc_url=None if private_docs else "/redoc",
+        openapi_url=None if private_docs else "/openapi.json",
     )
     app.add_exception_handler(HTTPException, http_error)
     app.add_exception_handler(DBAPIError, database_error)
@@ -147,6 +159,9 @@ def create_app() -> FastAPI:
     app.include_router(courses.router, prefix="/api")
     app.include_router(course_reviews.router, prefix="/api")
     app.include_router(lessons.router, prefix="/api")
+    app.include_router(listening.router, prefix="/api")
+    app.include_router(native_listening.router, prefix="/api")
+    app.include_router(listening_history.router, prefix="/api")
     app.include_router(media.router, prefix="/api")
     app.include_router(practice.router, prefix="/api")
     app.include_router(auth.router, prefix="/api")

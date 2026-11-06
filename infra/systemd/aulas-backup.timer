@@ -1,0 +1,11 @@
+[Unit]
+Description=Backup a cada 12 horas com compensacao de desligamento
+
+[Timer]
+OnCalendar=*-*-* 06,18:10:00 UTC
+Persistent=true
+RandomizedDelaySec=5min
+Unit=aulas-backup.service
+
+[Install]
+WantedBy=timers.target

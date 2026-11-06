@@ -145,7 +145,7 @@ describe('service worker: política executável', () => {
 
   it('serve manifesto e ícone pré-carregados também sem rede', async () => {
     const w = worker()
-    await w.store('shell', '/icon.svg', new Response('<svg/>'))
+    await w.store('static', '/icon.svg', new Response('<svg/>'))
     await w.store('shell', '/manifest.webmanifest', json('{}'))
     expect(await (await w.dispatch(`${origin}/icon.svg`, { destination: 'image' }))?.text()).toBe('<svg/>')
     expect(await (await w.dispatch(`${origin}/manifest.webmanifest`))?.json()).toEqual({})
@@ -170,6 +170,20 @@ describe('service worker: política executável', () => {
     await pending
     expect(await w.caches.keys()).toEqual(['aulas-other-app', `aulas-pwa-${version}-shell`])
     expect(w.self.skipWaiting).not.toHaveBeenCalled()
+  })
+
+  it('só antecipa a ativação após SKIP_WAITING explícito de cliente da mesma origem', async () => {
+    const w = worker()
+    let pending: Promise<void> | undefined
+    w.listeners.message!({ source: { url: `${origin}/inicio` }, ports: [],
+      data: { type: 'SKIP_WAITING' },
+      waitUntil: (p: Promise<void>) => { pending = p } })
+    await pending
+    expect(w.self.skipWaiting).toHaveBeenCalledOnce()
+
+    w.listeners.message!({ source: { url: 'https://outro.example/' }, ports: [],
+      data: { type: 'SKIP_WAITING' }, waitUntil: vi.fn() })
+    expect(w.self.skipWaiting).toHaveBeenCalledOnce()
   })
 
   it('limpeza confirmada remove somente texto, não shell, assets ou outro cache', async () => {

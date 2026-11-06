@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Course, CourseUnit
 from app.main import create_app
+from tests.http_assertions import assert_status
 
 
 async def conta(client: AsyncClient, sufixo: str) -> dict[str, str]:
@@ -187,17 +188,21 @@ async def test_progresso_filtra_curso_unidade_tentativas_e_revisao(
     exercise_31 = await primeiro_exercicio(client, 31)
     exercise_41 = await primeiro_exercicio(client, 41)
 
-    await client.put("/api/lessons/31/studied", headers=headers)
-    await client.put("/api/lessons/41/studied", headers=headers)
-    await client.post(
-        f"/api/exercises/{exercise_31['id']}/attempt",
-        headers=headers,
-        json=tentativa("wrong", 901),
+    assert_status(await client.put("/api/lessons/31/studied", headers=headers))
+    assert_status(await client.put("/api/lessons/41/studied", headers=headers))
+    assert_status(
+        await client.post(
+            f"/api/exercises/{exercise_31['id']}/attempt",
+            headers=headers,
+            json=tentativa("wrong", 901),
+        )
     )
-    await client.post(
-        f"/api/exercises/{exercise_41['id']}/attempt",
-        headers=headers,
-        json=tentativa("wrong", 902),
+    assert_status(
+        await client.post(
+            f"/api/exercises/{exercise_41['id']}/attempt",
+            headers=headers,
+            json=tentativa("wrong", 902),
+        )
     )
 
     first = (
@@ -366,7 +371,11 @@ async def test_correcao_acontece_no_servidor(client: AsyncClient) -> None:
 async def test_tentativa_errada_fica_gravada_com_o_que_foi_digitado(client: AsyncClient) -> None:
     h = await conta(client, "grava")
     ex = await primeiro_exercicio(client)
-    await client.post(f"/api/exercises/{ex['id']}/attempt", json=tentativa("more fast"), headers=h)
+    assert_status(
+        await client.post(
+            f"/api/exercises/{ex['id']}/attempt", json=tentativa("more fast"), headers=h
+        )
+    )
 
     p = (await client.get("/api/me/progress", headers=h)).json()
     aula31 = next(linha for linha in p["lessons"] if linha["lesson_number"] == 31)
@@ -407,7 +416,7 @@ async def test_marcar_aula_e_idempotente(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_desmarcar_aula(client: AsyncClient) -> None:
     h = await conta(client, "desmarca")
-    await client.put("/api/lessons/33/studied", headers=h)
+    assert_status(await client.put("/api/lessons/33/studied", headers=h))
     assert (await client.delete("/api/lessons/33/studied", headers=h)).status_code == 204
     assert (await client.get("/api/me/progress", headers=h)).json()["studied_count"] == 0
     # Desmarcar o que não está marcado não é erro.
@@ -441,9 +450,11 @@ async def test_duas_contas_nao_veem_o_progresso_uma_da_outra(client: AsyncClient
     ) as outro:
         bruno = await conta(outro, "bruno")
 
-        await client.put("/api/lessons/31/studied", headers=ana)
-        await client.post(
-            f"/api/exercises/{ex['id']}/attempt", json=tentativa("faster"), headers=ana
+        assert_status(await client.put("/api/lessons/31/studied", headers=ana))
+        assert_status(
+            await client.post(
+                f"/api/exercises/{ex['id']}/attempt", json=tentativa("faster"), headers=ana
+            )
         )
 
         p_ana = (await client.get("/api/me/progress", headers=ana)).json()
@@ -463,7 +474,7 @@ async def test_progresso_sobrevive_a_outro_navegador(client: AsyncClient) -> Non
     Dois clientes HTTP diferentes = dois navegadores; o que os liga é a conta.
     """
     h = await conta(client, "doisnavegadores")
-    await client.put("/api/lessons/38/studied", headers=h)
+    assert_status(await client.put("/api/lessons/38/studied", headers=h))
 
     async with AsyncClient(
         transport=ASGITransport(app=create_app()), base_url="http://test"
@@ -507,10 +518,12 @@ async def test_dicas_sao_liberadas_progressivamente(client: AsyncClient) -> None
 
     first = await client.get(f"{base}/1", headers=headers)
     blocked = await client.get(f"{base}/2", headers=headers)
-    await client.post(
-        f"/api/exercises/{ex['id']}/attempt",
-        json=tentativa("more fast", 88),
-        headers=headers,
+    assert_status(
+        await client.post(
+            f"/api/exercises/{ex['id']}/attempt",
+            json=tentativa("more fast", 88),
+            headers=headers,
+        )
     )
     second = await client.get(f"{base}/2", headers=headers)
 

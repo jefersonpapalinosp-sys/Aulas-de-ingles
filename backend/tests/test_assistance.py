@@ -42,8 +42,8 @@ def test_gateway_normaliza_transcricao_e_calcula_semelhanca(
         )
 
     monkeypatch.setattr(
-        assistance.urllib.request,
-        "urlopen",
+        assistance._opener,
+        "open",
         respond,
     )
     result = assistance.call_transcription_provider(
@@ -76,8 +76,8 @@ def test_gateway_valida_feedback_de_escrita(monkeypatch: pytest.MonkeyPatch) -> 
         )
 
     monkeypatch.setattr(
-        assistance.urllib.request,
-        "urlopen",
+        assistance._opener,
+        "open",
         respond,
     )
     result = assistance.call_writing_provider(
@@ -129,7 +129,7 @@ def test_ollama_usa_schema_estrito_e_confiança_conservadora(
             }
         )
 
-    monkeypatch.setattr(assistance.urllib.request, "urlopen", respond)
+    monkeypatch.setattr(assistance._opener, "open", respond)
     result = assistance.call_ollama_writing_provider(
         "http://host.docker.internal:11434/",
         "qwen2.5:7b",
@@ -162,8 +162,8 @@ def test_ollama_usa_schema_estrito_e_confiança_conservadora(
 
 def test_ollama_descarta_criterio_inventado(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        assistance.urllib.request,
-        "urlopen",
+        assistance._opener,
+        "open",
         lambda *args, **kwargs: FakeResponse(
             {
                 "message": {
@@ -220,7 +220,7 @@ def test_ollama_nao_e_chamado_quando_todos_os_criterios_passam(
     def unexpected_call(*args: object, **kwargs: object) -> FakeResponse:
         raise AssertionError("Ollama não deveria ser chamado")
 
-    monkeypatch.setattr(assistance.urllib.request, "urlopen", unexpected_call)
+    monkeypatch.setattr(assistance._opener, "open", unexpected_call)
     result = assistance.call_ollama_writing_provider(
         "http://localhost:11434",
         "qwen2.5:7b",
@@ -237,8 +237,8 @@ def test_gateway_converte_rede_e_json_invalido_em_codigo_tecnico(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        assistance.urllib.request,
-        "urlopen",
+        assistance._opener,
+        "open",
         lambda *args, **kwargs: (_ for _ in ()).throw(urllib.error.URLError("offline")),
     )
     with pytest.raises(assistance.ProviderFailure, match="provider_unavailable"):

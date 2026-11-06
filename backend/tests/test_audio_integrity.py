@@ -1,4 +1,5 @@
 import hashlib
+import os
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -12,6 +13,8 @@ from app.services.audio_storage import AudioStorage
 from tests.audio_samples import encoded
 from tests.test_assist_quota import audio_attempt
 from tests.test_speaking import conta
+
+pytestmark = pytest.mark.skipif(os.name != "posix", reason="storage privado POSIX")
 
 
 async def setup_audio(client, session, monkeypatch, tmp_path):

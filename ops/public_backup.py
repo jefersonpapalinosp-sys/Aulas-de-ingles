@@ -9,11 +9,12 @@ uma cópia efêmera, em container sem rede e somente leitura.
 O pacote resultante é `aulas-recovery-v2`: `verify`, `restore` em destino vazio
 e `prune` tratam-no como qualquer outro. Diferença declarada: a stack pública
 não para para manutenção, então a consistência banco/voz é conferida por
-snapshot antes e depois da captura e o pacote não é publicado se algo mudou
-(até três tentativas). O dump em si é consistente por transação.
+snapshot exportado compartilhado com o dump; voz e revisão são comparadas antes
+e depois da captura (até três tentativas). Novos eventos de estudo não invalidam
+o pacote. O manifesto descreve exatamente a visão do dump.
 
 A cópia externa exige criptografia com `age` para um destinatário cuja chave
-privada não mora neste Mac; sem destinatário, o pacote fica só local.
+privada fica em custódia separada; sem destinatário, o pacote fica só local.
 """
 
 import argparse
@@ -31,6 +32,7 @@ from typing import IO, TypedDict, Unpack, cast
 from uuid import uuid4
 
 from ops import recovery
+from ops.public_snapshot import exported_snapshot
 from ops.recovery_archive import (
     FileInfo,
     RecoveryError,
@@ -42,12 +44,12 @@ from ops.recovery_archive import (
 )
 
 HOST_ENV = "AULAS_PUBLIC_SSH_HOST"
-DEFAULT_HOST = "root@72.61.39.94"
+DEFAULT_HOST = ""
 PROJECT = "papalino"
 SERVICE = "aulas-ingles"
 BACKUP_ROLE = "aulas_backup"
 MAX_ATTEMPTS = 3
-DRIFT = "Banco público mudou durante a captura; pacote não publicado."
+DRIFT = "Voz ou schema mudou durante a captura; pacote não publicado."
 # BatchMode: nunca pedir senha/passphrase. StrictHostKeyChecking=yes: a chave da
 # VM precisa já estar em known_hosts; um host desconhecido é recusado, não aceito.
 SSH_OPTIONS = (
@@ -102,12 +104,16 @@ def checked_snapshot(value: object) -> Snapshot:
         raise RecoveryError("Snapshot remoto incompleto.")
     revision, counts, audio = value.get("revision"), value.get("counts"), value.get("audio")
     if (
-        not isinstance(revision, list) or not revision
+        not isinstance(revision, list)
+        or not revision
         or not all(isinstance(item, str) and item for item in revision)
         or not isinstance(counts, dict)
-        or not all(isinstance(key, str) and type(count) is int and count >= 0
-                   for key, count in counts.items())
-        or not isinstance(audio, list) or not all(isinstance(item, dict) for item in audio)
+        or not all(
+            isinstance(key, str) and type(count) is int and count >= 0
+            for key, count in counts.items()
+        )
+        or not isinstance(audio, list)
+        or not all(isinstance(item, dict) for item in audio)
     ):
         raise RecoveryError("Snapshot remoto incompleto.")
     # Preservar o objeto inteiro, inclusive extensões, para comparar antes/depois da captura.
@@ -132,21 +138,32 @@ def receipts_dir() -> Path:
 
 def resolve_host(explicit: str | None = None) -> str:
     host = explicit or os.environ.get(HOST_ENV) or DEFAULT_HOST
+    if host == "local":
+        return host
     require(
-        re.fullmatch(r"[A-Za-z0-9._-]+@[A-Za-z0-9.-]+", host) is not None,
-        "Destino SSH inválido; use usuario@host.",
+        re.fullmatch(r"(?!root@)[A-Za-z0-9_][A-Za-z0-9._-]*@[A-Za-z0-9][A-Za-z0-9.-]*", host)
+        is not None,
+        "Configure destino SSH não root ou --host local para o timer da VM.",
     )
     return host
 
 
+def transport(host: str, remote: str) -> list[str]:
+    return ["sh", "-c", remote] if host == "local" else ["ssh", *SSH_OPTIONS, host, remote]
+
+
 def ssh(
-    host: str, remote: str, *, stdin: IO[bytes] | int | None = None,
-    stdout: IO[bytes] | int | None = None, timeout: float = 600,
+    host: str,
+    remote: str,
+    *,
+    stdin: IO[bytes] | int | None = None,
+    stdout: IO[bytes] | int | None = None,
+    timeout: float = 600,
 ) -> bytes:
     """Executa um comando remoto. stderr nunca é repassado: pode conter caminhos ou dados."""
     try:
         result = subprocess.run(
-            ["ssh", *SSH_OPTIONS, host, remote],
+            transport(host, remote),
             stdin=stdin,
             stdout=stdout or subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -160,6 +177,10 @@ def ssh(
 
 def scp(host: str, sources: Iterable[str | Path], remote_dir: str) -> None:
     try:
+        if host == "local":
+            for source in sources:
+                shutil.copyfile(source, Path(remote_dir) / Path(source).name)
+            return
         subprocess.run(
             ["scp", "-q", *SSH_OPTIONS, *map(str, sources), f"{host}:{remote_dir}/"],
             stdout=subprocess.DEVNULL,
@@ -277,18 +298,24 @@ def capture(host: str, attempts: int = MAX_ATTEMPTS) -> Path:
     database = database_name(host)
 
     def do_capture(staging: Path) -> dict[str, object]:
-        before = snapshot(host)
-        with (staging / "database.dump").open("xb") as stream:
+        with (
+            exported_snapshot(host) as (before, token),
+            (staging / "database.dump").open("xb") as stream,
+        ):
             in_db(
                 host,
-                f'pg_dump -U {BACKUP_ROLE} -d "$POSTGRES_DB" -Fc',
+                f'pg_dump -U {BACKUP_ROLE} -d "$POSTGRES_DB" -Fc --snapshot={token}',
                 stdout=stream,
                 timeout=900,
             )
         local_pg_restore_list(staging / "database.dump")
         with (staging / "voice.tar").open("xb") as stream:
             export_voice(host, stream)
-        require(snapshot(host) == before, DRIFT)
+        after = snapshot(host)
+        require(
+            after["audio"] == before["audio"] and after["revision"] == before["revision"], DRIFT
+        )
+        require(inventory(host) == containers, "Deploy mudou durante a captura.")
         return {
             "snapshot": before,
             "source": {
@@ -299,7 +326,7 @@ def capture(host: str, attempts: int = MAX_ATTEMPTS) -> Path:
                 "db_container_id": containers[container("db")]["id"],
                 "db_image_id": containers[container("db")]["image_id"],
                 "voice_volume": voice_volume(),
-                "consistency": "online-snapshot-check",
+                "consistency": "exported-snapshot-voice-check",
             },
             "application": {
                 "deployed_containers": [
@@ -378,7 +405,11 @@ def encrypt(bundle: Path, recipient: str, out_dir: str | Path) -> EncryptedFile:
     if not ok:
         target.unlink(missing_ok=True)
         raise RecoveryError("Criptografia falhou; nenhum pacote cifrado foi publicado.")
-    return {"path": str(target), **file_info(target), "recipient": recipient}
+    from ops.backup_policy import record_copy
+
+    info = file_info(target)
+    record_copy(target, info)
+    return {"path": str(target), **info, "recipient": recipient}
 
 
 def copy_external(encrypted: str | Path, destination_dir: str | Path) -> CopiedFile:
@@ -407,11 +438,16 @@ def copy_external(encrypted: str | Path, destination_dir: str | Path) -> CopiedF
         file_info(target) == expected == file_info(source),
         "Cópia externa divergente da origem.",
     )
-    return {"path": str(target), **file_info(target)}
+    from ops.backup_policy import record_copy
+
+    info = file_info(target)
+    record_copy(target, info)
+    return {"path": str(target), **info}
 
 
 def write_receipt(
-    manifest: Mapping[str, object], encrypted: EncryptedFile | None = None,
+    manifest: Mapping[str, object],
+    encrypted: EncryptedFile | None = None,
     external: CopiedFile | None = None,
 ) -> Path:
     snapshot_data = checked_snapshot(manifest.get("snapshot"))
@@ -454,7 +490,7 @@ def check(host: str) -> CheckReport:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--host", help=f"usuario@host da VM (padrão: ${HOST_ENV} ou documentado)")
+    parser.add_argument("--host", help=f"usuario@host sem root; obrigatório aqui ou em ${HOST_ENV}")
     commands = parser.add_subparsers(dest="command", required=True)
     run_capture = commands.add_parser("capture", help="Publica um pacote v2 da stack pública.")
     run_capture.add_argument("--recipient-file", help="Arquivo com a chave pública age1... .")
@@ -465,6 +501,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     run_capture.add_argument("--copy-to", help="Diretório externo que recebe só o .tar.age.")
     run_capture.add_argument("--json", action="store_true")
+    run_capture.add_argument(
+        "--hold",
+        action="store_true",
+        help="Protege este backup e suas cópias antes de uma migração.",
+    )
     run_check = commands.add_parser("check", help="Pré-voo sem captura.")
     run_check.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -482,6 +523,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         recipient = read_recipient(args.recipient_file) if args.recipient_file else None
         bundle = capture(host)
+        if args.hold:
+            from ops.backup_policy import hold
+
+            hold(bundle.parent, bundle.name)
+            if recipient:
+                Path(args.encrypted_dir).mkdir(mode=0o700, parents=True, exist_ok=True)
+                hold(Path(args.encrypted_dir), bundle.name)
+            if args.copy_to:
+                hold(Path(args.copy_to), bundle.name)
         manifest = verify_bundle(bundle)
         snapshot_data = checked_snapshot(manifest.get("snapshot"))
         encrypted = encrypt(bundle, recipient, args.encrypted_dir) if recipient else None
@@ -517,6 +567,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"Operação recusada: {exc} Parciais são preservados; nada foi anunciado como válido.",
             file=sys.stderr,
         )
+        return 1
+    except Exception as exc:
+        from ops.diagnostics import diagnostic
+
+        diagnostic("public_backup", exc)
         return 1
 
 

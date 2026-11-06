@@ -1,0 +1,24 @@
+[Unit]
+Description=Backup cifrado e verificado do Aulas de Ingles
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+# /mnt/aulas-backups deve ser um mount externo configurado pelo operador.
+RequiresMountsFor=/mnt/aulas-backups
+
+[Service]
+Type=oneshot
+User=aulas-ops
+Group=aulas-ops
+SupplementaryGroups=docker
+WorkingDirectory=/opt/aulas-ingles
+UMask=0077
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 -m ops.backup_watch --status /var/lib/aulas-ops/backup-status.json --recipient-file /etc/aulas-ops/backup-recipient.txt --encrypted-dir /var/lib/aulas-ops/encrypted --copy-to /mnt/aulas-backups
+TimeoutStartSec=90min
+NoNewPrivileges=true
+# Helpers montados pelo daemon Docker precisam enxergar o /tmp do host.
+PrivateTmp=false
+
+[Install]
+WantedBy=multi-user.target

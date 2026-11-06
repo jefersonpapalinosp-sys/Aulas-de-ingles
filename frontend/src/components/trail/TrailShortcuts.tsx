@@ -24,6 +24,7 @@ export function TrailShortcuts({
     <nav className="trail-utilities" aria-label="Atalhos">
       <NavLink to={todayPath(courseSlug)} onClick={onNavigate}>Hoje</NavLink>
       <NavLink to="/cursos" onClick={onNavigate}>Cursos</NavLink>
+      <NavLink to="/listening" onClick={onNavigate}>Listening rápido</NavLink>
       <NavLink to={reviewPath(courseSlug, scopeUnitSlug)} onClick={onNavigate}>
         Revisar
         {Boolean(reviewDue) && <span className="badge">{reviewDue}</span>}

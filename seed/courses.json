@@ -1075,6 +1075,7 @@
       },
       {
         "slug": "40-44",
+        "review_overlap_lesson_numbers": [40],
         "title": "Aulas 40–44",
         "position": 8,
         "status": "published",

@@ -206,9 +206,17 @@ aparece no código de saída do `up --wait`, em `docker compose ps seed` e nos
 logs desse container. Corrija o pacote editorial (`python -m app.cli seed
 --dry-run` localmente) e refaça o deploy; não execute o seed à mão na stack.
 
-Não publique `api` nem `db` separadamente. O Traefik encaminha o protocolo
-externo no cabeçalho `X-Forwarded-Proto`; o nginx o preserva ao chamar a API.
-Isso é necessário porque o backend público recusa tráfego não HTTPS.
+Não publique `api` nem `db` separadamente. Antes do deploy da Sprint 51, configure
+**`EASYPANEL_TRUSTED_PROXY_CIDRS`** com os IPs/CIDRs revisados do Traefik visto
+pelo web. O Compose e o check recusam o perfil público sem essa configuração.
+Acrescente a variável ao arquivo privado existente; não regenere os segredos.
+
+Somente esse peer pode fornecer o endereço do aluno e `X-Forwarded-Proto`.
+O nginx substitui a cadeia recebida por um único IP resolvido ao chamar a API.
+Isso preserva HTTPS e separa os limites por origem sem confiar em headers do aluno.
+Confira `forwardedHeaders.insecure` desligado e o acréscimo do endereço observado
+à direita da cadeia. O procedimento e as pendências de aceite estão na
+[execução da Sprint 51](execucao_sprint51_2026-11-05.md).
 
 ## 5. Aceite pós-deploy
 
@@ -240,6 +248,12 @@ Sprint 43; deploy aprovado não substitui essas homologações.
 
 ## 6. Backup inicial e rotina
 
+**Atualização de 05/11/2026:** a rotina substituta no servidor, holds, poda cifrada
+e o restore em uma stack pública nova estão no
+[runbook da Sprint 54](backup_recuperacao_publica_2026-11-05.md).
+O registro do launchd abaixo é histórico; instalação na VM e custódia separada
+continuam pendentes de comprovação operacional.
+
 No primeiro deploy o banco nasce vazio e é preenchido somente pelo seed. O
 backup da stack pública é feito pela rotina do repositório, não pelo painel:
 
@@ -256,9 +270,9 @@ host em `AULAS_PUBLIC_SSH_HOST` ou o documentado) e lê o banco **dentro do
 container** com o papel `aulas_backup`, por socket local: nenhuma senha é lida ou
 transmitida. O volume de voz sai pelo mesmo `voice_transfer.py` do fluxo local,
 copiado de forma efêmera para a VM e executado em container sem rede e somente
-leitura. Como a stack pública não entra em manutenção, o snapshot do banco é
-conferido antes e depois da captura; divergência não publica o pacote (até três
-tentativas). O recibo fica em `backups/recovery/public-receipts/` e não contém
+leitura. Dump e manifesto compartilham um snapshot exportado; revisão e referências
+de voz são conferidas antes/depois, com até três tentativas. Eventos de estudo
+não invalidam a captura. O recibo fica em `backups/recovery/public-receipts/` e não contém
 segredos nem endereço da VM.
 
 A cópia externa só sai cifrada: `recipient` aponta para um arquivo com a chave
@@ -343,106 +357,21 @@ saudável; o encerramento integral ainda depende do DNS/certificado do domínio
 próprio, do teste funcional autenticado, da persistência após redeploy e do
 backup inicial verificado.
 
-## Deploy automatizado — `make deploy-public` e o job `deploy` (Sprint 45)
+## Deploy automatizado — Sprint 55
 
-A partir da Sprint 45 o procedimento do segundo deploy virou script:
-`ops/deploy_public.sh` reproduz por SSH exatamente o que foi feito à mão em
-21/10/2026, e o job `deploy` do CI o executa a cada push na `main` que passar
-nos quatro jobs bloqueantes.
+O cliente `make deploy-public sha=<sha>` agora chama um comando SSH restrito,
+instalado separadamente no servidor. O procedimento da Sprint 45 foi substituído:
+configuração, instalação, adoção da release atual, migração do volume do nginx e
+rollback estão no [runbook de deploy seguro](deploy_seguro_2026-11-05.md).
 
-### O que o script faz
+São obrigatórios usuário sem root, host explícito, known_hosts verificado e origem
+HTTPS. Não existe mais destino de produção embutido no script. O CI depende de
+backend, frontend, E2E, recovery, infra-lint e segurança; CRITICAL ou relatório
+inválido bloqueiam deploy. O environment `production` precisa de revisores
+configurados no GitHub; declarar o nome no YAML não cria essa proteção.
 
-`make deploy-public sha=<sha>` (ou `bash ops/deploy_public.sh <sha>`) executa,
-nesta ordem, parando no primeiro erro:
-
-1. confere **localmente** que o SHA existe e é ancestral de `origin/main`
-   (`git merge-base --is-ancestor`); branch, tag ou commit fora da `main` são
-   recusados antes de qualquer contato com a VM (faça `git fetch origin main`
-   se o seu clone estiver atrasado);
-2. pré-voo por SSH: `code/`, `compose.yml`, o `.env` e o
-   `docker-compose.override.yml` gerados pelo painel, `rsync` e `docker compose`
-   precisam existir — nada é alterado se faltar algo;
-3. `git archive --format=tar <sha> | ssh ... tar -x -C /tmp/aulas-deploy-<sha>`;
-4. `rsync -a --delete` de `/tmp/aulas-deploy-<sha>/` para
-   `/etc/easypanel/projects/papalino/aulas-ingles/code/`, preservando
-   `/docker-compose.override.yml`, `/infra/easypanel/.env` e
-   `/infra/easypanel/docker-compose.override.yml`; grava `code/.deployed-sha`
-   (`<sha> <data UTC> <origem>`, o mesmo formato já usado na VM) e remove o
-   diretório temporário;
-5. em `code/infra/easypanel`: `docker compose -p papalino_aulas-ingles
-   --env-file .env -f compose.yml -f docker-compose.override.yml up -d --build
-   --remove-orphans --wait --wait-timeout 420` — o mesmo comando do painel;
-6. imprime `docker compose ps -a` e os códigos de saída de `migrate`,
-   `permissions` e `seed` (serviço próprio desde a Sprint 45, executado depois
-   da API saudável); `up` reprovado ou qualquer one-shot diferente de 0 mostra
-   os últimos logs de `migrate`/`permissions` e falha o deploy — a stack fica
-   como o Compose a deixou, sem contorno manual. Um `seed` reprovado deixa o
-   site no ar com o conteúdo anterior, mas o deploy sai vermelho para a falha
-   editorial não passar despercebida;
-7. smokes HTTPS em `AULAS_PUBLIC_URL` (padrão: domínio gerado pelo painel):
-   `/`, `/sw.js`, `/api/live`, `/api/health` e `/api/courses` em 200 (até três
-   tentativas cada) e `status=ok`, `db=up`, `schema=compatible` no JSON do health.
-   A API compara as revisões internamente; o smoke público não recebe os seus nomes.
-
-SSH sempre com `-o BatchMode=yes -o StrictHostKeyChecking=yes`: sem senha
-interativa e sem aceitar host desconhecido. O script nunca lê nem imprime o
-`.env` remoto; só o referencia por `--env-file`. `AULAS_PUBLIC_SSH_HOST` troca o
-destino (padrão `root@72.61.39.94`, o mesmo de `ops/public_backup.py`).
-
-`make deploy-public-dry-run sha=<sha>` imprime cada comando prefixado por
-`[dry-run]` sem executar nada remoto — use antes de um deploy manual ou para
-revisar o que o CI fará. `--skip-smoke` pula a etapa 7. Os testes em
-`ops/tests/test_deploy_public.py` (rodam em `make test-recovery`) simulam `ssh`,
-`git` e `curl` e cobrem recusa de SHA, dry-run sem chamadas remotas, sequência
-dos comandos, one-shot com saída 1, `up` reprovado, smoke com 500 e schema
-divergente.
-
-### O job `deploy` do CI
-
-`needs: [backend, frontend, e2e, recovery]`, só em `push` na `main`, environment
-`production`, 20 minutos de limite e grupo de concorrência `deploy-public` sem
-cancelamento (dois merges seguidos entram em fila). Na `main` o workflow também
-deixou de cancelar a execução anterior, para um merge novo não derrubar um
-`compose up` em andamento. Um CI vermelho não chega ao EasyPanel porque o job
-nem inicia.
-
-Sem o segredo `PUBLIC_DEPLOY_SSH_KEY`, o job emite um `::notice::` dizendo que
-o deploy automatizado está desarmado e termina verde, sem tocar na VM — o deploy
-continua manual (`make deploy-public`). Com o segredo, o job instala a chave em
-`~/.ssh/id_deploy` (0600, `IdentitiesOnly yes`), grava `known_hosts` a partir de
-`PUBLIC_DEPLOY_KNOWN_HOSTS` (recusa se vazio), exporta `AULAS_PUBLIC_SSH_HOST` de
-`PUBLIC_DEPLOY_HOST` e roda `bash ops/deploy_public.sh "$GITHUB_SHA"`. Nenhum
-segredo passa por `echo`.
-
-### Secrets a criar (Settings → Secrets and variables → Actions)
-
-| Secret | Conteúdo | Como obter |
-|---|---|---|
-| `PUBLIC_DEPLOY_SSH_KEY` | chave privada OpenSSH **exclusiva** para deploy | `ssh-keygen -t ed25519 -f deploy-aulas-ingles -C deploy-aulas-ingles -N ""`; cole a privada no segredo, acrescente a pública em `~/.ssh/authorized_keys` do usuário de deploy na VM e apague a privada da máquina |
-| `PUBLIC_DEPLOY_KNOWN_HOSTS` | linha(s) de `known_hosts` da VM | `ssh-keyscan -t ed25519 72.61.39.94`; confira a impressão digital (`ssh-keygen -lf`) contra a já conhecida no Mac (`ssh-keygen -F 72.61.39.94`) antes de colar |
-| `PUBLIC_DEPLOY_HOST` | `root@72.61.39.94` (ou outro usuário) | opcional; sem ele vale o padrão do script |
-
-Recomendações: não reutilizar a chave pessoal do Mac; preferir um usuário da VM
-dedicado ao deploy, com acesso ao Docker e ao diretório do serviço; revogar a
-chave em `authorized_keys` se o segredo vazar. Para exigir aprovação humana
-antes de cada deploy, configure *required reviewers* no environment
-`production` do GitHub — o job já o declara.
-
-Alternativa ao SSH: um token da API do EasyPanel disparando o deploy do serviço
-`papalino/aulas-ingles` e deixando o build para o painel. É o caminho preferido
-quando o token existir, porque o deploy passa a aparecer no histórico do painel;
-o script por SSH continua valendo como contingência.
-
-### Limitações
-
-- O histórico de deploys do painel não registra deploys por SSH; a evidência é
-  `code/.deployed-sha` na VM, o log do job no GitHub e este documento. Um deploy
-  pela interface do painel depois converge para a mesma `main`.
-- O script publica código: variáveis de ambiente continuam sendo editadas no
-  painel (`.env` gerado), e o script as preserva.
-- O backup anterior/posterior e o ensaio da migration no clone restaurado
-  continuam sendo passos humanos da sequência da Sprint 43; o job não os faz.
-  Antes de mergear uma migration na `main`, ensaie-a no clone primeiro.
+O backup anterior/posterior e o ensaio de migration no clone continuam na sequência
+da Sprint 43. A implementação local não comprova instalação ou deploy na VM.
 
 ## Vigilância agendada — probe externo e gate operacional (INFRA-46)
 
@@ -482,21 +411,23 @@ portanto, nenhum cron dela vai reclamar.
   cron por último. Confira em Settings → Notifications que "Actions" está
   marcado para e-mail. Não há SMTP nem segredo de e-mail no repositório.
 - **VM**: `make operations-alert` é silencioso quando está tudo bem e escreve
-  o relatório em stdout quando não está, que é exatamente o contrato que o
+  o relatório em stderr quando não está, que é exatamente o contrato que o
   `cron` espera para mandar e-mail. Depende de um MTA funcionando na VM
   (`mailutils` ou equivalente); sem ele, o cron registra em
   `/var/log/syslog` e o e-mail não sai — confira antes de confiar.
 
-Linha de crontab sugerida, de dois em dois minutos:
+O modelo [infra/cron/aulas-operations.example](../infra/cron/aulas-operations.example)
+executa de dois em dois minutos, com lock e timeout. É um crontab de usuário;
+ajuste destinatário, permissões do lock e caminho do código antes de instalar.
+O runner `python3 -m ops.operations_alert` usa biblioteca padrão (Python 3.12+),
+dispensa `uv` no host e conserva saída 1 para alerta e 2 para erro de execução.
+Sem incidente não escreve; falha inesperada usa diagnóstico fixo sanitizado.
 
-```cron
-MAILTO=voce@exemplo.com
-OPERATIONS_BASE_URL=http://127.0.0.1:8011
-OPERATIONS_TOKEN=...
-*/2 * * * * cd /caminho/para/aulas-ingles && make operations-alert
-```
-
-O token fica no crontab do usuário, com `chmod 600`; ele dá leitura de
+Prepare `/etc/aulas/operations.env` a partir de
+[config/operations-watch.env.example](../config/operations-watch.env.example),
+com proprietário do processo operacional e modo 0600. Use a origem HTTPS pública
+no EasyPanel; `http://127.0.0.1:8011` serve apenas ao ambiente de estudo local.
+Esse arquivo é privado e não deve ser versionado. O token dá leitura de
 `/api/operations/metrics` e `/api/operations/readiness`. As métricas são
 agregadas; o diagnóstico inclui versão do banco, ambiente e revisões de schema.
 Nenhuma dessas respostas carrega texto de aluno, mas o token continua sendo credencial.
@@ -525,11 +456,24 @@ operacionais juntos: a versão anterior da API não oferece a rota privada.
 | Secret | Conteúdo | Sem ela |
 |---|---|---|
 | `PUBLIC_PROBE_ORIGIN` | `https://dominio-publico` | o workflow avisa que está desarmado e passa sem fazer nada |
-| `OPERATIONS_TOKEN` | o mesmo `OPERATIONS_TOKEN` da aplicação | só o probe roda; o gate de métricas fica de fora |
+| `OPERATIONS_TOKEN` | o mesmo `OPERATIONS_TOKEN` da aplicação | com origem configurada, o job falha por configuração incompleta |
 
-O probe não usa credencial nenhuma: `/api/health` é público. É por isso que ele
-roda primeiro e sozinho — disponibilidade é a pergunta que não deve depender de
-um segredo estar configurado.
+O probe não usa credencial: `/api/health` é público. O workflow exige as duas
+configurações para armar a vigilância completa. Com elas presentes, o gate privado
+executa mesmo se o probe externo falhar. Os dois preservam seus códigos de saída
+e o relatório no resumo do job, sem depender do resultado de um `tee`.
+
+O shell Bash explícito usa `pipefail`, conforme a
+[referência oficial do GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
+O teste `ops/tests/test_operations_workflow.py` executa os blocos reais com probes
+sintéticos que retornam 0, 1 e 2, incluindo origem configurada sem token.
+
+**Aceite operacional da Sprint 50:** depois de publicar, configurar as secrets,
+instalar o cron e comprovar entrega do MTA, interromper apenas o worker de uma
+stack de ensaio e registrar alerta recebido em até cinco minutos. Restaurar o
+worker e verificar recuperação. O cron do GitHub a cada 30 minutos não comprova
+esse prazo. Testes locais de saída não comprovam configuração remota, recebimento
+de e-mail nem publicação; esses itens permanecem pendentes até evidência do ensaio.
 
 ### O que cada limiar do diálogo significa
 
@@ -583,8 +527,23 @@ de 50.000 não é aluno conversando.
 
 ## Bundles de abas abertas durante um deploy
 
-O PWA aguarda todas as abas fecharem antes de ativar uma atualização. Enquanto
-isso, o shell antigo pode pedir pela primeira vez um chunk lazy, como Caderno.
+Por padrão, a PWA aguarda todas as abas fecharem antes de ativar uma atualização.
+O aluno também pode confirmar **Recarregar aplicativo…**: o aplicativo busca a
+atualização, ativa o worker novo e só então recarrega a aba solicitante. As outras
+abas continuam abertas; salvar textos ou gravações ainda apenas na memória
+continua necessário. Falha de rede ou de ativação mantém a tela aberta para nova
+tentativa. Essa ação preserva rascunhos e fila local; caches de conteúdo público
+podem ser renovados pela ativação.
+
+**Primeira publicação da FE-01:** abas que ainda executam o bundle anterior
+continuam com o botão antigo de recarga. Depois de salvar o trabalho pendente,
+feche todas as abas/janelas instaladas do aplicativo uma vez e reabra para
+receber esta correção. O botão novo passa a conduzir as atualizações seguintes;
+publicar JavaScript novo não substitui o código já carregado nas abas antigas.
+Esse passo inicial precisa ocorrer antes do corte dos clientes legados.
+
+Enquanto uma aba permanece na versão anterior, o shell antigo pode pedir pela
+primeira vez um chunk lazy, como Caderno.
 Substituir a imagem removendo esse arquivo causava 404 e a tela de recuperação.
 Em 29/10/2026, os logs confirmaram o problema nos arquivos
 `study-tools-DYItHnjn.js` e `HistoricalContentDetails-zf8C-HIs.js`.

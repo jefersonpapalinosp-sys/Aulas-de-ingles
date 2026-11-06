@@ -153,7 +153,7 @@ describe('ExerciseCard', () => {
 
   it('Resposta busca o gabarito num endpoint separado', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.GET).mockResolvedValue({
+    vi.mocked(api.GET<'/api/exercises/{exercise_id}/answer' | '/api/exercises/{exercise_id}/hints/{level}', { params: { path: { exercise_id: number; level: number } } }>).mockResolvedValue({
       data: { answers: ['should', 'ought to'], explanation: 'os dois valem.' },
       response: new Response(),
     })
@@ -293,7 +293,7 @@ describe('ExerciseCard', () => {
 
   it('libera as dicas em níveis e exige tentativa antes da segunda', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.GET)
+    vi.mocked(api.GET<'/api/exercises/{exercise_id}/answer' | '/api/exercises/{exercise_id}/hints/{level}', { params: { path: { exercise_id: number; level: number } } }>)
       .mockResolvedValueOnce({
         data: { level: 1, content: 'Pense no comparativo curto.' },
         response: new Response(),
@@ -423,7 +423,7 @@ describe('ExerciseCard', () => {
 
   it('apresenta o gabarito de classificação como pares legíveis', async () => {
     const user = userEvent.setup()
-    vi.mocked(api.GET).mockResolvedValue({
+    vi.mocked(api.GET<'/api/exercises/{exercise_id}/answer' | '/api/exercises/{exercise_id}/hints/{level}', { params: { path: { exercise_id: number; level: number } } }>).mockResolvedValue({
       data: {
         answers: ['{"careful":"adjective","carefully":"adverb"}'],
         explanation: 'Adjetivos descrevem nomes; advérbios modificam ações.',

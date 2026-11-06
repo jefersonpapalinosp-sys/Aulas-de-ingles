@@ -7,7 +7,7 @@ from functools import lru_cache
 from typing import Annotated, Literal
 from urllib.parse import urlparse
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # `domain/` não importa nada do projeto, então esta dependência não cria ciclo:
@@ -27,10 +27,26 @@ class Settings(BaseSettings):
 
     app_env: Literal["dev", "test", "prod"] = "dev"
     log_level: str = "info"
+    # Ativar após migration, seed e aceite; desligar preserva exportação/exclusão.
+    listening_enabled: bool = False
+    listening_native_enabled: bool = False
+    listening_native_preview: bool = False
 
     # Em dev o default serve; em prod a aplicação recusa subir sem valor próprio.
     # 32 bytes é o mínimo do RFC 7518 para HS256.
     jwt_secret: str = "dev-apenas-troque-isto-em-producao-32b"
+    jwt_key_id: str = Field(default="legacy", pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    jwt_previous_key_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    jwt_previous_secret: str | None = None
+    jwt_previous_valid_until: datetime | None = None
+
+    @field_validator(
+        "jwt_previous_key_id", "jwt_previous_secret", "jwt_previous_valid_until", mode="before"
+    )
+    @classmethod
+    def empty_rotation_value(cls, value: object) -> object:
+        return None if value == "" else value
+
     access_token_minutes: int = 15
     refresh_token_days: int = 30
     # O cookie de refresh só vai por HTTPS fora de dev.
@@ -54,6 +70,10 @@ class Settings(BaseSettings):
     database_pool_timeout_seconds: int = Field(default=10, ge=1, le=60)
     database_statement_timeout_ms: int = Field(default=30_000, ge=1_000, le=120_000)
     database_lock_timeout_ms: int = Field(default=5_000, ge=100, le=30_000)
+    database_idle_transaction_timeout_ms: int = Field(default=60_000, ge=1_000, le=300_000)
+    database_connection_reserve: int = Field(default=10, ge=0, le=100)
+    migration_lock_timeout_ms: int = Field(default=5_000, ge=100, le=30_000)
+    migration_statement_timeout_ms: int = Field(default=300_000, ge=1_000, le=3_600_000)
     # Enable only after the 40B.2a migration/permissions have been rehearsed.
     # Reads/exports of existing snapshots remain available when capture is off.
     editorial_snapshots_enabled: bool = False
@@ -202,6 +222,29 @@ class Settings(BaseSettings):
             raise RuntimeError("JWT_SECRET precisa de um valor próprio quando APP_ENV=prod.")
         if len(self.jwt_secret.encode()) < 32:
             raise RuntimeError("JWT_SECRET precisa de pelo menos 32 bytes (RFC 7518, HS256).")
+        previous = (
+            self.jwt_previous_key_id,
+            self.jwt_previous_secret,
+            self.jwt_previous_valid_until,
+        )
+        if any(value is not None for value in previous):
+            if not all(value is not None for value in previous):
+                raise RuntimeError("Rotação JWT exige kid, chave anterior e prazo absoluto juntos.")
+            assert self.jwt_previous_secret is not None
+            assert self.jwt_previous_valid_until is not None
+            if (
+                self.jwt_previous_key_id == self.jwt_key_id
+                or self.jwt_previous_secret == self.jwt_secret
+                or len(self.jwt_previous_secret.encode()) < 32
+                or self.jwt_previous_valid_until.tzinfo is None
+            ):
+                raise RuntimeError("Configuração de rotação JWT inválida.")
+            if self.app_env == "prod" and self.jwt_previous_secret.startswith("dev-apenas"):
+                raise RuntimeError(
+                    "Chave JWT anterior de desenvolvimento não é aceita em produção."
+                )
+        if self.migration_lock_timeout_ms >= self.migration_statement_timeout_ms:
+            raise RuntimeError("MIGRATION_LOCK_TIMEOUT_MS deve ser menor que STATEMENT_TIMEOUT_MS.")
         if self.database_lock_timeout_ms >= self.database_statement_timeout_ms:
             raise RuntimeError(
                 "DATABASE_LOCK_TIMEOUT_MS precisa ser menor que DATABASE_STATEMENT_TIMEOUT_MS."
@@ -231,9 +274,10 @@ class Settings(BaseSettings):
             raise RuntimeError("ASSIST_JOB_MAX_ATTEMPTS precisa ser positivo.")
         if self.assist_job_retry_base_seconds < 0:
             raise RuntimeError("ASSIST_JOB_RETRY_BASE_SECONDS não pode ser negativo.")
-        if self.assist_job_stale_seconds < self.assist_timeout_seconds:
+        if self.assist_job_stale_seconds < 2 * self.assist_timeout_seconds + 15:
             raise RuntimeError(
-                "ASSIST_JOB_STALE_SECONDS precisa ser maior ou igual a ASSIST_TIMEOUT_SECONDS."
+                "ASSIST_JOB_STALE_SECONDS precisa ser >= 2 * ASSIST_TIMEOUT_SECONDS + 15 "
+                "(STT, diálogo e margem para persistência)."
             )
         if self.assist_worker_poll_seconds <= 0:
             raise RuntimeError("ASSIST_WORKER_POLL_SECONDS precisa ser positivo.")
