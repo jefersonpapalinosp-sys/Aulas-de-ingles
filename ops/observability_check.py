@@ -288,7 +288,7 @@ def _url(base: str, path: str) -> str:
 
 
 def fetch(base: str, path: str, *, token: str | None = None) -> dict[str, Any]:
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "User-Agent": "Aulas-Public-Probe/1.0"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(_url(base, path), headers=headers)

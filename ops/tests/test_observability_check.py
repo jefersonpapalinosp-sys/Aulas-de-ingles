@@ -1,10 +1,12 @@
 import contextlib
 import io
+import json
 import os
 import unittest
-from unittest.mock import patch
+import urllib.error
+from unittest.mock import MagicMock, patch
 
-from ops.observability_check import Thresholds, _url, evaluate, main
+from ops.observability_check import Thresholds, _url, evaluate, fetch, main
 
 
 def readiness(schema="compatible"):
@@ -45,6 +47,51 @@ def configured_thresholds():
 
 
 class ObservabilityGateTests(unittest.TestCase):
+    def test_fetch_preserves_identity_authentication_timeout_and_read_limit(self):
+        for token in (None, "synthetic-operations-token"):
+            response = MagicMock()
+            response.read.return_value = json.dumps(readiness()).encode()
+            response.__enter__.return_value = response
+            with (
+                self.subTest(authenticated=bool(token)),
+                patch("ops.observability_check.urllib.request.urlopen", return_value=response)
+                as opener,
+            ):
+                value = fetch("https://example.test", "/api/operations/readiness", token=token)
+            request = opener.call_args.args[0]
+            self.assertEqual(request.full_url, "https://example.test/api/operations/readiness")
+            self.assertEqual(request.get_method(), "GET")
+            self.assertEqual(request.get_header("User-agent"), "Aulas-Public-Probe/1.0")
+            self.assertEqual(request.get_header("Accept"), "application/json")
+            self.assertEqual(
+                request.get_header("Authorization"), f"Bearer {token}" if token else None
+            )
+            self.assertEqual(opener.call_args.kwargs, {"timeout": 5})
+            response.read.assert_called_once_with(1_000_001)
+            self.assertEqual(value, readiness())
+
+    def test_fetch_rejects_oversized_body_with_probe_identity(self):
+        response = MagicMock()
+        response.read.return_value = b"x" * 1_000_001
+        response.__enter__.return_value = response
+        with (
+            patch("ops.observability_check.urllib.request.urlopen", return_value=response),
+            self.assertRaises(ValueError),
+        ):
+            fetch("https://example.test", "/api/operations/metrics", token="synthetic-token")
+
+    def test_http_readiness_failure_remains_critical_with_probe_identity(self):
+        error = urllib.error.HTTPError(
+            "https://example.test/api/operations/readiness", 503, "Unavailable", {},
+            io.BytesIO(json.dumps(readiness("incompatible")).encode()),
+        )
+        with patch("ops.observability_check.urllib.request.urlopen", side_effect=error):
+            value = fetch("https://example.test", "/api/operations/readiness")
+        report = evaluate(value, metrics(), configured_thresholds())
+        self.assertEqual(report["status"], "critical")
+        schema = next(item for item in report["checks"] if item["name"] == "readiness_schema")
+        self.assertEqual(schema["state"], "critical")
+
     def test_healthy_snapshot_passes_with_fixed_owners_and_actions(self):
         report = evaluate(readiness(), metrics(), configured_thresholds())
         self.assertEqual(report["status"], "ok")
