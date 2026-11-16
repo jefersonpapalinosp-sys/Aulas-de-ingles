@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/postgres:16.15-alpine@sha256:e0e53cfa0884f3cc216a621033e4f38dceb49e52218ac77facc8e48f02973093
+FROM public.ecr.aws/docker/library/postgres:18.7-alpine@sha256:b6972e1115a4ff8eba5d7f7d19184926d1e16d7d1136ae1e1a7ebf286da0f015
 
 # A base traz gosu com biblioteca Go sinalizada pelo scanner. O su-exec mantém
 # a troca para postgres sem carregar esse binário; PostgreSQL e digest ficam iguais.
